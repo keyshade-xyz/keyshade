@@ -1,0 +1,30 @@
+{
+  "name": "sdk-js",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/sdk-js/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/sdk-js",
+        "main": "packages/sdk-js/src/index.ts",
+        "tsConfig": "packages/sdk-js/tsconfig.lib.json",
+        "assets": ["packages/sdk-js/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/sdk-js/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
