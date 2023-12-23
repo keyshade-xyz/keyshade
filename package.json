@@ -1,0 +1,12 @@
+{
+  "name": "keyshade-xyz",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@nx/js": "17.2.7",
+    "nx": "17.2.7"
+  }
+}
