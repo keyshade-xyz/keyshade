@@ -6,7 +6,7 @@ Please read through this document before submitting any issues or pull requests 
 
 ## Reporting Bugs/Issues
 
-Before reporting a bug, please check our list of [open issues](https://github.com/keyshade-xyz/keyshade/issues) to see if someone has already reported the bug. If it's an open issue, please add any additional information that you think might be helpful. If it's not, please [create a new issue](https://github.com/yourusername/yourrepository/issues/new) and include as much information as you can. Information like a detailed description of the issue, steps to reproduce the issue, and any error messages are incredibly helpful.
+Before reporting a bug, please check our list of [open issues](https://github.com/keyshade-xyz/keyshade/issues) to see if someone has already reported the bug. If it's an open issue, please add any additional information that you think might be helpful. If it's not, please [create a new issue](https://github.com/keyshade-xyz/keyshade/issues/new/choose) and include as much information as you can. Information like a detailed description of the issue, steps to reproduce the issue, and any error messages are incredibly helpful.
 
 ## Suggesting Enhancements
 
@@ -18,7 +18,7 @@ Please ensure your pull request adheres to the following guidelines:
 
 - Search the [open pull requests](https://github.com/keyshade-xyz/keyshade/pulls) to ensure someone else has not already submitted the change.
 - Make sure your code follows the style guidelines of the project. For TypeScript, we use ESLint and [Prettier](.prettierrc) for formatting. For Rust, we use Cargo for building and testing.
-- Make sure your code passes all the project's tests. You can run tests using `npm test` for TypeScript and `cargo test` for Rust.
+- Make sure your code passes all the project's tests. You can run tests using `pnpm run test` for TypeScript and `cargo test` for Rust.
 - Write good commit messages by following [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 - Include relevant issue number if applicable.
 
