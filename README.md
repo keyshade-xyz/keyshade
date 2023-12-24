@@ -17,3 +17,13 @@
 </div>
 
 ---
+
+keyshade is designed to simplify the integration of your secrets into your codebase. We prioritize the security of your data by leveraging the power of [Zero-Knowledge Proof](https://chain.link/education/zero-knowledge-proof-zkp) for storing and transferring your secrets. 
+
+But that's not all! We offer a host of features to enhance your experience:
+
+- **Secret Rotation**: Regularly update your secrets to maintain their security.
+- **Auto Revoke**: Automatically revoke access to secrets when they're no longer needed.
+- **Collaboration**: Share and manage secrets across teams effortlessly.
+
+With keyshade, managing your secrets becomes a breeze while ensuring their security.
