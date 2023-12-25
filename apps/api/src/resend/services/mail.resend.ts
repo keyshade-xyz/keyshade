@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
-import { IResendService } from './resend.service.interface';
+import { Injectable, Logger } from '@nestjs/common'
+import { Resend } from 'resend'
+import { IResendService } from './resend.service.interface'
 
 @Injectable()
 export class MailResend implements IResendService {
-    private readonly resend: Resend;
+  private readonly resend: Resend
+  private readonly log = new Logger(MailResend.name)
 
-    constructor() {
-        this.resend = new Resend(process.env.RESEND_API_KEY)
-    }
+  constructor() {
+    this.resend = new Resend(process.env.RESEND_API_KEY)
+  }
 
-    async sendOtp(email: string, otp: string): Promise<void> {
-        const subject = 'Your Login OTP';
-        const body = `<!DOCTYPE html>
+  async sendOtp(email: string, otp: string): Promise<void> {
+    const subject = 'Your Login OTP'
+    const body = `<!DOCTYPE html>
         <html>
         <head>
            <title>OTP Verification</title>
@@ -29,20 +30,21 @@ export class MailResend implements IResendService {
            <p>keyshade Team</p>
         </body>
         </html>
-        `;
-        await this.sendEmail(email, subject, body);
-    }
+        `
+    await this.sendEmail(email, subject, body)
+  }
 
-    private async sendEmail(email: string, subject: string, body: string): Promise<void> {
-        const {error} = await this.resend.emails.send({
-            from: process.env.FROM_EMAIL,
-            to: email,
-            subject,
-            html: body
-        });
+  private async sendEmail(email: string, subject: string, body: string): Promise<void> {
+    const { error } = await this.resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: email,
+      subject,
+      html: body
+    })
 
-        if (error) {
-            throw new Error(error.message);
-        }
+    if (error) {
+      this.log.error(`Error sending email to ${email}: ${error.message}`)
+      throw new Error(error.message)
     }
+  }
 }

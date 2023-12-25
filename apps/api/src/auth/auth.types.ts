@@ -1,5 +1,5 @@
-import { User } from "@prisma/client";
+import { User } from '@prisma/client'
 
 export type UserAuthenticatedResponse = User & {
-    token: string;
+  token: string
 }

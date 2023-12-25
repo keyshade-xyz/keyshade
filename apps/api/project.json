@@ -41,6 +41,12 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
     },
+    "prettier:fix": {
+      "command": "pnpx prettier -w .",
+      "options": {
+        "cwd": "apps/api"
+      }
+    },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
