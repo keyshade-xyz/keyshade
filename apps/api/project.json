@@ -47,6 +47,30 @@
       "options": {
         "jestConfig": "apps/api/jest.config.ts"
       }
+    },
+    "prisma:generate": {
+      "command": "prisma generate",
+      "options": {
+        "cwd": "apps/api/src/prisma"
+      }
+    },
+    "prisma:format": {
+      "command": "prisma format",
+      "options": {
+        "cwd": "apps/api/src/prisma"
+      }
+    },
+    "prisma:validate": {
+      "command": "prisma validate",
+      "options": {
+        "cwd": "apps/api/src/prisma"
+      }
+    },
+    "prisma:reset": {
+      "command": "prisma migrate reset --force",
+      "options": {
+        "cwd": "apps/api/src/prisma"
+      }
     }
   },
   "tags": []

@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { SupabaseModule } from '../supabase/supabase.module';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
+import { AuthModule } from '../auth/auth.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { CommonModule } from '../common/common.module';
+import { ResendModule } from '../resend/resend.module';
 
 @Module({
   controllers: [AppController],
@@ -13,9 +16,12 @@ import { PassportModule } from '@nestjs/passport';
     }),
     PassportModule,
     SupabaseModule,
+    AuthModule,
+    PrismaModule,
+    CommonModule,
+    ResendModule,
+    SupabaseModule
   ],
-  providers: [
-    AppService,
-  ],
+  providers: [],
 })
 export class AppModule {}
