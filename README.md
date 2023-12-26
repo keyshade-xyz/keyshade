@@ -12,7 +12,7 @@
 
 <div align = "center">
     
-[![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/m6TcpWBSdt)
+[![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/7WYsBY3X)
 
 </div>
 
