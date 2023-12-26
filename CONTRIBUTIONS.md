@@ -18,7 +18,8 @@ Please ensure your pull request adheres to the following guidelines:
 
 - Search the [open pull requests](https://github.com/keyshade-xyz/keyshade/pulls) to ensure someone else has not already submitted the change.
 - Make sure your code follows the style guidelines of the project. For TypeScript, we use ESLint and [Prettier](.prettierrc) for formatting. For Rust, we use Cargo for building and testing.
-- Make sure your code passes all the project's tests. You can run tests using `pnpm run test` for TypeScript and `cargo test` for Rust.
+- Make sure your code passes all the project's tests. You can run tests using `pnpm run test`.
+- For setting up the project, do check the [Getting Started](./docs/getting-started.md) guide.
 - Write good commit messages by following [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 - Include relevant issue number if applicable.
 
