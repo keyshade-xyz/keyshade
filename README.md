@@ -18,7 +18,7 @@
 
 ---
 
-keyshade is designed to simplify the integration of your secrets into your codebase. We prioritize the security of your data by leveraging the power of [Zero-Knowledge Proof](https://chain.link/education/zero-knowledge-proof-zkp) for storing and transferring your secrets. 
+keyshade is designed to simplify the integration of your secrets into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
 
 But that's not all! We offer a host of features to enhance your experience:
 
