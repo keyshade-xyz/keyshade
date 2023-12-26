@@ -3,7 +3,7 @@ import { PrismaService } from './prisma.service'
 import { Otp, User } from '@prisma/client'
 
 @Injectable()
-export class PrimsaRepository {
+export class PrismaRepository {
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -33,6 +33,45 @@ export class PrimsaRepository {
   }
 
   /**
+   * Find all users
+   * @param page  The page number
+   * @param limit  The number of items per page
+   * @param sort  The field to sort by
+   * @param order  The order to sort by
+   * @param search  The search string
+   * @returns  The list of users
+   */
+  async findUsers(
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ): Promise<User[]> {
+    return await this.prisma.user.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      },
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          },
+          {
+            email: {
+              contains: search
+            }
+          }
+        ]
+      }
+    })
+  }
+
+  /**
    * Create a user with the given email. The onboarding process
    * will aim at updating the user further.
    * @param email The email of the user to create
@@ -49,12 +88,10 @@ export class PrimsaRepository {
   /**
    * Update an existing user
    * @param id ID of the user to update
-   * @param data The data to update (can not update email or id)
+   * @param data The data to update
    * @returns The updated user
    */
   async updateUser(id: string, data: Partial<User>): Promise<User> {
-    delete data.email
-    delete data.id
     return await this.prisma.user.update({
       where: {
         id
@@ -99,7 +136,11 @@ export class PrimsaRepository {
     )
   }
 
-  async createOtp(email: string, otp: string, expiresAfter: number): Promise<Otp> {
+  async createOtp(
+    email: string,
+    otp: string,
+    expiresAfter: number
+  ): Promise<Otp> {
     const timeNow = new Date()
     return await this.prisma.otp.create({
       data: {
@@ -125,5 +166,14 @@ export class PrimsaRepository {
         }
       }
     })
+  }
+
+  async excludeFields<T, K extends keyof T>(
+    key: T,
+    ...fields: K[]
+  ): Promise<Partial<T>> {
+    return Object.fromEntries(
+      Object.entries(key).filter(([k]) => !fields.includes(k as K))
+    ) as Partial<T>
   }
 }

@@ -9,6 +9,7 @@ import { CommonModule } from '../common/common.module'
 import { ResendModule } from '../resend/resend.module'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from '../auth/auth.guard'
+import { UserModule } from '../user/user.module'
 
 @Module({
   controllers: [AppController],
@@ -22,7 +23,8 @@ import { AuthGuard } from '../auth/auth.guard'
     PrismaModule,
     CommonModule,
     ResendModule,
-    SupabaseModule
+    SupabaseModule,
+    UserModule
   ],
   providers: [
     {

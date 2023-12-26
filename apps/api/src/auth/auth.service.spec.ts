@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from './auth.service'
-import { PrimsaRepository } from '../prisma/prisma.repository'
+import { PrismaRepository } from '../prisma/prisma.repository'
 import { TestResend } from '../resend/services/test.resend'
 import { RESEND_SERVICE } from '../resend/services/resend.service.interface'
 import { JwtService } from '@nestjs/jwt'
@@ -13,7 +13,7 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        PrimsaRepository,
+        PrismaRepository,
         { provide: RESEND_SERVICE, useClass: TestResend },
         JwtService,
         PrismaService
