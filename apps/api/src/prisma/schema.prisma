@@ -7,64 +7,123 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Scope {
-  CREATE
-  READ
-  UPDATE
-  DELETE
+enum ProjectRole {
+  OWNER // Can do everything
+  MAINTAINER // Can do everything except deleting the project
+  VIEWER // Can only view the project and its secrets
+}
+
+enum ApiKeyRole {
+  CREATE_PROJECT
+  READ_PROJECT
+  UPDATE_PROJECT
+  DELETE_PROJECT
+  CREATE_SECRET
+  READ_SECRET
+  UPDATE_SECRET
+  DELETE_SECRET
+  ADD_USER
+  REMOVE_USER
+  UPDATE_USER_ROLE
+  CREATE_API_KEY
+  READ_API_KEY
+  UPDATE_API_KEY
+  DELETE_API_KEY
 }
 
 model User {
-  id                   String  @id @default(cuid())
-  email                String  @unique
+  id                   String        @id @default(cuid())
+  email                String        @unique
   name                 String?
   profilePictureUrl    String?
-  isActive             Boolean @default(true)
-  isOnboardingFinished Boolean @default(false)
-  isAdmin              Boolean @default(false)
+  isActive             Boolean       @default(true)
+  isOnboardingFinished Boolean       @default(false)
+  isAdmin              Boolean       @default(false)
+  subscription         Subscription?
 
-  projects Project[]
+  projects ProjectMember[]
   apiKeys  ApiKey[]
   otps     Otp[]
+  Secret   Secret[] // Stores the secrets the user updated
+  Project  Project[] // Stores the projects the user updated
+}
+
+model Subscription {
+  id       String  @id @default(cuid())
+  plan     String
+  isActive Boolean @default(true)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
 }
 
 model Project {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
-  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publicKey   String
+  privateKey  String? // We store this only if the user wants us to do so! 
 
-  secrets Secret[]
-  ApiKey  ApiKey[]
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  lastUpdatedById String
+
+  members      ProjectMember[]
+  secrets      Secret[]
+  apiKeyScopes ApiKeyScope[]
+}
+
+model ProjectMember {
+  id        String      @id @default(cuid())
+  role      ProjectRole
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String
+}
+
+model ApiKeyScope {
+  id   String     @id @default(cuid())
+  role ApiKeyRole
+
+  apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  apiKeyId String
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Secret {
-  id    String @id @default(cuid())
-  name  String
-  value String
+  id        String    @id @default(cuid())
+  name      String
+  value     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  rotateAt  DateTime?
+
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id])
+  lastUpdatedById String
 
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model ApiKey {
-  id    String @id @default(cuid())
-  name  String
-  value String
+  id        String    @id @default(cuid())
+  name      String
+  value     String
+  expiresAt DateTime?
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  apiKeyScopes ApiKeyScope[]
 
-  scopes Scope[]
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
 }
 
 model Otp {
   code      String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime
