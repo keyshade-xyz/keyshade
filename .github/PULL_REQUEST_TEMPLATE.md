@@ -33,3 +33,9 @@ _Add screenshots of relevant screens_
 - [ ] I have added test cases to show that my feature works
 - [ ] I have added relevant screenshots in my PR
 - [ ] There are no UI/UX issues
+
+
+### Documentation Update
+
+- [ ] This PR requires an update to the documentation at [docs.keyshade.xyz](https://docs.keyshade.xyz)
+- [ ] I have made the necessary updates to the documentation, or no documentation changes are required.
