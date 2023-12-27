@@ -44,3 +44,4 @@ Thumbs.db
 .next
 .vscode
 .env
+pnpm-lock.yaml
