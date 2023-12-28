@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from './auth.service'
 import { PrismaRepository } from '../prisma/prisma.repository'
-import { TestResend } from '../resend/services/test.resend'
-import { RESEND_SERVICE } from '../resend/services/resend.service.interface'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../prisma/prisma.service'
+import { MAIL_SERVICE } from '../mail/services/mail.service.interface'
+import { TestMail } from '../mail/services/fake.mail'
 
 describe('AuthService', () => {
   let service: AuthService
@@ -14,7 +14,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         PrismaRepository,
-        { provide: RESEND_SERVICE, useClass: TestResend },
+        { provide: MAIL_SERVICE, useClass: TestMail },
         JwtService,
         PrismaService
       ]

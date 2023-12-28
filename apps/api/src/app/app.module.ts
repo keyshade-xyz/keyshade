@@ -10,6 +10,7 @@ import { ResendModule } from '../resend/resend.module'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from '../auth/auth.guard'
 import { UserModule } from '../user/user.module'
+import { MailModule } from '../mail/mail.module'
 
 @Module({
   controllers: [AppController],
@@ -24,7 +25,8 @@ import { UserModule } from '../user/user.module'
     CommonModule,
     ResendModule,
     SupabaseModule,
-    UserModule
+    UserModule,
+    MailModule
   ],
   providers: [
     {

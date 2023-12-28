@@ -1,14 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Resend } from 'resend'
-import { IResendService } from './resend.service.interface'
+import * as nodemailer from 'nodemailer'
+import { IMailService } from './mail.service.interface'
 
 @Injectable()
-export class MailResend implements IResendService {
-  private readonly resend: Resend
-  private readonly log = new Logger(MailResend.name)
+export class MailService implements IMailService {
+  private transporter: nodemailer.Transporter
+  private readonly log = new Logger(MailService.name)
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY)
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_APP_PASSWORD
+      }
+    })
   }
 
   async sendOtp(email: string, otp: string): Promise<void> {
@@ -34,17 +42,22 @@ export class MailResend implements IResendService {
     await this.sendEmail(email, subject, body)
   }
 
-  private async sendEmail(email: string, subject: string, body: string): Promise<void> {
-    const { error } = await this.resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject,
-      html: body
-    })
-
-    if (error) {
+  private async sendEmail(
+    email: string,
+    subject: string,
+    body: string
+  ): Promise<void> {
+    try {
+      await this.transporter.sendMail({
+        from: process.env.FROM_EMAIL,
+        to: email,
+        subject: subject,
+        html: body
+      })
+      this.log.log(`Email sent to ${email}`)
+    } catch (error) {
       this.log.error(`Error sending email to ${email}: ${error.message}`)
-      throw new Error(error.message)
+      throw new Error(`Error sending email to ${email}: ${error.message}`)
     }
   }
 }
