@@ -34,7 +34,11 @@ export class MailResend implements IResendService {
     await this.sendEmail(email, subject, body)
   }
 
-  private async sendEmail(email: string, subject: string, body: string): Promise<void> {
+  private async sendEmail(
+    email: string,
+    subject: string,
+    body: string
+  ): Promise<void> {
     const { error } = await this.resend.emails.send({
       from: process.env.FROM_EMAIL,
       to: email,
