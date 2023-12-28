@@ -6,7 +6,6 @@ import { PassportModule } from '@nestjs/passport'
 import { AuthModule } from '../auth/auth.module'
 import { PrismaModule } from '../prisma/prisma.module'
 import { CommonModule } from '../common/common.module'
-import { ResendModule } from '../resend/resend.module'
 import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from '../auth/auth.guard'
 import { UserModule } from '../user/user.module'
@@ -23,7 +22,6 @@ import { MailModule } from '../mail/mail.module'
     AuthModule,
     PrismaModule,
     CommonModule,
-    ResendModule,
     SupabaseModule,
     UserModule,
     MailModule
