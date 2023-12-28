@@ -1,22 +1,22 @@
 //@ts-check
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { composePlugins, withNx } = require('@nx/next');
+const path = require('path')
 
-/**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
- **/
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
-};
+  webpack(config, { isServer }) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack']
+    })
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx,
-];
+    if (!isServer) {
+      config.resolve.alias['@public'] = path.join(__dirname, 'public')
+    }
 
-module.exports = composePlugins(...plugins)(nextConfig);
+    return config
+  }
+}
+
+module.exports = nextConfig
