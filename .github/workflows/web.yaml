@@ -1,0 +1,51 @@
+on:
+  push:
+    branches: [main]
+    paths: ['apps/web/**']
+  pull_request:
+    paths: ['apps/web/**']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Lint
+        run: |
+          pnpm run lint:web
+
+      - name: Test
+        run: |
+          pnpm run test:web
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Build
+        run: |
+          pnpm run build:web
+
+      - name: Deploy
+        run: |
+          pnpm install --global vercel
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
