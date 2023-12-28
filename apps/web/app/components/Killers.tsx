@@ -11,7 +11,7 @@ const Killers = ({ image, twitterUserName }: KillersProps) => {
         <div className="flex items-center justify-cente gap-2">
             <div className="flex justify-center items-center h-[48px] w-[48px] rounded-full border-[#3a3e41] border-solid border-[2px] bg-gradient-to-br from-[#181c20] to-[#282d31]">
                 <Image
-                    src={`./${image}.svg`}
+                    src={`/./${image}.png`}
                     height={36}
                     width={37}
                     alt={`${image}`}
