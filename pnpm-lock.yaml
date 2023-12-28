@@ -50,6 +50,9 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.18.2
+      husky:
+        specifier: ^8.0.3
+        version: 8.0.3
       moment:
         specifier: ^2.29.4
         version: 2.29.4
@@ -186,9 +189,6 @@ importers:
       jest-environment-node:
         specifier: ^29.4.1
         version: 29.7.0
-      js:library:
-        specifier: link:@nx/js:library
-        version: link:@nx/js:library
       nx:
         specifier: 17.2.7
         version: 17.2.7(@swc-node/register@1.6.8)(@swc/core@1.3.101)
@@ -221,12 +221,6 @@ importers:
         version: 4.1.1(webpack@5.89.0)
 
   apps/cli:
-    dependencies:
-      tslib:
-        specifier: ^2.3.0
-        version: 2.6.2
-
-  packages/sdk-js:
     dependencies:
       tslib:
         specifier: ^2.3.0
@@ -7263,6 +7257,12 @@ packages:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
     dev: true
+
+  /husky@8.0.3:
+    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: false
 
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
