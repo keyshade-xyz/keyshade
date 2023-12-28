@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { Inter, Poppins } from "next/font/google"
+import { RiGitRepositoryLine } from "react-icons/ri";
 const inter = Inter({ subsets: ['latin'] })
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'] })
@@ -35,10 +36,12 @@ export default async function Index() {
             </div>
 
             <div className="flex gap-10 items-center justify-center">
-              <div className={`flex place-items-center gap-2 justify-center rounded-full border-[#3a3e41] border-solid border-[1px] bg-gradient-to-b from-[#0d1215]/35 to-[#323638]/35 px-4 py-2 ${inter.className} cursor-pointer transition-all ease-in-out duration-200 hover:scale-105 `}>
-                <Image src="./x_svg.svg" alt="x logo" height={13} width={13} ></Image>
-                <p className="text-white text-sm">Follow us on X</p>
-              </div>
+              <a href="https://docs.keyshade.xyz/" target="_blank">
+                <div className={`flex place-items-center gap-2 justify-center rounded-full border-[#3a3e41] border-solid border-[1px] bg-gradient-to-b from-[#0d1215]/35 to-[#323638]/35 px-4 py-2 ${inter.className} cursor-pointer transition-all ease-in-out duration-200 hover:scale-105 `}>
+                  <RiGitRepositoryLine className="text-white" />
+                  <p className="text-white text-sm">Documentation</p>
+                </div>
+              </a>
               <a href="https://github.com/keyshade-xyz/keyshade" target="_blank">
 
                 <div className={`flex place-items-center gap-2 justify-center rounded-full border-[#3a3e41] border-solid border-[1px] bg-gradient-to-b from-[#0d1215]/45 to-[#323638]/45 px-4 py-2 ${inter.className} cursor-pointer transition-all ease-in-out duration-200 hover:scale-105`}>
