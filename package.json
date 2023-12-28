@@ -13,7 +13,7 @@
     "lint:workspace": "nx run workspace:lint",
     "lint:cli": "nx run cli:lint",
     "lint:sdk-node": "nx run sdk-js:lint",
-    "lint:fix": "nx run-many -t lint --fix --parallel",
+    "lint:fix": "nx run-many -p api web workspace sdk-node -t lint --fix --parallel",
     "prettier:fix:api": "nx run api:prettier:fix",
     "build": "nx run-many -t build -p api web workspace --parallel --maxParallel 3",
     "build:api": "nx run api:build",
@@ -33,7 +33,8 @@
     "db:deploy-migrations": "cd apps/api/src/prisma && pnpx prisma migrate deploy",
     "db:validate": "nx run api:prisma:validate",
     "db:format": "nx run api:prisma:format",
-    "db:reset": "nx run api:prisma:reset"
+    "db:reset": "nx run api:prisma:reset",
+    "prepare": "husky install"
   },
   "private": false,
   "devDependencies": {
@@ -99,6 +100,7 @@
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "husky": "^8.0.3",
     "moment": "^2.29.4",
     "next": "13.4.4",
     "passport-jwt": "^4.0.1",
