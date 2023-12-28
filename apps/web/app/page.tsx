@@ -1,8 +1,7 @@
 import Image from 'next/image'
-import { Inter, Poppins } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import Links from './components/Links'
 import Killers from './components/Killers'
-const inter = Inter({ subsets: ['latin'] })
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -12,7 +11,7 @@ export default async function Index() {
   return (
     <div className="relative">
       <div className="absolute z-10 opacity-25">
-        <section className="h-[100vh] w-screen bg-[radial-gradient(ellipse_at_top_center,_#999797_38.7%,#060b0e_80%)]"></section>
+        <section className="h-[100vh] w-screen bg-[radial-gradient(ellipse_at_top_center,_#999797_38.7%,#060b0e_80%)]" />
       </div>
       <div className="bg-[#0a0a0a] w-full min-h-screen flex justify-center items-center absolute">
         <div>
