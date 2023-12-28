@@ -1,7 +1,6 @@
 on:
   push:
-    branches: [main]
-    paths: ['apps/web/**']
+    paths: ['apps/web/**', '.github/workflows/web.yaml']
   pull_request:
     paths: ['apps/web/**']
 
@@ -13,6 +12,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
 
       - name: Install packages
         run: |
@@ -27,13 +37,25 @@ jobs:
           pnpm run test:web
 
   deploy:
+    needs: validate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    name: Lint
+    name: Deploy
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
 
       - name: Install packages
         run: |
@@ -47,5 +69,4 @@ jobs:
         run: |
           pnpm install --global vercel
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
