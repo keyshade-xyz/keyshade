@@ -14,6 +14,7 @@
     "lint:cli": "nx run cli:lint",
     "lint:sdk-node": "nx run sdk-js:lint",
     "lint:fix": "nx run-many -p api web workspace sdk-node -t lint --fix --parallel",
+    "prettier:fix:api": "nx run api:prettier:fix",
     "build": "nx run-many -t build -p api web workspace --parallel --maxParallel 3",
     "build:api": "nx run api:build",
     "build:web": "nx run web:build",

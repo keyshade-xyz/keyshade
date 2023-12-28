@@ -1,7 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
-import { PrimsaRepository } from '../prisma/prisma.repository'
+import { PrismaRepository } from '../prisma/prisma.repository'
 import { Reflector } from '@nestjs/core'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 
@@ -9,7 +9,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private repository: PrimsaRepository,
+    private repository: PrismaRepository,
     private reflector: Reflector
   ) {}
 
@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
     if (!token) {
-      throw new UnauthorizedException()
+      throw new ForbiddenException()
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -33,7 +33,7 @@ export class AuthGuard implements CanActivate {
       })
       request['user'] = await this.repository.findUserById(payload.id)
     } catch {
-      throw new UnauthorizedException()
+      throw new ForbiddenException()
     }
     return true
   }

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable, Logger, LoggerService } from '@nestjs/common'
-import { PrimsaRepository } from '../prisma/prisma.repository'
+import { PrismaRepository } from '../prisma/prisma.repository'
 import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { UserAuthenticatedResponse } from './auth.types'
@@ -11,7 +11,7 @@ export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    private repository: PrimsaRepository,
+    private repository: PrismaRepository,
     @Inject(RESEND_SERVICE) private resend: IResendService,
     private jwt: JwtService
   ) {
