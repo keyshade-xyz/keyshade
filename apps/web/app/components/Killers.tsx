@@ -15,6 +15,8 @@ const Killers = ({ image, twitterUserName }: KillersProps) => {
                     height={36}
                     width={37}
                     alt={`${image}`}
+                    className='unselectable'
+                    draggable='false'
                 />
             </div>
             <div className={`flex flex-col justify-center items-center gap-1 ${inter.className}`}>

@@ -15,15 +15,15 @@ export default async function Index() {
       </div>
       <div className="bg-[#03080B] w-full min-h-screen flex justify-center items-center absolute">
         <div className='h-[69.16vh] w-[61.23vw] absolute'>
-          <Image src="./grid.svg" alt="grid" fill />
+          <Image src="./grid.svg" alt="grid" fill className='unselectable' draggable='false' />
         </div>
         <div className='h-[47.51vh] w-[87.92vw] absolute'>
-          <Image src="./stars.svg" alt="stars" fill />
+          <Image src="./stars.svg" alt="stars" fill className='unselectable' draggable='false' />
         </div>
         <div className="bg-transparent  w-fit h-[75%] flex flex-col p-1 mt-20 gap-10 z-20">
           <div className="flex flex-col items-center justify-center gap-10 min-w-screen">
             <div className="flex items-center justify-center">
-              <Image src="./logo.svg" height={60} width={61} alt="logo" />
+              <Image src="./logo.svg" height={60} width={61} alt="logo" className='unselectable' draggable='false' />
               <h1
                 className={`px-4 bg-gradient-to-br from-[#727576] to-[#fafafb] inline-block text-transparent bg-clip-text text-6xl ${poppins.className} py-1  md:text-5xl lg:text-7xl`}
               >

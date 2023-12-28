@@ -22,6 +22,8 @@ const Links = ({ icon, description, link }: LinksProps) => {
                     alt={`${icon}`}
                     height={12}
                     width={13}
+                    className='unselectable'
+                    draggable='false'
                 />
                 <p className="text-white text-sm">{description}</p>
             </div>
