@@ -20,7 +20,7 @@ const Links = ({ icon, description, link }: LinksProps) => {
                 <Image
                     src={`./${icon}.svg`}
                     alt={`${icon}`}
-                    height={13}
+                    height={12}
                     width={13}
                 />
                 <p className="text-white text-sm">{description}</p>

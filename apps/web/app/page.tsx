@@ -11,13 +11,13 @@ export default async function Index() {
   return (
     <div className="relative">
       <div className="absolute z-10 opacity-25">
-        <section className="h-[100vh] w-screen bg-[radial-gradient(ellipse_at_top_center,_#999797_38.7%,#060b0e_80%)]" />
+        <section className="h-[100vh] w-screen bg-[radial-gradient(ellipse_at_top_center,_#fff_20%,#ff03080B_80%)] opacity-50" />
       </div>
-      <div className="bg-[#0a0a0a] w-full min-h-screen flex justify-center items-center absolute">
-        <div>
+      <div className="bg-[#03080B] w-full min-h-screen flex justify-center items-center absolute">
+        <div className='h-[69.16vh] w-[61.23vw] absolute'>
           <Image src="./grid.svg" alt="grid" fill />
         </div>
-        <div>
+        <div className='h-[47.51vh] w-[87.92vw] absolute'>
           <Image src="./stars.svg" alt="stars" fill />
         </div>
         <div className="bg-transparent  w-fit h-[75%] flex flex-col p-1 mt-20 gap-10 z-20">

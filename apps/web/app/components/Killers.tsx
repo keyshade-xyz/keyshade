@@ -13,7 +13,7 @@ const Killers = ({ image, twitterUserName }: KillersProps) => {
                 <Image
                     src={`./${image}.svg`}
                     height={36}
-                    width={36}
+                    width={37}
                     alt={`${image}`}
                 />
             </div>
