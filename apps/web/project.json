@@ -14,7 +14,7 @@
     },
     "serve": {
       "executor": "@nx/next:server",
-      "defaultConfiguration": "production",
+      "defaultConfiguration": "development",
       "options": {
         "buildTarget": "web:build",
         "dev": true,
