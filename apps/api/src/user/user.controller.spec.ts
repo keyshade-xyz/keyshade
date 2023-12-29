@@ -95,4 +95,18 @@ describe('UserController', () => {
       expect(await controller.getUserById(userId)).toEqual(null)
     })
   })
+
+  describe('should get all users', () => {
+    it('should return all users with default parameters', async () => {
+      jest.spyOn(service, 'getAllUsers').mockResolvedValue([user])
+      expect(await controller.getAllUsers()).toEqual([user])
+    })
+
+    it('should return all users with custom parameters', async () => {
+      jest.spyOn(service, 'getAllUsers').mockResolvedValue([user])
+      expect(await controller.getAllUsers(1, 10, 'name', 'asc', '')).toEqual([
+        user
+      ])
+    })
+  })
 })
