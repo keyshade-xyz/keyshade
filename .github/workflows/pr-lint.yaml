@@ -1,18 +1,23 @@
-name: PR Lint
+name: "Lint PR"
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types:
+      - opened
+      - edited
+      - synchronize
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
 
 jobs:
-  pr-lint:
-    permissions: write-all
+  lint-pr:
+    name: Validate PR title
     runs-on: ubuntu-latest
     steps:
-      - uses: morrisoncole/pr-lint-action@v1.7.0
-        with:
-          repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          title-regex: '^(fix|feat|chore|docs|style|refactor|perf|test|ci|build|breaking-change|revert):\s(?:\D)[\w\d\s\-\.\,\_]+$'
-          on-failed-regex-fail-action: true
-          on-failed-regex-create-review: true
-          on-failed-regex-comment: 'PR title must match: `%regex%`!'
+      - name: Lint PR
+        uses: amannn/action-semantic-pull-request@v4.6.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
