@@ -26,7 +26,6 @@ function Index() {
                 keyshade.xyz
               </h1>
             </div>
-
             <div className="flex items-center justify-center py-10">
               <p className="min-w-[55%] sm:w-full md:w-[50%] lg:w-[35%] items-center justify-center bg-gradient-to-br from-[#727576] to-[#fafafb] inline-block text-transparent bg-clip-text text-wrap  text-center text-md md:p-1">
                 Manage all your secrets securely with public key encryption and
