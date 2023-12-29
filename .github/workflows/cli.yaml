@@ -30,10 +30,10 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm run lint:web
+          pnpm run lint:cli
 
       - name: Test
         run: |
-          pnpm run test:web
+          pnpm run test:cli
 
  
