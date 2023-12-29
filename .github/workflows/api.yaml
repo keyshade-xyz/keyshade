@@ -1,0 +1,37 @@
+on:
+  push:
+    paths: ['apps/api/**', '.github/workflows/api.yaml']
+  pull_request:
+    paths: ['apps/api/**']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+     - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Lint
+        run: |
+          pnpm run lint:api
+
+     - name: Test
+        run: |
+          pnpm run test:api

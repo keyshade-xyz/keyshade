@@ -22,6 +22,7 @@ Please ensure your pull request adheres to the following guidelines:
 - For setting up the project, do check the [Getting Started](https://docs.keyshade.xyz/contributing-to-keyshade/prerequisites) guide.
 - Write good commit messages by following [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 - Include relevant issue number if applicable.
+- Your PR should follow this pattern: `fix|feat|chore|docs|style|refactor|perf|test|ci|build|breaking-change|revert: <description>`. For example, `feat: add new feature` or `fix: fix a bug`. Note that description can contain only alphanumeric characters and `-`, `.` and `_` characters.
 
 ## Documentation
 
