@@ -24,7 +24,7 @@ jobs:
           version: 8
           run_install: false
 
-     - name: Install packages
+      - name: Install packages
         run: |
           pnpm i
 
@@ -32,6 +32,6 @@ jobs:
         run: |
           pnpm run lint:api
 
-     - name: Test
+      - name: Test
         run: |
           pnpm run test:api
