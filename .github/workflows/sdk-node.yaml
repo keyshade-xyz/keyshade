@@ -1,6 +1,6 @@
 on:
   push:
-    paths: ['/packages/sdk-node/**', '.github/workflows/sdk-node.yaml']
+    paths: ['packages/sdk-node/**', '.github/workflows/sdk-node.yaml']
   pull_request:
     paths: ['packages/sdk-node']
 
