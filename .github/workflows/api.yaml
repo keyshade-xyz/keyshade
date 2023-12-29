@@ -34,4 +34,5 @@ jobs:
 
       - name: Test
         run: |
+          pnpm run build:api
           pnpm run test:api
