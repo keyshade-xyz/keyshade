@@ -1,15 +1,5 @@
 import { User } from '@prisma/client'
 
-export const user: User = {
-  id: '1',
-  name: 'John Doe',
-  email: 'johndoe@keyshade.xyz',
-  profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
-  isActive: true,
-  isOnboardingFinished: false,
-  isAdmin: false
-}
-
 export const users: Array<User> = [
   {
     id: '1',
@@ -48,3 +38,5 @@ export const users: Array<User> = [
     isAdmin: true
   }
 ]
+
+export const user: User = users[0]

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { UserService } from './user.service'
 import { fakeRepository } from './fake.repository'
 import { User } from '@prisma/client'
-import { users } from '../mock-data/users'
+import { users } from '../common/mock-data/users'
 
 describe('UserService', () => {
   let service: UserService

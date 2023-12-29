@@ -1,6 +1,6 @@
 import { User } from '@prisma/client'
 import { PrismaRepository } from '../prisma/prisma.repository'
-import { users } from '../mock-data/users'
+import { users } from '../common/mock-data/users'
 
 export const fakeRepository: Partial<PrismaRepository> = {
   async excludeFields<T, K extends keyof T>(
