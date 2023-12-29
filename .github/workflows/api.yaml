@@ -31,3 +31,7 @@ jobs:
       - name: Lint
         run: |
           pnpm run lint:api
+
+     - name: Test
+        run: |
+          pnpm run test:api
