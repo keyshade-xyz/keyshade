@@ -57,3 +57,13 @@ jobs:
 
       - name: Push Docker image
         run: docker push keyshade/keyshade-web
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Deploy to Render
+
+    steps:
+      - name: deploy
+        run: curl ${{ secrets.RENDER_WEB_DEPLOY_HOOK }}
