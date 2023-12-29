@@ -9,18 +9,12 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/web"
-      },
-      "configurations": {
-        "development": {
-          "outputPath": "apps/web"
-        },
-        "production": {}
+        "outputPath": "apps/web/dist"
       }
     },
     "serve": {
       "executor": "@nx/next:server",
-      "defaultConfiguration": "development",
+      "defaultConfiguration": "production",
       "options": {
         "buildTarget": "web:build",
         "dev": true,
