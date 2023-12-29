@@ -38,5 +38,3 @@ export const users: Array<User> = [
     isAdmin: true
   }
 ]
-
-export const user: User = users[0]

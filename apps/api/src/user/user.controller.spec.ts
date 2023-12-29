@@ -9,15 +9,7 @@ describe('UserController', () => {
   let controller: UserController
   let service: UserService
 
-  const user: User = {
-    id: '1',
-    name: 'John Doe',
-    email: 'johndoe@keyshade.xyz',
-    profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
-    isActive: true,
-    isOnboardingFinished: false,
-    isAdmin: false
-  }
+  const user: User = users[0]
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
