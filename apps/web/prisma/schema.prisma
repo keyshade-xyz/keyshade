@@ -1,0 +1,71 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Scope {
+    CREATE
+    READ
+    UPDATE
+    DELETE
+}
+
+model User {
+    id                   String  @id @default(cuid())
+    email                String  @unique
+    name                 String?
+    profilePictureUrl    String?
+    isActive             Boolean @default(true)
+    isOnboardingFinished Boolean @default(false)
+    isAdmin              Boolean @default(false)
+
+    projects Project[]
+    apiKeys  ApiKey[]
+    otps     Otp[]
+}
+
+model Project {
+    id          String  @id @default(cuid())
+    name        String
+    description String?
+    owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId     String
+
+    secrets Secret[]
+    ApiKey  ApiKey[]
+}
+
+model Secret {
+    id    String @id @default(cuid())
+    name  String
+    value String
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+    id    String @id @default(cuid())
+    name  String
+    value String
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    scopes Scope[]
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+}
+
+model Otp {
+    code      String   @unique
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+}
