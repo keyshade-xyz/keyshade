@@ -142,6 +142,7 @@ export class PrismaRepository {
     expiresAfter: number
   ): Promise<Otp> {
     const timeNow = new Date()
+    await this.invalidateOldOtps(email)
     return await this.prisma.otp.create({
       data: {
         code: otp,
@@ -154,6 +155,39 @@ export class PrismaRepository {
       }
     })
   }
+
+  /**
+   * Invalidate Old OTPs for a User
+   *
+   * This method invalidates old OTPs (One-Time Passwords) associated with a user.
+   * It finds and deletes OTPs that belong to the user and have not expired yet.
+   *
+   * @param email - The email address of the user for whom old OTPs should be invalidated.
+   *
+   * @example
+   * ```typescript
+   * await invalidateOldOtps('user@example.com');
+   * ```
+   */
+  private async invalidateOldOtps(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+  
+    if (user) {
+      await this.prisma.otp.deleteMany({
+        where: {
+          userId: user.id,
+          expiresAt: {
+            gte: new Date(),
+          },
+        },
+      });
+    }
+  }
+  
 
   async deleteOtp(email: string, otp: string): Promise<void> {
     await this.prisma.otp.delete({
