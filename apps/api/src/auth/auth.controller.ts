@@ -15,7 +15,10 @@ export class AuthController {
 
   @Public()
   @Post('validate-otp')
-  async validateOtp(@Query('email') email: string, @Query('otp') otp: string): Promise<UserAuthenticatedResponse> {
+  async validateOtp(
+    @Query('email') email: string,
+    @Query('otp') otp: string
+  ): Promise<UserAuthenticatedResponse> {
     return await this.authService.validateOtp(email, otp)
   }
 }

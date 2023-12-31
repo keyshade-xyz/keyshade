@@ -1,9 +1,19 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger, LoggerService } from '@nestjs/common'
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  LoggerService
+} from '@nestjs/common'
 import { PrismaRepository } from '../prisma/prisma.repository'
 import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { UserAuthenticatedResponse } from './auth.types'
-import { IResendService, RESEND_SERVICE } from '../resend/services/resend.service.interface'
+import {
+  IResendService,
+  RESEND_SERVICE
+} from '../resend/services/resend.service.interface'
 
 @Injectable()
 export class AuthService {
@@ -21,7 +31,10 @@ export class AuthService {
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
-      throw new HttpException('Please enter a valid email address', HttpStatus.BAD_REQUEST)
+      throw new HttpException(
+        'Please enter a valid email address',
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     // We need to create the user if it doesn't exist yet
@@ -29,13 +42,20 @@ export class AuthService {
       await this.repository.createUser(email)
     }
 
-    const otp = await this.repository.createOtp(email, randomUUID().slice(0, 6).toUpperCase(), this.OTP_EXPIRY)
+    const otp = await this.repository.createOtp(
+      email,
+      randomUUID().slice(0, 6).toUpperCase(),
+      this.OTP_EXPIRY
+    )
 
     await this.resend.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}: ${otp.code}`)
   }
 
-  async validateOtp(email: string, otp: string): Promise<UserAuthenticatedResponse> {
+  async validateOtp(
+    email: string,
+    otp: string
+  ): Promise<UserAuthenticatedResponse> {
     const user = await this.repository.findUserByEmail(email)
     if (!user) {
       this.logger.error(`User not found: ${email}`)
