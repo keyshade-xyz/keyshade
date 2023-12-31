@@ -15,3 +15,7 @@ Here's the description of the environment variables used in the project. You can
 * **JWT\_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.
 * **FROM\_EMAIL**: The email address from which the emails will be sent. This is used by the Resend API to send out emails.
 * **WEB\_FRONTEND\_URL, WORKSPACE\_FRONTEND\_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
+
+* **CLERK\_SECRET\_KEY , NEXT\_PUBLIC\_CLERK\_PUBLISHABLE\_KEY, CLERK\_WEBHOOK\_SIGNING\_KEY**: These are the keys used by [Clerk](https://clerk.dev/) to authenticate users. The secret key is used by the backend to sign the JWT tokens. The public key is used by the frontend to verify the JWT tokens. The webhook signing key is used by the backend to verify the webhooks sent by Clerk.
+
+
