@@ -16,6 +16,9 @@
         "name": "next"
       }
     ],
+    "paths": {
+      "@/*": ["./*"],
+    },
     "types": [
       "jest",
       "node"
