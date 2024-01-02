@@ -94,6 +94,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/swagger": "^7.1.17",
     "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.39.1",
     "axios": "^1.0.0",

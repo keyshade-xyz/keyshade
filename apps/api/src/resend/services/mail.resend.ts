@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Resend } from 'resend'
 import { IResendService } from './resend.service.interface'
+import { $Enums } from '@prisma/client'
 
 @Injectable()
 export class MailResend implements IResendService {
@@ -9,6 +10,61 @@ export class MailResend implements IResendService {
 
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  async projectInvitationMailForRegisteredUser(
+    email: string,
+    project: string,
+    actionUrl: string,
+    invitee: string,
+    role: $Enums.ProjectRole
+  ): Promise<void> {
+    const subject = `You have been invited to a ${project}`
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>Project Invitation</title>
+        </head>
+        <body>
+           <h1>Welcome to keyshade!</h1>
+           <p>Hello there!</p>
+           <p>You have been invited to join the project <strong>${project}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
+           <p>Please click on the link below to accept the invitation.</p>
+           <p><a href="${actionUrl}">Accept Invitation</a></p>
+           <p>Thank you for choosing us.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        </html>
+        `
+    await this.sendEmail(email, subject, body)
+  }
+
+  async projectInvitationMailForNonRegisteredUser(
+    email: string,
+    project: string,
+    actionUrl: string,
+    invitee: string,
+    role: $Enums.ProjectRole
+  ): Promise<void> {
+    const subject = `You have been invited to a ${project}`
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>Project Invitation</title>
+        </head>
+        <body>
+           <h1>Welcome to keyshade!</h1>
+           <p>Hello there!</p>
+           <p>You have been invited to join the project <strong>${project}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
+           <p>Please click on the link below to accept the invitation.</p>
+           <p><a href="${actionUrl}">Accept Invitation</a></p>
+           <p>Thank you for choosing us.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        </html>
+        `
+    await this.sendEmail(email, subject, body)
   }
 
   async sendOtp(email: string, otp: string): Promise<void> {
@@ -34,7 +90,11 @@ export class MailResend implements IResendService {
     await this.sendEmail(email, subject, body)
   }
 
-  private async sendEmail(email: string, subject: string, body: string): Promise<void> {
+  private async sendEmail(
+    email: string,
+    subject: string,
+    body: string
+  ): Promise<void> {
     const { error } = await this.resend.emails.send({
       from: process.env.FROM_EMAIL,
       to: email,

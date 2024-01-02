@@ -9,6 +9,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import chalk from 'chalk'
 import moment from 'moment'
+import { QueryTransformPipe } from './common/query.transform.pipe'
 
 class CustomLogger implements LoggerService {
   log(message: string) {
@@ -16,15 +17,27 @@ class CustomLogger implements LoggerService {
   }
 
   info(message: string) {
-    console.info(`${chalk.green('[INFO]')} ${chalk.green(moment().format('YYYY-MM-DD HH:mm:ss'))} - ${message}`)
+    console.info(
+      `${chalk.green('[INFO]')} ${chalk.green(
+        moment().format('YYYY-MM-DD HH:mm:ss')
+      )} - ${message}`
+    )
   }
 
   error(message: string) {
-    console.error(`${chalk.red('[ERROR]')} ${chalk.red(moment().format('YYYY-MM-DD HH:mm:ss'))} - ${message}`)
+    console.error(
+      `${chalk.red('[ERROR]')} ${chalk.red(
+        moment().format('YYYY-MM-DD HH:mm:ss')
+      )} - ${message}`
+    )
   }
 
   warn(message: string) {
-    console.warn(`${chalk.yellow('[WARN]')} ${chalk.yellow(moment().format('YYYY-MM-DD HH:mm:ss'))} - ${message}`)
+    console.warn(
+      `${chalk.yellow('[WARN]')} ${chalk.yellow(
+        moment().format('YYYY-MM-DD HH:mm:ss')
+      )} - ${message}`
+    )
   }
 }
 
@@ -39,11 +52,14 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true
-    })
+    }),
+    new QueryTransformPipe()
   )
   const port = 4200
   await app.listen(port)
-  logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`)
+  logger.log(
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+  )
 }
 
 bootstrap()

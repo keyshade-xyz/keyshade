@@ -10,7 +10,7 @@ datasource db {
 enum ProjectRole {
   OWNER // Can do everything
   MAINTAINER // Can do everything except deleting the project
-  VIEWER // Can only view the project and its secrets
+  VIEWER // Can only view the project and use its secrets
 }
 
 enum ApiKeyRole {
@@ -29,6 +29,37 @@ enum ApiKeyRole {
   READ_API_KEY
   UPDATE_API_KEY
   DELETE_API_KEY
+  CREATE_ENVIRONMENT
+  READ_ENVIRONMENT
+  UPDATE_ENVIRONMENT
+  DELETE_ENVIRONMENT
+}
+
+enum NotificationType {
+  INVITED_TO_PROJECT
+  REMOVED_FROM_PROJECT
+  PROJECT_UPDATED
+  PROJECT_DELETED
+  SECRET_UPDATED
+  SECRET_DELETED
+  SECRET_ADDED
+  API_KEY_UPDATED
+  API_KEY_DELETED
+  API_KEY_ADDED
+  ENVIRONMENT_UPDATED
+  ENVIRONMENT_DELETED
+  ENVIRONMENT_ADDED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  type      NotificationType
+  message   String
+  link      String?
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
 }
 
 model User {
@@ -41,11 +72,13 @@ model User {
   isAdmin              Boolean       @default(false)
   subscription         Subscription?
 
-  projects ProjectMember[]
-  apiKeys  ApiKey[]
-  otps     Otp[]
-  Secret   Secret[] // Stores the secrets the user updated
-  Project  Project[] // Stores the projects the user updated
+  projects      ProjectMember[]
+  apiKeys       ApiKey[]
+  otps          Otp[]
+  notifications Notification[]
+  Secret        Secret[] // Stores the secrets the user updated
+  project       Project[] // Stores the projects the user updated
+  environments  Environment[] // Stores the environments the user updated
 }
 
 model Subscription {
@@ -57,14 +90,34 @@ model Subscription {
   userId String @unique
 }
 
-model Project {
+model Environment {
   id          String   @id @default(cuid())
   name        String
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  publicKey   String
-  privateKey  String? // We store this only if the user wants us to do so! 
+  isDefault   Boolean  @default(false)
+
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  lastUpdatedById String
+
+  secrets Secret[]
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publicKey       String
+  privateKey      String? // We store this only if the user wants us to do so! 
+  storePrivateKey Boolean  @default(false)
+  isFreeTier      Boolean  @default(true)
+  isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
 
   lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
   lastUpdatedById String
@@ -72,15 +125,19 @@ model Project {
   members      ProjectMember[]
   secrets      Secret[]
   apiKeyScopes ApiKeyScope[]
+  environments Environment[]
 }
 
 model ProjectMember {
-  id        String      @id @default(cuid())
-  role      ProjectRole
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    String
-  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  projectId String
+  id                 String      @id @default(cuid())
+  role               ProjectRole
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId             String
+  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId          String
+  invitationAccepted Boolean     @default(false)
+
+  @@unique([projectId, userId])
 }
 
 model ApiKeyScope {
@@ -94,12 +151,21 @@ model ApiKeyScope {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
+model SecretVersion {
+  id      String @id @default(cuid())
+  value   String
+  version Int    @default(1)
+
+  secretId String
+  secret   Secret @relation(fields: [secretId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 model Secret {
-  id        String    @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
-  value     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  versions  SecretVersion[] // Stores the versions of the secret
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   rotateAt  DateTime?
 
   lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id])
@@ -107,6 +173,9 @@ model Secret {
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model ApiKey {
