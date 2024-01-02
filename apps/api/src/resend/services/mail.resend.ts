@@ -31,7 +31,7 @@ export class MailResend implements IResendService {
         </body>
         </html>
         `
-    await this.sendEmail(email, subject, body)
+    this.sendEmail(email, subject, body)
   }
 
   private async sendEmail(
