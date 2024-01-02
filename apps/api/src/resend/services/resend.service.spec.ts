@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { IResendService } from './services/resend.service.interface'
-import { TestResend } from './services/test.resend'
+import { IResendService } from './resend.service.interface'
+import { MockResend } from './mock.resend'
 
 describe('ResendService', () => {
   let service: IResendService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TestResend]
+      providers: [MockResend]
     }).compile()
 
-    service = module.get<TestResend>(TestResend)
+    service = module.get<MockResend>(MockResend)
   })
 
   it('should be defined', () => {

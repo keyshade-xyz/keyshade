@@ -1,7 +1,7 @@
 import { Controller, Param, Post, Query } from '@nestjs/common'
-import { AuthService } from './auth.service'
-import { UserAuthenticatedResponse } from './auth.types'
-import { Public } from '../decorators/public.decorator'
+import { AuthService } from '../service/auth.service'
+import { UserAuthenticatedResponse } from '../auth.types'
+import { Public } from '../../decorators/public.decorator'
 
 @Controller('auth')
 export class AuthController {

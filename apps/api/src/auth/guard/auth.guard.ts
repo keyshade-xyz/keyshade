@@ -2,19 +2,23 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
-import { PrismaRepository } from '../prisma/prisma.repository'
 import { Reflector } from '@nestjs/core'
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
+import { IS_PUBLIC_KEY } from '../../decorators/public.decorator'
+import {
+  IUserRepository,
+  USER_REPOSITORY
+} from '../../user/repository/interface.repository'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private repository: PrismaRepository,
+    @Inject(USER_REPOSITORY) private repository: IUserRepository,
     private reflector: Reflector
   ) {}
 

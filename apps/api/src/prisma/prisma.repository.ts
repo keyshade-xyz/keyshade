@@ -172,22 +172,21 @@ export class PrismaRepository {
   private async invalidateOldOtps(email: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: {
-        email,
-      },
-    });
-  
+        email
+      }
+    })
+
     if (user) {
       await this.prisma.otp.deleteMany({
         where: {
           userId: user.id,
           expiresAt: {
-            gte: new Date(),
-          },
-        },
-      });
+            gte: new Date()
+          }
+        }
+      })
     }
   }
-  
 
   async deleteOtp(email: string, otp: string): Promise<void> {
     await this.prisma.otp.delete({

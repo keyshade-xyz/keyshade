@@ -1,18 +1,22 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { PrismaRepository } from '../prisma/prisma.repository'
-import { UpdateUserDto } from './dto/update.user/update.user'
+import { UpdateUserDto } from '../dto/update.user/update.user'
 import { User } from '@prisma/client'
+import {
+  IUserRepository,
+  USER_REPOSITORY
+} from '../repository/interface.repository'
+import { excludeFields } from '../../common/exclude-fields'
 
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
 
   constructor(
-    @Inject('PrismaRepository') private readonly repository: PrismaRepository
+    @Inject(USER_REPOSITORY) private readonly repository: IUserRepository
   ) {}
 
   async getSelf(user: User) {
-    return this.repository.excludeFields(user, 'isActive')
+    return excludeFields(user, 'isActive')
   }
 
   async updateSelf(user: User, dto: UpdateUserDto, finishOnboarding: boolean) {
@@ -22,7 +26,7 @@ export class UserService {
       isOnboardingFinished: finishOnboarding
     }
     this.log.log(`Updating user ${user.id} with data ${dto}`)
-    return await this.repository.excludeFields(
+    return excludeFields(
       await this.repository.updateUser(user.id, data),
       'isActive'
     )

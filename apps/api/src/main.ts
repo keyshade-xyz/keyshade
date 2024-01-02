@@ -9,6 +9,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import chalk from 'chalk'
 import moment from 'moment'
+import { QueryTransformPipe } from './common/query.transform.pipe'
 
 class CustomLogger implements LoggerService {
   log(message: string) {
@@ -51,7 +52,8 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true
-    })
+    }),
+    new QueryTransformPipe()
   )
   const port = 4200
   await app.listen(port)

@@ -7,11 +7,11 @@ import {
   Query,
   UseGuards
 } from '@nestjs/common'
-import { UserService } from './user.service'
-import { CurrentUser } from '../decorators/user.decorator'
+import { UserService } from '../service/user.service'
+import { CurrentUser } from '../../decorators/user.decorator'
 import { User } from '@prisma/client'
-import { UpdateUserDto } from './dto/update.user/update.user'
-import { AdminGuard } from '../auth/admin.guard'
+import { UpdateUserDto } from '../dto/update.user/update.user'
+import { AdminGuard } from '../../auth/guard/admin.guard'
 
 @Controller('user')
 export class UserController {

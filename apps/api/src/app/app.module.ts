@@ -8,8 +8,10 @@ import { PrismaModule } from '../prisma/prisma.module'
 import { CommonModule } from '../common/common.module'
 import { ResendModule } from '../resend/resend.module'
 import { APP_GUARD } from '@nestjs/core'
-import { AuthGuard } from '../auth/auth.guard'
+import { AuthGuard } from '../auth/guard/auth.guard'
 import { UserModule } from '../user/user.module'
+import { ProjectModule } from '../project/project.module'
+import { EnvironmentModule } from '../environment/environment.module'
 
 @Module({
   controllers: [AppController],
@@ -24,7 +26,9 @@ import { UserModule } from '../user/user.module'
     CommonModule,
     ResendModule,
     SupabaseModule,
-    UserModule
+    UserModule,
+    ProjectModule,
+    EnvironmentModule
   ],
   providers: [
     {
