@@ -56,7 +56,7 @@ export class AuthService {
       this.OTP_EXPIRY
     )
 
-    await this.resend.sendOtp(email, otp.code)
+    this.resend.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}: ${otp.code}`)
   }
 
