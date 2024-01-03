@@ -25,9 +25,9 @@ import {
   USER_REPOSITORY
 } from '../../user/repository/interface.repository'
 import {
-  IResendService,
-  RESEND_SERVICE
-} from '../../resend/services/resend.service.interface'
+  IMailService,
+  MAIL_SERVICE
+} from '../../mail/services/interface.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { JwtService } from '@nestjs/jwt'
 import { createKeyPair } from '../../common/create-key-pair'
@@ -43,7 +43,7 @@ export class ProjectService {
     @Inject(ENVIRONMENT_REPOSITORY)
     private readonly environmentRepository: IEnvironmentRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
-    @Inject(RESEND_SERVICE) private readonly resendService: IResendService,
+    @Inject(MAIL_SERVICE) private readonly resendService: IMailService,
     private readonly jwt: JwtService,
     private readonly permission: ProjectPermission
   ) {}

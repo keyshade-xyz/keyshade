@@ -1,8 +1,8 @@
 import { ProjectRole } from '@prisma/client'
 
-export const RESEND_SERVICE = 'RESEND_SERVICE'
+export const MAIL_SERVICE = 'MAIL_SERVICE'
 
-export interface IResendService {
+export interface IMailService {
   sendOtp(email: string, otp: string): Promise<void>
 
   projectInvitationMailForRegisteredUser(

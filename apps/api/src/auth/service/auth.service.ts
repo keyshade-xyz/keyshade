@@ -10,9 +10,9 @@ import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { UserAuthenticatedResponse } from '../auth.types'
 import {
-  IResendService,
-  RESEND_SERVICE
-} from '../../resend/services/resend.service.interface'
+  IMailService,
+  MAIL_SERVICE
+} from '../../mail/services/interface.service'
 import {
   IUserRepository,
   USER_REPOSITORY
@@ -30,7 +30,7 @@ export class AuthService {
   constructor(
     @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
     @Inject(USER_REPOSITORY) readonly userRepository: IUserRepository,
-    @Inject(RESEND_SERVICE) private resend: IResendService,
+    @Inject(MAIL_SERVICE) private resend: IMailService,
     private jwt: JwtService
   ) {
     this.logger = new Logger(AuthService.name)

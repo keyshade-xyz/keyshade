@@ -1,22 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Resend } from 'resend'
-import { IResendService } from './resend.service.interface'
-import { $Enums } from '@prisma/client'
+import { IMailService } from './interface.service'
+import { ProjectRole } from '@prisma/client'
+import { Transporter, createTransport } from 'nodemailer'
 
 @Injectable()
-export class MailResend implements IResendService {
-  private readonly resend: Resend
-  private readonly log = new Logger(MailResend.name)
+export class MailService implements IMailService {
+  private readonly transporter: Transporter
+  private readonly log = new Logger(MailService.name)
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY)
+    this.transporter = createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: true,
+      auth: {
+        user: process.env.SMTP_EMAIL_ADDRESS,
+        pass: process.env.SMTP_PASSWORD
+      }
+    })
   }
   async projectInvitationMailForRegisteredUser(
     email: string,
     project: string,
     actionUrl: string,
     invitee: string,
-    role: $Enums.ProjectRole
+    role: ProjectRole
   ): Promise<void> {
     const subject = `You have been invited to a ${project}`
     const body = `<!DOCTYPE html>
@@ -44,7 +52,7 @@ export class MailResend implements IResendService {
     project: string,
     actionUrl: string,
     invitee: string,
-    role: $Enums.ProjectRole
+    role: ProjectRole
   ): Promise<void> {
     const subject = `You have been invited to a ${project}`
     const body = `<!DOCTYPE html>
@@ -95,16 +103,17 @@ export class MailResend implements IResendService {
     subject: string,
     body: string
   ): Promise<void> {
-    const { error } = await this.resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject,
-      html: body
-    })
-
-    if (error) {
+    try {
+      await this.transporter.sendMail({
+        from: process.env.FROM_EMAIL,
+        to: email,
+        subject: subject,
+        html: body
+      })
+      this.log.log(`Email sent to ${email}`)
+    } catch (error) {
       this.log.error(`Error sending email to ${email}: ${error.message}`)
-      throw new Error(error.message)
+      throw new Error(`Error sending email to ${email}: ${error.message}`)
     }
   }
 }

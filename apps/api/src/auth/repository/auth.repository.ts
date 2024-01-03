@@ -1,7 +1,9 @@
 import { Otp, User } from '@prisma/client'
 import { IAuthRepository } from './interface.repository'
 import { PrismaService } from '../../prisma/prisma.service'
+import { Injectable } from '@nestjs/common'
 
+@Injectable()
 export class AuthRepository implements IAuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 

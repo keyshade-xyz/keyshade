@@ -7,8 +7,8 @@ import { ENVIRONMENT_REPOSITORY } from '../../environment/repository/interface.r
 import { MockEnvironmentRepository } from '../../environment/repository/mock.repository'
 import { USER_REPOSITORY } from '../../user/repository/interface.repository'
 import { MockUserRepository } from '../../user/repository/mock.repository'
-import { RESEND_SERVICE } from '../../resend/services/resend.service.interface'
-import { MockResend } from '../../resend/services/mock.resend'
+import { MAIL_SERVICE } from '../../mail/services/interface.service'
+import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
 import { ProjectPermission } from '../misc/project.permission'
 
@@ -26,7 +26,7 @@ describe('ProjectController', () => {
           useClass: MockEnvironmentRepository
         },
         { provide: USER_REPOSITORY, useClass: MockUserRepository },
-        { provide: RESEND_SERVICE, useClass: MockResend },
+        { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
         ProjectPermission
       ]
