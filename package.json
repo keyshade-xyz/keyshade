@@ -88,6 +88,8 @@
     "url-loader": "^4.1.1"
   },
   "dependencies": {
+    "@clerk/nextjs": "^4.29.1",
+    "@clerk/themes": "^1.7.9",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.2",
@@ -112,6 +114,7 @@
     "reflect-metadata": "^0.1.13",
     "resend": "^2.0.0",
     "rxjs": "^7.8.0",
+    "svix": "^1.15.0",
     "tslib": "^2.3.0"
   }
 }
