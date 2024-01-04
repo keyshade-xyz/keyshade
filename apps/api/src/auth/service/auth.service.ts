@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
 import {
   IMailService,
@@ -82,6 +83,16 @@ export class AuthService {
     return {
       ...user,
       token: await this.jwt.signAsync({ id: user.id })
+    }
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async cleanUpExpiredOtps() {
+    try {
+      await this.authRepository.deleteExpiredOtps()
+      this.logger.log('Expired OTPs cleaned up successfully.')
+    } catch (error) {
+      this.logger.error(`Error cleaning up expired OTPs: ${error.message}`)
     }
   }
 }

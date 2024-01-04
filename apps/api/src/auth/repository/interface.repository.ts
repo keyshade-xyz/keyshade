@@ -34,4 +34,10 @@ export interface IAuthRepository {
    * @returns {Promise<void>} - A promise that resolves when the OTP is successfully deleted.
    */
   deleteOtp(email: User['email'], otp: string): Promise<void>
+
+  /**
+   * Cron Job that runs every hours to delete expired otp
+   * @returns {Promise<void>} - A promise that resolves when the Expired OTPs are successfully deleted.
+   */
+  deleteExpiredOtps(): Promise<void>
 }
