@@ -17,6 +17,7 @@ import { UserModule } from '../user/user.module'
     ProjectPermission
   ],
   controllers: [ProjectController],
+  exports: [ProjectPermission],
   imports: [UserModule, EnvironmentModule]
 })
 export class ProjectModule {}
