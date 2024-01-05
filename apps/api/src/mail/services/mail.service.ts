@@ -44,7 +44,7 @@ export class MailService implements IMailService {
         </body>
         </html>
         `
-    this.sendEmail(email, subject, body)
+    await this.sendEmail(email, subject, body)
   }
 
   async projectInvitationMailForNonRegisteredUser(
@@ -72,7 +72,7 @@ export class MailService implements IMailService {
         </body>
         </html>
         `
-    this.sendEmail(email, subject, body)
+    await this.sendEmail(email, subject, body)
   }
 
   async sendOtp(email: string, otp: string): Promise<void> {
@@ -95,7 +95,7 @@ export class MailService implements IMailService {
         </body>
         </html>
         `
-    this.sendEmail(email, subject, body)
+    await this.sendEmail(email, subject, body)
   }
 
   private async sendEmail(
@@ -104,7 +104,7 @@ export class MailService implements IMailService {
     body: string
   ): Promise<void> {
     try {
-      this.transporter.sendMail({
+      await this.transporter.sendMail({
         from: process.env.FROM_EMAIL,
         to: email,
         subject: subject,
