@@ -15,7 +15,7 @@ jobs:
             const comment = context.payload.comment;
             const issue = context.issue;
             const owner = "keyshade-xyz";
-            const repo = "keyshade
+            const repo = "keyshade"
 
             if (comment.body.startsWith('/attempt')) {
               if (!issue.assignee) {
