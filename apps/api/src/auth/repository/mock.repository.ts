@@ -20,4 +20,8 @@ export class MockAuthRepository implements IAuthRepository {
   deleteOtp(email: string, otp: string): Promise<void> {
     throw new Error('Method not implemented.')
   }
+
+  deleteExpiredOtps(): Promise<void> {
+    throw new Error('Method not implemented.')
+  }
 }
