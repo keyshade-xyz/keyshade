@@ -61,6 +61,23 @@ export interface IEnvironmentRepository {
   ): Promise<Environment[]>
 
   /**
+   * Retrieves all environments with optional pagination, sorting, and search.
+   * @param {number} page - The page number for pagination.
+   * @param {number} limit - The number of environments per page.
+   * @param {string} sort - The field to sort by.
+   * @param {string} order - The sort order ('asc' or 'desc').
+   * @param {string} search - The search term for environment names.
+   * @returns {Promise<Environment[]>} - A promise that resolves to an array of environments.
+   */
+  getEnvironments(
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ): Promise<Environment[]>
+
+  /**
    * Updates an existing environment.
    * @param {Environment['id']} environmentId - The ID of the environment to update.
    * @param {Partial<Environment>} environment - The updated environment data.
@@ -74,9 +91,23 @@ export interface IEnvironmentRepository {
   ): Promise<Environment>
 
   /**
+   * Makes all the environments in this project non-default
+   * @param {Project['id']} projectId - The ID of the project.
+   * @returns {Promise<Environment | null>} - A promise that resolves to the default environment or null if not found.
+   */
+  makeAllNonDefault(projectId: Project['id']): Promise<void>
+
+  /**
    * Deletes an environment.
    * @param {Environment['id']} environmentId - The ID of the environment to delete.
    * @returns {Promise<void>} - A promise that resolves when the environment is successfully deleted.
    */
   deleteEnvironment(environmentId: Environment['id']): Promise<void>
+
+  /**
+   * Get the total number of environments in a project.
+   * @param {Project['id']} projectId - The ID of the project.
+   * @returns {Promise<void>} - A promise that resolves when the total environments are fetched.
+   */
+  countTotalEnvironmentsInProject(projectId: Project['id']): Promise<number>
 }

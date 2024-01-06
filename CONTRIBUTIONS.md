@@ -12,6 +12,15 @@ Before reporting a bug, please check our list of [open issues](https://github.co
 
 If you have ideas for improvements or new features we would love to hear them. Please provide as much detail as possible so we can fully understand your ideas. You can [create a new issue](https://github.com/keyshade-xyz/keyshade/issues/new/choose) to share your suggestions.
 
+## Self Assigning Issues
+
+1. To express interest in working on an issue, simply type `/attempt` at the beginning of a comment.
+2. If the issue is unassigned, it will be automatically assigned to you. ✨
+3. If the issue is already assigned, you'll receive a message indicating the need to contact a maintainer to discuss reassignment.
+
+**Example:**
+`/attempt` I'd like to work on this issue.
+
 ## Code Contribution
 
 Please ensure your pull request adheres to the following guidelines:

@@ -1,5 +1,5 @@
 import { ProjectRole } from '@prisma/client'
-import { CreateEnvironment } from '../../../environment/dto/create.environment'
+import { CreateEnvironment } from '../../../environment/dto/create.environment/create.environment'
 import {
   IsArray,
   IsBoolean,

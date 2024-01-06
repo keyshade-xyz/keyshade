@@ -44,18 +44,6 @@ CREATE TABLE "Subscription" (
 );
 
 -- CreateTable
-CREATE TABLE "FreeTierLimit" (
-    "id" TEXT NOT NULL,
-    "maxProjects" INTEGER NOT NULL DEFAULT 5,
-    "maxEnvironments" INTEGER NOT NULL DEFAULT 3,
-    "maxApiKeys" INTEGER NOT NULL DEFAULT 3,
-    "maxSecretsPerProject" INTEGER NOT NULL DEFAULT 10,
-    "maxMembersPerProject" INTEGER NOT NULL DEFAULT 5,
-
-    CONSTRAINT "FreeTierLimit_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Environment" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,

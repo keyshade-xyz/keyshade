@@ -1,4 +1,4 @@
-import { Environment } from '@prisma/client'
+import { Environment, Project } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { IEnvironmentRepository } from './interface.repository'
 import { Injectable } from '@nestjs/common'
@@ -16,6 +16,7 @@ export class EnvironmentRepository implements IEnvironmentRepository {
       data: {
         name: environment.name,
         description: environment.description,
+        isDefault: environment.isDefault,
         projectId,
         lastUpdatedById: userId
       }
@@ -42,7 +43,8 @@ export class EnvironmentRepository implements IEnvironmentRepository {
   ): Promise<Environment | null> {
     return await this.prisma.environment.findUnique({
       where: {
-        id: environmentId
+        id: environmentId,
+        projectId
       },
       include: {
         secrets: true,
@@ -67,7 +69,30 @@ export class EnvironmentRepository implements IEnvironmentRepository {
         }
       },
       include: {
-        secrets: true,
+        lastUpdatedBy: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+  }
+
+  async getEnvironments(
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ): Promise<Environment[]> {
+    return await this.prisma.environment.findMany({
+      where: {
+        name: {
+          contains: search
+        }
+      },
+      include: {
         lastUpdatedBy: true
       },
       skip: (page - 1) * limit,
@@ -90,6 +115,7 @@ export class EnvironmentRepository implements IEnvironmentRepository {
       data: {
         name: environment.name,
         description: environment.description,
+        isDefault: environment.isDefault,
         lastUpdatedById: userId
       },
       include: {
@@ -99,10 +125,31 @@ export class EnvironmentRepository implements IEnvironmentRepository {
     })
   }
 
+  async makeAllNonDefault(projectId: Project['id']): Promise<void> {
+    await this.prisma.environment.updateMany({
+      where: {
+        projectId
+      },
+      data: {
+        isDefault: false
+      }
+    })
+  }
+
   async deleteEnvironment(environmentId: string): Promise<void> {
     await this.prisma.environment.delete({
       where: {
         id: environmentId
+      }
+    })
+  }
+
+  async countTotalEnvironmentsInProject(
+    projectId: Project['id']
+  ): Promise<number> {
+    return await this.prisma.environment.count({
+      where: {
+        projectId
       }
     })
   }
