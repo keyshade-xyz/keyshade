@@ -15,7 +15,9 @@ import { User } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { AdminGuard } from '../../auth/guard/admin.guard'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Secret Controller')
 @Controller('secret')
 export class SecretController {
   constructor(private readonly secretService: SecretService) {}
