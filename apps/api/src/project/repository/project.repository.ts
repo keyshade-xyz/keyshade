@@ -2,6 +2,7 @@ import { Project, ProjectMember, ProjectRole, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { IProjectRepository } from './interface.repository'
 import { Injectable } from '@nestjs/common'
+import { ProjectMembership, ProjectWithUserRole } from '../project.types'
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
@@ -183,10 +184,18 @@ export class ProjectRepository implements IProjectRepository {
       },
       include: {
         members: {
-          select: {
-            user: true,
-            invitationAccepted: true,
-            role: true
+          include: {
+            user: true
+          }
+        },
+        secrets: {
+          include: {
+            versions: {
+              orderBy: {
+                version: 'desc'
+              },
+              take: 1
+            }
           }
         }
       }
@@ -205,6 +214,16 @@ export class ProjectRepository implements IProjectRepository {
             invitationAccepted: true,
             role: true
           }
+        },
+        secrets: {
+          include: {
+            versions: {
+              orderBy: {
+                version: 'desc'
+              },
+              take: 1
+            }
+          }
         }
       }
     })
@@ -217,7 +236,7 @@ export class ProjectRepository implements IProjectRepository {
     sort: string,
     order: string,
     search: string
-  ): Promise<Array<Project & { role: ProjectRole }>> {
+  ): Promise<Array<ProjectWithUserRole>> {
     const memberships = await this.prisma.projectMember.findMany({
       skip: (page - 1) * limit,
       orderBy: {
@@ -299,14 +318,7 @@ export class ProjectRepository implements IProjectRepository {
     sort: string,
     order: string,
     search: string
-  ): Promise<
-    {
-      id: string
-      role: ProjectRole
-      user: User
-      invitationAccepted: boolean
-    }[]
-  > {
+  ): Promise<ProjectMembership[]> {
     return await this.prisma.projectMember.findMany({
       skip: (page - 1) * limit,
       take: limit,

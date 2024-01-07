@@ -7,8 +7,21 @@ import {
   User
 } from '@prisma/client'
 import { IProjectRepository } from './interface.repository'
+import {
+  ProjectWithMembersAndSecrets,
+  ProjectWithSecrets
+} from '../project.types'
 
 export class MockProjectRepository implements IProjectRepository {
+  getProjectByUserIdAndId(
+    userId: string,
+    projectId: string
+  ): Promise<ProjectWithMembersAndSecrets> {
+    throw new Error('Method not implemented.')
+  }
+  getProjectById(projectId: string): Promise<ProjectWithSecrets> {
+    throw new Error('Method not implemented.')
+  }
   deleteMembership(projectId: string, userId: string): Promise<void> {
     throw new Error('Method not implemented.')
   }
@@ -89,14 +102,6 @@ export class MockProjectRepository implements IProjectRepository {
   }
 
   deleteProject(projectId: string): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  getProjectByUserIdAndId(userId: string, projectId: string): Promise<Project> {
-    throw new Error('Method not implemented.')
-  }
-
-  getProjectById(projectId: string): Promise<Project> {
     throw new Error('Method not implemented.')
   }
 

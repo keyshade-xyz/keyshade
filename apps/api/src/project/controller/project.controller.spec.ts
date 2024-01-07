@@ -11,6 +11,8 @@ import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
 import { ProjectPermission } from '../misc/project.permission'
+import { SECRET_REPOSITORY } from '../../secret/repository/interface.repository'
+import { MockSecretRepository } from '../../secret/repository/mock.repository'
 
 describe('ProjectController', () => {
   let controller: ProjectController
@@ -27,6 +29,7 @@ describe('ProjectController', () => {
         },
         { provide: USER_REPOSITORY, useClass: MockUserRepository },
         { provide: MAIL_SERVICE, useClass: MockMailService },
+        { provide: SECRET_REPOSITORY, useClass: MockSecretRepository },
         JwtService,
         ProjectPermission
       ]

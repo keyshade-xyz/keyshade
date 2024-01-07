@@ -101,6 +101,8 @@ CREATE TABLE "SecretVersion" (
     "value" TEXT NOT NULL,
     "version" INTEGER NOT NULL DEFAULT 1,
     "secretId" TEXT NOT NULL,
+    "createdOn" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdById" TEXT NOT NULL,
 
     CONSTRAINT "SecretVersion_pkey" PRIMARY KEY ("id")
 );
@@ -179,6 +181,9 @@ ALTER TABLE "ApiKeyScope" ADD CONSTRAINT "ApiKeyScope_projectId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "SecretVersion" ADD CONSTRAINT "SecretVersion_secretId_fkey" FOREIGN KEY ("secretId") REFERENCES "Secret"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SecretVersion" ADD CONSTRAINT "SecretVersion_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Secret" ADD CONSTRAINT "Secret_lastUpdatedById_fkey" FOREIGN KEY ("lastUpdatedById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
