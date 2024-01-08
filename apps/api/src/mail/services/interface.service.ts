@@ -20,4 +20,6 @@ export interface IMailService {
     invitedBy: string,
     role: ProjectRole
   ): Promise<void>
+  
+  sendLogInEmail(email: string): Promise<void>
 }

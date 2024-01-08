@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Post,
   Put,
   Query,
   UseGuards
@@ -12,6 +13,7 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
+import { ICreateUserDto } from '../dto/create.user/create.user'
 
 @Controller('user')
 export class UserController {
@@ -57,5 +59,11 @@ export class UserController {
     @Query('search') search: string = ''
   ) {
     return await this.userService.getAllUsers(page, limit, sort, order, search)
+  }
+
+  @Post()
+  @UseGuards(AdminGuard)
+  async createUser(@Body() dto: ICreateUserDto) {
+    return await this.userService.createUser(dto)
   }
 }

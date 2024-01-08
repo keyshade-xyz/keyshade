@@ -58,4 +58,11 @@ export interface IUserRepository {
    * @returns {Promise<User>} - A promise that resolves to the deleted user.
    */
   deleteUser(id: string): Promise<User>
+
+   /**
+   * Create the user with the given data by an admin
+   * @param data The data for the user to create
+   * @returns 
+   */
+   createUserByAdmin(data: Partial<User>): Promise<User>
 }

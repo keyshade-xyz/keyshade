@@ -98,6 +98,26 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
+  async sendLogInEmail(email: string): Promise<void> {
+    const subject = 'Login to your account'
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>Welcome to keyshade!</title>
+        </head>
+        <body>
+           <h1>Welcome to keyshade!</h1>
+           <p>Hello there!</p>
+           <p>Your account has been setup. Please Login in to your account for next steps.</p>
+           <p>Thank you for choosing us.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        </html>
+        `
+        await this.sendEmail(email, subject, body)
+  }
+
   private async sendEmail(
     email: string,
     subject: string,
