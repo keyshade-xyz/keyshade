@@ -1,5 +1,4 @@
 import {
-  HttpCode,
   HttpException,
   Inject,
   Injectable,
@@ -12,7 +11,7 @@ import {
   USER_REPOSITORY
 } from '../repository/interface.repository'
 import { excludeFields } from '../../common/exclude-fields'
-import { ICrateUserDTO } from '../dto/create.user/create.user'
+import { ICreateUserDTO } from '../dto/create.user/create.user'
 import {
   IMailService,
   MAIL_SERVICE
@@ -71,7 +70,7 @@ export class UserService {
     return await this.repository.findUsers(page, limit, sort, order, search)
   }
 
-  async createUser(user: ICrateUserDTO) {
+  async createUser(user: ICreateUserDTO) {
     this.log.log(`Creating user with email ${user.email}`)
     const checkDuplicateUser = await this.repository.findUserByEmail(user.email)
     if (checkDuplicateUser) {

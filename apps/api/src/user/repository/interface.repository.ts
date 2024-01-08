@@ -1,5 +1,5 @@
 import { User } from '@prisma/client'
-import { ICrateUserDTO } from '../dto/create.user/create.user'
+import { ICreateUserDTO } from '../dto/create.user/create.user'
 
 export const USER_REPOSITORY = 'USER_REPOSITORY'
 
@@ -64,5 +64,5 @@ export interface IUserRepository {
    * Create user by admin
    * @returns {Promise<number>} - A promise that resolves to create user.
    */
-  createUserByAdmin(user: ICrateUserDTO): Promise<User>
+  createUserByAdmin(user: ICreateUserDTO): Promise<User>
 }

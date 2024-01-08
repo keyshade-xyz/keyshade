@@ -13,7 +13,7 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
-import { ICrateUserDTO } from '../dto/create.user/create.user'
+import { ICreateUserDTO } from '../dto/create.user/create.user'
 
 @Controller('user')
 export class UserController {
@@ -63,7 +63,7 @@ export class UserController {
 
   @Post('')
   @UseGuards(AdminGuard)
-  async createUser(@Body() dto: ICrateUserDTO) {
+  async createUser(@Body() dto: ICreateUserDTO) {
     return await this.userService.createUser(dto);
   }
 }

@@ -1,6 +1,6 @@
 import { IsBoolean, IsString } from "class-validator";
 
-export class ICrateUserDTO {
+export class ICreateUserDTO {
     @IsString()
     name: string;
     @IsString()
