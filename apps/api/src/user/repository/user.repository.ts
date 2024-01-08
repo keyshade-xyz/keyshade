@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { User } from '@prisma/client'
 import { IUserRepository } from './interface.repository'
+import { ICrateUserDTO } from '../dto/create.user/create.user'
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -74,6 +75,14 @@ export class UserRepository implements IUserRepository {
     return await this.prisma.user.delete({
       where: {
         id
+      }
+    })
+  }
+
+  async createUserByAdmin(user: ICrateUserDTO): Promise<User> {
+    return await this.prisma.user.create({
+      data: {
+        ...user
       }
     })
   }

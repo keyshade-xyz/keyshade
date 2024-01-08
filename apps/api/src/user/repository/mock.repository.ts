@@ -2,6 +2,7 @@
 import { User } from '@prisma/client'
 import { IUserRepository } from './interface.repository'
 import { users } from '../../common/mock-data/users'
+import { ICrateUserDTO } from '../dto/create.user/create.user'
 
 export class MockUserRepository implements IUserRepository {
   findUserByEmail(email: string): Promise<User> {
@@ -50,6 +51,13 @@ export class MockUserRepository implements IUserRepository {
     return Promise.resolve({
       id,
       ...data
+    })
+  }
+
+  async createUserByAdmin(user: ICrateUserDTO): Promise<User> {
+    return Promise.resolve({
+      id: '1',
+      ...user
     })
   }
 }
