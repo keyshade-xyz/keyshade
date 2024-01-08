@@ -79,6 +79,7 @@ model User {
   Secret        Secret[] // Stores the secrets the user updated
   project       Project[] // Stores the projects the user updated
   environments  Environment[] // Stores the environments the user updated
+  SecretVersion SecretVersion[]
 }
 
 model Subscription {
@@ -158,6 +159,10 @@ model SecretVersion {
 
   secretId String
   secret   Secret @relation(fields: [secretId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdOn   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdById String
 }
 
 model Secret {

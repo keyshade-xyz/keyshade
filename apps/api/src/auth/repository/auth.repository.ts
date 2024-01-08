@@ -55,4 +55,15 @@ export class AuthRepository implements IAuthRepository {
       }
     })
   }
+
+  async deleteExpiredOtps(): Promise<void> {
+    const timeNow = new Date()
+    await this.prisma.otp.deleteMany({
+      where: {
+        expiresAt: {
+          lte: new Date(timeNow.getTime())
+        }
+      }
+    })
+  }
 }

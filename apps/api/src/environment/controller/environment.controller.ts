@@ -15,7 +15,9 @@ import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { User } from '@prisma/client'
 import { AdminGuard } from '../../auth/guard/admin.guard'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Environment Controller')
 @Controller('environment')
 export class EnvironmentController {
   constructor(private readonly environmentService: EnvironmentService) {}

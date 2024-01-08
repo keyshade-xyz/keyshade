@@ -18,7 +18,9 @@ import {
 } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { AdminGuard } from '../../auth/guard/admin.guard'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Project Controller')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly service: ProjectService) {}

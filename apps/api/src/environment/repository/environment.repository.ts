@@ -37,6 +37,26 @@ export class EnvironmentRepository implements IEnvironmentRepository {
       .then((count) => count > 0)
   }
 
+  async getDefaultEnvironmentOfProject(
+    projectId: string
+  ): Promise<{
+    id: string
+    name: string
+    description: string
+    createdAt: Date
+    updatedAt: Date
+    isDefault: boolean
+    lastUpdatedById: string
+    projectId: string
+  }> {
+    return await this.prisma.environment.findFirst({
+      where: {
+        projectId,
+        isDefault: true
+      }
+    })
+  }
+
   async getEnvironmentByProjectIdAndId(
     projectId: string,
     environmentId: string
