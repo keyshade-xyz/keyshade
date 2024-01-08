@@ -14,19 +14,27 @@ jobs:
           script: |
             const comment = context.payload.comment;
             const issue = context.issue;
+            const owner = "keyshade-xyz";
+            const repo = "keyshade"
 
             if (comment.body.startsWith('/attempt')) {
               if (!issue.assignee) {
-                github.issues.assignees.add({
+                await github.rest.issues.addAssignees({
+                  owner,
+                  repo,
                   issue_number: issue.number,
                   assignees: [comment.user.login]
                 });
-                await github.issues.createComment({
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
                   issue_number: issue.number,
                   body: 'Assigned the issue to you!'
                 });
               } else {
-                await github.issues.createComment({
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
                   issue_number: issue.number,
                   body: 'This issue is already assigned. Tag a maintainer if you need to take over.'
                 });

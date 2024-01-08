@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { Project, ProjectRole, User } from '@prisma/client'
+import { Project, ProjectRole, SecretVersion, User } from '@prisma/client'
 import {
   CreateProject,
   ProjectMemberDTO
@@ -32,6 +32,14 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { JwtService } from '@nestjs/jwt'
 import { createKeyPair } from '../../common/create-key-pair'
 import { excludeFields } from '../../common/exclude-fields'
+import {
+  ProjectWithMembersAndSecrets,
+  ProjectWithSecrets
+} from '../project.types'
+import {
+  ISecretRepository,
+  SECRET_REPOSITORY
+} from '../../secret/repository/interface.repository'
 
 @Injectable()
 export class ProjectService {
@@ -43,6 +51,8 @@ export class ProjectService {
     @Inject(ENVIRONMENT_REPOSITORY)
     private readonly environmentRepository: IEnvironmentRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+    @Inject(SECRET_REPOSITORY)
+    private readonly secretRepository: ISecretRepository,
     @Inject(MAIL_SERVICE) private readonly resendService: IMailService,
     private readonly jwt: JwtService,
     private readonly permission: ProjectPermission
@@ -127,10 +137,10 @@ export class ProjectService {
     projectId: Project['id'],
     dto: UpdateProject
   ): Promise<Project> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+    const project = (await this.projectRepository.getProjectByUserIdAndId(
       user.id,
       projectId
-    )
+    )) as ProjectWithSecrets
 
     // Check if the project exists or not
     if (!project)
@@ -146,7 +156,7 @@ export class ProjectService {
       )
 
     // Check if the user has the permission to update the project
-    this.permission.canUpdateProject(user, projectId)
+    this.permission.isProjectMaintainer(user, projectId)
 
     const data: Partial<Project> = {
       name: dto.name,
@@ -174,7 +184,23 @@ export class ProjectService {
       // Check if the private key should be stored
       data.privateKey = dto.storePrivateKey ? privateKey : null
 
-      // TODO: Re-hash all secrets
+      // Re-hash all secrets
+      for (const secret of project.secrets) {
+        const versions = await this.secretRepository.getAllVersionsOfSecret(
+          secret.id
+        )
+
+        const updatedVersions: Partial<SecretVersion>[] = []
+        for (const version of versions) {
+          updatedVersions.push({
+            id: version.id,
+            value: version.value,
+            version: version.version + 1
+          })
+        }
+
+        await this.secretRepository.updateVersions(secret.id, updatedVersions)
+      }
     }
 
     // Update and return the project
@@ -202,7 +228,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
     // Check if the user has the permission to delete the project
-    this.permission.canDeleteProject(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     // Delete the project
     await this.projectRepository.deleteProject(projectId)
@@ -224,7 +250,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
     // Check if the user has the permission to add users to the project
-    this.permission.canAddUserToProject(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     // Add users to the project if any
     if (members && members.length > 0) {
@@ -247,7 +273,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
     // Check if the user has the permission to remove users from the project
-    this.permission.canRemoveUserFromProject(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     // Check if the user is already a member of the project
     if (
@@ -290,7 +316,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
     // Check if the user has the permission to update the role of the user
-    this.permission.canUpdateUserPermissionsOfProject(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     // Check if the member in concern is a part of the project or not
     if (
@@ -324,9 +350,6 @@ export class ProjectService {
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    // Check if the user has maintainer or owner role in the project
-    this.permission.canUpdateUserPermissionsOfProject(user, projectId)
-
     return await this.projectRepository.memberExistsInProject(
       projectId,
       otherUserId
@@ -359,7 +382,7 @@ export class ProjectService {
     inviteeId: User['id']
   ): Promise<void> {
     // Check if the user has permission to decline the invitation
-    this.permission.canRemoveUserFromProject(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     // Check if the user has a pending invitation to the project
     if (!(await this.projectRepository.invitationPending(projectId, inviteeId)))
@@ -398,12 +421,7 @@ export class ProjectService {
     projectId: Project['id']
   ): Promise<void> {
     // Check if the user is a member of the project
-    if (
-      !(await this.projectRepository.memberExistsInProject(projectId, user.id))
-    )
-      throw new ConflictException(
-        `User ${user.name} (${user.id}) is not a member of project ${projectId}`
-      )
+    await this.permission.isProjectMember(user, projectId)
 
     // Delete the membership
     await this.projectRepository.deleteMembership(projectId, user.id)
@@ -414,24 +432,17 @@ export class ProjectService {
   async getProjectByUserAndId(
     user: User,
     projectId: Project['id']
-  ): Promise<Project & { members: number }> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+  ): Promise<ProjectWithMembersAndSecrets> {
+    const project = (await this.projectRepository.getProjectByUserIdAndId(
       user.id,
       projectId
-    )
+    )) as ProjectWithMembersAndSecrets
 
     // Check if the project exists or not
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    //@ts-expect-error We know that project.members is not undefined since it is included in the query
-    const memberCount = project.members.length
-
-    const data = {
-      ...project,
-      members: memberCount
-    }
-    return data
+    return project
   }
 
   async getProjectById(

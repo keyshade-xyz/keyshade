@@ -1,4 +1,9 @@
 import { Project, ProjectMember, ProjectRole, User } from '@prisma/client'
+import {
+  ProjectWithMembersAndSecrets,
+  ProjectWithSecrets,
+  ProjectWithUserRole
+} from '../project.types'
 
 export const PROJECT_REPOSITORY = 'PROJECT_REPOSITORY'
 
@@ -113,19 +118,19 @@ export interface IProjectRepository {
    * Retrieves a project by user ID and project ID.
    * @param {User['id']} userId - The ID of the user.
    * @param {Project['id']} projectId - The ID of the project.
-   * @returns {Promise<Project | null>} - A promise that resolves to the project or null if not found.
+   * @returns {Promise<ProjectWithSecrets | null>} - A promise that resolves to the project or null if not found.
    */
   getProjectByUserIdAndId(
     userId: User['id'],
     projectId: Project['id']
-  ): Promise<Project | null>
+  ): Promise<ProjectWithMembersAndSecrets | null>
 
   /**
    * Retrieves a project by ID.
    * @param {Project['id']} projectId - The ID of the project.
-   * @returns {Promise<Project | null>} - A promise that resolves to the project or null if not found.
+   * @returns {Promise<ProjectWithSecrets | null>} - A promise that resolves to the project or null if not found.
    */
-  getProjectById(projectId: Project['id']): Promise<Project | null>
+  getProjectById(projectId: Project['id']): Promise<ProjectWithSecrets | null>
 
   /**
    * Retrieves projects of a user with optional pagination, sorting, and search.
@@ -135,7 +140,7 @@ export interface IProjectRepository {
    * @param {string} sort - The field to sort by.
    * @param {string} order - The sort order ('asc' or 'desc').
    * @param {string} search - The search term for project names or descriptions.
-   * @returns {Promise<Array<Project & { role: ProjectRole }>>} - A promise that resolves to an array of projects and permission.
+   * @returns {Promise<Array<ProjectWithUserRole>>} - A promise that resolves to an array of projects and permission.
    */
   getProjectsOfUser(
     userId: User['id'],
@@ -144,7 +149,7 @@ export interface IProjectRepository {
     sort: string,
     order: string,
     search: string
-  ): Promise<Array<Project & { role: ProjectRole }>>
+  ): Promise<Array<ProjectWithUserRole>>
 
   /**
    * Retrieves projects with optional pagination, sorting, and search.

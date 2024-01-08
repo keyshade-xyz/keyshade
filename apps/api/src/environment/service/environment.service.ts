@@ -42,10 +42,7 @@ export class EnvironmentService {
     }
 
     // Check if the user can manage environments of the project
-    await this.projectPermissionService.canManageEnvironmentsOfProject(
-      user,
-      projectId
-    )
+    await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if an environment with the same name already exists
     if (
@@ -80,10 +77,7 @@ export class EnvironmentService {
     }
 
     // Check if the user can manage environments of the project
-    await this.projectPermissionService.canManageEnvironmentsOfProject(
-      user,
-      projectId
-    )
+    await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
     const environment =
@@ -132,10 +126,7 @@ export class EnvironmentService {
     }
 
     // Check if the user can manage environments of the project
-    await this.projectPermissionService.canManageEnvironmentsOfProject(
-      user,
-      projectId
-    )
+    await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
     const environment =
@@ -167,12 +158,6 @@ export class EnvironmentService {
     if (!project) {
       throw new NotFoundException('Project not found')
     }
-
-    // Check if the user can manage environments of the project
-    await this.projectPermissionService.canManageEnvironmentsOfProject(
-      user,
-      projectId
-    )
 
     // Get the environments
     return this.environmentRepository.getEnvironmentsOfProject(
@@ -217,10 +202,7 @@ export class EnvironmentService {
     }
 
     // Check if the user can manage environments of the project
-    await this.projectPermissionService.canManageEnvironmentsOfProject(
-      user,
-      projectId
-    )
+    await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
     const environment =

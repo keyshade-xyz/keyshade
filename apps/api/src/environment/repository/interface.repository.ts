@@ -31,6 +31,15 @@ export interface IEnvironmentRepository {
   ): Promise<boolean>
 
   /**
+   * Retrieves the default environment of a project.
+   * @param {Project['id']} projectId - The ID of the project.
+   * @returns {Promise<Environment | null>} - A promise that resolves to the default environment or null if not found.
+   */
+  getDefaultEnvironmentOfProject(
+    projectId: Project['id']
+  ): Promise<Environment | null>
+
+  /**
    * Retrieves an environment by project ID and environment ID.
    * @param {Project['id']} projectId - The ID of the project.
    * @param {Environment['id']} environmentId - The ID of the environment.

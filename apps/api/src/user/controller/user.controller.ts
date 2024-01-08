@@ -14,7 +14,9 @@ import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
 import { ICreateUserDTO } from '../dto/create.user/create.user'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('User Controller')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
