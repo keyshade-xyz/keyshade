@@ -7,64 +7,197 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Scope {
-  CREATE
-  READ
-  UPDATE
-  DELETE
+enum ProjectRole {
+  OWNER // Can do everything
+  MAINTAINER // Can do everything except deleting the project
+  VIEWER // Can only view the project and use its secrets
+}
+
+enum ApiKeyRole {
+  CREATE_PROJECT
+  READ_PROJECT
+  UPDATE_PROJECT
+  DELETE_PROJECT
+  CREATE_SECRET
+  READ_SECRET
+  UPDATE_SECRET
+  DELETE_SECRET
+  ADD_USER
+  REMOVE_USER
+  UPDATE_USER_ROLE
+  CREATE_API_KEY
+  READ_API_KEY
+  UPDATE_API_KEY
+  DELETE_API_KEY
+  CREATE_ENVIRONMENT
+  READ_ENVIRONMENT
+  UPDATE_ENVIRONMENT
+  DELETE_ENVIRONMENT
+}
+
+enum NotificationType {
+  INVITED_TO_PROJECT
+  REMOVED_FROM_PROJECT
+  PROJECT_UPDATED
+  PROJECT_DELETED
+  SECRET_UPDATED
+  SECRET_DELETED
+  SECRET_ADDED
+  API_KEY_UPDATED
+  API_KEY_DELETED
+  API_KEY_ADDED
+  ENVIRONMENT_UPDATED
+  ENVIRONMENT_DELETED
+  ENVIRONMENT_ADDED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  type      NotificationType
+  message   String
+  link      String?
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
 }
 
 model User {
-  id                   String  @id @default(cuid())
-  email                String  @unique
+  id                   String        @id @default(cuid())
+  email                String        @unique
   name                 String?
   profilePictureUrl    String?
-  isActive             Boolean @default(true)
-  isOnboardingFinished Boolean @default(false)
-  isAdmin              Boolean @default(false)
+  isActive             Boolean       @default(true)
+  isOnboardingFinished Boolean       @default(false)
+  isAdmin              Boolean       @default(false)
+  subscription         Subscription?
 
-  projects Project[]
-  apiKeys  ApiKey[]
-  otps     Otp[]
+  projects      ProjectMember[]
+  apiKeys       ApiKey[]
+  otps          Otp[]
+  notifications Notification[]
+  Secret        Secret[] // Stores the secrets the user updated
+  project       Project[] // Stores the projects the user updated
+  environments  Environment[] // Stores the environments the user updated
+  SecretVersion SecretVersion[]
+}
+
+model Subscription {
+  id       String  @id @default(cuid())
+  plan     String
+  isActive Boolean @default(true)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+}
+
+model Environment {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDefault   Boolean  @default(false)
+
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  lastUpdatedById String
+
+  secrets Secret[]
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String
 }
 
 model Project {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId     String
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publicKey       String
+  privateKey      String? // We store this only if the user wants us to do so! 
+  storePrivateKey Boolean  @default(false)
+  isFreeTier      Boolean  @default(true)
+  isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
 
-  secrets Secret[]
-  ApiKey  ApiKey[]
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  lastUpdatedById String
+
+  members      ProjectMember[]
+  secrets      Secret[]
+  apiKeyScopes ApiKeyScope[]
+  environments Environment[]
+}
+
+model ProjectMember {
+  id                 String      @id @default(cuid())
+  role               ProjectRole
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId             String
+  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId          String
+  invitationAccepted Boolean     @default(false)
+
+  @@unique([projectId, userId])
+}
+
+model ApiKeyScope {
+  id   String     @id @default(cuid())
+  role ApiKeyRole
+
+  apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  apiKeyId String
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model SecretVersion {
+  id      String @id @default(cuid())
+  value   String
+  version Int    @default(1)
+
+  secretId String
+  secret   Secret @relation(fields: [secretId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdOn   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdById String
 }
 
 model Secret {
-  id    String @id @default(cuid())
-  name  String
-  value String
+  id        String          @id @default(cuid())
+  name      String
+  versions  SecretVersion[] // Stores the versions of the secret
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  rotateAt  DateTime?
+
+  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id])
+  lastUpdatedById String
 
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model ApiKey {
-  id    String @id @default(cuid())
-  name  String
-  value String
+  id        String    @id @default(cuid())
+  name      String
+  value     String
+  expiresAt DateTime?
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  apiKeyScopes ApiKeyScope[]
 
-  scopes Scope[]
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
 }
 
 model Otp {
   code      String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime
