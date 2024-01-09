@@ -15,8 +15,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/sdk-node/**/*.ts",
+          "packages/sdk-node/package.json",
+          "packages/sdk-node/project.json"
+        ]
+      }
     },
     "test": {
       "executor": "@nx/jest:jest",

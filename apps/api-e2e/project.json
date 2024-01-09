@@ -13,8 +13,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/api-e2e/**/*.ts",
+          "apps/api-e2e/package.json",
+          "apps/api-e2e/project.json"
+        ]
+      }
     }
   }
 }
