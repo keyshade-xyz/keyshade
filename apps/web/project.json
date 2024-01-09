@@ -45,8 +45,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/web/**/*.ts",
+          "apps/web/package.json",
+          "apps/web/project.json"
+        ]
+      }
     }
   },
   "tags": []

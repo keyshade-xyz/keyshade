@@ -15,8 +15,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/cli/**/*.ts",
+          "apps/cli/package.json",
+          "apps/cli/project.json"
+        ]
+      }
     },
     "test": {
       "executor": "@nx/jest:jest",
