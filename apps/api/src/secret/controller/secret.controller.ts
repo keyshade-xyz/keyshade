@@ -87,7 +87,7 @@ export class SecretController {
     @Param('secretId') secretId: string,
     @Query('decryptValue') decryptValue: boolean = false
   ) {
-    return await this.secretService.getSecret(
+    return await this.secretService.getSecretById(
       user,
       secretId,
       projectId,

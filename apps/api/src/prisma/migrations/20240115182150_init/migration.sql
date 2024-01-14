@@ -2,7 +2,10 @@
 CREATE TYPE "ProjectRole" AS ENUM ('OWNER', 'MAINTAINER', 'VIEWER');
 
 -- CreateEnum
-CREATE TYPE "ApiKeyRole" AS ENUM ('CREATE_PROJECT', 'READ_PROJECT', 'UPDATE_PROJECT', 'DELETE_PROJECT', 'CREATE_SECRET', 'READ_SECRET', 'UPDATE_SECRET', 'DELETE_SECRET', 'ADD_USER', 'REMOVE_USER', 'UPDATE_USER_ROLE', 'CREATE_API_KEY', 'READ_API_KEY', 'UPDATE_API_KEY', 'DELETE_API_KEY', 'CREATE_ENVIRONMENT', 'READ_ENVIRONMENT', 'UPDATE_ENVIRONMENT', 'DELETE_ENVIRONMENT');
+CREATE TYPE "ApiKeyProjectRole" AS ENUM ('READ_PROJECT', 'UPDATE_PROJECT', 'DELETE_PROJECT', 'CREATE_SECRET', 'READ_SECRET', 'UPDATE_SECRET', 'DELETE_SECRET', 'READ_USERS', 'ADD_USER', 'REMOVE_USER', 'UPDATE_USER_ROLE', 'CREATE_ENVIRONMENT', 'READ_ENVIRONMENT', 'UPDATE_ENVIRONMENT', 'DELETE_ENVIRONMENT');
+
+-- CreateEnum
+CREATE TYPE "ApiKeyGeneralRole" AS ENUM ('CREATE_PROJECT', 'CREATE_API_KEY', 'READ_API_KEY', 'UPDATE_API_KEY', 'DELETE_API_KEY', 'UPDATE_PROFILE');
 
 -- CreateEnum
 CREATE TYPE "NotificationType" AS ENUM ('INVITED_TO_PROJECT', 'REMOVED_FROM_PROJECT', 'PROJECT_UPDATED', 'PROJECT_DELETED', 'SECRET_UPDATED', 'SECRET_DELETED', 'SECRET_ADDED', 'API_KEY_UPDATED', 'API_KEY_DELETED', 'API_KEY_ADDED', 'ENVIRONMENT_UPDATED', 'ENVIRONMENT_DELETED', 'ENVIRONMENT_ADDED');
@@ -86,13 +89,13 @@ CREATE TABLE "ProjectMember" (
 );
 
 -- CreateTable
-CREATE TABLE "ApiKeyScope" (
+CREATE TABLE "ProjectScope" (
     "id" TEXT NOT NULL,
-    "role" "ApiKeyRole" NOT NULL,
+    "roles" "ApiKeyProjectRole"[],
     "apiKeyId" TEXT NOT NULL,
     "projectId" TEXT NOT NULL,
 
-    CONSTRAINT "ApiKeyScope_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ProjectScope_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -127,6 +130,7 @@ CREATE TABLE "ApiKey" (
     "name" TEXT NOT NULL,
     "value" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3),
+    "generalRoles" "ApiKeyGeneralRole"[],
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "ApiKey_pkey" PRIMARY KEY ("id")
@@ -148,6 +152,9 @@ CREATE UNIQUE INDEX "Subscription_userId_key" ON "Subscription"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ProjectMember_projectId_userId_key" ON "ProjectMember"("projectId", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ApiKey_value_key" ON "ApiKey"("value");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Otp_code_key" ON "Otp"("code");
@@ -174,10 +181,10 @@ ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_userId_fkey" FOREIGN K
 ALTER TABLE "ProjectMember" ADD CONSTRAINT "ProjectMember_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ApiKeyScope" ADD CONSTRAINT "ApiKeyScope_apiKeyId_fkey" FOREIGN KEY ("apiKeyId") REFERENCES "ApiKey"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ProjectScope" ADD CONSTRAINT "ProjectScope_apiKeyId_fkey" FOREIGN KEY ("apiKeyId") REFERENCES "ApiKey"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ApiKeyScope" ADD CONSTRAINT "ApiKeyScope_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ProjectScope" ADD CONSTRAINT "ProjectScope_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SecretVersion" ADD CONSTRAINT "SecretVersion_secretId_fkey" FOREIGN KEY ("secretId") REFERENCES "Secret"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -2,23 +2,20 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  Inject,
   Injectable
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import { Reflector } from '@nestjs/core'
 import { IS_PUBLIC_KEY } from '../../decorators/public.decorator'
-import {
-  IUserRepository,
-  USER_REPOSITORY
-} from '../../user/repository/interface.repository'
+import { User } from '@prisma/client'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    @Inject(USER_REPOSITORY) private repository: IUserRepository,
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
     private reflector: Reflector
   ) {}
 
@@ -40,7 +37,18 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET
       })
-      request['user'] = await this.repository.findUserById(payload.id)
+
+      const user: User | null = await this.prisma.user.findUnique({
+        where: {
+          id: payload['sub']
+        }
+      })
+
+      if (!user) {
+        throw new ForbiddenException()
+      }
+
+      request['user'] = user
     } catch {
       throw new ForbiddenException()
     }

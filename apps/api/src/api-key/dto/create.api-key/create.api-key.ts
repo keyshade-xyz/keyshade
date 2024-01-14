@@ -6,7 +6,7 @@ export class CreateApiKey {
   name: ApiKey['name']
 
   @IsString()
-  expiresAfter: '1d' | '7d' | '30d' | '90d' | '365d' | 'never'
+  expiresAfter: '24' | '168' | '720' | '8760' | 'never' = 'never'
 
   generalRoles: ApiKeyGeneralRole[]
 

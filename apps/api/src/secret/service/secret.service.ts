@@ -1,18 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import {
-  IProjectRepository,
-  PROJECT_REPOSITORY
-} from '../../project/repository/interface.repository'
-import {
-  ISecretRepository,
-  SECRET_REPOSITORY
-} from '../repository/interface.repository'
 import {
   Environment,
   Project,
@@ -22,47 +13,23 @@ import {
 } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { ProjectPermission } from '../../project/misc/project.permission'
-import {
-  ENVIRONMENT_REPOSITORY,
-  IEnvironmentRepository
-} from '../../environment/repository/interface.repository'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { decrypt } from '../../common/decrypt'
 import { SecretWithVersion } from '../secret.types'
+import { PrismaService } from '../../prisma/prisma.service'
+import { addHoursToDate } from '../../common/add-hours-to-date'
 
 @Injectable()
 export class SecretService {
   constructor(
-    @Inject(PROJECT_REPOSITORY)
-    private readonly projectRepository: IProjectRepository,
-    @Inject(SECRET_REPOSITORY)
-    private readonly secretReposiotory: ISecretRepository,
-    @Inject(ENVIRONMENT_REPOSITORY)
-    private readonly environmentRepository: IEnvironmentRepository,
+    private readonly prisma: PrismaService,
     private readonly projectPermission: ProjectPermission
   ) {}
-
-  private async secretExists(
-    user: User,
-    secretName: Secret['name'],
-    environmentId: Environment['name'],
-    projectId: Project['id']
-  ) {
-    return await this.secretReposiotory.secretExists(
-      user.id,
-      secretName,
-      environmentId,
-      projectId
-    )
-  }
 
   async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
     const environmentId = dto.environmentId
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -73,11 +40,10 @@ export class SecretService {
     // Check if the environment exists
     let environment: Environment | null = null
     if (environmentId) {
-      environment =
-        await this.environmentRepository.getEnvironmentByProjectIdAndId(
-          projectId,
-          environmentId
-        )
+      environment = await this.getEnvironmentByProjectIdAndId(
+        projectId,
+        environmentId
+      )
       if (!environment) {
         throw new NotFoundException(
           `Environment not found: ${environmentId} in project ${projectId}`
@@ -85,10 +51,7 @@ export class SecretService {
       }
     }
     if (!environment) {
-      environment =
-        await this.environmentRepository.getDefaultEnvironmentOfProject(
-          projectId
-        )
+      environment = await this.getDefaultEnvironmentOfProject(projectId)
     }
 
     // If any default environment was not found, throw an error
@@ -99,19 +62,29 @@ export class SecretService {
     }
 
     // Check if the secret already exists in the environment
-    if (await this.secretExists(user, dto.name, environment.id, projectId)) {
+    if (await this.secretExists(dto.name, environment.id, projectId, user.id)) {
       throw new ConflictException(
         `Secret already exists: ${dto.name} in environment ${environment.name} in project ${projectId}`
       )
     }
 
     // Create the secret
-    return await this.secretReposiotory.createSecret(
-      dto,
-      projectId,
-      environment.id,
-      user.id
-    )
+    return await this.prisma.secret.create({
+      data: {
+        name: dto.name,
+        rotateAt: addHoursToDate(dto.rotateAfter),
+        versions: {
+          create: {
+            value: dto.value,
+            version: 1,
+            createdById: user.id
+          }
+        },
+        environmentId,
+        projectId,
+        lastUpdatedById: user.id
+      }
+    })
   }
 
   async updateSecret(
@@ -121,10 +94,7 @@ export class SecretService {
     projectId: Project['id']
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -133,7 +103,7 @@ export class SecretService {
     await this.projectPermission.isProjectMaintainer(user, projectId)
 
     // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
+    const secret = await this.getSecret(secretId, projectId)
     if (!secret) {
       throw new NotFoundException(`Secret not found: ${secretId}`)
     }
@@ -142,10 +112,10 @@ export class SecretService {
     if (
       dto.name &&
       (await this.secretExists(
-        user,
         dto.name,
         secret.environmentId,
-        projectId
+        projectId,
+        user.id
       )) &&
       secret.name !== dto.name
     ) {
@@ -155,7 +125,49 @@ export class SecretService {
     }
 
     // Update the secret
-    return await this.secretReposiotory.updateSecret(secretId, dto, user.id)
+    if (dto.value) {
+      const previousVersion = await this.prisma.secretVersion.findFirst({
+        where: {
+          secretId
+        },
+        select: {
+          version: true
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      return await this.prisma.secret.update({
+        where: {
+          id: secretId
+        },
+        data: {
+          name: dto.name,
+          rotateAt: addHoursToDate(dto.rotateAfter),
+          lastUpdatedById: user.id,
+          versions: {
+            create: {
+              value: dto.value,
+              version: previousVersion.version + 1,
+              createdById: user.id
+            }
+          }
+        }
+      })
+    }
+
+    return await this.prisma.secret.update({
+      where: {
+        id: secretId
+      },
+      data: {
+        name: secret.name,
+        rotateAt: secret.rotateAt,
+        lastUpdatedById: user.id
+      }
+    })
   }
 
   async updateSecretEnvironment(
@@ -165,10 +177,7 @@ export class SecretService {
     projectId: Project['id']
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -177,17 +186,16 @@ export class SecretService {
     await this.projectPermission.isProjectMaintainer(user, projectId)
 
     // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
+    const secret = await this.getSecret(secretId, projectId)
     if (!secret) {
       throw new NotFoundException(`Secret not found: ${secretId}`)
     }
 
     // Check if the environment exists
-    const environment =
-      await this.environmentRepository.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
-      )
+    const environment = await this.getEnvironmentByProjectIdAndId(
+      projectId,
+      environmentId
+    )
     if (!environment) {
       throw new NotFoundException(
         `Environment not found: ${environmentId} in project ${projectId}`
@@ -196,7 +204,12 @@ export class SecretService {
 
     // Check if the secret already exists in the environment
     if (
-      (await this.secretExists(user, secret.name, environment.id, projectId)) &&
+      (await this.secretExists(
+        secret.name,
+        environment.id,
+        projectId,
+        user.id
+      )) &&
       secret.environmentId !== environment.id
     ) {
       throw new ConflictException(
@@ -205,11 +218,14 @@ export class SecretService {
     }
 
     // Update the secret
-    return await this.secretReposiotory.updateSecretEnvironment(
-      secretId,
-      environmentId,
-      user.id
-    )
+    return await this.prisma.secret.update({
+      where: {
+        id: secretId
+      },
+      data: {
+        environmentId
+      }
+    })
   }
 
   async rollbackSecret(
@@ -219,10 +235,7 @@ export class SecretService {
     projectId: Project['id']
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -231,7 +244,7 @@ export class SecretService {
     await this.projectPermission.isProjectMaintainer(user, projectId)
 
     // Check if the secret exists
-    const secret = (await this.secretReposiotory.getSecret(
+    const secret = (await this.getSecret(
       secretId,
       projectId
     )) as SecretWithVersion
@@ -247,10 +260,14 @@ export class SecretService {
     }
 
     // Rollback the secret
-    return await this.secretReposiotory.rollbackSecret(
-      secretId,
-      rollbackVersion
-    )
+    return await this.prisma.secretVersion.deleteMany({
+      where: {
+        secretId,
+        version: {
+          gt: rollbackVersion
+        }
+      }
+    })
   }
 
   async deleteSecret(
@@ -259,10 +276,7 @@ export class SecretService {
     projectId: Project['id']
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -271,32 +285,33 @@ export class SecretService {
     await this.projectPermission.isProjectMaintainer(user, projectId)
 
     // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
+    const secret = await this.getSecret(secretId, projectId)
     if (!secret) {
       throw new NotFoundException(`Secret not found: ${secretId}`)
     }
 
     // Delete the secret
-    return await this.secretReposiotory.deleteSecret(secretId, user.id)
+    return await this.prisma.secret.delete({
+      where: {
+        id: secretId
+      }
+    })
   }
 
-  async getSecret(
+  async getSecretById(
     user: User,
     secretId: Secret['id'],
     projectId: Project['id'],
     decryptValue: boolean
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
 
     // Fetch the secret
-    const secret = (await this.secretReposiotory.getSecret(
+    const secret = (await this.getSecret(
       secretId,
       projectId
     )) as SecretWithVersion
@@ -338,22 +353,23 @@ export class SecretService {
     projectId: Project['id']
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
 
     // Fetch the secret
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
+    const secret = await this.getSecret(secretId, projectId)
     if (!secret) {
       throw new NotFoundException(`Secret not found: ${secretId}`)
     }
 
     // Return the secret versions
-    return await this.secretReposiotory.getAllVersionsOfSecret(secretId)
+    return await this.prisma.secretVersion.findMany({
+      where: {
+        secretId
+      }
+    })
   }
 
   async getAllSecretsOfProject(
@@ -367,10 +383,7 @@ export class SecretService {
     search: string
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException(`Project not found: ${projectId}`)
     }
@@ -390,14 +403,29 @@ export class SecretService {
       )
     }
 
-    const secrets = (await this.secretReposiotory.getAllSecretsOfProject(
-      projectId,
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )) as SecretWithVersion[]
+    const secrets = (await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: true,
+        environment: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })) as SecretWithVersion[]
 
     // Return the secrets
     return secrets.map((secret) => {
@@ -421,12 +449,117 @@ export class SecretService {
     search: string
   ) {
     // Return the secrets
-    return await this.secretReposiotory.getAllSecrets(
-      page,
-      limit,
-      sort,
-      order,
-      search
+    return await this.prisma.secret.findMany({
+      where: {
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: true,
+        environment: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+  }
+
+  private async getEnvironmentByProjectIdAndId(
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    return await this.prisma.environment.findFirst({
+      where: {
+        projectId,
+        id: environmentId
+      }
+    })
+  }
+
+  private async getDefaultEnvironmentOfProject(
+    projectId: Project['id']
+  ): Promise<Environment | null> {
+    return await this.prisma.environment.findFirst({
+      where: {
+        projectId,
+        isDefault: true
+      }
+    })
+  }
+
+  private async secretExists(
+    secretName: Secret['name'],
+    environmentId: Environment['id'],
+    projectId: Project['id'],
+    userId: User['id']
+  ): Promise<boolean> {
+    return (
+      (await this.prisma.secret.count({
+        where: {
+          name: secretName,
+          environment: {
+            id: environmentId
+          },
+          projectId,
+          project: {
+            members: {
+              some: {
+                userId
+              }
+            }
+          }
+        }
+      })) > 0
     )
+  }
+
+  private async getSecret(
+    secretId: Secret['id'],
+    projectId: Project['id']
+  ): Promise<Secret> {
+    return await this.prisma.secret.findUnique({
+      where: {
+        id: secretId,
+        projectId
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: true,
+        environment: true
+      }
+    })
+  }
+
+  private async getProjectByUserIdAndId(
+    userId: User['id'],
+    projectId: Project['id']
+  ): Promise<Project> {
+    return await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        members: {
+          some: {
+            userId
+          }
+        }
+      },
+      include: {
+        members: true
+      }
+    })
   }
 }
