@@ -13,8 +13,7 @@ enum ProjectRole {
   VIEWER // Can only view the project and use its secrets
 }
 
-enum ApiKeyRole {
-  CREATE_PROJECT
+enum ApiKeyProjectRole {
   READ_PROJECT
   UPDATE_PROJECT
   DELETE_PROJECT
@@ -22,17 +21,23 @@ enum ApiKeyRole {
   READ_SECRET
   UPDATE_SECRET
   DELETE_SECRET
+  READ_USERS
   ADD_USER
   REMOVE_USER
   UPDATE_USER_ROLE
-  CREATE_API_KEY
-  READ_API_KEY
-  UPDATE_API_KEY
-  DELETE_API_KEY
   CREATE_ENVIRONMENT
   READ_ENVIRONMENT
   UPDATE_ENVIRONMENT
   DELETE_ENVIRONMENT
+}
+
+enum ApiKeyGeneralRole {
+  CREATE_PROJECT
+  CREATE_API_KEY
+  READ_API_KEY
+  UPDATE_API_KEY
+  DELETE_API_KEY
+  UPDATE_PROFILE
 }
 
 enum NotificationType {
@@ -123,10 +128,10 @@ model Project {
   lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id], onDelete: Cascade, onUpdate: Cascade)
   lastUpdatedById String
 
-  members      ProjectMember[]
-  secrets      Secret[]
-  apiKeyScopes ApiKeyScope[]
-  environments Environment[]
+  members       ProjectMember[]
+  secrets       Secret[]
+  projectScopes ProjectScope[]
+  environments  Environment[]
 }
 
 model ProjectMember {
@@ -141,9 +146,9 @@ model ProjectMember {
   @@unique([projectId, userId])
 }
 
-model ApiKeyScope {
-  id   String     @id @default(cuid())
-  role ApiKeyRole
+model ProjectScope {
+  id    String              @id @default(cuid())
+  roles ApiKeyProjectRole[]
 
   apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   apiKeyId String
@@ -186,10 +191,11 @@ model Secret {
 model ApiKey {
   id        String    @id @default(cuid())
   name      String
-  value     String
+  value     String    @unique
   expiresAt DateTime?
 
-  apiKeyScopes ApiKeyScope[]
+  generalRoles  ApiKeyGeneralRole[]
+  projectScopes ProjectScope[]
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String

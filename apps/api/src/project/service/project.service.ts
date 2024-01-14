@@ -40,6 +40,8 @@ import {
   ISecretRepository,
   SECRET_REPOSITORY
 } from '../../secret/repository/interface.repository'
+import { API_KEY_REPOSITORY } from '../../api-key/repository/interface.repository'
+import { ApiKeyRepository } from '../../api-key/repository/api-key.repository'
 
 @Injectable()
 export class ProjectService {
@@ -54,6 +56,8 @@ export class ProjectService {
     @Inject(SECRET_REPOSITORY)
     private readonly secretRepository: ISecretRepository,
     @Inject(MAIL_SERVICE) private readonly resendService: IMailService,
+    @Inject(API_KEY_REPOSITORY)
+    private readonly apiKeyRepository: ApiKeyRepository,
     private readonly jwt: JwtService,
     private readonly permission: ProjectPermission
   ) {}
@@ -156,7 +160,7 @@ export class ProjectService {
       )
 
     // Check if the user has the permission to update the project
-    this.permission.isProjectMaintainer(user, projectId)
+    this.permission.isProjectAdmin(user, projectId)
 
     const data: Partial<Project> = {
       name: dto.name,
@@ -291,7 +295,14 @@ export class ProjectService {
             `You cannot remove yourself from the project. Please delete the project instead.`
           )
 
+        // Remove the user first from the project
         await this.projectRepository.removeMemberFromProject(projectId, userId)
+        // Then remove the API key access of the user to the project (if any)
+        await this.apiKeyRepository.updateRolesOfProjectScope(
+          userId,
+          projectId,
+          []
+        )
 
         this.log.debug(
           `Removed user ${userId} from project ${project.name} (${project.id})`
@@ -315,9 +326,6 @@ export class ProjectService {
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    // Check if the user has the permission to update the role of the user
-    this.permission.isProjectAdmin(user, projectId)
-
     // Check if the member in concern is a part of the project or not
     if (
       !(await this.projectRepository.memberExistsInProject(projectId, userId))
@@ -325,6 +333,9 @@ export class ProjectService {
       throw new NotFoundException(
         `User ${userId} is not a member of project ${project.name} (${project.id})`
       )
+
+    // Check if the user has the permission to update the role of the user
+    this.permission.isProjectAdmin(user, projectId)
 
     // Update the role of the user
     await this.projectRepository.updateMembership(projectId, userId, {
