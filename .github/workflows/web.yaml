@@ -66,7 +66,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t keyshade/keyshade-web:latest -f Dockerfile-web .
+        run: docker build -t keyshade/keyshade-web:latest -f ./apps/web/Dockerfile .
 
       - name: Push Docker image
         run: docker push keyshade/keyshade-web

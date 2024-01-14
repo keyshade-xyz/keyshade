@@ -29,6 +29,7 @@
     "test:cli": "nx run cli:test",
     "test:sdk-node": "nx run sdk-js:test",
     "start:web": "nx run web:serve --configuration=production",
+    "start:api": "nx run api:serve --configuration=production",
     "db:seed": "cd apps/api/src/prisma && pnpx ts-node seed.ts",
     "db:generate-types": "nx run api:prisma:generate",
     "db:generate-migrations": "cd apps/api/src/prisma && pnpx prisma migrate dev --create-only --skip-seed",
