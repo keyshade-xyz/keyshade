@@ -1,18 +1,16 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { User } from '@prisma/client'
-import {
-  IUserRepository,
-  USER_REPOSITORY
-} from '../repository/interface.repository'
 import { excludeFields } from '../../common/exclude-fields'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
 
   constructor(
-    @Inject(USER_REPOSITORY) private readonly repository: IUserRepository
+    // @Inject(USER_REPOSITORY) private readonly repository: IUserRepository
+    private readonly prisma: PrismaService
   ) {}
 
   async getSelf(user: User) {
@@ -27,7 +25,12 @@ export class UserService {
     }
     this.log.log(`Updating user ${user.id} with data ${dto}`)
     return excludeFields(
-      await this.repository.updateUser(user.id, data),
+      await this.prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data
+      }),
       'isActive'
     )
   }
@@ -42,11 +45,20 @@ export class UserService {
       isOnboardingFinished: finishOnboarding
     }
     this.log.log(`Updating user ${userId} with data ${dto}`)
-    return await this.repository.updateUser(userId, data)
+    return await this.prisma.user.update({
+      where: {
+        id: userId
+      },
+      data
+    })
   }
 
   async getUserById(userId: string) {
-    return await this.repository.findUserById(userId)
+    return await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
   }
 
   async getAllUsers(
@@ -56,6 +68,26 @@ export class UserService {
     order: string,
     search: string
   ): Promise<User[]> {
-    return await this.repository.findUsers(page, limit, sort, order, search)
+    return await this.prisma.user.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      },
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          },
+          {
+            email: {
+              contains: search
+            }
+          }
+        ]
+      }
+    })
   }
 }

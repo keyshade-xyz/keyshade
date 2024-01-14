@@ -1,29 +1,18 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import {
-  ENVIRONMENT_REPOSITORY,
-  IEnvironmentRepository
-} from '../repository/interface.repository'
 import { Environment, Project, User } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { ProjectPermission } from '../../project/misc/project.permission'
-import {
-  IProjectRepository,
-  PROJECT_REPOSITORY
-} from '../../project/repository/interface.repository'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class EnvironmentService {
   constructor(
-    @Inject(ENVIRONMENT_REPOSITORY)
-    private readonly environmentRepository: IEnvironmentRepository,
-    @Inject(PROJECT_REPOSITORY)
-    private readonly projectRepository: IProjectRepository,
+    private readonly prisma: PrismaService,
     private readonly projectPermissionService: ProjectPermission
   ) {}
 
@@ -33,10 +22,7 @@ export class EnvironmentService {
     projectId: Project['id']
   ) {
     // Check if the project exists
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException('Project not found')
     }
@@ -45,20 +31,26 @@ export class EnvironmentService {
     await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if an environment with the same name already exists
-    if (
-      await this.environmentRepository.environmentExists(dto.name, projectId)
-    ) {
+    if (await this.environmentExists(dto.name, projectId)) {
       throw new ConflictException('Environment already exists')
     }
 
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
     if (dto.isDefault) {
-      await this.environmentRepository.makeAllNonDefault(projectId)
+      await this.makeAllNonDefault(projectId)
     }
 
     // Create the environment
-    return this.environmentRepository.createEnvironment(dto, projectId, user.id)
+    return await this.prisma.environment.create({
+      data: {
+        name: dto.name,
+        description: dto.description,
+        isDefault: dto.isDefault,
+        projectId,
+        lastUpdatedById: user.id
+      }
+    })
   }
 
   async updateEnvironment(
@@ -68,10 +60,7 @@ export class EnvironmentService {
     environmentId: Environment['id']
   ) {
     // Check if the project exists
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException('Project not found')
     }
@@ -80,35 +69,38 @@ export class EnvironmentService {
     await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
-    const environment =
-      await this.environmentRepository.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
-      )
+    const environment = await this.getByProjectIdAndId(projectId, environmentId)
     if (!environment) {
       throw new NotFoundException('Environment not found')
     }
 
     // Check if an environment with the same name already exists
-    if (
-      dto.name &&
-      (await this.environmentRepository.environmentExists(dto.name, projectId))
-    ) {
+    if (dto.name && (await this.environmentExists(dto.name, projectId))) {
       throw new ConflictException('Environment already exists')
     }
 
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
     if (dto.isDefault) {
-      await this.environmentRepository.makeAllNonDefault(projectId)
+      await this.makeAllNonDefault(projectId)
     }
 
     // Update the environment
-    return this.environmentRepository.updateEnvironment(
-      environmentId,
-      dto,
-      user.id
-    )
+    return await this.prisma.environment.update({
+      where: {
+        id: environmentId
+      },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        isDefault: dto.isDefault,
+        lastUpdatedById: user.id
+      },
+      include: {
+        secrets: true,
+        lastUpdatedBy: true
+      }
+    })
   }
 
   async getEnvironmentByProjectIdAndId(
@@ -117,10 +109,7 @@ export class EnvironmentService {
     environmentId: Environment['id']
   ) {
     // Check if the project exists
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException('Project not found')
     }
@@ -129,11 +118,7 @@ export class EnvironmentService {
     await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
-    const environment =
-      await this.environmentRepository.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
-      )
+    const environment = await this.getByProjectIdAndId(projectId, environmentId)
     if (!environment) {
       throw new NotFoundException('Environment not found')
     }
@@ -151,23 +136,28 @@ export class EnvironmentService {
     search: string
   ) {
     // Check if the project exists
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException('Project not found')
     }
 
     // Get the environments
-    return this.environmentRepository.getEnvironmentsOfProject(
-      projectId,
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
+    return await this.prisma.environment.findMany({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        lastUpdatedBy: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
   }
 
   async getAllEnvironments(
@@ -178,13 +168,21 @@ export class EnvironmentService {
     search: string
   ) {
     // Get the environments
-    return this.environmentRepository.getEnvironments(
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
+    return await this.prisma.environment.findMany({
+      where: {
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        lastUpdatedBy: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
   }
 
   async deleteEnvironment(
@@ -193,10 +191,7 @@ export class EnvironmentService {
     environmentId: Environment['id']
   ) {
     // Check if the project exists
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
     if (!project) {
       throw new NotFoundException('Project not found')
     }
@@ -205,11 +200,7 @@ export class EnvironmentService {
     await this.projectPermissionService.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
-    const environment =
-      await this.environmentRepository.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
-      )
+    const environment = await this.getByProjectIdAndId(projectId, environmentId)
     if (!environment) {
       throw new NotFoundException('Environment not found')
     }
@@ -220,15 +211,74 @@ export class EnvironmentService {
     }
 
     // Check if this is the last environment
-    if (
-      (await this.environmentRepository.countTotalEnvironmentsInProject(
+    const count = await this.prisma.environment.count({
+      where: {
         projectId
-      )) === 1
-    ) {
+      }
+    })
+    if (count === 1) {
       throw new ConflictException('Cannot delete the last environment')
     }
 
     // Delete the environment
-    return this.environmentRepository.deleteEnvironment(environmentId)
+    return await this.prisma.environment.delete({
+      where: {
+        id: environmentId
+      }
+    })
+  }
+
+  private async environmentExists(
+    name: Environment['name'],
+    projectId: Project['id']
+  ) {
+    return await this.prisma.environment.findFirst({
+      where: {
+        name,
+        projectId
+      }
+    })
+  }
+
+  private async getByProjectIdAndId(
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    return await this.prisma.environment.findFirst({
+      where: {
+        id: environmentId,
+        projectId
+      }
+    })
+  }
+
+  private async makeAllNonDefault(projectId: Project['id']): Promise<void> {
+    await this.prisma.environment.updateMany({
+      where: {
+        projectId
+      },
+      data: {
+        isDefault: false
+      }
+    })
+  }
+
+  private async getProjectByUserIdAndId(
+    userId: User['id'],
+    projectId: Project['id']
+  ): Promise<Project> {
+    return await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        members: {
+          some: {
+            userId
+          }
+        }
+      },
+      include: {
+        members: true
+      }
+    })
   }
 }

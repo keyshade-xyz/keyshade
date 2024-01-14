@@ -5,25 +5,19 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { Project, ProjectRole, SecretVersion, User } from '@prisma/client'
+import {
+  Project,
+  ProjectMember,
+  ProjectRole,
+  SecretVersion,
+  User
+} from '@prisma/client'
 import {
   CreateProject,
   ProjectMemberDTO
 } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { ProjectPermission } from '../misc/project.permission'
-import {
-  IProjectRepository,
-  PROJECT_REPOSITORY
-} from '../repository/interface.repository'
-import {
-  ENVIRONMENT_REPOSITORY,
-  IEnvironmentRepository
-} from '../../environment/repository/interface.repository'
-import {
-  IUserRepository,
-  USER_REPOSITORY
-} from '../../user/repository/interface.repository'
 import {
   IMailService,
   MAIL_SERVICE
@@ -36,23 +30,16 @@ import {
   ProjectWithMembersAndSecrets,
   ProjectWithSecrets
 } from '../project.types'
-import {
-  ISecretRepository,
-  SECRET_REPOSITORY
-} from '../../secret/repository/interface.repository'
+import { PrismaService } from '../../prisma/prisma.service'
+import { decrypt } from '../../common/decrypt'
+import { encrypt } from '../../common/encrypt'
 
 @Injectable()
 export class ProjectService {
   private readonly log: Logger = new Logger(ProjectService.name)
 
   constructor(
-    @Inject(PROJECT_REPOSITORY)
-    private readonly projectRepository: IProjectRepository,
-    @Inject(ENVIRONMENT_REPOSITORY)
-    private readonly environmentRepository: IEnvironmentRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
-    @Inject(SECRET_REPOSITORY)
-    private readonly secretRepository: ISecretRepository,
+    private readonly prisma: PrismaService,
     @Inject(MAIL_SERVICE) private readonly resendService: IMailService,
     private readonly jwt: JwtService,
     private readonly permission: ProjectPermission
@@ -60,7 +47,7 @@ export class ProjectService {
 
   async createProject(user: User, dto: CreateProject): Promise<Project> {
     // Check if project with this name already exists for the user
-    if (await this.projectRepository.projectExists(dto.name, user.id))
+    if (await this.projectExists(dto.name, user.id))
       throw new ConflictException(
         `Project with this name **${dto.name}** already exists`
       )
@@ -81,9 +68,29 @@ export class ProjectService {
       data.privateKey = privateKey
     }
 
+    const userId = user.id
+
     // Create and return the project
-    const newProject = await this.projectRepository.createProject(data, user.id)
-    // Create and assign the environments providedd in the request, if any
+    const newProject = await this.prisma.project.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        publicKey: data.publicKey,
+        privateKey: data.privateKey,
+        storePrivateKey: data.storePrivateKey,
+        lastUpdatedById: userId,
+        members: {
+          create: {
+            userId: userId,
+            role: ProjectRole.OWNER,
+            invitationAccepted: true
+          }
+        },
+        isFreeTier: false
+      }
+    })
+
+    // Create and assign the environments provided in the request, if any
     // or create a default environment
     if (dto.environments && dto.environments.length > 0) {
       let defaultEnvironmentExists = false
@@ -91,28 +98,28 @@ export class ProjectService {
         defaultEnvironmentExists =
           defaultEnvironmentExists || environment.isDefault
 
-        const env = await this.environmentRepository.createEnvironment(
-          {
-            name: environment.name,
-            description: environment.description,
-            isDefault: defaultEnvironmentExists ? environment.isDefault : false // We don't want more than one default environment
-          },
-          newProject.id,
-          user.id
-        )
+        const env = await this.prisma.environment.create({
+          data: {
+            name: dto.name,
+            description: dto.description,
+            isDefault: environment.isDefault || false,
+            projectId: newProject.id,
+            lastUpdatedById: user.id
+          }
+        })
 
         this.log.debug(`Created environment ${env} for project ${newProject}`)
       }
     } else {
-      const defaultEnvironment = this.environmentRepository.createEnvironment(
-        {
+      const defaultEnvironment = await this.prisma.environment.create({
+        data: {
           name: 'Default',
           description: 'Default environment for the project',
-          isDefault: true
-        },
-        newProject.id,
-        user.id
-      )
+          isDefault: true,
+          projectId: newProject.id,
+          lastUpdatedById: user.id
+        }
+      })
 
       this.log.debug(
         `Created default environment ${defaultEnvironment} for project ${newProject}`
@@ -137,7 +144,7 @@ export class ProjectService {
     projectId: Project['id'],
     dto: UpdateProject
   ): Promise<Project> {
-    const project = (await this.projectRepository.getProjectByUserIdAndId(
+    const project = (await this.getProjectByUserIdAndId(
       user.id,
       projectId
     )) as ProjectWithSecrets
@@ -147,10 +154,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
     // Check if project with this name already exists for the user
-    if (
-      dto.name &&
-      (await this.projectRepository.projectExists(dto.name, user.id))
-    )
+    if (dto.name && (await this.projectExists(dto.name, user.id)))
       throw new ConflictException(
         `Project with this name **${dto.name}** already exists`
       )
@@ -186,29 +190,47 @@ export class ProjectService {
 
       // Re-hash all secrets
       for (const secret of project.secrets) {
-        const versions = await this.secretRepository.getAllVersionsOfSecret(
-          secret.id
-        )
+        const versions = await this.prisma.secretVersion.findMany({
+          where: {
+            secretId: secret.id
+          }
+        })
 
         const updatedVersions: Partial<SecretVersion>[] = []
+
         for (const version of versions) {
           updatedVersions.push({
             id: version.id,
-            value: version.value,
-            version: version.version + 1
+            value: encrypt(
+              decrypt(project.privateKey, version.value),
+              privateKey
+            )
           })
         }
 
-        await this.secretRepository.updateVersions(secret.id, updatedVersions)
+        for (const version of updatedVersions) {
+          await this.prisma.secretVersion.update({
+            where: {
+              id: version.id
+            },
+            data: {
+              value: version.value
+            }
+          })
+        }
       }
     }
 
     // Update and return the project
-    const updatedProject = await this.projectRepository.updateProject(
-      projectId,
-      data,
-      user.id
-    )
+    const updatedProject = await this.prisma.project.update({
+      where: {
+        id: projectId
+      },
+      data: {
+        ...data,
+        lastUpdatedById: user.id
+      }
+    })
 
     this.log.debug(`Updated project ${updatedProject.id}`)
     return {
@@ -218,10 +240,7 @@ export class ProjectService {
   }
 
   async deleteProject(user: User, projectId: Project['id']): Promise<void> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
@@ -231,7 +250,11 @@ export class ProjectService {
     this.permission.isProjectAdmin(user, projectId)
 
     // Delete the project
-    await this.projectRepository.deleteProject(projectId)
+    await this.prisma.project.delete({
+      where: {
+        id: projectId
+      }
+    })
     this.log.debug(`Deleted project ${project}`)
   }
 
@@ -240,10 +263,7 @@ export class ProjectService {
     projectId: Project['id'],
     members: ProjectMemberDTO[]
   ): Promise<void> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
@@ -263,10 +283,7 @@ export class ProjectService {
     projectId: Project['id'],
     userIds: User['id'][]
   ): Promise<void> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
@@ -276,9 +293,7 @@ export class ProjectService {
     this.permission.isProjectAdmin(user, projectId)
 
     // Check if the user is already a member of the project
-    if (
-      !(await this.projectRepository.memberExistsInProject(projectId, user.id))
-    )
+    if (!(await this.memberExistsInProject(projectId, user.id)))
       throw new ConflictException(
         `User ${user.name} (${user.id}) is not a member of project ${project.name} (${project.id})`
       )
@@ -291,7 +306,14 @@ export class ProjectService {
             `You cannot remove yourself from the project. Please delete the project instead.`
           )
 
-        await this.projectRepository.removeMemberFromProject(projectId, userId)
+        await this.prisma.projectMember.delete({
+          where: {
+            projectId_userId: {
+              projectId,
+              userId
+            }
+          }
+        })
 
         this.log.debug(
           `Removed user ${userId} from project ${project.name} (${project.id})`
@@ -306,10 +328,7 @@ export class ProjectService {
     userId: User['id'],
     role: ProjectRole
   ): Promise<void> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
@@ -319,15 +338,13 @@ export class ProjectService {
     this.permission.isProjectAdmin(user, projectId)
 
     // Check if the member in concern is a part of the project or not
-    if (
-      !(await this.projectRepository.memberExistsInProject(projectId, userId))
-    )
+    if (!(await this.memberExistsInProject(projectId, userId)))
       throw new NotFoundException(
         `User ${userId} is not a member of project ${project.name} (${project.id})`
       )
 
     // Update the role of the user
-    await this.projectRepository.updateMembership(projectId, userId, {
+    await this.updateMembership(projectId, userId, {
       role
     })
 
@@ -341,19 +358,13 @@ export class ProjectService {
     projectId: Project['id'],
     otherUserId: User['id']
   ): Promise<boolean> {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    return await this.projectRepository.memberExistsInProject(
-      projectId,
-      otherUserId
-    )
+    return await this.memberExistsInProject(projectId, otherUserId)
   }
 
   async acceptInvitation(
@@ -361,13 +372,13 @@ export class ProjectService {
     projectId: Project['id']
   ): Promise<void> {
     // Check if the user has a pending invitation to the project
-    if (!(await this.projectRepository.invitationPending(projectId, user.id)))
+    if (!(await this.invitationPending(projectId, user.id)))
       throw new ConflictException(
         `User ${user.name} (${user.id}) is not invited to project ${projectId}`
       )
 
     // Update the membership
-    await this.projectRepository.updateMembership(projectId, user.id, {
+    await this.updateMembership(projectId, user.id, {
       invitationAccepted: true
     })
 
@@ -385,13 +396,13 @@ export class ProjectService {
     this.permission.isProjectAdmin(user, projectId)
 
     // Check if the user has a pending invitation to the project
-    if (!(await this.projectRepository.invitationPending(projectId, inviteeId)))
+    if (!(await this.invitationPending(projectId, inviteeId)))
       throw new ConflictException(
         `User ${user.id} is not invited to project ${projectId}`
       )
 
     // Delete the membership
-    await this.projectRepository.deleteMembership(projectId, inviteeId)
+    await this.deleteMembership(projectId, inviteeId)
 
     this.log.debug(
       `User ${user.name} (${user.id}) declined invitation to project ${projectId}`
@@ -403,13 +414,13 @@ export class ProjectService {
     projectId: Project['id']
   ): Promise<void> {
     // Check if the user has a pending invitation to the project
-    if (!(await this.projectRepository.invitationPending(projectId, user.id)))
+    if (!(await this.invitationPending(projectId, user.id)))
       throw new ConflictException(
         `User ${user.name} (${user.id}) is not invited to project ${projectId}`
       )
 
     // Delete the membership
-    await this.projectRepository.deleteMembership(projectId, user.id)
+    await this.deleteMembership(projectId, user.id)
 
     this.log.debug(
       `User ${user.name} (${user.id}) declined invitation to project ${projectId}`
@@ -424,7 +435,7 @@ export class ProjectService {
     await this.permission.isProjectMember(user, projectId)
 
     // Delete the membership
-    await this.projectRepository.deleteMembership(projectId, user.id)
+    await this.deleteMembership(projectId, user.id)
 
     this.log.debug(`User ${user.name} (${user.id}) left project ${projectId}`)
   }
@@ -433,7 +444,7 @@ export class ProjectService {
     user: User,
     projectId: Project['id']
   ): Promise<ProjectWithMembersAndSecrets> {
-    const project = (await this.projectRepository.getProjectByUserIdAndId(
+    const project = (await this.getProjectByUserIdAndId(
       user.id,
       projectId
     )) as ProjectWithMembersAndSecrets
@@ -448,13 +459,35 @@ export class ProjectService {
   async getProjectById(
     projectId: Project['id']
   ): Promise<Project & { members: number }> {
-    const project = await this.projectRepository.getProjectById(projectId)
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: projectId
+      },
+      include: {
+        members: {
+          select: {
+            user: true,
+            invitationAccepted: true,
+            role: true
+          }
+        },
+        secrets: {
+          include: {
+            versions: {
+              orderBy: {
+                version: 'desc'
+              },
+              take: 1
+            }
+          }
+        }
+      }
+    })
 
     // Check if the project exists or not
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    //@ts-expect-error We know that project.members is not undefined since it is included in the query
     const memberCount = project.members.length
 
     const data = {
@@ -472,16 +505,41 @@ export class ProjectService {
     order: string,
     search: string
   ): Promise<Array<Partial<Project & { role: ProjectRole }>>> {
-    return (
-      await this.projectRepository.getProjectsOfUser(
-        user.id,
-        page,
-        limit,
-        sort,
-        order,
-        search
-      )
-    ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+    const memberships = await this.prisma.projectMember.findMany({
+      skip: (page - 1) * limit,
+      orderBy: {
+        project: {
+          [sort]: order
+        }
+      },
+      include: {
+        project: true
+      },
+      take: limit,
+      where: {
+        userId: user.id,
+        project: {
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              description: {
+                contains: search
+              }
+            }
+          ]
+        }
+      }
+    })
+    return memberships
+      .map((membership) => ({
+        ...membership.project,
+        role: membership.role
+      }))
+      .map((project) => excludeFields(project, 'privateKey', 'publicKey'))
   }
 
   async getProjects(
@@ -492,7 +550,27 @@ export class ProjectService {
     search: string
   ): Promise<Partial<Project>[]> {
     return (
-      await this.projectRepository.getProjects(page, limit, sort, order, search)
+      await this.prisma.project.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          [sort]: order
+        },
+        where: {
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              description: {
+                contains: search
+              }
+            }
+          ]
+        }
+      })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
   }
 
@@ -512,23 +590,41 @@ export class ProjectService {
       invitationAccepted: boolean
     }>
   > {
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
+    const project = await this.getProjectByUserIdAndId(user.id, projectId)
 
     // Check if the project exists or not
     if (!project)
       throw new NotFoundException(`Project with id ${projectId} not found`)
 
-    return await this.projectRepository.getMembersOfProject(
-      projectId,
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
+    return await this.prisma.projectMember.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        project: {
+          [sort]: order
+        }
+      },
+      where: {
+        projectId: projectId,
+        user: {
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              email: {
+                contains: search
+              }
+            }
+          ]
+        }
+      },
+      include: {
+        user: true
+      }
+    })
   }
 
   private async addMembersToProject(
@@ -537,17 +633,16 @@ export class ProjectService {
     members: ProjectMemberDTO[]
   ) {
     for (const member of members) {
-      let memberUser: User | null = await this.userRepository.findUserByEmail(
-        member.email
-      )
+      let memberUser: User | null = await this.prisma.user.findUnique({
+        where: {
+          email: member.email
+        }
+      })
 
       // Check if the user is already a member of the project
       if (
         memberUser &&
-        (await this.projectRepository.memberExistsInProject(
-          project.id,
-          memberUser.id
-        ))
+        (await this.memberExistsInProject(project.id, memberUser.id))
       )
         continue
 
@@ -564,7 +659,11 @@ export class ProjectService {
           `Sent project invitation mail to registered user ${memberUser}`
         )
       } else {
-        memberUser = await this.userRepository.createUser(member.email)
+        memberUser = await this.prisma.user.create({
+          data: {
+            email: member.email
+          }
+        })
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
@@ -586,15 +685,116 @@ export class ProjectService {
       }
 
       // Create the project membership
-      const membership = await this.projectRepository.addMemberToProject(
-        project.id,
-        memberUser.id,
-        member.role
-      )
+      const membership = await this.prisma.projectMember.create({
+        data: {
+          projectId: project.id,
+          userId: memberUser.id,
+          role: member.role
+        }
+      })
 
       this.log.debug(
         `Added user ${memberUser} as ${member.role} to project ${project.name}. Membership: ${membership.id}`
       )
     }
+  }
+
+  private async projectExists(
+    projectName: string,
+    userId: User['id']
+  ): Promise<boolean> {
+    return this.prisma.projectMember
+      .count({
+        where: {
+          user: {
+            id: userId
+          },
+          project: {
+            name: projectName
+          }
+        }
+      })
+      .then((count) => count > 0)
+  }
+
+  private async getProjectByUserIdAndId(
+    userId: User['id'],
+    projectId: Project['id']
+  ): Promise<Project> {
+    return await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        members: {
+          some: {
+            userId
+          }
+        }
+      },
+      include: {
+        members: true
+      }
+    })
+  }
+
+  private async memberExistsInProject(
+    projectId: string,
+    userId: string
+  ): Promise<boolean> {
+    return await this.prisma.projectMember
+      .count({
+        where: {
+          projectId,
+          userId
+        }
+      })
+      .then((count) => count > 0)
+  }
+
+  private async updateMembership(
+    projectId: Project['id'],
+    userId: User['id'],
+    data: Partial<Pick<ProjectMember, 'role' | 'invitationAccepted'>>
+  ): Promise<ProjectMember> {
+    return await this.prisma.projectMember.update({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId
+        }
+      },
+      data: {
+        role: data.role,
+        invitationAccepted: data.invitationAccepted
+      }
+    })
+  }
+
+  private async deleteMembership(
+    projectId: Project['id'],
+    userId: User['id']
+  ): Promise<void> {
+    await this.prisma.projectMember.delete({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId
+        }
+      }
+    })
+  }
+
+  private async invitationPending(
+    projectId: Project['id'],
+    userId: User['id']
+  ): Promise<boolean> {
+    return await this.prisma.projectMember
+      .count({
+        where: {
+          projectId,
+          userId,
+          invitationAccepted: false
+        }
+      })
+      .then((count) => count > 0)
   }
 }
