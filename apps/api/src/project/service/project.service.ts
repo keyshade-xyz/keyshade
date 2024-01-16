@@ -3,7 +3,8 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
 import {
   Project,
@@ -96,18 +97,26 @@ export class ProjectService {
     if (dto.environments && dto.environments.length > 0) {
       let defaultEnvironmentExists = false
       for (const environment of dto.environments) {
-        defaultEnvironmentExists =
-          defaultEnvironmentExists || environment.isDefault
-
+        console.log('default env exists: ', defaultEnvironmentExists)
+        console.log(
+          'will create default env: ',
+          defaultEnvironmentExists === false ? environment.isDefault : false
+        )
         const env = await this.prisma.environment.create({
           data: {
-            name: dto.name,
-            description: dto.description,
-            isDefault: environment.isDefault || false,
+            name: environment.name,
+            description: environment.description,
+            isDefault:
+              defaultEnvironmentExists === false
+                ? environment.isDefault
+                : false,
             projectId: newProject.id,
             lastUpdatedById: user.id
           }
         })
+
+        defaultEnvironmentExists =
+          defaultEnvironmentExists || environment.isDefault
 
         this.log.debug(`Created environment ${env} for project ${newProject}`)
       }
@@ -166,7 +175,6 @@ export class ProjectService {
     const data: Partial<Project> = {
       name: dto.name,
       description: dto.description,
-      updatedAt: new Date(),
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? project.privateKey : null
     }
@@ -488,8 +496,31 @@ export class ProjectService {
     @CurrentUser() user: User,
     projectId: Project['id']
   ): Promise<void> {
+    // Get all the memberships of this project
+    const memberships = await this.prisma.projectMember.findMany({
+      where: {
+        projectId
+      }
+    })
+
+    if (memberships.length === 0) {
+      // The project doesn't exist
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
+
     // Check if the user is a member of the project
-    await this.permission.isProjectMember(user, projectId)
+    if (
+      memberships.find((membership) => membership.userId === user.id) === null
+    )
+      throw new UnauthorizedException(
+        `User ${user.name} (${user.id}) is not a member of project ${projectId}`
+      )
+
+    if (memberships.length === 1) {
+      // If the user is the last member of the project, delete the project
+      await this.deleteProject(user, projectId)
+      return
+    }
 
     // Delete the membership
     await this.deleteMembership(projectId, user.id)

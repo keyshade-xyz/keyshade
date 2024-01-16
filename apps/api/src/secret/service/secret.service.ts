@@ -18,6 +18,7 @@ import { decrypt } from '../../common/decrypt'
 import { SecretWithVersion } from '../secret.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
+import { encrypt } from '../../common/encrypt'
 
 @Injectable()
 export class SecretService {
@@ -75,14 +76,26 @@ export class SecretService {
         rotateAt: addHoursToDate(dto.rotateAfter),
         versions: {
           create: {
-            value: dto.value,
+            value: encrypt(project.publicKey, dto.value),
             version: 1,
             createdById: user.id
           }
         },
-        environmentId,
-        projectId,
-        lastUpdatedById: user.id
+        environment: {
+          connect: {
+            id: environment.id
+          }
+        },
+        project: {
+          connect: {
+            id: projectId
+          }
+        },
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
       }
     })
   }
@@ -149,7 +162,7 @@ export class SecretService {
           lastUpdatedById: user.id,
           versions: {
             create: {
-              value: dto.value,
+              value: encrypt(project.publicKey, dto.value),
               version: previousVersion.version + 1,
               createdById: user.id
             }
@@ -209,7 +222,7 @@ export class SecretService {
         environment.id,
         projectId,
         user.id
-      )) &&
+      )) ||
       secret.environmentId !== environment.id
     ) {
       throw new ConflictException(
@@ -253,7 +266,7 @@ export class SecretService {
     }
 
     // Check if the rollback version is valid
-    if (rollbackVersion <= 1 || rollbackVersion > secret.versions[0].version) {
+    if (rollbackVersion < 1 || rollbackVersion > secret.versions[0].version) {
       throw new NotFoundException(
         `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
       )
@@ -417,8 +430,18 @@ export class SecretService {
           },
           take: 1
         },
-        lastUpdatedBy: true,
-        environment: true
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        environment: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
       },
       skip: (page - 1) * limit,
       take: limit,

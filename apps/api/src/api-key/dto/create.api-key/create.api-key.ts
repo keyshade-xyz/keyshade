@@ -1,5 +1,5 @@
 import { ApiKey, ApiKeyGeneralRole, ProjectScope } from '@prisma/client'
-import { IsString } from 'class-validator'
+import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export class CreateApiKey {
   @IsString()
@@ -8,7 +8,10 @@ export class CreateApiKey {
   @IsString()
   expiresAfter: '24' | '168' | '720' | '8760' | 'never' = 'never'
 
+  @IsArray()
   generalRoles: ApiKeyGeneralRole[]
 
+  @IsArray()
+  @IsOptional()
   scopes: ProjectScope[]
 }

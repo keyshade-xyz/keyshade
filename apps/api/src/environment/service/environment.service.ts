@@ -47,8 +47,16 @@ export class EnvironmentService {
         name: dto.name,
         description: dto.description,
         isDefault: dto.isDefault,
-        projectId,
-        lastUpdatedById: user.id
+        project: {
+          connect: {
+            id: projectId
+          }
+        },
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
       }
     })
   }
@@ -248,6 +256,10 @@ export class EnvironmentService {
       where: {
         id: environmentId,
         projectId
+      },
+      include: {
+        secrets: true,
+        lastUpdatedBy: true
       }
     })
   }

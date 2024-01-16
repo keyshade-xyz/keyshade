@@ -64,24 +64,38 @@ export class ApiKeyService {
 
     const plainTextApiKey = generateApiKey()
     const hashedApiKey = toSHA256(plainTextApiKey)
-    const apiKey = await this.prisma.apiKey.create({
-      data: {
-        name: dto.name,
-        value: hashedApiKey,
-        expiresAt: addHoursToDate(dto.expiresAfter),
-        generalRoles: dto.generalRoles,
-        projectScopes: {
-          createMany: {
-            data: dto.scopes
+    const apiKey = dto.scopes
+      ? await this.prisma.apiKey.create({
+          data: {
+            name: dto.name,
+            value: hashedApiKey,
+            expiresAt: addHoursToDate(dto.expiresAfter),
+            generalRoles: dto.generalRoles,
+            projectScopes: {
+              createMany: {
+                data: dto.scopes
+              }
+            },
+            user: {
+              connect: {
+                id: user.id
+              }
+            }
           }
-        },
-        user: {
-          connect: {
-            id: user.id
+        })
+      : await this.prisma.apiKey.create({
+          data: {
+            name: dto.name,
+            value: hashedApiKey,
+            expiresAt: addHoursToDate(dto.expiresAfter),
+            generalRoles: dto.generalRoles,
+            user: {
+              connect: {
+                id: user.id
+              }
+            }
           }
-        }
-      }
-    })
+        })
 
     this.logger.log(`User ${user.id} created API key ${apiKey.id}`)
 
@@ -141,6 +155,13 @@ export class ApiKeyService {
             name: dto.name,
             expiresAt: addHoursToDate(dto.expiresAfter),
             generalRoles: dto.generalRoles
+          },
+          select: {
+            id: true,
+            expiresAt: true,
+            name: true,
+            generalRoles: true,
+            projectScopes: true
           }
         })
 
@@ -164,7 +185,11 @@ export class ApiKeyService {
         id: apiKeyId,
         userId: user.id
       },
-      include: {
+      select: {
+        id: true,
+        expiresAt: true,
+        name: true,
+        generalRoles: true,
         projectScopes: true
       }
     })
@@ -197,6 +222,11 @@ export class ApiKeyService {
       take: limit,
       orderBy: {
         [sort]: order
+      },
+      select: {
+        id: true,
+        expiresAt: true,
+        name: true
       }
     })
   }

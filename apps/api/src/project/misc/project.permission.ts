@@ -4,7 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class ProjectPermission {
-  constructor(private readonly prims: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async isProjectAdmin(user: User, projectId: Project['id']): Promise<void> {
     // Admins can do everything
@@ -66,7 +66,7 @@ export class ProjectPermission {
     // const memberships = await this.repository.getProjectMembershipsOfUser(
     //   user.id
     // )
-    const memberships = await this.prims.projectMember.findMany({
+    const memberships = await this.prisma.projectMember.findMany({
       where: {
         userId: user.id
       }

@@ -12,6 +12,7 @@ import { AuthGuard } from '../auth/guard/auth.guard'
 import { UserModule } from '../user/user.module'
 import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
+import { ApiKeyModule } from '../api-key/api-key.module'
 
 @Module({
   controllers: [AppController],
@@ -25,7 +26,7 @@ import { EnvironmentModule } from '../environment/environment.module'
     PrismaModule,
     CommonModule,
     MailModule,
-    SupabaseModule,
+    ApiKeyModule,
     UserModule,
     ProjectModule,
     EnvironmentModule
