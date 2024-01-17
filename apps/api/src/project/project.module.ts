@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common'
 import { ProjectService } from './service/project.service'
 import { ProjectController } from './controller/project.controller'
-import { ProjectPermission } from './misc/project.permission'
 import { EnvironmentModule } from '../environment/environment.module'
 import { UserModule } from '../user/user.module'
 import { SecretModule } from '../secret/secret.module'
+import { WorkspacePermission } from '../workspace/misc/workspace.permission'
 
 @Module({
-  providers: [ProjectService, ProjectPermission],
+  providers: [ProjectService, WorkspacePermission],
   controllers: [ProjectController],
-  exports: [ProjectPermission],
   imports: [UserModule, EnvironmentModule, SecretModule]
 })
 export class ProjectModule {}

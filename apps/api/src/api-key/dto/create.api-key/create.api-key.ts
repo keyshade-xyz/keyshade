@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyGeneralRole, ProjectScope } from '@prisma/client'
+import { ApiKey, ApiKeyGeneralRole, ApiKeyWorkspaceScope } from '@prisma/client'
 import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export class CreateApiKey {
@@ -13,5 +13,5 @@ export class CreateApiKey {
 
   @IsArray()
   @IsOptional()
-  scopes: ProjectScope[]
+  scopes: ApiKeyWorkspaceScope[]
 }

@@ -90,4 +90,29 @@ export class UserService {
       }
     })
   }
+
+  async deleteSelf(user: User) {
+    this.deleteUserById(user.id)
+  }
+
+  async deleteUser(userId: User['id']) {
+    this.deleteUserById(userId)
+  }
+
+  private async deleteUserById(userId: User['id']) {
+    // Delete the user's default workspace
+    await this.prisma.workspace.delete({
+      where: {
+        id: userId,
+        isDefault: true
+      }
+    })
+
+    // Delete the user
+    await this.prisma.user.delete({
+      where: {
+        id: userId
+      }
+    })
+  }
 }

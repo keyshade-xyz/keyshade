@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -8,33 +7,20 @@ import {
 } from '@nestjs/common'
 import {
   Project,
-  ProjectMember,
-  ProjectRole,
   SecretVersion,
-  User
+  User,
+  Workspace,
+  WorkspaceRole
 } from '@prisma/client'
-import {
-  CreateProject,
-  ProjectMemberDTO
-} from '../dto/create.project/create.project'
+import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { ProjectPermission } from '../misc/project.permission'
-import {
-  IMailService,
-  MAIL_SERVICE
-} from '../../mail/services/interface.service'
-import { CurrentUser } from '../../decorators/user.decorator'
-import { JwtService } from '@nestjs/jwt'
 import { createKeyPair } from '../../common/create-key-pair'
 import { excludeFields } from '../../common/exclude-fields'
-import {
-  ProjectWithMembersAndSecrets,
-  ProjectWithSecrets
-} from '../project.types'
+import { ProjectWithSecrets } from '../project.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { decrypt } from '../../common/decrypt'
 import { encrypt } from '../../common/encrypt'
-import { ApiKeyProjectRoles } from '../../common/api-key-roles'
+import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
 
 @Injectable()
 export class ProjectService {
@@ -42,14 +28,25 @@ export class ProjectService {
 
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(MAIL_SERVICE) private readonly resendService: IMailService,
-    private readonly jwt: JwtService,
-    private readonly permission: ProjectPermission
+    private readonly permission: WorkspacePermission
   ) {}
 
-  async createProject(user: User, dto: CreateProject): Promise<Project> {
+  async createProject(
+    user: User,
+    workspaceId: Workspace['id'],
+    dto: CreateProject
+  ): Promise<Project> {
+    // Check if the workspace exists or not
+    const workspace = await this.getWorkspaceByUserIdAndId(user.id, workspaceId)
+
+    if (!workspace)
+      throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
+
+    // Check if the user has the permission to create a project
+    await this.permission.isWorkspaceMaintainer(user, workspaceId)
+
     // Check if project with this name already exists for the user
-    if (await this.projectExists(dto.name, user.id))
+    if (await this.projectExists(dto.name, workspaceId))
       throw new ConflictException(
         `Project with this name **${dto.name}** already exists`
       )
@@ -80,15 +77,16 @@ export class ProjectService {
         publicKey: data.publicKey,
         privateKey: data.privateKey,
         storePrivateKey: data.storePrivateKey,
-        lastUpdatedById: userId,
-        members: {
-          create: {
-            userId: userId,
-            role: ProjectRole.OWNER,
-            invitationAccepted: true
+        workspace: {
+          connect: {
+            id: workspaceId
           }
         },
-        isFreeTier: false
+        lastUpdatedBy: {
+          connect: {
+            id: userId
+          }
+        }
       }
     })
 
@@ -136,11 +134,6 @@ export class ProjectService {
       )
     }
 
-    // Add users to the project if any
-    if (dto.members && dto.members.length > 0) {
-      this.addMembersToProject(newProject, user, dto.members)
-    }
-
     this.log.debug(`Created project ${newProject}`)
     // It is important that we log before the private key is set
     // in order to not log the private key
@@ -154,23 +147,20 @@ export class ProjectService {
     projectId: Project['id'],
     dto: UpdateProject
   ): Promise<Project> {
-    const project = (await this.getProjectByUserIdAndId(
+    const project = await this.getProjectWithRole(
       user.id,
-      projectId
-    )) as ProjectWithSecrets
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
+      projectId,
+      WorkspaceRole.MAINTAINER
+    )
 
     // Check if project with this name already exists for the user
-    if (dto.name && (await this.projectExists(dto.name, user.id)))
+    if (
+      (dto.name && (await this.projectExists(dto.name, user.id))) ||
+      project.name === dto.name
+    )
       throw new ConflictException(
         `Project with this name **${dto.name}** already exists`
       )
-
-    // Check if the user has the permission to update the project
-    this.permission.isProjectAdmin(user, projectId)
 
     const data: Partial<Project> = {
       name: dto.name,
@@ -186,9 +176,6 @@ export class ProjectService {
     // - Or, the private key was stored
     // Only administrators can do this action since it's irreversible!
     if (dto.regenerateKeyPair && (dto.privateKey || project.privateKey)) {
-      // Check if the user has the permission to regenerate the key pair
-      this.permission.isProjectAdmin(user, projectId)
-
       const res = createKeyPair()
       privateKey = res.privateKey
       publicKey = res.publicKey
@@ -249,14 +236,11 @@ export class ProjectService {
   }
 
   async deleteProject(user: User, projectId: Project['id']): Promise<void> {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    // Check if the user has the permission to delete the project
-    this.permission.isProjectAdmin(user, projectId)
+    const project = await this.getProjectWithRole(
+      user.id,
+      projectId,
+      WorkspaceRole.MAINTAINER
+    )
 
     // Delete the project
     await this.prisma.project.delete({
@@ -265,351 +249,47 @@ export class ProjectService {
       }
     })
 
-    // Delete the API key scopes associated with this project
-    await this.deleteApiKeyScopesOfProject(projectId)
     this.log.debug(`Deleted project ${project}`)
   }
 
-  async addUsersToProject(
-    user: User,
-    projectId: Project['id'],
-    members: ProjectMemberDTO[]
-  ): Promise<void> {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    // Check if the user has the permission to add users to the project
-    this.permission.isProjectAdmin(user, projectId)
-
-    // Add users to the project if any
-    if (members && members.length > 0) {
-      this.addMembersToProject(project, user, members)
-    }
-  }
-
-  async removeUsersFromProject(
-    user: User,
-    projectId: Project['id'],
-    userIds: User['id'][]
-  ): Promise<void> {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    // Check if the user has the permission to remove users from the project
-    this.permission.isProjectAdmin(user, projectId)
-
-    // Check if the user is already a member of the project
-    if (!(await this.memberExistsInProject(projectId, user.id)))
-      throw new ConflictException(
-        `User ${user.name} (${user.id}) is not a member of project ${project.name} (${project.id})`
-      )
-
-    // Remove users from the project if any
-    if (userIds && userIds.length > 0) {
-      for (const userId of userIds) {
-        if (userId === user.id)
-          throw new ConflictException(
-            `You cannot remove yourself from the project. Please delete the project instead.`
-          )
-
-        // Delete the membership
-        await this.prisma.projectMember.delete({
-          where: {
-            projectId_userId: {
-              projectId,
-              userId
-            }
-          }
-        })
-
-        // Delete the API key scopes associated with this project
-        await this.deleteApiKeyScopesOfProject(projectId, userId)
-
-        this.log.debug(
-          `Removed user ${userId} from project ${project.name} (${project.id})`
-        )
-      }
-    }
-  }
-
-  async updateMemberRole(
-    user: User,
-    projectId: Project['id'],
-    userId: User['id'],
-    role: ProjectRole
-  ): Promise<void> {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    // Check if the member in concern is a part of the project or not
-    if (!(await this.memberExistsInProject(projectId, userId)))
-      throw new NotFoundException(
-        `User ${userId} is not a member of project ${project.name} (${project.id})`
-      )
-
-    // Check if the user has the permission to update the role of the user
-    this.permission.isProjectAdmin(user, projectId)
-
-    const currentRole = await this.prisma.projectMember.findUnique({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId
-        }
-      },
-      select: {
-        role: true
-      }
-    })
-
-    // We only want to reduce the roles of the API key if the user's role has been downgraded
-    if (
-      (currentRole.role === ProjectRole.OWNER && role !== ProjectRole.OWNER) ||
-      (currentRole.role === ProjectRole.MAINTAINER &&
-        role == ProjectRole.VIEWER)
-    ) {
-      const previousAPIKeyScopes = await this.prisma.projectScope.findFirst({
-        where: {
-          projectId,
-          apiKey: {
-            userId
-          }
-        },
-        select: {
-          roles: true
-        }
-      })
-
-      // Filtering out the old roles that are now not allowed
-      const updatedRoles = previousAPIKeyScopes.roles.filter((scope) =>
-        ApiKeyProjectRoles[role].includes(scope)
-      )
-
-      // Update the API key scopes associated with this project
-      await this.prisma.projectScope.updateMany({
-        where: {
-          projectId,
-          apiKey: {
-            userId
-          }
-        },
-        data: {
-          roles: updatedRoles
-        }
-      })
-    }
-
-    // Update the role of the user
-    await this.updateMembership(projectId, userId, {
-      role
-    })
-
-    this.log.debug(
-      `Updated role of user ${userId} to ${role} in project ${project.name} (${project.id})`
-    )
-  }
-
-  async isUserMemberOfProject(
-    user: User,
-    projectId: Project['id'],
-    otherUserId: User['id']
-  ): Promise<boolean> {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    return await this.memberExistsInProject(projectId, otherUserId)
-  }
-
-  async acceptInvitation(
-    @CurrentUser() user: User,
-    projectId: Project['id']
-  ): Promise<void> {
-    // Check if the user has a pending invitation to the project
-    if (!(await this.invitationPending(projectId, user.id)))
-      throw new ConflictException(
-        `User ${user.name} (${user.id}) is not invited to project ${projectId}`
-      )
-
-    // Update the membership
-    await this.updateMembership(projectId, user.id, {
-      invitationAccepted: true
-    })
-
-    this.log.debug(
-      `User ${user.name} (${user.id}) accepted invitation to project ${projectId}`
-    )
-  }
-
-  async cancelInvitation(
-    @CurrentUser() user: User,
-    projectId: Project['id'],
-    inviteeId: User['id']
-  ): Promise<void> {
-    // Check if the user has permission to decline the invitation
-    this.permission.isProjectAdmin(user, projectId)
-
-    // Check if the user has a pending invitation to the project
-    if (!(await this.invitationPending(projectId, inviteeId)))
-      throw new ConflictException(
-        `User ${user.id} is not invited to project ${projectId}`
-      )
-
-    // Delete the membership
-    await this.deleteMembership(projectId, inviteeId)
-
-    this.log.debug(
-      `User ${user.name} (${user.id}) declined invitation to project ${projectId}`
-    )
-  }
-
-  async declineInvitation(
-    @CurrentUser() user: User,
-    projectId: Project['id']
-  ): Promise<void> {
-    // Check if the user has a pending invitation to the project
-    if (!(await this.invitationPending(projectId, user.id)))
-      throw new ConflictException(
-        `User ${user.name} (${user.id}) is not invited to project ${projectId}`
-      )
-
-    // Delete the membership
-    await this.deleteMembership(projectId, user.id)
-
-    this.log.debug(
-      `User ${user.name} (${user.id}) declined invitation to project ${projectId}`
-    )
-  }
-
-  async leaveProject(
-    @CurrentUser() user: User,
-    projectId: Project['id']
-  ): Promise<void> {
-    // Get all the memberships of this project
-    const memberships = await this.prisma.projectMember.findMany({
-      where: {
-        projectId
-      }
-    })
-
-    if (memberships.length === 0) {
-      // The project doesn't exist
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    // Check if the user is a member of the project
-    if (
-      memberships.find((membership) => membership.userId === user.id) === null
-    )
-      throw new UnauthorizedException(
-        `User ${user.name} (${user.id}) is not a member of project ${projectId}`
-      )
-
-    if (memberships.length === 1) {
-      // If the user is the last member of the project, delete the project
-      await this.deleteProject(user, projectId)
-      return
-    }
-
-    // Delete the membership
-    await this.deleteMembership(projectId, user.id)
-
-    // Delete the API key scopes associated with this project
-    await this.deleteApiKeyScopesOfProject(projectId, user.id)
-
-    this.log.debug(`User ${user.name} (${user.id}) left project ${projectId}`)
-  }
-
-  async getProjectByUserAndId(
-    user: User,
-    projectId: Project['id']
-  ): Promise<ProjectWithMembersAndSecrets> {
-    const project = (await this.getProjectByUserIdAndId(
+  async getProjectByUserAndId(user: User, projectId: Project['id']) {
+    const project = await this.getProjectWithRole(
       user.id,
-      projectId
-    )) as ProjectWithMembersAndSecrets
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
+      projectId,
+      WorkspaceRole.VIEWER
+    )
 
     return project
   }
 
-  async getProjectById(
-    projectId: Project['id']
-  ): Promise<Project & { members: number }> {
-    const project = await this.prisma.project.findUnique({
-      where: {
-        id: projectId
-      },
-      include: {
-        members: {
-          select: {
-            user: true,
-            invitationAccepted: true,
-            role: true
-          }
-        },
-        secrets: {
-          include: {
-            versions: {
-              orderBy: {
-                version: 'desc'
-              },
-              take: 1
-            }
-          }
-        }
-      }
-    })
+  async getProjectById(projectId: Project['id']) {
+    const project = await this.getProjectWithRole(
+      null,
+      projectId,
+      WorkspaceRole.VIEWER
+    )
 
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    const memberCount = project.members.length
-
-    const data = {
-      ...project,
-      members: memberCount
-    }
-    return data
+    return project
   }
 
-  async getProjectsOfUser(
+  async getProjectsOfWorkspace(
     user: User,
+    workspaceId: Workspace['id'],
     page: number,
     limit: number,
     sort: string,
     order: string,
     search: string
-  ): Promise<Array<Partial<Project & { role: ProjectRole }>>> {
-    const memberships = await this.prisma.projectMember.findMany({
-      skip: (page - 1) * limit,
-      orderBy: {
-        project: {
+  ) {
+    return (
+      await this.prisma.project.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
           [sort]: order
-        }
-      },
-      include: {
-        project: true
-      },
-      take: limit,
-      where: {
-        userId: user.id,
-        project: {
+        },
+        where: {
+          workspaceId,
           OR: [
             {
               name: {
@@ -621,16 +301,17 @@ export class ProjectService {
                 contains: search
               }
             }
-          ]
+          ],
+          workspace: {
+            members: {
+              some: {
+                userId: user.id
+              }
+            }
+          }
         }
-      }
-    })
-    return memberships
-      .map((membership) => ({
-        ...membership.project,
-        role: membership.role
-      }))
-      .map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+      })
+    ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
   }
 
   async getProjects(
@@ -639,7 +320,7 @@ export class ProjectService {
     sort: string,
     order: string,
     search: string
-  ): Promise<Partial<Project>[]> {
+  ) {
     return (
       await this.prisma.project.findMany({
         skip: (page - 1) * limit,
@@ -665,156 +346,33 @@ export class ProjectService {
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
   }
 
-  async getProjectMembers(
-    user: User,
-    projectId: Project['id'],
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ): Promise<
-    Array<{
-      id: string
-      role: ProjectRole
-      user: User
-      invitationAccepted: boolean
-    }>
-  > {
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-
-    // Check if the project exists or not
-    if (!project)
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-
-    return await this.prisma.projectMember.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: {
-        project: {
-          [sort]: order
-        }
-      },
-      where: {
-        projectId: projectId,
-        user: {
-          OR: [
-            {
-              name: {
-                contains: search
-              }
-            },
-            {
-              email: {
-                contains: search
-              }
-            }
-          ]
-        }
-      },
-      include: {
-        user: true
-      }
-    })
-  }
-
-  private async addMembersToProject(
-    project: Project,
-    currentUser: User,
-    members: ProjectMemberDTO[]
-  ) {
-    for (const member of members) {
-      let memberUser: User | null = await this.prisma.user.findUnique({
-        where: {
-          email: member.email
-        }
-      })
-
-      // Check if the user is already a member of the project
-      if (
-        memberUser &&
-        (await this.memberExistsInProject(project.id, memberUser.id))
-      )
-        continue
-
-      if (memberUser) {
-        this.resendService.projectInvitationMailForRegisteredUser(
-          member.email,
-          project.name,
-          `${process.env.WORKSPACE_FRONTEND_URL}/project/${project.id}/join`,
-          currentUser.name,
-          member.role
-        )
-
-        this.log.debug(
-          `Sent project invitation mail to registered user ${memberUser}`
-        )
-      } else {
-        memberUser = await this.prisma.user.create({
-          data: {
-            email: member.email
-          }
-        })
-
-        this.log.debug(`Created non-registered user ${memberUser}`)
-
-        this.resendService.projectInvitationMailForNonRegisteredUser(
-          member.email,
-          project.name,
-          `${process.env.WORKSPACE_FRONTEND_URL}/project/${
-            project.id
-          }/join?token=${await await this.jwt.signAsync({
-            id: memberUser.id
-          })}`,
-          currentUser.name,
-          member.role
-        )
-
-        this.log.debug(
-          `Sent project invitation mail to non-registered user ${memberUser}`
-        )
-      }
-
-      // Create the project membership
-      const membership = await this.prisma.projectMember.create({
-        data: {
-          projectId: project.id,
-          userId: memberUser.id,
-          role: member.role
-        }
-      })
-
-      this.log.debug(
-        `Added user ${memberUser} as ${member.role} to project ${project.name}. Membership: ${membership.id}`
-      )
-    }
-  }
-
   private async projectExists(
     projectName: string,
-    userId: User['id']
+    workspaceId: Workspace['id']
   ): Promise<boolean> {
-    return this.prisma.projectMember
-      .count({
+    return (
+      (await this.prisma.workspaceMember.count({
         where: {
-          user: {
-            id: userId
-          },
-          project: {
-            name: projectName
+          workspaceId,
+          workspace: {
+            projects: {
+              some: {
+                name: projectName
+              }
+            }
           }
         }
-      })
-      .then((count) => count > 0)
+      })) > 0
+    )
   }
 
-  private async getProjectByUserIdAndId(
+  private async getWorkspaceByUserIdAndId(
     userId: User['id'],
-    projectId: Project['id']
-  ): Promise<Project> {
-    return await this.prisma.project.findFirst({
+    workspaceId: Workspace['id']
+  ): Promise<Workspace> {
+    return await this.prisma.workspace.findFirst({
       where: {
-        id: projectId,
+        id: workspaceId,
         members: {
           some: {
             userId
@@ -827,79 +385,43 @@ export class ProjectService {
     })
   }
 
-  private async memberExistsInProject(
-    projectId: string,
-    userId: string
-  ): Promise<boolean> {
-    return await this.prisma.projectMember
-      .count({
-        where: {
-          projectId,
-          userId
-        }
-      })
-      .then((count) => count > 0)
-  }
-
-  private async updateMembership(
-    projectId: Project['id'],
+  private async getProjectWithRole(
     userId: User['id'],
-    data: Partial<Pick<ProjectMember, 'role' | 'invitationAccepted'>>
-  ): Promise<ProjectMember> {
-    return await this.prisma.projectMember.update({
+    projectId: Project['id'],
+    role: WorkspaceRole
+  ): Promise<ProjectWithSecrets> {
+    // Fetch the project
+    const project = await this.prisma.project.findUnique({
       where: {
-        projectId_userId: {
-          projectId,
-          userId
-        }
+        id: projectId
       },
-      data: {
-        role: data.role,
-        invitationAccepted: data.invitationAccepted
+      include: {
+        workspace: {
+          include: {
+            members: true
+          }
+        },
+        secrets: true
       }
     })
-  }
 
-  private async deleteMembership(
-    projectId: Project['id'],
-    userId: User['id']
-  ): Promise<void> {
-    await this.prisma.projectMember.delete({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId
-        }
-      }
-    })
-  }
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
 
-  private async invitationPending(
-    projectId: Project['id'],
-    userId: User['id']
-  ): Promise<boolean> {
-    return await this.prisma.projectMember
-      .count({
-        where: {
-          projectId,
-          userId,
-          invitationAccepted: false
-        }
-      })
-      .then((count) => count > 0)
-  }
+    // Check for the required membership role
+    if (
+      !project.workspace.members.some(
+        (member) => member.userId === userId && member.role === role
+      )
+    )
+      throw new UnauthorizedException(
+        `You don't have the required role to access this project`
+      )
 
-  private async deleteApiKeyScopesOfProject(
-    projectId: Project['id'],
-    userId?: User['id']
-  ) {
-    await this.prisma.projectScope.deleteMany({
-      where: {
-        projectId,
-        apiKey: {
-          userId
-        }
-      }
-    })
+    // Remove the workspace from the project
+    project.workspace = undefined
+
+    return project
   }
 }

@@ -18,9 +18,9 @@ import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
-  @Get('permissable-scopes-of-projects')
-  async getPermissableScopesOfProjects(@CurrentUser() user: User) {
-    return this.apiKeyService.getPermissableScopesOfProjects(user)
+  @Get('permissable-scopes-of-workspaces')
+  async getPermissableScopesOfWorkspaces(@CurrentUser() user: User) {
+    return this.apiKeyService.getPermissableScopesOfWorkspaces(user)
   }
 
   @Post()

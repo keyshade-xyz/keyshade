@@ -40,9 +40,25 @@ export class AuthService {
 
     // We need to create the user if it doesn't exist yet
     if (!(await this.findUserByEmail(email))) {
-      await this.prisma.user.create({
+      // Create the user
+      const user = await this.prisma.user.create({
         data: {
           email
+        }
+      })
+
+      // Create the user's default workspace
+      await this.prisma.workspace.create({
+        data: {
+          name: `My Workspace`,
+          description: 'My default workspace',
+          isDefault: true,
+          ownerId: user.id,
+          lastUpdatedBy: {
+            connect: {
+              id: user.id
+            }
+          }
         }
       })
     }

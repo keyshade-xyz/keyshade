@@ -1,23 +1,23 @@
-import { ProjectRole } from '@prisma/client'
+import { WorkspaceRole } from '@prisma/client'
 
 export const MAIL_SERVICE = 'MAIL_SERVICE'
 
 export interface IMailService {
   sendOtp(email: string, otp: string): Promise<void>
 
-  projectInvitationMailForRegisteredUser(
+  workspaceInvitationMailForRegisteredUser(
     email: string,
-    project: string,
+    workspace: string,
     actionUrl: string,
     invitedBy: string,
-    role: ProjectRole
+    role: WorkspaceRole
   ): Promise<void>
 
-  projectInvitationMailForNonRegisteredUser(
+  workspaceInvitationMailForNonRegisteredUser(
     email: string,
-    project: string,
+    workspace: string,
     actionUrl: string,
     invitedBy: string,
-    role: ProjectRole
+    role: WorkspaceRole
   ): Promise<void>
 }

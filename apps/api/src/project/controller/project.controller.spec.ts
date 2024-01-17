@@ -3,10 +3,9 @@ import { ProjectController } from './project.controller'
 import { ProjectService } from '../service/project.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
-import { JwtService } from '@nestjs/jwt'
-import { ProjectPermission } from '../misc/project.permission'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
 
 describe('ProjectController', () => {
   let controller: ProjectController
@@ -18,8 +17,7 @@ describe('ProjectController', () => {
         ProjectService,
         PrismaService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
-        JwtService,
-        ProjectPermission
+        WorkspacePermission
       ]
     })
       .overrideProvider(PrismaService)

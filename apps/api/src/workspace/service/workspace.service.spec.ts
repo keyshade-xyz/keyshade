@@ -1,29 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { SecretService } from './secret.service'
+import { WorkspaceService } from './workspace.service'
+import { WorkspacePermission } from '../misc/workspace.permission'
+import { PrismaService } from '../../prisma/prisma.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
-import { PrismaService } from '../../prisma/prisma.service'
-import { mockDeep } from 'jest-mock-extended'
+import { JwtService } from '@nestjs/jwt'
 
-describe('SecretService', () => {
-  let service: SecretService
+describe('WorkspaceService', () => {
+  let service: WorkspaceService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        WorkspaceService,
+        WorkspacePermission,
         PrismaService,
         {
           provide: MAIL_SERVICE,
           useClass: MockMailService
         },
-        SecretService
+        JwtService
       ]
-    })
-      .overrideProvider(PrismaService)
-      .useValue(mockDeep<PrismaService>())
-      .compile()
+    }).compile()
 
-    service = module.get<SecretService>(SecretService)
+    service = module.get<WorkspaceService>(WorkspaceService)
   })
 
   it('should be defined', () => {

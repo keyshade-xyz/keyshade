@@ -31,81 +31,64 @@ export class SecretController {
     return await this.secretService.createSecret(user, dto, projectId)
   }
 
-  @Put(':projectId/:secretId')
+  @Put(':secretId')
   async updateSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string,
     @Body() dto: UpdateSecret
   ) {
-    return await this.secretService.updateSecret(user, secretId, dto, projectId)
+    return await this.secretService.updateSecret(user, secretId, dto)
   }
 
-  @Put(':projectId/:secretId/environment/:environmentId')
+  @Put(':secretId/environment/:environmentId')
   async updateSecretEnvironment(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string,
     @Param('environmentId') environmentId: string
   ) {
     return await this.secretService.updateSecretEnvironment(
       user,
       secretId,
-      environmentId,
-      projectId
+      environmentId
     )
   }
 
-  @Put(':projectId/:secretId/rollback/:rollbackVersion')
+  @Put(':secretId/rollback/:rollbackVersion')
   async rollbackSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string,
     @Param('rollbackVersion') rollbackVersion: number
   ) {
     return await this.secretService.rollbackSecret(
       user,
       secretId,
-      rollbackVersion,
-      projectId
+      rollbackVersion
     )
   }
 
-  @Delete(':projectId/:secretId')
+  @Delete(':secretId')
   async deleteSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string
   ) {
-    return await this.secretService.deleteSecret(user, secretId, projectId)
+    return await this.secretService.deleteSecret(user, secretId)
   }
 
-  @Get(':projectId/:secretId')
+  @Get(':secretId')
   async getSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string,
     @Query('decryptValue') decryptValue: boolean = false
   ) {
-    return await this.secretService.getSecretById(
-      user,
-      secretId,
-      projectId,
-      decryptValue
-    )
+    return await this.secretService.getSecretById(user, secretId, decryptValue)
   }
 
-  @Get(':projectId/:secretId/versions')
+  @Get(':secretId/versions')
   async getAllVersionsOfSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('secretId') secretId: string
   ) {
-    return await this.secretService.getAllVersionsOfSecret(
-      user,
-      secretId,
-      projectId
-    )
+    return await this.secretService.getAllVersionsOfSecret(user, secretId)
   }
 
   @Get(':projectId')

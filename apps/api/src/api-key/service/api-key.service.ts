@@ -4,14 +4,14 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { ApiKeyProjectRole, ProjectRole, User } from '@prisma/client'
+import { ApiKeyWorkspaceRole, User, WorkspaceRole } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
-import { ApiKeyProjectRoles } from '../../common/api-key-roles'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { generateApiKey } from '../../common/api-key-generator'
 import { toSHA256 } from '../../common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
+import { ApiKeyWorkspaceRoles } from '../../common/api-key-roles'
 
 @Injectable()
 export class ApiKeyService {
@@ -19,47 +19,47 @@ export class ApiKeyService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPermissableScopesOfProjects(user: User) {
-    const projects = await this.prisma.projectMember.findMany({
+  async getPermissableScopesOfWorkspaces(user: User) {
+    const workspaces = await this.prisma.workspaceMember.findMany({
       where: {
         userId: user.id
       },
       select: {
-        project: true,
+        workspace: true,
         role: true
       }
     })
 
-    function getProjectScopes(role: ProjectRole) {
+    function getWorkspaceScopes(role: WorkspaceRole) {
       switch (role) {
-        case ProjectRole.VIEWER:
-          return [...ApiKeyProjectRoles.VIEWER]
-        case ProjectRole.MAINTAINER:
+        case WorkspaceRole.VIEWER:
+          return [...ApiKeyWorkspaceRoles.VIEWER]
+        case WorkspaceRole.MAINTAINER:
           return [
-            ...ApiKeyProjectRoles.VIEWER,
-            ...ApiKeyProjectRoles.MAINTAINER
+            ...ApiKeyWorkspaceRoles.VIEWER,
+            ...ApiKeyWorkspaceRoles.MAINTAINER
           ]
-        case ProjectRole.OWNER:
+        case WorkspaceRole.OWNER:
           return [
-            ...ApiKeyProjectRoles.VIEWER,
-            ...ApiKeyProjectRoles.MAINTAINER,
-            ...ApiKeyProjectRoles.OWNER
+            ...ApiKeyWorkspaceRoles.VIEWER,
+            ...ApiKeyWorkspaceRoles.MAINTAINER,
+            ...ApiKeyWorkspaceRoles.OWNER
           ]
         default:
           throw new Error(`Unknown user role ${role}`)
       }
     }
 
-    return projects.map((project) => ({
-      projectId: project.project.id,
-      roles: getProjectScopes(project.role)
+    return workspaces.map((workspace) => ({
+      workspaceId: workspace.workspace.id,
+      roles: getWorkspaceScopes(workspace.role)
     }))
   }
 
   async createApiKey(user: User, dto: CreateApiKey) {
-    // For each project scope, check if the user has the required roles to perform the action.
+    // For each workspace scope, check if the user has the required roles to perform the action.
     if (dto.scopes) {
-      await this.checkPermissionsOfProjectScopes(user, dto.scopes)
+      await this.checkPermissionsOfWorkspaceScopes(user, dto.scopes)
     }
 
     const plainTextApiKey = generateApiKey()
@@ -71,7 +71,7 @@ export class ApiKeyService {
             value: hashedApiKey,
             expiresAt: addHoursToDate(dto.expiresAfter),
             generalRoles: dto.generalRoles,
-            projectScopes: {
+            workspaceScopes: {
               createMany: {
                 data: dto.scopes
               }
@@ -112,7 +112,7 @@ export class ApiKeyService {
         userId: user.id
       },
       include: {
-        projectScopes: true
+        workspaceScopes: true
       }
     })
 
@@ -122,11 +122,11 @@ export class ApiKeyService {
       )
     }
 
-    if (apiKey.projectScopes) {
-      await this.checkPermissionsOfProjectScopes(user, apiKey.projectScopes)
+    if (apiKey.workspaceScopes) {
+      await this.checkPermissionsOfWorkspaceScopes(user, apiKey.workspaceScopes)
     }
 
-    const updatedApiKey = apiKey.projectScopes
+    const updatedApiKey = apiKey.workspaceScopes
       ? await this.prisma.apiKey.update({
           where: {
             id: apiKeyId
@@ -135,10 +135,10 @@ export class ApiKeyService {
             name: dto.name,
             expiresAt: addHoursToDate(dto.expiresAfter),
             generalRoles: dto.generalRoles,
-            projectScopes: {
+            workspaceScopes: {
               deleteMany: {
-                projectId: {
-                  in: dto.scopes.map((scope) => scope.projectId)
+                workspaceId: {
+                  in: dto.scopes.map((scope) => scope.workspaceId)
                 }
               },
               createMany: {
@@ -161,7 +161,7 @@ export class ApiKeyService {
             expiresAt: true,
             name: true,
             generalRoles: true,
-            projectScopes: true
+            workspaceScopes: true
           }
         })
 
@@ -190,7 +190,7 @@ export class ApiKeyService {
         expiresAt: true,
         name: true,
         generalRoles: true,
-        projectScopes: true
+        workspaceScopes: true
       }
     })
 
@@ -231,15 +231,15 @@ export class ApiKeyService {
     })
   }
 
-  private async checkPermissionsOfProjectScopes(
+  private async checkPermissionsOfWorkspaceScopes(
     user: User,
-    projectScopes: { projectId: string; roles: ApiKeyProjectRole[] }[]
+    workspaceScopes: { workspaceId: string; roles: ApiKeyWorkspaceRole[] }[]
   ) {
-    for (const apiKeyScope of projectScopes) {
-      const membership = await this.prisma.projectMember.findUnique({
+    for (const apiKeyScope of workspaceScopes) {
+      const membership = await this.prisma.workspaceMember.findUnique({
         where: {
-          projectId_userId: {
-            projectId: apiKeyScope.projectId,
+          workspaceId_userId: {
+            workspaceId: apiKeyScope.workspaceId,
             userId: user.id
           }
         }
@@ -247,28 +247,30 @@ export class ApiKeyService {
 
       if (!membership) {
         throw new UnauthorizedException(
-          `User ${user.id} is not a member of project ${apiKeyScope.projectId}`
+          `User ${user.id} is not a member of workspace ${apiKeyScope.workspaceId}`
         )
       }
 
       if (
-        ApiKeyProjectRoles.OWNER.some((role) => !membership.role.includes(role))
+        ApiKeyWorkspaceRoles.OWNER.some(
+          (role) => !membership.role.includes(role)
+        )
       ) {
-        if (membership.role !== ProjectRole.OWNER) {
+        if (membership.role !== WorkspaceRole.OWNER) {
           throw new UnauthorizedException(
-            `User ${user.id} is not an owner of project ${apiKeyScope.projectId}`
+            `User ${user.id} is not an owner of workspace ${apiKeyScope.workspaceId}`
           )
         }
       }
 
       if (
-        ApiKeyProjectRoles.MAINTAINER.some(
+        ApiKeyWorkspaceRoles.MAINTAINER.some(
           (role) => !membership.role.includes(role)
         )
       ) {
-        if (membership.role !== ProjectRole.MAINTAINER) {
+        if (membership.role !== WorkspaceRole.MAINTAINER) {
           throw new UnauthorizedException(
-            `User ${user.id} is not a maintainer of project ${apiKeyScope.projectId}`
+            `User ${user.id} is not a maintainer of workspace ${apiKeyScope.workspaceId}`
           )
         }
       }

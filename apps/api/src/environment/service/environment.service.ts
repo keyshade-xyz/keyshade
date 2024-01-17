@@ -1,34 +1,25 @@
 import {
   ConflictException,
   Injectable,
-  NotFoundException
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
-import { Environment, Project, User } from '@prisma/client'
+import { Environment, Project, User, WorkspaceRole } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
-import { ProjectPermission } from '../../project/misc/project.permission'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class EnvironmentService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly projectPermissionService: ProjectPermission
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createEnvironment(
     user: User,
     dto: CreateEnvironment,
     projectId: Project['id']
   ) {
-    // Check if the project exists
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-    if (!project) {
-      throw new NotFoundException('Project not found')
-    }
-
-    // Check if the user can manage environments of the project
-    await this.projectPermissionService.isProjectMaintainer(user, projectId)
+    // Check if the user has the required role to create an environment
+    await this.getProjectWithRole(user.id, projectId, WorkspaceRole.MAINTAINER)
 
     // Check if an environment with the same name already exists
     if (await this.environmentExists(dto.name, projectId)) {
@@ -64,33 +55,27 @@ export class EnvironmentService {
   async updateEnvironment(
     user: User,
     dto: UpdateEnvironment,
-    projectId: Project['id'],
     environmentId: Environment['id']
   ) {
-    // Check if the project exists
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-    if (!project) {
-      throw new NotFoundException('Project not found')
-    }
-
-    // Check if the user can manage environments of the project
-    await this.projectPermissionService.isProjectMaintainer(user, projectId)
-
-    // Check if the environment exists
-    const environment = await this.getByProjectIdAndId(projectId, environmentId)
-    if (!environment) {
-      throw new NotFoundException('Environment not found')
-    }
+    const environment = await this.getEnvironmentWithRole(
+      user.id,
+      environmentId,
+      WorkspaceRole.MAINTAINER
+    )
 
     // Check if an environment with the same name already exists
-    if (dto.name && (await this.environmentExists(dto.name, projectId))) {
+    if (
+      (dto.name &&
+        (await this.environmentExists(dto.name, environment.projectId))) ||
+      environment.name === dto.name
+    ) {
       throw new ConflictException('Environment already exists')
     }
 
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
     if (dto.isDefault) {
-      await this.makeAllNonDefault(projectId)
+      await this.makeAllNonDefault(environment.projectId)
     }
 
     // Update the environment
@@ -111,25 +96,12 @@ export class EnvironmentService {
     })
   }
 
-  async getEnvironmentByProjectIdAndId(
-    user: User,
-    projectId: Project['id'],
-    environmentId: Environment['id']
-  ) {
-    // Check if the project exists
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-    if (!project) {
-      throw new NotFoundException('Project not found')
-    }
-
-    // Check if the user can manage environments of the project
-    await this.projectPermissionService.isProjectMaintainer(user, projectId)
-
-    // Check if the environment exists
-    const environment = await this.getByProjectIdAndId(projectId, environmentId)
-    if (!environment) {
-      throw new NotFoundException('Environment not found')
-    }
+  async getEnvironment(user: User, environmentId: Environment['id']) {
+    const environment = await this.getEnvironmentWithRole(
+      user.id,
+      environmentId,
+      WorkspaceRole.VIEWER
+    )
 
     return environment
   }
@@ -143,11 +115,7 @@ export class EnvironmentService {
     order: string,
     search: string
   ) {
-    // Check if the project exists
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-    if (!project) {
-      throw new NotFoundException('Project not found')
-    }
+    await this.getProjectWithRole(user.id, projectId, WorkspaceRole.VIEWER)
 
     // Get the environments
     return await this.prisma.environment.findMany({
@@ -193,25 +161,14 @@ export class EnvironmentService {
     })
   }
 
-  async deleteEnvironment(
-    user: User,
-    projectId: Project['id'],
-    environmentId: Environment['id']
-  ) {
-    // Check if the project exists
-    const project = await this.getProjectByUserIdAndId(user.id, projectId)
-    if (!project) {
-      throw new NotFoundException('Project not found')
-    }
+  async deleteEnvironment(user: User, environmentId: Environment['id']) {
+    const environment = await this.getEnvironmentWithRole(
+      user.id,
+      environmentId,
+      WorkspaceRole.MAINTAINER
+    )
 
-    // Check if the user can manage environments of the project
-    await this.projectPermissionService.isProjectMaintainer(user, projectId)
-
-    // Check if the environment exists
-    const environment = await this.getByProjectIdAndId(projectId, environmentId)
-    if (!environment) {
-      throw new NotFoundException('Environment not found')
-    }
+    const projectId = environment.projectId
 
     // Check if the environment is the default one
     if (environment.isDefault) {
@@ -275,22 +232,87 @@ export class EnvironmentService {
     })
   }
 
-  private async getProjectByUserIdAndId(
+  private async getEnvironmentWithRole(
     userId: User['id'],
-    projectId: Project['id']
-  ): Promise<Project> {
-    return await this.prisma.project.findFirst({
+    environmentId: Environment['id'],
+    role: WorkspaceRole
+  ): Promise<Environment> {
+    // Fetch the environment
+    const environment = await this.prisma.environment.findUnique({
       where: {
-        id: projectId,
-        members: {
-          some: {
-            userId
-          }
-        }
+        id: environmentId
       },
       include: {
-        members: true
+        project: {
+          include: {
+            workspace: {
+              include: {
+                members: true
+              }
+            }
+          }
+        }
       }
     })
+
+    if (!environment) {
+      throw new NotFoundException(
+        `Environment with id ${environmentId} not found`
+      )
+    }
+
+    // Check for the required membership role
+    if (
+      !environment.project.workspace.members.some(
+        (member) => member.userId === userId && member.role === role
+      )
+    )
+      throw new UnauthorizedException(
+        `You don't have the required role to access this environment`
+      )
+
+    // Remove the workspace from the environment
+    environment.project.workspace = undefined
+
+    return environment
+  }
+
+  private async getProjectWithRole(
+    userId: User['id'],
+    projectId: Project['id'],
+    role: WorkspaceRole
+  ): Promise<Project> {
+    // Fetch the project
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: projectId
+      },
+      include: {
+        workspace: {
+          include: {
+            members: true
+          }
+        }
+      }
+    })
+
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
+
+    // Check for the required membership role
+    if (
+      !project.workspace.members.some(
+        (member) => member.userId === userId && member.role === role
+      )
+    )
+      throw new UnauthorizedException(
+        `You don't have the required role to access this project`
+      )
+
+    // Remove the workspace from the project
+    project.workspace = undefined
+
+    return project
   }
 }
