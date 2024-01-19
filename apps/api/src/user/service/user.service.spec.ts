@@ -3,6 +3,8 @@ import { UserService } from './user.service'
 import { User } from '@prisma/client'
 import { USER_REPOSITORY } from '../repository/interface.repository'
 import { MockUserRepository } from '../repository/mock.repository'
+import { MAIL_SERVICE } from '../../mail/services/interface.service'
+import { MockMailService } from '../../mail/services/mock.service'
 
 describe('UserService', () => {
   let service: UserService
@@ -21,7 +23,8 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        { provide: USER_REPOSITORY, useClass: MockUserRepository }
+        { provide: USER_REPOSITORY, useClass: MockUserRepository },
+        { provide: MAIL_SERVICE, useValue: MockMailService }
       ]
     }).compile()
 

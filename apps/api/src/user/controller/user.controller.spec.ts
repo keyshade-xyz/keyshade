@@ -4,6 +4,8 @@ import { UserService } from '../service/user.service'
 import { User } from '@prisma/client'
 import { USER_REPOSITORY } from '../repository/interface.repository'
 import { MockUserRepository } from '../repository/mock.repository'
+import { MAIL_SERVICE } from '../../mail/services/interface.service'
+import { MockMailService } from '../../mail/services/mock.service'
 
 describe('UserController', () => {
   let controller: UserController
@@ -27,7 +29,8 @@ describe('UserController', () => {
         {
           provide: USER_REPOSITORY,
           useValue: MockUserRepository
-        }
+        },
+        { provide: MAIL_SERVICE, useValue: MockMailService }
       ]
     }).compile()
 

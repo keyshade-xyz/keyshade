@@ -13,7 +13,7 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
-import { ICreateUserDTO } from '../dto/create.user/create.user'
+import { CreateUserDto } from '../dto/create.user/create.user'
 import { ApiTags } from '@nestjs/swagger'
 
 @ApiTags('User Controller')
@@ -65,7 +65,7 @@ export class UserController {
 
   @Post('')
   @UseGuards(AdminGuard)
-  async createUser(@Body() dto: ICreateUserDTO) {
+  async createUser(@Body() dto: CreateUserDto) {
     return await this.userService.createUser(dto);
   }
 }

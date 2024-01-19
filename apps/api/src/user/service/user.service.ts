@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  Inject,
-  Injectable,
-  Logger
-} from '@nestjs/common'
+import { HttpException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { User } from '@prisma/client'
 import {
@@ -11,7 +6,7 @@ import {
   USER_REPOSITORY
 } from '../repository/interface.repository'
 import { excludeFields } from '../../common/exclude-fields'
-import { ICreateUserDTO } from '../dto/create.user/create.user'
+import { CreateUserDto } from '../dto/create.user/create.user'
 import {
   IMailService,
   MAIL_SERVICE
@@ -70,14 +65,21 @@ export class UserService {
     return await this.repository.findUsers(page, limit, sort, order, search)
   }
 
-  async createUser(user: ICreateUserDTO) {
+  async createUser(user: CreateUserDto) {
     this.log.log(`Creating user with email ${user.email}`)
     const checkDuplicateUser = await this.repository.findUserByEmail(user.email)
     if (checkDuplicateUser) {
       throw new HttpException('User already exists', 400)
     }
 
-    const newUser = await this.repository.createUserByAdmin(user)
+    const userObject: CreateUserDto = {
+      ...user,
+      isOnboardingFinished: true,
+      isActive: true,
+      isAdmin: false
+    }
+
+    const newUser = await this.repository.createUserByAdmin(userObject)
     this.log.log(`Created user with email ${user.email}`)
 
     await this.resendService.accountLoginEmail(newUser.email)
