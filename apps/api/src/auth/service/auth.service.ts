@@ -14,14 +14,7 @@ import {
   IMailService,
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
-import {
-  IUserRepository,
-  USER_REPOSITORY
-} from '../../user/repository/interface.repository'
-import {
-  AUTH_REPOSITORY,
-  IAuthRepository
-} from '../repository/interface.repository'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Injectable()
 export class AuthService {
@@ -29,9 +22,8 @@ export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    @Inject(AUTH_REPOSITORY) private readonly authRepository: IAuthRepository,
-    @Inject(USER_REPOSITORY) readonly userRepository: IUserRepository,
-    @Inject(MAIL_SERVICE) private resend: IMailService,
+    @Inject(MAIL_SERVICE) private mailService: IMailService,
+    private readonly prisma: PrismaService,
     private jwt: JwtService
   ) {
     this.logger = new Logger(AuthService.name)
@@ -47,17 +39,43 @@ export class AuthService {
     }
 
     // We need to create the user if it doesn't exist yet
-    if (!(await this.userRepository.findUserByEmail(email))) {
-      await this.userRepository.createUser(email)
+    if (!(await this.findUserByEmail(email))) {
+      // Create the user
+      const user = await this.prisma.user.create({
+        data: {
+          email
+        }
+      })
+
+      // Create the user's default workspace
+      await this.prisma.workspace.create({
+        data: {
+          name: `My Workspace`,
+          description: 'My default workspace',
+          isDefault: true,
+          ownerId: user.id,
+          lastUpdatedBy: {
+            connect: {
+              id: user.id
+            }
+          }
+        }
+      })
     }
 
-    const otp = await this.authRepository.createOtp(
-      email,
-      randomUUID().slice(0, 6).toUpperCase(),
-      this.OTP_EXPIRY
-    )
+    const otp = await this.prisma.otp.create({
+      data: {
+        code: randomUUID().slice(0, 6).toUpperCase(),
+        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
+        user: {
+          connect: {
+            email
+          }
+        }
+      }
+    })
 
-    await this.resend.sendOtp(email, otp.code)
+    await this.mailService.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}: ${otp.code}`)
   }
 
@@ -65,18 +83,40 @@ export class AuthService {
     email: string,
     otp: string
   ): Promise<UserAuthenticatedResponse> {
-    const user = await this.userRepository.findUserByEmail(email)
+    const user = await this.findUserByEmail(email)
     if (!user) {
       this.logger.error(`User not found: ${email}`)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND)
     }
 
-    if (!(await this.authRepository.isOtpValid(email, otp))) {
+    const isOtpValid =
+      (await this.prisma.otp.count({
+        where: {
+          code: otp,
+          user: {
+            email
+          },
+          expiresAt: {
+            gt: new Date()
+          }
+        }
+      })) > 0
+
+    if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
       throw new HttpException('Invalid login code', HttpStatus.UNAUTHORIZED)
     }
 
-    await this.authRepository.deleteOtp(email, otp)
+    await this.prisma.otp.delete({
+      where: {
+        code: otp,
+        AND: {
+          user: {
+            email
+          }
+        }
+      }
+    })
 
     this.logger.log(`User logged in: ${email}`)
 
@@ -89,10 +129,25 @@ export class AuthService {
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
     try {
-      await this.authRepository.deleteExpiredOtps()
+      const timeNow = new Date()
+      await this.prisma.otp.deleteMany({
+        where: {
+          expiresAt: {
+            lte: new Date(timeNow.getTime())
+          }
+        }
+      })
       this.logger.log('Expired OTPs cleaned up successfully.')
     } catch (error) {
       this.logger.error(`Error cleaning up expired OTPs: ${error.message}`)
     }
+  }
+
+  private async findUserByEmail(email: string) {
+    return await this.prisma.user.findUnique({
+      where: {
+        email
+      }
+    })
   }
 }

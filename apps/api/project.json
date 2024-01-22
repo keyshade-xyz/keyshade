@@ -37,8 +37,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/api/**/*.ts",
+          "apps/api/package.json",
+          "apps/api/project.json"
+        ]
+      }
     },
     "prettier:fix": {
       "command": "pnpx prettier -w .",

@@ -31,32 +31,25 @@ export class EnvironmentController {
     return await this.environmentService.createEnvironment(user, dto, projectId)
   }
 
-  @Put(':projectId/:environmentId')
+  @Put(':environmentId')
   async updateEnvironment(
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
-    @Param('projectId') projectId: string,
     @Param('environmentId') environmentId: string
   ) {
     return await this.environmentService.updateEnvironment(
       user,
       dto,
-      projectId,
       environmentId
     )
   }
 
-  @Get(':projectId/:environmentId')
+  @Get(':environmentId')
   async getEnvironment(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('environmentId') environmentId: string
   ) {
-    return await this.environmentService.getEnvironmentByProjectIdAndId(
-      user,
-      projectId,
-      environmentId
-    )
+    return await this.environmentService.getEnvironment(user, environmentId)
   }
 
   @Get(':projectId')
@@ -98,16 +91,11 @@ export class EnvironmentController {
     )
   }
 
-  @Delete(':projectId/:environmentId')
+  @Delete(':environmentId')
   async deleteEnvironment(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
     @Param('environmentId') environmentId: string
   ) {
-    return await this.environmentService.deleteEnvironment(
-      user,
-      projectId,
-      environmentId
-    )
+    return await this.environmentService.deleteEnvironment(user, environmentId)
   }
 }

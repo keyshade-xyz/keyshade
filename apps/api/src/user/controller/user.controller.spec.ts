@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { UserController } from './user.controller'
 import { UserService } from '../service/user.service'
 import { User } from '@prisma/client'
-import { USER_REPOSITORY } from '../repository/interface.repository'
-import { MockUserRepository } from '../repository/mock.repository'
+import { PrismaService } from '../../prisma/prisma.service'
+import { mockDeep } from 'jest-mock-extended'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 
@@ -26,13 +26,13 @@ describe('UserController', () => {
       controllers: [UserController],
       providers: [
         UserService,
-        {
-          provide: USER_REPOSITORY,
-          useValue: MockUserRepository
-        },
+        PrismaService,
         { provide: MAIL_SERVICE, useValue: MockMailService }
       ]
-    }).compile()
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockDeep<PrismaService>())
+      .compile()
 
     controller = module.get<UserController>(UserController)
     service = module.get<UserService>(UserService)

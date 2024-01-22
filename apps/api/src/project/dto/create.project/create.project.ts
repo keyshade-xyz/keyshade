@@ -1,4 +1,3 @@
-import { ProjectRole } from '@prisma/client'
 import { CreateEnvironment } from '../../../environment/dto/create.environment/create.environment'
 import {
   IsArray,
@@ -23,13 +22,4 @@ export class CreateProject {
   @IsArray()
   @IsOptional()
   environments: CreateEnvironment[]
-
-  @IsArray()
-  @IsOptional()
-  members: ProjectMemberDTO[]
-}
-
-export interface ProjectMemberDTO {
-  email: string
-  role: ProjectRole
 }
