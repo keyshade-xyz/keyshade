@@ -1,83 +1,46 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
-  NotFoundException
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
-import {
-  IProjectRepository,
-  PROJECT_REPOSITORY
-} from '../../project/repository/interface.repository'
-import {
-  ISecretRepository,
-  SECRET_REPOSITORY
-} from '../repository/interface.repository'
 import {
   Environment,
   Project,
   Secret,
   SecretVersion,
-  User
+  User,
+  WorkspaceRole
 } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
-import { ProjectPermission } from '../../project/misc/project.permission'
-import {
-  ENVIRONMENT_REPOSITORY,
-  IEnvironmentRepository
-} from '../../environment/repository/interface.repository'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { decrypt } from '../../common/decrypt'
-import { SecretWithVersion } from '../secret.types'
+import { SecretWithProjectAndVersion, SecretWithVersion } from '../secret.types'
+import { PrismaService } from '../../prisma/prisma.service'
+import { addHoursToDate } from '../../common/add-hours-to-date'
+import { encrypt } from '../../common/encrypt'
 
 @Injectable()
 export class SecretService {
-  constructor(
-    @Inject(PROJECT_REPOSITORY)
-    private readonly projectRepository: IProjectRepository,
-    @Inject(SECRET_REPOSITORY)
-    private readonly secretReposiotory: ISecretRepository,
-    @Inject(ENVIRONMENT_REPOSITORY)
-    private readonly environmentRepository: IEnvironmentRepository,
-    private readonly projectPermission: ProjectPermission
-  ) {}
-
-  private async secretExists(
-    user: User,
-    secretName: Secret['name'],
-    environmentId: Environment['name'],
-    projectId: Project['id']
-  ) {
-    return await this.secretReposiotory.secretExists(
-      user.id,
-      secretName,
-      environmentId,
-      projectId
-    )
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
     const environmentId = dto.environmentId
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+    const project = await this.getProjectWithRole(
       user.id,
-      projectId
+      projectId,
+      WorkspaceRole.MAINTAINER
     )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
-    // Check if the project can create secrets in the project
-    await this.projectPermission.isProjectMaintainer(user, projectId)
 
     // Check if the environment exists
     let environment: Environment | null = null
     if (environmentId) {
-      environment =
-        await this.environmentRepository.getEnvironmentByProjectIdAndId(
-          projectId,
-          environmentId
-        )
+      environment = await this.getEnvironmentByProjectIdAndId(
+        projectId,
+        environmentId
+      )
       if (!environment) {
         throw new NotFoundException(
           `Environment not found: ${environmentId} in project ${projectId}`
@@ -85,10 +48,7 @@ export class SecretService {
       }
     }
     if (!environment) {
-      environment =
-        await this.environmentRepository.getDefaultEnvironmentOfProject(
-          projectId
-        )
+      environment = await this.getDefaultEnvironmentOfProject(projectId)
     }
 
     // If any default environment was not found, throw an error
@@ -99,210 +59,204 @@ export class SecretService {
     }
 
     // Check if the secret already exists in the environment
-    if (await this.secretExists(user, dto.name, environment.id, projectId)) {
+    if (await this.secretExists(dto.name, environment.id)) {
       throw new ConflictException(
         `Secret already exists: ${dto.name} in environment ${environment.name} in project ${projectId}`
       )
     }
 
     // Create the secret
-    return await this.secretReposiotory.createSecret(
-      dto,
-      projectId,
-      environment.id,
-      user.id
-    )
+    return await this.prisma.secret.create({
+      data: {
+        name: dto.name,
+        rotateAt: addHoursToDate(dto.rotateAfter),
+        versions: {
+          create: {
+            value: encrypt(project.publicKey, dto.value),
+            version: 1,
+            createdById: user.id
+          }
+        },
+        environment: {
+          connect: {
+            id: environment.id
+          }
+        },
+        project: {
+          connect: {
+            id: projectId
+          }
+        },
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    })
   }
 
-  async updateSecret(
-    user: User,
-    secretId: Secret['id'],
-    dto: UpdateSecret,
-    projectId: Project['id']
-  ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+  async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
+    const secret = await this.getSecretWithRole(
       user.id,
-      projectId
+      secretId,
+      WorkspaceRole.MAINTAINER
     )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
-    // Check if the project can create secrets in the project
-    await this.projectPermission.isProjectMaintainer(user, projectId)
-
-    // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
 
     // Check if the secret already exists in the environment
     if (
-      dto.name &&
-      (await this.secretExists(
-        user,
-        dto.name,
-        secret.environmentId,
-        projectId
-      )) &&
-      secret.name !== dto.name
+      (dto.name && (await this.secretExists(dto.name, secret.environmentId))) ||
+      secret.name === dto.name
     ) {
       throw new ConflictException(
-        `Secret already exists: ${dto.name} in environment ${secret.environmentId} in project ${projectId}`
+        `Secret already exists: ${dto.name} in environment ${secret.environmentId}`
       )
     }
 
     // Update the secret
-    return await this.secretReposiotory.updateSecret(secretId, dto, user.id)
+    if (dto.value) {
+      const previousVersion = await this.prisma.secretVersion.findFirst({
+        where: {
+          secretId
+        },
+        select: {
+          version: true
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      return await this.prisma.secret.update({
+        where: {
+          id: secretId
+        },
+        data: {
+          name: dto.name,
+          rotateAt: addHoursToDate(dto.rotateAfter),
+          lastUpdatedById: user.id,
+          versions: {
+            create: {
+              value: encrypt(secret.project.publicKey, dto.value),
+              version: previousVersion.version + 1,
+              createdById: user.id
+            }
+          }
+        }
+      })
+    }
+
+    return await this.prisma.secret.update({
+      where: {
+        id: secretId
+      },
+      data: {
+        name: secret.name,
+        rotateAt: secret.rotateAt,
+        lastUpdatedById: user.id
+      }
+    })
   }
 
   async updateSecretEnvironment(
     user: User,
     secretId: Secret['id'],
-    environmentId: Environment['id'],
-    projectId: Project['id']
+    environmentId: Environment['id']
   ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+    const secret = await this.getSecretWithRole(
       user.id,
-      projectId
+      secretId,
+      WorkspaceRole.MAINTAINER
     )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
-    // Check if the project can create secrets in the project
-    await this.projectPermission.isProjectMaintainer(user, projectId)
-
-    // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
 
     // Check if the environment exists
-    const environment =
-      await this.environmentRepository.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
-      )
+    const environment = await this.getEnvironmentByProjectIdAndId(
+      secret.projectId,
+      environmentId
+    )
     if (!environment) {
       throw new NotFoundException(
-        `Environment not found: ${environmentId} in project ${projectId}`
+        `Environment not found: ${environmentId} in project ${secret.projectId}`
       )
     }
 
     // Check if the secret already exists in the environment
     if (
-      (await this.secretExists(user, secret.name, environment.id, projectId)) &&
+      (await this.secretExists(secret.name, environment.id)) ||
       secret.environmentId !== environment.id
     ) {
       throw new ConflictException(
-        `Secret already exists: ${secret.name} in environment ${environment.id} in project ${projectId}`
+        `Secret already exists: ${secret.name} in environment ${environment.id} in project ${secret.projectId}`
       )
     }
 
     // Update the secret
-    return await this.secretReposiotory.updateSecretEnvironment(
-      secretId,
-      environmentId,
-      user.id
-    )
+    return await this.prisma.secret.update({
+      where: {
+        id: secretId
+      },
+      data: {
+        environmentId
+      }
+    })
   }
 
   async rollbackSecret(
     user: User,
     secretId: Secret['id'],
-    rollbackVersion: SecretVersion['version'],
-    projectId: Project['id']
+    rollbackVersion: SecretVersion['version']
   ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+    // Fetch the secret
+    const secret = await this.getSecretWithRole(
       user.id,
-      projectId
-    )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
-    // Check if the project can create secrets in the project
-    await this.projectPermission.isProjectMaintainer(user, projectId)
-
-    // Check if the secret exists
-    const secret = (await this.secretReposiotory.getSecret(
       secretId,
-      projectId
-    )) as SecretWithVersion
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
+      WorkspaceRole.MAINTAINER
+    )
 
     // Check if the rollback version is valid
-    if (rollbackVersion <= 1 || rollbackVersion > secret.versions[0].version) {
+    if (rollbackVersion < 1 || rollbackVersion > secret.versions[0].version) {
       throw new NotFoundException(
         `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
       )
     }
 
     // Rollback the secret
-    return await this.secretReposiotory.rollbackSecret(
-      secretId,
-      rollbackVersion
-    )
+    return await this.prisma.secretVersion.deleteMany({
+      where: {
+        secretId,
+        version: {
+          gt: rollbackVersion
+        }
+      }
+    })
   }
 
-  async deleteSecret(
-    user: User,
-    secretId: Secret['id'],
-    projectId: Project['id']
-  ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
-    // Check if the project can create secrets in the project
-    await this.projectPermission.isProjectMaintainer(user, projectId)
-
-    // Check if the secret exists
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
+  async deleteSecret(user: User, secretId: Secret['id']) {
+    // Check if the user has the required role
+    await this.getSecretWithRole(user.id, secretId, WorkspaceRole.MAINTAINER)
 
     // Delete the secret
-    return await this.secretReposiotory.deleteSecret(secretId, user.id)
+    return await this.prisma.secret.delete({
+      where: {
+        id: secretId
+      }
+    })
   }
 
-  async getSecret(
+  async getSecretById(
     user: User,
     secretId: Secret['id'],
-    projectId: Project['id'],
     decryptValue: boolean
   ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
     // Fetch the secret
-    const secret = (await this.secretReposiotory.getSecret(
+    const secret = await this.getSecretWithRole(
+      user.id,
       secretId,
-      projectId
-    )) as SecretWithVersion
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
+      WorkspaceRole.VIEWER
+    )
+
+    const project = secret.project
 
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {
@@ -332,28 +286,15 @@ export class SecretService {
     return secret
   }
 
-  async getAllVersionsOfSecret(
-    user: User,
-    secretId: Secret['id'],
-    projectId: Project['id']
-  ) {
-    // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
-      user.id,
-      projectId
-    )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
-
+  async getAllVersionsOfSecret(user: User, secretId: Secret['id']) {
     // Fetch the secret
-    const secret = await this.secretReposiotory.getSecret(secretId, projectId)
-    if (!secret) {
-      throw new NotFoundException(`Secret not found: ${secretId}`)
-    }
+    const secret = await this.getSecretWithRole(
+      user.id,
+      secretId,
+      WorkspaceRole.MAINTAINER
+    )
 
-    // Return the secret versions
-    return await this.secretReposiotory.getAllVersionsOfSecret(secretId)
+    return secret.versions
   }
 
   async getAllSecretsOfProject(
@@ -367,13 +308,11 @@ export class SecretService {
     search: string
   ) {
     // Fetch the project
-    const project = await this.projectRepository.getProjectByUserIdAndId(
+    const project = await this.getProjectWithRole(
       user.id,
-      projectId
+      projectId,
+      WorkspaceRole.VIEWER
     )
-    if (!project) {
-      throw new NotFoundException(`Project not found: ${projectId}`)
-    }
 
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {
@@ -390,14 +329,39 @@ export class SecretService {
       )
     }
 
-    const secrets = (await this.secretReposiotory.getAllSecretsOfProject(
-      projectId,
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )) as SecretWithVersion[]
+    const secrets = (await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        environment: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })) as SecretWithVersion[]
 
     // Return the secrets
     return secrets.map((secret) => {
@@ -421,12 +385,171 @@ export class SecretService {
     search: string
   ) {
     // Return the secrets
-    return await this.secretReposiotory.getAllSecrets(
-      page,
-      limit,
-      sort,
-      order,
-      search
+    return await this.prisma.secret.findMany({
+      where: {
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: true,
+        environment: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+  }
+
+  private async getEnvironmentByProjectIdAndId(
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    return await this.prisma.environment.findFirst({
+      where: {
+        projectId,
+        id: environmentId
+      }
+    })
+  }
+
+  private async getDefaultEnvironmentOfProject(
+    projectId: Project['id']
+  ): Promise<Environment | null> {
+    return await this.prisma.environment.findFirst({
+      where: {
+        projectId,
+        isDefault: true
+      }
+    })
+  }
+
+  private async secretExists(
+    secretName: Secret['name'],
+    environmentId: Environment['id']
+  ): Promise<boolean> {
+    return (
+      (await this.prisma.secret.count({
+        where: {
+          name: secretName,
+          environment: {
+            id: environmentId
+          }
+        }
+      })) > 0
     )
+  }
+
+  private async getSecret(
+    secretId: Secret['id'],
+    projectId: Project['id']
+  ): Promise<Secret> {
+    return await this.prisma.secret.findUnique({
+      where: {
+        id: secretId,
+        projectId
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: true,
+        environment: true
+      }
+    })
+  }
+
+  private async getSecretWithRole(
+    userId: User['id'],
+    secretId: Secret['id'],
+    role: WorkspaceRole
+  ): Promise<SecretWithProjectAndVersion> {
+    // Fetch the secret
+    const secret = await this.prisma.secret.findUnique({
+      where: {
+        id: secretId
+      },
+      include: {
+        versions: true,
+        project: {
+          include: {
+            workspace: {
+              include: {
+                members: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!secret) {
+      throw new NotFoundException(`Secret with id ${secretId} not found`)
+    }
+
+    // Check for the required membership role
+    if (
+      !secret.project.workspace.members.some(
+        (member) => member.userId === userId && member.role === role
+      )
+    )
+      throw new UnauthorizedException(
+        `You don't have the required role to access this secret`
+      )
+
+    // Remove the workspace from the secret
+    secret.project.workspace = undefined
+
+    return secret
+  }
+
+  private async getProjectWithRole(
+    userId: User['id'],
+    projectId: Project['id'],
+    role: WorkspaceRole
+  ): Promise<Project> {
+    // Fetch the project
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: projectId
+      },
+      include: {
+        workspace: {
+          include: {
+            members: true
+          }
+        }
+      }
+    })
+
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
+
+    // Check for the required membership role
+    if (
+      !project.workspace.members.some(
+        (member) => member.userId === userId && member.role === role
+      )
+    )
+      throw new UnauthorizedException(
+        `You don't have the required role to access this project`
+      )
+
+    // Remove the workspace from the project
+    project.workspace = undefined
+
+    return project
   }
 }

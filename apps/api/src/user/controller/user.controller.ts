@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Post,
   Put,
   Query,
   UseGuards
@@ -12,6 +13,7 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
+import { CreateUserDto } from '../dto/create.user/create.user'
 import { ApiTags } from '@nestjs/swagger'
 
 @ApiTags('User Controller')
@@ -59,5 +61,11 @@ export class UserController {
     @Query('search') search: string = ''
   ) {
     return await this.userService.getAllUsers(page, limit, sort, order, search)
+  }
+
+  @Post('')
+  @UseGuards(AdminGuard)
+  async createUser(@Body() dto: CreateUserDto) {
+    return await this.userService.createUser(dto);
   }
 }

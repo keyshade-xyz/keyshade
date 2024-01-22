@@ -1,29 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { EnvironmentService } from './environment.service'
-import { ENVIRONMENT_REPOSITORY } from '../repository/interface.repository'
-import { MockEnvironmentRepository } from '../repository/mock.repository'
-import { PROJECT_REPOSITORY } from '../../project/repository/interface.repository'
-import { MockProjectRepository } from '../../project/repository/mock.repository'
-import { ProjectPermission } from '../../project/misc/project.permission'
+import { PrismaService } from '../../prisma/prisma.service'
+import { mockDeep } from 'jest-mock-extended'
 
 describe('EnvironmentService', () => {
   let service: EnvironmentService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EnvironmentService,
-        {
-          provide: ENVIRONMENT_REPOSITORY,
-          useClass: MockEnvironmentRepository
-        },
-        {
-          provide: PROJECT_REPOSITORY,
-          useClass: MockProjectRepository
-        },
-        ProjectPermission
-      ]
-    }).compile()
+      providers: [EnvironmentService, PrismaService]
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockDeep<PrismaService>())
+      .compile()
 
     service = module.get<EnvironmentService>(EnvironmentService)
   })

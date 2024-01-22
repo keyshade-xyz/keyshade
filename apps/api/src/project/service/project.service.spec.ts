@@ -1,17 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ProjectService } from './project.service'
-import { PROJECT_REPOSITORY } from '../repository/interface.repository'
-import { MockProjectRepository } from '../repository/mock.repository'
-import { ENVIRONMENT_REPOSITORY } from '../../environment/repository/interface.repository'
-import { MockEnvironmentRepository } from '../../environment/repository/mock.repository'
-import { USER_REPOSITORY } from '../../user/repository/interface.repository'
-import { MockUserRepository } from '../../user/repository/mock.repository'
 import { MockMailService } from '../../mail/services/mock.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
-import { JwtService } from '@nestjs/jwt'
-import { ProjectPermission } from '../misc/project.permission'
-import { SECRET_REPOSITORY } from '../../secret/repository/interface.repository'
-import { MockSecretRepository } from '../../secret/repository/mock.repository'
+import { PrismaService } from '../../prisma/prisma.service'
+import { mockDeep } from 'jest-mock-extended'
+import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
 
 describe('ProjectService', () => {
   let service: ProjectService
@@ -20,18 +13,14 @@ describe('ProjectService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
-        { provide: PROJECT_REPOSITORY, useClass: MockProjectRepository },
-        {
-          provide: ENVIRONMENT_REPOSITORY,
-          useClass: MockEnvironmentRepository
-        },
-        { provide: USER_REPOSITORY, useClass: MockUserRepository },
+        PrismaService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
-        { provide: SECRET_REPOSITORY, useClass: MockSecretRepository },
-        ProjectPermission,
-        JwtService
+        WorkspacePermission
       ]
-    }).compile()
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockDeep<PrismaService>())
+      .compile()
 
     service = module.get<ProjectService>(ProjectService)
   })

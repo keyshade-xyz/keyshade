@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { IMailService } from './interface.service'
-import { ProjectRole } from '@prisma/client'
+import { WorkspaceRole } from '@prisma/client'
 import { Transporter, createTransport } from 'nodemailer'
 
 @Injectable()
@@ -19,23 +19,23 @@ export class MailService implements IMailService {
       }
     })
   }
-  async projectInvitationMailForRegisteredUser(
+  async workspaceInvitationMailForRegisteredUser(
     email: string,
-    project: string,
+    workspace: string,
     actionUrl: string,
     invitee: string,
-    role: ProjectRole
+    role: WorkspaceRole
   ): Promise<void> {
-    const subject = `You have been invited to a ${project}`
+    const subject = `You have been invited to a ${workspace}`
     const body = `<!DOCTYPE html>
         <html>
         <head>
-           <title>Project Invitation</title>
+           <title>Workspace Invitation</title>
         </head>
         <body>
            <h1>Welcome to keyshade!</h1>
            <p>Hello there!</p>
-           <p>You have been invited to join the project <strong>${project}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
+           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
            <p>Please click on the link below to accept the invitation.</p>
            <p><a href="${actionUrl}">Accept Invitation</a></p>
            <p>Thank you for choosing us.</p>
@@ -47,23 +47,23 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
-  async projectInvitationMailForNonRegisteredUser(
+  async workspaceInvitationMailForNonRegisteredUser(
     email: string,
-    project: string,
+    workspace: string,
     actionUrl: string,
     invitee: string,
-    role: ProjectRole
+    role: WorkspaceRole
   ): Promise<void> {
-    const subject = `You have been invited to a ${project}`
+    const subject = `You have been invited to a ${workspace}`
     const body = `<!DOCTYPE html>
         <html>
         <head>
-           <title>Project Invitation</title>
+           <title>Workspace Invitation</title>
         </head>
         <body>
            <h1>Welcome to keyshade!</h1>
            <p>Hello there!</p>
-           <p>You have been invited to join the project <strong>${project}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
+           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
            <p>Please click on the link below to accept the invitation.</p>
            <p><a href="${actionUrl}">Accept Invitation</a></p>
            <p>Thank you for choosing us.</p>
@@ -89,6 +89,28 @@ export class MailService implements IMailService {
            <p>Your One Time Password (OTP) is: <strong>${otp}</strong></p>
            <p>This OTP will expire in <strong>5 minutes</strong>.</p>
            <p>Please enter this OTP in the application to verify your account.</p>
+           <p>Thank you for choosing us.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        </html>
+        `
+    await this.sendEmail(email, subject, body)
+  }
+
+  async accountLoginEmail(
+    email: string
+  ): Promise<void> {
+    const subject = 'LogIn Invitation Accepted'
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>LogIn Invitaion</title>
+        </head>
+        <body>
+           <h1>Welcome to keyshade!</h1>
+           <p>Hello there!</p>
+           <p>Your account has been setup. Please login to your account for further process.</p>
            <p>Thank you for choosing us.</p>
            <p>Best Regards,</p>
            <p>keyshade Team</p>
