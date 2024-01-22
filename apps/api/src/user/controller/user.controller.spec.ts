@@ -4,6 +4,8 @@ import { UserService } from '../service/user.service'
 import { User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { MAIL_SERVICE } from '../../mail/services/interface.service'
+import { MockMailService } from '../../mail/services/mock.service'
 
 describe('UserController', () => {
   let controller: UserController
@@ -22,7 +24,11 @@ describe('UserController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [UserService, PrismaService]
+      providers: [
+        UserService,
+        PrismaService,
+        { provide: MAIL_SERVICE, useValue: MockMailService }
+      ]
     })
       .overrideProvider(PrismaService)
       .useValue(mockDeep<PrismaService>())

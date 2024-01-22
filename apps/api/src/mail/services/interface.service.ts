@@ -20,4 +20,8 @@ export interface IMailService {
     invitedBy: string,
     role: WorkspaceRole
   ): Promise<void>
+
+  accountLoginEmail(
+    email: string
+  ): Promise<void>
 }
