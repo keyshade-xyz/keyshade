@@ -90,17 +90,17 @@ export class AuthService {
     }
 
     const isOtpValid =
-      (await this.prisma.otp.count({
+      (await this.prisma.otp.findUnique({
         where: {
-          code: otp,
-          user: {
-            email
+          userCode: {
+            code: otp,
+            userId: user.id
           },
           expiresAt: {
             gt: new Date()
           }
         }
-      })) > 0
+      })) !== null
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)

@@ -90,6 +90,8 @@ model User {
   projects         Project[] // Stores the projects the user updated
   environments     Environment[] // Stores the environments the user updated
   secretVersion    SecretVersion[]
+
+  @@index([email], name: "email")
 }
 
 model Subscription {
@@ -212,6 +214,9 @@ model Otp {
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime
+
+  @@unique([userId, code], name: "userCode")
+  @@index([expiresAt], name: "expiresAt")
 }
 
 model Workspace {

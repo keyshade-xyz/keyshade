@@ -14,13 +14,8 @@ export class WorkspacePermission {
     if (user.isAdmin) Promise.resolve()
 
     // Else, check if the user is a workspace admin
-    const memberships = await this.resolveWorkspacesOfUser(user)
-    const membership = memberships.find(
-      (membership) => membership.workspaceId === workspaceId
-    )
-    if (!membership) {
-      throw new UnauthorizedException('User is not a member of the workspace')
-    }
+    const membership = await this.getMembership(workspaceId, user.id)
+
     if (membership.role !== WorkspaceRole.OWNER) {
       throw new UnauthorizedException('Atleast OWNER role is required')
     }
@@ -34,13 +29,9 @@ export class WorkspacePermission {
     if (user.isAdmin) Promise.resolve()
 
     // Else, check if the user is a workspace admin
-    const memberships = await this.resolveWorkspacesOfUser(user)
-    const membership = memberships.find(
-      (membership) => membership.workspaceId === workspaceId
-    )
-    if (!membership) {
-      throw new UnauthorizedException('User is not a member of the workspace')
-    }
+    // const memberships = await this.resolveWorkspacesOfUser(user)
+    const membership = await this.getMembership(workspaceId, user.id)
+
     if (
       membership.role !== WorkspaceRole.OWNER &&
       membership.role !== WorkspaceRole.MAINTAINER
@@ -57,29 +48,43 @@ export class WorkspacePermission {
     if (user.isAdmin) Promise.resolve()
 
     // Else, check if the user is a workspace admin
-    const memberships = await this.resolveWorkspacesOfUser(user)
-    const membership = memberships.find(
-      (membership) => membership.workspaceId === workspaceId
-    )
+    this.getMembership(workspaceId, user.id)
+  }
+
+  private async getMembership(
+    workspaceId: Workspace['id'],
+    userId: User['id']
+  ) {
+    const membership = await this.prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId
+        }
+      }
+    })
+
     if (!membership) {
       throw new UnauthorizedException('User is not a member of the workspace')
     }
+
+    return membership
   }
 
-  private async resolveWorkspacesOfUser(
-    user: User
-  ): Promise<{ workspaceId: Workspace['id']; role: WorkspaceRole }[]> {
-    // const memberships = await this.repository.getWorkspaceMembershipsOfUser(
-    //   user.id
-    // )
-    const memberships = await this.prisma.workspaceMember.findMany({
-      where: {
-        userId: user.id
-      }
-    })
-    return memberships.map((membership) => ({
-      workspaceId: membership.workspaceId,
-      role: membership.role
-    }))
-  }
+  // private async resolveWorkspacesOfUser(
+  //   user: User
+  // ): Promise<{ workspaceId: Workspace['id']; role: WorkspaceRole }[]> {
+  //   // const memberships = await this.repository.getWorkspaceMembershipsOfUser(
+  //   //   user.id
+  //   // )
+  //   const memberships = await this.prisma.workspaceMember.findMany({
+  //     where: {
+  //       userId: user.id
+  //     }
+  //   })
+  //   return memberships.map((membership) => ({
+  //     workspaceId: membership.workspaceId,
+  //     role: membership.role
+  //   }))
+  // }
 }
