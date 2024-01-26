@@ -9,13 +9,24 @@
     <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
     <a href="https://discord.gg/m6TcpWBSdt" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
+    <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
 </p>
 
 <div align = "center">
-    
+
 [![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/pbBghfnC)
+<a href="https://twitter.com/keyshade_xyz"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
+<a href="https://www.linkedin.com/company/keyshade-xyz/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
 
 </div>
+
+<p align="center>
+
+<a href="https://www.producthunt.com/posts/keyshade?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-keyshade" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=436664&theme=light" alt="keyshade - Manage&#0032;all&#0032;your&#0032;secrets&#0032;securely | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+</p>
+
+
 
 ---
 
