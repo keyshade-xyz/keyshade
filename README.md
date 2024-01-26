@@ -20,6 +20,14 @@
 
 </div>
 
+<p align="center>
+
+<a href="https://www.producthunt.com/posts/keyshade?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-keyshade" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=436664&theme=light" alt="keyshade - Manage&#0032;all&#0032;your&#0032;secrets&#0032;securely | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+</p>
+
+
+
 ---
 
 keyshade is designed to simplify the integration of your secrets into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
