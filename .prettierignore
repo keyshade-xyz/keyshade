@@ -2,3 +2,4 @@
 /dist
 /coverage
 /.nx/cache
+auto-changelog-template.hbs
