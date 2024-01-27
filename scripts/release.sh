@@ -41,7 +41,7 @@ sed -i "s/\"version\": \".*\"/\"version\": \"$version\"/g" package.json
 
 # Generate the CHANGELOG.md
 echo "Generating CHANGELOG.md"
-npm run changelog
+pnpm run changelog
 
 # Commit the changes
 echo "Committing the changes"

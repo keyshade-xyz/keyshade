@@ -38,7 +38,7 @@
     "db:format": "nx run api:prisma:format",
     "db:reset": "nx run api:prisma:reset",
     "prepare": "husky install",
-    "changelog": "npx auto-changelog -c .auto-changelog.json --template auto-changelog-template.hbs"
+    "changelog": "auto-changelog -c .auto-changelog.json --template auto-changelog-template.hbs"
   },
   "private": false,
   "devDependencies": {
