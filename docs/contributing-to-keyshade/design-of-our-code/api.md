@@ -13,7 +13,7 @@ Our API is developed using the following stack:
 * **NestJS** as the base
 * **Prisma** as the DDL and DML
 * **Supabase** as the database and bucket storage
-* **Resend** as the mail agent
+* **Node Mailer** as the mail agent
 
 ## Structure
 
@@ -21,9 +21,9 @@ As per the NestJS convention, our API base is totally modularized, with each mod
 
 * **controller**: Stores the APIs that the clients will be interacting with.
 * **service**: Holds the business logic
-* **repository**: Holds the logic related to manipulating the database
 * **misc**: Holds utility functions and classes localized to the particular module
 * **dto**: Contains class objects for data intake from the clients
+* **types:** Optionally, some modules have a \`\<module\_name>.types.ts\` file that holds the custom types it uses in the module.
 
 ### The `prisma` module
 
