@@ -1,0 +1,81 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: 'Features'
+    labels:
+      - 'type: feature'
+
+  - title: 'Breaking Changes'
+    labels:
+      - 'type: breaking'
+
+  - title: 'Documentation'
+    labels:
+      - 'type: docs'
+
+  - title: 'Bug Fixes'
+    labels:
+      - 'type: fix'
+
+  - title: 'Patches'
+    labels:
+      - 'type: chore'
+      - 'type: tests'
+      - 'type: patch'
+
+  - title: 'Miscellaneous'
+    labels:
+      - 'type: misc'
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'type: breaking'
+  minor:
+    labels:
+      - 'type: feature'
+
+  patch:
+    labels:
+      - 'type: fix'
+      - 'type: chore'
+      - 'type: docs'
+      - 'type: bug'
+      - 'type: testing'
+  default: patch
+
+exclude-labels:
+  - 'release: skip changelog'
+
+template: |
+  ## Changes
+
+  $CHANGES
+
+autolabeler:
+  - label: 'type: chore'
+    title:
+      - /chore/i
+      - /refactor/i
+
+  - label: 'type: fix'
+    title:
+      - /fix/i
+      - /hotfix/i
+      - /bugfix/i
+      - /patch/i
+
+  - label: 'type: feature'
+    title:
+      - /feat/i
+      - /feature/i
+      - /enhancement/i
+      - /new/i
+
+  - label: 'type: docs'
+    title:
+      - /doc/i
+      - /docs/i
