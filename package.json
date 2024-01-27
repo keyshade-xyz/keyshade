@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "0.0.0",
+  "version": "0.2.0-alpha",
   "license": "MPL-2.0",
   "scripts": {
     "dev": "nx run-many -t serve -p api web workspace --parallel --maxParallel 3",
@@ -38,7 +38,7 @@
     "db:format": "nx run api:prisma:format",
     "db:reset": "nx run api:prisma:reset",
     "prepare": "husky install",
-    "generate-changelog": "npx auto-changelog -c .auto-changelog.json --template auto-changelog-template.hbs"
+    "changelog": "npx auto-changelog -c .auto-changelog.json --template auto-changelog-template.hbs"
   },
   "private": false,
   "devDependencies": {
