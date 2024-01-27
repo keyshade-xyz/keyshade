@@ -25,8 +25,8 @@ export class UserService {
 
   async updateSelf(user: User, dto: UpdateUserDto, finishOnboarding: boolean) {
     const data = {
-      ...user,
-      ...dto,
+      name: dto?.name,
+      profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: finishOnboarding
     }
     this.log.log(`Updating user ${user.id} with data ${dto}`)
@@ -47,7 +47,10 @@ export class UserService {
     finishOnboarding: boolean
   ) {
     const data = {
-      ...dto,
+      name: dto.name,
+      profilePictureUrl: dto.profilePictureUrl,
+      isAdmin: dto.isAdmin,
+      isActive: dto.isActive,
       isOnboardingFinished: finishOnboarding
     }
     this.log.log(`Updating user ${userId} with data ${dto}`)

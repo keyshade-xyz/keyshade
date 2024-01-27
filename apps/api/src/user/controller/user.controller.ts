@@ -63,7 +63,7 @@ export class UserController {
     return await this.userService.getAllUsers(page, limit, sort, order, search)
   }
 
-  @Post('')
+  @Post()
   @UseGuards(AdminGuard)
   async createUser(@Body() dto: CreateUserDto) {
     return await this.userService.createUser(dto);
