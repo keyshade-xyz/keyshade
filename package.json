@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "0.2.0-alpha",
+  "version": "0.1.0-alpha",
   "license": "MPL-2.0",
   "scripts": {
     "dev": "nx run-many -t serve -p api web workspace --parallel --maxParallel 3",
