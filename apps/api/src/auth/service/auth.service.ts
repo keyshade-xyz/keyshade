@@ -29,42 +29,6 @@ export class AuthService {
     this.logger = new Logger(AuthService.name)
   }
 
-  private async createUserIfNotExists(
-    email: string,
-    name?: string,
-    profilePictureUrl?: string
-  ) {
-    let user = await this.findUserByEmail(email)
-
-    // We need to create the user if it doesn't exist yet
-    if (!user) {
-      // Create the user
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          name,
-          profilePictureUrl
-        }
-      })
-
-      // Create the user's default workspace
-      await this.prisma.workspace.create({
-        data: {
-          name: `My Workspace`,
-          description: 'My default workspace',
-          isDefault: true,
-          ownerId: user.id,
-          lastUpdatedBy: {
-            connect: {
-              id: user.id
-            }
-          }
-        }
-      })
-    }
-    return user
-  }
-
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
@@ -131,9 +95,11 @@ export class AuthService {
 
     this.logger.log(`User logged in: ${email}`)
 
+    const token = await this.generteToken(user.id)
+
     return {
       ...user,
-      token: await this.jwt.signAsync({ id: user.id })
+      token
     }
   }
 
@@ -149,9 +115,11 @@ export class AuthService {
       profilePictureUrl
     )
 
+    const token = await this.generteToken(user.id)
+
     return {
       ...user,
-      token: await this.jwt.signAsync({ id: user.id })
+      token
     }
   }
 
@@ -170,6 +138,54 @@ export class AuthService {
     } catch (error) {
       this.logger.error(`Error cleaning up expired OTPs: ${error.message}`)
     }
+  }
+
+  private async createUserIfNotExists(
+    email: string,
+    name?: string,
+    profilePictureUrl?: string
+  ) {
+    const user = await this.findUserByEmail(email)
+
+    // We need to create the user if it doesn't exist yet
+    if (!user) {
+      await this.createUser(email, name, profilePictureUrl)
+    }
+    return user
+  }
+
+  private async createUser(
+    email: string,
+    name: string,
+    profilePictureUrl: string
+  ) {
+    // Create the user
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        name,
+        profilePictureUrl
+      }
+    })
+
+    // Create the user's default workspace
+    await this.prisma.workspace.create({
+      data: {
+        name: `My Workspace`,
+        description: 'My default workspace',
+        isDefault: true,
+        ownerId: user.id,
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    })
+  }
+
+  private async generteToken(id: string) {
+    return await this.jwt.signAsync({ id })
   }
 
   private async findUserByEmail(email: string) {
