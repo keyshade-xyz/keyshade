@@ -229,8 +229,8 @@ model Workspace {
   updatedAt   DateTime @updatedAt
   ownerId     String
 
-  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade)
-  lastUpdatedById String
+  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
 
   projects             Project[]
   members              WorkspaceMember[]
