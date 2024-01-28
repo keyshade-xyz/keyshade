@@ -43,7 +43,6 @@
       }
     }
   },
-  "plugins": ["@monodon/rust"],
   "pluginsConfig": {
     "@nx/js": {
       "analyzeSourceFiles": true
