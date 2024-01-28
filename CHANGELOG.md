@@ -1,3 +1,17 @@
+## [Unreleased](https://github.com/keyshade-xyz/keyshade/compare/0.1.0-alpha...HEAD)
+
+### Team Contributions
+
+#### Patches
+
+- chore: remove unused import [`7f189dd`](https://github.com/keyshade-xyz/keyshade/commit/7f189ddc20718b74dd590b826816eced2795e31d)
+
+#### Miscellaneous
+
+- refactor: service functions as suggested [`c1ae78a`](https://github.com/keyshade-xyz/keyshade/commit/c1ae78abb38006cd22ef0c5ea359253e7e8ff6e4)
+- feat(oauth): get 'name' and 'avatar' of the user
+* this for github oauth [`20e8dbf`](https://github.com/keyshade-xyz/keyshade/commit/20e8dbf081aa8948f71fb7cf999125cb175f4bc2)
+
 ## 0.1.0-alpha - 2024-01-28
 
 ### Community Contributions
