@@ -1,7 +1,0 @@
-
-[workspace]
-resolver = '2'
-members = ['packages/sdk-rust']
-
-[profile.release]
-lto = true
