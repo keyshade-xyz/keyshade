@@ -15,6 +15,7 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
+import { User } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -29,14 +30,21 @@ export class AuthService {
     this.logger = new Logger(AuthService.name)
   }
 
-  private async createUserIfNotExists(email: string) {
+  private async createUserIfNotExists(
+    email: string,
+    name?: string,
+    profilePictureUrl?: string
+  ) {
     let user = await this.findUserByEmail(email)
+
     // We need to create the user if it doesn't exist yet
     if (!user) {
       // Create the user
       user = await this.prisma.user.create({
         data: {
-          email
+          email,
+          name,
+          profilePictureUrl
         }
       })
 
@@ -130,9 +138,17 @@ export class AuthService {
     }
   }
 
-  async handleGithubOAuth(email: string) {
+  async handleGithubOAuth(
+    email: string,
+    name: string,
+    profilePictureUrl: string
+  ) {
     // We need to create the user if it doesn't exist yet
-    const user = await this.createUserIfNotExists(email)
+    const user = await this.createUserIfNotExists(
+      email,
+      name,
+      profilePictureUrl
+    )
 
     return {
       ...user,

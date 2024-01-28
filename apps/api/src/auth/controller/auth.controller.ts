@@ -117,8 +117,13 @@ export class AuthController {
   })
   // TODO: Change the Res Code from 500 -> 401, when incorrect code is provided
   async githubOAuthCallback(@Req() req) {
-    const user = req.user
-    const email = user.emails[0].value
-    return await this.authService.handleGithubOAuth(email)
+    const { emails, displayName: name, photos } = req.user
+    const email = emails[0].value
+    const profilePictureUrl = photos[0].value
+    return await this.authService.handleGithubOAuth(
+      email,
+      name,
+      profilePictureUrl
+    )
   }
 }
