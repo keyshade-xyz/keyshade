@@ -15,7 +15,6 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
-import { User } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
