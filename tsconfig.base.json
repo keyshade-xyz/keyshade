@@ -15,8 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "cli": ["apps/cli/src/index.ts"],
-      "sdk-node": ["packages/sdk-node/src/index.ts"]
+      "cli": ["apps/cli/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

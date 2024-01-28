@@ -12,6 +12,7 @@
     "lint:web": "nx run web:lint",
     "lint:workspace": "nx run workspace:lint",
     "lint:cli": "nx run cli:lint",
+    "lint:fix": "nx run-many -p api web workspace -t lint --fix --parallel",
     "prettier:fix": "nx run-many -t prettier:lint --parallel",
     "prettier:fix:api": "nx run api:prettier:fix",
     "build": "nx run-many -t build -p api web workspace --parallel --maxParallel 3",
