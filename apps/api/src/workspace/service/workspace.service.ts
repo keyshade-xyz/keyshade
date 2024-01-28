@@ -731,6 +731,21 @@ export class WorkspaceService {
       }
     })
 
+    const permittedRoles = () => {
+      switch (role) {
+        case WorkspaceRole.OWNER:
+          return [
+            WorkspaceRole.OWNER,
+            WorkspaceRole.MAINTAINER,
+            WorkspaceRole.VIEWER
+          ]
+        case WorkspaceRole.MAINTAINER:
+          return [WorkspaceRole.MAINTAINER, WorkspaceRole.VIEWER]
+        case WorkspaceRole.VIEWER:
+          return [WorkspaceRole.VIEWER]
+      }
+    }
+
     // Check if the workspace exists or not
     if (!workspace) {
       throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
@@ -739,7 +754,7 @@ export class WorkspaceService {
     // Check if the user is a member of the workspace
     if (
       !workspace.members.some(
-        (member) => member.userId === userId && member.role === role
+        (member) => member.userId === userId && permittedRoles().includes(role)
       )
     ) {
       throw new UnauthorizedException(
