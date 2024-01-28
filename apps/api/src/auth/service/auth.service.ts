@@ -29,19 +29,12 @@ export class AuthService {
     this.logger = new Logger(AuthService.name)
   }
 
-  async sendOtp(email: string): Promise<void> {
-    if (!email || !email.includes('@')) {
-      this.logger.error(`Invalid email address: ${email}`)
-      throw new HttpException(
-        'Please enter a valid email address',
-        HttpStatus.BAD_REQUEST
-      )
-    }
-
+  private async createUserIfNotExists(email: string) {
+    let user = await this.findUserByEmail(email)
     // We need to create the user if it doesn't exist yet
-    if (!(await this.findUserByEmail(email))) {
+    if (!user) {
       // Create the user
-      const user = await this.prisma.user.create({
+      user = await this.prisma.user.create({
         data: {
           email
         }
@@ -62,7 +55,18 @@ export class AuthService {
         }
       })
     }
+    return user
+  }
 
+  async sendOtp(email: string): Promise<void> {
+    if (!email || !email.includes('@')) {
+      this.logger.error(`Invalid email address: ${email}`)
+      throw new HttpException(
+        'Please enter a valid email address',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+    await this.createUserIfNotExists(email)
     const otp = await this.prisma.otp.create({
       data: {
         code: randomUUID().slice(0, 6).toUpperCase(),
@@ -119,6 +123,16 @@ export class AuthService {
     })
 
     this.logger.log(`User logged in: ${email}`)
+
+    return {
+      ...user,
+      token: await this.jwt.signAsync({ id: user.id })
+    }
+  }
+
+  async handleGithubOAuth(email: string) {
+    // We need to create the user if it doesn't exist yet
+    const user = await this.createUserIfNotExists(email)
 
     return {
       ...user,
