@@ -90,8 +90,13 @@ export class AuthController {
     description:
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  // TODO: add params, response and function return types here
-  async githubOAuthLogin() {}
+  async githubOAuthLogin() {
+    /**
+     * NOTE:
+     * This function does nothing and the oauth redirect is managed my AuthGuard
+     * - The 'github' method inside the authguard is managed by passport
+     */
+  }
 
   @Public()
   @Get('github/callback')
@@ -101,11 +106,19 @@ export class AuthController {
     description:
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  // TODO: add params, response and function return types here
+  @ApiParam({
+    name: 'code',
+    description: 'Code for the Callback',
+    required: true
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logged in successfully'
+  })
+  // TODO: Change the Res Code from 500 -> 401, when incorrect code is provided
   async githubOAuthCallback(@Req() req) {
     const user = req.user
     const email = user.emails[0].value
-    console.log(email)
     return await this.authService.handleGithubOAuth(email)
   }
 }
