@@ -30,6 +30,10 @@ export class MockMailService implements IMailService {
     )
   }
 
+  async adminUserCreateEmail(email: string, password: string): Promise<void> {
+    this.log.log(`Admin User Create Email: ${email}, ${password}`)
+  }
+
   async sendOtp(email: string, otp: string): Promise<void> {
     this.log.log(`OTP for ${email} is ${otp}`)
   }

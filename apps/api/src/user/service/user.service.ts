@@ -19,6 +19,10 @@ export class UserService {
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
+  async onApplicationBootstrap() {
+    await this.checkIfAdminExistsOrCreate()
+  }
+
   async getSelf(user: User) {
     return excludeFields(user, 'isActive')
   }
@@ -171,5 +175,41 @@ export class UserService {
     this.log.log(`Sent login email to ${user.email}`)
 
     return newUser
+  }
+
+  private async checkIfAdminExistsOrCreate() {
+    const adminExists =
+      (await this.prisma.user.count({
+        where: {
+          isAdmin: true
+        }
+      })) > 0
+
+    if (!adminExists) {
+      this.log.warn('No admin user found', 'UserService')
+      await this.createAdminUser()
+      return
+    }
+    this.log.log('Admin user found', 'UserService')
+  }
+
+  private async createAdminUser() {
+    this.log.log('Creating admin user', 'UserService')
+    const adminUser = await this.prisma.user.create({
+      data: {
+        name: 'Admin',
+        email: 'admin@keyshade.xyz', // TODO: Confirm if this admin email is correct!
+        isAdmin: true,
+        isOnboardingFinished: true
+      }
+    })
+    // TODO: confirm, if we also need to create a default workspace for admin user
+
+    // TODO: send an email to admin@keyshade
+    const adminUserPwd = crypto.randomUUID().replace('-', '')
+    this.log.verbose(`Admin user password: ${adminUserPwd}`, 'UserService')
+    await this.mailService.adminUserCreateEmail(adminUser.email, adminUserPwd)
+
+    this.log.log('Created admin user', 'UserService')
   }
 }
