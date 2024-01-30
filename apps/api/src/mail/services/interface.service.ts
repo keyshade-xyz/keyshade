@@ -21,7 +21,7 @@ export interface IMailService {
     role: WorkspaceRole
   ): Promise<void>
 
-  accountLoginEmail(
-    email: string
-  ): Promise<void>
+  accountLoginEmail(email: string): Promise<void>
+
+  adminUserCreateEmail(email: string): Promise<void>
 }

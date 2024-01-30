@@ -14,10 +14,13 @@ export class UserService {
   private readonly log = new Logger(UserService.name)
 
   constructor(
-    // @Inject(USER_REPOSITORY) private readonly repository: IUserRepository
     private readonly prisma: PrismaService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
+
+  async onApplicationBootstrap() {
+    await this.checkIfAdminExistsOrCreate()
+  }
 
   async getSelf(user: User) {
     return excludeFields(user, 'isActive')
@@ -171,5 +174,35 @@ export class UserService {
     this.log.log(`Sent login email to ${user.email}`)
 
     return newUser
+  }
+
+  private async checkIfAdminExistsOrCreate() {
+    const adminExists =
+      (await this.prisma.user.count({
+        where: {
+          isAdmin: true
+        }
+      })) > 0
+
+    if (!adminExists) {
+      this.log.warn('No admin user found', 'UserService')
+      this.log.log('Creating admin user', 'UserService')
+
+      // Create the admin user
+      const adminUser = await this.prisma.user.create({
+        data: {
+          name: 'Admin',
+          email: process.env.ADMIN_EMAIL || 'admin@keyshade.xyz',
+          isAdmin: true,
+          isActive: true,
+          isOnboardingFinished: true
+        }
+      })
+
+      await this.mailService.adminUserCreateEmail(adminUser.email)
+      this.log.log('Created admin user', 'UserService')
+      return
+    }
+    this.log.log('Admin user found', 'UserService')
   }
 }

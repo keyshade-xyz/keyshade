@@ -98,9 +98,7 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
-  async accountLoginEmail(
-    email: string
-  ): Promise<void> {
+  async accountLoginEmail(email: string): Promise<void> {
     const subject = 'LogIn Invitation Accepted'
     const body = `<!DOCTYPE html>
         <html>
@@ -118,6 +116,26 @@ export class MailService implements IMailService {
         </html>
         `
     await this.sendEmail(email, subject, body)
+  }
+
+  async adminUserCreateEmail(email: string): Promise<void> {
+    const subject = 'Admin User Created!!'
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>Admin User Was Created!</title>
+        </head>
+        <body>
+           <h1>Welcome to keyshade!</h1>
+           <p>Hello there!</p>
+           <p>Your admin account has been setup. Please login to your account for further process.</p>
+           <p>Your email is: <strong>${email}</strong></p>
+           <p>Thank you for choosing us.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        `
+    await this.sendEmail('admin@keyshade.xyz', subject, body)
   }
 
   private async sendEmail(
