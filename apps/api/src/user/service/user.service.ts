@@ -8,6 +8,7 @@ import {
   IMailService,
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
+import { createUser } from '../../common/create-user'
 
 @Injectable()
 export class UserService {
@@ -131,44 +132,7 @@ export class UserService {
   async createUser(user: CreateUserDto) {
     this.log.log(`Creating user with email ${user.email}`)
 
-    // Check for duplicate user
-    const checkDuplicateUser =
-      (await this.prisma.user.count({
-        where: {
-          email: user.email
-        }
-      })) > 0
-    if (checkDuplicateUser) {
-      throw new ConflictException('User already exists with this email')
-    }
-
-    // Create the user
-    const newUser = await this.prisma.user.create({
-      data: {
-        name: user.name,
-        email: user.email,
-        profilePictureUrl: user.profilePictureUrl,
-        isActive: user.isActive ?? true,
-        isOnboardingFinished: user.isOnboardingFinished ?? true,
-        isAdmin: user.isAdmin ?? false
-      }
-    })
-    this.log.log(`Created user with email ${user.email}`)
-
-    // Create the user's default workspace
-    await this.prisma.workspace.create({
-      data: {
-        name: 'Default',
-        isDefault: true,
-        ownerId: newUser.id,
-        lastUpdatedBy: {
-          connect: {
-            id: newUser.id
-          }
-        }
-      }
-    })
-    this.log.log(`Created user's default workspace`)
+    const newUser = await createUser(user, this.prisma, true)
 
     await this.mailService.accountLoginEmail(newUser.email)
     this.log.log(`Sent login email to ${user.email}`)

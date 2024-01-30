@@ -15,6 +15,7 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
+import { createUser } from '../../common/create-user'
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST
       )
     }
-    await this.createUserIfNotExists(email)
+    await createUser({ email }, this.prisma)
     const otp = await this.prisma.otp.create({
       data: {
         code: randomUUID().slice(0, 6).toUpperCase(),
@@ -109,10 +110,9 @@ export class AuthService {
     profilePictureUrl: string
   ) {
     // We need to create the user if it doesn't exist yet
-    const user = await this.createUserIfNotExists(
-      email,
-      name,
-      profilePictureUrl
+    const user = await createUser(
+      { email, name, profilePictureUrl },
+      this.prisma
     )
 
     const token = await this.generteToken(user.id)
@@ -140,49 +140,49 @@ export class AuthService {
     }
   }
 
-  private async createUserIfNotExists(
-    email: string,
-    name?: string,
-    profilePictureUrl?: string
-  ) {
-    const user = await this.findUserByEmail(email)
+  // private async createUserIfNotExists(
+  //   email: string,
+  //   name?: string,
+  //   profilePictureUrl?: string
+  // ) {
+  //   const user = await this.findUserByEmail(email)
 
-    // We need to create the user if it doesn't exist yet
-    if (!user) {
-      await this.createUser(email, name, profilePictureUrl)
-    }
-    return user
-  }
+  //   // We need to create the user if it doesn't exist yet
+  //   if (!user) {
+  //     await this.createUser(email, name, profilePictureUrl)
+  //   }
+  //   return user
+  // }
 
-  private async createUser(
-    email: string,
-    name: string,
-    profilePictureUrl: string
-  ) {
-    // Create the user
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        name,
-        profilePictureUrl
-      }
-    })
+  // private async createUser(
+  //   email: string,
+  //   name: string,
+  //   profilePictureUrl: string
+  // ) {
+  //   // Create the user
+  //   const user = await this.prisma.user.create({
+  //     data: {
+  //       email,
+  //       name,
+  //       profilePictureUrl
+  //     }
+  //   })
 
-    // Create the user's default workspace
-    await this.prisma.workspace.create({
-      data: {
-        name: `My Workspace`,
-        description: 'My default workspace',
-        isDefault: true,
-        ownerId: user.id,
-        lastUpdatedBy: {
-          connect: {
-            id: user.id
-          }
-        }
-      }
-    })
-  }
+  //   // Create the user's default workspace
+  //   await this.prisma.workspace.create({
+  //     data: {
+  //       name: `My Workspace`,
+  //       description: 'My default workspace',
+  //       isDefault: true,
+  //       ownerId: user.id,
+  //       lastUpdatedBy: {
+  //         connect: {
+  //           id: user.id
+  //         }
+  //       }
+  //     }
+  //   })
+  // }
 
   private async generteToken(id: string) {
     return await this.jwt.signAsync({ id })
