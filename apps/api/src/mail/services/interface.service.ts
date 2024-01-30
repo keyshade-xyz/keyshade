@@ -23,5 +23,5 @@ export interface IMailService {
 
   accountLoginEmail(email: string): Promise<void>
 
-  adminUserCreateEmail(email: string, password: string): Promise<void>
+  adminUserCreateEmail(email: string): Promise<void>
 }

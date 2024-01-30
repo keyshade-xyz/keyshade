@@ -14,7 +14,6 @@ export class UserService {
   private readonly log = new Logger(UserService.name)
 
   constructor(
-    // @Inject(USER_REPOSITORY) private readonly repository: IUserRepository
     private readonly prisma: PrismaService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
@@ -195,21 +194,18 @@ export class UserService {
 
   private async createAdminUser() {
     this.log.log('Creating admin user', 'UserService')
+
+    // Create the admin user
     const adminUser = await this.prisma.user.create({
       data: {
         name: 'Admin',
-        email: 'admin@keyshade.xyz', // TODO: Confirm if this admin email is correct!
+        email: process.env.ADMIN_EMAIL || 'admin@keyshade.xyz',
         isAdmin: true,
         isOnboardingFinished: true
       }
     })
-    // TODO: confirm, if we also need to create a default workspace for admin user
 
-    // TODO: send an email to admin@keyshade
-    const adminUserPwd = crypto.randomUUID().replace('-', '')
-    this.log.verbose(`Admin user password: ${adminUserPwd}`, 'UserService')
-    await this.mailService.adminUserCreateEmail(adminUser.email, adminUserPwd)
-
+    await this.mailService.adminUserCreateEmail(adminUser.email)
     this.log.log('Created admin user', 'UserService')
   }
 }

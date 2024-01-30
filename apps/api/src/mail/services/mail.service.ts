@@ -118,8 +118,8 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
-  async adminUserCreateEmail(email: string, password: string): Promise<void> {
-    const subject = 'Admin User Created'
+  async adminUserCreateEmail(email: string): Promise<void> {
+    const subject = 'Admin User Created!!'
     const body = `<!DOCTYPE html>
         <html>
         <head>
@@ -128,8 +128,7 @@ export class MailService implements IMailService {
         <body>
            <h1>Welcome to keyshade!</h1>
            <p>Hello there!</p>
-           <p>Your account has been setup. Please login to your account for further process.</p>
-           <p>Your password is: <strong>${password}</strong></p>
+           <p>Your admin account has been setup. Please login to your account for further process.</p>
            <p>Thank you for choosing us.</p>
            <p>Best Regards,</p>
            <p>keyshade Team</p>
