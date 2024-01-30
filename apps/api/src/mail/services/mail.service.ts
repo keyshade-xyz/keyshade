@@ -135,7 +135,7 @@ export class MailService implements IMailService {
            <p>keyshade Team</p>
         </body>
         `
-    await this.sendEmail('admin@keyshade.xyz', subject, body)
+    await this.sendEmail(process.env.ADMIN_EMAIL, subject, body)
   }
 
   private async sendEmail(
