@@ -201,6 +201,7 @@ export class UserService {
         name: 'Admin',
         email: process.env.ADMIN_EMAIL || 'admin@keyshade.xyz',
         isAdmin: true,
+        isActive: true,
         isOnboardingFinished: true
       }
     })
