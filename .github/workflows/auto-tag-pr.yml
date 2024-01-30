@@ -13,6 +13,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Add labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_TITLE=$(gh pr view ${{ github.event.pull_request.number }} --json title -q '.title')
           if [[ $PR_TITLE == *\[BREAKING\]* ]]; then
