@@ -186,27 +186,23 @@ export class UserService {
 
     if (!adminExists) {
       this.log.warn('No admin user found', 'UserService')
-      await this.createAdminUser()
+      this.log.log('Creating admin user', 'UserService')
+
+      // Create the admin user
+      const adminUser = await this.prisma.user.create({
+        data: {
+          name: 'Admin',
+          email: process.env.ADMIN_EMAIL || 'admin@keyshade.xyz',
+          isAdmin: true,
+          isActive: true,
+          isOnboardingFinished: true
+        }
+      })
+
+      await this.mailService.adminUserCreateEmail(adminUser.email)
+      this.log.log('Created admin user', 'UserService')
       return
     }
     this.log.log('Admin user found', 'UserService')
-  }
-
-  private async createAdminUser() {
-    this.log.log('Creating admin user', 'UserService')
-
-    // Create the admin user
-    const adminUser = await this.prisma.user.create({
-      data: {
-        name: 'Admin',
-        email: process.env.ADMIN_EMAIL || 'admin@keyshade.xyz',
-        isAdmin: true,
-        isActive: true,
-        isOnboardingFinished: true
-      }
-    })
-
-    await this.mailService.adminUserCreateEmail(adminUser.email)
-    this.log.log('Created admin user', 'UserService')
   }
 }
