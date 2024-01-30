@@ -129,6 +129,7 @@ export class MailService implements IMailService {
            <h1>Welcome to keyshade!</h1>
            <p>Hello there!</p>
            <p>Your admin account has been setup. Please login to your account for further process.</p>
+           <p>Your email is: <strong>${email}</strong></p>
            <p>Thank you for choosing us.</p>
            <p>Best Regards,</p>
            <p>keyshade Team</p>
