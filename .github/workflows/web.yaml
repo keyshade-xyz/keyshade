@@ -2,7 +2,7 @@ on:
   push:
     paths: ['apps/web/**', '.github/workflows/web.yaml']
     tags:
-      - 'v*.*.*'
+      - '*'
   pull_request:
     paths: ['apps/web/**']
 
@@ -51,15 +51,15 @@ jobs:
         run: |
           pnpm run test:web
 
-  build-alpha:
+  build-web-alpha:
     needs: validate
-    if: ${{ github.ref == 'refs/tags/v*.*.*-alpha' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
-    name: Build and push docker image
+    name: Build and push Web docker image for alpha
+    if: ${{ startsWith(github.ref , 'refs/tags/') && contains(github.ref, 'alpha') }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -68,20 +68,20 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t keyshade/keyshade-web:${{ github.ref_name }}-alpha -f ./apps/web/Dockerfile .
+        run: docker build -t keyshade/keyshade-web:${{ github.ref_name }} keyshade/keyshade-web:alpha-latest -f ./apps/web/Dockerfile .
 
       - name: Push Docker image
         run: docker push keyshade/keyshade-web
 
-  build-release:
+  build-web-release:
     needs: validate
-    if: ${{ github.ref == 'refs/tags/v*.*.*' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
-    name: Build and push docker image
+    name: Build and push Web docker image for release
+    if: ${{ startsWith(github.ref , 'refs/tags/') && !contains(github.ref, 'alpha') }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -90,17 +90,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t keyshade/keyshade-web:latest -t keyshade/keyshade-web:${{ github.ref_name }} -f ./apps/web/Dockerfile .
+        run: docker build -t keyshade/keyshade-web:${{ github.ref_name }} keyshade/keyshade-web:latest -f ./apps/web/Dockerfile .
 
       - name: Push Docker image
         run: docker push keyshade/keyshade-web
-
-  deploy:
-    needs: build-release
-    if: ${{ github.ref == 'refs/tags/v*.*.*' && github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    name: Deploy to Render
-
-    steps:
-      - name: deploy
-        run: curl ${{ secrets.RENDER_WEB_DEPLOY_HOOK }}
