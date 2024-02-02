@@ -25,7 +25,7 @@ export class ProjectController {
   @Post(':workspaceId')
   async createProject(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
+    @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() dto: CreateProject
   ) {
     return await this.service.createProject(user, workspaceId, dto)

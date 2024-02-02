@@ -31,7 +31,7 @@ export class WorkspaceController {
   @Put(':workspaceId')
   async update(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
+    @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() dto: UpdateWorkspace
   ) {
     return this.workspaceService.updateWorkspace(user, workspaceId, dto)
@@ -40,8 +40,8 @@ export class WorkspaceController {
   @Put(':workspaceId/transfer-ownership/:userId')
   async transferOwnership(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
-    @Param() userId: User['id']
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('userId') userId: User['id']
   ) {
     return this.workspaceService.transferOwnership(user, workspaceId, userId)
   }
@@ -49,7 +49,7 @@ export class WorkspaceController {
   @Delete(':workspaceId')
   async delete(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id']
+    @Param('workspaceId') workspaceId: Workspace['id']
   ) {
     return this.workspaceService.deleteWorkspace(user, workspaceId)
   }
@@ -57,7 +57,7 @@ export class WorkspaceController {
   @Post(':workspaceId/add-users')
   async addUsers(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
+    @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() members: WorkspaceMemberDTO[]
   ) {
     return this.workspaceService.addUsersToWorkspace(user, workspaceId, members)
@@ -66,7 +66,7 @@ export class WorkspaceController {
   @Delete(':workspaceId/remove-users')
   async removeUsers(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
+    @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() userIds: User['id'][]
   ) {
     return this.workspaceService.removeUsersFromWorkspace(
@@ -79,9 +79,9 @@ export class WorkspaceController {
   @Put(':workspaceId/update-member-role/:userId')
   async updateMemberRole(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
-    @Param() userId: User['id'],
-    @Query() role: WorkspaceRole
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('userId') userId: User['id'],
+    @Query('role') role: WorkspaceRole
   ) {
     return this.workspaceService.updateMemberRole(
       user,
@@ -94,7 +94,7 @@ export class WorkspaceController {
   @Post(':workspaceId/accept-invitation')
   async acceptInvitation(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id']
+    @Param('workspaceId') workspaceId: Workspace['id']
   ) {
     return this.workspaceService.acceptInvitation(user, workspaceId)
   }
@@ -102,7 +102,7 @@ export class WorkspaceController {
   @Delete(':workspaceId/decline-invitation')
   async declineInvitation(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id']
+    @Param('workspaceId') workspaceId: Workspace['id']
   ) {
     return this.workspaceService.declineInvitation(user, workspaceId)
   }
@@ -110,8 +110,8 @@ export class WorkspaceController {
   @Delete(':workspaceId/cancel-invitation/:userId')
   async cancelInvitation(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
-    @Param() userId: User['id']
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('userId') userId: User['id']
   ) {
     return this.workspaceService.cancelInvitation(user, workspaceId, userId)
   }
@@ -119,7 +119,7 @@ export class WorkspaceController {
   @Delete(':workspaceId/leave')
   async leave(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id']
+    @Param('workspaceId') workspaceId: Workspace['id']
   ) {
     return this.workspaceService.leaveWorkspace(user, workspaceId)
   }
@@ -127,8 +127,8 @@ export class WorkspaceController {
   @Get(':workspaceId/is-member/:userId')
   async isMember(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id'],
-    @Param() userId: User['id']
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('userId') userId: User['id']
   ) {
     return this.workspaceService.isUserMemberOfWorkspace(
       user,
@@ -140,7 +140,7 @@ export class WorkspaceController {
   @Get(':workspaceId')
   async getWorkspace(
     @CurrentUser() user: User,
-    @Param() workspaceId: Workspace['id']
+    @Param('workspaceId') workspaceId: Workspace['id']
   ) {
     return this.workspaceService.getWorkspaceById(user, workspaceId)
   }
@@ -148,7 +148,7 @@ export class WorkspaceController {
   @Get()
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
@@ -167,7 +167,7 @@ export class WorkspaceController {
   @UseGuards(AdminGuard)
   @Get()
   async getAllWorkspaces(
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',

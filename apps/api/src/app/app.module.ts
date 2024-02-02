@@ -13,6 +13,7 @@ import { UserModule } from '../user/user.module'
 import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
+import { WorkspaceModule } from '../workspace/workspace.module'
 
 @Module({
   controllers: [AppController],
@@ -29,7 +30,8 @@ import { ApiKeyModule } from '../api-key/api-key.module'
     ApiKeyModule,
     UserModule,
     ProjectModule,
-    EnvironmentModule
+    EnvironmentModule,
+    WorkspaceModule
   ],
   providers: [
     {

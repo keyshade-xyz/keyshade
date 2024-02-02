@@ -21,6 +21,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { decrypt } from '../../common/decrypt'
 import { encrypt } from '../../common/encrypt'
 import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
+import permittedRoles from '../../common/get-permitted.roles'
 
 @Injectable()
 export class ProjectService {
@@ -412,7 +413,8 @@ export class ProjectService {
     // Check for the required membership role
     if (
       !project.workspace.members.some(
-        (member) => member.userId === userId && member.role === role
+        (member) =>
+          member.userId === userId && permittedRoles(role).includes(role)
       )
     )
       throw new UnauthorizedException(

@@ -20,6 +20,7 @@ import { SecretWithProjectAndVersion, SecretWithVersion } from '../secret.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
+import permittedRoles from '../../common/get-permitted.roles'
 
 @Injectable()
 export class SecretService {
@@ -501,7 +502,8 @@ export class SecretService {
     // Check for the required membership role
     if (
       !secret.project.workspace.members.some(
-        (member) => member.userId === userId && member.role === role
+        (member) =>
+          member.userId === userId && permittedRoles(role).includes(role)
       )
     )
       throw new UnauthorizedException(
@@ -540,7 +542,8 @@ export class SecretService {
     // Check for the required membership role
     if (
       !project.workspace.members.some(
-        (member) => member.userId === userId && member.role === role
+        (member) =>
+          member.userId === userId && permittedRoles(role).includes(role)
       )
     )
       throw new UnauthorizedException(

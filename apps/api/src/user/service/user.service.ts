@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { User } from '@prisma/client'
+import { User, WorkspaceRole } from '@prisma/client'
 import { excludeFields } from '../../common/exclude-fields'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
@@ -164,6 +164,17 @@ export class UserService {
         lastUpdatedBy: {
           connect: {
             id: newUser.id
+          }
+        },
+        members: {
+          create: {
+            role: WorkspaceRole.OWNER,
+            invitationAccepted: true,
+            user: {
+              connect: {
+                id: newUser.id
+              }
+            }
           }
         }
       }

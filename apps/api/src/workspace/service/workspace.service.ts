@@ -21,6 +21,7 @@ import {
 } from '../../mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
+import permittedRoles from '../../common/get-permitted.roles'
 
 @Injectable()
 export class WorkspaceService {
@@ -731,21 +732,6 @@ export class WorkspaceService {
       }
     })
 
-    const permittedRoles = () => {
-      switch (role) {
-        case WorkspaceRole.OWNER:
-          return [
-            WorkspaceRole.OWNER,
-            WorkspaceRole.MAINTAINER,
-            WorkspaceRole.VIEWER
-          ]
-        case WorkspaceRole.MAINTAINER:
-          return [WorkspaceRole.MAINTAINER, WorkspaceRole.VIEWER]
-        case WorkspaceRole.VIEWER:
-          return [WorkspaceRole.VIEWER]
-      }
-    }
-
     // Check if the workspace exists or not
     if (!workspace) {
       throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
@@ -754,7 +740,8 @@ export class WorkspaceService {
     // Check if the user is a member of the workspace
     if (
       !workspace.members.some(
-        (member) => member.userId === userId && permittedRoles().includes(role)
+        (member) =>
+          member.userId === userId && permittedRoles(role).includes(role)
       )
     ) {
       throw new UnauthorizedException(

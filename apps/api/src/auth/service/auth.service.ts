@@ -15,6 +15,7 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
+import { WorkspaceRole } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -178,6 +179,17 @@ export class AuthService {
         lastUpdatedBy: {
           connect: {
             id: user.id
+          }
+        },
+        members: {
+          create: {
+            role: WorkspaceRole.OWNER,
+            invitationAccepted: true,
+            user: {
+              connect: {
+                id: user.id
+              }
+            }
           }
         }
       }
