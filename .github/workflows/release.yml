@@ -1,19 +1,27 @@
-name: Release Drafter
+name: Semantic Release
 
 on:
   push:
     branches:
-      - release
+      - main
       - alpha
 
 jobs:
-  update_release_draft:
+  release:
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into "main"
-      - uses: release-drafter/release-drafter@v5
+      - name: checkout
+        uses: actions/checkout@v3
         with:
-          config-name: release-drafter.yml
-          disable-autolabeler: false
+          persist-credentials: false
+      - name: node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          registry-url: https://registry.npmjs.org
+      - name: install
+        run: npm install --no-save @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github
+      - name: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        run: npx semantic-release
