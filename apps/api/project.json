@@ -60,6 +60,19 @@
         "jestConfig": "apps/api/jest.config.ts"
       }
     },
+    "test:e2e": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage-e2e/{projectRoot}"],
+      "options": {
+        "devServerTarget": "api:serve",
+        "jestConfig": "apps/api/jest.e2e-config.ts"
+      },
+      "configurations": {
+        "development": {
+          "devServerTarget": "api:serve:development"
+        }
+      }
+    },
     "prisma:generate": {
       "command": "prisma generate",
       "options": {

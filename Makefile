@@ -2,9 +2,11 @@ VERSION ?= $(shell echo $$1)
 RELEASE_TYPE ?= $(shell echo $$2)
 CURRENT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
-all: check_args update_version generate_changelog commit_changes tag_release push_changes switch_branch rebase_and_push
+all: check_args update_version generate_changelog commit_changes tag_release push_changes switch_branch rebase_and_push api_e2e
 
 release: check_args update_version generate_changelog commit_changes tag_release push_changes switch_branch rebase_and_push
+
+api_e2e: run_api run_e2e docker_down
 
 check_args:
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make <version> <release_type>"; exit 1; fi
@@ -42,3 +44,24 @@ rebase_and_push:
 	@git rebase main
 	@echo "Pushing the changes to $(RELEASE_TYPE)"
 	@git push origin $(RELEASE_TYPE) --tags
+
+
+# -----------------------_E2E TESTS----------------------- #
+
+docker_up:
+	@echo "Starting docker containers"
+	@docker compose up -d
+
+run_api: docker_up
+	@echo "Running API"
+	@DATABASE_URL="postgresql://prisma:prisma@localhost:5433/tests" pnpm run dev:api&
+
+run_e2e:
+	@sleep 10
+	@echo "Running tests"
+	@nx run api-e2e:e2e
+
+docker_down: run_e2e
+	@echo "Stopping docker containers"
+	@docker compose down
+	@kill -9 $(shell lsof -t -i:4200)

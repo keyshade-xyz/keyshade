@@ -45,7 +45,13 @@ jobs:
         run: |
           pnpm run lint:api
 
-      - name: Test
+      - name: Unit tests
         run: |
           pnpm run db:generate-types
           pnpm run test:api
+
+      - name: E2E tests
+        run: |
+          docker compose up -d
+          pnpm run e2e:api
+          docker compose down

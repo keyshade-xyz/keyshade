@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -14,7 +16,12 @@ import { User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin.guard'
 import { CreateUserDto } from '../dto/create.user/create.user'
-import { ApiTags } from '@nestjs/swagger'
+import {
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiTags
+} from '@nestjs/swagger'
+import { BypassOnboarding } from '../../decorators/bypass-onboarding.decorator'
 
 @ApiTags('User Controller')
 @Controller('user')
@@ -22,27 +29,39 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @BypassOnboarding()
   async getCurrentUser(@CurrentUser() user: User) {
     return this.userService.getSelf(user)
   }
 
   @Put()
-  async updateSelf(
-    @CurrentUser() user: User,
-    @Body() dto: UpdateUserDto,
-    @Query('finishOnboarding') finishOnboarding: boolean = false
-  ) {
-    return await this.userService.updateSelf(user, dto, finishOnboarding)
+  @BypassOnboarding()
+  async updateSelf(@CurrentUser() user: User, @Body() dto: UpdateUserDto) {
+    return await this.userService.updateSelf(user, dto)
+  }
+
+  @Delete()
+  @ApiNoContentResponse()
+  @HttpCode(204)
+  async deleteSelf(@CurrentUser() user: User) {
+    await this.userService.deleteSelf(user)
+  }
+
+  @Delete(':userId')
+  @UseGuards(AdminGuard)
+  @ApiNoContentResponse()
+  @HttpCode(204)
+  async deleteUser(@Param('userId') userId: string) {
+    await this.userService.deleteUser(userId)
   }
 
   @Put(':userId')
   @UseGuards(AdminGuard)
   async updateUser(
     @Param('userId') userId: string,
-    @Body() dto: UpdateUserDto,
-    @Query('finishOnboarding') finishOnboarding: boolean = false
+    @Body() dto: UpdateUserDto
   ) {
-    return await this.userService.updateUser(userId, dto, finishOnboarding)
+    return await this.userService.updateUser(userId, dto)
   }
 
   @Get(':userId')
@@ -65,7 +84,8 @@ export class UserController {
 
   @Post()
   @UseGuards(AdminGuard)
+  @ApiCreatedResponse()
   async createUser(@Body() dto: CreateUserDto) {
-    return await this.userService.createUser(dto);
+    return await this.userService.createUser(dto)
   }
 }

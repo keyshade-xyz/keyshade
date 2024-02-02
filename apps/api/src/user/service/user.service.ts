@@ -1,7 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { User, WorkspaceRole } from '@prisma/client'
-import { excludeFields } from '../../common/exclude-fields'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
@@ -23,38 +22,31 @@ export class UserService {
   }
 
   async getSelf(user: User) {
-    return excludeFields(user, 'isActive')
+    return user
   }
 
-  async updateSelf(user: User, dto: UpdateUserDto, finishOnboarding: boolean) {
+  async updateSelf(user: User, dto: UpdateUserDto) {
     const data = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
-      isOnboardingFinished: finishOnboarding
+      isOnboardingFinished: dto.isOnboardingFinished
     }
     this.log.log(`Updating user ${user.id} with data ${dto}`)
-    return excludeFields(
-      await this.prisma.user.update({
-        where: {
-          id: user.id
-        },
-        data
-      }),
-      'isActive'
-    )
+    return await this.prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data
+    })
   }
 
-  async updateUser(
-    userId: string,
-    dto: UpdateUserDto,
-    finishOnboarding: boolean
-  ) {
+  async updateUser(userId: string, dto: UpdateUserDto) {
     const data = {
       name: dto.name,
       profilePictureUrl: dto.profilePictureUrl,
       isAdmin: dto.isAdmin,
       isActive: dto.isActive,
-      isOnboardingFinished: finishOnboarding
+      isOnboardingFinished: dto.isOnboardingFinished
     }
     this.log.log(`Updating user ${userId} with data ${dto}`)
     return await this.prisma.user.update({
@@ -115,8 +107,10 @@ export class UserService {
     // Delete the user's default workspace
     await this.prisma.workspace.delete({
       where: {
-        id: userId,
-        isDefault: true
+        defaultWorkspace: {
+          ownerId: userId,
+          isDefault: true
+        }
       }
     })
 
@@ -188,6 +182,10 @@ export class UserService {
   }
 
   private async checkIfAdminExistsOrCreate() {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
+      return
+    }
+
     const adminExists =
       (await this.prisma.user.count({
         where: {

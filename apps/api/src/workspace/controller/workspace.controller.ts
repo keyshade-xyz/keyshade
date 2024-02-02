@@ -145,7 +145,7 @@ export class WorkspaceController {
     return this.workspaceService.getWorkspaceById(user, workspaceId)
   }
 
-  @Get()
+  @Get('/all')
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,
     @Query('page') page: number = 0,

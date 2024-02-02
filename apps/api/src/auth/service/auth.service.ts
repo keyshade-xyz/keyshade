@@ -38,9 +38,18 @@ export class AuthService {
         HttpStatus.BAD_REQUEST
       )
     }
-    await this.createUserIfNotExists(email)
-    const otp = await this.prisma.otp.create({
-      data: {
+
+    const user = await this.createUserIfNotExists(email)
+
+    const otp = await this.prisma.otp.upsert({
+      where: {
+        userId: user.id
+      },
+      update: {
+        code: randomUUID().slice(0, 6).toUpperCase(),
+        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
+      },
+      create: {
         code: randomUUID().slice(0, 6).toUpperCase(),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
         user: {
@@ -52,7 +61,7 @@ export class AuthService {
     })
 
     await this.mailService.sendOtp(email, otp.code)
-    this.logger.log(`Login code sent to ${email}: ${otp.code}`)
+    this.logger.log(`Login code sent to ${email}`)
   }
 
   async validateOtp(
@@ -85,11 +94,9 @@ export class AuthService {
 
     await this.prisma.otp.delete({
       where: {
-        code: otp,
-        AND: {
-          user: {
-            email
-          }
+        userCode: {
+          code: otp,
+          userId: user.id
         }
       }
     })
@@ -194,6 +201,8 @@ export class AuthService {
         }
       }
     })
+
+    return user
   }
 
   private async generteToken(id: string) {

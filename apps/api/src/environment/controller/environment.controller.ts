@@ -52,7 +52,7 @@ export class EnvironmentController {
     return await this.environmentService.getEnvironment(user, environmentId)
   }
 
-  @Get(':projectId')
+  @Get('/all/:projectId')
   async getEnvironmentsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,

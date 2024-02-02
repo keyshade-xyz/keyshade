@@ -91,7 +91,7 @@ export class SecretController {
     return await this.secretService.getAllVersionsOfSecret(user, secretId)
   }
 
-  @Get(':projectId')
+  @Get('/all/:projectId')
   async getAllSecretsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,

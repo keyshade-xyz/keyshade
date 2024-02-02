@@ -56,7 +56,7 @@ export class ProjectController {
     return await this.service.getProjectByUserAndId(user, projectId)
   }
 
-  @Get(':workspaceId')
+  @Get('/all/:workspaceId')
   async getAllProjects(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],

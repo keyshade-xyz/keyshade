@@ -84,7 +84,7 @@ model User {
   workspaceMembers WorkspaceMember[]
   workspaces       Workspace[]
   apiKeys          ApiKey[]
-  otps             Otp[]
+  otp              Otp?
   notifications    Notification[]
   secrets          Secret[] // Stores the secrets the user updated
   projects         Project[] // Stores the projects the user updated
@@ -111,8 +111,8 @@ model Environment {
   updatedAt   DateTime @updatedAt
   isDefault   Boolean  @default(false)
 
-  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade)
-  lastUpdatedById String
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
 
   secrets Secret[]
 
@@ -211,7 +211,7 @@ model ApiKey {
 model Otp {
   code      String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    String
+  userId    String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime
 
@@ -229,10 +229,12 @@ model Workspace {
   updatedAt   DateTime @updatedAt
   ownerId     String
 
-  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
   projects             Project[]
   members              WorkspaceMember[]
   apiKeyWorkspaceScope ApiKeyWorkspaceScope[]
+
+  @@unique([isDefault, ownerId], name: "defaultWorkspace")
 }

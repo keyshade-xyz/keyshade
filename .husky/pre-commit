@@ -2,3 +2,6 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 pnpm run lint:fix && pnpm run prettier:fix && pnpm run test:api
+docker compose up -d
+pnpm run e2e:api
+docker compose down
