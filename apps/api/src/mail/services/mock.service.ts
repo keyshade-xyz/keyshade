@@ -6,7 +6,7 @@ import { WorkspaceRole } from '@prisma/client'
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
-  async workspaceInvitationMailForRegisteredUser(
+  async workspaceInvitationMailForUsers(
     email: string,
     workspace: string,
     actionUrl: string,
@@ -20,17 +20,6 @@ export class MockMailService implements IMailService {
     )
   }
 
-  // async workspaceInvitationMailForNonRegisteredUser(
-  //   email: string,
-  //   workspace: string,
-  //   actionUrl: string,
-  //   invitee: string,
-  //   role: WorkspaceRole
-  // ): Promise<void> {
-  //   this.log.log(
-  //     `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}, ${role}`
-  //   )
-  // }
 
   async adminUserCreateEmail(email: string): Promise<void> {
     this.log.log(`Create pAdmin User Email: ${email}`)
