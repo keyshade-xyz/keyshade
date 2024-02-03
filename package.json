@@ -2,19 +2,17 @@
   "name": "keyshade-xyz",
   "version": "0.1.0-alpha",
   "license": "MPL-2.0",
+  "private": true,
   "release": {
     "branches": [
       "main",
-      {
-        "name": "alpha",
-        "prerelease": true
-      }
+      "alpha"
     ],
     "plugins": [
       [
         "@semantic-release/release-notes-generator",
         {
-          "preset": "eslint",
+          "preset": "conventionalcommits",
           "parserOpts": {
             "noteKeywords": [
               "BREAKING CHANGE",
@@ -27,40 +25,38 @@
             "types": [
               {
                 "type": "feat",
-                "section": "Features"
+                "section": "🚀 Features"
               },
               {
                 "type": "fix",
-                "section": "Bug Fixes"
+                "section": "🐛 Bug Fixes"
               },
               {
                 "type": "perf",
-                "section": "Performance Improvements"
+                "section": "⚡ Performance Improvements"
               },
               {
                 "type": "revert",
-                "section": "Reverts"
+                "section": "🔙 Reverts"
               },
               {
                 "type": "docs",
-                "section": "Documentation",
-                "hidden": true
+                "section": "📚 Documentation"
               },
               {
                 "type": "style",
-                "section": "Styles"
+                "section": "💅 Styles"
               },
               {
                 "type": "chore",
-                "section": "Miscellaneous Chores"
+                "section": "🔧 Miscellaneous Chores"
               },
               {
                 "type": "refactor",
-                "section": "Code Refactoring"
+                "section": "🔨 Code Refactoring"
               },
               {
                 "type": "test",
-                "section": "Tests",
                 "hidden": true
               }
             ]
@@ -73,7 +69,6 @@
           "changelogFile": "CHANGELOG.md"
         }
       ],
-      "@semantic-release/github",
       [
         "@semantic-release/git",
         {
@@ -83,7 +78,9 @@
           ],
           "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
-      ]
+      ],
+      "@semantic-release/github",
+      "@semantic-release/npm"
     ]
   },
   "scripts": {
@@ -122,7 +119,6 @@
     "db:reset": "nx run api:prisma:reset",
     "prepare": "husky install"
   },
-  "private": false,
   "devDependencies": {
     "@nestjs/schematics": "^10.0.3",
     "@nestjs/testing": "^10.3.0",
