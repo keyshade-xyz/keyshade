@@ -7,6 +7,8 @@ import { UserModule } from './user.module'
 import { PrismaService } from '../prisma/prisma.service'
 import { AppModule } from '../app/app.module'
 import { User } from '@prisma/client'
+import { MAIL_SERVICE } from '../mail/services/interface.service'
+import { MockMailService } from '../mail/services/mock.service'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -19,7 +21,10 @@ describe('User Controller Tests', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, UserModule]
-    }).compile()
+    })
+      .overrideProvider(MAIL_SERVICE)
+      .useClass(MockMailService)
+      .compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter()
     )
