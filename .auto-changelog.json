@@ -1,6 +1,0 @@
-{
-  "output": "CHANGELOG.md",
-  "sortCommits": "date-desc",
-  "commitLint": false,
-  "unreleased": true
-}
