@@ -28,7 +28,7 @@ export class MailService implements IMailService {
     forRegisteredUser: boolean
   ): Promise<void> {
     const subject = `You have been invited to a ${workspace}`
-    const intro = forRegisteredUser? `Hello there! We're excited to welcome you to Keyshade.`:`Hello there! We're excited to welcome you to Keyshade.`
+    const intro = forRegisteredUser? `Hello again! You've been invited to join a new workspace.`:`Hello there! We're excited to welcome you to Keyshade.`
     const body = 
     `<!DOCTYPE html>
         <html>
