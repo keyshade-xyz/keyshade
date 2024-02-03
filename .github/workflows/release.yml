@@ -20,7 +20,7 @@ jobs:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
       - name: install
-        run: npm install --no-save @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github
+        run: npm install --no-save @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github conventional-changelog-conventionalcommits
       - name: release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
