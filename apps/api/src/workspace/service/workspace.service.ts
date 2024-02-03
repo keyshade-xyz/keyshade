@@ -590,12 +590,13 @@ export class WorkspaceService {
         continue
 
       if (memberUser) {
-        this.mailService.workspaceInvitationMailForRegisteredUser(
+        this.mailService.workspaceInvitationMailForUsers(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.id}/join`,
           currentUser.name,
-          member.role
+          member.role,
+          true
         )
 
         this.log.debug(
@@ -610,7 +611,7 @@ export class WorkspaceService {
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
-        this.mailService.workspaceInvitationMailForNonRegisteredUser(
+        this.mailService.workspaceInvitationMailForUsers(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${
@@ -619,7 +620,8 @@ export class WorkspaceService {
             id: memberUser.id
           })}`,
           currentUser.name,
-          member.role
+          member.role,
+          false
         )
 
         this.log.debug(
