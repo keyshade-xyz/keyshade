@@ -1,5 +1,4 @@
-import { ApiKeyWorkspaceRole } from '@prisma/client'
-import { WorkspaceRole } from '@prisma/client'
+import { ApiKeyWorkspaceRole, WorkspaceRole } from '@prisma/client'
 
 export const ApiKeyWorkspaceRoles: {
   [key in WorkspaceRole]: ApiKeyWorkspaceRole[]

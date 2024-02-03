@@ -10,16 +10,17 @@ export interface IMailService {
     workspace: string,
     actionUrl: string,
     invitedBy: string,
-    role: WorkspaceRole
+    role: WorkspaceRole,
+    forRegisteredUser: boolean
   ): Promise<void>
 
-  workspaceInvitationMailForNonRegisteredUser(
-    email: string,
-    workspace: string,
-    actionUrl: string,
-    invitedBy: string,
-    role: WorkspaceRole
-  ): Promise<void>
+  // workspaceInvitationMailForNonRegisteredUser(
+  //   email: string,
+  //   workspace: string,
+  //   actionUrl: string,
+  //   invitedBy: string,
+  //   role: WorkspaceRole
+  // ): Promise<void>
 
   accountLoginEmail(email: string): Promise<void>
 
