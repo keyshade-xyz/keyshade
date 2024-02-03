@@ -51,6 +51,10 @@ jobs:
           pnpm run test:api
 
       - name: E2E tests
+        env:
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
         run: |
           docker compose up -d
           pnpm run e2e:api
