@@ -77,17 +77,17 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/update-member-role/:userId')
-  async updateMemberRole(
+  async updateMemberRoles(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Param('userId') userId: User['id'],
-    @Query('role') role: WorkspaceRole
+    @Query('roles') roleIds: WorkspaceRole['id'][]
   ) {
-    return this.workspaceService.updateMemberRole(
+    return this.workspaceService.updateMemberRoles(
       user,
       workspaceId,
       userId,
-      role
+      roleIds
     )
   }
 
@@ -137,6 +137,27 @@ export class WorkspaceController {
     )
   }
 
+  @Get(':workspaceId/members')
+  async getMembers(
+    @CurrentUser() user: User,
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+    @Query('sort') sort: string = 'name',
+    @Query('order') order: string = 'asc',
+    @Query('search') search: string = ''
+  ) {
+    return this.workspaceService.getAllMembersOfWorkspace(
+      user,
+      workspaceId,
+      page,
+      limit,
+      sort,
+      order,
+      search
+    )
+  }
+
   @Get(':workspaceId')
   async getWorkspace(
     @CurrentUser() user: User,
@@ -145,7 +166,7 @@ export class WorkspaceController {
     return this.workspaceService.getWorkspaceById(user, workspaceId)
   }
 
-  @Get('/all')
+  @Get('/all/as-user')
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,
     @Query('page') page: number = 0,
@@ -165,7 +186,7 @@ export class WorkspaceController {
   }
 
   @UseGuards(AdminGuard)
-  @Get()
+  @Get('/all/as-admin')
   async getAllWorkspaces(
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,

@@ -65,7 +65,8 @@
       "outputs": ["{workspaceRoot}/coverage-e2e/{projectRoot}"],
       "options": {
         "devServerTarget": "api:serve",
-        "jestConfig": "apps/api/jest.e2e-config.ts"
+        "jestConfig": "apps/api/jest.e2e-config.ts",
+        "runInBand": true
       },
       "configurations": {
         "development": {

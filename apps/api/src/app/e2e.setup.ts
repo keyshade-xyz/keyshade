@@ -44,7 +44,6 @@ export class E2ESetup implements OnModuleInit {
         data: {
           name: `My Workspace`,
           description: 'My default workspace',
-          isDefault: true,
           ownerId: regularUser.id,
           lastUpdatedBy: {
             connect: {

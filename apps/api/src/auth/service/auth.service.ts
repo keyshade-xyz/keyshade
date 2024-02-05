@@ -15,7 +15,7 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
-import { WorkspaceRole } from '@prisma/client'
+import createUser from '../../common/create-user'
 
 @Injectable()
 export class AuthService {
@@ -153,11 +153,10 @@ export class AuthService {
     name?: string,
     profilePictureUrl?: string
   ) {
-    const user = await this.findUserByEmail(email)
-
+    let user = await this.findUserByEmail(email)
     // We need to create the user if it doesn't exist yet
     if (!user) {
-      await this.createUser(email, name, profilePictureUrl)
+      user = await this.createUser(email, name, profilePictureUrl)
     }
     return user
   }
@@ -168,39 +167,15 @@ export class AuthService {
     profilePictureUrl: string
   ) {
     // Create the user
-    const user = await this.prisma.user.create({
-      data: {
+    const user = await createUser(
+      {
         email,
         name,
         profilePictureUrl
-      }
-    })
-
-    // Create the user's default workspace
-    await this.prisma.workspace.create({
-      data: {
-        name: `My Workspace`,
-        description: 'My default workspace',
-        isDefault: true,
-        ownerId: user.id,
-        lastUpdatedBy: {
-          connect: {
-            id: user.id
-          }
-        },
-        members: {
-          create: {
-            role: WorkspaceRole.OWNER,
-            invitationAccepted: true,
-            user: {
-              connect: {
-                id: user.id
-              }
-            }
-          }
-        }
-      }
-    })
+      },
+      this.prisma
+    )
+    this.logger.log(`User created: ${email}`)
 
     return user
   }

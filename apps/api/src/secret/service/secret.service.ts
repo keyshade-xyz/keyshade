@@ -2,16 +2,15 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
-  UnauthorizedException
+  NotFoundException
 } from '@nestjs/common'
 import {
+  Authority,
   Environment,
   Project,
   Secret,
   SecretVersion,
-  User,
-  WorkspaceRole
+  User
 } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
@@ -20,7 +19,9 @@ import { SecretWithProjectAndVersion, SecretWithVersion } from '../secret.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
-import permittedRoles from '../../common/get-permitted.roles'
+import getCollectiveProjectAuthorities from '../../common/get-collective-project-authorities'
+import getProjectWithAuthority from '../../common/get-project-with-authority'
+import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 
 @Injectable()
 export class SecretService {
@@ -29,24 +30,22 @@ export class SecretService {
   async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
     const environmentId = dto.environmentId
     // Fetch the project
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
-      WorkspaceRole.MAINTAINER
+      Authority.CREATE_SECRET,
+      this.prisma
     )
 
     // Check if the environment exists
     let environment: Environment | null = null
     if (environmentId) {
-      environment = await this.getEnvironmentByProjectIdAndId(
-        projectId,
-        environmentId
+      environment = await getEnvironmentWithAuthority(
+        user.id,
+        environmentId,
+        Authority.READ_ENVIRONMENT,
+        this.prisma
       )
-      if (!environment) {
-        throw new NotFoundException(
-          `Environment not found: ${environmentId} in project ${projectId}`
-        )
-      }
     }
     if (!environment) {
       environment = await this.getDefaultEnvironmentOfProject(projectId)
@@ -98,10 +97,10 @@ export class SecretService {
   }
 
   async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
-    const secret = await this.getSecretWithRole(
+    const secret = await this.getSecretWithAuthority(
       user.id,
       secretId,
-      WorkspaceRole.MAINTAINER
+      Authority.UPDATE_SECRET
     )
 
     // Check if the secret already exists in the environment
@@ -165,22 +164,19 @@ export class SecretService {
     secretId: Secret['id'],
     environmentId: Environment['id']
   ) {
-    const secret = await this.getSecretWithRole(
+    const secret = await this.getSecretWithAuthority(
       user.id,
       secretId,
-      WorkspaceRole.MAINTAINER
+      Authority.UPDATE_SECRET
     )
 
     // Check if the environment exists
-    const environment = await this.getEnvironmentByProjectIdAndId(
+    const environment = await getEnvironmentWithAuthority(
       secret.projectId,
-      environmentId
+      environmentId,
+      Authority.READ_ENVIRONMENT,
+      this.prisma
     )
-    if (!environment) {
-      throw new NotFoundException(
-        `Environment not found: ${environmentId} in project ${secret.projectId}`
-      )
-    }
 
     // Check if the secret already exists in the environment
     if (
@@ -209,10 +205,10 @@ export class SecretService {
     rollbackVersion: SecretVersion['version']
   ) {
     // Fetch the secret
-    const secret = await this.getSecretWithRole(
+    const secret = await this.getSecretWithAuthority(
       user.id,
       secretId,
-      WorkspaceRole.MAINTAINER
+      Authority.UPDATE_SECRET
     )
 
     // Check if the rollback version is valid
@@ -235,7 +231,11 @@ export class SecretService {
 
   async deleteSecret(user: User, secretId: Secret['id']) {
     // Check if the user has the required role
-    await this.getSecretWithRole(user.id, secretId, WorkspaceRole.MAINTAINER)
+    await this.getSecretWithAuthority(
+      user.id,
+      secretId,
+      Authority.DELETE_SECRET
+    )
 
     // Delete the secret
     return await this.prisma.secret.delete({
@@ -251,10 +251,10 @@ export class SecretService {
     decryptValue: boolean
   ) {
     // Fetch the secret
-    const secret = await this.getSecretWithRole(
+    const secret = await this.getSecretWithAuthority(
       user.id,
       secretId,
-      WorkspaceRole.VIEWER
+      Authority.READ_SECRET
     )
 
     const project = secret.project
@@ -289,10 +289,10 @@ export class SecretService {
 
   async getAllVersionsOfSecret(user: User, secretId: Secret['id']) {
     // Fetch the secret
-    const secret = await this.getSecretWithRole(
+    const secret = await this.getSecretWithAuthority(
       user.id,
       secretId,
-      WorkspaceRole.MAINTAINER
+      Authority.READ_SECRET
     )
 
     return secret.versions
@@ -309,10 +309,11 @@ export class SecretService {
     search: string
   ) {
     // Fetch the project
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
-      WorkspaceRole.VIEWER
+      Authority.READ_SECRET,
+      this.prisma
     )
 
     // Check if the project is allowed to store the private key
@@ -410,18 +411,6 @@ export class SecretService {
     })
   }
 
-  private async getEnvironmentByProjectIdAndId(
-    projectId: Project['id'],
-    environmentId: Environment['id']
-  ) {
-    return await this.prisma.environment.findFirst({
-      where: {
-        projectId,
-        id: environmentId
-      }
-    })
-  }
-
   private async getDefaultEnvironmentOfProject(
     projectId: Project['id']
   ): Promise<Environment | null> {
@@ -449,32 +438,10 @@ export class SecretService {
     )
   }
 
-  private async getSecret(
-    secretId: Secret['id'],
-    projectId: Project['id']
-  ): Promise<Secret> {
-    return await this.prisma.secret.findUnique({
-      where: {
-        id: secretId,
-        projectId
-      },
-      include: {
-        versions: {
-          orderBy: {
-            version: 'desc'
-          },
-          take: 1
-        },
-        lastUpdatedBy: true,
-        environment: true
-      }
-    })
-  }
-
-  private async getSecretWithRole(
+  private async getSecretWithAuthority(
     userId: User['id'],
     secretId: Secret['id'],
-    role: WorkspaceRole
+    authority: Authority
   ): Promise<SecretWithProjectAndVersion> {
     // Fetch the secret
     const secret = await this.prisma.secret.findUnique({
@@ -499,60 +466,26 @@ export class SecretService {
       throw new NotFoundException(`Secret with id ${secretId} not found`)
     }
 
-    // Check for the required membership role
-    if (
-      !secret.project.workspace.members.some(
-        (member) =>
-          member.userId === userId && permittedRoles(role).includes(role)
-      )
+    // Check if the user has the project in their workspace role list
+    const permittedAuthorities = await getCollectiveProjectAuthorities(
+      userId,
+      secret.project,
+      this.prisma
     )
-      throw new UnauthorizedException(
-        `You don't have the required role to access this secret`
+
+    // Check if the user has the required authorities
+    if (
+      !permittedAuthorities.has(authority) &&
+      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
+    ) {
+      throw new ConflictException(
+        `User ${userId} does not have the required authorities`
       )
+    }
 
     // Remove the workspace from the secret
     secret.project.workspace = undefined
 
     return secret
-  }
-
-  private async getProjectWithRole(
-    userId: User['id'],
-    projectId: Project['id'],
-    role: WorkspaceRole
-  ): Promise<Project> {
-    // Fetch the project
-    const project = await this.prisma.project.findUnique({
-      where: {
-        id: projectId
-      },
-      include: {
-        workspace: {
-          include: {
-            members: true
-          }
-        }
-      }
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    // Check for the required membership role
-    if (
-      !project.workspace.members.some(
-        (member) =>
-          member.userId === userId && permittedRoles(role).includes(role)
-      )
-    )
-      throw new UnauthorizedException(
-        `You don't have the required role to access this project`
-      )
-
-    // Remove the workspace from the project
-    project.workspace = undefined
-
-    return project
   }
 }

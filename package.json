@@ -2,6 +2,90 @@
   "name": "keyshade-xyz",
   "version": "0.1.0-alpha",
   "license": "MPL-2.0",
+  "private": true,
+  "release": {
+    "branches": [
+      "main",
+      {
+        "name": "alpha",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES",
+              "BREAKING"
+            ]
+          },
+          "presetConfig": {
+            "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]\n\n{{currentTag}}\n\n{{notes}}",
+            "types": [
+              {
+                "type": "feat",
+                "section": "🚀 Features"
+              },
+              {
+                "type": "fix",
+                "section": "🐛 Bug Fixes"
+              },
+              {
+                "type": "perf",
+                "section": "⚡ Performance Improvements"
+              },
+              {
+                "type": "revert",
+                "section": "🔙 Reverts"
+              },
+              {
+                "type": "docs",
+                "section": "📚 Documentation"
+              },
+              {
+                "type": "style",
+                "section": "💅 Styles"
+              },
+              {
+                "type": "chore",
+                "section": "🔧 Miscellaneous Chores"
+              },
+              {
+                "type": "refactor",
+                "section": "🔨 Code Refactoring"
+              },
+              {
+                "type": "test",
+                "hidden": true
+              }
+            ]
+          }
+        }
+      ],
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md",
+            "package.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github",
+      "@semantic-release/npm"
+    ]
+  },
   "scripts": {
     "dev": "nx run-many -t serve -p api web workspace --parallel --maxParallel 3",
     "dev:api": "nx run api:serve",
@@ -36,10 +120,8 @@
     "db:validate": "nx run api:prisma:validate",
     "db:format": "nx run api:prisma:format",
     "db:reset": "nx run api:prisma:reset",
-    "prepare": "husky install",
-    "changelog": "auto-changelog -c .auto-changelog.json --template auto-changelog-template.hbs"
+    "prepare": "husky install"
   },
-  "private": false,
   "devDependencies": {
     "@nestjs/schematics": "^10.0.3",
     "@nestjs/testing": "^10.3.0",
@@ -63,10 +145,12 @@
     "@types/passport-jwt": "^3.0.13",
     "@types/react": "18.2.33",
     "@types/react-dom": "18.2.14",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
     "autoprefixer": "^10.4.16",
     "babel-jest": "^29.7.0",
+    "conventional-changelog-eslint": "^5.0.0",
     "eslint": "~8.48.0",
     "eslint-config-next": "14.0.4",
     "eslint-config-prettier": "^9.1.0",
@@ -99,13 +183,17 @@
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/swagger": "^7.1.17",
     "@prisma/client": "^5.7.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^11.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/release-notes-generator": "^12.1.0",
     "@supabase/supabase-js": "^2.39.2",
     "@types/jsonwebtoken": "^9.0.5",
-    "auto-changelog": "^2.4.0",
     "axios": "^1.6.5",
     "chalk": "4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "conventional-changelog-conventionalcommits": "^7.0.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "husky": "^8.0.3",
@@ -120,6 +208,8 @@
     "react-dom": "18.2.0",
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.1",
-    "tslib": "^2.6.2"
+    "semantic-release": "^23.0.0",
+    "tslib": "^2.6.2",
+    "uuid": "^9.0.1"
   }
 }
