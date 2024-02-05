@@ -60,6 +60,12 @@ jobs:
           pnpm run e2e:api
           docker compose down
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/apps/api
+
   build-api-alpha:
     needs: validate
     runs-on: ubuntu-latest

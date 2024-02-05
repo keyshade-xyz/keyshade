@@ -18,6 +18,15 @@ ALTER TABLE "ApiKeyWorkspaceScope" DROP CONSTRAINT "ApiKeyWorkspaceScope_apiKeyI
 -- DropForeignKey
 ALTER TABLE "ApiKeyWorkspaceScope" DROP CONSTRAINT "ApiKeyWorkspaceScope_workspaceId_fkey";
 
+-- DropForeignKey
+ALTER TABLE "Project" DROP CONSTRAINT "Project_lastUpdatedById_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Secret" DROP CONSTRAINT "Secret_lastUpdatedById_fkey";
+
+-- DropForeignKey
+ALTER TABLE "SecretVersion" DROP CONSTRAINT "SecretVersion_createdById_fkey";
+
 -- DropIndex
 DROP INDEX "Workspace_isDefault_ownerId_key";
 
@@ -29,7 +38,14 @@ ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
 -- AlterTable
 ALTER TABLE "Project" ADD COLUMN     "apiKeyWorkspaceAuthorityId" TEXT,
 ADD COLUMN     "isPublic" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "workspaceRoleId" TEXT;
+ADD COLUMN     "workspaceRoleId" TEXT,
+ALTER COLUMN "lastUpdatedById" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Secret" ALTER COLUMN "lastUpdatedById" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "SecretVersion" ALTER COLUMN "createdById" DROP NOT NULL;
 
 -- AlterTable
 ALTER TABLE "Workspace" DROP COLUMN "isDefault";
@@ -83,6 +99,9 @@ CREATE UNIQUE INDEX "WorkspaceMemberRoleAssociation_roleId_workspaceMemberId_key
 CREATE UNIQUE INDEX "Workspace_name_ownerId_key" ON "Workspace"("name", "ownerId");
 
 -- AddForeignKey
+ALTER TABLE "Project" ADD CONSTRAINT "Project_lastUpdatedById_fkey" FOREIGN KEY ("lastUpdatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Project" ADD CONSTRAINT "Project_workspaceRoleId_fkey" FOREIGN KEY ("workspaceRoleId") REFERENCES "WorkspaceRole"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -93,3 +112,9 @@ ALTER TABLE "WorkspaceMemberRoleAssociation" ADD CONSTRAINT "WorkspaceMemberRole
 
 -- AddForeignKey
 ALTER TABLE "WorkspaceMemberRoleAssociation" ADD CONSTRAINT "WorkspaceMemberRoleAssociation_workspaceMemberId_fkey" FOREIGN KEY ("workspaceMemberId") REFERENCES "WorkspaceMember"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SecretVersion" ADD CONSTRAINT "SecretVersion_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Secret" ADD CONSTRAINT "Secret_lastUpdatedById_fkey" FOREIGN KEY ("lastUpdatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
