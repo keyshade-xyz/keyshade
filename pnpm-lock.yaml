@@ -119,6 +119,9 @@ importers:
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
     devDependencies:
       '@nestjs/schematics':
         specifier: ^10.0.3
@@ -186,6 +189,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.14
         version: 18.2.14
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.18.0
         version: 6.18.0(@typescript-eslint/parser@6.18.0)(eslint@8.48.0)(typescript@5.2.2)
@@ -4634,6 +4640,10 @@ packages:
 
   /@types/tough-cookie@4.0.5:
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
+    dev: true
+
+  /@types/uuid@9.0.8:
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
     dev: true
 
   /@types/validator@13.11.7:

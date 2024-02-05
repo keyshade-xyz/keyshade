@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { WorkspaceController } from './workspace.controller'
 import { WorkspaceService } from '../service/workspace.service'
-import { WorkspacePermission } from '../misc/workspace.permission'
 import { PrismaService } from '../../prisma/prisma.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
@@ -14,7 +13,6 @@ describe('WorkspaceController', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WorkspaceService,
-        WorkspacePermission,
         PrismaService,
         {
           provide: MAIL_SERVICE,

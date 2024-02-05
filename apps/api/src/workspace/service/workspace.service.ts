@@ -8,20 +8,25 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
-import { User, Workspace, WorkspaceMember, WorkspaceRole } from '@prisma/client'
+import {
+  Authority,
+  User,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceRole
+} from '@prisma/client'
 import {
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
-import { WorkspacePermission } from '../misc/workspace.permission'
-import { ApiKeyWorkspaceRoles } from '../../common/api-key-roles'
 import {
   IMailService,
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
-import permittedRoles from '../../common/get-permitted.roles'
+import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
+import { v4 } from 'uuid'
 
 @Injectable()
 export class WorkspaceService {
@@ -29,7 +34,6 @@ export class WorkspaceService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly permission: WorkspacePermission,
     private readonly jwt: JwtService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
@@ -39,37 +43,67 @@ export class WorkspaceService {
       throw new ConflictException('Workspace already exists')
     }
 
-    const newWorkspace = await this.prisma.workspace.create({
+    const workspaceId = v4()
+
+    const createNewWorkspace = this.prisma.workspace.create({
       data: {
+        id: workspaceId,
         name: dto.name,
         description: dto.description,
-        isDefault: false,
         isFreeTier: true,
         ownerId: user.id,
-        members: {
-          create: {
-            user: {
-              connect: {
-                id: user.id
+        roles: {
+          createMany: {
+            data: [
+              {
+                name: 'Admin',
+                authorities: [Authority.WORKSPACE_ADMIN],
+                hasAdminAuthority: true,
+                colorCode: '#FF0000'
               }
-            },
-            role: WorkspaceRole.OWNER,
-            invitationAccepted: true
+            ]
           }
         }
       }
     })
 
-    // Add users to the project if any
-    if (dto.members && dto.members.length > 0) {
-      this.addMembersToWorkspace(newWorkspace, user, dto.members)
-    }
+    // Add the owner to the workspace
+    const assignOwnership = this.prisma.workspaceMember.create({
+      data: {
+        workspace: {
+          connect: {
+            id: workspaceId
+          }
+        },
+        user: {
+          connect: {
+            id: user.id
+          }
+        },
+        invitationAccepted: true,
+        roles: {
+          create: {
+            role: {
+              connect: {
+                workspaceId_name: {
+                  workspaceId: workspaceId,
+                  name: 'Admin'
+                }
+              }
+            }
+          }
+        }
+      }
+    })
 
-    this.log.debug(
-      `Created workspace ${newWorkspace.name} (${newWorkspace.id})`
-    )
+    const result = await this.prisma.$transaction([
+      createNewWorkspace,
+      assignOwnership
+    ])
 
-    return newWorkspace
+    this.log.debug(`Created workspace ${dto.name} (${workspaceId})`)
+
+    return result[0]
   }
 
   async updateWorkspace(
@@ -78,10 +112,11 @@ export class WorkspaceService {
     dto: UpdateWorkspace
   ) {
     // Fetch the workspace
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.UPDATE_WORKSPACE,
+      this.prisma
     )
 
     // Check if a same named workspace already exists
@@ -99,7 +134,12 @@ export class WorkspaceService {
       },
       data: {
         name: dto.name,
-        description: dto.description
+        description: dto.description,
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
       }
     })
   }
@@ -109,32 +149,81 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     userId: User['id']
   ): Promise<void> {
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.TRANSFER_OWNERSHIP,
+      this.prisma
+    )
+
+    if (userId === user.id) {
+      throw new BadRequestException(
+        `You are already the owner of the workspace ${workspace.name} (${workspace.id})`
+      )
+    }
+
+    const workspaceMembership = await this.getWorkspaceMembership(
+      workspaceId,
+      userId
     )
 
     // Check if the user is a member of the workspace
-    if (!(await this.memberExistsInWorkspace(workspaceId, userId)))
+    if (!workspaceMembership) {
       throw new NotFoundException(
         `User ${userId} is not a member of workspace ${workspace.name} (${workspace.id})`
       )
+    }
 
-    // Update the role of the user
-    await this.updateMembership(workspaceId, userId, {
-      role: WorkspaceRole.OWNER
+    // Get the admin ownership role
+    const adminOwnershipRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId,
+        hasAdminAuthority: true
+      }
+    })
+
+    // Assign this role to the new owner
+    const assignRole = this.prisma.workspaceMemberRoleAssociation.upsert({
+      where: {
+        roleId_workspaceMemberId: {
+          roleId: adminOwnershipRole.id,
+          workspaceMemberId: workspaceMembership.id
+        }
+      },
+      create: {
+        role: {
+          connect: {
+            workspaceId_name: {
+              name: adminOwnershipRole.name,
+              workspaceId
+            }
+          }
+        },
+        workspaceMember: {
+          connect: {
+            id: workspaceMembership.id
+          }
+        }
+      },
+      update: {}
     })
 
     // Update the owner of the workspace
-    await this.prisma.workspace.update({
+    const updateUser = this.prisma.workspace.update({
       where: {
         id: workspaceId
       },
       data: {
-        ownerId: userId
+        ownerId: userId,
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
       }
     })
+
+    await this.prisma.$transaction([assignRole, updateUser])
 
     this.log.debug(
       `Transferred ownership of workspace ${workspace.name} (${workspace.id}) to user ${userId}`
@@ -145,14 +234,12 @@ export class WorkspaceService {
     user: User,
     workspaceId: Workspace['id']
   ): Promise<void> {
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.DELETE_WORKSPACE,
+      this.prisma
     )
-
-    // Delete the API key scopes associated with this workspace
-    await this.deleteApiKeyScopesOfWorkspace(workspaceId)
 
     // Delete the workspace
     await this.prisma.workspace.delete({
@@ -169,10 +256,11 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     members: WorkspaceMemberDTO[]
   ): Promise<void> {
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.ADD_USER,
+      this.prisma
     )
 
     // Add users to the workspace if any
@@ -186,10 +274,11 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     userIds: User['id'][]
   ): Promise<void> {
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.REMOVE_USER,
+      this.prisma
     )
 
     // Check if the user is already a member of the workspace
@@ -199,6 +288,7 @@ export class WorkspaceService {
       )
 
     // Remove users from the workspace if any
+    const ops = []
     if (userIds && userIds.length > 0) {
       for (const userId of userIds) {
         if (userId === user.id)
@@ -207,35 +297,33 @@ export class WorkspaceService {
           )
 
         // Delete the membership
-        await this.prisma.workspaceMember.delete({
-          where: {
-            workspaceId_userId: {
-              workspaceId,
-              userId
+        ops.push(
+          this.prisma.workspaceMember.delete({
+            where: {
+              workspaceId_userId: {
+                workspaceId,
+                userId
+              }
             }
-          }
-        })
-
-        // Delete the API key scopes associated with this workspace
-        await this.deleteApiKeyScopesOfWorkspace(workspaceId, userId)
-
-        this.log.debug(
-          `Removed user ${userId} from workspace ${workspace.name} (${workspace.id})`
+          })
         )
       }
     }
+
+    await this.prisma.$transaction(ops)
   }
 
-  async updateMemberRole(
+  async updateMemberRoles(
     user: User,
     workspaceId: Workspace['id'],
     userId: User['id'],
-    role: WorkspaceRole
+    roleIds: WorkspaceRole['id'][]
   ): Promise<void> {
-    const workspace = await this.getWorkspaceWithRole(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.OWNER
+      Authority.UPDATE_USER_ROLE,
+      this.prisma
     )
 
     // Check if the member in concern is a part of the workspace or not
@@ -244,69 +332,91 @@ export class WorkspaceService {
         `User ${userId} is not a member of workspace ${workspace.name} (${workspace.id})`
       )
 
-    // Check if the user has the permission to update the role of the user
-    this.permission.isWorkspaceAdmin(user, workspaceId)
-
-    // Fetch the current role of the user in concern
-    const currentRole = await this.prisma.workspaceMember.findUnique({
+    // Update the role of the user
+    await this.prisma.workspaceMember.update({
       where: {
         workspaceId_userId: {
           workspaceId,
           userId
         }
       },
-      select: {
-        role: true
+      data: {
+        roles: {
+          set: roleIds.map((id) => ({ id }))
+        }
       }
     })
 
-    // We only want to reduce the roles of the API key if the user's role has been downgraded
-    if (
-      (currentRole.role === WorkspaceRole.OWNER &&
-        role !== WorkspaceRole.OWNER) ||
-      (currentRole.role === WorkspaceRole.MAINTAINER &&
-        role == WorkspaceRole.VIEWER)
-    ) {
-      const previousAPIKeyScopes =
-        await this.prisma.apiKeyWorkspaceScope.findFirst({
-          where: {
-            workspaceId,
-            apiKey: {
-              userId
-            }
-          },
-          select: {
-            roles: true
-          }
-        })
-
-      // Filtering out the old roles that are now not allowed
-      const updatedRoles = previousAPIKeyScopes.roles.filter((scope) =>
-        ApiKeyWorkspaceRoles[currentRole.role].includes(scope)
-      )
-
-      // Update the API key scopes associated with this workspace
-      await this.prisma.apiKeyWorkspaceScope.updateMany({
-        where: {
-          workspaceId,
-          apiKey: {
-            userId
-          }
-        },
-        data: {
-          roles: updatedRoles
-        }
-      })
-    }
-
-    // Update the role of the user
-    await this.updateMembership(workspaceId, userId, {
-      role
-    })
-
     this.log.debug(
-      `Updated role of user ${userId} to ${role} in workspace ${workspace.name} (${workspace.id})`
+      `Updated role of user ${userId} in workspace ${workspace.name} (${workspace.id})`
     )
+  }
+
+  async getAllMembersOfWorkspace(
+    user: User,
+    workspaceId: Workspace['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.READ_USERS,
+      this.prisma
+    )
+
+    return await this.prisma.workspaceMember.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        workspace: {
+          [sort]: order
+        }
+      },
+      where: {
+        workspaceId,
+        user: {
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              email: {
+                contains: search
+              }
+            }
+          ]
+        }
+      },
+      select: {
+        id: true,
+        user: true,
+        roles: {
+          select: {
+            id: true,
+            role: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                colorCode: true,
+                authorities: true,
+                projects: {
+                  select: {
+                    id: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
   }
 
   async acceptInvitation(
@@ -320,8 +430,16 @@ export class WorkspaceService {
       )
 
     // Update the membership
-    await this.updateMembership(workspaceId, user.id, {
-      invitationAccepted: true
+    await this.prisma.workspaceMember.update({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId: user.id
+        }
+      },
+      data: {
+        invitationAccepted: true
+      }
     })
 
     this.log.debug(
@@ -334,8 +452,12 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     inviteeId: User['id']
   ): Promise<void> {
-    // Check if the user has permission to decline the invitation
-    this.permission.isWorkspaceAdmin(user, workspaceId)
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.REMOVE_USER,
+      this.prisma
+    )
 
     // Check if the user has a pending invitation to the workspace
     if (!(await this.invitationPending(workspaceId, inviteeId)))
@@ -419,9 +541,6 @@ export class WorkspaceService {
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
 
-    // Delete the API key scopes associated with this workspace
-    await this.deleteApiKeyScopesOfWorkspace(workspaceId, user.id)
-
     this.log.debug(
       `User ${user.name} (${user.id}) left workspace ${workspaceId}`
     )
@@ -436,7 +555,12 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    await this.getWorkspaceWithRole(user.id, workspaceId, WorkspaceRole.VIEWER)
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.READ_USERS,
+      this.prisma
+    )
 
     return await this.prisma.workspaceMember.findMany({
       skip: (page - 1) * limit,
@@ -474,7 +598,12 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     otherUserId: User['id']
   ): Promise<boolean> {
-    await this.getWorkspaceWithRole(user.id, workspaceId, WorkspaceRole.VIEWER)
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.READ_USERS,
+      this.prisma
+    )
 
     return await this.memberExistsInWorkspace(workspaceId, otherUserId)
   }
@@ -483,10 +612,11 @@ export class WorkspaceService {
     user: User,
     workspaceId: Workspace['id']
   ): Promise<Workspace> {
-    return await this.getWorkspaceWithRole(
+    return await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      WorkspaceRole.VIEWER
+      Authority.READ_USERS,
+      this.prisma
     )
   }
 
@@ -576,7 +706,7 @@ export class WorkspaceService {
     members: WorkspaceMemberDTO[]
   ) {
     for (const member of members) {
-      let memberUser: User | null = await this.prisma.user.findUnique({
+      const memberUser: User | null = await this.prisma.user.findUnique({
         where: {
           email: member.email
         }
@@ -587,15 +717,31 @@ export class WorkspaceService {
         memberUser &&
         (await this.memberExistsInWorkspace(workspace.id, memberUser.id))
       )
-        continue
+        throw new ConflictException(
+          `User ${memberUser.name} (${memberUser.id}) is already a member of workspace ${workspace.name} (${workspace.id})`
+        )
+
+      // Create the workspace membership
+      const createMembership = this.prisma.workspaceMember.create({
+        data: {
+          workspaceId: workspace.id,
+          userId: memberUser.id,
+          roles: {
+            connect: member.roleIds.map((r) => ({ id: r }))
+          }
+        }
+      })
+
+      let txResult
 
       if (memberUser) {
+        txResult = await this.prisma.$transaction([createMembership])
+
         this.mailService.workspaceInvitationMailForUsers(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.id}/join`,
           currentUser.name,
-          member.role,
           true
         )
 
@@ -603,11 +749,16 @@ export class WorkspaceService {
           `Sent workspace invitation mail to registered user ${memberUser}`
         )
       } else {
-        memberUser = await this.prisma.user.create({
+        const createMember = this.prisma.user.create({
           data: {
             email: member.email
           }
         })
+
+        txResult = await this.prisma.$transaction([
+          createMember,
+          createMembership
+        ])
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
@@ -616,11 +767,10 @@ export class WorkspaceService {
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${
             workspace.id
-          }/join?token=${await await this.jwt.signAsync({
+          }/join?token=${await this.jwt.signAsync({
             id: memberUser.id
           })}`,
           currentUser.name,
-          member.role,
           false
         )
 
@@ -629,17 +779,8 @@ export class WorkspaceService {
         )
       }
 
-      // Create the workspace membership
-      const membership = await this.prisma.workspaceMember.create({
-        data: {
-          workspaceId: workspace.id,
-          userId: memberUser.id,
-          role: member.role
-        }
-      })
-
       this.log.debug(
-        `Added user ${memberUser} as ${member.role} to workspace ${workspace.name}. Membership: ${membership.id}`
+        `Added user ${memberUser} to workspace ${workspace.name}. Membership: ${txResult[0].membership.id}`
       )
     }
   }
@@ -648,31 +789,26 @@ export class WorkspaceService {
     workspaceId: string,
     userId: string
   ): Promise<boolean> {
-    return await this.prisma.workspaceMember
-      .count({
+    return (
+      (await this.prisma.workspaceMember.count({
         where: {
           workspaceId,
           userId
         }
-      })
-      .then((count) => count > 0)
+      })) > 0
+    )
   }
 
-  private async updateMembership(
+  private async getWorkspaceMembership(
     workspaceId: Workspace['id'],
-    userId: User['id'],
-    data: Partial<Pick<WorkspaceMember, 'role' | 'invitationAccepted'>>
+    userId: User['id']
   ): Promise<WorkspaceMember> {
-    return await this.prisma.workspaceMember.update({
+    return await this.prisma.workspaceMember.findUnique({
       where: {
         workspaceId_userId: {
           workspaceId,
           userId
         }
-      },
-      data: {
-        role: data.role,
-        invitationAccepted: data.invitationAccepted
       }
     })
   }
@@ -704,53 +840,5 @@ export class WorkspaceService {
         }
       })
       .then((count) => count > 0)
-  }
-
-  private async deleteApiKeyScopesOfWorkspace(
-    workspaceId: Workspace['id'],
-    userId?: User['id']
-  ) {
-    await this.prisma.apiKeyWorkspaceScope.deleteMany({
-      where: {
-        workspaceId,
-        apiKey: {
-          userId
-        }
-      }
-    })
-  }
-
-  private async getWorkspaceWithRole(
-    userId: User['id'],
-    workspaceId: Workspace['id'],
-    role: WorkspaceRole
-  ): Promise<Workspace> {
-    const workspace = await this.prisma.workspace.findUnique({
-      where: {
-        id: workspaceId
-      },
-      include: {
-        members: true
-      }
-    })
-
-    // Check if the workspace exists or not
-    if (!workspace) {
-      throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
-    }
-
-    // Check if the user is a member of the workspace
-    if (
-      !workspace.members.some(
-        (member) =>
-          member.userId === userId && permittedRoles(role).includes(role)
-      )
-    ) {
-      throw new UnauthorizedException(
-        `User ${userId} is not a member of workspace ${workspaceId}`
-      )
-    }
-
-    return workspace
   }
 }

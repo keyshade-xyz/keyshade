@@ -14,6 +14,7 @@ import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
+import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
 
 @Module({
   controllers: [AppController],
@@ -31,7 +32,8 @@ import { WorkspaceModule } from '../workspace/workspace.module'
     UserModule,
     ProjectModule,
     EnvironmentModule,
-    WorkspaceModule
+    WorkspaceModule,
+    WorkspaceRoleModule
   ],
   providers: [
     {

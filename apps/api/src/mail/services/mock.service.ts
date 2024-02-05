@@ -11,15 +11,14 @@ export class MockMailService implements IMailService {
     workspace: string,
     actionUrl: string,
     invitee: string,
-    role: WorkspaceRole,
     forRegisteredUser: boolean
   ): Promise<void> {
     this.log.log(
-      forRegisteredUser?
-      `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}, ${role}`:`Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}, ${role}`
+      forRegisteredUser
+        ? `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
+        : `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
     )
   }
-
 
   async adminUserCreateEmail(email: string): Promise<void> {
     this.log.log(`Create pAdmin User Email: ${email}`)

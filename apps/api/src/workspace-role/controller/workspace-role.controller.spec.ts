@@ -1,29 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { ProjectService } from './project.service'
+import { WorkspaceRoleController } from './workspace-role.controller'
 import { MockMailService } from '../../mail/services/mock.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
-import { mockDeep } from 'jest-mock-extended'
+import { WorkspaceRoleService } from '../service/workspace-role.service'
 
-describe('ProjectService', () => {
-  let service: ProjectService
+describe('WorkspaceRoleController', () => {
+  let controller: WorkspaceRoleController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ProjectService,
+        WorkspaceRoleService,
         PrismaService,
         { provide: MAIL_SERVICE, useClass: MockMailService }
-      ]
-    })
-      .overrideProvider(PrismaService)
-      .useValue(mockDeep<PrismaService>())
-      .compile()
+      ],
+      controllers: [WorkspaceRoleController]
+    }).compile()
 
-    service = module.get<ProjectService>(ProjectService)
+    controller = module.get<WorkspaceRoleController>(WorkspaceRoleController)
   })
 
   it('should be defined', () => {
-    expect(service).toBeDefined()
+    expect(controller).toBeDefined()
   })
 })

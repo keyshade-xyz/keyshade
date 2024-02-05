@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { IMailService } from './interface.service'
-import { WorkspaceRole } from '@prisma/client'
 import { Transporter, createTransport } from 'nodemailer'
 
 @Injectable()
@@ -24,13 +23,13 @@ export class MailService implements IMailService {
     workspace: string,
     actionUrl: string,
     invitee: string,
-    role: WorkspaceRole,
     forRegisteredUser: boolean
   ): Promise<void> {
     const subject = `You have been invited to a ${workspace}`
-    const intro = forRegisteredUser? `Hello again! You've been invited to join a new workspace.`:`Hello there! We're excited to welcome you to Keyshade.`
-    const body = 
-    `<!DOCTYPE html>
+    const intro = forRegisteredUser
+      ? `Hello again! You've been invited to join a new workspace.`
+      : `Hello there! We're excited to welcome you to Keyshade.`
+    const body = `<!DOCTYPE html>
         <html>
         <head>
            <title>Workspace Invitation</title>
@@ -38,7 +37,7 @@ export class MailService implements IMailService {
         <body>
            <h1>Welcome to keyshade!</h1>
            <p>${intro}</p>
-           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong> as ${role.toString()}.</p>
+           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong>.</p>
            <p>Please click on the link below to accept the invitation.</p>
            <p><a href="${actionUrl}">Accept Invitation</a></p>
            <p>Thank you for choosing us.</p>
@@ -48,7 +47,6 @@ export class MailService implements IMailService {
         </html>`
     await this.sendEmail(email, subject, body)
   }
-
 
   async sendOtp(email: string, otp: string): Promise<void> {
     const subject = 'Your Login OTP'

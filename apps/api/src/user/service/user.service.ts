@@ -1,12 +1,13 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { User, WorkspaceRole } from '@prisma/client'
+import { User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
   IMailService,
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
+import createUser from '../../common/create-user'
 
 @Injectable()
 export class UserService {
@@ -104,16 +105,6 @@ export class UserService {
   }
 
   private async deleteUserById(userId: User['id']) {
-    // Delete the user's default workspace
-    await this.prisma.workspace.delete({
-      where: {
-        defaultWorkspace: {
-          ownerId: userId,
-          isDefault: true
-        }
-      }
-    })
-
     // Delete the user
     await this.prisma.user.delete({
       where: {
@@ -136,44 +127,9 @@ export class UserService {
       throw new ConflictException('User already exists with this email')
     }
 
-    // Create the user
-    const newUser = await this.prisma.user.create({
-      data: {
-        name: user.name,
-        email: user.email,
-        profilePictureUrl: user.profilePictureUrl,
-        isActive: user.isActive ?? true,
-        isOnboardingFinished: user.isOnboardingFinished ?? true,
-        isAdmin: user.isAdmin ?? false
-      }
-    })
-    this.log.log(`Created user with email ${user.email}`)
-
     // Create the user's default workspace
-    await this.prisma.workspace.create({
-      data: {
-        name: 'Default',
-        isDefault: true,
-        ownerId: newUser.id,
-        lastUpdatedBy: {
-          connect: {
-            id: newUser.id
-          }
-        },
-        members: {
-          create: {
-            role: WorkspaceRole.OWNER,
-            invitationAccepted: true,
-            user: {
-              connect: {
-                id: newUser.id
-              }
-            }
-          }
-        }
-      }
-    })
-    this.log.log(`Created user's default workspace`)
+    const newUser = await createUser(user, this.prisma)
+    this.log.log(`Created user with email ${user.email}`)
 
     await this.mailService.accountLoginEmail(newUser.email)
     this.log.log(`Sent login email to ${user.email}`)
