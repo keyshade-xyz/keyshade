@@ -7,17 +7,17 @@ export class CreateWorkspaceRole {
 
   @IsString()
   @IsOptional()
-  readonly description: string
+  readonly description?: string
 
   @IsString()
   @IsOptional()
-  readonly colorCode: string
+  readonly colorCode?: string
 
   @IsArray()
   @IsOptional()
-  readonly authorities: Authority[]
+  readonly authorities?: Authority[]
 
   @IsArray()
   @IsOptional()
-  readonly projectIds: string[]
+  readonly projectIds?: string[]
 }

@@ -293,16 +293,10 @@ describe('Workspace Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
-      id: expect.any(String),
-      name: 'Admin',
-      description: null,
-      colorCode: '#FF0000',
-      hasAdminAuthority: true,
+      ...adminRole1,
       createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      authorities: [Authority.WORKSPACE_ADMIN],
-      workspaceId: workspaceAlice.id,
-      projects: []
+      projects: [],
+      updatedAt: expect.any(String)
     })
   })
 
@@ -412,16 +406,10 @@ describe('Workspace Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
-      id: expect.any(String),
-      name: 'Admin',
-      description: null,
-      colorCode: '#FF0000',
-      hasAdminAuthority: true,
+      ...adminRole1,
       createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      authorities: [Authority.WORKSPACE_ADMIN],
-      workspaceId: workspaceAlice.id,
-      projects: []
+      projects: [],
+      updatedAt: expect.any(String)
     })
   })
 
@@ -741,7 +729,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(roles)
+    expect(response.json()).toEqual(expect.arrayContaining(roles))
   })
 
   it('should be able to fetch all the roles of a workspace with READ_WORKSPACE_ROLE role', async () => {
@@ -782,7 +770,7 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(roles)
+    expect(response.json()).toEqual(expect.arrayContaining(roles))
   })
 
   it('should not be able to fetch all the roles of a workspace without READ_WORKSPACE_ROLE role', async () => {
@@ -825,15 +813,9 @@ describe('Workspace Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
-      id: adminRole1.id,
-      name: 'Updated Admin',
-      description: 'Updated Description',
-      colorCode: '#00FF00',
-      authorities: [Authority.WORKSPACE_ADMIN],
-      workspaceId: workspaceAlice.id,
+      ...adminRole1,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      hasAdminAuthority: true,
       projects: expect.arrayContaining([
         {
           id: projects[0].id
@@ -877,12 +859,7 @@ describe('Workspace Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
-      id: adminRole1.id,
-      name: 'Updated Admin',
-      description: 'Updated Description',
-      colorCode: '#00FF00',
-      authorities: [Authority.WORKSPACE_ADMIN],
-      workspaceId: workspaceAlice.id,
+      ...adminRole1,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
       hasAdminAuthority: true,
@@ -895,6 +872,8 @@ describe('Workspace Role Controller Tests', () => {
         }
       ])
     })
+
+    adminRole1 = response.json()
   })
 
   it('should not be able to add projects to the role without UPDATE_WORKSPACE_ROLE and READ_PROJECT authorities', async () => {

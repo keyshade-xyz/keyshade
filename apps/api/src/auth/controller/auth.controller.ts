@@ -115,7 +115,6 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  // TODO: Change the Res Code from 500 -> 401, when incorrect code is provided
   async githubOAuthCallback(@Req() req) {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value

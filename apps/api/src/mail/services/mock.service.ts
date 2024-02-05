@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Logger } from '@nestjs/common'
 import { IMailService } from './interface.service'
-import { WorkspaceRole } from '@prisma/client'
 
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
