@@ -1,3 +1,35 @@
+## [1.0.0-alpha.2](https://github.com/keyshade-xyz/keyshade/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-02-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** update workspace role mechanism and added functionality to create custom roles
+
+### 🚀 Features
+
+* **api:** update workspace role mechanism and added functionality to create custom roles ([6144aea](https://github.com/keyshade-xyz/keyshade/commit/6144aea23ea66cdc1fa7e29080e349d299154933))
+* **nx-cloud:** setup nx workspace ([#108](https://github.com/keyshade-xyz/keyshade/issues/108)) ([cb61d45](https://github.com/keyshade-xyz/keyshade/commit/cb61d458519ff7b06c87e2a9ac99d2109e934895))
+
+
+### 🔧 Miscellaneous Chores
+
+* **api:** update dockerfile entrypoint ([3962beb](https://github.com/keyshade-xyz/keyshade/commit/3962bebf91973e5ca18f47bf5dab5c4fd94cf873))
+* **ci:** add dummy envs to api workflow ([4f6bb44](https://github.com/keyshade-xyz/keyshade/commit/4f6bb4492a47676d56439d730f49c71275c8d60a))
+* **ci:** add fly.io ([46bcd22](https://github.com/keyshade-xyz/keyshade/commit/46bcd225f66aba763ee4619531d3cfec5cb68e11))
+* **ci:** fixed broken fly installation ([6ec728f](https://github.com/keyshade-xyz/keyshade/commit/6ec728ff94c7f74d3b89947f8fef7e7ada6dc996))
+* **ci:** integrated codecov ([0daeff3](https://github.com/keyshade-xyz/keyshade/commit/0daeff3422818463077e02d681715a945bf21340))
+* **ci:** remove auto tag workflow ([63daab3](https://github.com/keyshade-xyz/keyshade/commit/63daab3e23f42ab8dc9666b1490d2990554208ea))
+* **ci:** update release workflow deps ([f2a8243](https://github.com/keyshade-xyz/keyshade/commit/f2a8243bddfca192feceb321a4415b4a039c5c94))
+* **package.json:** update release settings ([9b0e414](https://github.com/keyshade-xyz/keyshade/commit/9b0e4141180d23c39229bc98916b98cb39615b32))
+* update docker push workflow ([e286b1a](https://github.com/keyshade-xyz/keyshade/commit/e286b1a5b0e6729a37c6bd663f577c515ed76ef6))
+* update docker push workflow ([#103](https://github.com/keyshade-xyz/keyshade/issues/103)) ([d562e5a](https://github.com/keyshade-xyz/keyshade/commit/d562e5a1342749d6f04afb960189e92952fd01f5))
+* update preset ([004ea3a](https://github.com/keyshade-xyz/keyshade/commit/004ea3a5b8f1b1c2ab9fcd0ee8fbb5bacf0cc858))
+
+
+### 🔨 Code Refactoring
+
+* addressed sonarqube lints ([#106](https://github.com/keyshade-xyz/keyshade/issues/106)) ([3df13f8](https://github.com/keyshade-xyz/keyshade/commit/3df13f884687586af983c8f36d26cf3a904e70e9))
+
 # 1.0.0-alpha.1 (2024-02-02)
 
 
