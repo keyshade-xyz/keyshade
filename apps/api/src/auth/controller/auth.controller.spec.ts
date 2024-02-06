@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../../prisma/prisma.service'
 import { AuthController } from './auth.controller'
 import { mockDeep } from 'jest-mock-extended'
+import { GithubEnvService } from '../github.stratergy'
+import { ConfigService } from '@nestjs/config'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -15,6 +17,8 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         AuthService,
+        GithubEnvService,
+        ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
         PrismaService

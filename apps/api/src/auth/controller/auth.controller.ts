@@ -1,11 +1,13 @@
 import {
   Controller,
   Get,
+  HttpException,
   HttpStatus,
   Param,
   Post,
   Query,
   Req,
+  Res,
   UseGuards
 } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
@@ -13,11 +15,15 @@ import { UserAuthenticatedResponse } from '../auth.types'
 import { Public } from '../../decorators/public.decorator'
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
+import { GithubEnvService } from '../github.stratergy'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly githubEnvService: GithubEnvService
+  ) {}
 
   @Public()
   @Post('send-otp/:email')
@@ -84,18 +90,20 @@ export class AuthController {
 
   @Public()
   @Get('github')
-  @UseGuards(AuthGuard('github'))
   @ApiOperation({
     summary: 'Github OAuth',
     description:
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  async githubOAuthLogin() {
-    /**
-     * NOTE:
-     * This function does nothing and the oauth redirect is managed my AuthGuard
-     * - The 'github' method inside the authguard is managed by passport
-     */
+  async githubOAuthLogin(@Res() res) {
+    if (!this.githubEnvService.isGithubEnabled()) {
+      throw new HttpException(
+        'Github Login Is Not Enabled In This Environment',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    res.status(302).redirect('/api/auth/github/callback')
   }
 
   @Public()
