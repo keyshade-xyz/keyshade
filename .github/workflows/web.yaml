@@ -56,6 +56,18 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  deploy-stage:
+    runs-on: ubuntu-latest
+    name: Deploy to stage
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install fly CLI
+        run: curl -L https://fly.io/install.sh | sh
+      - name: Deploy to stage
+        run: fly deploy --config fly.web.toml --dockerfile ./apps/web/Dockerfile --app keyshade-web --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
+
   build-web-alpha:
     needs: validate
     runs-on: ubuntu-latest
