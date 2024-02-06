@@ -74,9 +74,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install fly CLI
-        run: curl -L https://fly.io/install.sh | sh
+        run: |
+          curl -L https://fly.io/install.sh | sh
       - name: Deploy to stage
-        run: fly deploy --config fly.api.toml --dockerfile ./apps/api/Dockerfile --app keyshade-api-stage --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
+        run: ~/.fly/bin/fly deploy --config fly.api.toml --dockerfile ./apps/api/Dockerfile --app keyshade-api-stage --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
 
   build-api-alpha:
     needs: validate
