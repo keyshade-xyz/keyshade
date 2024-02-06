@@ -69,6 +69,7 @@ jobs:
   deploy-stage:
     runs-on: ubuntu-latest
     name: Deploy to stage
+    if: ${{ github.ref == 'refs/heads/develop' }}
 
     steps:
       - name: Checkout
