@@ -674,7 +674,7 @@ describe('Workspace Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
-      exists: 
+      exists: false
     })
   })
 
