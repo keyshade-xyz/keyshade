@@ -59,6 +59,7 @@ jobs:
           docker compose up -d
           pnpm run e2e:api -- --no-cache
           docker compose down
+          ls -l
 
       - name: Upload unit test coverage reports to Codecov
         uses: codecov/codecov-action@v3
