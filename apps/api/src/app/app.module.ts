@@ -8,13 +8,14 @@ import { PrismaModule } from '../prisma/prisma.module'
 import { CommonModule } from '../common/common.module'
 import { MailModule } from '../mail/mail.module'
 import { APP_GUARD } from '@nestjs/core'
-import { AuthGuard } from '../auth/guard/auth.guard'
+import { AuthGuard } from '../auth/guard/auth/auth.guard'
 import { UserModule } from '../user/user.module'
 import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
 import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
+import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
 
 @Module({
   controllers: [AppController],
@@ -39,6 +40,10 @@ import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
     {
       provide: APP_GUARD,
       useClass: AuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard
     }
   ]
 })

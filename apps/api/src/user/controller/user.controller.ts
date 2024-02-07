@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common'
 import { UserService } from '../service/user.service'
 import { CurrentUser } from '../../decorators/user.decorator'
-import { User } from '@prisma/client'
+import { Authority, User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { AdminGuard } from '../../auth/guard/admin.guard'
+import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
   ApiCreatedResponse,
@@ -22,6 +22,8 @@ import {
   ApiTags
 } from '@nestjs/swagger'
 import { BypassOnboarding } from '../../decorators/bypass-onboarding.decorator'
+import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { ForbidApiKey } from '../../decorators/forbid-api-key.decorator'
 
 @ApiTags('User Controller')
 @Controller('user')
@@ -30,12 +32,14 @@ export class UserController {
 
   @Get()
   @BypassOnboarding()
+  @RequiredApiKeyAuthorities(Authority.READ_SELF)
   async getCurrentUser(@CurrentUser() user: User) {
     return this.userService.getSelf(user)
   }
 
   @Put()
   @BypassOnboarding()
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SELF)
   async updateSelf(@CurrentUser() user: User, @Body() dto: UpdateUserDto) {
     return await this.userService.updateSelf(user, dto)
   }
@@ -43,6 +47,7 @@ export class UserController {
   @Delete()
   @ApiNoContentResponse()
   @HttpCode(204)
+  @ForbidApiKey()
   async deleteSelf(@CurrentUser() user: User) {
     await this.userService.deleteSelf(user)
   }

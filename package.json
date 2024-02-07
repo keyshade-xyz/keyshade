@@ -103,7 +103,7 @@
     "build:web": "nx run web:build --configuration=production",
     "build:workspace": "nx run workspace:build",
     "test": "nx run-many -t test --parallel",
-    "test:api": "nx run api:test -- --collectCoverage --coverageReporters=json",
+    "test:api": "nx run api:test",
     "e2e:api:prepare": "NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5433/tests' pnpm run db:deploy-migrations",
     "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5433/tests' nx run api:test:e2e",
     "test:web": "nx run web:test",

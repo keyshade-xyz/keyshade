@@ -11,24 +11,27 @@ import {
 } from '@nestjs/common'
 import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '../../decorators/user.decorator'
-import { User, Workspace, WorkspaceRole } from '@prisma/client'
+import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
 import {
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
-import { AdminGuard } from '../../auth/guard/admin.guard'
+import { AdminGuard } from '../../auth/guard/admin/admin.guard'
+import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
 @Controller('workspace')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
+  @RequiredApiKeyAuthorities(Authority.CREATE_WORKSPACE)
   async create(@CurrentUser() user: User, @Body() dto: CreateWorkspace) {
     return this.workspaceService.createWorkspace(user, dto)
   }
 
   @Put(':workspaceId')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_WORKSPACE)
   async update(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -38,6 +41,7 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/transfer-ownership/:userId')
+  @RequiredApiKeyAuthorities(Authority.TRANSFER_OWNERSHIP)
   async transferOwnership(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -47,6 +51,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId')
+  @RequiredApiKeyAuthorities(Authority.DELETE_WORKSPACE)
   async delete(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id']
@@ -55,6 +60,7 @@ export class WorkspaceController {
   }
 
   @Post(':workspaceId/add-users')
+  @RequiredApiKeyAuthorities(Authority.ADD_USER)
   async addUsers(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -64,6 +70,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId/remove-users')
+  @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
   async removeUsers(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -77,6 +84,7 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/update-member-role/:userId')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_USER_ROLE)
   async updateMemberRoles(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -92,6 +100,7 @@ export class WorkspaceController {
   }
 
   @Post(':workspaceId/accept-invitation')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async acceptInvitation(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id']
@@ -100,6 +109,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId/decline-invitation')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async declineInvitation(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id']
@@ -108,6 +118,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId/cancel-invitation/:userId')
+  @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
   async cancelInvitation(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -117,6 +128,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId/leave')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async leave(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id']
@@ -125,6 +137,7 @@ export class WorkspaceController {
   }
 
   @Get(':workspaceId/is-member/:userId')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async isMember(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -138,6 +151,7 @@ export class WorkspaceController {
   }
 
   @Get(':workspaceId/members')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getMembers(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -159,6 +173,7 @@ export class WorkspaceController {
   }
 
   @Get(':workspaceId')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getWorkspace(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id']
@@ -167,6 +182,7 @@ export class WorkspaceController {
   }
 
   @Get('/all/as-user')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,
     @Query('page') page: number = 0,

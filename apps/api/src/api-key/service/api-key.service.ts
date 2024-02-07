@@ -1,11 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { generateApiKey } from '../../common/api-key-generator'
 import { toSHA256 } from '../../common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
+import { User } from '@prisma/client'
 
 @Injectable()
 export class ApiKeyService {
@@ -20,6 +20,11 @@ export class ApiKeyService {
       data: {
         name: dto.name,
         value: hashedApiKey,
+        authorities: dto.authorities
+          ? {
+              set: dto.authorities
+            }
+          : [],
         expiresAt: addHoursToDate(dto.expiresAfter),
         user: {
           connect: {
@@ -31,6 +36,7 @@ export class ApiKeyService {
         id: true,
         expiresAt: true,
         name: true,
+        authorities: true,
         createdAt: true,
         updatedAt: true
       }
@@ -52,6 +58,11 @@ export class ApiKeyService {
       },
       data: {
         name: dto.name,
+        authorities: dto.authorities
+          ? {
+              set: dto.authorities
+            }
+          : undefined,
         expiresAt: dto.expiresAfter
           ? addHoursToDate(dto.expiresAfter)
           : undefined
@@ -60,6 +71,7 @@ export class ApiKeyService {
         id: true,
         expiresAt: true,
         name: true,
+        authorities: true,
         createdAt: true,
         updatedAt: true
       }
@@ -89,6 +101,7 @@ export class ApiKeyService {
         id: true,
         expiresAt: true,
         name: true,
+        authorities: true,
         createdAt: true,
         updatedAt: true
       }
@@ -127,6 +140,7 @@ export class ApiKeyService {
         id: true,
         expiresAt: true,
         name: true,
+        authorities: true,
         createdAt: true,
         updatedAt: true
       }
@@ -155,6 +169,7 @@ export class ApiKeyService {
         id: true,
         expiresAt: true,
         name: true,
+        authorities: true,
         createdAt: true,
         updatedAt: true
       }

@@ -44,6 +44,8 @@ enum Authority {
   UPDATE_API_KEY
   DELETE_API_KEY
   UPDATE_PROFILE
+  READ_SELF
+  UPDATE_SELF
 }
 
 enum NotificationType {
@@ -134,7 +136,7 @@ model Project {
   isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
   isPublic        Boolean  @default(false)
 
-  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
   workspaceId String
@@ -224,12 +226,13 @@ model Secret {
 }
 
 model ApiKey {
-  id        String    @id @default(cuid())
-  name      String
-  value     String    @unique
-  expiresAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String      @id @default(cuid())
+  name        String
+  value       String      @unique
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  authorities Authority[]
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String

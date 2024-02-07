@@ -60,16 +60,29 @@ jobs:
           pnpm run e2e:api
           docker compose down
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload unit test coverage reports to Codecov
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/apps/api
+        with:
+          flags: api-unit-tests
+          files: ./coverage-final.json
+          directory: ./coverage/api
+
+      - name: Upload e2e test coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: api-e2e-tests
+          files: ./coverage-final.json
+          directory: ./coverage-e2e/api
 
   deploy-stage:
     runs-on: ubuntu-latest
     name: Deploy to stage
     if: ${{ github.ref == 'refs/heads/develop' }}
+    needs: validate
 
     steps:
       - name: Checkout
