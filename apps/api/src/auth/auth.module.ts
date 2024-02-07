@@ -1,9 +1,10 @@
-import { Logger, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { AuthService } from './service/auth.service'
 import { AuthController } from './controller/auth.controller'
 import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from '../user/user.module'
-import { GithubEnvService, GithubStrategy } from './github.stratergy'
+import { GithubStrategy } from '../config/oauth-stratergy/github.stratergy'
+import { GithubOAuthStratergyFactory } from '../config/factory/github-stratergy.factory'
 
 @Module({
   imports: [
@@ -20,23 +21,13 @@ import { GithubEnvService, GithubStrategy } from './github.stratergy'
   ],
   providers: [
     AuthService,
-    GithubEnvService,
+    GithubOAuthStratergyFactory,
     {
       provide: GithubStrategy,
-      useFactory: (githubEnvService: GithubEnvService) => {
-        if (githubEnvService.isGithubEnabled()) {
-          const creds = githubEnvService.getGithubCredentials()
-          return new GithubStrategy(
-            creds.clientID,
-            creds.clientSecret,
-            creds.callbackURL
-          )
-        } else {
-          Logger.warn('Github Login Is Not Enabled In This Environment')
-          return null
-        }
+      useFactory: (stratergy: GithubOAuthStratergyFactory) => {
+        stratergy.createOAuthStratergy()
       },
-      inject: [GithubEnvService]
+      inject: [GithubOAuthStratergyFactory]
     }
   ],
   controllers: [AuthController]

@@ -15,14 +15,14 @@ import { UserAuthenticatedResponse } from '../auth.types'
 import { Public } from '../../decorators/public.decorator'
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
-import { GithubEnvService } from '../github.stratergy'
+import { GithubOAuthStratergyFactory } from '../../config/factory/github-stratergy.factory'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private readonly githubEnvService: GithubEnvService
+    private githubStrategy: GithubOAuthStratergyFactory
   ) {}
 
   @Public()
@@ -96,9 +96,9 @@ export class AuthController {
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
   async githubOAuthLogin(@Res() res) {
-    if (!this.githubEnvService.isGithubEnabled()) {
+    if (!this.githubStrategy.checkIfEnabled()) {
       throw new HttpException(
-        'Github Login Is Not Enabled In This Environment',
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
         HttpStatus.BAD_REQUEST
       )
     }
