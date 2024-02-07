@@ -24,8 +24,8 @@ import { GithubOAuthStratergyFactory } from '../config/factory/github-stratergy.
     GithubOAuthStratergyFactory,
     {
       provide: GithubStrategy,
-      useFactory: (stratergy: GithubOAuthStratergyFactory) => {
-        stratergy.createOAuthStratergy()
+      useFactory: (githubOAuthStrategyFactory: GithubOAuthStratergyFactory) => {
+        githubOAuthStrategyFactory.createOAuthStratergy()
       },
       inject: [GithubOAuthStratergyFactory]
     }

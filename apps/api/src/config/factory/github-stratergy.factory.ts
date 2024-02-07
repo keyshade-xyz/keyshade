@@ -34,7 +34,7 @@ export class GithubOAuthStratergyFactory implements OAuthStratergyFactory {
     return this.isOAuthEnabled
   }
 
-  public createOAuthStratergy<T extends typeof PassportStrategy>(): T {
+  public createOAuthStratergy<T extends typeof PassportStrategy>(): T | never {
     if (this.isOAuthEnabled) {
       const creds = this.getGithubCredentials()
       return new GithubStrategy(

@@ -17,7 +17,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     _accessToken: string,
     _refreshToken: string,
     profile: Profile
-  ) {
+  ): Promise<Profile> {
     return profile
   }
 }
