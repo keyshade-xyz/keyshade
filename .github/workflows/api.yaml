@@ -48,7 +48,7 @@ jobs:
       - name: Unit tests
         run: |
           pnpm run db:generate-types
-          pnpm run test:api
+          pnpm run test:api -- --no-cache
 
       - name: E2E tests
         env:
@@ -57,7 +57,7 @@ jobs:
           GITHUB_CALLBACK_URL: dummy
         run: |
           docker compose up -d
-          pnpm run e2e:api
+          pnpm run e2e:api -- --no-cache
           docker compose down
 
       - name: Upload unit test coverage reports to Codecov
