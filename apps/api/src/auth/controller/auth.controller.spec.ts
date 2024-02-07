@@ -17,7 +17,6 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         AuthService,
-        // Todo: Implement mockGithubOAuthStratergyFactory
         GithubOAuthStrategyFactory,
         ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
