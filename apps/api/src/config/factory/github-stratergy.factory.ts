@@ -35,20 +35,18 @@ export class GithubOAuthStratergyFactory implements OAuthStratergyFactory {
   }
 
   public createOAuthStratergy<T extends typeof PassportStrategy>(): T {
-    {
-      if (this.isOAuthEnabled) {
-        const creds = this.getGithubCredentials()
-        return new GithubStrategy(
-          creds.clientID,
-          creds.clientSecret,
-          creds.callbackURL
-        ) as unknown as T
-      } else {
-        Logger.warn(
-          'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
-        )
-        return null
-      }
+    if (this.isOAuthEnabled) {
+      const creds = this.getGithubCredentials()
+      return new GithubStrategy(
+        creds.clientID,
+        creds.clientSecret,
+        creds.callbackURL
+      ) as unknown as T
+    } else {
+      Logger.warn(
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
+      )
+      return null
     }
   }
 }
