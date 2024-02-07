@@ -8,12 +8,15 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import { Reflector } from '@nestjs/core'
-import { IS_PUBLIC_KEY } from '../../decorators/public.decorator'
-import { User } from '@prisma/client'
-import { PrismaService } from '../../prisma/prisma.service'
-import { ONBOARDING_BYPASSED } from '../../decorators/bypass-onboarding.decorator'
+import { IS_PUBLIC_KEY } from '../../../decorators/public.decorator'
+import { PrismaService } from '../../../prisma/prisma.service'
+import { ONBOARDING_BYPASSED } from '../../../decorators/bypass-onboarding.decorator'
+import { AuthenticatedUserContext } from '../../auth.types'
+import { toSHA256 } from '../../../common/to-sha256'
 
-export const X_E2E_USER_EMAIL = 'x-e2e-user-email'
+const X_E2E_USER_EMAIL = 'x-e2e-user-email'
+const X_KEYSHADE_TOKEN = 'x-keyshade-token'
+const AUTHORIZATION = 'authorization'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -35,12 +38,13 @@ export class AuthGuard implements CanActivate {
       return true
     }
 
-    let user: User | null = null
+    let user: AuthenticatedUserContext | null = null
     const request = context.switchToHttp().getRequest()
+    const authType = this.getAuthType(request)
 
     // In case the environment is e2e, we want to authenticate the user using the email
     // else we want to authenticate the user using the JWT token.
-    if (process.env.NODE_ENV === 'e2e') {
+    if (authType !== 'API_KEY' && process.env.NODE_ENV === 'e2e') {
       const email = request.headers[X_E2E_USER_EMAIL]
       if (!email) {
         throw new ForbiddenException()
@@ -53,22 +57,49 @@ export class AuthGuard implements CanActivate {
       })
     } else {
       const request = context.switchToHttp().getRequest()
-      const token = this.extractTokenFromHeader(request)
-      if (!token) {
-        throw new ForbiddenException()
-      }
-      try {
-        const payload = await this.jwtService.verifyAsync(token, {
-          secret: process.env.JWT_SECRET
-        })
 
-        user = await this.prisma.user.findUnique({
+      if (authType === 'API_KEY') {
+        const apiKeyValue = this.extractApiKeyFromHeader(request)
+        if (!apiKeyValue) {
+          throw new ForbiddenException()
+        }
+
+        const apiKey = await this.prisma.apiKey.findUnique({
           where: {
-            id: payload['id']
+            value: toSHA256(apiKeyValue)
+          },
+          include: {
+            user: true
           }
         })
-      } catch {
-        throw new ForbiddenException()
+
+        if (!apiKey) {
+          throw new ForbiddenException()
+        }
+
+        user = apiKey.user
+        user.isAuthViaApiKey = true
+        user.apiKeyAuthorities = new Set(apiKey.authorities)
+      } else if (authType === 'JWT') {
+        const token = this.extractTokenFromHeader(request)
+        if (!token) {
+          throw new ForbiddenException()
+        }
+        try {
+          const payload = await this.jwtService.verifyAsync(token, {
+            secret: process.env.JWT_SECRET
+          })
+
+          user = await this.prisma.user.findUnique({
+            where: {
+              id: payload['id']
+            }
+          })
+        } catch {
+          throw new ForbiddenException()
+        }
+      } else {
+        throw new ForbiddenException('No authentication provided')
       }
     }
 
@@ -98,8 +129,22 @@ export class AuthGuard implements CanActivate {
     return true
   }
 
+  private getAuthType(request: Request): 'JWT' | 'API_KEY' | 'NONE' {
+    if (request.headers[X_KEYSHADE_TOKEN]) {
+      return 'API_KEY'
+    }
+    if (request.headers[AUTHORIZATION]) {
+      return 'JWT'
+    }
+    return 'NONE'
+  }
+
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? []
     return type === 'Bearer' ? token : undefined
+  }
+
+  private extractApiKeyFromHeader(request: Request): string | undefined {
+    return request.headers[X_KEYSHADE_TOKEN]
   }
 }

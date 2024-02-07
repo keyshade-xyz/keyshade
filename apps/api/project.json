@@ -62,6 +62,7 @@
     },
     "test:e2e": {
       "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage-e2e/{projectRoot}"],
       "options": {
         "runInBand": true,
         "devServerTarget": "api:serve",

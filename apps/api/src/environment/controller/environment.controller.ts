@@ -12,10 +12,11 @@ import {
 import { EnvironmentService } from '../service/environment.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
-import { User } from '@prisma/client'
-import { AdminGuard } from '../../auth/guard/admin.guard'
+import { Authority, User } from '@prisma/client'
+import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { ApiTags } from '@nestjs/swagger'
+import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
 @ApiTags('Environment Controller')
 @Controller('environment')
@@ -23,6 +24,7 @@ export class EnvironmentController {
   constructor(private readonly environmentService: EnvironmentService) {}
 
   @Post(':projectId')
+  @RequiredApiKeyAuthorities(Authority.CREATE_ENVIRONMENT)
   async createEnvironment(
     @CurrentUser() user: User,
     @Body() dto: CreateEnvironment,
@@ -32,6 +34,7 @@ export class EnvironmentController {
   }
 
   @Put(':environmentId')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_ENVIRONMENT)
   async updateEnvironment(
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
@@ -45,6 +48,7 @@ export class EnvironmentController {
   }
 
   @Get(':environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironment(
     @CurrentUser() user: User,
     @Param('environmentId') environmentId: string
@@ -53,6 +57,7 @@ export class EnvironmentController {
   }
 
   @Get('/all/:projectId')
+  @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironmentsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
@@ -92,6 +97,7 @@ export class EnvironmentController {
   }
 
   @Delete(':environmentId')
+  @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(
     @CurrentUser() user: User,
     @Param('environmentId') environmentId: string

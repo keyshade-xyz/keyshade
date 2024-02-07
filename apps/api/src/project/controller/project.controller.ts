@@ -11,11 +11,12 @@ import {
 } from '@nestjs/common'
 import { ProjectService } from '../service/project.service'
 import { CurrentUser } from '../../decorators/user.decorator'
-import { Project, User, Workspace } from '@prisma/client'
+import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { AdminGuard } from '../../auth/guard/admin.guard'
+import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { ApiTags } from '@nestjs/swagger'
+import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
 @ApiTags('Project Controller')
 @Controller('project')
@@ -23,6 +24,7 @@ export class ProjectController {
   constructor(private readonly service: ProjectService) {}
 
   @Post(':workspaceId')
+  @RequiredApiKeyAuthorities(Authority.CREATE_PROJECT)
   async createProject(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -32,6 +34,7 @@ export class ProjectController {
   }
 
   @Put(':projectId')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
   async updateProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id'],
@@ -41,6 +44,7 @@ export class ProjectController {
   }
 
   @Delete(':projectId')
+  @RequiredApiKeyAuthorities(Authority.DELETE_PROJECT)
   async deleteProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id']
@@ -49,6 +53,7 @@ export class ProjectController {
   }
 
   @Get(':projectId')
+  @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id']
@@ -57,6 +62,7 @@ export class ProjectController {
   }
 
   @Get('/all/:workspaceId')
+  @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getAllProjects(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],

@@ -48,7 +48,7 @@ jobs:
       - name: Unit tests
         run: |
           pnpm run db:generate-types
-          pnpm run test:api
+          pnpm run test:api -- --no-cache
 
       - name: E2E tests
         env:
@@ -57,19 +57,32 @@ jobs:
           GITHUB_CALLBACK_URL: dummy
         run: |
           docker compose up -d
-          pnpm run e2e:api
+          pnpm run e2e:api -- --no-cache
           docker compose down
 
-      - name: Upload coverage reports to Codecov
+      - name: Upload unit test coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/apps/api
+          directory: coverage/api/
+        with:
+          flags: api-unit-tests
+          files: coverage-final.json
+
+      - name: Upload e2e test coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          directory: coverage-e2e/api/
+        with:
+          flags: api-e2e-tests
+          files: coverage-final.json
 
   deploy-stage:
     runs-on: ubuntu-latest
     name: Deploy to stage
     if: ${{ github.ref == 'refs/heads/develop' }}
+    needs: validate
 
     steps:
       - name: Checkout

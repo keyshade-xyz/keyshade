@@ -15,6 +15,7 @@ describe('Api Key Role Controller Tests', () => {
   let prisma: PrismaService
   let user: User
   let apiKey: ApiKey
+  let apiKeyValue: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -51,7 +52,8 @@ describe('Api Key Role Controller Tests', () => {
       url: '/api-key',
       payload: {
         name: 'Test Key',
-        expiresAfter: '24'
+        expiresAfter: '24',
+        authorities: ['READ_API_KEY']
       },
       headers: {
         'x-e2e-user-email': user.email
@@ -63,12 +65,14 @@ describe('Api Key Role Controller Tests', () => {
       id: expect.any(String),
       name: 'Test Key',
       value: expect.stringMatching(/^ks_*/),
+      authorities: ['READ_API_KEY'],
       expiresAt: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String)
     })
 
     apiKey = response.json()
+    apiKeyValue = response.json().value
   })
 
   it('should be able to update the api key', async () => {
@@ -88,6 +92,7 @@ describe('Api Key Role Controller Tests', () => {
     expect(response.json()).toEqual({
       id: apiKey.id,
       name: 'Updated Test Key',
+      authorities: ['READ_API_KEY'],
       expiresAt: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String)
@@ -109,6 +114,7 @@ describe('Api Key Role Controller Tests', () => {
     expect(response.json()).toEqual({
       id: apiKey.id,
       name: 'Updated Test Key',
+      authorities: ['READ_API_KEY'],
       expiresAt: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String)
@@ -129,11 +135,50 @@ describe('Api Key Role Controller Tests', () => {
       {
         id: apiKey.id,
         name: 'Updated Test Key',
+        authorities: ['READ_API_KEY'],
         expiresAt: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String)
       }
     ])
+  })
+
+  it('should be able to get all api keys using the API key', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api-key/all/as-user',
+      headers: {
+        'x-keyshade-token': apiKeyValue
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual([
+      {
+        id: apiKey.id,
+        name: 'Updated Test Key',
+        authorities: ['READ_API_KEY'],
+        expiresAt: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String)
+      }
+    ])
+  })
+
+  it('should not be able to create api key with invalid authorities of API key', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api-key',
+      payload: {
+        name: 'Test Key',
+        expiresAfter: '24'
+      },
+      headers: {
+        'x-keyshade-token': apiKeyValue
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
   })
 
   it('should be able to delete the api key', async () => {
