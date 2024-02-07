@@ -3,7 +3,8 @@ import { AuthService } from './service/auth.service'
 import { AuthController } from './controller/auth.controller'
 import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from '../user/user.module'
-import { GithubStrategy } from './github.stratergy'
+import { GithubStrategy } from '../config/oauth-strategy/github/github.strategy'
+import { GithubOAuthStrategyFactory } from '../config/factory/github/github-strategy.factory'
 
 @Module({
   imports: [
@@ -18,7 +19,17 @@ import { GithubStrategy } from './github.stratergy'
     }),
     UserModule
   ],
-  providers: [AuthService, GithubStrategy],
+  providers: [
+    AuthService,
+    GithubOAuthStrategyFactory,
+    {
+      provide: GithubStrategy,
+      useFactory: (githubOAuthStrategyFactory: GithubOAuthStrategyFactory) => {
+        githubOAuthStrategyFactory.createOAuthStrategy()
+      },
+      inject: [GithubOAuthStrategyFactory]
+    }
+  ],
   controllers: [AuthController]
 })
 export class AuthModule {}
