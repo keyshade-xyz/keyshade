@@ -61,7 +61,7 @@ jobs:
           docker compose down
 
       - name: Upload unit test coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/api
@@ -69,7 +69,7 @@ jobs:
           flags: api-unit-tests
 
       - name: Upload e2e test coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage-e2e/api
