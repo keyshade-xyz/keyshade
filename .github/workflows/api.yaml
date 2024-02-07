@@ -64,19 +64,17 @@ jobs:
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/api
         with:
           flags: api-unit-tests
-          files: ./coverage-final.json
-          directory: ./coverage/api
 
       - name: Upload e2e test coverage reports to Codecov
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage-e2e/api
         with:
           flags: api-e2e-tests
-          files: ./coverage-final.json
-          directory: ./coverage-e2e/api
 
   deploy-stage:
     runs-on: ubuntu-latest
