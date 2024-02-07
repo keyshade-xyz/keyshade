@@ -64,8 +64,8 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          directory: coverage/api/
         with:
+          directory: coverage/api/
           flags: api-unit-tests
           files: coverage-final.json
 
@@ -73,8 +73,8 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          directory: coverage-e2e/api/
         with:
+          directory: coverage-e2e/api/
           flags: api-e2e-tests
           files: coverage-final.json
 
