@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
-import { GithubOAuthStratergyFactory } from './factory/github-stratergy.factory'
-import { GithubStrategy } from './oauth-stratergy/github.stratergy'
+import { GithubOAuthStrategyFactory } from './factory/github/github-strategy.factory'
+import { GithubStrategy } from './oauth-strategy/github/github.strategy'
 
 @Module({
   providers: [GithubStrategy],
-  exports: [GithubOAuthStratergyFactory, GithubStrategy]
+  exports: [GithubOAuthStrategyFactory, GithubStrategy]
 })
 export class ConfigModule {}

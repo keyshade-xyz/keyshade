@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { AuthController } from './auth.controller'
 import { mockDeep } from 'jest-mock-extended'
 import { ConfigService } from '@nestjs/config'
-import { GithubOAuthStratergyFactory } from '../../config/factory/github-stratergy.factory'
+import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -18,7 +18,7 @@ describe('AuthController', () => {
       providers: [
         AuthService,
         // Todo: Implement mockGithubOAuthStratergyFactory
-        GithubOAuthStratergyFactory,
+        GithubOAuthStrategyFactory,
         ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,

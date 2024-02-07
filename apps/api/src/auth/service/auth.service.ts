@@ -103,7 +103,7 @@ export class AuthService {
 
     this.logger.log(`User logged in: ${email}`)
 
-    const token = await this.generteToken(user.id)
+    const token = await this.generateToken(user.id)
 
     return {
       ...user,
@@ -123,7 +123,7 @@ export class AuthService {
       profilePictureUrl
     )
 
-    const token = await this.generteToken(user.id)
+    const token = await this.generateToken(user.id)
 
     return {
       ...user,
@@ -180,7 +180,7 @@ export class AuthService {
     return user
   }
 
-  private async generteToken(id: string) {
+  private async generateToken(id: string) {
     return await this.jwt.signAsync({ id })
   }
 
