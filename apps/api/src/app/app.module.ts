@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
-import { SupabaseModule } from '../supabase/supabase.module'
 import { ConfigModule } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 import { AuthModule } from '../auth/auth.module'
@@ -22,7 +21,6 @@ import { WorkspaceModule } from '../workspace/workspace.module'
       isGlobal: true
     }),
     PassportModule,
-    SupabaseModule,
     AuthModule,
     PrismaModule,
     CommonModule,
