@@ -6,12 +6,20 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
+import {
+  Authority,
+  EventSource,
+  EventType,
+  User,
+  Workspace,
+  WorkspaceRole
+} from '@prisma/client'
 import { CreateWorkspaceRole } from '../dto/create-workspace-role/create-workspace-role'
 import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import getCollectiveWorkspaceAuthorities from '../../common/get-collective-workspace-authorities'
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
 import { PrismaService } from '../../prisma/prisma.service'
+import createEvent from '../../common/create-event'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -33,7 +41,7 @@ export class WorkspaceRoleService {
       )
     }
 
-    await getWorkspaceWithAuthority(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
       Authority.CREATE_WORKSPACE_ROLE,
@@ -70,6 +78,23 @@ export class WorkspaceRoleService {
         }
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspaceRole,
+        type: EventType.WORKSPACE_ROLE_CREATED,
+        source: EventSource.WORKSPACE_ROLE,
+        title: `Workspace deleted`,
+        metadata: {
+          workspaceRoleId: workspaceRole.id,
+          name: workspaceRole.name,
+          workspaceId,
+          workspaceName: workspace.name
+        }
+      },
+      this.prisma
+    )
 
     this.logger.log(
       `User with id ${user.id} created workspace role with id ${workspaceRole.id}`
@@ -155,6 +180,22 @@ export class WorkspaceRoleService {
           }
         })
 
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspaceRole,
+        type: EventType.WORKSPACE_ROLE_UPDATED,
+        source: EventSource.WORKSPACE_ROLE,
+        title: `Workspace role updated`,
+        metadata: {
+          workspaceRoleId: workspaceRole.id,
+          name: workspaceRole.name,
+          workspaceId: workspaceRole.workspaceId
+        }
+      },
+      this.prisma
+    )
+
     this.logger.log(
       `User with id ${user.id} updated workspace role with id ${workspaceRoleId}`
     )
@@ -180,6 +221,21 @@ export class WorkspaceRoleService {
         id: workspaceRoleId
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        type: EventType.WORKSPACE_ROLE_DELETED,
+        source: EventSource.WORKSPACE_ROLE,
+        title: `Workspace role deleted`,
+        metadata: {
+          workspaceRoleId: workspaceRole.id,
+          name: workspaceRole.name,
+          workspaceId: workspaceRole.workspaceId
+        }
+      },
+      this.prisma
+    )
 
     this.logger.log(
       `User with id ${user.id} deleted workspace role with id ${workspaceRoleId}`

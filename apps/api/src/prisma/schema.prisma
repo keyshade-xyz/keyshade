@@ -34,10 +34,12 @@ enum EventType {
   REMOVED_FROM_WORKSPACE
   ACCEPTED_INVITATION
   DECLINED_INVITATION
+  CANCELLED_INVITATION
+  LEFT_WORKSPACE
   WORKSPACE_MEMBERSHIP_UPDATED
   WORKSPACE_UPDATED
   WORKSPACE_DELETED
-  WORKSAPCE_CREATED
+  WORKSPACE_CREATED
   WORKSPACE_ROLE_CREATED
   WORKSPACE_ROLE_UPDATED
   WORKSPACE_ROLE_DELETED
@@ -95,6 +97,7 @@ enum Authority {
   UPDATE_PROFILE
   READ_SELF
   UPDATE_SELF
+  READ_EVENT
 }
 
 enum NotificationType {
@@ -114,12 +117,15 @@ enum NotificationType {
 }
 
 model Event {
-  id        String         @id @default(cuid())
-  source    EventSource
-  triggerer EventTriggerer
-  severity  EventSeverity
-  timestamp DateTime       @default(now())
-  metadata  Json
+  id          String         @id @default(cuid())
+  source      EventSource
+  triggerer   EventTriggerer
+  severity    EventSeverity
+  type        EventType
+  timestamp   DateTime       @default(now())
+  metadata    Json
+  title       String
+  description String?
 
   sourceUser                  User?            @relation(fields: [sourceUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   sourceUserId                String?

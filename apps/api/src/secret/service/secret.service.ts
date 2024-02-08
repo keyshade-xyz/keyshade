@@ -2,11 +2,14 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common'
 import {
   Authority,
   Environment,
+  EventSource,
+  EventType,
   Project,
   Secret,
   SecretVersion,
@@ -15,16 +18,19 @@ import {
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { decrypt } from '../../common/decrypt'
-import { SecretWithProjectAndVersion, SecretWithVersion } from '../secret.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
-import getCollectiveProjectAuthorities from '../../common/get-collective-project-authorities'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
+import getSecretWithAuthority from '../../common/get-secret-with-authority'
+import { SecretWithVersion } from '../secret.types'
+import createEvent from '../../common/create-event'
 
 @Injectable()
 export class SecretService {
+  private readonly logger = new Logger(SecretService.name)
+
   constructor(private readonly prisma: PrismaService) {}
 
   async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
@@ -66,7 +72,7 @@ export class SecretService {
     }
 
     // Create the secret
-    return await this.prisma.secret.create({
+    const secret = await this.prisma.secret.create({
       data: {
         name: dto.name,
         rotateAt: addHoursToDate(dto.rotateAfter),
@@ -94,14 +100,40 @@ export class SecretService {
         }
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_ADDED,
+        source: EventSource.SECRET,
+        title: `Secret created`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId,
+          projectName: project.name,
+          environmentId: environment.id,
+          environmentName: environment.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} created secret ${secret.id}`)
+
+    return secret
   }
 
   async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
-    const secret = await this.getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.UPDATE_SECRET
+      Authority.UPDATE_SECRET,
+      this.prisma
     )
+
+    let result
 
     // Check if the secret already exists in the environment
     if (
@@ -128,7 +160,7 @@ export class SecretService {
         take: 1
       })
 
-      return await this.prisma.secret.update({
+      result = await this.prisma.secret.update({
         where: {
           id: secretId
         },
@@ -147,7 +179,7 @@ export class SecretService {
       })
     }
 
-    return await this.prisma.secret.update({
+    result = await this.prisma.secret.update({
       where: {
         id: secretId
       },
@@ -157,6 +189,27 @@ export class SecretService {
         lastUpdatedById: user.id
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret updated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
+
+    return result
   }
 
   async updateSecretEnvironment(
@@ -164,10 +217,11 @@ export class SecretService {
     secretId: Secret['id'],
     environmentId: Environment['id']
   ) {
-    const secret = await this.getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.UPDATE_SECRET
+      Authority.UPDATE_SECRET,
+      this.prisma
     )
 
     // Check if the environment exists
@@ -189,7 +243,7 @@ export class SecretService {
     }
 
     // Update the secret
-    return await this.prisma.secret.update({
+    const result = await this.prisma.secret.update({
       where: {
         id: secretId
       },
@@ -197,6 +251,29 @@ export class SecretService {
         environmentId
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret environment updated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name,
+          environmentId: environment.id,
+          environmentName: environment.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
+
+    return result
   }
 
   async rollbackSecret(
@@ -205,10 +282,11 @@ export class SecretService {
     rollbackVersion: SecretVersion['version']
   ) {
     // Fetch the secret
-    const secret = await this.getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.UPDATE_SECRET
+      Authority.UPDATE_SECRET,
+      this.prisma
     )
 
     // Check if the rollback version is valid
@@ -231,10 +309,11 @@ export class SecretService {
 
   async deleteSecret(user: User, secretId: Secret['id']) {
     // Check if the user has the required role
-    await this.getSecretWithAuthority(
+    await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.DELETE_SECRET
+      Authority.DELETE_SECRET,
+      this.prisma
     )
 
     // Delete the secret
@@ -251,10 +330,11 @@ export class SecretService {
     decryptValue: boolean
   ) {
     // Fetch the secret
-    const secret = await this.getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.READ_SECRET
+      Authority.READ_SECRET,
+      this.prisma
     )
 
     const project = secret.project
@@ -289,10 +369,11 @@ export class SecretService {
 
   async getAllVersionsOfSecret(user: User, secretId: Secret['id']) {
     // Fetch the secret
-    const secret = await this.getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
-      Authority.READ_SECRET
+      Authority.READ_SECRET,
+      this.prisma
     )
 
     return secret.versions
@@ -436,56 +517,5 @@ export class SecretService {
         }
       })) > 0
     )
-  }
-
-  private async getSecretWithAuthority(
-    userId: User['id'],
-    secretId: Secret['id'],
-    authority: Authority
-  ): Promise<SecretWithProjectAndVersion> {
-    // Fetch the secret
-    const secret = await this.prisma.secret.findUnique({
-      where: {
-        id: secretId
-      },
-      include: {
-        versions: true,
-        project: {
-          include: {
-            workspace: {
-              include: {
-                members: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!secret) {
-      throw new NotFoundException(`Secret with id ${secretId} not found`)
-    }
-
-    // Check if the user has the project in their workspace role list
-    const permittedAuthorities = await getCollectiveProjectAuthorities(
-      userId,
-      secret.project,
-      this.prisma
-    )
-
-    // Check if the user has the required authorities
-    if (
-      !permittedAuthorities.has(authority) &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    ) {
-      throw new ConflictException(
-        `User ${userId} does not have the required authorities`
-      )
-    }
-
-    // Remove the workspace from the secret
-    secret.project.workspace = undefined
-
-    return secret
   }
 }
