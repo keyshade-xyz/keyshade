@@ -51,7 +51,65 @@ jobs:
           pnpm run test:api
 
       - name: E2E tests
+        env:
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
         run: |
           docker compose up -d
           pnpm run e2e:api
           docker compose down
+          ls -l
+
+      - name: Upload unit test coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: api-unit-tests
+          files: /coverage/api/coverage-final.json
+
+      - name: Upload e2e test coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: api-e2e-tests
+          files: /coverage-e2e/api/coverage-final.json
+
+  deploy-stage:
+    runs-on: ubuntu-latest
+    name: Deploy to stage
+    if: ${{ github.ref == 'refs/heads/develop' && (startsWith(github.event.head_commit, 'fix') || startsWith(github.event.head_commit, 'feat') || startsWith(github.event.head_commit, 'chore') || startsWith(github.event.head_commit, 'refactor') || startsWith(github.event.head_commit, 'patch')) }}
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install fly CLI
+        run: |
+          curl -L https://fly.io/install.sh | sh
+      - name: Deploy to stage
+        run: ~/.fly/bin/fly deploy --config fly.api.toml --dockerfile ./apps/api/Dockerfile --app keyshade-api-stage --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
+
+  build-api-release:
+    needs: validate
+    runs-on: ubuntu-latest
+    name: Build and push API docker image for release
+    if: ${{ startsWith(github.ref , 'refs/tags/')}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t keyshade/keyshade-api:${{ github.ref_name }} keyshade/keyshade-api:latest -f ./apps/api/Dockerfile .
+
+      - name: Push Docker image
+        run: docker push keyshade/keyshade-api

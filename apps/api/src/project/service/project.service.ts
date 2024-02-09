@@ -1,36 +1,27 @@
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import {
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common'
-import {
+  Authority,
   Project,
   SecretVersion,
   User,
-  Workspace,
-  WorkspaceRole
+  Workspace
 } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { createKeyPair } from '../../common/create-key-pair'
 import { excludeFields } from '../../common/exclude-fields'
-import { ProjectWithSecrets } from '../project.types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { decrypt } from '../../common/decrypt'
 import { encrypt } from '../../common/encrypt'
-import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
-import permittedRoles from '../../common/get-permitted.roles'
+import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
+import getProjectWithAuthority from '../../common/get-project-with-authority'
+import { v4 } from 'uuid'
 
 @Injectable()
 export class ProjectService {
   private readonly log: Logger = new Logger(ProjectService.name)
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly permission: WorkspacePermission
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createProject(
     user: User,
@@ -38,13 +29,12 @@ export class ProjectService {
     dto: CreateProject
   ): Promise<Project> {
     // Check if the workspace exists or not
-    const workspace = await this.getWorkspaceByUserIdAndId(user.id, workspaceId)
-
-    if (!workspace)
-      throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
-
-    // Check if the user has the permission to create a project
-    await this.permission.isWorkspaceMaintainer(user, workspaceId)
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.CREATE_SECRET,
+      this.prisma
+    )
 
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
@@ -70,9 +60,19 @@ export class ProjectService {
 
     const userId = user.id
 
+    const newProjectId = v4()
+
+    const adminRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId: workspaceId,
+        hasAdminAuthority: true
+      }
+    })
+
     // Create and return the project
-    const newProject = await this.prisma.project.create({
+    const createNewProject = this.prisma.project.create({
       data: {
+        id: newProjectId,
         name: data.name,
         description: data.description,
         publicKey: data.publicKey,
@@ -91,6 +91,22 @@ export class ProjectService {
       }
     })
 
+    const addProjectToAdminRoleOfItsWorkspace =
+      this.prisma.workspaceRole.update({
+        where: {
+          id: adminRole.id
+        },
+        data: {
+          projects: {
+            connect: {
+              id: newProjectId
+            }
+          }
+        }
+      })
+
+    const createEnvironmentOps = []
+
     // Create and assign the environments provided in the request, if any
     // or create a default environment
     if (dto.environments && dto.environments.length > 0) {
@@ -101,39 +117,43 @@ export class ProjectService {
           'will create default env: ',
           defaultEnvironmentExists === false ? environment.isDefault : false
         )
-        const env = await this.prisma.environment.create({
-          data: {
-            name: environment.name,
-            description: environment.description,
-            isDefault:
-              defaultEnvironmentExists === false
-                ? environment.isDefault
-                : false,
-            projectId: newProject.id,
-            lastUpdatedById: user.id
-          }
-        })
+        createEnvironmentOps.push(
+          this.prisma.environment.create({
+            data: {
+              name: environment.name,
+              description: environment.description,
+              isDefault:
+                defaultEnvironmentExists === false
+                  ? environment.isDefault
+                  : false,
+              projectId: newProjectId,
+              lastUpdatedById: user.id
+            }
+          })
+        )
 
         defaultEnvironmentExists =
           defaultEnvironmentExists || environment.isDefault
-
-        this.log.debug(`Created environment ${env} for project ${newProject}`)
       }
     } else {
-      const defaultEnvironment = await this.prisma.environment.create({
-        data: {
-          name: 'Default',
-          description: 'Default environment for the project',
-          isDefault: true,
-          projectId: newProject.id,
-          lastUpdatedById: user.id
-        }
-      })
-
-      this.log.debug(
-        `Created default environment ${defaultEnvironment} for project ${newProject}`
+      createEnvironmentOps.push(
+        this.prisma.environment.create({
+          data: {
+            name: 'Default',
+            description: 'Default environment for the project',
+            isDefault: true,
+            projectId: newProjectId,
+            lastUpdatedById: user.id
+          }
+        })
       )
     }
+
+    const [newProject] = await this.prisma.$transaction([
+      createNewProject,
+      addProjectToAdminRoleOfItsWorkspace,
+      ...createEnvironmentOps
+    ])
 
     this.log.debug(`Created project ${newProject}`)
     // It is important that we log before the private key is set
@@ -148,10 +168,11 @@ export class ProjectService {
     projectId: Project['id'],
     dto: UpdateProject
   ): Promise<Project> {
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
-      WorkspaceRole.MAINTAINER
+      Authority.UPDATE_PROJECT,
+      this.prisma
     )
 
     // Check if project with this name already exists for the user
@@ -169,6 +190,8 @@ export class ProjectService {
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? project.privateKey : null
     }
+
+    const versionUpdateOps = []
 
     let privateKey = undefined,
       publicKey = undefined
@@ -206,20 +229,22 @@ export class ProjectService {
         }
 
         for (const version of updatedVersions) {
-          await this.prisma.secretVersion.update({
-            where: {
-              id: version.id
-            },
-            data: {
-              value: version.value
-            }
-          })
+          versionUpdateOps.push(
+            this.prisma.secretVersion.update({
+              where: {
+                id: version.id
+              },
+              data: {
+                value: version.value
+              }
+            })
+          )
         }
       }
     }
 
     // Update and return the project
-    const updatedProject = await this.prisma.project.update({
+    const updateProjectOp = this.prisma.project.update({
       where: {
         id: projectId
       },
@@ -229,6 +254,11 @@ export class ProjectService {
       }
     })
 
+    const [updatedProject] = await this.prisma.$transaction([
+      updateProjectOp,
+      ...versionUpdateOps
+    ])
+
     this.log.debug(`Updated project ${updatedProject.id}`)
     return {
       ...updatedProject,
@@ -237,10 +267,11 @@ export class ProjectService {
   }
 
   async deleteProject(user: User, projectId: Project['id']): Promise<void> {
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
-      WorkspaceRole.MAINTAINER
+      Authority.DELETE_PROJECT,
+      this.prisma
     )
 
     // Delete the project
@@ -254,20 +285,22 @@ export class ProjectService {
   }
 
   async getProjectByUserAndId(user: User, projectId: Project['id']) {
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
-      WorkspaceRole.VIEWER
+      Authority.READ_PROJECT,
+      this.prisma
     )
 
     return project
   }
 
   async getProjectById(projectId: Project['id']) {
-    const project = await this.getProjectWithRole(
+    const project = await getProjectWithAuthority(
       null,
       projectId,
-      WorkspaceRole.VIEWER
+      Authority.READ_PROJECT,
+      this.prisma
     )
 
     return project
@@ -365,65 +398,5 @@ export class ProjectService {
         }
       })) > 0
     )
-  }
-
-  private async getWorkspaceByUserIdAndId(
-    userId: User['id'],
-    workspaceId: Workspace['id']
-  ): Promise<Workspace> {
-    return await this.prisma.workspace.findFirst({
-      where: {
-        id: workspaceId,
-        members: {
-          some: {
-            userId
-          }
-        }
-      },
-      include: {
-        members: true
-      }
-    })
-  }
-
-  private async getProjectWithRole(
-    userId: User['id'],
-    projectId: Project['id'],
-    role: WorkspaceRole
-  ): Promise<ProjectWithSecrets> {
-    // Fetch the project
-    const project = await this.prisma.project.findUnique({
-      where: {
-        id: projectId
-      },
-      include: {
-        workspace: {
-          include: {
-            members: true
-          }
-        },
-        secrets: true
-      }
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    // Check for the required membership role
-    if (
-      !project.workspace.members.some(
-        (member) =>
-          member.userId === userId && permittedRoles(role).includes(role)
-      )
-    )
-      throw new UnauthorizedException(
-        `You don't have the required role to access this project`
-      )
-
-    // Remove the workspace from the project
-    project.workspace = undefined
-
-    return project
   }
 }

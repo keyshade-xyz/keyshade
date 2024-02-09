@@ -1,4 +1,6 @@
 {
+  "nxCloudAccessToken": "NWUxMDk4YTEtY2IwZi00NDg4LWJlZWEtMTg1Zjg4ODdlMzQ1fHJlYWQtd3JpdGU=",
+  "nxCloudUrl": "https://cloud.nx.app",
   "extends": "nx/presets/npm.json",
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
@@ -29,7 +31,6 @@
       }
     }
   },
-  "nxCloudAccessToken": "MzgyY2NhZjctY2MwNi00NTZiLThiYjctMTFhZGQyY2ZiNDIyfHJlYWQtd3JpdGU=",
   "generators": {
     "@nx/react": {
       "application": {

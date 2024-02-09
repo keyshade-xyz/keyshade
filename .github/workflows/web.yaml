@@ -2,7 +2,7 @@ on:
   push:
     paths: ['apps/web/**', '.github/workflows/web.yaml']
     tags:
-      - 'v*.*.*'
+      - '*'
   pull_request:
     paths: ['apps/web/**']
 
@@ -51,15 +51,37 @@ jobs:
         run: |
           pnpm run test:web
 
-  build-alpha:
-    needs: validate
-    if: ${{ github.ref == 'refs/tags/v*.*.*-alpha' && github.event_name == 'push' }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: web
+
+  deploy-stage:
     runs-on: ubuntu-latest
-    name: Build and push docker image
+    name: Deploy to stage
+    if: ${{ github.ref == 'refs/heads/develop' && (startsWith(github.event.head_commit, 'fix') || startsWith(github.event.head_commit, 'feat') || startsWith(github.event.head_commit, 'chore') || startsWith(github.event.head_commit, 'refactor') || startsWith(github.event.head_commit, 'style') || startsWith(github.event.head_commit, 'patch')) }}
+    needs: validate
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Install fly CLI
+        run: |
+          curl -L https://fly.io/install.sh | sh
+      - name: Deploy to stage
+        run: ~/.fly/bin/fly deploy --config fly.web.toml --dockerfile ./apps/web/Dockerfile --app keyshade-web --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
+
+  build-web-release:
+    needs: validate
+    runs-on: ubuntu-latest
+    name: Build and push Web docker image for release
+    if: ${{ startsWith(github.ref , 'refs/tags/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -68,39 +90,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t keyshade/keyshade-web:${{ github.ref_name }}-alpha -f ./apps/web/Dockerfile .
+        run: docker build -t keyshade/keyshade-web:${{ github.ref_name }} keyshade/keyshade-web:latest -f ./apps/web/Dockerfile .
 
       - name: Push Docker image
         run: docker push keyshade/keyshade-web
-
-  build-release:
-    needs: validate
-    if: ${{ github.ref == 'refs/tags/v*.*.*' && github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    name: Build and push docker image
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build Docker image
-        run: docker build -t keyshade/keyshade-web:latest -t keyshade/keyshade-web:${{ github.ref_name }} -f ./apps/web/Dockerfile .
-
-      - name: Push Docker image
-        run: docker push keyshade/keyshade-web
-
-  deploy:
-    needs: build-release
-    if: ${{ github.ref == 'refs/tags/v*.*.*' && github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    name: Deploy to Render
-
-    steps:
-      - name: deploy
-        run: curl ${{ secrets.RENDER_WEB_DEPLOY_HOOK }}

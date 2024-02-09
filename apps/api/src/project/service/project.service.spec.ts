@@ -4,7 +4,6 @@ import { MockMailService } from '../../mail/services/mock.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
-import { WorkspacePermission } from '../../workspace/misc/workspace.permission'
 
 describe('ProjectService', () => {
   let service: ProjectService
@@ -14,8 +13,7 @@ describe('ProjectService', () => {
       providers: [
         ProjectService,
         PrismaService,
-        { provide: MAIL_SERVICE, useClass: MockMailService },
-        WorkspacePermission
+        { provide: MAIL_SERVICE, useClass: MockMailService }
       ]
     })
       .overrideProvider(PrismaService)

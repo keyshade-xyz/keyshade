@@ -1,13 +1,10 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common'
-import { Environment, Project, User, WorkspaceRole } from '@prisma/client'
+import { ConflictException, Injectable } from '@nestjs/common'
+import { Authority, Environment, Project, User } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '../../prisma/prisma.service'
+import getProjectWithAuthority from '../../common/get-project-with-authority'
+import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 
 @Injectable()
 export class EnvironmentService {
@@ -19,7 +16,12 @@ export class EnvironmentService {
     projectId: Project['id']
   ) {
     // Check if the user has the required role to create an environment
-    await this.getProjectWithRole(user.id, projectId, WorkspaceRole.MAINTAINER)
+    await getProjectWithAuthority(
+      user.id,
+      projectId,
+      Authority.CREATE_ENVIRONMENT,
+      this.prisma
+    )
 
     // Check if an environment with the same name already exists
     if (await this.environmentExists(dto.name, projectId)) {
@@ -28,28 +30,35 @@ export class EnvironmentService {
 
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
+    const ops = []
+
     if (dto.isDefault) {
-      await this.makeAllNonDefault(projectId)
+      ops.push(this.makeAllNonDefault(projectId))
     }
 
     // Create the environment
-    return await this.prisma.environment.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        isDefault: dto.isDefault,
-        project: {
-          connect: {
-            id: projectId
-          }
-        },
-        lastUpdatedBy: {
-          connect: {
-            id: user.id
+    ops.unshift(
+      this.prisma.environment.create({
+        data: {
+          name: dto.name,
+          description: dto.description,
+          isDefault: dto.isDefault,
+          project: {
+            connect: {
+              id: projectId
+            }
+          },
+          lastUpdatedBy: {
+            connect: {
+              id: user.id
+            }
           }
         }
-      }
-    })
+      })
+    )
+
+    const result = await this.prisma.$transaction(ops)
+    return result[0]
   }
 
   async updateEnvironment(
@@ -57,10 +66,11 @@ export class EnvironmentService {
     dto: UpdateEnvironment,
     environmentId: Environment['id']
   ) {
-    const environment = await this.getEnvironmentWithRole(
+    const environment = await getEnvironmentWithAuthority(
       user.id,
       environmentId,
-      WorkspaceRole.MAINTAINER
+      Authority.UPDATE_ENVIRONMENT,
+      this.prisma
     )
 
     // Check if an environment with the same name already exists
@@ -72,35 +82,43 @@ export class EnvironmentService {
       throw new ConflictException('Environment already exists')
     }
 
+    const ops = []
+
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
     if (dto.isDefault) {
-      await this.makeAllNonDefault(environment.projectId)
+      ops.push(this.makeAllNonDefault(environment.projectId))
     }
 
     // Update the environment
-    return await this.prisma.environment.update({
-      where: {
-        id: environmentId
-      },
-      data: {
-        name: dto.name,
-        description: dto.description,
-        isDefault: dto.isDefault,
-        lastUpdatedById: user.id
-      },
-      include: {
-        secrets: true,
-        lastUpdatedBy: true
-      }
-    })
+    ops.unshift(
+      this.prisma.environment.update({
+        where: {
+          id: environmentId
+        },
+        data: {
+          name: dto.name,
+          description: dto.description,
+          isDefault: dto.isDefault,
+          lastUpdatedById: user.id
+        },
+        include: {
+          secrets: true,
+          lastUpdatedBy: true
+        }
+      })
+    )
+
+    const result = await this.prisma.$transaction(ops)
+    return result[0]
   }
 
   async getEnvironment(user: User, environmentId: Environment['id']) {
-    const environment = await this.getEnvironmentWithRole(
+    const environment = await getEnvironmentWithAuthority(
       user.id,
       environmentId,
-      WorkspaceRole.VIEWER
+      Authority.READ_ENVIRONMENT,
+      this.prisma
     )
 
     return environment
@@ -115,7 +133,12 @@ export class EnvironmentService {
     order: string,
     search: string
   ) {
-    await this.getProjectWithRole(user.id, projectId, WorkspaceRole.VIEWER)
+    await getProjectWithAuthority(
+      user.id,
+      projectId,
+      Authority.READ_ENVIRONMENT,
+      this.prisma
+    )
 
     // Get the environments
     return await this.prisma.environment.findMany({
@@ -162,10 +185,11 @@ export class EnvironmentService {
   }
 
   async deleteEnvironment(user: User, environmentId: Environment['id']) {
-    const environment = await this.getEnvironmentWithRole(
+    const environment = await getEnvironmentWithAuthority(
       user.id,
       environmentId,
-      WorkspaceRole.MAINTAINER
+      Authority.DELETE_ENVIRONMENT,
+      this.prisma
     )
 
     const projectId = environment.projectId
@@ -205,24 +229,8 @@ export class EnvironmentService {
     })
   }
 
-  private async getByProjectIdAndId(
-    projectId: Project['id'],
-    environmentId: Environment['id']
-  ) {
-    return await this.prisma.environment.findFirst({
-      where: {
-        id: environmentId,
-        projectId
-      },
-      include: {
-        secrets: true,
-        lastUpdatedBy: true
-      }
-    })
-  }
-
   private async makeAllNonDefault(projectId: Project['id']): Promise<void> {
-    await this.prisma.environment.updateMany({
+    this.prisma.environment.updateMany({
       where: {
         projectId
       },
@@ -230,89 +238,5 @@ export class EnvironmentService {
         isDefault: false
       }
     })
-  }
-
-  private async getEnvironmentWithRole(
-    userId: User['id'],
-    environmentId: Environment['id'],
-    role: WorkspaceRole
-  ): Promise<Environment> {
-    // Fetch the environment
-    const environment = await this.prisma.environment.findUnique({
-      where: {
-        id: environmentId
-      },
-      include: {
-        project: {
-          include: {
-            workspace: {
-              include: {
-                members: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!environment) {
-      throw new NotFoundException(
-        `Environment with id ${environmentId} not found`
-      )
-    }
-
-    // Check for the required membership role
-    if (
-      !environment.project.workspace.members.some(
-        (member) => member.userId === userId && member.role === role
-      )
-    )
-      throw new UnauthorizedException(
-        `You don't have the required role to access this environment`
-      )
-
-    // Remove the workspace from the environment
-    environment.project.workspace = undefined
-
-    return environment
-  }
-
-  private async getProjectWithRole(
-    userId: User['id'],
-    projectId: Project['id'],
-    role: WorkspaceRole
-  ): Promise<Project> {
-    // Fetch the project
-    const project = await this.prisma.project.findUnique({
-      where: {
-        id: projectId
-      },
-      include: {
-        workspace: {
-          include: {
-            members: true
-          }
-        }
-      }
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    // Check for the required membership role
-    if (
-      !project.workspace.members.some(
-        (member) => member.userId === userId && member.role === role
-      )
-    )
-      throw new UnauthorizedException(
-        `You don't have the required role to access this project`
-      )
-
-    // Remove the workspace from the project
-    project.workspace = undefined
-
-    return project
   }
 }

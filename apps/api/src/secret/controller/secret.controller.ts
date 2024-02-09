@@ -11,11 +11,12 @@ import {
 } from '@nestjs/common'
 import { SecretService } from '../service/secret.service'
 import { CurrentUser } from '../../decorators/user.decorator'
-import { User } from '@prisma/client'
+import { Authority, User } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { AdminGuard } from '../../auth/guard/admin.guard'
+import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { ApiTags } from '@nestjs/swagger'
+import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
 @ApiTags('Secret Controller')
 @Controller('secret')
@@ -23,6 +24,7 @@ export class SecretController {
   constructor(private readonly secretService: SecretService) {}
 
   @Post(':projectId')
+  @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
   async createSecret(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
@@ -32,6 +34,7 @@ export class SecretController {
   }
 
   @Put(':secretId')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async updateSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
@@ -41,6 +44,10 @@ export class SecretController {
   }
 
   @Put(':secretId/environment/:environmentId')
+  @RequiredApiKeyAuthorities(
+    Authority.UPDATE_SECRET,
+    Authority.READ_ENVIRONMENT
+  )
   async updateSecretEnvironment(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
@@ -54,6 +61,7 @@ export class SecretController {
   }
 
   @Put(':secretId/rollback/:rollbackVersion')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async rollbackSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
@@ -67,6 +75,7 @@ export class SecretController {
   }
 
   @Delete(':secretId')
+  @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string
@@ -75,6 +84,7 @@ export class SecretController {
   }
 
   @Get(':secretId')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
@@ -84,6 +94,7 @@ export class SecretController {
   }
 
   @Get(':secretId/versions')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllVersionsOfSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string
@@ -92,6 +103,7 @@ export class SecretController {
   }
 
   @Get('/all/:projectId')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,

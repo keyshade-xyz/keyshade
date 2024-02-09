@@ -1,4 +1,4 @@
-export const addHoursToDate = (hours: string): Date | undefined => {
+export const addHoursToDate = (hours?: string): Date | undefined => {
   if (!hours || hours === 'never') return undefined
 
   const date = new Date()

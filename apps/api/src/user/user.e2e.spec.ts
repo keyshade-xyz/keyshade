@@ -7,6 +7,8 @@ import { UserModule } from './user.module'
 import { PrismaService } from '../prisma/prisma.service'
 import { AppModule } from '../app/app.module'
 import { User } from '@prisma/client'
+import { MAIL_SERVICE } from '../mail/services/interface.service'
+import { MockMailService } from '../mail/services/mock.service'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -19,7 +21,10 @@ describe('User Controller Tests', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, UserModule]
-    }).compile()
+    })
+      .overrideProvider(MAIL_SERVICE)
+      .useClass(MockMailService)
+      .compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter()
     )
@@ -49,56 +54,10 @@ describe('User Controller Tests', () => {
         isOnboardingFinished: false
       }
     })
+  })
 
-    // Regular user's workspace
-    await prisma.workspace.create({
-      data: {
-        name: 'Default',
-        isDefault: true,
-        ownerId: regularUser.id,
-        lastUpdatedBy: {
-          connect: {
-            id: regularUser.id
-          }
-        },
-        members: {
-          create: {
-            role: 'OWNER',
-            invitationAccepted: true,
-            user: {
-              connect: {
-                id: regularUser.id
-              }
-            }
-          }
-        }
-      }
-    })
-
-    // Admin user's workspace
-    await prisma.workspace.create({
-      data: {
-        name: 'Default',
-        isDefault: true,
-        ownerId: adminUser.id,
-        lastUpdatedBy: {
-          connect: {
-            id: adminUser.id
-          }
-        },
-        members: {
-          create: {
-            role: 'OWNER',
-            invitationAccepted: true,
-            user: {
-              connect: {
-                id: adminUser.id
-              }
-            }
-          }
-        }
-      }
-    })
+  it('should be defined', () => {
+    expect(app).toBeDefined()
   })
 
   it(`should be able to get self as admin`, async () => {
@@ -312,6 +271,7 @@ describe('User Controller Tests', () => {
   })
 
   afterAll(async () => {
+    await prisma.user.deleteMany()
     await prisma.$disconnect()
     await app.close()
   })

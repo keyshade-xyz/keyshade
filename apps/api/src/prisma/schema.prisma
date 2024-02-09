@@ -7,14 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum WorkspaceRole {
-  OWNER // Can do everything
-  MAINTAINER // Can do everything except deleting the workspace
-  VIEWER // Can only view the workspace, projects in it and use its secrets
-}
-
-enum ApiKeyWorkspaceRole {
+enum Authority {
+  // Workspace authorities
   CREATE_PROJECT
+  READ_USERS
+  ADD_USER
+  REMOVE_USER
+  UPDATE_USER_ROLE
+  READ_WORKSPACE
+  UPDATE_WORKSPACE
+  DELETE_WORKSPACE
+  TRANSFER_OWNERSHIP
+  CREATE_WORKSPACE_ROLE
+  READ_WORKSPACE_ROLE
+  UPDATE_WORKSPACE_ROLE
+  DELETE_WORKSPACE_ROLE
+  WORKSPACE_ADMIN
+
+  // Project authorities
   READ_PROJECT
   UPDATE_PROJECT
   DELETE_PROJECT
@@ -22,26 +32,20 @@ enum ApiKeyWorkspaceRole {
   READ_SECRET
   UPDATE_SECRET
   DELETE_SECRET
-  READ_USERS
-  ADD_USER
-  REMOVE_USER
-  UPDATE_USER_ROLE
   CREATE_ENVIRONMENT
   READ_ENVIRONMENT
   UPDATE_ENVIRONMENT
   DELETE_ENVIRONMENT
-}
 
-enum ApiKeyGeneralRole {
+  // User authorities
   CREATE_WORKSPACE
-  READ_WORKSPACE
-  UPDATE_WORKSPACE
-  DELETE_WORKSPACE
   CREATE_API_KEY
   READ_API_KEY
   UPDATE_API_KEY
   DELETE_API_KEY
   UPDATE_PROFILE
+  READ_SELF
+  UPDATE_SELF
 }
 
 enum NotificationType {
@@ -130,38 +134,64 @@ model Project {
   privateKey      String? // We store this only if the user wants us to do so! 
   storePrivateKey Boolean  @default(false)
   isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
+  isPublic        Boolean  @default(false)
 
-  lastUpdatedBy   User?  @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade)
-  lastUpdatedById String
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  secrets      Secret[]
-  environments Environment[]
+  secrets                    Secret[]
+  environments               Environment[]
+  workspaceRole              WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  workspaceRoleId            String?
+  apiKeyWorkspaceAuthorityId String?
 }
 
+model WorkspaceRole {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  colorCode         String?
+  hasAdminAuthority Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  authorities      Authority[]
+  workspaceMembers WorkspaceMemberRoleAssociation[]
+
+  projects Project[]
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([workspaceId, name])
+}
+
+model WorkspaceMemberRoleAssociation {
+  id String @id @default(cuid())
+
+  role   WorkspaceRole @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roleId String
+
+  workspaceMember   WorkspaceMember @relation(fields: [workspaceMemberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceMemberId String
+
+  @@unique([roleId, workspaceMemberId])
+}
+
+// This model stores the membership of a workspace-user and their roles.
 model WorkspaceMember {
-  id                 String        @id @default(cuid())
-  role               WorkspaceRole
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                 String                           @id @default(cuid())
+  user               User                             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId             String
-  workspace          Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspace          Workspace                        @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   workspaceId        String
-  invitationAccepted Boolean       @default(false)
+  invitationAccepted Boolean                          @default(false)
+  roles              WorkspaceMemberRoleAssociation[]
 
   @@unique([workspaceId, userId])
-}
-
-model ApiKeyWorkspaceScope {
-  id    String                @id @default(cuid())
-  roles ApiKeyWorkspaceRole[]
-
-  apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  apiKeyId String
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model SecretVersion {
@@ -173,8 +203,8 @@ model SecretVersion {
   secret   Secret @relation(fields: [secretId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdOn   DateTime @default(now())
-  createdBy   User?    @relation(fields: [createdById], references: [id], onUpdate: Cascade)
-  createdById String
+  createdBy   User?    @relation(fields: [createdById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  createdById String?
 }
 
 model Secret {
@@ -185,8 +215,8 @@ model Secret {
   updatedAt DateTime        @updatedAt
   rotateAt  DateTime?
 
-  lastUpdatedBy   User   @relation(fields: [lastUpdatedById], references: [id])
-  lastUpdatedById String
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -196,13 +226,13 @@ model Secret {
 }
 
 model ApiKey {
-  id        String    @id @default(cuid())
-  name      String
-  value     String    @unique
-  expiresAt DateTime?
-
-  generalRoles    ApiKeyGeneralRole[]
-  workspaceScopes ApiKeyWorkspaceScope[]
+  id          String      @id @default(cuid())
+  name        String
+  value       String      @unique
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  authorities Authority[]
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
@@ -224,7 +254,6 @@ model Workspace {
   name        String
   description String?
   isFreeTier  Boolean  @default(true)
-  isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   ownerId     String
@@ -232,9 +261,9 @@ model Workspace {
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  projects             Project[]
-  members              WorkspaceMember[]
-  apiKeyWorkspaceScope ApiKeyWorkspaceScope[]
+  projects Project[]
+  members  WorkspaceMember[]
+  roles    WorkspaceRole[]
 
-  @@unique([isDefault, ownerId], name: "defaultWorkspace")
+  @@unique([name, ownerId])
 }

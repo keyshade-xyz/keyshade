@@ -1,32 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Logger } from '@nestjs/common'
 import { IMailService } from './interface.service'
-import { WorkspaceRole } from '@prisma/client'
 
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
-  async workspaceInvitationMailForRegisteredUser(
+  async workspaceInvitationMailForUsers(
     email: string,
     workspace: string,
     actionUrl: string,
     invitee: string,
-    role: WorkspaceRole
+    forRegisteredUser: boolean
   ): Promise<void> {
     this.log.log(
-      `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}, ${role}`
-    )
-  }
-
-  async workspaceInvitationMailForNonRegisteredUser(
-    email: string,
-    workspace: string,
-    actionUrl: string,
-    invitee: string,
-    role: WorkspaceRole
-  ): Promise<void> {
-    this.log.log(
-      `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}, ${role}`
+      forRegisteredUser
+        ? `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
+        : `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
     )
   }
 

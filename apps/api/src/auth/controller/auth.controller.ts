@@ -1,11 +1,13 @@
 import {
   Controller,
   Get,
+  HttpException,
   HttpStatus,
   Param,
   Post,
   Query,
   Req,
+  Res,
   UseGuards
 } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
@@ -13,11 +15,15 @@ import { UserAuthenticatedResponse } from '../auth.types'
 import { Public } from '../../decorators/public.decorator'
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
+import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private githubOAuthStrategyFactory: GithubOAuthStrategyFactory
+  ) {}
 
   @Public()
   @Post('send-otp/:email')
@@ -84,18 +90,20 @@ export class AuthController {
 
   @Public()
   @Get('github')
-  @UseGuards(AuthGuard('github'))
   @ApiOperation({
     summary: 'Github OAuth',
     description:
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  async githubOAuthLogin() {
-    /**
-     * NOTE:
-     * This function does nothing and the oauth redirect is managed my AuthGuard
-     * - The 'github' method inside the authguard is managed by passport
-     */
+  async githubOAuthLogin(@Res() res) {
+    if (!this.githubOAuthStrategyFactory.isOAuthEnabled()) {
+      throw new HttpException(
+        'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    res.status(302).redirect('/api/auth/github/callback')
   }
 
   @Public()
@@ -115,7 +123,6 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  // TODO: Change the Res Code from 500 -> 401, when incorrect code is provided
   async githubOAuthCallback(@Req() req) {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value

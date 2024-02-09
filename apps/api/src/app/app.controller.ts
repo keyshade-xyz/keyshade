@@ -5,8 +5,6 @@ import { ApiTags } from '@nestjs/swagger'
 @ApiTags('App Controller')
 @Controller()
 export class AppController {
-  constructor() {}
-
   @Get('health')
   @Public()
   health(): string {

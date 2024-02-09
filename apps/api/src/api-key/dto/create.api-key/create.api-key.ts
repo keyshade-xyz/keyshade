@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyGeneralRole, ApiKeyWorkspaceScope } from '@prisma/client'
+import { ApiKey, Authority } from '@prisma/client'
 import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export class CreateApiKey {
@@ -6,12 +6,10 @@ export class CreateApiKey {
   name: ApiKey['name']
 
   @IsString()
-  expiresAfter: '24' | '168' | '720' | '8760' | 'never' = 'never'
-
-  @IsArray()
-  generalRoles: ApiKeyGeneralRole[]
+  @IsOptional()
+  expiresAfter?: '24' | '168' | '720' | '8760' | 'never' = 'never'
 
   @IsArray()
   @IsOptional()
-  scopes: ApiKeyWorkspaceScope[]
+  authorities?: Authority[] = []
 }

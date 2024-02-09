@@ -1,0 +1,41 @@
+codecov:
+  max_report_age: 24
+  require_ci_to_pass: false
+
+flag_management:
+  default_rules: # the rules that will be followed for any flag added, generally
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+      - type: patch
+        target: 90%
+  individual_flags:
+    - name: web
+      paths:
+        - apps/web/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 98%
+    - name: api-e2e-tests
+      paths:
+        - apps/api/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 95%
+        - type: patch
+          target: 98%
+    - name: api-unit-tests
+      paths:
+        - apps/api/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 90%
