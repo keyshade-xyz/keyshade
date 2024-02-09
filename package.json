@@ -5,11 +5,7 @@
   "private": true,
   "release": {
     "branches": [
-      "main",
-      {
-        "name": "alpha",
-        "prerelease": true
-      }
+      "main"
     ],
     "plugins": [
       [
