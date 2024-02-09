@@ -10,6 +10,8 @@ import {
 import { PrismaService } from '../../prisma/prisma.service'
 import {
   Authority,
+  EventSource,
+  EventType,
   User,
   Workspace,
   WorkspaceMember,
@@ -27,6 +29,7 @@ import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
 import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import { v4 } from 'uuid'
+import createEvent from '../../common/create-event'
 
 @Injectable()
 export class WorkspaceService {
@@ -100,10 +103,26 @@ export class WorkspaceService {
       createNewWorkspace,
       assignOwnership
     ])
+    const workspace = result[0]
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_CREATED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace created`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(`Created workspace ${dto.name} (${workspaceId})`)
 
-    return result[0]
+    return workspace
   }
 
   async updateWorkspace(
@@ -112,7 +131,7 @@ export class WorkspaceService {
     dto: UpdateWorkspace
   ) {
     // Fetch the workspace
-    const workspace = await getWorkspaceWithAuthority(
+    let workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
       Authority.UPDATE_WORKSPACE,
@@ -128,7 +147,7 @@ export class WorkspaceService {
     }
 
     // Update the workspace
-    return await this.prisma.workspace.update({
+    workspace = await this.prisma.workspace.update({
       where: {
         id: workspaceId
       },
@@ -142,6 +161,25 @@ export class WorkspaceService {
         }
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_UPDATED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace updated`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name
+        }
+      },
+      this.prisma
+    )
+
+    this.log.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
+
+    return workspace
   }
 
   async transferOwnership(
@@ -225,6 +263,22 @@ export class WorkspaceService {
 
     await this.prisma.$transaction([assignRole, updateUser])
 
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_UPDATED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace transferred`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name,
+          newOwnerId: userId
+        }
+      },
+      this.prisma
+    )
+
     this.log.debug(
       `Transferred ownership of workspace ${workspace.name} (${workspace.id}) to user ${userId}`
     )
@@ -248,6 +302,21 @@ export class WorkspaceService {
       }
     })
 
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_DELETED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace deleted`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name
+        }
+      },
+      this.prisma
+    )
+
     this.log.debug(`Deleted workspace ${workspace.name} (${workspace.id})`)
   }
 
@@ -267,6 +336,26 @@ export class WorkspaceService {
     if (members && members.length > 0) {
       this.addMembersToWorkspace(workspace, user, members)
     }
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.INVITED_TO_WORKSPACE,
+        source: EventSource.WORKSPACE,
+        title: `Invited users to workspace`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name,
+          members: members.map((m) => m.email)
+        }
+      },
+      this.prisma
+    )
+
+    this.log.debug(
+      `Added users to workspace ${workspace.name} (${workspace.id})`
+    )
   }
 
   async removeUsersFromWorkspace(
@@ -311,6 +400,26 @@ export class WorkspaceService {
     }
 
     await this.prisma.$transaction(ops)
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.REMOVED_FROM_WORKSPACE,
+        source: EventSource.WORKSPACE,
+        title: `Removed users from workspace`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name,
+          members: userIds
+        }
+      },
+      this.prisma
+    )
+
+    this.log.debug(
+      `Removed users from workspace ${workspace.name} (${workspace.id})`
+    )
   }
 
   async updateMemberRoles(
@@ -346,6 +455,23 @@ export class WorkspaceService {
         }
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_MEMBERSHIP_UPDATED,
+        source: EventSource.WORKSPACE,
+        title: `Updated role of user in workspace`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name,
+          userId,
+          roleIds
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(
       `Updated role of user ${userId} in workspace ${workspace.name} (${workspace.id})`
@@ -442,6 +568,26 @@ export class WorkspaceService {
       }
     })
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceId
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.ACCEPTED_INVITATION,
+        source: EventSource.WORKSPACE,
+        title: `${user.name} accepted invitation to workspace ${workspace.name}`,
+        metadata: {
+          workspaceId: workspaceId
+        }
+      },
+      this.prisma
+    )
+
     this.log.debug(
       `User ${user.name} (${user.id}) accepted invitation to workspace ${workspaceId}`
     )
@@ -452,7 +598,7 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     inviteeId: User['id']
   ): Promise<void> {
-    await getWorkspaceWithAuthority(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
       Authority.REMOVE_USER,
@@ -467,6 +613,21 @@ export class WorkspaceService {
 
     // Delete the membership
     await this.deleteMembership(workspaceId, inviteeId)
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.CANCELLED_INVITATION,
+        source: EventSource.WORKSPACE,
+        title: `Cancelled invitation to workspace`,
+        metadata: {
+          workspaceId: workspaceId,
+          inviteeId
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(
       `User ${user.name} (${user.id}) declined invitation to workspace ${workspaceId}`
@@ -485,6 +646,26 @@ export class WorkspaceService {
 
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
+
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceId
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.DECLINED_INVITATION,
+        source: EventSource.WORKSPACE,
+        title: `${user.name} declined invitation to workspace ${workspace.name}`,
+        metadata: {
+          workspaceId: workspaceId
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(
       `User ${user.name} (${user.id}) declined invitation to workspace ${workspaceId}`
@@ -540,6 +721,26 @@ export class WorkspaceService {
 
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
+
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceId
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.LEFT_WORKSPACE,
+        source: EventSource.WORKSPACE,
+        title: `User left workspace`,
+        metadata: {
+          workspaceId: workspaceId
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(
       `User ${user.name} (${user.id}) left workspace ${workspaceId}`

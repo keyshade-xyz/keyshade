@@ -4,4 +4,4 @@ Of course, to get started, you will need to have the required components in plac
 
 * Make sure you have Git installed and have an account in GitHub
 * Have an account in Supabase along with a project
-* Have your SMTP credentials ready (only for backend development)
+* Have your SMTP credentials ready

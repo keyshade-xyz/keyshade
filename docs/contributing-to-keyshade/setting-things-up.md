@@ -1,3 +1,7 @@
+---
+description: A tour of how to get the prerequisites done
+---
+
 # Setting things up
 
 ## Setting up the .env file
@@ -9,6 +13,10 @@ cp .env.example .env
 ```
 
 Fill in the values for the environment variables in the `.env` file. You can find the values for the variables in the [Environment Variables](environment-variables.md) section.&#x20;
+
+## Installing Docker
+
+We tend to use docker for doing the heavy lifting on our behalf. Currently, we use it to set up the integration test environment before you make a commit. To make sure your experience is smooth, consider installing docker from [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
 ## Setting up `pnpm`
 
@@ -39,6 +47,13 @@ pnpm install
 The last step is to install NX. It is the monorepo management tool that we are using. Read more about it in [https://nx.dev](https://nx.dev). To install nx, you need to run the following command:
 
 ```bash
-pnpm i -g nx
+npm i -g nx
 ```
 
+## Installing nest CLI
+
+If you plan to work on the API, you would need the **NestJS CLI.** To do this, simply run:
+
+```bash
+npm install -g @nestjs/cli
+```

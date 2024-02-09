@@ -7,6 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventSource {
+  SECRET
+  API_KEY
+  ENVIRONMENT
+  PROJECT
+  WORKSPACE
+  WORKSPACE_ROLE
+  USER
+  WORKSPACE_MEMBER
+}
+
+enum EventTriggerer {
+  USER
+  SYSTEM
+}
+
+enum EventSeverity {
+  INFO
+  WARN
+  ERROR
+}
+
+enum EventType {
+  INVITED_TO_WORKSPACE
+  REMOVED_FROM_WORKSPACE
+  ACCEPTED_INVITATION
+  DECLINED_INVITATION
+  CANCELLED_INVITATION
+  LEFT_WORKSPACE
+  WORKSPACE_MEMBERSHIP_UPDATED
+  WORKSPACE_UPDATED
+  WORKSPACE_DELETED
+  WORKSPACE_CREATED
+  WORKSPACE_ROLE_CREATED
+  WORKSPACE_ROLE_UPDATED
+  WORKSPACE_ROLE_DELETED
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_DELETED
+  SECRET_UPDATED
+  SECRET_DELETED
+  SECRET_ADDED
+  API_KEY_UPDATED
+  API_KEY_DELETED
+  API_KEY_ADDED
+  ENVIRONMENT_UPDATED
+  ENVIRONMENT_DELETED
+  ENVIRONMENT_ADDED
+  USER_UPDATED
+}
+
 enum Authority {
   // Workspace authorities
   CREATE_PROJECT
@@ -46,6 +97,7 @@ enum Authority {
   UPDATE_PROFILE
   READ_SELF
   UPDATE_SELF
+  READ_EVENT
 }
 
 enum NotificationType {
@@ -62,6 +114,35 @@ enum NotificationType {
   ENVIRONMENT_UPDATED
   ENVIRONMENT_DELETED
   ENVIRONMENT_ADDED
+}
+
+model Event {
+  id          String         @id @default(cuid())
+  source      EventSource
+  triggerer   EventTriggerer
+  severity    EventSeverity
+  type        EventType
+  timestamp   DateTime       @default(now())
+  metadata    Json
+  title       String
+  description String?
+
+  sourceUser                  User?            @relation(fields: [sourceUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceUserId                String?
+  sourceWorkspace             Workspace?       @relation(fields: [sourceWorkspaceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceWorkspaceId           String?
+  sourceWorkspaceRole         WorkspaceRole?   @relation(fields: [sourceWorkspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceWorkspaceRoleId       String?
+  sourceProject               Project?         @relation(fields: [sourceProjectId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceProjectId             String?
+  sourceEnvironment           Environment?     @relation(fields: [sourceEnvironmentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceEnvironmentId         String?
+  sourceSecret                Secret?          @relation(fields: [sourceSecretId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceSecretId              String?
+  sourceApiKey                ApiKey?          @relation(fields: [sourceApiKeyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceApiKeyId              String?
+  sourceWorkspaceMembership   WorkspaceMember? @relation(fields: [sourceWorkspaceMembershipId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceWorkspaceMembershipId String?
 }
 
 model Notification {
@@ -94,6 +175,7 @@ model User {
   projects         Project[] // Stores the projects the user updated
   environments     Environment[] // Stores the environments the user updated
   secretVersion    SecretVersion[]
+  events           Event[]
 
   @@index([email], name: "email")
 }
@@ -122,6 +204,8 @@ model Environment {
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
+
+  events Event[]
 }
 
 model Project {
@@ -142,6 +226,7 @@ model Project {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  events                     Event[]
   secrets                    Secret[]
   environments               Environment[]
   workspaceRole              WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -161,6 +246,7 @@ model WorkspaceRole {
   authorities      Authority[]
   workspaceMembers WorkspaceMemberRoleAssociation[]
 
+  events   Event[]
   projects Project[]
 
   workspaceId String
@@ -190,6 +276,7 @@ model WorkspaceMember {
   workspaceId        String
   invitationAccepted Boolean                          @default(false)
   roles              WorkspaceMemberRoleAssociation[]
+  events             Event[]
 
   @@unique([workspaceId, userId])
 }
@@ -223,6 +310,8 @@ model Secret {
 
   environmentId String
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  events Event[]
 }
 
 model ApiKey {
@@ -233,6 +322,7 @@ model ApiKey {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   authorities Authority[]
+  events      Event[]
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
@@ -264,6 +354,7 @@ model Workspace {
   projects Project[]
   members  WorkspaceMember[]
   roles    WorkspaceRole[]
+  events   Event[]
 
   @@unique([name, ownerId])
 }

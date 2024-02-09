@@ -25,6 +25,10 @@ As per the NestJS convention, our API base is totally modularized, with each mod
 * **dto**: Contains class objects for data intake from the clients
 * **types:** Optionally, some modules have a \`\<module\_name>.types.ts\` file that holds the custom types it uses in the module.
 
+## The common module
+
+Just so that we can employ code reusability without much OOP hassle, we have clustered all of our usable components of the backend under the `common` module.&#x20;
+
 ### The `prisma` module
 
 This module deserves special attention since it deals with the data layer. Apart from the usual files, we have two other:
