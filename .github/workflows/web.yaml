@@ -4,7 +4,7 @@ on:
     tags:
       - '*'
   pull_request:
-    paths: ['apps/web/**']
+    types: [opened]
 
 jobs:
   validate:

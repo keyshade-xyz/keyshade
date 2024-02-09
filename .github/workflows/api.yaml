@@ -1,8 +1,10 @@
 on:
   push:
     paths: ['apps/api/**', '.github/workflows/api.yaml']
+    tags:
+      - '*'
   pull_request:
-    paths: ['apps/api/**']
+    types: [opened]
 
 jobs:
   validate:
