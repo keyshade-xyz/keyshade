@@ -26,21 +26,41 @@ describe('util', () => {
     expect(decrypted).toEqual(plaintext)
   })
 
+  it('should fail to encrypt and decrypt a string', () => {
+    const keyPair = createKeyPair()
+    const plainText = 'hello world'
+    const encrypted = encrypt(keyPair.publicKey, plainText)
+    const modifiedText = 'modified hello world'
+    const decrypted = decrypt(keyPair.privateKey, encrypted)
+    expect(decrypted).not.toEqual(modifiedText)
+  })
+
+  const object = {
+    id: '1',
+    name: 'John Doe',
+    email: 'johndoe@keyshade.xyz',
+    profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
+    isActive: true,
+    isOnboardingFinished: false,
+    isAdmin: false
+  }
+
   it('should exclude fields', () => {
-    const object = {
-      id: '1',
-      name: 'John Doe',
-      email: 'johndoe@keyshade.xyz',
-      profilePictureUrl: 'https://keyshade.xyz/johndoe.jpg',
-      isActive: true,
-      isOnboardingFinished: false,
-      isAdmin: false
-    }
     const excluded = excludeFields(object, 'isActive')
     expect(excluded).not.toHaveProperty('isActive')
     expect(excluded).toEqual({
       ...object,
       isActive: undefined
+    })
+  })
+
+  it ('should fail to exclude fields', () => {    
+    const excluded = excludeFields(object, 'isActive')
+    excluded.isActive = true
+    expect(excluded).toHaveProperty('isActive')
+    expect(excluded).toEqual({
+      ...object,
+      isActive: true
     })
   })
 })
