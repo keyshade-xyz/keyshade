@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { Authority, EventSeverity, User } from '@prisma/client'
 import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
@@ -26,8 +26,12 @@ export class EventService {
     search: string,
     severity?: EventSeverity
   ) {
+    if (severity && !Object.values(EventSeverity).includes(severity)) {
+      throw new BadRequestException('Invalid "severity" value')
+    }
+
     const whereCondition = {
-      severity: severity ? severity : undefined,
+      severity: severity,
       title: {
         contains: search
       }

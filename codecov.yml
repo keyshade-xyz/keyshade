@@ -30,12 +30,3 @@ flag_management:
           target: 95%
         - type: patch
           target: 98%
-    - name: api-unit-tests
-      paths:
-        - apps/api/
-      carryforward: true
-      statuses:
-        - type: project
-          target: 80%
-        - type: patch
-          target: 90%

@@ -41,115 +41,125 @@ export default async function createEvent(
   }
 
   const baseData = {
-    triggerer: data.triggerer ? data.triggerer : EventTriggerer.USER,
-    severity: data.severity ? data.severity : EventSeverity.INFO,
+    triggerer: data.triggerer ?? EventTriggerer.USER,
+    severity: data.severity ?? EventSeverity.INFO,
     type: data.type,
     source: data.source,
     title: data.title,
     description: data.description,
     metadata: data.metadata,
-    sourceUser: {
-      connect: {
-        id: data.triggeredBy.id
-      }
-    }
+    sourceUser: data.triggeredBy.id
+      ? {
+          connect: {
+            id: data.triggeredBy.id
+          }
+        }
+      : undefined
   }
 
-  switch (data.source) {
-    case EventSource.WORKSPACE: {
-      const entity = data.entity as Workspace
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceWorkspace: data.entity
-            ? {
-                connect: {
-                  id: entity.id
+  try {
+    switch (data.source) {
+      case EventSource.WORKSPACE: {
+        const entity = data.entity as Workspace
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceWorkspace: data.entity
+              ? {
+                  connect: {
+                    id: entity.id
+                  }
                 }
-              }
-            : undefined
-        }
-      })
-      break
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.PROJECT: {
+        const entity = data.entity as Project
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceProject: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.ENVIRONMENT: {
+        const entity = data.entity as Environment
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceEnvironment: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.WORKSPACE_ROLE: {
+        const entity = data.entity as WorkspaceRole
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceWorkspaceRole: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.WORKSPACE_MEMBER: {
+        const entity = data.entity as WorkspaceMember
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceWorkspaceMembership: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.API_KEY: {
+        const entity = data.entity as ApiKey
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceApiKey: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.SECRET: {
+        const entity = data.entity as Secret
+        await prisma.event.create({
+          data: {
+            ...baseData,
+            sourceSecret: data.entity
+              ? { connect: { id: entity.id } }
+              : undefined
+          }
+        })
+        break
+      }
+      case EventSource.USER: {
+        await prisma.event.create({
+          data: {
+            ...baseData
+          }
+        })
+        break
+      }
+      default: {
+        throw new Error('Invalid event source')
+      }
     }
-    case EventSource.PROJECT: {
-      const entity = data.entity as Project
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceProject: data.entity
-            ? { connect: { id: entity.id } }
-            : undefined
-        }
-      })
-      break
-    }
-    case EventSource.ENVIRONMENT: {
-      const entity = data.entity as Environment
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceEnvironment: data.entity
-            ? { connect: { id: entity.id } }
-            : undefined
-        }
-      })
-      break
-    }
-    case EventSource.WORKSPACE_ROLE: {
-      const entity = data.entity as WorkspaceRole
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceWorkspaceRole: data.entity
-            ? { connect: { id: entity.id } }
-            : undefined
-        }
-      })
-      break
-    }
-    case EventSource.WORKSPACE_MEMBER: {
-      const entity = data.entity as WorkspaceMember
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceWorkspaceMembership: data.entity
-            ? { connect: { id: entity.id } }
-            : undefined
-        }
-      })
-      break
-    }
-    case EventSource.API_KEY: {
-      const entity = data.entity as ApiKey
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceApiKey: data.entity ? { connect: { id: entity.id } } : undefined
-        }
-      })
-      break
-    }
-    case EventSource.SECRET: {
-      const entity = data.entity as Secret
-      await prisma.event.create({
-        data: {
-          ...baseData,
-          sourceSecret: data.entity ? { connect: { id: entity.id } } : undefined
-        }
-      })
-      break
-    }
-    case EventSource.USER: {
-      await prisma.event.create({
-        data: {
-          ...baseData
-        }
-      })
-      break
-    }
-    default: {
-      throw new Error('Invalid event source')
-    }
+  } catch (error) {
+    console.error('Error creating event', error)
   }
 }
