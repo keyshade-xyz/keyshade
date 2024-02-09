@@ -1,10 +1,18 @@
 import { ConflictException, Injectable } from '@nestjs/common'
-import { Authority, Environment, Project, User } from '@prisma/client'
+import {
+  Authority,
+  Environment,
+  EventSource,
+  EventType,
+  Project,
+  User
+} from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '../../prisma/prisma.service'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
+import createEvent from '../../common/create-event'
 
 @Injectable()
 export class EnvironmentService {
@@ -16,7 +24,7 @@ export class EnvironmentService {
     projectId: Project['id']
   ) {
     // Check if the user has the required role to create an environment
-    await getProjectWithAuthority(
+    const project = await getProjectWithAuthority(
       user.id,
       projectId,
       Authority.CREATE_ENVIRONMENT,
@@ -58,7 +66,26 @@ export class EnvironmentService {
     )
 
     const result = await this.prisma.$transaction(ops)
-    return result[0]
+    const environment = result[0] as Environment
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: environment,
+        type: EventType.ENVIRONMENT_ADDED,
+        source: EventSource.ENVIRONMENT,
+        title: `Environment created`,
+        metadata: {
+          environmentId: environment.id,
+          name: environment.name,
+          projectId,
+          projectName: project.name
+        }
+      },
+      this.prisma
+    )
+
+    return environment
   }
 
   async updateEnvironment(
@@ -110,7 +137,25 @@ export class EnvironmentService {
     )
 
     const result = await this.prisma.$transaction(ops)
-    return result[0]
+    const updatedEnvironment = result[0] as Environment
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: updatedEnvironment,
+        type: EventType.ENVIRONMENT_UPDATED,
+        source: EventSource.ENVIRONMENT,
+        title: `Environment updated`,
+        metadata: {
+          environmentId: updatedEnvironment.id,
+          name: updatedEnvironment.name,
+          projectId: updatedEnvironment.projectId
+        }
+      },
+      this.prisma
+    )
+
+    return updatedEnvironment
   }
 
   async getEnvironment(user: User, environmentId: Environment['id']) {
@@ -210,11 +255,27 @@ export class EnvironmentService {
     }
 
     // Delete the environment
-    return await this.prisma.environment.delete({
+    await this.prisma.environment.delete({
       where: {
         id: environmentId
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: environment,
+        type: EventType.ENVIRONMENT_DELETED,
+        source: EventSource.ENVIRONMENT,
+        title: `Environment deleted`,
+        metadata: {
+          environmentId: environment.id,
+          name: environment.name,
+          projectId
+        }
+      },
+      this.prisma
+    )
   }
 
   private async environmentExists(
