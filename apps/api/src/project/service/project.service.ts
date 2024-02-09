@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import {
   Authority,
+  EventSource,
+  EventType,
   Project,
   SecretVersion,
   User,
@@ -16,6 +18,7 @@ import { encrypt } from '../../common/encrypt'
 import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import { v4 } from 'uuid'
+import createEvent from '../../common/create-event'
 
 @Injectable()
 export class ProjectService {
@@ -29,7 +32,7 @@ export class ProjectService {
     dto: CreateProject
   ): Promise<Project> {
     // Check if the workspace exists or not
-    await getWorkspaceWithAuthority(
+    const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
       Authority.CREATE_SECRET,
@@ -155,6 +158,23 @@ export class ProjectService {
       ...createEnvironmentOps
     ])
 
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: newProject,
+        type: EventType.PROJECT_CREATED,
+        source: EventSource.PROJECT,
+        title: `Project created`,
+        metadata: {
+          projectId: newProject.id,
+          name: newProject.name,
+          workspaceId,
+          workspaceName: workspace.name
+        }
+      },
+      this.prisma
+    )
+
     this.log.debug(`Created project ${newProject}`)
     // It is important that we log before the private key is set
     // in order to not log the private key
@@ -259,6 +279,21 @@ export class ProjectService {
       ...versionUpdateOps
     ])
 
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: updatedProject,
+        type: EventType.PROJECT_UPDATED,
+        source: EventSource.PROJECT,
+        title: `Project updated`,
+        metadata: {
+          projectId: updatedProject.id,
+          name: updatedProject.name
+        }
+      },
+      this.prisma
+    )
+
     this.log.debug(`Updated project ${updatedProject.id}`)
     return {
       ...updatedProject,
@@ -280,6 +315,21 @@ export class ProjectService {
         id: projectId
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: project,
+        type: EventType.PROJECT_DELETED,
+        source: EventSource.PROJECT,
+        title: `Project deleted`,
+        metadata: {
+          projectId: project.id,
+          name: project.name
+        }
+      },
+      this.prisma
+    )
 
     this.log.debug(`Deleted project ${project}`)
   }

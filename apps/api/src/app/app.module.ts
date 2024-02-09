@@ -16,6 +16,7 @@ import { ApiKeyModule } from '../api-key/api-key.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
 import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
 import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
+import { EventModule } from '../event/event.module'
 
 @Module({
   controllers: [AppController],
@@ -34,7 +35,8 @@ import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
     ProjectModule,
     EnvironmentModule,
     WorkspaceModule,
-    WorkspaceRoleModule
+    WorkspaceRoleModule,
+    EventModule
   ],
   providers: [
     {

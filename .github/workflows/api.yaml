@@ -4,7 +4,7 @@ on:
     tags:
       - '*'
   pull_request:
-    types: [opened]
+    paths: ['apps/api/**', '.github/workflows/api.yaml']
 
 jobs:
   validate:
@@ -61,15 +61,6 @@ jobs:
           docker compose up -d
           pnpm run e2e:api
           docker compose down
-          ls -l
-
-      - name: Upload unit test coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          flags: api-unit-tests
-          files: /coverage/api/coverage-final.json
 
       - name: Upload e2e test coverage reports to Codecov
         uses: codecov/codecov-action@v3
