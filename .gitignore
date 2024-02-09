@@ -46,3 +46,6 @@ Thumbs.db
 .vscode
 .env
 pnpm-lock.yaml
+
+# Database
+data/
