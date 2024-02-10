@@ -63,6 +63,8 @@ async function bootstrap() {
       const app = await NestFactory.create(AppModule, {
         logger
       })
+      app.use(Sentry.Handlers.requestHandler())
+      app.use(Sentry.Handlers.tracingHandler())
       const globalPrefix = 'api'
       app.setGlobalPrefix(globalPrefix)
       app.useGlobalPipes(
@@ -72,7 +74,6 @@ async function bootstrap() {
         }),
         new QueryTransformPipe()
       )
-      app.use(Sentry.Handlers.requestHandler())
       const port = 4200
       const swaggerConfig = new DocumentBuilder()
         .setTitle('keyshade')
@@ -81,6 +82,7 @@ async function bootstrap() {
         .build()
       const document = SwaggerModule.createDocument(app, swaggerConfig)
       SwaggerModule.setup('docs', app, document)
+      app.use(Sentry.Handlers.errorHandler())
       await app.listen(port)
       logger.log(
         `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
