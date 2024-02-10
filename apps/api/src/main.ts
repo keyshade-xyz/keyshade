@@ -47,7 +47,7 @@ class CustomLogger implements LoggerService {
 async function bootstrap() {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV || 'development',
     tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
     profilesSampleRate: Number(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
     integrations: [new ProfilingIntegration()],
@@ -65,6 +65,7 @@ async function bootstrap() {
       })
       app.use(Sentry.Handlers.requestHandler())
       app.use(Sentry.Handlers.tracingHandler())
+
       const globalPrefix = 'api'
       app.setGlobalPrefix(globalPrefix)
       app.useGlobalPipes(
