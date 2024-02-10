@@ -92,16 +92,20 @@ async function initializeNestApp() {
 }
 
 async function bootstrap() {
-  await initializeSentry()
-  await Sentry.startSpan(
-    {
-      op: 'applicationBootstrap',
-      name: 'Application Bootstrap Process'
-    },
-    async () => {
-      await initializeNestApp()
-    }
-  )
+  try {
+    await initializeSentry()
+    await Sentry.startSpan(
+      {
+        op: 'applicationBootstrap',
+        name: 'Application Bootstrap Process'
+      },
+      async () => {
+        await initializeNestApp()
+      }
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+  }
 }
 
 bootstrap()
