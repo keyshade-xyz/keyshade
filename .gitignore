@@ -49,3 +49,5 @@ pnpm-lock.yaml
 
 # Database
 data/
+# Sentry Config File
+.sentryclirc
