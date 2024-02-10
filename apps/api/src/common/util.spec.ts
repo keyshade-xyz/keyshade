@@ -26,6 +26,17 @@ describe('util', () => {
     expect(decrypted).toEqual(plaintext)
   })
 
+  it('should fail to encrypt and decrypt a string', () => {
+    const keyPair = createKeyPair()
+    const differenetKeyPair = createKeyPair()
+    const plainText = 'hello world'
+    const encrypted = encrypt(keyPair.publicKey, plainText)
+    const decrypted = () => {
+      decrypt(differenetKeyPair.privateKey, encrypted);
+    };
+    expect(decrypted).toThrow()
+  })
+
   it('should exclude fields', () => {
     const object = {
       id: '1',
@@ -36,6 +47,7 @@ describe('util', () => {
       isOnboardingFinished: false,
       isAdmin: false
     }
+
     const excluded = excludeFields(object, 'isActive')
     expect(excluded).not.toHaveProperty('isActive')
     expect(excluded).toEqual({
