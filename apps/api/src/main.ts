@@ -44,7 +44,10 @@ class CustomLogger implements LoggerService {
   }
 }
 
-async function bootstrap() {
+async function initializeSentry() {
+  if (!process.env.SENTRY_DSN) {
+    throw new Error('Missing environment variable: SENTRY_DSN')
+  }
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     enabled: process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'e2e',
@@ -54,41 +57,49 @@ async function bootstrap() {
     integrations: [new ProfilingIntegration()],
     debug: process.env.NODE_ENV.startsWith('dev')
   })
+}
+
+async function initializeNestApp() {
+  const logger = new CustomLogger()
+  const app = await NestFactory.create(AppModule, {
+    logger
+  })
+  app.use(Sentry.Handlers.requestHandler())
+  app.use(Sentry.Handlers.tracingHandler())
+
+  const globalPrefix = 'api'
+  app.setGlobalPrefix(globalPrefix)
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true
+    }),
+    new QueryTransformPipe()
+  )
+  const port = 4200
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('keyshade')
+    .setDescription('The keyshade API description')
+    .setVersion('1.0')
+    .build()
+  const document = SwaggerModule.createDocument(app, swaggerConfig)
+  SwaggerModule.setup('docs', app, document)
+  app.use(Sentry.Handlers.errorHandler())
+  await app.listen(port)
+  logger.log(
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+  )
+}
+
+async function bootstrap() {
+  await initializeSentry()
   await Sentry.startSpan(
     {
-      op: 'mainSpan',
-      name: 'My Main Span'
+      op: 'applicationBootstrap',
+      name: 'Application Bootstrap Process'
     },
     async () => {
-      const logger = new CustomLogger()
-      const app = await NestFactory.create(AppModule, {
-        logger
-      })
-      app.use(Sentry.Handlers.requestHandler())
-      app.use(Sentry.Handlers.tracingHandler())
-
-      const globalPrefix = 'api'
-      app.setGlobalPrefix(globalPrefix)
-      app.useGlobalPipes(
-        new ValidationPipe({
-          whitelist: true,
-          transform: true
-        }),
-        new QueryTransformPipe()
-      )
-      const port = 4200
-      const swaggerConfig = new DocumentBuilder()
-        .setTitle('keyshade')
-        .setDescription('The keyshade API description')
-        .setVersion('1.0')
-        .build()
-      const document = SwaggerModule.createDocument(app, swaggerConfig)
-      SwaggerModule.setup('docs', app, document)
-      app.use(Sentry.Handlers.errorHandler())
-      await app.listen(port)
-      logger.log(
-        `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-      )
+      await initializeNestApp()
     }
   )
 }
