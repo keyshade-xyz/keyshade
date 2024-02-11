@@ -241,8 +241,8 @@ export class ProjectService {
         for (const version of versions) {
           updatedVersions.push({
             id: version.id,
-            value: encrypt(
-              decrypt(project.privateKey, version.value),
+            value: await encrypt(
+              await decrypt(project.privateKey, version.value),
               privateKey
             )
           })

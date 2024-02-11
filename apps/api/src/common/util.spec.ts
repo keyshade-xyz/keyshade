@@ -18,22 +18,20 @@ describe('util', () => {
     expect(keyPair.privateKey).toBeDefined()
   })
 
-  it('should encrypt and decrypt a string', () => {
+  it('should encrypt and decrypt a string', async () => {
     const keyPair = createKeyPair()
     const plaintext = 'hello world'
-    const encrypted = encrypt(keyPair.publicKey, plaintext)
-    const decrypted = decrypt(keyPair.privateKey, encrypted)
+    const encrypted = await encrypt(keyPair.publicKey, plaintext)
+    const decrypted = await decrypt(keyPair.privateKey, encrypted)
     expect(decrypted).toEqual(plaintext)
   })
 
-  it('should fail to encrypt and decrypt a string', () => {
+  it('should fail to encrypt and decrypt a string', async () => {
     const keyPair = createKeyPair()
     const differenetKeyPair = createKeyPair()
     const plainText = 'hello world'
-    const encrypted = encrypt(keyPair.publicKey, plainText)
-    const decrypted = () => {
-      decrypt(differenetKeyPair.privateKey, encrypted);
-    };
+    const encrypted = await encrypt(keyPair.publicKey, plainText)
+    const decrypted = await decrypt(differenetKeyPair.privateKey, encrypted)
     expect(decrypted).toThrow()
   })
 

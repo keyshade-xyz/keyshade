@@ -1,12 +1,13 @@
-import { createPublicKey, publicEncrypt } from 'crypto'
+import eccrypto from 'eccrypto'
 
-export const encrypt = (publicKey: string, data: string): string => {
-  const publicKeyPEM = createPublicKey({
-    key: publicKey,
-    format: 'pem'
-  })
+export const encrypt = async (
+  publicKey: string,
+  data: string
+): Promise<string> => {
+  const encrypted = await eccrypto.encrypt(
+    Buffer.from(publicKey, 'hex'),
+    Buffer.from(data)
+  )
 
-  const messageBuffer = Buffer.from(data)
-  const encrypted = publicEncrypt(publicKeyPEM, messageBuffer)
-  return encrypted.toString('base64')
+  return JSON.stringify(encrypted)
 }
