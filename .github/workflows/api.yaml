@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - develop
     paths: ['apps/api/**', '.github/workflows/api.yaml']
     tags:
       - '*'
@@ -70,7 +72,7 @@ jobs:
   deploy-stage:
     runs-on: ubuntu-latest
     name: Deploy to stage
-    if: ${{ github.ref == 'refs/heads/develop' && (startsWith(github.event.head_commit, 'fix') || startsWith(github.event.head_commit, 'feat') || startsWith(github.event.head_commit, 'chore') || startsWith(github.event.head_commit, 'refactor') || startsWith(github.event.head_commit, 'patch')) }}
+    if: github.ref == 'refs/heads/develop'
     needs: validate
 
     steps:
