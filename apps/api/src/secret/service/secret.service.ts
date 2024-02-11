@@ -78,7 +78,7 @@ export class SecretService {
         rotateAt: addHoursToDate(dto.rotateAfter),
         versions: {
           create: {
-            value: encrypt(project.publicKey, dto.value),
+            value: await encrypt(project.publicKey, dto.value),
             version: 1,
             createdById: user.id
           }
@@ -170,7 +170,7 @@ export class SecretService {
           lastUpdatedById: user.id,
           versions: {
             create: {
-              value: encrypt(secret.project.publicKey, dto.value),
+              value: await encrypt(secret.project.publicKey, dto.value),
               version: previousVersion.version + 1,
               createdById: user.id
             }
@@ -356,7 +356,7 @@ export class SecretService {
 
     if (decryptValue) {
       // Decrypt the secret value
-      const decryptedValue = decrypt(
+      const decryptedValue = await decrypt(
         project.privateKey,
         secret.versions[0].value
       )
@@ -447,10 +447,10 @@ export class SecretService {
     })) as SecretWithVersion[]
 
     // Return the secrets
-    return secrets.map((secret) => {
+    return secrets.map(async (secret) => {
       if (decryptValue) {
         // Decrypt the secret value
-        const decryptedValue = decrypt(
+        const decryptedValue = await decrypt(
           project.privateKey,
           secret.versions[0].value
         )

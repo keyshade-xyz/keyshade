@@ -1,12 +1,22 @@
-import { createPrivateKey, privateDecrypt } from 'crypto'
+import eccrypto from 'eccrypto'
 
-export const decrypt = (privateKey: string, data: string): string => {
-  const privateKeyPEM = createPrivateKey({
-    key: privateKey,
-    format: 'pem'
-  })
+export const decrypt = async (
+  privateKey: string,
+  data: string
+): Promise<string> => {
+  const parsed = JSON.parse(data)
 
-  const buffer = Buffer.from(data, 'base64')
-  const decrypted = privateDecrypt(privateKeyPEM, buffer)
-  return decrypted.toString('utf8')
+  const eicesData = {
+    iv: Buffer.from(parsed.iv),
+    ephemPublicKey: Buffer.from(parsed.ephemPublicKey),
+    ciphertext: Buffer.from(parsed.ciphertext),
+    mac: Buffer.from(parsed.mac)
+  }
+
+  const decrypted = await eccrypto.decrypt(
+    Buffer.from(privateKey, 'hex'),
+    eicesData
+  )
+
+  return decrypted.toString()
 }
