@@ -31,8 +31,12 @@ describe('util', () => {
     const differenetKeyPair = createKeyPair()
     const plainText = 'hello world'
     const encrypted = await encrypt(keyPair.publicKey, plainText)
-    const decrypted = await decrypt(differenetKeyPair.privateKey, encrypted)
-    expect(decrypted).toThrow()
+    try {
+      await decrypt(differenetKeyPair.privateKey, encrypted)
+    } catch (e) {
+      expect(e).toBeDefined()
+      expect(e.message).toEqual('Bad MAC')
+    }
   })
 
   it('should exclude fields', () => {
