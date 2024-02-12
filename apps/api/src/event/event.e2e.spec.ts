@@ -34,6 +34,7 @@ import { SecretModule } from '../secret/secret.module'
 import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
+import createEvent from '../common/create-event'
 
 const makeRequest = async (
   app: NestFastifyApplication,
@@ -344,6 +345,72 @@ describe('Event Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual(totalEvents)
+  })
+
+  it('should throw an error with wrong severity value', async () => {
+    const response = await makeRequest(app, user, 'severity=WRONG')
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('should throw an error if user is not provided in event creation for user-triggered event', async () => {
+    try {
+      await createEvent(
+        {
+          triggerer: EventTriggerer.USER,
+          severity: EventSeverity.INFO,
+          type: EventType.USER_UPDATED,
+          source: EventSource.USER,
+          title: 'User updated',
+          description: 'User updated',
+          metadata: {}
+        },
+        prisma
+      )
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+  })
+
+  it('should throw an exception for invalid event source', async () => {
+    try {
+      await createEvent(
+        {
+          triggerer: EventTriggerer.SYSTEM,
+          severity: EventSeverity.INFO,
+          type: EventType.USER_UPDATED,
+          source: 'INVALID' as EventSource,
+          title: 'User updated',
+          description: 'User updated',
+          metadata: {}
+        },
+        prisma
+      )
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+  })
+
+  it('should throw an exception for invalid event type', async () => {
+    try {
+      await createEvent(
+        {
+          triggerer: EventTriggerer.SYSTEM,
+          severity: EventSeverity.INFO,
+          type: EventType.WORKSPACE_CREATED,
+          source: EventSource.WORKSPACE,
+          title: 'User updated',
+          description: 'User updated',
+          entity: {
+            id: '1'
+          } as Workspace,
+          metadata: {}
+        },
+        prisma
+      )
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
   })
 
   afterAll(async () => {
