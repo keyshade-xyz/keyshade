@@ -1,0 +1,57 @@
+on:
+  push:
+    paths: ['apps/web/**', '.github/workflows/web.yaml']
+  pull_request:
+    paths: ['apps/web/**', '.github/workflows/web.yaml']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Lint
+        run: |
+          pnpm run lint:web
+
+      - name: Test
+        run: |
+          pnpm run test:web
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: web
