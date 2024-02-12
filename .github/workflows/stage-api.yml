@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - develop
-    paths: ['apps/api/**', '.github/workflows/api.yaml']
+    paths: ['apps/api/**', '.github/workflows/stage-api.yml']
 
 jobs:
   deploy-api-stage:

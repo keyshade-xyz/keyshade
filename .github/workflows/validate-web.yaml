@@ -1,5 +1,8 @@
 on:
   push:
+    branches:
+      - '!develop'
+      - '!main'
     paths: ['apps/web/**', '.github/workflows/web.yaml']
   pull_request:
     paths: ['apps/web/**', '.github/workflows/web.yaml']

@@ -1,8 +1,11 @@
 on:
   push:
-    paths: ['apps/api/**', '.github/workflows/api.yaml']
+    branches:
+      - '!develop'
+      - '!main'
+    paths: ['apps/api/**']
   pull_request:
-    paths: ['apps/api/**', '.github/workflows/api.yaml']
+    paths: ['apps/api/**']
 
 jobs:
   validate:
