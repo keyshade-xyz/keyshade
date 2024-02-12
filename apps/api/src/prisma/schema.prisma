@@ -15,7 +15,6 @@ enum EventSource {
   WORKSPACE
   WORKSPACE_ROLE
   USER
-  WORKSPACE_MEMBER
 }
 
 enum EventTriggerer {

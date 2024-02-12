@@ -19,7 +19,6 @@ export class EventService {
       secretId?: string
       apiKeyId?: string
       workspaceRoleId?: string
-      workspaceMemberId?: string
     },
     page: number,
     limit: number,
@@ -73,21 +72,23 @@ export class EventService {
     } else if (context.apiKeyId) {
       whereCondition['sourceApiKeyId'] = context.apiKeyId
     } else if (context.workspaceRoleId) {
+      const workspaceRole = await this.prisma.workspaceRole.findUnique({
+        where: {
+          id: context.workspaceRoleId
+        },
+        include: {
+          workspace: true
+        }
+      })
       await getWorkspaceWithAuthority(
         user.id,
-        context.workspaceRoleId,
+        workspaceRole.workspace.id,
         Authority.READ_WORKSPACE_ROLE,
         this.prisma
       )
       whereCondition['sourceWorkspaceRoleId'] = context.workspaceRoleId
-    } else if (context.workspaceMemberId) {
-      await getWorkspaceWithAuthority(
-        user.id,
-        context.workspaceMemberId,
-        Authority.READ_USERS,
-        this.prisma
-      )
-      whereCondition['sourceWorkspaceMembershipId'] = context.workspaceMemberId
+    } else {
+      whereCondition['sourceUserId'] = user.id
     }
 
     // Get the events

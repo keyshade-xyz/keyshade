@@ -59,14 +59,18 @@ export class WorkspaceController {
     return this.workspaceService.deleteWorkspace(user, workspaceId)
   }
 
-  @Post(':workspaceId/add-users')
+  @Post(':workspaceId/invite-users')
   @RequiredApiKeyAuthorities(Authority.ADD_USER)
   async addUsers(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() members: WorkspaceMemberDTO[]
   ) {
-    return this.workspaceService.addUsersToWorkspace(user, workspaceId, members)
+    return this.workspaceService.inviteUsersToWorkspace(
+      user,
+      workspaceId,
+      members
+    )
   }
 
   @Delete(':workspaceId/remove-users')

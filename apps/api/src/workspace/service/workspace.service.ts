@@ -305,7 +305,6 @@ export class WorkspaceService {
     createEvent(
       {
         triggeredBy: user,
-        entity: workspace,
         type: EventType.WORKSPACE_DELETED,
         source: EventSource.WORKSPACE,
         title: `Workspace deleted`,
@@ -320,7 +319,7 @@ export class WorkspaceService {
     this.log.debug(`Deleted workspace ${workspace.name} (${workspace.id})`)
   }
 
-  async addUsersToWorkspace(
+  async inviteUsersToWorkspace(
     user: User,
     workspaceId: Workspace['id'],
     members: WorkspaceMemberDTO[]
@@ -679,7 +678,8 @@ export class WorkspaceService {
     // Get all the memberships of this workspace
     const memberships = await this.prisma.workspaceMember.findMany({
       where: {
-        workspaceId
+        workspaceId,
+        invitationAccepted: true
       }
     })
 
@@ -913,30 +913,42 @@ export class WorkspaceService {
         }
       })
 
+      const userId = memberUser?.id ?? v4()
+
       // Check if the user is already a member of the workspace
       if (
         memberUser &&
-        (await this.memberExistsInWorkspace(workspace.id, memberUser.id))
-      )
-        throw new ConflictException(
-          `User ${memberUser.name} (${memberUser.id}) is already a member of workspace ${workspace.name} (${workspace.id})`
+        (await this.memberExistsInWorkspace(workspace.id, userId))
+      ) {
+        this.log.warn(
+          `User ${
+            memberUser.name ?? 'NO_NAME_YET'
+          } (${userId}) is already a member of workspace ${workspace.name} (${
+            workspace.id
+          }). Skipping.`
         )
+        return
+      }
 
       // Create the workspace membership
       const createMembership = this.prisma.workspaceMember.create({
         data: {
           workspaceId: workspace.id,
-          userId: memberUser.id,
+          userId,
           roles: {
-            connect: member.roleIds.map((r) => ({ id: r }))
+            create: member.roleIds.map((id) => ({
+              role: {
+                connect: {
+                  id
+                }
+              }
+            }))
           }
         }
       })
 
-      let txResult
-
       if (memberUser) {
-        txResult = await this.prisma.$transaction([createMembership])
+        await this.prisma.$transaction([createMembership])
 
         this.mailService.workspaceInvitationMailForUsers(
           member.email,
@@ -952,14 +964,12 @@ export class WorkspaceService {
       } else {
         const createMember = this.prisma.user.create({
           data: {
+            id: userId,
             email: member.email
           }
         })
 
-        txResult = await this.prisma.$transaction([
-          createMember,
-          createMembership
-        ])
+        await this.prisma.$transaction([createMember, createMembership])
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
@@ -969,7 +979,7 @@ export class WorkspaceService {
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${
             workspace.id
           }/join?token=${await this.jwt.signAsync({
-            id: memberUser.id
+            id: userId
           })}`,
           currentUser.name,
           false
@@ -980,9 +990,7 @@ export class WorkspaceService {
         )
       }
 
-      this.log.debug(
-        `Added user ${memberUser} to workspace ${workspace.name}. Membership: ${txResult[0].membership.id}`
-      )
+      this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
     }
   }
 
