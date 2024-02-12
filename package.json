@@ -101,7 +101,7 @@
     "test": "nx run-many -t test --parallel",
     "test:api": "nx run api:test",
     "e2e:api:prepare": "docker compose down && docker compose -f docker-compose-test.yml up -d && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
-    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' nx run api:test:e2e -- --coverage --coverageDirectory=coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
+    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' nx run api:test:e2e --skip-nx-cache -- --coverage --coverageDirectory=coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
     "e2e:api:teardown": "docker compose -f docker-compose-test.yml down",
     "test:web": "nx run web:test",
     "test:workspace": "nx run workspace:test",

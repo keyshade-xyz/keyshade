@@ -9,6 +9,7 @@ import { MockMailService } from '../mail/services/mock.service'
 import { AppModule } from '../app/app.module'
 import { Test } from '@nestjs/testing'
 import { ApiKey, User } from '@prisma/client'
+import cleanUp from '../common/cleanup'
 
 describe('Api Key Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -194,10 +195,6 @@ describe('Api Key Role Controller Tests', () => {
   })
 
   afterAll(async () => {
-    await prisma.apiKey.deleteMany()
-    await prisma.user.deleteMany()
-
-    await prisma.$disconnect()
-    await app.close()
+    await cleanUp(prisma)
   })
 })
