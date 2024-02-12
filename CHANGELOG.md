@@ -1,3 +1,22 @@
+## [1.1.0](https://github.com/keyshade-xyz/keyshade/compare/v1.0.0...v1.1.0) (2024-02-12)
+
+
+### 🚀 Features
+
+* **api:** add event ([#115](https://github.com/keyshade-xyz/keyshade/issues/115)) ([19e6603](https://github.com/keyshade-xyz/keyshade/commit/19e6603341fb7d4d0f752d1c3b3c02695f25ab25))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** CI rework ([788c141](https://github.com/keyshade-xyz/keyshade/commit/788c1417a2b43969f7810a3e7e9b3793f90c7fbe))
+* **ci:** update CI of web and API ([bd171da](https://github.com/keyshade-xyz/keyshade/commit/bd171da5cb5fa8a23f022e2dbb5c199c3101ca71))
+* **husky:** Update precommit ([b170cf3](https://github.com/keyshade-xyz/keyshade/commit/b170cf309e3ddcdc13f03d9eb6c4222cf1b02ecf))
+* migrate from supabase to postgresql ([#129](https://github.com/keyshade-xyz/keyshade/issues/129)) ([e1ff912](https://github.com/keyshade-xyz/keyshade/commit/e1ff912fc5149f1249bcfa7a199d2dbdf080eb46))
+* update CI ([32eb820](https://github.com/keyshade-xyz/keyshade/commit/32eb82006e61115f5b9f42cf82dd7f6fe09ca041))
+* Update release config in package.json ([71c75a7](https://github.com/keyshade-xyz/keyshade/commit/71c75a71b695f8bbe9d52df72c93ea2847bae967))
+* **version:** Upgrade next from 14.0.4 to 14.1.0 ([#136](https://github.com/keyshade-xyz/keyshade/issues/136)) ([c958865](https://github.com/keyshade-xyz/keyshade/commit/c958865c092bcae131419b79b8372dce45767cfd))
+* **version:** Upgrade reflect-metadata from 0.1.14 to 0.2.1 ([#137](https://github.com/keyshade-xyz/keyshade/issues/137)) ([574b6ce](https://github.com/keyshade-xyz/keyshade/commit/574b6ce7b1d20a280e47268c1a5abd4bacb285a0))
+
 ## 1.0.0 (2024-02-09)
 
 
