@@ -111,6 +111,11 @@ describe('Event Controller Tests', () => {
     })
   })
 
+  it('should be defined', async () => {
+    expect(app).toBeDefined()
+    expect(prisma).toBeDefined()
+  })
+
   it('should be able to fetch a user event', async () => {
     const updatedUser = await userService.updateSelf(user, {
       isOnboardingFinished: true

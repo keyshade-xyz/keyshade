@@ -47,6 +47,11 @@ describe('Api Key Role Controller Tests', () => {
     })
   })
 
+  it('should be defined', async () => {
+    expect(app).toBeDefined()
+    expect(prisma).toBeDefined()
+  })
+
   it('should be able to create api key', async () => {
     const response = await app.inject({
       method: 'POST',

@@ -41,7 +41,7 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/transfer-ownership/:userId')
-  @RequiredApiKeyAuthorities(Authority.TRANSFER_OWNERSHIP)
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   async transferOwnership(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -93,7 +93,7 @@ export class WorkspaceController {
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Param('userId') userId: User['id'],
-    @Query('roles') roleIds: WorkspaceRole['id'][]
+    @Body() roleIds: WorkspaceRole['id'][]
   ) {
     return this.workspaceService.updateMemberRoles(
       user,
