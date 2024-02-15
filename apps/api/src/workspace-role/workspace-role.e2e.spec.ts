@@ -273,8 +273,9 @@ describe('Workspace Role Controller Tests', () => {
     ])
   })
 
-  it('should be defined', () => {
+  it('should be defined', async () => {
     expect(app).toBeDefined()
+    expect(prisma).toBeDefined()
   })
 
   it('should be able to get the auto generated admin role', async () => {
