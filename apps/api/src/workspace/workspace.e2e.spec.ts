@@ -60,7 +60,7 @@ describe('Workspace Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
 
-  let user1: User, user2: User
+  let user1: User, user2: User, user3: User
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
 
@@ -98,10 +98,23 @@ describe('Workspace Controller Tests', () => {
       }
     })
 
-    const result = await prisma.$transaction([createUser1, createUser2])
+    const createUser3 = prisma.user.create({
+      data: {
+        email: 'sadie@keyshade.xyz',
+        name: 'Sadie',
+        isOnboardingFinished: true
+      }
+    })
+
+    const result = await prisma.$transaction([
+      createUser1,
+      createUser2,
+      createUser3
+    ])
 
     user1 = result[0]
     user2 = result[1]
+    user3 = result[2]
   })
 
   it('should be defined', async () => {
@@ -347,6 +360,19 @@ describe('Workspace Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual(totalEvents)
+  })
+
+  it('should do nothing if null or empty array is sent for invitation of user', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: []
+    })
+
+    expect(response.statusCode).toBe(201)
   })
 
   it('should allow user to invite another user to the workspace', async () => {
@@ -965,7 +991,7 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  it('should not be able to transfer ownership if user is not a member', async () => {
+  it('should prevent external user from changing ownership of workspace', async () => {
     const response = await app.inject({
       method: 'PUT',
       headers: {
@@ -999,6 +1025,23 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
+  it('should not be able to transfer ownership to a non member', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/transfer-ownership/${user3.id}`
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `User ${user3.id} is not a member of workspace ${workspace1.name} (${workspace1.id})`
+    })
+  })
+
   it('should be able to fetch all the workspaces the user is a member of', async () => {
     await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
     const response = await app.inject({
@@ -1011,6 +1054,23 @@ describe('Workspace Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual([workspace2, workspace1])
+  })
+
+  it('should crash while transferring ownership if the assignee already has the Admin role(impossible case)', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/transfer-ownership/${user2.id}`
+    })
+
+    expect(response.statusCode).toBe(500)
+    expect(response.json()).toEqual({
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'Error in transaction'
+    })
   })
 
   it('should be able to transfer the ownership of the workspace', async () => {

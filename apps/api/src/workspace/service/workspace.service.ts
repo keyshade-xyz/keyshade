@@ -733,14 +733,6 @@ export class WorkspaceService {
         `You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.`
       )
 
-    // Check if the user is a member of the workspace
-    if (
-      memberships.find((membership) => membership.userId === user.id) === null
-    )
-      throw new UnauthorizedException(
-        `User ${user.name} (${user.id}) is not a member of workspace ${workspaceId}`
-      )
-
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
 
