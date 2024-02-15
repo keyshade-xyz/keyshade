@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException
@@ -266,7 +267,12 @@ export class WorkspaceService {
       }
     })
 
-    await this.prisma.$transaction([removeRole, assignRole, updateWorkspace])
+    try {
+      await this.prisma.$transaction([removeRole, assignRole, updateWorkspace])
+    } catch (e) {
+      this.log.error('Error in transaction', e)
+      throw new InternalServerErrorException('Error in transaction')
+    }
 
     createEvent(
       {
@@ -570,10 +576,7 @@ export class WorkspaceService {
     workspaceId: Workspace['id']
   ): Promise<void> {
     // Check if the user has a pending invitation to the workspace
-    if (!(await this.invitationPending(workspaceId, user.id)))
-      throw new BadRequestException(
-        `User ${user.name} (${user.id}) is not invited to workspace ${workspaceId}`
-      )
+    await this.checkInvitationPending(workspaceId, user.id)
 
     // Update the membership
     await this.prisma.workspaceMember.update({
@@ -659,10 +662,7 @@ export class WorkspaceService {
     workspaceId: Workspace['id']
   ): Promise<void> {
     // Check if the user has a pending invitation to the workspace
-    if (!(await this.invitationPending(workspaceId, user.id)))
-      throw new BadRequestException(
-        `User ${user.name} (${user.id}) is not invited to workspace ${workspaceId}`
-      )
+    await this.checkInvitationPending(workspaceId, user.id)
 
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
@@ -1067,5 +1067,15 @@ export class WorkspaceService {
         }
       })
       .then((count) => count > 0)
+  }
+
+  private async checkInvitationPending(
+    workspaceId: Workspace['id'],
+    userId: User['id']
+  ): Promise<void> {
+    if (!(await this.invitationPending(workspaceId, userId)))
+      throw new BadRequestException(
+        `User ${userId} is not invited to workspace ${workspaceId}`
+      )
   }
 }

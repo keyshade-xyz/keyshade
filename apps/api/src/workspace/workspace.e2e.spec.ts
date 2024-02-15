@@ -543,7 +543,7 @@ describe('Workspace Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 400,
       error: 'Bad Request',
-      message: `User ${user2.name} (${user2.id}) is not invited to workspace ${workspace1.id}`
+      message: `User ${user2.id} is not invited to workspace ${workspace1.id}`
     })
   })
 
@@ -616,7 +616,7 @@ describe('Workspace Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 400,
       error: 'Bad Request',
-      message: `User ${user2.name} (${user2.id}) is not invited to workspace ${workspace1.id}`
+      message: `User ${user2.id} is not invited to workspace ${workspace1.id}`
     })
   })
 
