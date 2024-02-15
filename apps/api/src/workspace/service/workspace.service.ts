@@ -5,8 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
-  UnauthorizedException
+  NotFoundException
 } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import {
