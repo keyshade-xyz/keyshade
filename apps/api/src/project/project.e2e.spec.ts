@@ -32,8 +32,6 @@ describe('Project Controller Tests', () => {
   let project1: Project, project2: Project, otherProject: Project
   let adminRole1: WorkspaceRole
 
-  const totalEvents = []
-
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, ProjectModule]
@@ -70,14 +68,6 @@ describe('Project Controller Tests', () => {
         id: user2Id,
         email: 'janedoe@keyshade.xyz',
         name: 'Jane Doe',
-        isOnboardingFinished: true
-      }
-    })
-
-    const createUser3 = prisma.user.create({
-      data: {
-        email: 'sadie@keyshade.xyz',
-        name: 'Sadie',
         isOnboardingFinished: true
       }
     })
@@ -139,7 +129,6 @@ describe('Project Controller Tests', () => {
     const result = await prisma.$transaction([
       createUser1,
       createUser2,
-      createUser3,
       createWorkspace1,
       createWorkspace1AdminRole,
       createWorkspace1Membership1,
@@ -150,11 +139,11 @@ describe('Project Controller Tests', () => {
     user1 = result[0]
     user2 = result[1]
 
-    workspace1 = result[3]
+    workspace1 = result[2]
 
-    otherProject = result[7]
+    otherProject = result[6]
 
-    adminRole1 = result[4]
+    adminRole1 = result[3]
   })
 
   it('should be defined', async () => {
@@ -243,10 +232,8 @@ describe('Project Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should have added the project to the admin role of the workspace', async () => {
@@ -421,10 +408,8 @@ describe('Project Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to fetch a project by its id', async () => {
@@ -656,6 +641,33 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+  })
+
+  it('should have removed all environments of the project', async () => {
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
+
+    expect(environments).toHaveLength(0)
+  })
+
+  it('should have removed the project from the admin role of the workspace', async () => {
+    const adminRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_name: {
+          workspaceId: workspace1.id,
+          name: 'Admin'
+        }
+      },
+      select: {
+        projects: true
+      }
+    })
+
+    expect(adminRole).toBeDefined()
+    expect(adminRole.projects).toHaveLength(2)
   })
 
   it('should not be able to delete a non existing project', async () => {

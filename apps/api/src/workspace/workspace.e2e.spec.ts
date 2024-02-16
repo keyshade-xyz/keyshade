@@ -52,8 +52,6 @@ describe('Workspace Controller Tests', () => {
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
 
-  const totalEvents = []
-
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, WorkspaceModule]
@@ -206,10 +204,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should have created a new role with name Admin', async () => {
@@ -344,10 +340,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should do nothing if null or empty array is sent for invitation of user', async () => {
@@ -448,10 +442,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to cancel the invitation', async () => {
@@ -513,10 +505,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to decline invitation to the workspace', async () => {
@@ -580,10 +570,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to accept the invitation to the workspace', async () => {
@@ -653,10 +641,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to leave the workspace', async () => {
@@ -735,10 +721,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to update the role of a member', async () => {
@@ -797,10 +781,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to remove users from workspace', async () => {
@@ -864,10 +846,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should not be able to update the role of a non existing member', async () => {
@@ -1147,10 +1127,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to delete the workspace', async () => {

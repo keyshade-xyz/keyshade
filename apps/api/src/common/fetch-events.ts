@@ -6,7 +6,7 @@ export default async function fetchEvents(
   user: User,
   query?: string
 ) {
-  return await app.inject({
+  return app.inject({
     method: 'GET',
     headers: {
       'x-e2e-user-email': user.email
