@@ -35,19 +35,7 @@ import { ProjectModule } from '../project/project.module'
 import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import createEvent from '../common/create-event'
-
-const makeRequest = async (
-  app: NestFastifyApplication,
-  user: User,
-  query?: string
-) =>
-  await app.inject({
-    method: 'GET',
-    headers: {
-      'x-e2e-user-email': user.email
-    },
-    url: `/event${query ? '?' + query : ''}`
-  })
+import fetchEvents from '../common/fetch-events'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -124,7 +112,7 @@ describe('Event Controller Tests', () => {
 
     expect(updatedUser).toBeDefined()
 
-    const response = await makeRequest(app, user)
+    const response = await fetchEvents(app, user)
 
     totalEvents.push({
       id: expect.any(String),
@@ -150,7 +138,7 @@ describe('Event Controller Tests', () => {
 
     expect(newApiKey).toBeDefined()
 
-    const response = await makeRequest(app, user, `apiKeyId=${newApiKey.id}`)
+    const response = await fetchEvents(app, user, `apiKeyId=${newApiKey.id}`)
 
     const event = {
       id: expect.any(String),
@@ -179,7 +167,7 @@ describe('Event Controller Tests', () => {
 
     expect(newWorkspace).toBeDefined()
 
-    const response = await makeRequest(
+    const response = await fetchEvents(
       app,
       user,
       `workspaceId=${newWorkspace.id}`
@@ -214,7 +202,7 @@ describe('Event Controller Tests', () => {
 
     expect(newProject).toBeDefined()
 
-    const response = await makeRequest(app, user, `projectId=${newProject.id}`)
+    const response = await fetchEvents(app, user, `projectId=${newProject.id}`)
 
     const event = {
       id: expect.any(String),
@@ -248,7 +236,7 @@ describe('Event Controller Tests', () => {
 
     expect(newEnvironment).toBeDefined()
 
-    const response = await makeRequest(
+    const response = await fetchEvents(
       app,
       user,
       `environmentId=${newEnvironment.id}`
@@ -286,7 +274,7 @@ describe('Event Controller Tests', () => {
 
     expect(newSecret).toBeDefined()
 
-    const response = await makeRequest(app, user, `secretId=${newSecret.id}`)
+    const response = await fetchEvents(app, user, `secretId=${newSecret.id}`)
 
     const event = {
       id: expect.any(String),
@@ -321,7 +309,7 @@ describe('Event Controller Tests', () => {
 
     expect(newWorkspaceRole).toBeDefined()
 
-    const response = await makeRequest(
+    const response = await fetchEvents(
       app,
       user,
       `workspaceRoleId=${newWorkspaceRole.id}`
@@ -346,14 +334,14 @@ describe('Event Controller Tests', () => {
   })
 
   it('should be able to fetch all events', async () => {
-    const response = await makeRequest(app, user)
+    const response = await fetchEvents(app, user)
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual(totalEvents)
   })
 
   it('should throw an error with wrong severity value', async () => {
-    const response = await makeRequest(app, user, 'severity=WRONG')
+    const response = await fetchEvents(app, user, 'severity=WRONG')
 
     expect(response.statusCode).toBe(400)
   })

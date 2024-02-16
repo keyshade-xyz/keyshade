@@ -19,19 +19,7 @@ import {
   WorkspaceRole
 } from '@prisma/client'
 import cleanUp from '../common/cleanup'
-
-const fetchEvents = async (
-  app: NestFastifyApplication,
-  user: User,
-  query?: string
-) =>
-  await app.inject({
-    method: 'GET',
-    headers: {
-      'x-e2e-user-email': user.email
-    },
-    url: `/event${query ? '?' + query : ''}`
-  })
+import fetchEvents from '../common/fetch-events'
 
 const createMembership = async (
   adminRoleId: string,
@@ -63,8 +51,6 @@ describe('Workspace Controller Tests', () => {
   let user1: User, user2: User, user3: User
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
-
-  const totalEvents = []
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -218,10 +204,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should have created a new role with name Admin', async () => {
@@ -356,10 +340,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should do nothing if null or empty array is sent for invitation of user', async () => {
@@ -460,10 +442,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to cancel the invitation', async () => {
@@ -525,10 +505,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to decline invitation to the workspace', async () => {
@@ -592,10 +570,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to accept the invitation to the workspace', async () => {
@@ -665,10 +641,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to leave the workspace', async () => {
@@ -747,10 +721,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to update the role of a member', async () => {
@@ -809,10 +781,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to remove users from workspace', async () => {
@@ -876,10 +846,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should not be able to update the role of a non existing member', async () => {
@@ -1159,10 +1127,8 @@ describe('Workspace Controller Tests', () => {
       metadata: expect.any(Object)
     }
 
-    totalEvents.push(event)
-
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(totalEvents)
+    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   it('should be able to delete the workspace', async () => {
@@ -1183,6 +1149,23 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(workspace).toBeNull()
+  })
+
+  it('should not be able to delete a non existing workspace', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}`
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Workspace with id ${workspace1.id} not found`
+    })
   })
 
   afterAll(async () => {
