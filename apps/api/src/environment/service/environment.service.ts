@@ -149,7 +149,7 @@ export class EnvironmentService {
           name: dto.name,
           description: dto.description,
           isDefault:
-            dto.isDefault !== undefined || dto.isDefault !== null
+            dto.isDefault !== undefined && dto.isDefault !== null
               ? dto.isDefault
               : environment.isDefault,
           lastUpdatedById: user.id
@@ -229,30 +229,30 @@ export class EnvironmentService {
     })
   }
 
-  async getAllEnvironments(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    // Get the environments
-    return await this.prisma.environment.findMany({
-      where: {
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        lastUpdatedBy: true
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
-    })
-  }
+  // async getAllEnvironments(
+  //   page: number,
+  //   limit: number,
+  //   sort: string,
+  //   order: string,
+  //   search: string
+  // ) {
+  //   // Get the environments
+  //   return await this.prisma.environment.findMany({
+  //     where: {
+  //       name: {
+  //         contains: search
+  //       }
+  //     },
+  //     include: {
+  //       lastUpdatedBy: true
+  //     },
+  //     skip: page * limit,
+  //     take: limit,
+  //     orderBy: {
+  //       [sort]: order
+  //     }
+  //   })
+  // }
 
   async deleteEnvironment(user: User, environmentId: Environment['id']) {
     const environment = await getEnvironmentWithAuthority(
@@ -267,16 +267,6 @@ export class EnvironmentService {
     // Check if the environment is the default one
     if (environment.isDefault) {
       throw new BadRequestException('Cannot delete the default environment')
-    }
-
-    // Check if this is the last environment
-    const count = await this.prisma.environment.count({
-      where: {
-        projectId
-      }
-    })
-    if (count === 1) {
-      throw new BadRequestException('Cannot delete the last environment')
     }
 
     // Delete the environment

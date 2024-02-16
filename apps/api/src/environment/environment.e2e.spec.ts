@@ -18,15 +18,13 @@ import {
   EventType,
   Project,
   User,
-  Workspace,
-  WorkspaceRole
+  Workspace
 } from '@prisma/client'
 import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { ProjectModule } from '../project/project.module'
 import { WorkspaceService } from '../workspace/service/workspace.service'
 import { ProjectService } from '../project/service/project.service'
-import { CreateWorkspace } from '../workspace/dto/create.workspace/create.workspace'
 import { EventModule } from '../event/event.module'
 import { UserModule } from '../user/user.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
@@ -41,7 +39,7 @@ describe('Environment Controller Tests', () => {
   let workspaceService: WorkspaceService
 
   let user1: User, user2: User
-  let workspace1: Workspace, workspace2: Workspace
+  let workspace1: Workspace
   let project1: Project
   let environment1: Environment, environment2: Environment
 
@@ -99,11 +97,6 @@ describe('Environment Controller Tests', () => {
     workspace1 = await workspaceService.createWorkspace(user1, {
       name: 'Workspace 1',
       description: 'Workspace 1 description'
-    })
-
-    workspace2 = await workspaceService.createWorkspace(user2, {
-      name: 'Workspace 2',
-      description: 'Workspace 2 description'
     })
 
     project1 = await projectService.createProject(user1, workspace1.id, {

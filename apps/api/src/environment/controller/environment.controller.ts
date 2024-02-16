@@ -6,14 +6,12 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { EnvironmentService } from '../service/environment.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { Authority, User } from '@prisma/client'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
@@ -78,23 +76,23 @@ export class EnvironmentController {
     )
   }
 
-  @Get()
-  @UseGuards(AdminGuard)
-  async getAllEnvironments(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return await this.environmentService.getAllEnvironments(
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
-  }
+  // @Get()
+  // @UseGuards(AdminGuard)
+  // async getAllEnvironments(
+  //   @Query('page') page: number = 1,
+  //   @Query('limit') limit: number = 10,
+  //   @Query('sort') sort: string = 'name',
+  //   @Query('order') order: string = 'asc',
+  //   @Query('search') search: string = ''
+  // ) {
+  //   return await this.environmentService.getAllEnvironments(
+  //     page,
+  //     limit,
+  //     sort,
+  //     order,
+  //     search
+  //   )
+  // }
 
   @Delete(':environmentId')
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
