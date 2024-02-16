@@ -204,6 +204,8 @@ model Environment {
   projectId String
 
   events Event[]
+
+  @@unique([projectId, name])
 }
 
 model Project {
