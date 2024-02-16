@@ -51,7 +51,7 @@ async function initializeSentry() {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     enabled: process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'e2e',
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV || 'production',
     tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
     profilesSampleRate: Number(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
     integrations: [new ProfilingIntegration()],

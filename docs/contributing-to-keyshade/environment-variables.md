@@ -8,6 +8,7 @@ description: Get to know the environment you are working with
 
 Here's the description of the environment variables used in the project. You can find the values for these variables in \`.env.example\`.
 
+* **NODE\_ENV**: The The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration. 
 * **DATABASE\_URL**: The URL of the PSQL database to connect to. This is used by the [Prisma Client](https://www.prisma.io/docs/orm/prisma-client) to connect to the database.
 * **SUPABASE\_API\_URL**: The URL of the Supabase API. This is used by the [Supabase Client](https://supabase.io/docs/reference/javascript/supabase-client) to connect to the Supabase API. Make sure you create a Supabase project and get the API URL from the project settings.
 * **SUPABASE\_ANON\_KEY**: The anonymous key of the Supabase project. This is used by the Supabase Client to connect to the Supabase API. Make sure you create a Supabase project and get the anonymous key from the project settings.

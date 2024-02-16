@@ -52,3 +52,6 @@ pnpm-lock.yaml
 data/
 # Sentry Config File
 .sentryclirc
+
+# Sentry Config File
+.env.sentry-build-plugin
