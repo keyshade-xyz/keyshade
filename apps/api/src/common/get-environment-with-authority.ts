@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common'
+import { NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { Authority, Environment, PrismaClient, User } from '@prisma/client'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
 
@@ -35,7 +35,7 @@ export default async function getEnvironmentWithAuthority(
     !permittedAuthorities.has(authority) &&
     !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
   ) {
-    throw new ConflictException(
+    throw new UnauthorizedException(
       `User ${userId} does not have the required authorities`
     )
   }
