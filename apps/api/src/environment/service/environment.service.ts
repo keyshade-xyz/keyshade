@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable
+} from '@nestjs/common'
 import {
   Authority,
   Environment,
@@ -33,7 +37,9 @@ export class EnvironmentService {
 
     // Check if an environment with the same name already exists
     if (await this.environmentExists(dto.name, projectId)) {
-      throw new ConflictException('Environment already exists')
+      throw new ConflictException(
+        `Environment with name ${dto.name} already exists in project ${project.name} (${project.id})`
+      )
     }
 
     // If the current environment needs to be the default one, we will
@@ -45,7 +51,7 @@ export class EnvironmentService {
     }
 
     // Create the environment
-    ops.unshift(
+    ops.push(
       this.prisma.environment.create({
         data: {
           name: dto.name,
@@ -66,7 +72,7 @@ export class EnvironmentService {
     )
 
     const result = await this.prisma.$transaction(ops)
-    const environment = result[0] as Environment
+    const environment = result[result.length - 1]
 
     createEvent(
       {
@@ -102,14 +108,30 @@ export class EnvironmentService {
 
     // Check if an environment with the same name already exists
     if (
-      (dto.name &&
-        (await this.environmentExists(dto.name, environment.projectId))) ||
-      environment.name === dto.name
+      dto.name &&
+      (environment.name === dto.name ||
+        (await this.environmentExists(dto.name, environment.projectId)))
     ) {
-      throw new ConflictException('Environment already exists')
+      throw new ConflictException(
+        `Environment with name ${dto.name} already exists in project ${environment.projectId}`
+      )
     }
 
     const ops = []
+
+    // If this environment is the last one, and is being updated to be non-default
+    // we will skip this operation
+    const count = await this.prisma.environment.count({
+      where: {
+        projectId: environment.projectId
+      }
+    })
+
+    if (dto.isDefault === false && environment.isDefault && count === 1) {
+      throw new BadRequestException(
+        'Cannot make the last environment non-default'
+      )
+    }
 
     // If the current environment needs to be the default one, we will
     // need to update the existing default environment to be a regular one
@@ -118,7 +140,7 @@ export class EnvironmentService {
     }
 
     // Update the environment
-    ops.unshift(
+    ops.push(
       this.prisma.environment.update({
         where: {
           id: environmentId
@@ -126,7 +148,10 @@ export class EnvironmentService {
         data: {
           name: dto.name,
           description: dto.description,
-          isDefault: dto.isDefault,
+          isDefault:
+            dto.isDefault !== undefined || dto.isDefault !== null
+              ? dto.isDefault
+              : environment.isDefault,
           lastUpdatedById: user.id
         },
         include: {
@@ -137,7 +162,7 @@ export class EnvironmentService {
     )
 
     const result = await this.prisma.$transaction(ops)
-    const updatedEnvironment = result[0] as Environment
+    const updatedEnvironment = result[result.length - 1]
 
     createEvent(
       {
@@ -241,7 +266,7 @@ export class EnvironmentService {
 
     // Check if the environment is the default one
     if (environment.isDefault) {
-      throw new ConflictException('Cannot delete the default environment')
+      throw new BadRequestException('Cannot delete the default environment')
     }
 
     // Check if this is the last environment
@@ -251,7 +276,7 @@ export class EnvironmentService {
       }
     })
     if (count === 1) {
-      throw new ConflictException('Cannot delete the last environment')
+      throw new BadRequestException('Cannot delete the last environment')
     }
 
     // Delete the environment
@@ -264,7 +289,6 @@ export class EnvironmentService {
     createEvent(
       {
         triggeredBy: user,
-        entity: environment,
         type: EventType.ENVIRONMENT_DELETED,
         source: EventSource.ENVIRONMENT,
         title: `Environment deleted`,
@@ -290,8 +314,8 @@ export class EnvironmentService {
     })
   }
 
-  private async makeAllNonDefault(projectId: Project['id']): Promise<void> {
-    this.prisma.environment.updateMany({
+  private makeAllNonDefault(projectId: Project['id']) {
+    return this.prisma.environment.updateMany({
       where: {
         projectId
       },
