@@ -229,7 +229,6 @@ model Project {
   environments               Environment[]
   workspaceRole              WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   workspaceRoleId            String?
-  apiKeyWorkspaceAuthorityId String?
 }
 
 model WorkspaceRole {

@@ -35,7 +35,7 @@ export class ProjectService {
     const workspace = await getWorkspaceWithAuthority(
       user.id,
       workspaceId,
-      Authority.CREATE_SECRET,
+      Authority.CREATE_PROJECT,
       this.prisma
     )
 
@@ -115,11 +115,6 @@ export class ProjectService {
     if (dto.environments && dto.environments.length > 0) {
       let defaultEnvironmentExists = false
       for (const environment of dto.environments) {
-        console.log('default env exists: ', defaultEnvironmentExists)
-        console.log(
-          'will create default env: ',
-          defaultEnvironmentExists === false ? environment.isDefault : false
-        )
         createEnvironmentOps.push(
           this.prisma.environment.create({
             data: {
@@ -316,12 +311,18 @@ export class ProjectService {
       }
     })
 
+    const workspace = await this.prisma.workspace.findUnique({
+      where: {
+        id: project.workspaceId
+      }
+    })
+
     createEvent(
       {
         triggeredBy: user,
-        entity: project,
         type: EventType.PROJECT_DELETED,
-        source: EventSource.PROJECT,
+        source: EventSource.WORKSPACE,
+        entity: workspace,
         title: `Project deleted`,
         metadata: {
           projectId: project.id,
@@ -365,9 +366,16 @@ export class ProjectService {
     order: string,
     search: string
   ) {
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.READ_PROJECT,
+      this.prisma
+    )
+
     return (
       await this.prisma.project.findMany({
-        skip: (page - 1) * limit,
+        skip: page * limit,
         take: limit,
         orderBy: {
           [sort]: order
@@ -407,7 +415,7 @@ export class ProjectService {
   ) {
     return (
       await this.prisma.project.findMany({
-        skip: (page - 1) * limit,
+        skip: page * limit,
         take: limit,
         orderBy: {
           [sort]: order

@@ -19,19 +19,7 @@ import {
   WorkspaceRole
 } from '@prisma/client'
 import cleanUp from '../common/cleanup'
-
-const fetchEvents = async (
-  app: NestFastifyApplication,
-  user: User,
-  query?: string
-) =>
-  await app.inject({
-    method: 'GET',
-    headers: {
-      'x-e2e-user-email': user.email
-    },
-    url: `/event${query ? '?' + query : ''}`
-  })
+import fetchEvents from '../common/fetch-events'
 
 const createMembership = async (
   adminRoleId: string,
@@ -1183,6 +1171,23 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(workspace).toBeNull()
+  })
+
+  it('should not be able to delete a non existing workspace', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}`
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Workspace with id ${workspace1.id} not found`
+    })
   })
 
   afterAll(async () => {
