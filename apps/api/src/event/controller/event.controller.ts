@@ -23,8 +23,7 @@ export class EventController {
     @Query('environmentId') environmentId: string,
     @Query('secretId') secretId: string,
     @Query('apiKeyId') apiKeyId: string,
-    @Query('workspaceRoleId') workspaceRoleId: string,
-    @Query('workspaceMemberId') workspaceMemberId: string
+    @Query('workspaceRoleId') workspaceRoleId: string
   ) {
     return this.eventService.getEvents(
       user,
@@ -34,8 +33,7 @@ export class EventController {
         environmentId,
         secretId,
         apiKeyId,
-        workspaceRoleId,
-        workspaceMemberId
+        workspaceRoleId
       },
       page,
       limit,

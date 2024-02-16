@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "0.1.0-alpha",
+  "version": "1.1.0",
   "license": "MPL-2.0",
   "private": true,
   "release": {
@@ -68,6 +68,7 @@
           "changelogFile": "CHANGELOG.md"
         }
       ],
+      "@semantic-release/npm",
       [
         "@semantic-release/git",
         {
@@ -78,8 +79,7 @@
           "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ],
-      "@semantic-release/github",
-      "@semantic-release/npm"
+      "@semantic-release/github"
     ]
   },
   "scripts": {
@@ -101,7 +101,7 @@
     "test": "nx run-many -t test --parallel",
     "test:api": "nx run api:test",
     "e2e:api:prepare": "docker compose down && docker compose -f docker-compose-test.yml up -d && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
-    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' nx run api:test:e2e -- --coverage --coverageDirectory=coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
+    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' nx run api:test:e2e --skip-nx-cache -- --coverage --coverageDirectory=coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
     "e2e:api:teardown": "docker compose -f docker-compose-test.yml down",
     "test:web": "nx run web:test",
     "test:workspace": "nx run workspace:test",
@@ -166,7 +166,13 @@
     "ts-jest": "^29.1.1",
     "ts-node": "10.9.1",
     "typescript": "~5.2.2",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^11.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/release-notes-generator": "^12.1.0",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/eccrypto": "^1.1.6"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
@@ -194,6 +200,7 @@
     "class-validator": "^0.14.0",
     "conventional-changelog-conventionalcommits": "^7.0.2",
     "dotenv": "^16.3.1",
+    "eccrypto": "^1.1.6",
     "express": "^4.18.2",
     "husky": "^8.0.3",
     "jest-mock-extended": "^3.0.5",

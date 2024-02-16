@@ -196,7 +196,7 @@ export class EnvironmentService {
       include: {
         lastUpdatedBy: true
       },
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
@@ -221,7 +221,7 @@ export class EnvironmentService {
       include: {
         lastUpdatedBy: true
       },
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order

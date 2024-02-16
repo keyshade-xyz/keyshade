@@ -8,11 +8,17 @@ export default async function getWorkspaceWithAuthority(
   authority: Authority,
   prisma: PrismaClient
 ): Promise<Workspace> {
-  const workspace = await prisma.workspace.findUnique({
-    where: {
-      id: workspaceId
-    }
-  })
+  let workspace: Workspace
+
+  try {
+    workspace = await prisma.workspace.findUnique({
+      where: {
+        id: workspaceId
+      }
+    })
+  } catch (error) {
+    /* empty */
+  }
 
   // Check if the workspace exists or not
   if (!workspace) {

@@ -16,6 +16,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
+import cleanUp from '../common/cleanup'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -45,13 +46,7 @@ describe('Workspace Role Controller Tests', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    await prisma.$transaction([
-      prisma.user.deleteMany(),
-      prisma.project.deleteMany(),
-      prisma.workspace.deleteMany(),
-      prisma.workspaceRole.deleteMany(),
-      prisma.workspaceMember.deleteMany()
-    ])
+    await cleanUp(prisma)
 
     const aliceId = v4()
     const bobId = v4()
@@ -278,8 +273,9 @@ describe('Workspace Role Controller Tests', () => {
     ])
   })
 
-  it('should be defined', () => {
+  it('should be defined', async () => {
     expect(app).toBeDefined()
+    expect(prisma).toBeDefined()
   })
 
   it('should be able to get the auto generated admin role', async () => {
@@ -906,15 +902,6 @@ describe('Workspace Role Controller Tests', () => {
   })
 
   afterAll(async () => {
-    await prisma.$transaction([
-      prisma.user.deleteMany(),
-      prisma.project.deleteMany(),
-      prisma.workspace.deleteMany(),
-      prisma.workspaceRole.deleteMany(),
-      prisma.workspaceMember.deleteMany()
-    ])
-
-    await prisma.$disconnect()
-    await app.close()
+    await cleanUp(prisma)
   })
 })

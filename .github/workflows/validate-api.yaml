@@ -1,0 +1,69 @@
+on:
+  push:
+    branches:
+      - '!develop'
+      - '!main'
+    paths: ['apps/api/**']
+  pull_request:
+    paths: ['apps/api/**']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate API
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Lint
+        run: |
+          pnpm run lint:api
+
+      - name: Unit tests
+        run: |
+          pnpm run db:generate-types
+          pnpm run test:api
+
+      - name: E2E tests
+        env:
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
+        run: pnpm run e2e:api
+
+      - name: Upload e2e test coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: api-e2e-tests
+          files: /coverage-e2e/api/coverage-final.json

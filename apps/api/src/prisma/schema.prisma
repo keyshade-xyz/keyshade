@@ -15,7 +15,6 @@ enum EventSource {
   WORKSPACE
   WORKSPACE_ROLE
   USER
-  WORKSPACE_MEMBER
 }
 
 enum EventTriggerer {
@@ -68,7 +67,6 @@ enum Authority {
   READ_WORKSPACE
   UPDATE_WORKSPACE
   DELETE_WORKSPACE
-  TRANSFER_OWNERSHIP
   CREATE_WORKSPACE_ROLE
   READ_WORKSPACE_ROLE
   UPDATE_WORKSPACE_ROLE
@@ -231,7 +229,6 @@ model Project {
   environments               Environment[]
   workspaceRole              WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   workspaceRoleId            String?
-  apiKeyWorkspaceAuthorityId String?
 }
 
 model WorkspaceRole {

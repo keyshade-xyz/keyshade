@@ -41,7 +41,7 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/transfer-ownership/:userId')
-  @RequiredApiKeyAuthorities(Authority.TRANSFER_OWNERSHIP)
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   async transferOwnership(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
@@ -59,14 +59,18 @@ export class WorkspaceController {
     return this.workspaceService.deleteWorkspace(user, workspaceId)
   }
 
-  @Post(':workspaceId/add-users')
+  @Post(':workspaceId/invite-users')
   @RequiredApiKeyAuthorities(Authority.ADD_USER)
   async addUsers(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() members: WorkspaceMemberDTO[]
   ) {
-    return this.workspaceService.addUsersToWorkspace(user, workspaceId, members)
+    return this.workspaceService.inviteUsersToWorkspace(
+      user,
+      workspaceId,
+      members
+    )
   }
 
   @Delete(':workspaceId/remove-users')
@@ -89,7 +93,7 @@ export class WorkspaceController {
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Param('userId') userId: User['id'],
-    @Query('roles') roleIds: WorkspaceRole['id'][]
+    @Body() roleIds: WorkspaceRole['id'][]
   ) {
     return this.workspaceService.updateMemberRoles(
       user,
