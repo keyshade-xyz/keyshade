@@ -10,4 +10,10 @@ export class AppController {
   health(): string {
     return 'UP'
   }
+
+  @Get('break')
+  @Public()
+  break(): string {
+    throw new Error('Broken')
+  }
 }

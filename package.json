@@ -115,7 +115,7 @@
     "db:format": "nx run api:prisma:format",
     "db:reset": "nx run api:prisma:reset",
     "prepare": "husky install",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist || echo 'Failed to upload source maps to Sentry'"
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.0.3",
