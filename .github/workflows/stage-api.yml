@@ -4,6 +4,12 @@ on:
       - develop
     paths: ['apps/api/**', '.github/workflows/stage-api.yml']
 
+env:
+  SENTRY_PROJECT: keyshade-api
+  SENTRY_ENVIRONMENT: production
+  SENTRY_ORG: keyshade
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
 jobs:
   deploy-api-stage:
     runs-on: ubuntu-latest
