@@ -48,9 +48,9 @@ class CustomLogger implements LoggerService {
 
 async function initializeSentry() {
   if (
-    !process.env.SENTRY_DSN &&
-    !process.env.SENTRY_ORG &&
-    !process.env.SENTRY_PROJECT &&
+    !process.env.SENTRY_DSN ||
+    !process.env.SENTRY_ORG ||
+    !process.env.SENTRY_PROJECT ||
     !process.env.SENTRY_AUTH_TOKEN
   ) {
     Logger.error('Missing environment variable: SENTRY_DSN')
