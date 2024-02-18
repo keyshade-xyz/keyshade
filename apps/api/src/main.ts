@@ -47,7 +47,12 @@ class CustomLogger implements LoggerService {
 }
 
 async function initializeSentry() {
-  if (!process.env.SENTRY_DSN) {
+  if (
+    !process.env.SENTRY_DSN &&
+    !process.env.SENTRY_ORG &&
+    !process.env.SENTRY_PROJECT &&
+    !process.env.SENTRY_AUTH_TOKEN
+  ) {
     Logger.error('Missing environment variable: SENTRY_DSN')
     process.exit(1)
   }
@@ -60,7 +65,7 @@ async function initializeSentry() {
     profilesSampleRate:
       parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
     integrations: [new ProfilingIntegration()],
-    debug: process.env.SENTRY_ENV.startsWith('dev')
+    debug: sentryEnv.startsWith('dev')
   })
 }
 
