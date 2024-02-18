@@ -53,20 +53,22 @@ async function initializeSentry() {
     !process.env.SENTRY_PROJECT ||
     !process.env.SENTRY_AUTH_TOKEN
   ) {
-    Logger.error('Missing environment variable: SENTRY_DSN')
-    process.exit(1)
+    Logger.warn(
+      'Missing one or more Sentry environment variables. Skipping initialization...'
+    )
+  } else {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
+      environment: sentryEnv,
+      tracesSampleRate:
+        parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
+      profilesSampleRate:
+        parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
+      integrations: [new ProfilingIntegration()],
+      debug: sentryEnv.startsWith('dev')
+    })
   }
-
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
-    environment: sentryEnv,
-    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
-    profilesSampleRate:
-      parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
-    integrations: [new ProfilingIntegration()],
-    debug: sentryEnv.startsWith('dev')
-  })
 }
 
 async function initializeNestApp() {
