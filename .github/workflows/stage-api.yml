@@ -5,9 +5,6 @@ on:
     paths: ['apps/api/**', '.github/workflows/stage-api.yml']
 
 env:
-  SENTRY_PROJECT: keyshade-api
-  SENTRY_ENVIRONMENT: production
-  SENTRY_ORG: keyshade
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
@@ -23,4 +20,4 @@ jobs:
         run: |
           curl -L https://fly.io/install.sh | sh
       - name: Deploy to stage
-        run: ~/.fly/bin/fly deploy --config fly.api.toml --dockerfile ./apps/api/Dockerfile --app keyshade-api-stage --access-token ${{ secrets.FLY_ACCESS_TOKEN }}
+        run: ~/.fly/bin/fly deploy --config fly.api.toml --dockerfile ./apps/api/Dockerfile --app keyshade-api-stage --access-token ${{ secrets.FLY_ACCESS_TOKEN }} --build-arg SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN} --build-arg SENTRY_PROJECT=keyshade-api --build-arg SENTRY_ORG=keyshade --build-arg SENTRY_ENVIRONMENT=stage

@@ -15,7 +15,10 @@ COPY apps/api apps/api
 COPY apps/api/startup.sh .
 RUN chmod +x startup.sh
 
-RUN ls -la
+ARG SENTRY_ORG=${SENTRY_ORG}
+ARG SENTRY_PROJECT=${SENTRY_PROJECT}
+ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
 RUN pnpm run db:generate-types
 RUN pnpm run build:api
