@@ -6,12 +6,15 @@ module.exports = composePlugins(
     target: 'node',
     devtool: 'source-map',
     plugins: [
-      ...((process.env.NODE_ENV || 'production') === 'production'
-        ? sentryWebpackPlugin({
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT,
-            authToken: process.env.SENTRY_AUTH_TOKEN
-          })
+      ...(process.env.SENTRY_ENV === 'production' ||
+      process.env.SENTRY_ENV === 'stage'
+        ? [
+            sentryWebpackPlugin({
+              org: process.env.SENTRY_ORG,
+              project: process.env.SENTRY_PROJECT,
+              authToken: process.env.SENTRY_AUTH_TOKEN
+            })
+          ]
         : [])
     ]
   }),

@@ -14,6 +14,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 
+export const sentryEnv = process.env.SENTRY_ENV || 'production'
+
 class CustomLogger implements LoggerService {
   log(message: string) {
     this.info(message)
@@ -52,13 +54,13 @@ async function initializeSentry() {
 
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    enabled: process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'e2e',
-    environment: process.env.NODE_ENV || 'production',
+    enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
+    environment: sentryEnv,
     tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
     profilesSampleRate:
       parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
     integrations: [new ProfilingIntegration()],
-    debug: process.env.NODE_ENV.startsWith('dev')
+    debug: process.env.SENTRY_ENV.startsWith('dev')
   })
 }
 

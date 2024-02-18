@@ -8,7 +8,6 @@ description: Get to know the environment you are working with
 
 Here's the description of the environment variables used in the project. You can find the values for these variables in \`.env.example\`.
 
-* **NODE\_ENV**: The The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration. 
 * **DATABASE\_URL**: The URL of the PSQL database to connect to. This is used by the [Prisma Client](https://www.prisma.io/docs/orm/prisma-client) to connect to the database.
 * **SUPABASE\_API\_URL**: The URL of the Supabase API. This is used by the [Supabase Client](https://supabase.io/docs/reference/javascript/supabase-client) to connect to the Supabase API. Make sure you create a Supabase project and get the API URL from the project settings.
 * **SUPABASE\_ANON\_KEY**: The anonymous key of the Supabase project. This is used by the Supabase Client to connect to the Supabase API. Make sure you create a Supabase project and get the anonymous key from the project settings.
@@ -22,6 +21,7 @@ Here's the description of the environment variables used in the project. You can
 * **SENTRY\_PROJECT**: The project ID within your Sentry organization where events will be reported.
 * **SENTRY\_TRACES\_SAMPLE\_RATE**: The sample rate for collecting transaction traces in Sentry. It determines the percentage of transactions to capture traces for.
 * **SENTRY\_PROFILES\_SAMPLE\_RATE**: The sample rate for collecting performance profiles in Sentry. It determines the percentage of requests to capture performance profiles for.
+* **SENTRY\_ENV**: The The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration. 
 * **FROM\_EMAIL**: The display of the email sender title.
 * **JWT\_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.
 * **WEB\_FRONTEND\_URL, WORKSPACE\_FRONTEND\_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
