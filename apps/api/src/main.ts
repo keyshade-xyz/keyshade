@@ -47,13 +47,15 @@ class CustomLogger implements LoggerService {
 }
 
 async function initializeSentry() {
+  const logger = new CustomLogger()
+
   if (
     !process.env.SENTRY_DSN ||
     !process.env.SENTRY_ORG ||
     !process.env.SENTRY_PROJECT ||
     !process.env.SENTRY_AUTH_TOKEN
   ) {
-    Logger.warn(
+    logger.warn(
       'Missing one or more Sentry environment variables. Skipping initialization...'
     )
   } else {
@@ -68,6 +70,8 @@ async function initializeSentry() {
       integrations: [new ProfilingIntegration()],
       debug: sentryEnv.startsWith('dev')
     })
+
+    logger.log('Sentry initialized')
   }
 }
 
