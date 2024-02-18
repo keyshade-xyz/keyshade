@@ -45,7 +45,13 @@ Thumbs.db
 .next
 .vscode
 .env
+.env.local
 pnpm-lock.yaml
 
 # Database
 data/
+# Sentry Config File
+.sentryclirc
+
+# Sentry Config File
+.env.sentry-build-plugin
