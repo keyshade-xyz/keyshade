@@ -1,3 +1,19 @@
+## [1.2.0](https://github.com/keyshade-xyz/keyshade/compare/v1.1.0...v1.2.0) (2024-02-18)
+
+
+### 🚀 Features
+
+* **api:** Add Sentry Integeration ([#133](https://github.com/keyshade-xyz/keyshade/issues/133)) ([5ae2c92](https://github.com/keyshade-xyz/keyshade/commit/5ae2c92648dffb5f957ac3fb17812bfb504ded4d))
+
+
+### 🔧 Miscellaneous Chores
+
+* **api:** update dockerfile and ci ([ae2d944](https://github.com/keyshade-xyz/keyshade/commit/ae2d9441ab9d73ea61e5924a6157da7260aaf9c7))
+* **api:** update sentry log messages ([976026c](https://github.com/keyshade-xyz/keyshade/commit/976026c74f2f1e7de7cab284b751ea87a8ce573d))
+* **ci:** update stage-api workflow ([addaa61](https://github.com/keyshade-xyz/keyshade/commit/addaa61b5fd93af9e78854c254bf3874b8a73911))
+* **husky:** Remove `e2e:api` command from husky ([#144](https://github.com/keyshade-xyz/keyshade/issues/144)) ([8a2fa58](https://github.com/keyshade-xyz/keyshade/commit/8a2fa5872d46b10bd820cc4188b4a5b11e23ff8c))
+* update sentry source map script ([bdc9dc6](https://github.com/keyshade-xyz/keyshade/commit/bdc9dc684e4f4e6885a8a6f41fc20f9c5650f9b1))
+
 ## [1.1.0](https://github.com/keyshade-xyz/keyshade/compare/v1.0.0...v1.1.0) (2024-02-12)
 
 
