@@ -40,7 +40,7 @@ export default async function getProjectWithAuthority(
     !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
   ) {
     throw new UnauthorizedException(
-      `User with id ${userId} does not have the authority ${authority} in the project with id ${projectId}`
+      `User with id ${userId} does not have the authority in the project with id ${projectId}`
     )
   }
 

@@ -1,7 +1,7 @@
 import { Authority, PrismaClient, Secret, User } from '@prisma/client'
 import { SecretWithProjectAndVersion } from '../secret/secret.types'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
-import { ConflictException, NotFoundException } from '@nestjs/common'
+import { NotFoundException, UnauthorizedException } from '@nestjs/common'
 
 export default async function getSecretWithAuthority(
   userId: User['id'],
@@ -10,23 +10,27 @@ export default async function getSecretWithAuthority(
   prisma: PrismaClient
 ): Promise<SecretWithProjectAndVersion> {
   // Fetch the secret
-  const secret = await prisma.secret.findUnique({
-    where: {
-      id: secretId
-    },
-    include: {
-      versions: true,
-      project: {
-        include: {
-          workspace: {
-            include: {
-              members: true
-            }
+  let secret: SecretWithProjectAndVersion
+
+  try {
+    secret = await prisma.secret.findUnique({
+      where: {
+        id: secretId
+      },
+      include: {
+        versions: true,
+        project: true,
+        environment: {
+          select: {
+            id: true,
+            name: true
           }
         }
       }
-    }
-  })
+    })
+  } catch (error) {
+    /* empty */
+  }
 
   if (!secret) {
     throw new NotFoundException(`Secret with id ${secretId} not found`)
@@ -44,13 +48,10 @@ export default async function getSecretWithAuthority(
     !permittedAuthorities.has(authority) &&
     !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
   ) {
-    throw new ConflictException(
+    throw new UnauthorizedException(
       `User ${userId} does not have the required authorities`
     )
   }
-
-  // Remove the workspace from the secret
-  secret.project.workspace = undefined
 
   return secret
 }

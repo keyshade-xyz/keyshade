@@ -146,6 +146,8 @@ export class SecretService {
     }
 
     // Update the secret
+    // If a new secret value is proposed, we want to create a new version for
+    // that secret
     if (dto.value) {
       const previousVersion = await this.prisma.secretVersion.findFirst({
         where: {
@@ -177,18 +179,18 @@ export class SecretService {
           }
         }
       })
+    } else {
+      result = await this.prisma.secret.update({
+        where: {
+          id: secretId
+        },
+        data: {
+          name: dto.name ?? secret.name,
+          rotateAt: dto.rotateAfter ?? secret.rotateAt,
+          lastUpdatedById: user.id
+        }
+      })
     }
-
-    result = await this.prisma.secret.update({
-      where: {
-        id: secretId
-      },
-      data: {
-        name: secret.name,
-        rotateAt: secret.rotateAt,
-        lastUpdatedById: user.id
-      }
-    })
 
     createEvent(
       {
@@ -224,21 +226,30 @@ export class SecretService {
       this.prisma
     )
 
+    if (secret.environmentId === environmentId) {
+      throw new BadRequestException(
+        `Can not update the environment of the secret to the same environment: ${environmentId} in project ${secret.projectId}`
+      )
+    }
+
     // Check if the environment exists
     const environment = await getEnvironmentWithAuthority(
-      secret.projectId,
+      user.id,
       environmentId,
       Authority.READ_ENVIRONMENT,
       this.prisma
     )
 
+    if (environment.projectId !== secret.projectId) {
+      throw new BadRequestException(
+        `Environment ${environmentId} does not belong to project ${secret.projectId}`
+      )
+    }
+
     // Check if the secret already exists in the environment
-    if (
-      (await this.secretExists(secret.name, environment.id)) ||
-      secret.environmentId !== environment.id
-    ) {
+    if (await this.secretExists(secret.name, environmentId)) {
       throw new ConflictException(
-        `Secret already exists: ${secret.name} in environment ${environment.id} in project ${secret.projectId}`
+        `Secret already exists: ${secret.name} in environment ${environmentId} in project ${secret.projectId}`
       )
     }
 
@@ -289,8 +300,10 @@ export class SecretService {
       this.prisma
     )
 
+    const maxVersion = secret.versions[secret.versions.length - 1].version
+
     // Check if the rollback version is valid
-    if (rollbackVersion < 1 || rollbackVersion > secret.versions[0].version) {
+    if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
         `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
       )
@@ -301,7 +314,7 @@ export class SecretService {
       where: {
         secretId,
         version: {
-          gt: rollbackVersion
+          gt: Number(rollbackVersion)
         }
       }
     })
@@ -356,27 +369,17 @@ export class SecretService {
 
     if (decryptValue) {
       // Decrypt the secret value
-      const decryptedValue = await decrypt(
-        project.privateKey,
-        secret.versions[0].value
-      )
-      secret.versions[0].value = decryptedValue
+      for (let i = 0; i < secret.versions.length; i++) {
+        const decryptedValue = await decrypt(
+          project.privateKey,
+          secret.versions[i].value
+        )
+        secret.versions[i].value = decryptedValue
+      }
     }
 
     // Return the secret
     return secret
-  }
-
-  async getAllVersionsOfSecret(user: User, secretId: Secret['id']) {
-    // Fetch the secret
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.READ_SECRET,
-      this.prisma
-    )
-
-    return secret.versions
   }
 
   async getAllSecretsOfProject(
@@ -439,58 +442,60 @@ export class SecretService {
           }
         }
       },
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
       }
     })) as SecretWithVersion[]
 
-    // Return the secrets
-    return secrets.map(async (secret) => {
-      if (decryptValue) {
+    if (decryptValue) {
+      for (const secret of secrets) {
         // Decrypt the secret value
-        const decryptedValue = await decrypt(
-          project.privateKey,
-          secret.versions[0].value
-        )
-        secret.versions[0].value = decryptedValue
+        for (let i = 0; i < secret.versions.length; i++) {
+          const decryptedValue = await decrypt(
+            project.privateKey,
+            secret.versions[i].value
+          )
+          secret.versions[i].value = decryptedValue
+        }
       }
-      return secret
-    })
+    }
+
+    return secrets
   }
 
-  async getAllSecrets(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    // Return the secrets
-    return await this.prisma.secret.findMany({
-      where: {
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        versions: {
-          orderBy: {
-            version: 'desc'
-          },
-          take: 1
-        },
-        lastUpdatedBy: true,
-        environment: true
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
-    })
-  }
+  // async getAllSecrets(
+  //   page: number,
+  //   limit: number,
+  //   sort: string,
+  //   order: string,
+  //   search: string
+  // ) {
+  //   // Return the secrets
+  //   return await this.prisma.secret.findMany({
+  //     where: {
+  //       name: {
+  //         contains: search
+  //       }
+  //     },
+  //     include: {
+  //       versions: {
+  //         orderBy: {
+  //           version: 'desc'
+  //         },
+  //         take: 1
+  //       },
+  //       lastUpdatedBy: true,
+  //       environment: true
+  //     },
+  //     skip: page * limit,
+  //     take: limit,
+  //     orderBy: {
+  //       [sort]: order
+  //     }
+  //   })
+  // }
 
   private async getDefaultEnvironmentOfProject(
     projectId: Project['id']

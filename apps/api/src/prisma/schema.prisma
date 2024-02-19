@@ -291,6 +291,8 @@ model SecretVersion {
   createdOn   DateTime @default(now())
   createdBy   User?    @relation(fields: [createdById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   createdById String?
+
+  @@unique([secretId, version])
 }
 
 model Secret {
@@ -311,6 +313,8 @@ model Secret {
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   events Event[]
+
+  @@unique([projectId, environmentId, name])
 }
 
 model ApiKey {

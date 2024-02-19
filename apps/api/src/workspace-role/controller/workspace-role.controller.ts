@@ -94,7 +94,7 @@ export class WorkspaceRoleController {
   async getAllWorkspaceRolesOfWorkspace(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
@@ -114,7 +114,7 @@ export class WorkspaceRoleController {
   @Get()
   @UseGuards(AdminGuard)
   async getAllWorkspaceRoles(
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',

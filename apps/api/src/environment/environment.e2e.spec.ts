@@ -10,7 +10,6 @@ import {
 import { PrismaService } from '../prisma/prisma.service'
 import cleanUp from '../common/cleanup'
 import {
-  Authority,
   Environment,
   EventSeverity,
   EventSource,
@@ -26,11 +25,7 @@ import { ProjectModule } from '../project/project.module'
 import { WorkspaceService } from '../workspace/service/workspace.service'
 import { ProjectService } from '../project/service/project.service'
 import { EventModule } from '../event/event.module'
-import { UserModule } from '../user/user.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
-import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
-import { SecretModule } from '../secret/secret.module'
-import { ApiKeyModule } from '../api-key/api-key.module'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -48,13 +43,9 @@ describe('Environment Controller Tests', () => {
       imports: [
         AppModule,
         EventModule,
-        UserModule,
         WorkspaceModule,
-        WorkspaceRoleModule,
-        SecretModule,
         ProjectModule,
-        EnvironmentModule,
-        ApiKeyModule
+        EnvironmentModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -186,7 +177,7 @@ describe('Environment Controller Tests', () => {
 
     expect(response.statusCode).toBe(401)
     expect(response.json().message).toBe(
-      `User with id ${user2.id} does not have the authority ${Authority.CREATE_ENVIRONMENT} in the project with id ${project1.id}`
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
     )
   })
 
@@ -487,7 +478,7 @@ describe('Environment Controller Tests', () => {
 
     expect(response.statusCode).toBe(401)
     expect(response.json().message).toBe(
-      `User with id ${user2.id} does not have the authority ${Authority.READ_ENVIRONMENT} in the project with id ${project1.id}`
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
     )
   })
 

@@ -1,5 +1,11 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common'
-import { Authority, Environment, PrismaClient, User } from '@prisma/client'
+import {
+  Authority,
+  Environment,
+  PrismaClient,
+  Project,
+  User
+} from '@prisma/client'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
 
 export default async function getEnvironmentWithAuthority(
@@ -9,14 +15,20 @@ export default async function getEnvironmentWithAuthority(
   prisma: PrismaClient
 ): Promise<Environment> {
   // Fetch the environment
-  const environment = await prisma.environment.findUnique({
-    where: {
-      id: environmentId
-    },
-    include: {
-      project: true
-    }
-  })
+  let environment: Environment & { project: Project }
+
+  try {
+    environment = await prisma.environment.findUnique({
+      where: {
+        id: environmentId
+      },
+      include: {
+        project: true
+      }
+    })
+  } catch (e) {
+    /* empty */
+  }
 
   if (!environment) {
     throw new NotFoundException(

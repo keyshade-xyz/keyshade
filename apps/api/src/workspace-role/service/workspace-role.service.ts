@@ -147,7 +147,7 @@ export class WorkspaceRoleService {
             description: dto.description,
             colorCode: dto.colorCode,
             projects: {
-              connect: dto.projectIds?.map((id) => ({ id }))
+              set: dto.projectIds?.map((id) => ({ id }))
             }
           },
           include: {
@@ -168,7 +168,7 @@ export class WorkspaceRoleService {
             colorCode: dto.colorCode,
             authorities: dto.authorities ?? [],
             projects: {
-              connect: dto.projectIds?.map((id) => ({ id }))
+              set: dto.projectIds?.map((id) => ({ id }))
             }
           },
           include: {
@@ -298,7 +298,8 @@ export class WorkspaceRoleService {
           contains: search
         }
       },
-      skip: (page - 1) * limit,
+
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
@@ -319,7 +320,7 @@ export class WorkspaceRoleService {
           contains: search
         }
       },
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
