@@ -147,7 +147,7 @@ export class WorkspaceRoleService {
             description: dto.description,
             colorCode: dto.colorCode,
             projects: {
-              connect: dto.projectIds?.map((id) => ({ id }))
+              set: dto.projectIds?.map((id) => ({ id }))
             }
           },
           include: {
@@ -168,7 +168,7 @@ export class WorkspaceRoleService {
             colorCode: dto.colorCode,
             authorities: dto.authorities ?? [],
             projects: {
-              connect: dto.projectIds?.map((id) => ({ id }))
+              set: dto.projectIds?.map((id) => ({ id }))
             }
           },
           include: {
@@ -298,7 +298,8 @@ export class WorkspaceRoleService {
           contains: search
         }
       },
-      skip: (page - 1) * limit,
+
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
@@ -306,26 +307,26 @@ export class WorkspaceRoleService {
     })
   }
 
-  async getWorkspaceRoles(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ): Promise<WorkspaceRole[]> {
-    return await this.prisma.workspaceRole.findMany({
-      where: {
-        name: {
-          contains: search
-        }
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
-    })
-  }
+  // async getWorkspaceRoles(
+  //   page: number,
+  //   limit: number,
+  //   sort: string,
+  //   order: string,
+  //   search: string
+  // ): Promise<WorkspaceRole[]> {
+  //   return await this.prisma.workspaceRole.findMany({
+  //     where: {
+  //       name: {
+  //         contains: search
+  //       }
+  //     },
+  //     skip: page * limit,
+  //     take: limit,
+  //     orderBy: {
+  //       [sort]: order
+  //     }
+  //   })
+  // }
 
   private async getWorkspaceRoleWithAuthority(
     userId: User['id'],

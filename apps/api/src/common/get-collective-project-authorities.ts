@@ -32,7 +32,7 @@ export default async function getCollectiveProjectAuthorities(
           }
         }
       },
-      include: {
+      select: {
         role: {
           select: {
             authorities: true
@@ -47,6 +47,8 @@ export default async function getCollectiveProjectAuthorities(
       authorities.add(authority)
     })
   })
+
+  // console.log('authorities: ', authorities)
 
   return authorities
 }

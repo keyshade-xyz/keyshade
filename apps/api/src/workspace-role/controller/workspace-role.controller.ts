@@ -6,14 +6,12 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { WorkspaceRoleService } from '../service/workspace-role.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
 import { CreateWorkspaceRole } from '../dto/create-workspace-role/create-workspace-role'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
@@ -94,7 +92,7 @@ export class WorkspaceRoleController {
   async getAllWorkspaceRolesOfWorkspace(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
@@ -111,21 +109,21 @@ export class WorkspaceRoleController {
     )
   }
 
-  @Get()
-  @UseGuards(AdminGuard)
-  async getAllWorkspaceRoles(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return await this.workspaceRoleService.getWorkspaceRoles(
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
-  }
+  // @Get()
+  // @UseGuards(AdminGuard)
+  // async getAllWorkspaceRoles(
+  //   @Query('page') page: number = 0,
+  //   @Query('limit') limit: number = 10,
+  //   @Query('sort') sort: string = 'name',
+  //   @Query('order') order: string = 'asc',
+  //   @Query('search') search: string = ''
+  // ) {
+  //   return await this.workspaceRoleService.getWorkspaceRoles(
+  //     page,
+  //     limit,
+  //     sort,
+  //     order,
+  //     search
+  //   )
+  // }
 }

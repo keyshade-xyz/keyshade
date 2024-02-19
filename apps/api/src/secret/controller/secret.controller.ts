@@ -6,15 +6,13 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { SecretService } from '../service/secret.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
@@ -93,21 +91,12 @@ export class SecretController {
     return await this.secretService.getSecretById(user, secretId, decryptValue)
   }
 
-  @Get(':secretId/versions')
-  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
-  async getAllVersionsOfSecret(
-    @CurrentUser() user: User,
-    @Param('secretId') secretId: string
-  ) {
-    return await this.secretService.getAllVersionsOfSecret(user, secretId)
-  }
-
   @Get('/all/:projectId')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
@@ -126,21 +115,21 @@ export class SecretController {
     )
   }
 
-  @UseGuards(AdminGuard)
-  @Get()
-  async getAllSecrets(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return await this.secretService.getAllSecrets(
-      page,
-      limit,
-      sort,
-      order,
-      search
-    )
-  }
+  // @UseGuards(AdminGuard)
+  // @Get()
+  // async getAllSecrets(
+  //   @Query('page') page: number = 1,
+  //   @Query('limit') limit: number = 10,
+  //   @Query('sort') sort: string = 'name',
+  //   @Query('order') order: string = 'asc',
+  //   @Query('search') search: string = ''
+  // ) {
+  //   return await this.secretService.getAllSecrets(
+  //     page,
+  //     limit,
+  //     sort,
+  //     order,
+  //     search
+  //   )
+  // }
 }

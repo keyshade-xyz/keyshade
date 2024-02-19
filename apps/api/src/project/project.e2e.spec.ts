@@ -389,7 +389,7 @@ describe('Project Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User with id ${user2.id} does not have the authority UPDATE_PROJECT in the project with id ${project1.id}`
+      message: `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
     })
   })
 
@@ -462,7 +462,7 @@ describe('Project Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User with id ${user2.id} does not have the authority READ_PROJECT in the project with id ${project1.id}`
+      message: `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
     })
   })
 
@@ -700,7 +700,7 @@ describe('Project Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User with id ${user1.id} does not have the authority DELETE_PROJECT in the project with id ${otherProject.id}`
+      message: `User with id ${user1.id} does not have the authority in the project with id ${otherProject.id}`
     })
   })
 
