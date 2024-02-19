@@ -307,26 +307,26 @@ export class WorkspaceRoleService {
     })
   }
 
-  async getWorkspaceRoles(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ): Promise<WorkspaceRole[]> {
-    return await this.prisma.workspaceRole.findMany({
-      where: {
-        name: {
-          contains: search
-        }
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
-    })
-  }
+  // async getWorkspaceRoles(
+  //   page: number,
+  //   limit: number,
+  //   sort: string,
+  //   order: string,
+  //   search: string
+  // ): Promise<WorkspaceRole[]> {
+  //   return await this.prisma.workspaceRole.findMany({
+  //     where: {
+  //       name: {
+  //         contains: search
+  //       }
+  //     },
+  //     skip: page * limit,
+  //     take: limit,
+  //     orderBy: {
+  //       [sort]: order
+  //     }
+  //   })
+  // }
 
   private async getWorkspaceRoleWithAuthority(
     userId: User['id'],
