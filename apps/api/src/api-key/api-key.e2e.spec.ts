@@ -130,7 +130,7 @@ describe('Api Key Role Controller Tests', () => {
   it('should be able to get all the api keys of the user', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all/as-user',
+      url: '/api-key/all',
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -152,7 +152,7 @@ describe('Api Key Role Controller Tests', () => {
   it('should be able to get all api keys using the API key', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all/as-user',
+      url: '/api-key/all',
       headers: {
         'x-keyshade-token': apiKeyValue
       }

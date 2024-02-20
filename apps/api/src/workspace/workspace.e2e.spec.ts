@@ -1017,7 +1017,7 @@ describe('Workspace Controller Tests', () => {
       headers: {
         'x-e2e-user-email': user2.email
       },
-      url: '/workspace/all/as-user'
+      url: '/workspace/all'
     })
 
     expect(response.statusCode).toBe(200)

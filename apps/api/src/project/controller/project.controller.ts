@@ -6,15 +6,13 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { ProjectService } from '../service/project.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
@@ -81,23 +79,5 @@ export class ProjectController {
       order,
       search
     )
-  }
-
-  @Get('admin/:projectId')
-  @UseGuards(AdminGuard)
-  async getProjectById(@Param('projectId') projectId: Project['id']) {
-    return await this.service.getProjectById(projectId)
-  }
-
-  @Get('admin/all')
-  @UseGuards(AdminGuard)
-  async getAllProjectsAdmin(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return await this.service.getProjects(page, limit, sort, order, search)
   }
 }

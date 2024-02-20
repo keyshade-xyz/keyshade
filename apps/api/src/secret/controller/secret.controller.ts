@@ -114,22 +114,4 @@ export class SecretController {
       search
     )
   }
-
-  // @UseGuards(AdminGuard)
-  // @Get()
-  // async getAllSecrets(
-  //   @Query('page') page: number = 1,
-  //   @Query('limit') limit: number = 10,
-  //   @Query('sort') sort: string = 'name',
-  //   @Query('order') order: string = 'asc',
-  //   @Query('search') search: string = ''
-  // ) {
-  //   return await this.secretService.getAllSecrets(
-  //     page,
-  //     limit,
-  //     sort,
-  //     order,
-  //     search
-  //   )
-  // }
 }
