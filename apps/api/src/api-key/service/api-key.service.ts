@@ -152,9 +152,7 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
-      throw new NotFoundException(
-        `User ${user.id} is not authorized to access API key ${apiKeyId}`
-      )
+      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
     }
 
     return apiKey
