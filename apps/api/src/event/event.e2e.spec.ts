@@ -36,6 +36,8 @@ import { EnvironmentModule } from '../environment/environment.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import createEvent from '../common/create-event'
 import fetchEvents from '../common/fetch-events'
+import { VariableService } from '../variable/service/variable.service'
+import { VariableModule } from '../variable/variable.module'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -48,6 +50,7 @@ describe('Event Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
   let projectService: ProjectService
   let secretService: SecretService
+  let variableService: VariableService
 
   let user: User
   let workspace: Workspace
@@ -67,7 +70,8 @@ describe('Event Controller Tests', () => {
         SecretModule,
         ProjectModule,
         EnvironmentModule,
-        ApiKeyModule
+        ApiKeyModule,
+        VariableModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -85,6 +89,7 @@ describe('Event Controller Tests', () => {
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     projectService = moduleRef.get(ProjectService)
     secretService = moduleRef.get(SecretService)
+    variableService = moduleRef.get(VariableService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -284,6 +289,43 @@ describe('Event Controller Tests', () => {
       triggerer: EventTriggerer.USER,
       severity: EventSeverity.INFO,
       type: EventType.SECRET_ADDED,
+      timestamp: expect.any(String),
+      metadata: expect.any(Object)
+    }
+
+    totalEvents.push(event)
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual([event])
+  })
+
+  it('should be able to fetch a variable event', async () => {
+    const newVariable = await variableService.createVariable(
+      user,
+      {
+        name: 'My variable',
+        value: 'My value',
+        environmentId: environment.id
+      },
+      project.id
+    )
+
+    expect(newVariable).toBeDefined()
+
+    const response = await fetchEvents(
+      app,
+      user,
+      `variableId=${newVariable.id}`
+    )
+
+    const event = {
+      id: expect.any(String),
+      title: expect.any(String),
+      description: expect.any(String),
+      source: EventSource.VARIABLE,
+      triggerer: EventTriggerer.USER,
+      severity: EventSeverity.INFO,
+      type: EventType.VARIABLE_ADDED,
       timestamp: expect.any(String),
       metadata: expect.any(Object)
     }

@@ -5,7 +5,6 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { SecretService } from '../../secret/service/secret.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import {
   Authority,
@@ -27,7 +26,7 @@ import getVariableWithAuthority from '../../common/get-variable-with-authority'
 
 @Injectable()
 export class VariableService {
-  private readonly logger = new Logger(SecretService.name)
+  private readonly logger = new Logger(VariableService.name)
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -114,7 +113,7 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          secretId: variable.id,
+          variableId: variable.id,
           name: variable.name,
           projectId,
           projectName: project.name,
@@ -171,7 +170,7 @@ export class VariableService {
         take: 1
       })
 
-      result = await this.prisma.secret.update({
+      result = await this.prisma.variable.update({
         where: {
           id: variableId
         },
@@ -207,7 +206,7 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable updated`,
         metadata: {
-          secretId: variable.id,
+          variableId: variable.id,
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name
@@ -283,7 +282,7 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable environment updated`,
         metadata: {
-          secretId: variable.id,
+          variableId: variable.id,
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name,
@@ -338,7 +337,7 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable rolled back`,
         metadata: {
-          secretId: variable.id,
+          variableId: variable.id,
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name,
@@ -370,12 +369,11 @@ export class VariableService {
     createEvent(
       {
         triggeredBy: user,
-        entity: variable,
         type: EventType.VARIABLE_DELETED,
         source: EventSource.VARIABLE,
         title: `Variable deleted`,
         metadata: {
-          secretId: variable.id,
+          variableId: variable.id,
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name
