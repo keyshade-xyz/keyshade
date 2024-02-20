@@ -5,6 +5,7 @@ import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 import getSecretWithAuthority from '../../common/get-secret-with-authority'
 import { PrismaService } from '../../prisma/prisma.service'
+import getVariableWithAuthority from '../../common/get-variable-with-authority'
 
 @Injectable()
 export class EventService {
@@ -17,6 +18,7 @@ export class EventService {
       projectId?: string
       environmentId?: string
       secretId?: string
+      variableId?: string
       apiKeyId?: string
       workspaceRoleId?: string
     },
@@ -69,6 +71,14 @@ export class EventService {
         this.prisma
       )
       whereCondition['sourceSecretId'] = context.secretId
+    } else if (context.variableId) {
+      await getVariableWithAuthority(
+        user.id,
+        context.variableId,
+        Authority.READ_VARIABLE,
+        this.prisma
+      )
+      whereCondition['sourceVariableId'] = context.variableId
     } else if (context.apiKeyId) {
       whereCondition['sourceApiKeyId'] = context.apiKeyId
     } else if (context.workspaceRoleId) {

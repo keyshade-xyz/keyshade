@@ -10,7 +10,8 @@ import {
   Secret,
   User,
   Workspace,
-  WorkspaceRole
+  WorkspaceRole,
+  Variable
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
 
@@ -19,7 +20,14 @@ export default async function createEvent(
     triggerer?: EventTriggerer
     severity?: EventSeverity
     triggeredBy?: User
-    entity?: Workspace | Project | Environment | WorkspaceRole | ApiKey | Secret
+    entity?:
+      | Workspace
+      | Project
+      | Environment
+      | WorkspaceRole
+      | ApiKey
+      | Secret
+      | Variable
     type: EventType
     source: EventSource
     title: string
@@ -82,6 +90,12 @@ export default async function createEvent(
       case EventSource.SECRET: {
         if (data.entity) {
           baseData.sourceSecretId = data.entity.id
+        }
+        break
+      }
+      case EventSource.VARIABLE: {
+        if (data.entity) {
+          baseData.sourceVariableId = data.entity.id
         }
         break
       }

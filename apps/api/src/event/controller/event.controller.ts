@@ -22,6 +22,7 @@ export class EventController {
     @Query('projectId') projectId: string,
     @Query('environmentId') environmentId: string,
     @Query('secretId') secretId: string,
+    @Query('variableId') variableId: string,
     @Query('apiKeyId') apiKeyId: string,
     @Query('workspaceRoleId') workspaceRoleId: string
   ) {
@@ -32,6 +33,7 @@ export class EventController {
         projectId,
         environmentId,
         secretId,
+        variableId,
         apiKeyId,
         workspaceRoleId
       },

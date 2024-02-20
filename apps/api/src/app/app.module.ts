@@ -16,6 +16,7 @@ import { WorkspaceModule } from '../workspace/workspace.module'
 import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
 import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
 import { EventModule } from '../event/event.module'
+import { VariableModule } from '../variable/variable.module'
 
 @Module({
   controllers: [AppController],
@@ -34,7 +35,8 @@ import { EventModule } from '../event/event.module'
     EnvironmentModule,
     WorkspaceModule,
     WorkspaceRoleModule,
-    EventModule
+    EventModule,
+    VariableModule
   ],
   providers: [
     {

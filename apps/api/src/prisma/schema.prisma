@@ -9,6 +9,7 @@ datasource db {
 
 enum EventSource {
   SECRET
+  VARIABLE
   API_KEY
   ENVIRONMENT
   PROJECT
@@ -48,6 +49,9 @@ enum EventType {
   SECRET_UPDATED
   SECRET_DELETED
   SECRET_ADDED
+  VARIABLE_UPDATED
+  VARIABLE_DELETED
+  VARIABLE_ADDED
   API_KEY_UPDATED
   API_KEY_DELETED
   API_KEY_ADDED
@@ -85,6 +89,10 @@ enum Authority {
   READ_ENVIRONMENT
   UPDATE_ENVIRONMENT
   DELETE_ENVIRONMENT
+  CREATE_VARIABLE
+  READ_VARIABLE
+  UPDATE_VARIABLE
+  DELETE_VARIABLE
 
   // User authorities
   CREATE_WORKSPACE
@@ -112,6 +120,9 @@ enum NotificationType {
   ENVIRONMENT_UPDATED
   ENVIRONMENT_DELETED
   ENVIRONMENT_ADDED
+  VARIABLE_UPDATED
+  VARIABLE_DELETED
+  VARIABLE_ADDED
 }
 
 model Event {
@@ -137,6 +148,8 @@ model Event {
   sourceEnvironmentId         String?
   sourceSecret                Secret?          @relation(fields: [sourceSecretId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   sourceSecretId              String?
+  sourceVariable              Variable?        @relation(fields: [sourceVariableId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceVariableId            String?
   sourceApiKey                ApiKey?          @relation(fields: [sourceApiKeyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   sourceApiKeyId              String?
   sourceWorkspaceMembership   WorkspaceMember? @relation(fields: [sourceWorkspaceMembershipId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -170,9 +183,11 @@ model User {
   otp              Otp?
   notifications    Notification[]
   secrets          Secret[] // Stores the secrets the user updated
+  variables        Variable[] // Stores the variables the user updated
   projects         Project[] // Stores the projects the user updated
   environments     Environment[] // Stores the environments the user updated
   secretVersion    SecretVersion[]
+  variableVersion  VariableVersion[]
   events           Event[]
 
   @@index([email], name: "email")
@@ -198,7 +213,8 @@ model Environment {
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  secrets Secret[]
+  secrets   Secret[]
+  variables Variable[]
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
@@ -226,11 +242,12 @@ model Project {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  events                     Event[]
-  secrets                    Secret[]
-  environments               Environment[]
-  workspaceRole              WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  workspaceRoleId            String?
+  events          Event[]
+  secrets         Secret[]
+  variables       Variable[]
+  environments    Environment[]
+  workspaceRole   WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  workspaceRoleId String?
 }
 
 model WorkspaceRole {
@@ -302,6 +319,42 @@ model Secret {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   rotateAt  DateTime?
+
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  environmentId String
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  events Event[]
+
+  @@unique([projectId, environmentId, name])
+}
+
+model VariableVersion {
+  id      String @id @default(cuid())
+  value   String
+  version Int    @default(1)
+
+  variableId String
+  variable   Variable @relation(fields: [variableId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdOn   DateTime @default(now())
+  createdBy   User?    @relation(fields: [createdById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  createdById String?
+
+  @@unique([variableId, version])
+}
+
+model Variable {
+  id        String            @id @default(cuid())
+  name      String
+  versions  VariableVersion[] // Stores the versions of the variable
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

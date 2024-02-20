@@ -26,6 +26,7 @@ import getEnvironmentWithAuthority from '../../common/get-environment-with-autho
 import getSecretWithAuthority from '../../common/get-secret-with-authority'
 import { SecretWithVersion } from '../secret.types'
 import createEvent from '../../common/create-event'
+import getDefaultEnvironmentOfProject from '../../common/get-default-project-environemnt'
 
 @Injectable()
 export class SecretService {
@@ -54,7 +55,7 @@ export class SecretService {
       )
     }
     if (!environment) {
-      environment = await this.getDefaultEnvironmentOfProject(projectId)
+      environment = await getDefaultEnvironmentOfProject(projectId, this.prisma)
     }
 
     // If any default environment was not found, throw an error
@@ -310,7 +311,7 @@ export class SecretService {
     }
 
     // Rollback the secret
-    return await this.prisma.secretVersion.deleteMany({
+    const result = await this.prisma.secretVersion.deleteMany({
       where: {
         secretId,
         version: {
@@ -318,6 +319,27 @@ export class SecretService {
         }
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret rolled back`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} rolled back secret ${secret.id}`)
+
+    return result
   }
 
   async deleteSecret(user: User, secretId: Secret['id']) {
@@ -330,11 +352,26 @@ export class SecretService {
     )
 
     // Delete the secret
-    return await this.prisma.secret.delete({
+    await this.prisma.secret.delete({
       where: {
         id: secretId
       }
     })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        type: EventType.SECRET_DELETED,
+        source: EventSource.SECRET,
+        title: `Secret deleted`,
+        metadata: {
+          secretId
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} deleted secret ${secretId}`)
   }
 
   async getSecretById(
@@ -496,17 +533,6 @@ export class SecretService {
   //     }
   //   })
   // }
-
-  private async getDefaultEnvironmentOfProject(
-    projectId: Project['id']
-  ): Promise<Environment | null> {
-    return await this.prisma.environment.findFirst({
-      where: {
-        projectId,
-        isDefault: true
-      }
-    })
-  }
 
   private async secretExists(
     secretName: Secret['name'],
