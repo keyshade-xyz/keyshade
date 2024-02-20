@@ -6,14 +6,12 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { ApiKeyService } from '../service/api-key.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { Authority, User } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
@@ -49,7 +47,7 @@ export class ApiKeyController {
     return this.apiKeyService.getApiKeyById(user, id)
   }
 
-  @Get('all/as-user')
+  @Get('all')
   @RequiredApiKeyAuthorities(Authority.READ_API_KEY)
   async getApiKeysOfUser(
     @CurrentUser() user: User,
@@ -67,17 +65,5 @@ export class ApiKeyController {
       order,
       search
     )
-  }
-
-  @Get('all/as-admin')
-  @UseGuards(AdminGuard)
-  async getApiKeys(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return this.apiKeyService.getAllApiKeys(page, limit, sort, order, search)
   }
 }

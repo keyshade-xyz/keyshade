@@ -864,36 +864,6 @@ export class WorkspaceService {
     })
   }
 
-  async getWorkspaces(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    return await this.prisma.workspace.findMany({
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      },
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search
-            }
-          },
-          {
-            description: {
-              contains: search
-            }
-          }
-        ]
-      }
-    })
-  }
-
   private async existsByName(
     name: string,
     userId: User['id']

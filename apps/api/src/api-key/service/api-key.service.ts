@@ -152,9 +152,7 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
-      throw new NotFoundException(
-        `User ${user.id} is not authorized to access API key ${apiKeyId}`
-      )
+      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
     }
 
     return apiKey
@@ -171,35 +169,6 @@ export class ApiKeyService {
     return await this.prisma.apiKey.findMany({
       where: {
         userId: user.id,
-        name: {
-          contains: search
-        }
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    })
-  }
-
-  async getAllApiKeys(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    return await this.prisma.apiKey.findMany({
-      where: {
         name: {
           contains: search
         }

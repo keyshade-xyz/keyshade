@@ -502,38 +502,6 @@ export class SecretService {
     return secrets
   }
 
-  // async getAllSecrets(
-  //   page: number,
-  //   limit: number,
-  //   sort: string,
-  //   order: string,
-  //   search: string
-  // ) {
-  //   // Return the secrets
-  //   return await this.prisma.secret.findMany({
-  //     where: {
-  //       name: {
-  //         contains: search
-  //       }
-  //     },
-  //     include: {
-  //       versions: {
-  //         orderBy: {
-  //           version: 'desc'
-  //         },
-  //         take: 1
-  //       },
-  //       lastUpdatedBy: true,
-  //       environment: true
-  //     },
-  //     skip: page * limit,
-  //     take: limit,
-  //     orderBy: {
-  //       [sort]: order
-  //     }
-  //   })
-  // }
-
   private async secretExists(
     secretName: Secret['name'],
     environmentId: Environment['id']

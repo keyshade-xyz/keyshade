@@ -346,17 +346,6 @@ export class ProjectService {
     return project
   }
 
-  async getProjectById(projectId: Project['id']) {
-    const project = await getProjectWithAuthority(
-      null,
-      projectId,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
-
-    return project
-  }
-
   async getProjectsOfWorkspace(
     user: User,
     workspaceId: Workspace['id'],
@@ -401,38 +390,6 @@ export class ProjectService {
               }
             }
           }
-        }
-      })
-    ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
-  }
-
-  async getProjects(
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    return (
-      await this.prisma.project.findMany({
-        skip: page * limit,
-        take: limit,
-        orderBy: {
-          [sort]: order
-        },
-        where: {
-          OR: [
-            {
-              name: {
-                contains: search
-              }
-            },
-            {
-              description: {
-                contains: search
-              }
-            }
-          ]
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))

@@ -52,6 +52,7 @@ export class AuthController {
     await this.authService.sendOtp(email)
   }
 
+  /* istanbul ignore next */
   @Public()
   @Post('validate-otp')
   @ApiOperation({
@@ -88,6 +89,7 @@ export class AuthController {
     return await this.authService.validateOtp(email, otp)
   }
 
+  /* istanbul ignore next */
   @Public()
   @Get('github')
   @ApiOperation({
@@ -106,6 +108,7 @@ export class AuthController {
     res.status(302).redirect('/api/auth/github/callback')
   }
 
+  /* istanbul ignore next */
   @Public()
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))

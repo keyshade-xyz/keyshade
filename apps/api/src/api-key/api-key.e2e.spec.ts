@@ -81,7 +81,32 @@ describe('Api Key Role Controller Tests', () => {
     apiKeyValue = response.json().value
   })
 
-  it('should be able to update the api key', async () => {
+  it('should not have any authorities if none are provided', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api-key',
+      payload: {
+        name: 'Test Key 2',
+        expiresAfter: '24'
+      },
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+    expect(response.json()).toEqual({
+      id: expect.any(String),
+      name: 'Test Key 2',
+      value: expect.stringMatching(/^ks_*/),
+      authorities: [],
+      expiresAt: expect.any(String),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String)
+    })
+  })
+
+  it('should be able to update the api key without without changing the authorities', async () => {
     const response = await app.inject({
       method: 'PUT',
       url: `/api-key/${apiKey.id}`,
@@ -107,6 +132,31 @@ describe('Api Key Role Controller Tests', () => {
     apiKey = response.json()
   })
 
+  it('should be able to update the api key with changing the expiry', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/api-key/${apiKey.id}`,
+      payload: {
+        name: 'Updated Test Key',
+        expiresAfter: '24',
+        authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT']
+      },
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      id: apiKey.id,
+      name: 'Updated Test Key',
+      authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
+      expiresAt: expect.any(String),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String)
+    })
+  })
+
   it('should be able to get the api key', async () => {
     const response = await app.inject({
       method: 'GET',
@@ -120,55 +170,71 @@ describe('Api Key Role Controller Tests', () => {
     expect(response.json()).toEqual({
       id: apiKey.id,
       name: 'Updated Test Key',
-      authorities: ['READ_API_KEY'],
+      authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
       expiresAt: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String)
     })
   })
 
+  it('should not be able to get the API key if not exists', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api-key/ks_1234567890`,
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+  })
+
   it('should be able to get all the api keys of the user', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all/as-user',
+      url: '/api-key/all',
       headers: {
         'x-e2e-user-email': user.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual([
-      {
-        id: apiKey.id,
-        name: 'Updated Test Key',
-        authorities: ['READ_API_KEY'],
-        expiresAt: expect.any(String),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String)
-      }
-    ])
+    expect(response.json()).toEqual(
+      expect.arrayContaining([
+        {
+          id: apiKey.id,
+          name: 'Updated Test Key',
+          authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
+          expiresAt: expect.any(String),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String)
+        }
+      ])
+    )
   })
 
   it('should be able to get all api keys using the API key', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all/as-user',
+      url: '/api-key/all',
       headers: {
         'x-keyshade-token': apiKeyValue
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual([
-      {
-        id: apiKey.id,
-        name: 'Updated Test Key',
-        authorities: ['READ_API_KEY'],
-        expiresAt: expect.any(String),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String)
-      }
-    ])
+    expect(response.json()).toEqual(
+      expect.arrayContaining([
+        {
+          id: apiKey.id,
+          name: 'Updated Test Key',
+          authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
+          expiresAt: expect.any(String),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String)
+        }
+      ])
+    )
   })
 
   it('should not be able to create api key with invalid authorities of API key', async () => {

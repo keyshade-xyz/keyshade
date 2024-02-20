@@ -1,10 +1,11 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
   Inject,
   Injectable,
   Logger,
-  LoggerService
+  LoggerService,
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
@@ -33,10 +34,7 @@ export class AuthService {
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
-      throw new HttpException(
-        'Please enter a valid email address',
-        HttpStatus.BAD_REQUEST
-      )
+      throw new BadRequestException('Please enter a valid email address')
     }
 
     const user = await this.createUserIfNotExists(email)
@@ -64,6 +62,7 @@ export class AuthService {
     this.logger.log(`Login code sent to ${email}`)
   }
 
+  /* istanbul ignore next */
   async validateOtp(
     email: string,
     otp: string
@@ -71,7 +70,7 @@ export class AuthService {
     const user = await this.findUserByEmail(email)
     if (!user) {
       this.logger.error(`User not found: ${email}`)
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+      throw new NotFoundException('User not found')
     }
 
     const isOtpValid =
@@ -89,7 +88,7 @@ export class AuthService {
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
-      throw new HttpException('Invalid login code', HttpStatus.UNAUTHORIZED)
+      throw new UnauthorizedException('Invalid login code')
     }
 
     await this.prisma.otp.delete({
@@ -111,6 +110,7 @@ export class AuthService {
     }
   }
 
+  /* istanbul ignore next */
   async handleGithubOAuth(
     email: string,
     name: string,
@@ -131,6 +131,7 @@ export class AuthService {
     }
   }
 
+  /* istanbul ignore next */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
     try {

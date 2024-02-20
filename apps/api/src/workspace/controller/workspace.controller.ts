@@ -6,8 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  UseGuards
+  Query
 } from '@nestjs/common'
 import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '../../decorators/user.decorator'
@@ -17,7 +16,6 @@ import {
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
 @Controller('workspace')
@@ -185,7 +183,7 @@ export class WorkspaceController {
     return this.workspaceService.getWorkspaceById(user, workspaceId)
   }
 
-  @Get('/all/as-user')
+  @Get('/all')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,
@@ -203,17 +201,5 @@ export class WorkspaceController {
       order,
       search
     )
-  }
-
-  @UseGuards(AdminGuard)
-  @Get('/all/as-admin')
-  async getAllWorkspaces(
-    @Query('page') page: number = 0,
-    @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'name',
-    @Query('order') order: string = 'asc',
-    @Query('search') search: string = ''
-  ) {
-    return this.workspaceService.getWorkspaces(page, limit, sort, order, search)
   }
 }

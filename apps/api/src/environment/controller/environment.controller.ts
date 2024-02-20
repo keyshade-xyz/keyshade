@@ -76,24 +76,6 @@ export class EnvironmentController {
     )
   }
 
-  // @Get()
-  // @UseGuards(AdminGuard)
-  // async getAllEnvironments(
-  //   @Query('page') page: number = 1,
-  //   @Query('limit') limit: number = 10,
-  //   @Query('sort') sort: string = 'name',
-  //   @Query('order') order: string = 'asc',
-  //   @Query('search') search: string = ''
-  // ) {
-  //   return await this.environmentService.getAllEnvironments(
-  //     page,
-  //     limit,
-  //     sort,
-  //     order,
-  //     search
-  //   )
-  // }
-
   @Delete(':environmentId')
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(

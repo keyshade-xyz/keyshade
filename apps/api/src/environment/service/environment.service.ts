@@ -229,31 +229,6 @@ export class EnvironmentService {
     })
   }
 
-  // async getAllEnvironments(
-  //   page: number,
-  //   limit: number,
-  //   sort: string,
-  //   order: string,
-  //   search: string
-  // ) {
-  //   // Get the environments
-  //   return await this.prisma.environment.findMany({
-  //     where: {
-  //       name: {
-  //         contains: search
-  //       }
-  //     },
-  //     include: {
-  //       lastUpdatedBy: true
-  //     },
-  //     skip: page * limit,
-  //     take: limit,
-  //     orderBy: {
-  //       [sort]: order
-  //     }
-  //   })
-  // }
-
   async deleteEnvironment(user: User, environmentId: Environment['id']) {
     const environment = await getEnvironmentWithAuthority(
       user.id,
