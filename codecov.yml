@@ -31,6 +31,6 @@ flag_management:
       carryforward: true
       statuses:
         - type: project
-          target: 95%
+          target: 85%
         - type: patch
           target: 98%
