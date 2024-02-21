@@ -26,21 +26,19 @@
 
 </p>
 
-
-
 ---
 
-keyshade is designed to simplify the integration of your secrets into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
+keyshade is designed to simplify the integration of your secrets and variables into your codebase. We prioritize the security of your data by leveraging the power of [Public Key Encryption](https://en.m.wikipedia.org/wiki/Public-key_cryptography) empowered by [Elliptic Curve Cryptography](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) for storing and transferring your secrets to your runtime environment in realtime.
 
-With keyshade, managing your secrets becomes a breeze while ensuring their security.
+With keyshade, managing your configurations becomes a breeze while ensuring their security.
 
 ## Why keyshade?
 
-Any application that you host on a cloud provider would need access to secrets. These secrets help you to access other APIs or perform internal actions such as generating JWT tokens. Hence, all cloud providers give you the ability to store your secrets in their platform. However, this comes with a few caveats:
+Any application that you host on a cloud provider would need access to configurations. These configurations help you to access other APIs or perform internal actions. You would generally be managing this from the dashboard of your project in the cloud provider. However, this comes with a few caveats:
 
-- **Security**: Cloud providers store your secrets in plaintext. This means that anyone with access to your cloud provider's dashboard can view your secrets.
+- **Security**: Cloud providers store your sensitive data in plaintext, or decipherable hashes. This means that anyone with access to your cloud provider's dashboard can view your secrets.
 
-- **Access Control**: Cloud providers don't give you the ability to control who can access your secrets. This means that anyone with access to your cloud provider's dashboard can view your secrets.
+- **Access Control**: Cloud providers don't give you the ability to control who can access your secrets. This becomes a problem since you might not want everyone to have access to everything.
 
 - **Maintainability**: As the application grows, you'll need to add more secrets. This means that you'll have to update your secrets in multiple places, manually.
 
@@ -62,13 +60,51 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 - **Object Values**: You can store your secrets as JSON like objects. This gives you the ability to group similar secrets together.
 
-- **Secret versioning**: We maintain a history of all your secrets. This means that you can easily revert to an older version of your secrets if you need to.
+- **Secret and variable versioning**: We maintain a history of all your secrets. This means that you can easily revert to an older version of your configuration if you need to.
 
 - **Secret Rotation**: We allow you to rotate your secrets regularly. This means that you can update your secrets without having to update your application.
 
 - **Workspaces and projects**: Managing your data in a clean and efficient goes a long way in improving your productivity. We allow you to organize your secrets into workspaces and projects. This gives you the ability to share your secrets with your team members easily.
 
 - **Access Control**: You are the owner of your secrets. This means that you have complete control over who can access your secrets. You can share your secrets with your team members by adding them to your workspace.
+
+- **Custom Roles**: We allow you to create custom roles for your team members. This will allow you to fine tune your control over who gets to do what.
+
+- **Event tracking**: For every event that happens, we maintain an in detailed log of what happened, accounting for who did what and when.
+
+- **Auditing and anomaly detection**: Our robots are continuously monitoring access to your secrets and variables. With the power of AI, it becomes near to impossible to breach your data.
+
+- **Integrations**: Our vast library of integration allows you to use keyshade with your favorite tools and platforms.
+
+## Architecture
+
+The following few diagrams try to explain the architecture of keyshade.
+
+### Control Flow
+
+![Control Flow](./blob/control-flow.png)
+
+### Hierarchical Structure
+
+![Hierarchical Structure](./blob/data-hierarchy.png)
+
+### Behind the curtain
+
+#### Projects
+
+![Projects](./blob/projects.png)
+
+#### Creating secrets
+
+![Creating secrets](./blob/secret-creation.png)
+
+#### Retrieving secrets
+
+![Retrieving secrets](./blob/secret-retrieval.png)
+
+## Setting things up
+
+We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.xyz/).
 
 ## Contributing
 
