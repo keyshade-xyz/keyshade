@@ -1,7 +1,7 @@
-import { UpdateWorkspace } from './update.workspace';
+import { UpdateWorkspace } from './update.workspace'
 
 describe('UpdateWorkspace', () => {
   it('should be defined', () => {
-    expect(new UpdateWorkspace()).toBeDefined();
-  });
-});
+    expect(new UpdateWorkspace()).toBeDefined()
+  })
+})

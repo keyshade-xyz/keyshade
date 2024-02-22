@@ -1,7 +1,7 @@
-import { CreateWorkspace } from './create.workspace';
+import { CreateWorkspace } from './create.workspace'
 
 describe('CreateWorkspace', () => {
   it('should be defined', () => {
-    expect(new CreateWorkspace()).toBeDefined();
-  });
-});
+    expect(new CreateWorkspace()).toBeDefined()
+  })
+})

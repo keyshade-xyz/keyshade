@@ -145,6 +145,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractApiKeyFromHeader(request: Request): string | undefined {
+    if (Array.isArray(request.headers[X_KEYSHADE_TOKEN])) {
+      throw new Error('Bad auth')
+    }
     return request.headers[X_KEYSHADE_TOKEN]
   }
 }

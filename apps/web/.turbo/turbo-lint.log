@@ -1,0 +1,6 @@
+
+
+> web@1.0.0 lint /home/kriptonian/Desktop/work/keyshade_xyz/keyshade/apps/web
+> next lint --fix
+
+[32m✔ No ESLint warnings or errors[39m

@@ -1,13 +1,14 @@
 import { Poppins } from 'next/font/google'
-import Links from '../components/Links'
-import Killers from '../components/Killers'
+import Links from '../components/links'
+import Killers from '../components/killers'
 import { Logo, Grid, Stars } from '../public'
+
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700']
 })
 
-function Index() {
+function Index(): React.JSX.Element {
   return (
     <div className="relative">
       <div className="absolute z-10 opacity-25">
@@ -35,13 +36,13 @@ function Index() {
 
             <div className="flex gap-4 items-center justify-center md:gap-10">
               <Links
-                icon="docs"
                 description="Documentation"
+                icon="docs"
                 link="https://docs.keyshade.xyz/"
               />
               <Links
-                icon="github"
                 description="Star on Github"
+                icon="github"
                 link="https://github.com/keyshade-xyz/keyshade"
               />
             </div>

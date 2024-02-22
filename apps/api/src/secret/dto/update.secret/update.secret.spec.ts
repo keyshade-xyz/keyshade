@@ -1,7 +1,7 @@
-import { UpdateSecret } from './update.secret';
+import { UpdateSecret } from './update.secret'
 
 describe('UpdateSecret', () => {
   it('should be defined', () => {
-    expect(new UpdateSecret()).toBeDefined();
-  });
-});
+    expect(new UpdateSecret()).toBeDefined()
+  })
+})

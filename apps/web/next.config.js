@@ -1,33 +1,19 @@
-const { composePlugins, withNx } = require('@nx/next')
-
-/**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
- **/
+const path = require("node:path");
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: 'dist/.next',
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/,
-      use: ['@svgr/webpack']
-    })
+      use: ["@svgr/webpack"],
+    });
 
     if (!isServer) {
-      // eslint-disable-next-line no-undef
-      // config.resolve.alias['@public'] = path.join(__dirname, 'public')
+      config.resolve.alias["@public"] = path.join(__dirname, "public");
     }
 
-    return config
+    return config;
   },
-  nx: {
-    // Set this to true if you would like to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false
-  }
-}
+  reactStrictMode: true,
+};
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx
-]
-
-module.exports = composePlugins(...plugins)(nextConfig)
+module.exports = nextConfig;

@@ -1,7 +1,7 @@
-import { UpdateWorkspaceRole } from './update-workspace-role';
+import { UpdateWorkspaceRole } from './update-workspace-role'
 
 describe('UpdateWorkspaceRole', () => {
   it('should be defined', () => {
-    expect(new UpdateWorkspaceRole()).toBeDefined();
-  });
-});
+    expect(new UpdateWorkspaceRole()).toBeDefined()
+  })
+})

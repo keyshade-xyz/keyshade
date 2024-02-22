@@ -5,7 +5,7 @@ export default async function fetchEvents(
   app: NestFastifyApplication,
   user: User,
   query?: string
-) {
+): Promise<any> {
   return app.inject({
     method: 'GET',
     headers: {

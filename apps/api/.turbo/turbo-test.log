@@ -1,0 +1,1302 @@
+
+
+> api@1.0.0 test /home/kriptonian/Desktop/work/keyshade_xyz/keyshade/apps/api
+> jest "--config=jest.config.ts"
+
+[1m[2mDetermining test suites to run...[22m[22m[999D[K
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0 s, estimated 8 s
+[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0 s, estimated 8 s
+[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        2 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        3 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        3 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/service/[22m[1mauth.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m0 of 41 total
+[1mTests:       [22m0 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        3 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 of 41 total
+[1mTests:       [22m[1m[32m1 passed[39m[22m, 1 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 of 41 total
+[1mTests:       [22m[1m[32m1 passed[39m[22m, 1 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A  [1m● [22mConsole
+
+    [2mconsole.info[22m
+      secp256k1 unavailable, reverting to browser version
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m../../node_modules/.pnpm/eccrypto@1.1.6/node_modules/eccrypto/index.js[2m:23:13)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/service/[22m[1msecret.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 of 41 total
+[1mTests:       [22m[1m[32m1 passed[39m[22m, 1 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m2 passed[39m[22m, 2 of 41 total
+[1mTests:       [22m[1m[32m2 passed[39m[22m, 2 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/controller/[22m[1mauth.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m2 passed[39m[22m, 2 of 41 total
+[1mTests:       [22m[1m[32m2 passed[39m[22m, 2 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m3 passed[39m[22m, 3 of 41 total
+[1mTests:       [22m[1m[32m3 passed[39m[22m, 3 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m3 passed[39m[22m, 3 of 41 total
+[1mTests:       [22m[1m[32m3 passed[39m[22m, 3 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/controller/[22m[1mevent.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/update.project/[22m[1mupdate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m3 passed[39m[22m, 3 of 41 total
+[1mTests:       [22m[1m[32m3 passed[39m[22m, 3 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m5 passed[39m[22m, 5 of 41 total
+[1mTests:       [22m[1m[32m5 passed[39m[22m, 5 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/factory/github/[22m[1mgithub-strategy.factory.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m5 passed[39m[22m, 5 of 41 total
+[1mTests:       [22m[1m[32m5 passed[39m[22m, 5 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m6 passed[39m[22m, 6 of 41 total
+[1mTests:       [22m[1m[32m9 passed[39m[22m, 9 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/update-workspace-role/[22m[1mupdate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m6 passed[39m[22m, 6 of 41 total
+[1mTests:       [22m[1m[32m9 passed[39m[22m, 9 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        4 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m7 passed[39m[22m, 7 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m12 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[31m FAIL [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m7 passed[39m[22m, 7 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m12 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A  [1m● [22mConsole
+
+    [2mconsole.info[22m
+      secp256k1 unavailable, reverting to browser version
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m../../node_modules/.pnpm/eccrypto@1.1.6/node_modules/eccrypto/index.js[2m:23:13)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m7 passed[39m[22m, 7 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m12 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[1m[31m  [1m● [22m[1mutil › should create a key pair[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:15:34)[22m[2m[22m
+
+[1m[31m  [1m● [22m[1mutil › should encrypt and decrypt a string[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:22:34)[22m[2m[22m
+
+[1m[31m  [1m● [22m[1mutil › should fail to encrypt and decrypt a string[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:30:34)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m7 passed[39m[22m, 7 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m12 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/controller/[22m[1mworkspace-role.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[32m7 passed[39m[22m, 7 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m12 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m8 passed[39m[22m, 9 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m13 passed[39m[22m, 16 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m8 passed[39m[22m, 9 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m13 passed[39m[22m, 16 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/update.api-key/[22m[1mupdate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/create.secret/[22m[1mcreate.secret.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m8 passed[39m[22m, 9 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m13 passed[39m[22m, 16 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m10 passed[39m[22m, 11 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m15 passed[39m[22m, 18 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m10 passed[39m[22m, 11 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m15 passed[39m[22m, 18 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/dto/update.secret/[22m[1mupdate.secret.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/controller/[22m[1mapi-key.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m10 passed[39m[22m, 11 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m15 passed[39m[22m, 18 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m12 passed[39m[22m, 13 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m17 passed[39m[22m, 20 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/service/[22m[1mworkspace.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m12 passed[39m[22m, 13 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m17 passed[39m[22m, 20 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m13 passed[39m[22m, 14 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m18 passed[39m[22m, 21 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m13 passed[39m[22m, 14 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m18 passed[39m[22m, 21 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m13 passed[39m[22m, 14 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m18 passed[39m[22m, 21 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m13 passed[39m[22m, 14 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m18 passed[39m[22m, 21 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/event/service/[22m[1mevent.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/dto/update.user/[22m[1mupdate.user.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/service/[22m[1muser.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/service/[22m[1mapi-key.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m13 passed[39m[22m, 14 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m18 passed[39m[22m, 21 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m17 passed[39m[22m, 18 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m22 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m17 passed[39m[22m, 18 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m22 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m17 passed[39m[22m, 18 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m22 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m17 passed[39m[22m, 18 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m22 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/service/[22m[1menvironment.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/api-key/[22m[1mapi-key.guard.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/config/oauth-strategy/github/[22m[1mgithub.strategy.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/update.workspace/[22m[1mupdate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m17 passed[39m[22m, 18 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m22 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m21 passed[39m[22m, 22 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m27 passed[39m[22m, 30 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/auth/[22m[1mauth.guard.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m21 passed[39m[22m, 22 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m27 passed[39m[22m, 30 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m22 passed[39m[22m, 23 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m28 passed[39m[22m, 31 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m22 passed[39m[22m, 23 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m28 passed[39m[22m, 31 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/service/[22m[1mworkspace-role.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/app/[22m[1mapp.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m22 passed[39m[22m, 23 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m28 passed[39m[22m, 31 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m24 passed[39m[22m, 25 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m31 passed[39m[22m, 34 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m24 passed[39m[22m, 25 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m31 passed[39m[22m, 34 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m24 passed[39m[22m, 25 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m31 passed[39m[22m, 34 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m24 passed[39m[22m, 25 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m31 passed[39m[22m, 34 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace-role/dto/create-workspace-role/[22m[1mcreate-workspace-role.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/prisma/[22m[1mprisma.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/controller/[22m[1menvironment.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/dto/create.project/[22m[1mcreate.project.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m24 passed[39m[22m, 25 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m31 passed[39m[22m, 34 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m28 passed[39m[22m, 29 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m34 passed[39m[22m, 37 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m28 passed[39m[22m, 29 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m34 passed[39m[22m, 37 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m28 passed[39m[22m, 29 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m34 passed[39m[22m, 37 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m28 passed[39m[22m, 29 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m34 passed[39m[22m, 37 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/auth/guard/admin/[22m[1madmin.guard.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/mail/services/[22m[1mresend.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/dto/create.workspace/[22m[1mcreate.workspace.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/create.environment/[22m[1mcreate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m28 passed[39m[22m, 29 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m34 passed[39m[22m, 37 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m32 passed[39m[22m, 33 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m38 passed[39m[22m, 41 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m32 passed[39m[22m, 33 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m38 passed[39m[22m, 41 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m32 passed[39m[22m, 33 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m38 passed[39m[22m, 41 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/api-key/dto/create.api-key/[22m[1mcreate.api-key.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/environment/dto/update.environment/[22m[1mupdate.environment.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/common/[22m[1mquery.transform.pipe.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m32 passed[39m[22m, 33 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m38 passed[39m[22m, 41 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m35 passed[39m[22m, 36 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m41 passed[39m[22m, 44 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m ([0m[1m[41m6.225 s[49m[22m[0m)
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m35 passed[39m[22m, 36 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m41 passed[39m[22m, 44 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m ([0m[1m[41m6.221 s[49m[22m[0m)
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m35 passed[39m[22m, 36 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m41 passed[39m[22m, 44 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A  [1m● [22mConsole
+
+    [2mconsole.info[22m
+      secp256k1 unavailable, reverting to browser version
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m../../node_modules/.pnpm/eccrypto@1.1.6/node_modules/eccrypto/index.js[2m:23:13)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/secret/controller/[22m[1msecret.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/user/controller/[22m[1muser.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m35 passed[39m[22m, 36 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m41 passed[39m[22m, 44 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m37 passed[39m[22m, 38 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m43 passed[39m[22m, 46 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m ([0m[1m[41m6.146 s[49m[22m[0m)
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/workspace/controller/[22m[1mworkspace.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m37 passed[39m[22m, 38 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m43 passed[39m[22m, 46 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m38 passed[39m[22m, 39 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m44 passed[39m[22m, 47 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m ([0m[1m[41m6.651 s[49m[22m[0m)
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m38 passed[39m[22m, 39 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m44 passed[39m[22m, 47 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A  [1m● [22mConsole
+
+    [2mconsole.info[22m
+      secp256k1 unavailable, reverting to browser version
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m../../node_modules/.pnpm/eccrypto@1.1.6/node_modules/eccrypto/index.js[2m:23:13)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/service/[22m[1mproject.service.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m38 passed[39m[22m, 39 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m44 passed[39m[22m, 47 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m39 passed[39m[22m, 40 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m45 passed[39m[22m, 48 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        7 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[0m[7m[1m[32m PASS [39m[22m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m ([0m[1m[41m7.267 s[49m[22m[0m)
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m39 passed[39m[22m, 40 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m45 passed[39m[22m, 48 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        7 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A  [1m● [22mConsole
+
+    [2mconsole.info[22m
+      secp256k1 unavailable, reverting to browser version
+[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m../../node_modules/.pnpm/eccrypto@1.1.6/node_modules/eccrypto/index.js[2m:23:13)[22m[2m[22m
+
+
+[0m[7m[33m[1m RUNS [22m[39m[27m[0m [0m[7m[37m api [39m[27m[0m [2msrc/project/controller/[22m[1mproject.controller.spec.ts[22m
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m39 passed[39m[22m, 40 of 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m45 passed[39m[22m, 48 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        7 s, estimated 8 s
+[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[32m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[37m█[39m[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[K[1A[999D[K
+[1mSummary of all failing tests[22m
+[0m[7m[1m[31m FAIL [39m[22m[27m[0m [2msrc/common/[22m[1mutil.spec.ts[22m
+[1m[31m  [1m● [22m[1mutil › should create a key pair[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:15:34)[22m[2m[22m
+
+[1m[31m  [1m● [22m[1mutil › should encrypt and decrypt a string[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:22:34)[22m[2m[22m
+
+[1m[31m  [1m● [22m[1mutil › should fail to encrypt and decrypt a string[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'generatePrivate')
+[2m[22m
+[2m    [0m [90m  5 |[39m   privateKey[33m:[39m string[0m[22m
+[2m    [0m [90m  6 |[39m } [33m=>[39m {[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m  7 |[39m   [36mconst[39m privateKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgeneratePrivate() [36mas[39m [33mBuffer[39m[0m[22m
+[2m    [0m [90m    |[39m                                       [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m  8 |[39m   [36mconst[39m publicKey[33m:[39m [33mBuffer[39m [33m=[39m eccrypto[33m.[39mgetPublic(privateKey)[0m[22m
+[2m    [0m [90m  9 |[39m[0m[22m
+[2m    [0m [90m 10 |[39m   [36mreturn[39m {[0m[22m
+[2m[22m
+[2m      [2mat createKeyPair ([22m[2msrc/common/create-key-pair.ts[2m:7:39)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/common/util.spec.ts[39m[0m[2m:30:34)[22m[2m[22m
+
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m40 passed[39m[22m, 41 total
+[1mTests:       [22m[1m[31m3 failed[39m[22m, [1m[32m46 passed[39m[22m, 49 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        7.639 s, estimated 8 s
+[2mRan all test suites[22m[2m.[22m
+[41m[30m ELIFECYCLE [39m[49m [31mTest failed. See above for more details.[39m
