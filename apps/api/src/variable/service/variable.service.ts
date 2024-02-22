@@ -194,8 +194,8 @@ export class VariableService {
           id: variableId
         },
         data: {
-          note: dto.note ?? variable.note,
-          name: dto.name ?? variable.name,
+          note: dto.note,
+          name: dto.name,
           lastUpdatedById: user.id
         }
       })

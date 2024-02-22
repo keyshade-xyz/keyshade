@@ -170,7 +170,7 @@ export class SecretService {
         },
         data: {
           name: dto.name,
-          note: dto.note ?? secret.note,
+          note: dto.note,
           rotateAt: addHoursToDate(dto.rotateAfter),
           lastUpdatedById: user.id,
           versions: {
@@ -188,9 +188,11 @@ export class SecretService {
           id: secretId
         },
         data: {
-          note: dto.note ?? secret.note,
-          name: dto.name ?? secret.name,
-          rotateAt: dto.rotateAfter ?? secret.rotateAt,
+          note: dto.note,
+          name: dto.name,
+          rotateAt: dto.rotateAfter
+            ? addHoursToDate(dto.rotateAfter)
+            : undefined,
           lastUpdatedById: user.id
         }
       })
