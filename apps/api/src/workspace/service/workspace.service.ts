@@ -864,6 +864,89 @@ export class WorkspaceService {
     })
   }
 
+  async exportData(user: User, workspaceId: Workspace['id']) {
+    const workspace = await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.WORKSPACE_ADMIN,
+      this.prisma
+    )
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {}
+
+    data.name = workspace.name
+    data.description = workspace.description
+
+    // Get all the roles of the workspace
+    data.workspaceRoles = await this.prisma.workspaceRole.findMany({
+      where: {
+        workspaceId
+      },
+      select: {
+        name: true,
+        description: true,
+        colorCode: true,
+        hasAdminAuthority: true,
+        authorities: true,
+        projects: {
+          select: {
+            id: true
+          }
+        }
+      }
+    })
+
+    // Get all projects, environments, variables and secrets of the workspace
+    data.projects = await this.prisma.project.findMany({
+      where: {
+        workspaceId
+      },
+      select: {
+        name: true,
+        description: true,
+        publicKey: true,
+        privateKey: true,
+        storePrivateKey: true,
+        isPublic: true,
+        environments: {
+          select: {
+            name: true,
+            description: true,
+            isDefault: true,
+            secrets: {
+              select: {
+                name: true,
+                rotateAt: true,
+                note: true,
+                versions: {
+                  select: {
+                    value: true,
+                    version: true
+                  }
+                }
+              }
+            },
+            variables: {
+              select: {
+                name: true,
+                note: true,
+                versions: {
+                  select: {
+                    value: true,
+                    version: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    return data
+  }
+
   private async existsByName(
     name: string,
     userId: User['id']

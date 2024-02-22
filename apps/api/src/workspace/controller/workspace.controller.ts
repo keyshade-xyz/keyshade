@@ -183,6 +183,15 @@ export class WorkspaceController {
     return this.workspaceService.getWorkspaceById(user, workspaceId)
   }
 
+  @Get(':workspaceId/export-data')
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
+  async exportData(
+    @CurrentUser() user: User,
+    @Param('workspaceId') workspaceId: Workspace['id']
+  ) {
+    return this.workspaceService.exportData(user, workspaceId)
+  }
+
   @Get('/all')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getAllWorkspacesOfUser(

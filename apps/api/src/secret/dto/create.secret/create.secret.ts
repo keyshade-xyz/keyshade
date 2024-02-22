@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, Length } from 'class-validator'
+import { IsOptional, IsString, Length } from 'class-validator'
 
 export class CreateSecret {
   @IsString()
@@ -12,8 +12,8 @@ export class CreateSecret {
   @Length(0, 100)
   note: string
 
-  @IsNumber()
   @IsOptional()
+  @IsString()
   environmentId: string
 
   @IsString()
