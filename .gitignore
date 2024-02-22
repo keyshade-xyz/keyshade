@@ -39,8 +39,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-.nx/cache
-
 # Next.js
 .next
 .vscode
@@ -49,7 +47,7 @@ Thumbs.db
 pnpm-lock.yaml
 
 # Database
-data/
+/data
 # Sentry Config File
 .sentryclirc
 
