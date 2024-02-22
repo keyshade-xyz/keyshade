@@ -87,6 +87,7 @@
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
     "dev:workspace": "turbo run dev --filter=workspace",
+    "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=api",
     "add:web": "pnpm add --filter=web",
     "add:workspace": "pnpm add --filter=workspace",
@@ -95,7 +96,7 @@
     "lint:web": "turbo run lint --filter=web",
     "lint:workspace": "turbo run lint --filter=workspace",
     "build": "turbo run build",
-    "build:api": "turbo run build --filter=api",
+    "build:api": "pnpm db:generate-types && turbo run build --filter=api && pnpm sentry:sourcemaps",
     "build:web": "turbo run build --filter=web",
     "build:workspace": "turbo run build --filter=workspace",
     "test": "turbo run test",
@@ -118,10 +119,16 @@
   },
   "packageManager": "pnpm@8.6.10",
   "devDependencies": {
+    "@sentry/cli": "^2.28.6",
+    "@sentry/webpack-plugin": "^2.14.2",
     "husky": "^9.0.11",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "turbo": "^1.12.4",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "turbo": "^1.12.4"
+  },
+  "dependencies": {
+    "@sentry/node": "^7.102.0",
+    "@sentry/profiling-node": "^7.102.0"
   }
 }

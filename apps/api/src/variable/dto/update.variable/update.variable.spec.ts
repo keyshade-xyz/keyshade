@@ -1,7 +1,7 @@
-import { UpdateVariable } from './update.variable';
+import { UpdateVariable } from './update.variable'
 
 describe('UpdateVariable', () => {
   it('should be defined', () => {
-    expect(new UpdateVariable()).toBeDefined();
-  });
-});
+    expect(new UpdateVariable()).toBeDefined()
+  })
+})

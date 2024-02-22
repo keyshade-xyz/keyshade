@@ -1,5 +1,0 @@
-
-
-> api@1.0.0 lint /home/kriptonian/Desktop/work/keyshade_xyz/keyshade/apps/api
-> eslint "{src,apps,libs,test}/**/*.ts" --fix
-

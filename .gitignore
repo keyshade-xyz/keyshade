@@ -55,3 +55,6 @@ data/
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# turbo
+.turbo
