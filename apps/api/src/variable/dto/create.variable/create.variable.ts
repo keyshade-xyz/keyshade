@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, Length } from 'class-validator'
+import { IsOptional, IsString, Length } from 'class-validator'
 
 export class CreateVariable {
   @IsString()
@@ -12,7 +12,7 @@ export class CreateVariable {
   @Length(0, 100)
   note: string
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   environmentId: string
 }

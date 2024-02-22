@@ -1131,6 +1131,59 @@ describe('Workspace Controller Tests', () => {
     expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
+  it('should not be able to export data of a non-existing workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/abc/export-data`
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Workspace with id abc not found`
+    })
+  })
+
+  it('should not be able to export data of a workspace it is not a member of', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/export-data`
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User ${user1.id} does not have the required authorities to perform the action`
+    })
+  })
+
+  it('should be able to export data of the workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/export-data`
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const body = response.json()
+
+    expect(body.name).toEqual(workspace1.name)
+    expect(body.description).toEqual(workspace1.description)
+    expect(body.workspaceRoles).toBeInstanceOf(Array)
+    expect(body.projects).toBeInstanceOf(Array)
+  })
+
   it('should be able to delete the workspace', async () => {
     const response = await app.inject({
       method: 'DELETE',
