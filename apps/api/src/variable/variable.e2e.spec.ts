@@ -200,6 +200,7 @@ describe('Variable Controller Tests', () => {
         environmentId: environment2.id,
         name: 'Variable 1',
         value: 'Variable 1 value',
+        note: 'Variable 1 note',
         rotateAfter: '24'
       },
       headers: {
@@ -213,6 +214,7 @@ describe('Variable Controller Tests', () => {
 
     expect(body).toBeDefined()
     expect(body.name).toBe('Variable 1')
+    expect(body.note).toBe('Variable 1 note')
     expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
 
@@ -238,6 +240,7 @@ describe('Variable Controller Tests', () => {
       payload: {
         name: 'Variable 2',
         value: 'Variable 2 value',
+        note: 'Variable 2 note',
         rotateAfter: '24'
       },
       headers: {
@@ -251,6 +254,7 @@ describe('Variable Controller Tests', () => {
 
     expect(body).toBeDefined()
     expect(body.name).toBe('Variable 2')
+    expect(body.note).toBe('Variable 2 note')
     expect(body.environmentId).toBe(environment1.id)
     expect(body.projectId).toBe(project1.id)
   })
@@ -417,12 +421,13 @@ describe('Variable Controller Tests', () => {
     )
   })
 
-  it('should be able to update the environment name without creating a new version', async () => {
+  it('should be able to update the variable name and note without creating a new version', async () => {
     const response = await app.inject({
       method: 'PUT',
       url: `/variable/${variable1.id}`,
       payload: {
-        name: 'Updated Variable 1'
+        name: 'Updated Variable 1',
+        note: 'Updated Variable 1 note'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -431,6 +436,7 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().name).toEqual('Updated Variable 1')
+    expect(response.json().note).toEqual('Updated Variable 1 note')
 
     const variableVersion = await prisma.variableVersion.findMany({
       where: {

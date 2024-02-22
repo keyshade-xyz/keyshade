@@ -319,6 +319,7 @@ model Secret {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   rotateAt  DateTime?
+  note      String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -355,6 +356,7 @@ model Variable {
   versions  VariableVersion[] // Stores the versions of the variable
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  note      String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

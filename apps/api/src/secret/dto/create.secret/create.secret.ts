@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsNumber, IsOptional, IsString, Length } from 'class-validator'
 
 export class CreateSecret {
   @IsString()
@@ -6,6 +6,11 @@ export class CreateSecret {
 
   @IsString()
   value: string
+
+  @IsString()
+  @IsOptional()
+  @Length(0, 100)
+  note: string
 
   @IsNumber()
   @IsOptional()
