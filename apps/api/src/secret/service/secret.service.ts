@@ -26,7 +26,7 @@ import getEnvironmentWithAuthority from '../../common/get-environment-with-autho
 import getSecretWithAuthority from '../../common/get-secret-with-authority'
 import { SecretWithVersion } from '../secret.types'
 import createEvent from '../../common/create-event'
-import getDefaultEnvironmentOfProject from '../../common/get-default-project-environemnt'
+import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
 
 @Injectable()
 export class SecretService {
@@ -76,6 +76,7 @@ export class SecretService {
     const secret = await this.prisma.secret.create({
       data: {
         name: dto.name,
+        note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
         versions: {
           create: {
@@ -169,6 +170,7 @@ export class SecretService {
         },
         data: {
           name: dto.name,
+          note: dto.note ?? secret.note,
           rotateAt: addHoursToDate(dto.rotateAfter),
           lastUpdatedById: user.id,
           versions: {
@@ -186,6 +188,7 @@ export class SecretService {
           id: secretId
         },
         data: {
+          note: dto.note ?? secret.note,
           name: dto.name ?? secret.name,
           rotateAt: dto.rotateAfter ?? secret.rotateAt,
           lastUpdatedById: user.id

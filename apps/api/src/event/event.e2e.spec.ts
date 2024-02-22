@@ -271,6 +271,7 @@ describe('Event Controller Tests', () => {
       {
         name: 'My secret',
         value: 'My value',
+        note: 'Some note',
         environmentId: environment.id,
         rotateAfter: '720'
       },
@@ -305,6 +306,7 @@ describe('Event Controller Tests', () => {
       {
         name: 'My variable',
         value: 'My value',
+        note: 'Some note',
         environmentId: environment.id
       },
       project.id

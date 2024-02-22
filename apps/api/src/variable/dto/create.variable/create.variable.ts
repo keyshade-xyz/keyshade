@@ -7,6 +7,10 @@ export class CreateVariable {
   @IsString()
   value: string
 
+  @IsString()
+  @IsOptional()
+  note: string
+
   @IsNumber()
   @IsOptional()
   environmentId: string

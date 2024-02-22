@@ -199,6 +199,7 @@ describe('Secret Controller Tests', () => {
       payload: {
         environmentId: environment2.id,
         name: 'Secret 1',
+        note: 'Secret 1 note',
         value: 'Secret 1 value',
         rotateAfter: '24'
       },
@@ -213,6 +214,7 @@ describe('Secret Controller Tests', () => {
 
     expect(body).toBeDefined()
     expect(body.name).toBe('Secret 1')
+    expect(body.note).toBe('Secret 1 note')
     expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
 
@@ -417,12 +419,13 @@ describe('Secret Controller Tests', () => {
     )
   })
 
-  it('should be able to update the environment name without creating a new version', async () => {
+  it('should be able to update the secret name and note without creating a new version', async () => {
     const response = await app.inject({
       method: 'PUT',
       url: `/secret/${secret1.id}`,
       payload: {
-        name: 'Updated Secret 1'
+        name: 'Updated Secret 1',
+        note: 'Updated Secret 1 note'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -431,6 +434,7 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().name).toEqual('Updated Secret 1')
+    expect(response.json().note).toEqual('Updated Secret 1 note')
 
     const secretVersion = await prisma.secretVersion.findMany({
       where: {
@@ -764,7 +768,8 @@ describe('Secret Controller Tests', () => {
         environmentId: environment1.id,
         name: 'Secret 20',
         value: 'Secret 20 value',
-        rotateAfter: '24'
+        rotateAfter: '24',
+        note: 'Secret 20 note'
       },
       project2.id
     )

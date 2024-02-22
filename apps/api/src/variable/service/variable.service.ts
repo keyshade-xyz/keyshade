@@ -19,7 +19,7 @@ import {
 import { CreateVariable } from '../dto/create.variable/create.variable'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
-import getDefaultEnvironmentOfProject from '../../common/get-default-project-environemnt'
+import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
 import createEvent from '../../common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
 import getVariableWithAuthority from '../../common/get-variable-with-authority'
@@ -76,6 +76,7 @@ export class VariableService {
     const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
+        note: dto.note,
         versions: {
           create: {
             value: dto.value,
@@ -176,6 +177,7 @@ export class VariableService {
         },
         data: {
           name: dto.name,
+          note: dto.note,
           lastUpdatedById: user.id,
           versions: {
             create: {
@@ -192,6 +194,7 @@ export class VariableService {
           id: variableId
         },
         data: {
+          note: dto.note ?? variable.note,
           name: dto.name ?? variable.name,
           lastUpdatedById: user.id
         }
