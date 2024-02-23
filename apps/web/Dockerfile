@@ -5,7 +5,7 @@ WORKDIR /app
 RUN npm i -g pnpm
 
 COPY package.json .
-COPY tsconfig.base.json .
+COPY tsconfig.json .
 
 RUN pnpm install
 
