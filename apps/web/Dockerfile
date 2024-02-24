@@ -4,15 +4,15 @@ WORKDIR /app
 
 RUN npm i -g pnpm
 
-COPY package.json .
+# COPY package.json .
 COPY turbo.json .
-
-RUN pnpm install
+COPY pnpm-workspace.yaml .
+COPY pnpm-lock.yaml .
+COPY package*.json .
+COPY ./packages ./packages
 
 COPY apps/web/package.json apps/web/package.json
 COPY apps/web/tsconfig.json apps/web/tsconfig.json
-
-RUN cd apps/web && pnpm install
 
 RUN pnpm install
 
