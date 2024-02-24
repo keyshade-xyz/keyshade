@@ -102,6 +102,7 @@
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
     "start:web": "turbo run start --filter=web",
+    "start:workspace": "turbo run start --filter=workspace",
     "test": "turbo run test",
     "test:api": "pnpm db:generate-types && turbo run test --filter=api -- --config=jest.config.ts",
     "e2e:api:prepare": "docker compose down && docker compose -f docker-compose-test.yml up -d && pnpm db:generate-types && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
