@@ -96,13 +96,16 @@
     "lint:web": "turbo run lint --filter=web",
     "lint:workspace": "turbo run lint --filter=workspace",
     "build": "turbo run build",
-    "build:api": "pnpm db:generate-types && turbo run build --filter=api && pnpm sentry:sourcemaps",
+    "build:api": "pnpm db:generate-types && turbo run build --filter=api",
     "build:web": "turbo run build --filter=web",
     "build:workspace": "turbo run build --filter=workspace",
+    "start": "turbo run start",
+    "start:api": "turbo run start --filter=api",
+    "start:web": "turbo run start --filter=web",
     "test": "turbo run test",
     "test:api": "pnpm db:generate-types && turbo run test --filter=api -- --config=jest.config.ts",
     "e2e:api:prepare": "docker compose down && docker compose -f docker-compose-test.yml up -d && pnpm db:generate-types && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
-    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' turbo run test --no-cache --filter=api -- --config=jest.e2e-config.ts --coverage --coverageDirectory=../../coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
+    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' turbo run test --no-cache --filter=api -- --runInBand --config=jest.e2e-config.ts --coverage --coverageDirectory=../../coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
     "e2e:api:teardown": "docker compose -f docker-compose-test.yml down",
     "test:web": "turbo run test --filter=web",
     "test:workspace": "turbo run test --filter=workspace",
@@ -114,8 +117,7 @@
     "db:reset": "pnpm dlx prisma migrate reset --force --schema=apps/api/src/prisma/schema.prisma",
     "format": "prettier apps/**/*.{ts,tsx} --write",
     "prepare": "husky install",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || pnpm run sentry:sourcemaps:exit",
-    "sentry:sourcemaps:exit": "echo 'Failed to upload source maps to Sentry'"
+    "sourcemaps:api": "turbo run sourcemaps --filter=api"
   },
   "packageManager": "pnpm@8.6.10",
   "devDependencies": {
