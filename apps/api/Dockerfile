@@ -8,7 +8,6 @@ ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
 ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ARG DATABASE_URL=${DATABASE_URL}
 
-RUN apk add --no-cache bash
 RUN npm i -g pnpm
 
 COPY package.json .
@@ -18,26 +17,16 @@ COPY pnpm-workspace.yaml .
 COPY apps/api/package.json apps/api/package.json
 COPY apps/api/tsconfig.json apps/api/tsconfig.json
 
+COPY apps/api/src apps/api/src
+
 COPY packages packages
 
 RUN pnpm install
 
-RUN cd apps/api && pnpm install
-RUN cd ../../
-
-COPY apps/api apps/api
-
 RUN pnpm db:generate-types
 RUN pnpm build:api
-# RUN pnpm sourcemaps:api
-RUN pnpm db:deploy-migrations
-
-FROM node:20-alpine as production
-
-WORKDIR /app
-
-COPY --from=build /app/apps/api/dist/ /app
+RUN pnpm sourcemaps:api
 
 EXPOSE 4200
 
-ENTRYPOINT ["node" "dist/main"]
+ENTRYPOINT ["node", "apps/api/dist/main.js"]
