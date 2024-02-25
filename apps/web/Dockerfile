@@ -7,7 +7,6 @@ RUN npm i -g pnpm
 # COPY package.json .
 COPY turbo.json .
 COPY pnpm-workspace.yaml .
-COPY pnpm-lock.yaml .
 COPY package*.json .
 COPY ./packages ./packages
 
