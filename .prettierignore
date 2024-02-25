@@ -1,5 +1,6 @@
 # Add files here to ignore them from prettier formatting
 /dist
 /coverage
-/.nx/cache
-auto-changelog-template.hbs
+/data
+/node_modules
+.turbo

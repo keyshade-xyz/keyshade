@@ -68,6 +68,8 @@ describe('Workspace Controller Tests', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
+    await cleanUp(prisma)
+
     const createUser1 = prisma.user.create({
       data: {
         email: 'johndoe@keyshade.xyz',
@@ -78,7 +80,7 @@ describe('Workspace Controller Tests', () => {
 
     const createUser2 = prisma.user.create({
       data: {
-        email: 'janedoe@keyshade.xyz',
+        email: 'jane@keyshade.xyz',
         name: 'Jane Doe',
         isOnboardingFinished: true
       }

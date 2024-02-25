@@ -48,6 +48,8 @@ describe('Project Controller Tests', () => {
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
+    await cleanUp(prisma)
+
     const workspace1Id = v4()
     const workspace2Id = v4()
     const workspace1AdminRoleId = v4()
@@ -66,7 +68,7 @@ describe('Project Controller Tests', () => {
     const createUser2 = prisma.user.create({
       data: {
         id: user2Id,
-        email: 'janedoe@keyshade.xyz',
+        email: 'jane@keyshade.xyz',
         name: 'Jane Doe',
         isOnboardingFinished: true
       }

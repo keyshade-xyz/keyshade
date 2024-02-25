@@ -1,4 +1,4 @@
-import eccrypto from 'eccrypto'
+import * as eccrypto from 'eccrypto'
 
 export const decrypt = async (
   privateKey: string,
