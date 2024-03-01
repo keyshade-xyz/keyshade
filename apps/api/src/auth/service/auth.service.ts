@@ -131,6 +131,16 @@ export class AuthService {
     }
   }
 
+    /* istanbul ignore next */
+  async handleGoogleOAuth(email: string, name: string, profilePictureUrl: string) {
+    const user = await this.createUserIfNotExists(email, name, profilePictureUrl);
+    const token = await this.generateToken(user.id);
+    return {
+      ...user,
+      token
+    };
+  }
+
   /* istanbul ignore next */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
