@@ -16,7 +16,7 @@ import { Public } from '../../decorators/public.decorator'
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
-import { GoogleOAuthStrategyFactory } from 'src/config/factory/google/google-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
