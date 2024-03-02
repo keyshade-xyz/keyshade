@@ -5,8 +5,8 @@ import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from '../user/user.module'
 import { GithubStrategy } from '../config/oauth-strategy/github/github.strategy'
 import { GithubOAuthStrategyFactory } from '../config/factory/github/github-strategy.factory'
-import { GoogleOAuthStrategyFactory } from 'src/config/factory/google/google-strategy.factory'
-import { GoogleStrategy } from 'src/config/oauth-strategy/google/google.strategy'
+import { GoogleOAuthStrategyFactory } from '../config/factory/google/google-strategy.factory'
+import { GoogleStrategy } from '../config/oauth-strategy/google/google.strategy'
 
 @Module({
   imports: [
