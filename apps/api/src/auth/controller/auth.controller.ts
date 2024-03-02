@@ -132,7 +132,7 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
-    return await this.authService.handleGithubOAuth(
+    return await this.authService.handleOAuthLogin(
       email,
       name,
       profilePictureUrl
@@ -178,7 +178,7 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
-    return await this.authService.handleGoogleOAuth(
+    return await this.authService.handleOAuthLogin(
       email,
       name,
       profilePictureUrl
