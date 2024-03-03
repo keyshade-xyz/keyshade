@@ -25,9 +25,15 @@ export class VariableController {
   async createVariable(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Body() dto: CreateVariable
+    @Body() dto: CreateVariable,
+    @Query('reason') reason: string
   ) {
-    return await this.variableService.createVariable(user, dto, projectId)
+    return await this.variableService.createVariable(
+      user,
+      dto,
+      projectId,
+      reason
+    )
   }
 
   @Put(':variableId')
@@ -35,9 +41,15 @@ export class VariableController {
   async updateVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Body() dto: CreateVariable
+    @Body() dto: CreateVariable,
+    @Query('reason') reason: string
   ) {
-    return await this.variableService.updateVariable(user, variableId, dto)
+    return await this.variableService.updateVariable(
+      user,
+      variableId,
+      dto,
+      reason
+    )
   }
 
   @Put(':variableId/environment/:environmentId')
@@ -48,12 +60,14 @@ export class VariableController {
   async updateVariableEnvironment(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Param('environmentId') environmentId: string
+    @Param('environmentId') environmentId: string,
+    @Query('reason') reason: string
   ) {
     return await this.variableService.updateVariableEnvironment(
       user,
       variableId,
-      environmentId
+      environmentId,
+      reason
     )
   }
 
@@ -62,12 +76,14 @@ export class VariableController {
   async rollbackVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Param('rollbackVersion') rollbackVersion: number
+    @Param('rollbackVersion') rollbackVersion: number,
+    @Query('reason') reason: string
   ) {
     return await this.variableService.rollbackVariable(
       user,
       variableId,
-      rollbackVersion
+      rollbackVersion,
+      reason
     )
   }
 
@@ -75,9 +91,10 @@ export class VariableController {
   @RequiredApiKeyAuthorities(Authority.DELETE_VARIABLE)
   async deleteVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string
+    @Param('variableId') variableId: string,
+    @Query('reason') reason: string
   ) {
-    return await this.variableService.deleteVariable(user, variableId)
+    return await this.variableService.deleteVariable(user, variableId, reason)
   }
 
   @Get(':variableId')

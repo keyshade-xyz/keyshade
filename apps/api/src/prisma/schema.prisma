@@ -7,6 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ApprovalItemType {
+  SECRET
+  VARIABLE
+  ENVIRONMENT
+  PROJECT
+  WORKSPACE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 enum EventSource {
   SECRET
   VARIABLE
@@ -16,6 +36,7 @@ enum EventSource {
   WORKSPACE
   WORKSPACE_ROLE
   USER
+  APPROVAL
 }
 
 enum EventTriggerer {
@@ -59,6 +80,11 @@ enum EventType {
   ENVIRONMENT_DELETED
   ENVIRONMENT_ADDED
   USER_UPDATED
+  APPROVAL_CREATED
+  APPROVAL_UPDATED
+  APPROVAL_DELETED
+  APPROVAL_APPROVED
+  APPROVAL_REJECTED
 }
 
 enum Authority {
@@ -76,6 +102,7 @@ enum Authority {
   UPDATE_WORKSPACE_ROLE
   DELETE_WORKSPACE_ROLE
   WORKSPACE_ADMIN
+  MANAGE_APPROVALS
 
   // Project authorities
   READ_PROJECT
@@ -123,6 +150,11 @@ enum NotificationType {
   VARIABLE_UPDATED
   VARIABLE_DELETED
   VARIABLE_ADDED
+  APPROVAL_CREATED
+  APPROVAL_UPDATED
+  APPROVAL_DELETED
+  APPROVAL_APPROVED
+  APPROVAL_REJECTED
 }
 
 model Event {
@@ -154,6 +186,8 @@ model Event {
   sourceApiKeyId              String?
   sourceWorkspaceMembership   WorkspaceMember? @relation(fields: [sourceWorkspaceMembershipId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   sourceWorkspaceMembershipId String?
+  sourceApproval              Approval?        @relation(fields: [sourceApprovalId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sourceApprovalId            String?
 }
 
 model Notification {
@@ -177,18 +211,21 @@ model User {
   isAdmin              Boolean       @default(false)
   subscription         Subscription?
 
-  workspaceMembers WorkspaceMember[]
-  workspaces       Workspace[]
-  apiKeys          ApiKey[]
-  otp              Otp?
-  notifications    Notification[]
-  secrets          Secret[] // Stores the secrets the user updated
-  variables        Variable[] // Stores the variables the user updated
-  projects         Project[] // Stores the projects the user updated
-  environments     Environment[] // Stores the environments the user updated
-  secretVersion    SecretVersion[]
-  variableVersion  VariableVersion[]
-  events           Event[]
+  workspaceMembers   WorkspaceMember[]
+  workspaces         Workspace[]
+  apiKeys            ApiKey[]
+  otp                Otp?
+  notifications      Notification[]
+  secrets            Secret[] // Stores the secrets the user updated
+  variables          Variable[] // Stores the variables the user updated
+  projects           Project[] // Stores the projects the user updated
+  environments       Environment[] // Stores the environments the user updated
+  secretVersion      SecretVersion[]
+  variableVersion    VariableVersion[]
+  events             Event[]
+  requestedApprovals Approval[]        @relation("requestedBy")
+  approvedApprovals  Approval[]        @relation("approvedBy")
+  rejectedApprovals  Approval[]        @relation("rejectedBy")
 
   @@index([email], name: "email")
 }
@@ -203,12 +240,13 @@ model Subscription {
 }
 
 model Environment {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDefault   Boolean  @default(false)
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isDefault       Boolean  @default(false)
+  pendingCreation Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -235,6 +273,7 @@ model Project {
   storePrivateKey Boolean  @default(false)
   isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
   isPublic        Boolean  @default(false)
+  pendingCreation Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -246,8 +285,21 @@ model Project {
   secrets         Secret[]
   variables       Variable[]
   environments    Environment[]
-  workspaceRole   WorkspaceRole? @relation(fields: [workspaceRoleId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  workspaceRoleId String?
+  workspaceRoles  ProjectWorkspaceRoleAssociation[]
+
+  @@unique([workspaceId, name])
+}
+
+model ProjectWorkspaceRoleAssociation {
+  id String @id @default(cuid())
+
+  role   WorkspaceRole @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roleId String
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String
+
+  @@unique([roleId, projectId])
 }
 
 model WorkspaceRole {
@@ -263,7 +315,7 @@ model WorkspaceRole {
   workspaceMembers WorkspaceMemberRoleAssociation[]
 
   events   Event[]
-  projects Project[]
+  projects ProjectWorkspaceRoleAssociation[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -313,13 +365,14 @@ model SecretVersion {
 }
 
 model Secret {
-  id        String          @id @default(cuid())
-  name      String
-  versions  SecretVersion[] // Stores the versions of the secret
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  rotateAt  DateTime?
-  note      String?
+  id              String          @id @default(cuid())
+  name            String
+  versions        SecretVersion[] // Stores the versions of the secret
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  rotateAt        DateTime?
+  note            String?
+  pendingCreation Boolean         @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -351,12 +404,13 @@ model VariableVersion {
 }
 
 model Variable {
-  id        String            @id @default(cuid())
-  name      String
-  versions  VariableVersion[] // Stores the versions of the variable
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  note      String?
+  id              String            @id @default(cuid())
+  name            String
+  versions        VariableVersion[] // Stores the versions of the variable
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  note            String?
+  pendingCreation Boolean           @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -398,21 +452,50 @@ model Otp {
 }
 
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  isFreeTier  Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  ownerId     String
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  isFreeTier      Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  ownerId         String
+  approvalEnabled Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
-  projects Project[]
-  members  WorkspaceMember[]
-  roles    WorkspaceRole[]
-  events   Event[]
+  projects  Project[]
+  members   WorkspaceMember[]
+  roles     WorkspaceRole[]
+  events    Event[]
+  approvals Approval[]
 
   @@unique([name, ownerId])
+}
+
+model Approval {
+  id         String           @id @default(cuid())
+  itemType   ApprovalItemType
+  status     ApprovalStatus   @default(PENDING)
+  action     ApprovalAction
+  metadata   Json
+  itemId     String
+  reason     String?
+  createdAt  DateTime         @default(now())
+  approvedAt DateTime?
+  rejectedAt DateTime?
+
+  requestedBy   User?   @relation(fields: [requestedById], references: [id], onUpdate: Cascade, onDelete: SetNull, name: "requestedBy")
+  requestedById String?
+  approvedBy    User?   @relation(fields: [approvedById], references: [id], onUpdate: Cascade, onDelete: SetNull, name: "approvedBy")
+  approvedById  String?
+  rejectedBy    User?   @relation(fields: [rejectedById], references: [id], onUpdate: Cascade, onDelete: SetNull, name: "rejectedBy")
+  rejectedById  String?
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  events Event[]
+
+  @@index([itemType, itemId])
 }

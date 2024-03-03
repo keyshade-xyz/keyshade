@@ -14,12 +14,17 @@ export class CreateProject {
 
   @IsString()
   @IsOptional()
-  description: string
+  description?: string
 
   @IsBoolean()
-  storePrivateKey: boolean
+  @IsOptional()
+  storePrivateKey?: boolean
 
   @IsArray()
   @IsOptional()
-  environments: CreateEnvironment[]
+  environments?: CreateEnvironment[]
+
+  @IsBoolean()
+  @IsOptional()
+  isPublic?: boolean
 }

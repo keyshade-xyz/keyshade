@@ -4,6 +4,8 @@ import {
   Injectable
 } from '@nestjs/common'
 import {
+  ApprovalAction,
+  ApprovalItemType,
   Authority,
   Environment,
   EventSource,
@@ -17,6 +19,10 @@ import { PrismaService } from '../../prisma/prisma.service'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 import createEvent from '../../common/create-event'
+import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
+import { EnvironmentWithProject } from '../environment.types'
+import createApproval from '../../common/create-approval'
+import { UpdateEnvironmentMetadata } from '../../approval/approval.types'
 
 @Injectable()
 export class EnvironmentService {
@@ -25,7 +31,8 @@ export class EnvironmentService {
   async createEnvironment(
     user: User,
     dto: CreateEnvironment,
-    projectId: Project['id']
+    projectId: Project['id'],
+    reason?: string
   ) {
     // Check if the user has the required role to create an environment
     const project = await getProjectWithAuthority(
@@ -50,6 +57,11 @@ export class EnvironmentService {
       ops.push(this.makeAllNonDefault(projectId))
     }
 
+    const approvalEnabled = await workspaceApprovalEnabled(
+      project.workspaceId,
+      this.prisma
+    )
+
     // Create the environment
     ops.push(
       this.prisma.environment.create({
@@ -57,6 +69,7 @@ export class EnvironmentService {
           name: dto.name,
           description: dto.description,
           isDefault: dto.isDefault,
+          pendingCreation: project.pendingCreation || approvalEnabled,
           project: {
             connect: {
               id: projectId
@@ -67,12 +80,15 @@ export class EnvironmentService {
               id: user.id
             }
           }
+        },
+        include: {
+          project: true
         }
       })
     )
 
     const result = await this.prisma.$transaction(ops)
-    const environment = result[result.length - 1]
+    const environment: EnvironmentWithProject = result[result.length - 1]
 
     createEvent(
       {
@@ -91,13 +107,32 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return environment
+    if (!project.pendingCreation && approvalEnabled) {
+      const approval = await createApproval(
+        {
+          action: ApprovalAction.CREATE,
+          itemType: ApprovalItemType.ENVIRONMENT,
+          itemId: environment.id,
+          reason,
+          user,
+          workspaceId: project.workspaceId
+        },
+        this.prisma
+      )
+      return {
+        environment,
+        approval
+      }
+    } else {
+      return environment
+    }
   }
 
   async updateEnvironment(
     user: User,
     dto: UpdateEnvironment,
-    environmentId: Environment['id']
+    environmentId: Environment['id'],
+    reason?: string
   ) {
     const environment = await getEnvironmentWithAuthority(
       user.id,
@@ -117,6 +152,202 @@ export class EnvironmentService {
       )
     }
 
+    if (
+      !environment.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        environment.project.workspaceId,
+        this.prisma
+      ))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.ENVIRONMENT,
+          itemId: environment.id,
+          reason,
+          user,
+          workspaceId: environment.project.workspaceId,
+          metadata: dto
+        },
+        this.prisma
+      )
+    } else {
+      return this.update(user, environment, dto)
+    }
+  }
+
+  async getEnvironment(user: User, environmentId: Environment['id']) {
+    const environment = await getEnvironmentWithAuthority(
+      user.id,
+      environmentId,
+      Authority.READ_ENVIRONMENT,
+      this.prisma
+    )
+
+    return environment
+  }
+
+  async getEnvironmentsOfProject(
+    user: User,
+    projectId: Project['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    await getProjectWithAuthority(
+      user.id,
+      projectId,
+      Authority.READ_ENVIRONMENT,
+      this.prisma
+    )
+
+    // Get the environments
+    return await this.prisma.environment.findMany({
+      where: {
+        projectId,
+        pendingCreation: false,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        lastUpdatedBy: true
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+  }
+
+  async deleteEnvironment(
+    user: User,
+    environmentId: Environment['id'],
+    reason?: string
+  ) {
+    const environment = await getEnvironmentWithAuthority(
+      user.id,
+      environmentId,
+      Authority.DELETE_ENVIRONMENT,
+      this.prisma
+    )
+
+    // Check if the environment is the default one
+    if (environment.isDefault) {
+      throw new BadRequestException('Cannot delete the default environment')
+    }
+
+    if (environment.pendingCreation) {
+      throw new BadRequestException(
+        `Environment is pending creation and cannot be deleted. Delete the related approval to delete the environment.`
+      )
+    }
+
+    if (
+      await workspaceApprovalEnabled(
+        environment.project.workspaceId,
+        this.prisma
+      )
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.DELETE,
+          itemType: ApprovalItemType.ENVIRONMENT,
+          itemId: environment.id,
+          reason,
+          user,
+          workspaceId: environment.project.workspaceId
+        },
+        this.prisma
+      )
+    } else {
+      return this.delete(user, environment)
+    }
+  }
+
+  private async environmentExists(
+    name: Environment['name'],
+    projectId: Project['id']
+  ) {
+    return await this.prisma.environment.findFirst({
+      where: {
+        name,
+        projectId,
+        pendingCreation: false
+      }
+    })
+  }
+
+  private makeAllNonDefault(projectId: Project['id']) {
+    return this.prisma.environment.updateMany({
+      where: {
+        projectId
+      },
+      data: {
+        isDefault: false
+      }
+    })
+  }
+
+  async makeEnvironmentApproved(environmentId: Environment['id']) {
+    const environment = await this.prisma.environment.findUnique({
+      where: {
+        id: environmentId
+      }
+    })
+
+    const environmentExists = await this.prisma.environment.count({
+      where: {
+        name: environment.name,
+        pendingCreation: false,
+        projectId: environment.projectId
+      }
+    })
+
+    if (environmentExists) {
+      throw new ConflictException(
+        `Environment with name ${environment.name} already exists in project ${environment.projectId}`
+      )
+    }
+
+    await this.prisma.environment.update({
+      where: {
+        id: environmentId
+      },
+      data: {
+        pendingCreation: false,
+        secrets: {
+          updateMany: {
+            where: {
+              environmentId
+            },
+            data: {
+              pendingCreation: false
+            }
+          }
+        },
+        variables: {
+          updateMany: {
+            where: {
+              environmentId
+            },
+            data: {
+              pendingCreation: false
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async update(
+    user: User,
+    environment: Environment,
+    dto: UpdateEnvironment | UpdateEnvironmentMetadata
+  ) {
     const ops = []
 
     // If this environment is the last one, and is being updated to be non-default
@@ -143,7 +374,7 @@ export class EnvironmentService {
     ops.push(
       this.prisma.environment.update({
         where: {
-          id: environmentId
+          id: environment.id
         },
         data: {
           name: dto.name,
@@ -183,73 +414,38 @@ export class EnvironmentService {
     return updatedEnvironment
   }
 
-  async getEnvironment(user: User, environmentId: Environment['id']) {
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
-
-    return environment
-  }
-
-  async getEnvironmentsOfProject(
-    user: User,
-    projectId: Project['id'],
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
-
-    // Get the environments
-    return await this.prisma.environment.findMany({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        lastUpdatedBy: true
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
-    })
-  }
-
-  async deleteEnvironment(user: User, environmentId: Environment['id']) {
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.DELETE_ENVIRONMENT,
-      this.prisma
-    )
-
-    const projectId = environment.projectId
-
-    // Check if the environment is the default one
-    if (environment.isDefault) {
-      throw new BadRequestException('Cannot delete the default environment')
-    }
+  async delete(user: User, environment: EnvironmentWithProject) {
+    const op = []
 
     // Delete the environment
-    await this.prisma.environment.delete({
-      where: {
-        id: environmentId
-      }
-    })
+    op.push(
+      this.prisma.environment.delete({
+        where: {
+          id: environment.id
+        }
+      })
+    )
+
+    // If the environment is in pending creation state and the workspace has approval enabled,
+    // we will need to delete the approval as well
+    if (
+      environment.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        environment.project.workspaceId,
+        this.prisma
+      ))
+    ) {
+      op.push(
+        this.prisma.approval.deleteMany({
+          where: {
+            itemId: environment.id,
+            itemType: ApprovalItemType.ENVIRONMENT
+          }
+        })
+      )
+    }
+
+    await this.prisma.$transaction(op)
 
     createEvent(
       {
@@ -260,33 +456,10 @@ export class EnvironmentService {
         metadata: {
           environmentId: environment.id,
           name: environment.name,
-          projectId
+          projectId: environment.projectId
         }
       },
       this.prisma
     )
-  }
-
-  private async environmentExists(
-    name: Environment['name'],
-    projectId: Project['id']
-  ) {
-    return await this.prisma.environment.findFirst({
-      where: {
-        name,
-        projectId
-      }
-    })
-  }
-
-  private makeAllNonDefault(projectId: Project['id']) {
-    return this.prisma.environment.updateMany({
-      where: {
-        projectId
-      },
-      data: {
-        isDefault: false
-      }
-    })
   }
 }

@@ -26,9 +26,10 @@ export class SecretController {
   async createSecret(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Body() dto: CreateSecret
+    @Body() dto: CreateSecret,
+    @Query('reason') reason: string
   ) {
-    return await this.secretService.createSecret(user, dto, projectId)
+    return await this.secretService.createSecret(user, dto, projectId, reason)
   }
 
   @Put(':secretId')
@@ -36,9 +37,10 @@ export class SecretController {
   async updateSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Body() dto: UpdateSecret
+    @Body() dto: UpdateSecret,
+    @Query('reason') reason: string
   ) {
-    return await this.secretService.updateSecret(user, secretId, dto)
+    return await this.secretService.updateSecret(user, secretId, dto, reason)
   }
 
   @Put(':secretId/environment/:environmentId')
@@ -49,12 +51,14 @@ export class SecretController {
   async updateSecretEnvironment(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Param('environmentId') environmentId: string
+    @Param('environmentId') environmentId: string,
+    @Query('reason') reason: string
   ) {
     return await this.secretService.updateSecretEnvironment(
       user,
       secretId,
-      environmentId
+      environmentId,
+      reason
     )
   }
 
@@ -63,12 +67,14 @@ export class SecretController {
   async rollbackSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Param('rollbackVersion') rollbackVersion: number
+    @Param('rollbackVersion') rollbackVersion: number,
+    @Query('reason') reason: string
   ) {
     return await this.secretService.rollbackSecret(
       user,
       secretId,
-      rollbackVersion
+      rollbackVersion,
+      reason
     )
   }
 
@@ -76,9 +82,10 @@ export class SecretController {
   @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string
+    @Param('secretId') secretId: string,
+    @Query('reason') reason: string
   ) {
-    return await this.secretService.deleteSecret(user, secretId)
+    return await this.secretService.deleteSecret(user, secretId, reason)
   }
 
   @Get(':secretId')

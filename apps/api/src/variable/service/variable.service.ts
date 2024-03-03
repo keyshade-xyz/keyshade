@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import {
+  ApprovalAction,
+  ApprovalItemType,
   Authority,
   Environment,
   EventSource,
@@ -23,6 +25,10 @@ import getDefaultEnvironmentOfProject from '../../common/get-default-project-env
 import createEvent from '../../common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
 import getVariableWithAuthority from '../../common/get-variable-with-authority'
+import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
+import createApproval from '../../common/create-approval'
+import { UpdateVariableMetadata } from '../../approval/approval.types'
+import { VariableWithProject } from '../variable.types'
 
 @Injectable()
 export class VariableService {
@@ -33,7 +39,8 @@ export class VariableService {
   async createVariable(
     user: User,
     dto: CreateVariable,
-    projectId: Project['id']
+    projectId: Project['id'],
+    reason?: string
   ) {
     const environmentId = dto.environmentId
     // Fetch the project
@@ -72,11 +79,20 @@ export class VariableService {
       )
     }
 
+    const approvalEnabled = await workspaceApprovalEnabled(
+      project.workspaceId,
+      this.prisma
+    )
+
     // Create the variable
     const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
         note: dto.note,
+        pendingCreation:
+          project.pendingCreation ||
+          environment.pendingCreation ||
+          approvalEnabled,
         versions: {
           create: {
             value: dto.value,
@@ -103,6 +119,13 @@ export class VariableService {
             id: user.id
           }
         }
+      },
+      include: {
+        project: {
+          select: {
+            workspaceId: true
+          }
+        }
       }
     })
 
@@ -127,13 +150,36 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} created variable ${variable.id}`)
 
-    return variable
+    if (
+      !project.pendingCreation &&
+      !environment.pendingCreation &&
+      approvalEnabled
+    ) {
+      const approval = await createApproval(
+        {
+          action: ApprovalAction.CREATE,
+          itemType: ApprovalItemType.VARIABLE,
+          itemId: variable.id,
+          reason,
+          user,
+          workspaceId: project.workspaceId
+        },
+        this.prisma
+      )
+      return {
+        variable,
+        approval
+      }
+    } else {
+      return variable
+    }
   }
 
   async updateVariable(
     user: User,
     variableId: Variable['id'],
-    dto: UpdateVariable
+    dto: UpdateVariable,
+    reason?: string
   ) {
     const variable = await getVariableWithAuthority(
       user.id,
@@ -141,8 +187,6 @@ export class VariableService {
       Authority.UPDATE_VARIABLE,
       this.prisma
     )
-
-    let result
 
     // Check if the variable already exists in the environment
     if (
@@ -155,78 +199,34 @@ export class VariableService {
       )
     }
 
-    // Update the variable
-    // If a new variable value is proposed, we want to create a new version for that variable
-    if (dto.value) {
-      const previousVersion = await this.prisma.variableVersion.findFirst({
-        where: {
-          variableId
+    if (
+      !variable.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        variable.project.workspaceId,
+        this.prisma
+      ))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.VARIABLE,
+          itemId: variable.id,
+          reason,
+          user,
+          workspaceId: variable.project.workspaceId
         },
-        select: {
-          version: true
-        },
-        orderBy: {
-          version: 'desc'
-        },
-        take: 1
-      })
-
-      result = await this.prisma.variable.update({
-        where: {
-          id: variableId
-        },
-        data: {
-          name: dto.name,
-          note: dto.note,
-          lastUpdatedById: user.id,
-          versions: {
-            create: {
-              value: dto.value,
-              version: previousVersion.version + 1,
-              createdById: user.id
-            }
-          }
-        }
-      })
+        this.prisma
+      )
     } else {
-      result = await this.prisma.variable.update({
-        where: {
-          id: variableId
-        },
-        data: {
-          note: dto.note,
-          name: dto.name,
-          lastUpdatedById: user.id
-        }
-      })
+      return this.update(dto, user, variable)
     }
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: variable,
-        type: EventType.VARIABLE_UPDATED,
-        source: EventSource.VARIABLE,
-        title: `Variable updated`,
-        metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} updated variable ${variable.id}`)
-
-    return result
   }
 
   async updateVariableEnvironment(
     user: User,
     variableId: Variable['id'],
-    environmentId: Environment['id']
+    environmentId: Environment['id'],
+    reason?: string
   ) {
     const variable = await getVariableWithAuthority(
       user.id,
@@ -257,54 +257,42 @@ export class VariableService {
     }
 
     // Check if the variable already exists in the environment
-    if (await this.variableExists(variable.name, environment.id)) {
+    if (
+      !variable.pendingCreation &&
+      (await this.variableExists(variable.name, environment.id))
+    ) {
       throw new ConflictException(
         `Variable already exists: ${variable.name} in environment ${environment.id} in project ${variable.projectId}`
       )
     }
 
-    // Update the variable
-    const result = await this.prisma.variable.update({
-      where: {
-        id: variableId
-      },
-      data: {
-        environment: {
-          connect: {
-            id: environmentId
+    if (
+      await workspaceApprovalEnabled(variable.project.workspaceId, this.prisma)
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.VARIABLE,
+          itemId: variable.id,
+          reason,
+          user,
+          workspaceId: variable.project.workspaceId,
+          metadata: {
+            environmentId
           }
-        }
-      }
-    })
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: variable,
-        type: EventType.VARIABLE_UPDATED,
-        source: EventSource.VARIABLE,
-        title: `Variable environment updated`,
-        metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} updated variable ${variable.id}`)
-
-    return result
+        },
+        this.prisma
+      )
+    } else {
+      return this.updateEnvironment(user, variable, environment)
+    }
   }
 
   async rollbackVariable(
     user: User,
     variableId: Variable['id'],
-    rollbackVersion: VariableVersion['version']
+    rollbackVersion: VariableVersion['version'],
+    reason?: string
   ) {
     const variable = await getVariableWithAuthority(
       user.id,
@@ -322,40 +310,37 @@ export class VariableService {
       )
     }
 
-    // Rollback the variable
-    const result = await this.prisma.variableVersion.deleteMany({
-      where: {
-        variableId,
-        version: {
-          gt: Number(rollbackVersion)
-        }
-      }
-    })
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: variable,
-        type: EventType.VARIABLE_UPDATED,
-        source: EventSource.VARIABLE,
-        title: `Variable rolled back`,
-        metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name,
-          rollbackVersion
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} rolled back variable ${variable.id}`)
-
-    return result
+    if (
+      !variable.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        variable.project.workspaceId,
+        this.prisma
+      ))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.VARIABLE,
+          itemId: variable.id,
+          reason,
+          user,
+          workspaceId: variable.project.workspaceId,
+          metadata: {
+            rollbackVersion
+          }
+        },
+        this.prisma
+      )
+    } else {
+      return this.rollback(user, variable, rollbackVersion)
+    }
   }
 
-  async deleteVariable(user: User, variableId: Variable['id']) {
+  async deleteVariable(
+    user: User,
+    variableId: Variable['id'],
+    reason?: string
+  ) {
     const variable = await getVariableWithAuthority(
       user.id,
       variableId,
@@ -363,29 +348,29 @@ export class VariableService {
       this.prisma
     )
 
-    await this.prisma.variable.delete({
-      where: {
-        id: variableId
-      }
-    })
+    if (variable.pendingCreation) {
+      throw new BadRequestException(
+        `Variable is pending creation and cannot be deleted. Delete the related approval to delete the variable.`
+      )
+    }
 
-    createEvent(
-      {
-        triggeredBy: user,
-        type: EventType.VARIABLE_DELETED,
-        source: EventSource.VARIABLE,
-        title: `Variable deleted`,
-        metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
+    if (
+      await workspaceApprovalEnabled(variable.project.workspaceId, this.prisma)
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.DELETE,
+          itemType: ApprovalItemType.VARIABLE,
+          itemId: variable.id,
+          reason,
+          user,
+          workspaceId: variable.project.workspaceId
+        },
+        this.prisma
+      )
+    } else {
+      return this.delete(user, variable)
+    }
   }
 
   async getVariableById(user: User, variableId: Variable['id']) {
@@ -417,6 +402,7 @@ export class VariableService {
     return await this.prisma.variable.findMany({
       where: {
         projectId,
+        pendingCreation: false,
         name: {
           contains: search
         }
@@ -457,11 +443,251 @@ export class VariableService {
       (await this.prisma.variable.count({
         where: {
           name: variableName,
+          pendingCreation: false,
           environment: {
             id: environmentId
           }
         }
       })) > 0
     )
+  }
+
+  async makeVariableApproved(variableId: Variable['id']): Promise<any> {
+    const variable = await this.prisma.variable.findUnique({
+      where: {
+        id: variableId
+      }
+    })
+
+    const variableExists = await this.prisma.variable.count({
+      where: {
+        name: variable.name,
+        pendingCreation: false,
+        environmentId: variable.environmentId,
+        projectId: variable.projectId
+      }
+    })
+
+    if (variableExists > 1) {
+      throw new ConflictException(
+        `Variable already exists: ${variable.name} in environment ${variable.environmentId} in project ${variable.projectId}`
+      )
+    }
+
+    return this.prisma.variable.update({
+      where: {
+        id: variableId
+      },
+      data: {
+        pendingCreation: false
+      }
+    })
+  }
+
+  async update(
+    dto: UpdateVariable | UpdateVariableMetadata,
+    user: User,
+    variable: VariableWithProject
+  ) {
+    let result
+
+    // Update the variable
+    // If a new variable value is proposed, we want to create a new version for that variable
+    if (dto.value) {
+      const previousVersion = await this.prisma.variableVersion.findFirst({
+        where: {
+          variableId: variable.id
+        },
+        select: {
+          version: true
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      result = await this.prisma.variable.update({
+        where: {
+          id: variable.id
+        },
+        data: {
+          name: dto.name,
+          note: dto.note,
+          lastUpdatedById: user.id,
+          versions: {
+            create: {
+              value: dto.value,
+              version: previousVersion.version + 1,
+              createdById: user.id
+            }
+          }
+        }
+      })
+    } else {
+      result = await this.prisma.variable.update({
+        where: {
+          id: variable.id
+        },
+        data: {
+          note: dto.note,
+          name: dto.name,
+          lastUpdatedById: user.id
+        }
+      })
+    }
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: variable,
+        type: EventType.VARIABLE_UPDATED,
+        source: EventSource.VARIABLE,
+        title: `Variable updated`,
+        metadata: {
+          variableId: variable.id,
+          name: variable.name,
+          projectId: variable.projectId,
+          projectName: variable.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated variable ${variable.id}`)
+
+    return result
+  }
+
+  async updateEnvironment(
+    user: User,
+    variable: VariableWithProject,
+    environment: Environment
+  ) {
+    // Update the variable
+    const result = await this.prisma.variable.update({
+      where: {
+        id: variable.id
+      },
+      data: {
+        environment: {
+          connect: {
+            id: environment.id
+          }
+        }
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: variable,
+        type: EventType.VARIABLE_UPDATED,
+        source: EventSource.VARIABLE,
+        title: `Variable environment updated`,
+        metadata: {
+          variableId: variable.id,
+          name: variable.name,
+          projectId: variable.projectId,
+          projectName: variable.project.name,
+          environmentId: environment.id,
+          environmentName: environment.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated variable ${variable.id}`)
+
+    return result
+  }
+
+  async rollback(
+    user: User,
+    variable: VariableWithProject,
+    rollbackVersion: VariableVersion['version']
+  ) {
+    // Rollback the variable
+    const result = await this.prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable.id,
+        version: {
+          gt: Number(rollbackVersion)
+        }
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: variable,
+        type: EventType.VARIABLE_UPDATED,
+        source: EventSource.VARIABLE,
+        title: `Variable rolled back`,
+        metadata: {
+          variableId: variable.id,
+          name: variable.name,
+          projectId: variable.projectId,
+          projectName: variable.project.name,
+          rollbackVersion
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} rolled back variable ${variable.id}`)
+
+    return result
+  }
+
+  async delete(user: User, variable: VariableWithProject) {
+    const op = []
+
+    // Delete the variable
+    op.push(
+      this.prisma.variable.delete({
+        where: {
+          id: variable.id
+        }
+      })
+    )
+
+    // If the variable is in pending creation and the workspace approval is enabled, we need to delete the approval
+    if (
+      variable.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        variable.project.workspaceId,
+        this.prisma
+      ))
+    ) {
+      op.push(
+        this.prisma.approval.deleteMany({
+          where: {
+            itemId: variable.id,
+            itemType: ApprovalItemType.VARIABLE
+          }
+        })
+      )
+    }
+
+    await this.prisma.$transaction(op)
+
+    createEvent(
+      {
+        triggeredBy: user,
+        type: EventType.VARIABLE_DELETED,
+        source: EventSource.VARIABLE,
+        title: `Variable deleted`,
+        metadata: {
+          variableId: variable.id,
+          name: variable.name,
+          projectId: variable.projectId,
+          projectName: variable.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
   }
 }

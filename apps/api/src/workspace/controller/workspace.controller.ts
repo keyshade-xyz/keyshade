@@ -33,9 +33,10 @@ export class WorkspaceController {
   async update(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Body() dto: UpdateWorkspace
+    @Body() dto: UpdateWorkspace,
+    @Query('reason') reason: string
   ) {
-    return this.workspaceService.updateWorkspace(user, workspaceId, dto)
+    return this.workspaceService.updateWorkspace(user, workspaceId, dto, reason)
   }
 
   @Put(':workspaceId/transfer-ownership/:userId')

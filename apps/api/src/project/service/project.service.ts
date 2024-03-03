@@ -1,5 +1,12 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger
+} from '@nestjs/common'
+import {
+  ApprovalAction,
+  ApprovalItemType,
   Authority,
   EventSource,
   EventType,
@@ -19,6 +26,10 @@ import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
+import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
+import createApproval from '../../common/create-approval'
+import { UpdateProjectMetadata } from '../../approval/approval.types'
+import { ProjectWithSecrets } from '../project.types'
 
 @Injectable()
 export class ProjectService {
@@ -29,8 +40,9 @@ export class ProjectService {
   async createProject(
     user: User,
     workspaceId: Workspace['id'],
-    dto: CreateProject
-  ): Promise<Project> {
+    dto: CreateProject,
+    reason?: string
+  ) {
     // Check if the workspace exists or not
     const workspace = await getWorkspaceWithAuthority(
       user.id,
@@ -48,11 +60,18 @@ export class ProjectService {
     // Create the public and private key pair
     const { publicKey, privateKey } = createKeyPair()
 
-    const data: Partial<Project> = {
+    const approvalEnabled = await workspaceApprovalEnabled(
+      workspaceId,
+      this.prisma
+    )
+
+    const data: any = {
       name: dto.name,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
-      publicKey
+      publicKey,
+      isPublic: dto.isPublic,
+      pendingCreation: approvalEnabled
     }
 
     // Check if the private key should be stored
@@ -76,11 +95,7 @@ export class ProjectService {
     const createNewProject = this.prisma.project.create({
       data: {
         id: newProjectId,
-        name: data.name,
-        description: data.description,
-        publicKey: data.publicKey,
-        privateKey: data.privateKey,
-        storePrivateKey: data.storePrivateKey,
+        ...data,
         workspace: {
           connect: {
             id: workspaceId
@@ -101,8 +116,12 @@ export class ProjectService {
         },
         data: {
           projects: {
-            connect: {
-              id: newProjectId
+            create: {
+              project: {
+                connect: {
+                  id: newProjectId
+                }
+              }
             }
           }
         }
@@ -171,18 +190,38 @@ export class ProjectService {
     )
 
     this.log.debug(`Created project ${newProject}`)
+
     // It is important that we log before the private key is set
     // in order to not log the private key
     newProject.privateKey = privateKey
 
-    return newProject
+    if (approvalEnabled) {
+      const approval = await createApproval(
+        {
+          action: ApprovalAction.CREATE,
+          itemType: ApprovalItemType.PROJECT,
+          itemId: newProjectId,
+          reason,
+          user,
+          workspaceId
+        },
+        this.prisma
+      )
+      return {
+        project: newProject,
+        approval
+      }
+    } else {
+      return newProject
+    }
   }
 
   async updateProject(
     user: User,
     projectId: Project['id'],
-    dto: UpdateProject
-  ): Promise<Project> {
+    dto: UpdateProject,
+    reason?: string
+  ) {
     const project = await getProjectWithAuthority(
       user.id,
       projectId,
@@ -199,11 +238,213 @@ export class ProjectService {
         `Project with this name **${dto.name}** already exists`
       )
 
+    if (
+      !project.pendingCreation &&
+      (await workspaceApprovalEnabled(project.workspaceId, this.prisma))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.PROJECT,
+          itemId: projectId,
+          reason,
+          user,
+          workspaceId: project.workspaceId,
+          metadata: dto
+        },
+        this.prisma
+      )
+    } else {
+      return this.update(dto, user, project)
+    }
+  }
+
+  async deleteProject(user: User, projectId: Project['id'], reason?: string) {
+    const project = await getProjectWithAuthority(
+      user.id,
+      projectId,
+      Authority.DELETE_PROJECT,
+      this.prisma
+    )
+
+    if (project.pendingCreation) {
+      throw new BadRequestException(
+        `Project is pending creation and cannot be deleted. Delete the related approval to delete the project.`
+      )
+    }
+
+    if (await workspaceApprovalEnabled(project.workspaceId, this.prisma)) {
+      return await createApproval(
+        {
+          action: ApprovalAction.DELETE,
+          itemType: ApprovalItemType.PROJECT,
+          itemId: projectId,
+          reason,
+          user,
+          workspaceId: project.workspaceId
+        },
+        this.prisma
+      )
+    } else {
+      return this.delete(user, project)
+    }
+  }
+
+  async getProjectByUserAndId(user: User, projectId: Project['id']) {
+    const project = await getProjectWithAuthority(
+      user.id,
+      projectId,
+      Authority.READ_PROJECT,
+      this.prisma
+    )
+
+    return project
+  }
+
+  async getProjectsOfWorkspace(
+    user: User,
+    workspaceId: Workspace['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    await getWorkspaceWithAuthority(
+      user.id,
+      workspaceId,
+      Authority.READ_PROJECT,
+      this.prisma
+    )
+
+    return (
+      await this.prisma.project.findMany({
+        skip: page * limit,
+        take: limit,
+        orderBy: {
+          [sort]: order
+        },
+        where: {
+          pendingCreation: false,
+          workspaceId,
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              description: {
+                contains: search
+              }
+            }
+          ],
+          workspace: {
+            members: {
+              some: {
+                userId: user.id
+              }
+            }
+          }
+        }
+      })
+    ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+  }
+
+  private async projectExists(
+    projectName: string,
+    workspaceId: Workspace['id']
+  ): Promise<boolean> {
+    return (
+      (await this.prisma.workspaceMember.count({
+        where: {
+          workspaceId,
+          workspace: {
+            projects: {
+              some: {
+                name: projectName,
+                pendingCreation: false
+              }
+            }
+          }
+        }
+      })) > 0
+    )
+  }
+
+  async makeProjectApproved(projectId: Project['id']) {
+    const project = await this.prisma.project.findUnique({
+      where: {
+        id: projectId
+      }
+    })
+
+    // Check if a project with this name already exists
+    const projectExists = await this.prisma.project.count({
+      where: {
+        name: project.name,
+        pendingCreation: false,
+        workspaceId: project.workspaceId
+      }
+    })
+
+    if (projectExists > 1) {
+      throw new ConflictException(
+        `Project with this name ${project.name} already exists`
+      )
+    }
+
+    return this.prisma.project.update({
+      where: {
+        id: projectId
+      },
+      data: {
+        pendingCreation: false,
+        environments: {
+          updateMany: {
+            where: {
+              projectId
+            },
+            data: {
+              pendingCreation: false
+            }
+          }
+        },
+        secrets: {
+          updateMany: {
+            where: {
+              projectId
+            },
+            data: {
+              pendingCreation: false
+            }
+          }
+        },
+        variables: {
+          updateMany: {
+            where: {
+              projectId
+            },
+            data: {
+              pendingCreation: false
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async update(
+    dto: UpdateProject | UpdateProjectMetadata,
+    user: User,
+    project: ProjectWithSecrets
+  ) {
     const data: Partial<Project> = {
       name: dto.name,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
-      privateKey: dto.storePrivateKey ? project.privateKey : null
+      privateKey: dto.storePrivateKey ? project.privateKey : null,
+      isPublic: dto.isPublic
     }
 
     const versionUpdateOps = []
@@ -261,7 +502,7 @@ export class ProjectService {
     // Update and return the project
     const updateProjectOp = this.prisma.project.update({
       where: {
-        id: projectId
+        id: project.id
       },
       data: {
         ...data,
@@ -296,20 +537,34 @@ export class ProjectService {
     }
   }
 
-  async deleteProject(user: User, projectId: Project['id']): Promise<void> {
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.DELETE_PROJECT,
-      this.prisma
-    )
+  async delete(user: User, project: Project) {
+    const op = []
 
     // Delete the project
-    await this.prisma.project.delete({
-      where: {
-        id: projectId
-      }
-    })
+    op.push(
+      this.prisma.project.delete({
+        where: {
+          id: project.id
+        }
+      })
+    )
+
+    // If the project is pending creation, and the workspace has approval enabled, then delete the approval
+    if (
+      project.pendingCreation &&
+      (await workspaceApprovalEnabled(project.workspaceId, this.prisma))
+    ) {
+      op.push(
+        this.prisma.approval.deleteMany({
+          where: {
+            itemId: project.id,
+            itemType: ApprovalItemType.PROJECT
+          }
+        })
+      )
+    }
+
+    await this.prisma.$transaction(op)
 
     const workspace = await this.prisma.workspace.findUnique({
       where: {
@@ -333,85 +588,5 @@ export class ProjectService {
     )
 
     this.log.debug(`Deleted project ${project}`)
-  }
-
-  async getProjectByUserAndId(user: User, projectId: Project['id']) {
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
-
-    return project
-  }
-
-  async getProjectsOfWorkspace(
-    user: User,
-    workspaceId: Workspace['id'],
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
-
-    return (
-      await this.prisma.project.findMany({
-        skip: page * limit,
-        take: limit,
-        orderBy: {
-          [sort]: order
-        },
-        where: {
-          workspaceId,
-          OR: [
-            {
-              name: {
-                contains: search
-              }
-            },
-            {
-              description: {
-                contains: search
-              }
-            }
-          ],
-          workspace: {
-            members: {
-              some: {
-                userId: user.id
-              }
-            }
-          }
-        }
-      })
-    ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
-  }
-
-  private async projectExists(
-    projectName: string,
-    workspaceId: Workspace['id']
-  ): Promise<boolean> {
-    return (
-      (await this.prisma.workspaceMember.count({
-        where: {
-          workspaceId,
-          workspace: {
-            projects: {
-              some: {
-                name: projectName
-              }
-            }
-          }
-        }
-      })) > 0
-    )
   }
 }

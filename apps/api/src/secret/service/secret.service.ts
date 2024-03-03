@@ -6,6 +6,8 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import {
+  ApprovalAction,
+  ApprovalItemType,
   Authority,
   Environment,
   EventSource,
@@ -24,9 +26,16 @@ import { encrypt } from '../../common/encrypt'
 import getProjectWithAuthority from '../../common/get-project-with-authority'
 import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 import getSecretWithAuthority from '../../common/get-secret-with-authority'
-import { SecretWithVersion } from '../secret.types'
+import {
+  SecretWithProject,
+  SecretWithProjectAndVersion,
+  SecretWithVersion
+} from '../secret.types'
 import createEvent from '../../common/create-event'
 import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
+import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
+import createApproval from '../../common/create-approval'
+import { UpdateSecretMetadata } from '../../approval/approval.types'
 
 @Injectable()
 export class SecretService {
@@ -34,7 +43,12 @@ export class SecretService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
+  async createSecret(
+    user: User,
+    dto: CreateSecret,
+    projectId: Project['id'],
+    reason?: string
+  ) {
     const environmentId = dto.environmentId
     // Fetch the project
     const project = await getProjectWithAuthority(
@@ -72,12 +86,21 @@ export class SecretService {
       )
     }
 
+    const approvalEnabled = await workspaceApprovalEnabled(
+      project.workspaceId,
+      this.prisma
+    )
+
     // Create the secret
     const secret = await this.prisma.secret.create({
       data: {
         name: dto.name,
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
+        pendingCreation:
+          project.pendingCreation ||
+          environment.pendingCreation ||
+          approvalEnabled,
         versions: {
           create: {
             value: await encrypt(project.publicKey, dto.value),
@@ -124,18 +147,43 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} created secret ${secret.id}`)
 
-    return secret
+    if (
+      !project.pendingCreation &&
+      !environment.pendingCreation &&
+      approvalEnabled
+    ) {
+      const approval = await createApproval(
+        {
+          action: ApprovalAction.CREATE,
+          itemType: ApprovalItemType.SECRET,
+          itemId: secret.id,
+          reason,
+          user,
+          workspaceId: project.workspaceId
+        },
+        this.prisma
+      )
+      return {
+        secret,
+        approval
+      }
+    } else {
+      return secret
+    }
   }
 
-  async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
+  async updateSecret(
+    user: User,
+    secretId: Secret['id'],
+    dto: UpdateSecret,
+    reason?: string
+  ) {
     const secret = await getSecretWithAuthority(
       user.id,
       secretId,
       Authority.UPDATE_SECRET,
       this.prisma
     )
-
-    let result
 
     // Check if the secret already exists in the environment
     if (
@@ -147,83 +195,31 @@ export class SecretService {
       )
     }
 
-    // Update the secret
-    // If a new secret value is proposed, we want to create a new version for
-    // that secret
-    if (dto.value) {
-      const previousVersion = await this.prisma.secretVersion.findFirst({
-        where: {
-          secretId
+    if (
+      !secret.pendingCreation &&
+      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.SECRET,
+          itemId: secret.id,
+          reason,
+          user,
+          workspaceId: secret.project.workspaceId
         },
-        select: {
-          version: true
-        },
-        orderBy: {
-          version: 'desc'
-        },
-        take: 1
-      })
-
-      result = await this.prisma.secret.update({
-        where: {
-          id: secretId
-        },
-        data: {
-          name: dto.name,
-          note: dto.note,
-          rotateAt: addHoursToDate(dto.rotateAfter),
-          lastUpdatedById: user.id,
-          versions: {
-            create: {
-              value: await encrypt(secret.project.publicKey, dto.value),
-              version: previousVersion.version + 1,
-              createdById: user.id
-            }
-          }
-        }
-      })
+        this.prisma
+      )
     } else {
-      result = await this.prisma.secret.update({
-        where: {
-          id: secretId
-        },
-        data: {
-          note: dto.note,
-          name: dto.name,
-          rotateAt: dto.rotateAfter
-            ? addHoursToDate(dto.rotateAfter)
-            : undefined,
-          lastUpdatedById: user.id
-        }
-      })
+      return this.update(dto, user, secret)
     }
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: secret,
-        type: EventType.SECRET_UPDATED,
-        source: EventSource.SECRET,
-        title: `Secret updated`,
-        metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
-
-    return result
   }
 
   async updateSecretEnvironment(
     user: User,
     secretId: Secret['id'],
-    environmentId: Environment['id']
+    environmentId: Environment['id'],
+    reason?: string
   ) {
     const secret = await getSecretWithAuthority(
       user.id,
@@ -259,44 +255,34 @@ export class SecretService {
       )
     }
 
-    // Update the secret
-    const result = await this.prisma.secret.update({
-      where: {
-        id: secretId
-      },
-      data: {
-        environmentId
-      }
-    })
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: secret,
-        type: EventType.SECRET_UPDATED,
-        source: EventSource.SECRET,
-        title: `Secret environment updated`,
-        metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
-
-    return result
+    if (
+      !secret.pendingCreation &&
+      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.SECRET,
+          itemId: secret.id,
+          reason,
+          user,
+          workspaceId: secret.project.workspaceId,
+          metadata: {
+            environmentId
+          }
+        },
+        this.prisma
+      )
+    } else {
+      return this.updateEnvironment(user, secret, environment)
+    }
   }
 
   async rollbackSecret(
     user: User,
     secretId: Secret['id'],
-    rollbackVersion: SecretVersion['version']
+    rollbackVersion: SecretVersion['version'],
+    reason?: string
   ) {
     // Fetch the secret
     const secret = await getSecretWithAuthority(
@@ -315,68 +301,61 @@ export class SecretService {
       )
     }
 
-    // Rollback the secret
-    const result = await this.prisma.secretVersion.deleteMany({
-      where: {
-        secretId,
-        version: {
-          gt: Number(rollbackVersion)
-        }
-      }
-    })
-
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: secret,
-        type: EventType.SECRET_UPDATED,
-        source: EventSource.SECRET,
-        title: `Secret rolled back`,
-        metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} rolled back secret ${secret.id}`)
-
-    return result
+    if (
+      !secret.pendingCreation &&
+      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.UPDATE,
+          itemType: ApprovalItemType.SECRET,
+          itemId: secret.id,
+          reason,
+          user,
+          workspaceId: secret.project.workspaceId,
+          metadata: {
+            rollbackVersion
+          }
+        },
+        this.prisma
+      )
+    } else {
+      return this.rollback(user, secret, rollbackVersion)
+    }
   }
 
-  async deleteSecret(user: User, secretId: Secret['id']) {
+  async deleteSecret(user: User, secretId: Secret['id'], reason?: string) {
     // Check if the user has the required role
-    await getSecretWithAuthority(
+    const secret = await getSecretWithAuthority(
       user.id,
       secretId,
       Authority.DELETE_SECRET,
       this.prisma
     )
 
-    // Delete the secret
-    await this.prisma.secret.delete({
-      where: {
-        id: secretId
-      }
-    })
+    if (secret.pendingCreation) {
+      throw new BadRequestException(
+        `Secret is pending creation and cannot be deleted. Delete the related approval to delete the secret.`
+      )
+    }
 
-    createEvent(
-      {
-        triggeredBy: user,
-        type: EventType.SECRET_DELETED,
-        source: EventSource.SECRET,
-        title: `Secret deleted`,
-        metadata: {
-          secretId
-        }
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} deleted secret ${secretId}`)
+    if (
+      await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma)
+    ) {
+      return await createApproval(
+        {
+          action: ApprovalAction.DELETE,
+          itemType: ApprovalItemType.SECRET,
+          itemId: secretId,
+          reason,
+          user,
+          workspaceId: secret.project.workspaceId
+        },
+        this.prisma
+      )
+    } else {
+      return this.delete(user, secret)
+    }
   }
 
   async getSecretById(
@@ -460,6 +439,7 @@ export class SecretService {
     const secrets = (await this.prisma.secret.findMany({
       where: {
         projectId,
+        pendingCreation: false,
         name: {
           contains: search
         }
@@ -514,6 +494,7 @@ export class SecretService {
     return (
       (await this.prisma.secret.count({
         where: {
+          pendingCreation: false,
           name: secretName,
           environment: {
             id: environmentId
@@ -521,5 +502,239 @@ export class SecretService {
         }
       })) > 0
     )
+  }
+
+  async makeSecretApproved(secretId: Secret['id']) {
+    const secret = await this.prisma.secret.findUnique({
+      where: {
+        id: secretId
+      }
+    })
+
+    const secretExists = await this.prisma.secret.count({
+      where: {
+        name: secret.name,
+        environmentId: secret.environmentId,
+        pendingCreation: false,
+        projectId: secret.projectId
+      }
+    })
+
+    if (secretExists > 1) {
+      throw new ConflictException(
+        `Secret already exists: ${secret.name} in environment ${secret.environmentId} in project ${secret.projectId}`
+      )
+    }
+
+    return this.prisma.secret.update({
+      where: {
+        id: secretId
+      },
+      data: {
+        pendingCreation: false
+      }
+    })
+  }
+
+  async update(
+    dto: UpdateSecret | UpdateSecretMetadata,
+    user: User,
+    secret: SecretWithProjectAndVersion
+  ) {
+    let result
+
+    // Update the secret
+    // If a new secret value is proposed, we want to create a new version for
+    // that secret
+    if (dto.value) {
+      const previousVersion = await this.prisma.secretVersion.findFirst({
+        where: {
+          secretId: secret.id
+        },
+        select: {
+          version: true
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      result = await this.prisma.secret.update({
+        where: {
+          id: secret.id
+        },
+        data: {
+          name: dto.name,
+          note: dto.note,
+          rotateAt: addHoursToDate(dto.rotateAfter),
+          lastUpdatedById: user.id,
+          versions: {
+            create: {
+              value: await encrypt(secret.project.publicKey, dto.value),
+              version: previousVersion.version + 1,
+              createdById: user.id
+            }
+          }
+        }
+      })
+    } else {
+      result = await this.prisma.secret.update({
+        where: {
+          id: secret.id
+        },
+        data: {
+          note: dto.note,
+          name: dto.name,
+          rotateAt: dto.rotateAfter
+            ? addHoursToDate(dto.rotateAfter)
+            : undefined,
+          lastUpdatedById: user.id
+        }
+      })
+    }
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret updated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
+
+    return result
+  }
+
+  async updateEnvironment(
+    user: User,
+    secret: SecretWithProject,
+    environment: Environment
+  ) {
+    // Update the secret
+    const result = await this.prisma.secret.update({
+      where: {
+        id: secret.id
+      },
+      data: {
+        environmentId: environment.id
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret environment updated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name,
+          environmentId: environment.id,
+          environmentName: environment.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
+
+    return result
+  }
+
+  async rollback(
+    user: User,
+    secret: SecretWithProject,
+    rollbackVersion: number
+  ) {
+    // Rollback the secret
+    const result = await this.prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret.id,
+        version: {
+          gt: Number(rollbackVersion)
+        }
+      }
+    })
+
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret rolled back`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} rolled back secret ${secret.id}`)
+
+    return result
+  }
+
+  async delete(user: User, secret: SecretWithProject) {
+    const op = []
+
+    // Delete the secret
+    op.push(
+      this.prisma.secret.delete({
+        where: {
+          id: secret.id
+        }
+      })
+    )
+
+    // If the secret is in pending creation and the workspace approval is enabled, we need to
+    // delete the approval as well
+    if (
+      secret.pendingCreation &&
+      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
+    ) {
+      op.push(
+        this.prisma.approval.deleteMany({
+          where: {
+            itemId: secret.id,
+            itemType: ApprovalItemType.SECRET
+          }
+        })
+      )
+    }
+
+    await this.prisma.$transaction(op)
+
+    createEvent(
+      {
+        triggeredBy: user,
+        type: EventType.SECRET_DELETED,
+        source: EventSource.SECRET,
+        title: `Secret deleted`,
+        metadata: {
+          secretId: secret.id
+        }
+      },
+      this.prisma
+    )
+
+    this.logger.log(`User ${user.id} deleted secret ${secret.id}`)
   }
 }
