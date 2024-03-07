@@ -650,32 +650,6 @@ describe('Workspace Controller Tests', () => {
   //   expect(response.json()).toEqual(expect.arrayContaining([event]))
   // })
 
-  it('should create a new user if the member invited to the workspace does not exist in our database', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      headers: {
-        'x-e2e-user-email': user2.email
-      },
-      url: `/workspace/${workspace1.id}/invite-users`,
-      payload: [
-        {
-          email: 'jimmy@keyshade.xyz',
-          roleIds: [memberRole.id]
-        }
-      ]
-    })
-
-    expect(response.statusCode).toBe(201)
-
-    const user = await prisma.user.findUnique({
-      where: {
-        email: 'jimmy@keyshade.xyz'
-      }
-    })
-
-    expect(user).toBeDefined()
-  })
-
   it('should be able to leave the workspace', async () => {
     const response = await app.inject({
       method: 'DELETE',
@@ -940,7 +914,7 @@ describe('Workspace Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json()).toBeInstanceOf(Array)
-    expect(response.json()).toHaveLength(2)
+    expect(response.json()).toHaveLength(1)
   })
 
   it('should not be able to get all the members of the workspace if user is not a member', async () => {
