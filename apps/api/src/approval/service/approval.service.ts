@@ -11,7 +11,6 @@ import {
   ApprovalItemType,
   ApprovalStatus,
   Authority,
-  Environment,
   EventSource,
   EventType,
   Secret,
@@ -254,14 +253,13 @@ export class ApprovalService {
               const metadata = approval.metadata as UpdateSecretMetadata
 
               if (metadata.environmentId) {
-                let environment: Environment
-                try {
-                  environment = await this.prisma.environment.findUnique({
-                    where: {
-                      id: metadata.environmentId
-                    }
-                  })
-                } catch (e) {
+                const environment = await this.prisma.environment.findUnique({
+                  where: {
+                    id: metadata.environmentId
+                  }
+                })
+
+                if (!environment) {
                   throw new BadRequestException(
                     `Environment with id ${metadata.environmentId} does not exist`
                   )
@@ -308,14 +306,13 @@ export class ApprovalService {
               const metadata = approval.metadata as UpdateVariableMetadata
 
               if (metadata.environmentId) {
-                let environment: Environment
-                try {
-                  environment = await this.prisma.environment.findUnique({
-                    where: {
-                      id: metadata.environmentId
-                    }
-                  })
-                } catch (e) {
+                const environment = await this.prisma.environment.findUnique({
+                  where: {
+                    id: metadata.environmentId
+                  }
+                })
+
+                if (!environment) {
                   throw new BadRequestException(
                     `Environment with id ${metadata.environmentId} does not exist`
                   )
@@ -539,10 +536,6 @@ export class ApprovalService {
       throw new NotFoundException(
         `Approval with id ${approvalId} does not exist`
       )
-    }
-
-    if (user.isAdmin) {
-      return approval
     }
 
     const workspaceAuthorities = await getCollectiveWorkspaceAuthorities(

@@ -1389,6 +1389,115 @@ describe('Approval Controller Tests', () => {
     expect(response.json().length).not.toBe(0)
   })
 
+  it('should have the project if project approval is fetched', async () => {
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        itemType: ApprovalItemType.PROJECT
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/approval/${approval.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().approval.id).toBe(approval.id)
+    expect(response.json().project).toBeDefined()
+  })
+
+  it('should have the environment if environment approval is fetched', async () => {
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        itemType: ApprovalItemType.ENVIRONMENT
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/approval/${approval.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().approval.id).toBe(approval.id)
+    expect(response.json().environment).toBeDefined()
+  })
+
+  it('should have the secret if secret approval is fetched', async () => {
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        itemType: ApprovalItemType.SECRET
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/approval/${approval.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().approval.id).toBe(approval.id)
+    expect(response.json().secret).toBeDefined()
+  })
+
+  it('should have the variable if variable approval is fetched', async () => {
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        itemType: ApprovalItemType.VARIABLE
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/approval/${approval.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().approval.id).toBe(approval.id)
+    expect(response.json().variable).toBeDefined()
+  })
+
+  it('should have the workspace if workspace approval is fetched', async () => {
+    await workspaceService.updateWorkspace(user1, workspace1.id, {
+      name: 'Workspace 10 Updated'
+    })
+
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        itemType: ApprovalItemType.WORKSPACE
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/approval/${approval.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().approval.id).toBe(approval.id)
+    expect(response.json().workspace).toBeDefined()
+  })
+
   it('should be able to fetch all approvals of a user in a workspace', async () => {
     const response = await app.inject({
       method: 'GET',
@@ -1400,6 +1509,409 @@ describe('Approval Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).not.toBe(0)
+  })
+
+  it('should be able to reject an approval', async () => {
+    const approval = await prisma.approval.findFirst({
+      where: {
+        workspaceId: workspace1.id,
+        status: ApprovalStatus.PENDING
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/reject`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should delete the item if the approval is rejected', async () => {
+    // Create a new project
+    const result = (await projectService.createProject(
+      user1,
+      workspace1.id,
+      {
+        name: 'Project 2'
+      },
+      'Test reason'
+    )) as {
+      approval: Approval
+      project: Project
+    }
+
+    const approval = result.approval
+    const project = result.project
+
+    expect(approval).toBeDefined()
+    expect(project).toBeDefined()
+
+    // Reject the approval
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/reject`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const approvalAfterRejection = await prisma.approval.findUnique({
+      where: {
+        id: approval.id
+      }
+    })
+
+    expect(approvalAfterRejection.status).toBe(ApprovalStatus.REJECTED)
+
+    // Project should be deleted
+    const deletedProject = await prisma.project.findUnique({
+      where: {
+        id: project.id
+      }
+    })
+    expect(deletedProject).toBeNull()
+  })
+
+  it('should update a project if the approval is accepted', async () => {
+    const createProjectResponse = (await projectService.createProject(
+      user1,
+      workspace1.id,
+      {
+        name: 'Project 3'
+      },
+      'Test reason'
+    )) as {
+      approval: Approval
+      project: Project
+    }
+
+    const approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.PROJECT,
+        action: ApprovalAction.CREATE,
+        itemId: createProjectResponse.project.id
+      }
+    })
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    await projectService.updateProject(
+      user1,
+      createProjectResponse.project.id,
+      {
+        name: 'Project 3 Updated'
+      }
+    )
+
+    const updateProjectApproval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.PROJECT,
+        action: ApprovalAction.UPDATE,
+        itemId: createProjectResponse.project.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${updateProjectApproval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const project = await prisma.project.findUnique({
+      where: {
+        id: createProjectResponse.project.id
+      }
+    })
+    expect(project.name).toBe('Project 3 Updated')
+
+    project1 = project
+  })
+
+  it('should update an environment if approval is accepted', async () => {
+    const createEnvResponse = (await environmentService.createEnvironment(
+      user1,
+      {
+        name: 'Environment 6',
+        description: 'Environment 6 description',
+        isDefault: true
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      environment: Environment
+    }
+
+    const approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.ENVIRONMENT,
+        action: ApprovalAction.CREATE,
+        itemId: createEnvResponse.environment.id
+      }
+    })
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    await environmentService.updateEnvironment(
+      user1,
+      {
+        name: 'Environment 6 Updated'
+      },
+      createEnvResponse.environment.id
+    )
+
+    const updateEnvApproval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.ENVIRONMENT,
+        action: ApprovalAction.UPDATE,
+        itemId: createEnvResponse.environment.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${updateEnvApproval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const environment = await prisma.environment.findUnique({
+      where: {
+        id: createEnvResponse.environment.id
+      }
+    })
+    expect(environment.name).toBe('Environment 6 Updated')
+
+    environment1 = environment
+  })
+
+  it('should approve a secret if the approval is approved', async () => {
+    const createSecretResponse = (await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 5',
+        value: 'Secret 5 value'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      secret: Secret
+    }
+
+    let approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.SECRET,
+        action: ApprovalAction.CREATE,
+        itemId: createSecretResponse.secret.id
+      }
+    })
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.APPROVED,
+        itemType: ApprovalItemType.SECRET,
+        action: ApprovalAction.CREATE,
+        itemId: createSecretResponse.secret.id
+      }
+    })
+
+    const secret = await prisma.secret.findUnique({
+      where: {
+        id: createSecretResponse.secret.id
+      }
+    })
+
+    expect(secret.pendingCreation).toBe(false)
+    expect(approval).toBeDefined()
+    expect(approval.id).toBeDefined()
+    expect(approval.status).toBe(ApprovalStatus.APPROVED)
+
+    secret1 = secret
+  })
+
+  it('should approve a variable if the approval is approved', async () => {
+    const createVariableResponse = (await variableService.createVariable(
+      user1,
+      {
+        environmentId: environment1.id,
+        name: 'KEY5',
+        value: 'VALUE5'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      variable: Variable
+    }
+
+    let approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.PENDING,
+        itemType: ApprovalItemType.VARIABLE,
+        action: ApprovalAction.CREATE,
+        itemId: createVariableResponse.variable.id
+      }
+    })
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    approval = await prisma.approval.findFirst({
+      where: {
+        status: ApprovalStatus.APPROVED,
+        itemType: ApprovalItemType.VARIABLE,
+        action: ApprovalAction.CREATE,
+        itemId: createVariableResponse.variable.id
+      }
+    })
+
+    const variable = await prisma.variable.findUnique({
+      where: {
+        id: createVariableResponse.variable.id
+      }
+    })
+
+    expect(variable.pendingCreation).toBe(false)
+    expect(approval).toBeDefined()
+    expect(approval.id).toBeDefined()
+    expect(approval.status).toBe(ApprovalStatus.APPROVED)
+
+    variable1 = variable
+  })
+
+  it('should throw error if the environment to which a variable is to be transferred is deleted before the approval is accepted', async () => {
+    const createEnvResponse = (await environmentService.createEnvironment(
+      user1,
+      {
+        name: 'Environment 7',
+        description: 'Environment 7 description'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      environment: Environment
+    }
+
+    const approval = createEnvResponse.approval
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    const updateVariableEnvironmentResponse =
+      (await variableService.updateVariableEnvironment(
+        user1,
+        variable1.id,
+        createEnvResponse.environment.id
+      )) as Approval
+
+    await prisma.environment.delete({
+      where: {
+        id: createEnvResponse.environment.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${updateVariableEnvironmentResponse.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('should throw error if the environment to which a secret is to be transferred is deleted before the approval is accepted', async () => {
+    const createEnvResponse = (await environmentService.createEnvironment(
+      user1,
+      {
+        name: 'Environment 8',
+        description: 'Environment 8 description'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      environment: Environment
+    }
+
+    const approval = createEnvResponse.approval
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    const updateSecretEnvironmentResponse =
+      (await secretService.updateSecretEnvironment(
+        user1,
+        secret1.id,
+        createEnvResponse.environment.id
+      )) as Approval
+
+    await prisma.environment.delete({
+      where: {
+        id: createEnvResponse.environment.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${updateSecretEnvironmentResponse.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
   })
 
   afterAll(async () => {

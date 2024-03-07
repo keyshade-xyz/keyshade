@@ -10,5 +10,5 @@ export class CreateEnvironment {
 
   @IsBoolean()
   @IsOptional()
-  isDefault: boolean
+  isDefault?: boolean
 }

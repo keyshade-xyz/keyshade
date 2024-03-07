@@ -1,7 +1,7 @@
 /*
   Warnings:
 
-  - A unique constraint covering the columns `[workspaceId,name]` on the table `Project` will be added. If there are existing duplicate values, this will fail.
+  - You are about to drop the column `workspaceRoleId` on the `Project` table. All the data in the column will be lost.
 
 */
 -- CreateEnum
@@ -47,6 +47,15 @@ ALTER TYPE "NotificationType" ADD VALUE 'APPROVAL_DELETED';
 ALTER TYPE "NotificationType" ADD VALUE 'APPROVAL_APPROVED';
 ALTER TYPE "NotificationType" ADD VALUE 'APPROVAL_REJECTED';
 
+-- DropForeignKey
+ALTER TABLE "Project" DROP CONSTRAINT "Project_workspaceRoleId_fkey";
+
+-- DropIndex
+DROP INDEX "Secret_projectId_environmentId_name_key";
+
+-- DropIndex
+DROP INDEX "Variable_projectId_environmentId_name_key";
+
 -- AlterTable
 ALTER TABLE "Environment" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
 
@@ -54,7 +63,8 @@ ALTER TABLE "Environment" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFA
 ALTER TABLE "Event" ADD COLUMN     "sourceApprovalId" TEXT;
 
 -- AlterTable
-ALTER TABLE "Project" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Project" DROP COLUMN "workspaceRoleId",
+ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
 
 -- AlterTable
 ALTER TABLE "Secret" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
@@ -63,8 +73,16 @@ ALTER TABLE "Secret" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT f
 ALTER TABLE "Variable" ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
 
 -- AlterTable
-ALTER TABLE "Workspace" ADD COLUMN     "approvalEnabled" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "pendingCreation" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Workspace" ADD COLUMN     "approvalEnabled" BOOLEAN NOT NULL DEFAULT false;
+
+-- CreateTable
+CREATE TABLE "ProjectWorkspaceRoleAssociation" (
+    "id" TEXT NOT NULL,
+    "roleId" TEXT NOT NULL,
+    "projectId" TEXT NOT NULL,
+
+    CONSTRAINT "ProjectWorkspaceRoleAssociation_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Approval" (
@@ -87,13 +105,19 @@ CREATE TABLE "Approval" (
 );
 
 -- CreateIndex
-CREATE INDEX "Approval_itemType_itemId_idx" ON "Approval"("itemType", "itemId");
+CREATE UNIQUE INDEX "ProjectWorkspaceRoleAssociation_roleId_projectId_key" ON "ProjectWorkspaceRoleAssociation"("roleId", "projectId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Project_workspaceId_name_key" ON "Project"("workspaceId", "name");
+CREATE INDEX "Approval_itemType_itemId_idx" ON "Approval"("itemType", "itemId");
 
 -- AddForeignKey
 ALTER TABLE "Event" ADD CONSTRAINT "Event_sourceApprovalId_fkey" FOREIGN KEY ("sourceApprovalId") REFERENCES "Approval"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProjectWorkspaceRoleAssociation" ADD CONSTRAINT "ProjectWorkspaceRoleAssociation_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "WorkspaceRole"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProjectWorkspaceRoleAssociation" ADD CONSTRAINT "ProjectWorkspaceRoleAssociation_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Approval" ADD CONSTRAINT "Approval_requestedById_fkey" FOREIGN KEY ("requestedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
