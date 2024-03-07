@@ -146,19 +146,19 @@ export class ApprovalService {
 
     this.logger.log(`Approval with id ${approvalId} rejected by ${user.id}`)
 
-    // await createEvent(
-    //   {
-    //     triggeredBy: user,
-    //     entity: approval,
-    //     type: EventType.APPROVAL_REJECTED,
-    //     source: EventSource.APPROVAL,
-    //     title: `Approval with id ${approvalId} rejected`,
-    //     metadata: {
-    //       approvalId
-    //     }
-    //   },
-    //   this.prisma
-    // )
+    createEvent(
+      {
+        triggeredBy: user,
+        entity: approval,
+        type: EventType.APPROVAL_REJECTED,
+        source: EventSource.APPROVAL,
+        title: `Approval with id ${approvalId} rejected`,
+        metadata: {
+          approvalId
+        }
+      },
+      this.prisma
+    )
   }
 
   async approveApproval(user: User, approvalId: Approval['id']) {
@@ -167,26 +167,6 @@ export class ApprovalService {
 
     this.isApprovalInActableState(approval)
 
-    const op = []
-
-    // Update the approval
-    op.push(
-      this.prisma.approval.update({
-        where: {
-          id: approvalId
-        },
-        data: {
-          status: ApprovalStatus.APPROVED,
-          approvedAt: new Date(),
-          approvedBy: {
-            connect: {
-              id: user.id
-            }
-          }
-        }
-      })
-    )
-
     if (approval.action === ApprovalAction.DELETE) {
       await this.deleteItem(approval, user)
     } else {
@@ -194,12 +174,10 @@ export class ApprovalService {
         case ApprovalItemType.WORKSPACE: {
           switch (approval.action) {
             case ApprovalAction.UPDATE: {
-              op.push(
-                this.workspaceService.update(
-                  approval.itemId,
-                  approval.metadata as UpdateWorkspaceMetadata,
-                  user
-                )
+              await this.workspaceService.update(
+                approval.itemId,
+                approval.metadata as UpdateWorkspaceMetadata,
+                user
               )
               break
             }
@@ -217,16 +195,14 @@ export class ApprovalService {
           })
           switch (approval.action) {
             case ApprovalAction.CREATE: {
-              op.push(this.projectService.makeProjectApproved(approval.itemId))
+              await this.projectService.makeProjectApproved(approval.itemId)
               break
             }
             case ApprovalAction.UPDATE: {
-              op.push(
-                this.projectService.update(
-                  approval.metadata as UpdateProjectMetadata,
-                  user,
-                  project
-                )
+              await this.projectService.update(
+                approval.metadata as UpdateProjectMetadata,
+                user,
+                project
               )
               break
             }
@@ -236,8 +212,8 @@ export class ApprovalService {
         case ApprovalItemType.ENVIRONMENT: {
           switch (approval.action) {
             case ApprovalAction.CREATE: {
-              op.push(
-                this.environmentService.makeEnvironmentApproved(approval.itemId)
+              await this.environmentService.makeEnvironmentApproved(
+                approval.itemId
               )
               break
             }
@@ -247,12 +223,10 @@ export class ApprovalService {
                   id: approval.itemId
                 }
               })
-              op.push(
-                this.environmentService.update(
-                  user,
-                  environment,
-                  approval.metadata as UpdateProjectMetadata
-                )
+              await this.environmentService.update(
+                user,
+                environment,
+                approval.metadata as UpdateProjectMetadata
               )
               break
             }
@@ -262,10 +236,8 @@ export class ApprovalService {
         case ApprovalItemType.SECRET: {
           switch (approval.action) {
             case ApprovalAction.CREATE: {
-              op.push(
-                this.secretService.makeSecretApproved(
-                  approval.itemId as Secret['id']
-                )
+              await this.secretService.makeSecretApproved(
+                approval.itemId as Secret['id']
               )
               break
             }
@@ -294,28 +266,22 @@ export class ApprovalService {
                     `Environment with id ${metadata.environmentId} does not exist`
                   )
                 }
-                op.push(
-                  this.secretService.updateEnvironment(
-                    user,
-                    secret,
-                    environment
-                  )
+                await this.secretService.updateEnvironment(
+                  user,
+                  secret,
+                  environment
                 )
               } else if (metadata.rollbackVersion) {
-                op.push(
-                  this.secretService.rollback(
-                    user,
-                    secret,
-                    metadata.rollbackVersion
-                  )
+                await this.secretService.rollback(
+                  user,
+                  secret,
+                  metadata.rollbackVersion
                 )
               } else {
-                op.push(
-                  this.secretService.update(
-                    metadata as UpdateSecretMetadata,
-                    user,
-                    secret
-                  )
+                await this.secretService.update(
+                  metadata as UpdateSecretMetadata,
+                  user,
+                  secret
                 )
               }
               break
@@ -326,9 +292,7 @@ export class ApprovalService {
         case ApprovalItemType.VARIABLE: {
           switch (approval.action) {
             case ApprovalAction.CREATE: {
-              op.push(
-                this.variableService.makeVariableApproved(approval.itemId)
-              )
+              await this.variableService.makeVariableApproved(approval.itemId)
               break
             }
             case ApprovalAction.UPDATE: {
@@ -356,28 +320,22 @@ export class ApprovalService {
                     `Environment with id ${metadata.environmentId} does not exist`
                   )
                 }
-                op.push(
-                  this.variableService.updateEnvironment(
-                    user,
-                    variable,
-                    environment
-                  )
+                await this.variableService.updateEnvironment(
+                  user,
+                  variable,
+                  environment
                 )
               } else if (metadata.rollbackVersion) {
-                op.push(
-                  this.variableService.rollback(
-                    user,
-                    variable,
-                    metadata.rollbackVersion
-                  )
+                await this.variableService.rollback(
+                  user,
+                  variable,
+                  metadata.rollbackVersion
                 )
               } else {
-                op.push(
-                  this.variableService.update(
-                    metadata as UpdateVariableMetadata,
-                    user,
-                    variable
-                  )
+                await this.variableService.update(
+                  metadata as UpdateVariableMetadata,
+                  user,
+                  variable
                 )
               }
               break
@@ -387,7 +345,21 @@ export class ApprovalService {
       }
     }
 
-    await Promise.all(op)
+    // Update the approval
+    await this.prisma.approval.update({
+      where: {
+        id: approvalId
+      },
+      data: {
+        status: ApprovalStatus.APPROVED,
+        approvedAt: new Date(),
+        approvedBy: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    })
 
     this.logger.log(`Approval with id ${approvalId} approved by ${user.id}`)
 
@@ -407,7 +379,65 @@ export class ApprovalService {
   }
 
   async getApprovalById(user: User, approvalId: Approval['id']) {
-    return this.checkApprovalAuthority(user, approvalId)
+    const approval = await this.checkApprovalAuthority(user, approvalId)
+
+    switch (approval.itemType) {
+      case ApprovalItemType.PROJECT: {
+        const project = await this.prisma.project.findUnique({
+          where: {
+            id: approval.itemId
+          }
+        })
+        return {
+          approval,
+          project
+        }
+      }
+      case ApprovalItemType.ENVIRONMENT: {
+        const environment = await this.prisma.environment.findUnique({
+          where: {
+            id: approval.itemId
+          }
+        })
+        return {
+          approval,
+          environment
+        }
+      }
+      case ApprovalItemType.SECRET: {
+        const secret = await this.prisma.secret.findUnique({
+          where: {
+            id: approval.itemId
+          }
+        })
+        return {
+          approval,
+          secret
+        }
+      }
+      case ApprovalItemType.VARIABLE: {
+        const variable = await this.prisma.variable.findUnique({
+          where: {
+            id: approval.itemId
+          }
+        })
+        return {
+          approval,
+          variable
+        }
+      }
+      case ApprovalItemType.WORKSPACE: {
+        const workspace = await this.prisma.workspace.findUnique({
+          where: {
+            id: approval.itemId
+          }
+        })
+        return {
+          approval,
+          workspace
+        }
+      }
+    }
   }
 
   async getApprovalsForWorkspace(
@@ -428,7 +458,7 @@ export class ApprovalService {
       this.prisma
     )
 
-    return this.prisma.approval.findMany({
+    return await this.prisma.approval.findMany({
       where: {
         workspaceId,
         itemType: {
@@ -451,6 +481,7 @@ export class ApprovalService {
 
   async getApprovalsOfUser(
     user: User,
+    otherUserId: User['id'],
     workspaceId: Workspace['id'],
     page: number,
     limit: number,
@@ -469,7 +500,7 @@ export class ApprovalService {
 
     return this.prisma.approval.findMany({
       where: {
-        requestedById: user.id,
+        requestedById: otherUserId,
         workspaceId,
         itemType: {
           in: itemTypes

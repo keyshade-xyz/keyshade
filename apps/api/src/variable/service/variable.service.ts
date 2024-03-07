@@ -9,6 +9,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import {
   ApprovalAction,
   ApprovalItemType,
+  ApprovalStatus,
   Authority,
   Environment,
   EventSource,
@@ -213,7 +214,8 @@ export class VariableService {
           itemId: variable.id,
           reason,
           user,
-          workspaceId: variable.project.workspaceId
+          workspaceId: variable.project.workspaceId,
+          metadata: dto
         },
         this.prisma
       )
@@ -348,14 +350,12 @@ export class VariableService {
       this.prisma
     )
 
-    if (variable.pendingCreation) {
-      throw new BadRequestException(
-        `Variable is pending creation and cannot be deleted. Delete the related approval to delete the variable.`
-      )
-    }
-
     if (
-      await workspaceApprovalEnabled(variable.project.workspaceId, this.prisma)
+      !variable.pendingCreation &&
+      (await workspaceApprovalEnabled(
+        variable.project.workspaceId,
+        this.prisma
+      ))
     ) {
       return await createApproval(
         {
@@ -468,7 +468,7 @@ export class VariableService {
       }
     })
 
-    if (variableExists > 1) {
+    if (variableExists > 0) {
       throw new ConflictException(
         `Variable already exists: ${variable.name} in environment ${variable.environmentId} in project ${variable.projectId}`
       )
@@ -664,7 +664,9 @@ export class VariableService {
         this.prisma.approval.deleteMany({
           where: {
             itemId: variable.id,
-            itemType: ApprovalItemType.VARIABLE
+            itemType: ApprovalItemType.VARIABLE,
+            status: ApprovalStatus.PENDING,
+            action: ApprovalAction.CREATE
           }
         })
       )

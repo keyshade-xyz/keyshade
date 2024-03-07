@@ -396,7 +396,7 @@ describe('Event Controller Tests', () => {
 
   // it('should throw an error if user is not provided in event creation for user-triggered event', async () => {
   //   try {
-  //     await createEvent(
+  //     createEvent(
   //       {
   //         triggerer: EventTriggerer.USER,
   //         severity: EventSeverity.INFO,
@@ -415,7 +415,7 @@ describe('Event Controller Tests', () => {
 
   // it('should throw an exception for invalid event source', async () => {
   //   try {
-  //     await createEvent(
+  //     createEvent(
   //       {
   //         triggerer: EventTriggerer.SYSTEM,
   //         severity: EventSeverity.INFO,
@@ -434,7 +434,7 @@ describe('Event Controller Tests', () => {
 
   // it('should throw an exception for invalid event type', async () => {
   //   try {
-  //     await createEvent(
+  //     createEvent(
   //       {
   //         triggerer: EventTriggerer.SYSTEM,
   //         severity: EventSeverity.INFO,

@@ -193,7 +193,7 @@ export class WorkspaceController {
     return this.workspaceService.exportData(user, workspaceId)
   }
 
-  @Get('/all')
+  @Get()
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getAllWorkspacesOfUser(
     @CurrentUser() user: User,

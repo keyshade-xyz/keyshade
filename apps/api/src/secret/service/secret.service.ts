@@ -8,6 +8,7 @@ import {
 import {
   ApprovalAction,
   ApprovalItemType,
+  ApprovalStatus,
   Authority,
   Environment,
   EventSource,
@@ -195,6 +196,11 @@ export class SecretService {
       )
     }
 
+    // Encrypt the secret value before storing/processing it
+    if (dto.value) {
+      dto.value = await encrypt(secret.project.publicKey, dto.value)
+    }
+
     if (
       !secret.pendingCreation &&
       (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
@@ -206,7 +212,8 @@ export class SecretService {
           itemId: secret.id,
           reason,
           user,
-          workspaceId: secret.project.workspaceId
+          workspaceId: secret.project.workspaceId,
+          metadata: dto
         },
         this.prisma
       )
@@ -333,14 +340,9 @@ export class SecretService {
       this.prisma
     )
 
-    if (secret.pendingCreation) {
-      throw new BadRequestException(
-        `Secret is pending creation and cannot be deleted. Delete the related approval to delete the secret.`
-      )
-    }
-
     if (
-      await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma)
+      !secret.pendingCreation &&
+      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
     ) {
       return await createApproval(
         {
@@ -520,7 +522,7 @@ export class SecretService {
       }
     })
 
-    if (secretExists > 1) {
+    if (secretExists > 0) {
       throw new ConflictException(
         `Secret already exists: ${secret.name} in environment ${secret.environmentId} in project ${secret.projectId}`
       )
@@ -571,7 +573,7 @@ export class SecretService {
           lastUpdatedById: user.id,
           versions: {
             create: {
-              value: await encrypt(secret.project.publicKey, dto.value),
+              value: dto.value, // The value is already encrypted
               version: previousVersion.version + 1,
               createdById: user.id
             }
@@ -714,7 +716,9 @@ export class SecretService {
         this.prisma.approval.deleteMany({
           where: {
             itemId: secret.id,
-            itemType: ApprovalItemType.SECRET
+            itemType: ApprovalItemType.SECRET,
+            action: ApprovalAction.CREATE,
+            status: ApprovalStatus.PENDING
           }
         })
       )

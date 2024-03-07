@@ -110,134 +110,136 @@ describe('Environment Controller Tests', () => {
     expect(prisma).toBeDefined()
   })
 
-  // it('should be able to create an environment under a project', async () => {
-  //   const response = await app.inject({
-  //     method: 'POST',
-  //     url: `/environment/${project1.id}`,
-  //     payload: {
-  //       name: 'Environment 1',
-  //       description: 'Environment 1 description',
-  //       isDefault: true
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should be able to create an environment under a project', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/environment/${project1.id}`,
+      payload: {
+        name: 'Environment 1',
+        description: 'Environment 1 description',
+        isDefault: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(201)
-  //   expect(response.json()).toEqual({
-  //     id: expect.any(String),
-  //     name: 'Environment 1',
-  //     description: 'Environment 1 description',
-  //     isDefault: true,
-  //     projectId: project1.id,
-  //     lastUpdatedById: user1.id,
-  //     createdAt: expect.any(String),
-  //     updatedAt: expect.any(String)
-  //   })
+    expect(response.statusCode).toBe(201)
+    expect(response.json()).toEqual({
+      id: expect.any(String),
+      name: 'Environment 1',
+      description: 'Environment 1 description',
+      isDefault: true,
+      projectId: project1.id,
+      lastUpdatedById: user1.id,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      pendingCreation: false,
+      project: expect.any(Object)
+    })
 
-  //   environment1 = response.json()
-  // })
+    environment1 = response.json()
+  })
 
-  // it('should ensure there is only one default environment per project', async () => {
-  //   const environments = await prisma.environment.findMany({
-  //     where: {
-  //       projectId: project1.id
-  //     }
-  //   })
+  it('should ensure there is only one default environment per project', async () => {
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
 
-  //   expect(environments.length).toBe(2)
-  //   expect(environments.filter((e) => e.isDefault).length).toBe(1)
-  // })
+    expect(environments.length).toBe(2)
+    expect(environments.filter((e) => e.isDefault).length).toBe(1)
+  })
 
-  // it('should not be able to create an environment in a project that does not exist', async () => {
-  //   const response = await app.inject({
-  //     method: 'POST',
-  //     url: `/environment/123`,
-  //     payload: {
-  //       name: 'Environment 1',
-  //       description: 'Environment 1 description',
-  //       isDefault: true
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to create an environment in a project that does not exist', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/environment/123`,
+      payload: {
+        name: 'Environment 1',
+        description: 'Environment 1 description',
+        isDefault: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(404)
-  //   expect(response.json().message).toBe('Project with id 123 not found')
-  // })
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toBe('Project with id 123 not found')
+  })
 
-  // it('should not be able to create an environment in a project that the user does not have access to', async () => {
-  //   const response = await app.inject({
-  //     method: 'POST',
-  //     url: `/environment/${project1.id}`,
-  //     payload: {
-  //       name: 'Environment 1',
-  //       description: 'Environment 1 description',
-  //       isDefault: true
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user2.email
-  //     }
-  //   })
+  it('should not be able to create an environment in a project that the user does not have access to', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/environment/${project1.id}`,
+      payload: {
+        name: 'Environment 1',
+        description: 'Environment 1 description',
+        isDefault: true
+      },
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(401)
-  //   expect(response.json().message).toBe(
-  //     `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-  //   )
-  // })
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toBe(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
 
-  // it('should not be able to create a duplicate environment', async () => {
-  //   const response = await app.inject({
-  //     method: 'POST',
-  //     url: `/environment/${project1.id}`,
-  //     payload: {
-  //       name: 'Environment 1',
-  //       description: 'Environment 1 description',
-  //       isDefault: true
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to create a duplicate environment', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/environment/${project1.id}`,
+      payload: {
+        name: 'Environment 1',
+        description: 'Environment 1 description',
+        isDefault: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(409)
-  //   expect(response.json().message).toBe(
-  //     `Environment with name Environment 1 already exists in project ${project1.name} (${project1.id})`
-  //   )
-  // })
+    expect(response.statusCode).toBe(409)
+    expect(response.json().message).toBe(
+      `Environment with name Environment 1 already exists in project ${project1.name} (${project1.id})`
+    )
+  })
 
-  // it('should not make other environments non-default if the current environment is not the default one', async () => {
-  //   const response = await app.inject({
-  //     method: 'POST',
-  //     url: `/environment/${project1.id}`,
-  //     payload: {
-  //       name: 'Environment 2',
-  //       description: 'Environment 2 description',
-  //       isDefault: false
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not make other environments non-default if the current environment is not the default one', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/environment/${project1.id}`,
+      payload: {
+        name: 'Environment 2',
+        description: 'Environment 2 description',
+        isDefault: false
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(201)
-  //   expect(response.json().name).toBe('Environment 2')
-  //   expect(response.json().description).toBe('Environment 2 description')
-  //   expect(response.json().isDefault).toBe(false)
+    expect(response.statusCode).toBe(201)
+    expect(response.json().name).toBe('Environment 2')
+    expect(response.json().description).toBe('Environment 2 description')
+    expect(response.json().isDefault).toBe(false)
 
-  //   environment2 = response.json()
+    environment2 = response.json()
 
-  //   const environments = await prisma.environment.findMany({
-  //     where: {
-  //       projectId: project1.id
-  //     }
-  //   })
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
 
-  //   expect(environments.length).toBe(3)
-  //   expect(environments.filter((e) => e.isDefault).length).toBe(1)
-  // })
+    expect(environments.length).toBe(3)
+    expect(environments.filter((e) => e.isDefault).length).toBe(1)
+  })
 
   // it('should have created a ENVIRONMENT_ADDED event', async () => {
   //   const response = await fetchEvents(
@@ -262,90 +264,91 @@ describe('Environment Controller Tests', () => {
   //   expect(response.json()).toEqual(expect.arrayContaining([event]))
   // })
 
-  // it('should be able to update an environment', async () => {
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/${environment1.id}`,
-  //     payload: {
-  //       name: 'Environment 1 Updated',
-  //       description: 'Environment 1 description updated'
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should be able to update an environment', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment1.id}`,
+      payload: {
+        name: 'Environment 1 Updated',
+        description: 'Environment 1 description updated'
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual({
-  //     id: environment1.id,
-  //     name: 'Environment 1 Updated',
-  //     description: 'Environment 1 description updated',
-  //     isDefault: true,
-  //     projectId: project1.id,
-  //     lastUpdatedById: user1.id,
-  //     lastUpdatedBy: expect.any(Object),
-  //     secrets: [],
-  //     createdAt: expect.any(String),
-  //     updatedAt: expect.any(String)
-  //   })
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      id: environment1.id,
+      name: 'Environment 1 Updated',
+      description: 'Environment 1 description updated',
+      isDefault: true,
+      projectId: project1.id,
+      lastUpdatedById: user1.id,
+      lastUpdatedBy: expect.any(Object),
+      secrets: [],
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      pendingCreation: false
+    })
 
-  //   environment1 = response.json()
-  // })
+    environment1 = response.json()
+  })
 
-  // it('should not be able to update an environment that does not exist', async () => {
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/123`,
-  //     payload: {
-  //       name: 'Environment 1 Updated',
-  //       description: 'Environment 1 description updated'
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to update an environment that does not exist', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/123`,
+      payload: {
+        name: 'Environment 1 Updated',
+        description: 'Environment 1 description updated'
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(404)
-  //   expect(response.json().message).toBe('Environment with id 123 not found')
-  // })
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toBe('Environment with id 123 not found')
+  })
 
-  // it('should not be able to update an environment that the user does not have access to', async () => {
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/${environment1.id}`,
-  //     payload: {
-  //       name: 'Environment 1 Updated',
-  //       description: 'Environment 1 description updated'
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user2.email
-  //     }
-  //   })
+  it('should not be able to update an environment that the user does not have access to', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment1.id}`,
+      payload: {
+        name: 'Environment 1 Updated',
+        description: 'Environment 1 description updated'
+      },
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(401)
-  //   expect(response.json().message).toBe(
-  //     `User ${user2.id} does not have the required authorities`
-  //   )
-  // })
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toBe(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
 
-  // it('should not be able to update an environment to a duplicate name', async () => {
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/${environment1.id}`,
-  //     payload: {
-  //       name: 'Environment 2',
-  //       description: 'Environment 1 description updated'
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to update an environment to a duplicate name', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment1.id}`,
+      payload: {
+        name: 'Environment 2',
+        description: 'Environment 1 description updated'
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(409)
-  //   expect(response.json().message).toBe(
-  //     `Environment with name Environment 2 already exists in project ${project1.id}`
-  //   )
-  // })
+    expect(response.statusCode).toBe(409)
+    expect(response.json().message).toBe(
+      `Environment with name Environment 2 already exists in project ${project1.id}`
+    )
+  })
 
   // it('should create a ENVIRONMENT_UPDATED event', async () => {
   //   const response = await fetchEvents(
@@ -370,206 +373,206 @@ describe('Environment Controller Tests', () => {
   //   expect(response.json()).toEqual(expect.arrayContaining([event]))
   // })
 
-  // it('should make other environments non-default if the current environment is the default one', async () => {
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/${environment2.id}`,
-  //     payload: {
-  //       name: 'Environment 2 Updated',
-  //       description: 'Environment 2 description updated',
-  //       isDefault: true
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should make other environments non-default if the current environment is the default one', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment2.id}`,
+      payload: {
+        name: 'Environment 2 Updated',
+        description: 'Environment 2 description updated',
+        isDefault: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json().name).toBe('Environment 2 Updated')
-  //   expect(response.json().description).toBe(
-  //     'Environment 2 description updated'
-  //   )
-  //   expect(response.json().isDefault).toBe(true)
+    expect(response.statusCode).toBe(200)
+    expect(response.json().name).toBe('Environment 2 Updated')
+    expect(response.json().description).toBe(
+      'Environment 2 description updated'
+    )
+    expect(response.json().isDefault).toBe(true)
 
-  //   const environments = await prisma.environment.findMany({
-  //     where: {
-  //       projectId: project1.id
-  //     }
-  //   })
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
 
-  //   expect(environments.length).toBe(3)
-  //   expect(environments.filter((e) => e.isDefault).length).toBe(1)
+    expect(environments.length).toBe(3)
+    expect(environments.filter((e) => e.isDefault).length).toBe(1)
 
-  //   environment2 = response.json()
-  //   environment1.isDefault = false
-  // })
+    environment2 = response.json()
+    environment1.isDefault = false
+  })
 
-  // it('should be able to fetch an environment', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/${environment1.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should be able to fetch an environment', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json().name).toBe('Environment 1 Updated')
-  //   expect(response.json().description).toBe(
-  //     'Environment 1 description updated'
-  //   )
-  //   expect(response.json().isDefault).toBe(false)
-  // })
+    expect(response.statusCode).toBe(200)
+    expect(response.json().name).toBe('Environment 1 Updated')
+    expect(response.json().description).toBe(
+      'Environment 1 description updated'
+    )
+    expect(response.json().isDefault).toBe(false)
+  })
 
-  // it('should not be able to fetch an environment that does not exist', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/123`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to fetch an environment that does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(404)
-  //   expect(response.json().message).toBe('Environment with id 123 not found')
-  // })
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toBe('Environment with id 123 not found')
+  })
 
-  // it('should not be able to fetch an environment that the user does not have access to', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/${environment1.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user2.email
-  //     }
-  //   })
+  it('should not be able to fetch an environment that the user does not have access to', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(401)
-  //   expect(response.json().message).toBe(
-  //     `User ${user2.id} does not have the required authorities`
-  //   )
-  // })
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toBe(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
 
-  // it('should be able to fetch all environments of a project', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/all/${project1.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should be able to fetch all environments of a project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/all/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(200)
-  // })
+    expect(response.statusCode).toBe(200)
+  })
 
-  // it('should not be able to fetch all environments of a project that does not exist', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/all/123`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to fetch all environments of a project that does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/all/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(404)
-  //   expect(response.json().message).toBe('Project with id 123 not found')
-  // })
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toBe('Project with id 123 not found')
+  })
 
-  // it('should not be able to fetch all environments of a project that the user does not have access to', async () => {
-  //   const response = await app.inject({
-  //     method: 'GET',
-  //     url: `/environment/all/${project1.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user2.email
-  //     }
-  //   })
+  it('should not be able to fetch all environments of a project that the user does not have access to', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/all/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(401)
-  //   expect(response.json().message).toBe(
-  //     `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-  //   )
-  // })
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toBe(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
 
-  // it('should be able to delete an environment', async () => {
-  //   const response = await app.inject({
-  //     method: 'DELETE',
-  //     url: `/environment/${environment1.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should be able to delete an environment', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/environment/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(200)
-  // })
+    expect(response.statusCode).toBe(200)
+  })
 
-  // it('should not be able to delete an environment that does not exist', async () => {
-  //   const response = await app.inject({
-  //     method: 'DELETE',
-  //     url: `/environment/123`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to delete an environment that does not exist', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/environment/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(404)
-  //   expect(response.json().message).toBe('Environment with id 123 not found')
-  // })
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toBe('Environment with id 123 not found')
+  })
 
-  // it('should not be able to delete an environment that the user does not have access to', async () => {
-  //   const response = await app.inject({
-  //     method: 'DELETE',
-  //     url: `/environment/${environment2.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user2.email
-  //     }
-  //   })
+  it('should not be able to delete an environment that the user does not have access to', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/environment/${environment2.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(401)
-  //   expect(response.json().message).toBe(
-  //     `User ${user2.id} does not have the required authorities`
-  //   )
-  // })
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toBe(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
 
-  // it('should not be able to delete the default environment of a project', async () => {
-  //   const response = await app.inject({
-  //     method: 'DELETE',
-  //     url: `/environment/${environment2.id}`,
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+  it('should not be able to delete the default environment of a project', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/environment/${environment2.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(400)
-  //   expect(response.json().message).toBe(
-  //     'Cannot delete the default environment'
-  //   )
-  // })
+    expect(response.statusCode).toBe(400)
+    expect(response.json().message).toBe(
+      'Cannot delete the default environment'
+    )
+  })
 
-  // it('should not be able to make the only environment non-default', async () => {
-  //   await prisma.environment.delete({
-  //     where: {
-  //       projectId_name: {
-  //         projectId: project1.id,
-  //         name: 'Default'
-  //       }
-  //     }
-  //   })
+  it('should not be able to make the only environment non-default', async () => {
+    await prisma.environment.delete({
+      where: {
+        projectId_name: {
+          projectId: project1.id,
+          name: 'Default'
+        }
+      }
+    })
 
-  //   const response = await app.inject({
-  //     method: 'PUT',
-  //     url: `/environment/${environment2.id}`,
-  //     payload: {
-  //       isDefault: false
-  //     },
-  //     headers: {
-  //       'x-e2e-user-email': user1.email
-  //     }
-  //   })
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment2.id}`,
+      payload: {
+        isDefault: false
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
 
-  //   expect(response.statusCode).toBe(400)
-  //   expect(response.json().message).toBe(
-  //     'Cannot make the last environment non-default'
-  //   )
-  // })
+    expect(response.statusCode).toBe(400)
+    expect(response.json().message).toBe(
+      'Cannot make the last environment non-default'
+    )
+  })
 
   afterAll(async () => {
     await cleanUp(prisma)

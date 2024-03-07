@@ -8,7 +8,7 @@ import {
 } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 import createEvent from './create-event'
-import { ConflictException, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 
 const logger = new Logger('CreateApproval')
 
@@ -37,9 +37,6 @@ export default async function createApproval(
   },
   prisma: PrismaService
 ) {
-  // Check if approval already exists for this item
-  await checkApprovalExists(data.itemType, data.itemId, prisma)
-
   // Create the approval
   const approval = await prisma.approval.create({
     data: {
@@ -83,37 +80,4 @@ export default async function createApproval(
   )
 
   return approval
-}
-
-/**
- * An approval is said to exist if the a record with the same itemType and itemId exists
- * and the approvedAt and rejectedAt fields are null
- * @param itemType The type of item to check for
- * @param itemId The id of the item to check for
- * @returns False if no approval exists
- * @throws ConflictException if an approval exists
- */
-async function checkApprovalExists(
-  itemType: ApprovalItemType,
-  itemId: string,
-  prisma: PrismaService
-) {
-  const approval = await prisma.approval.findFirst({
-    where: {
-      itemType,
-      itemId,
-      approvedAt: null,
-      rejectedAt: null
-    }
-  })
-
-  if (approval === null) {
-    return false
-  }
-
-  if (approval.approvedAt === null && approval.rejectedAt === null) {
-    throw new ConflictException(
-      `Active approval for ${itemType} with id ${itemId} already exists`
-    )
-  }
 }

@@ -6,6 +6,7 @@ import {
 import {
   ApprovalAction,
   ApprovalItemType,
+  ApprovalStatus,
   Authority,
   Environment,
   EventSource,
@@ -240,17 +241,12 @@ export class EnvironmentService {
       throw new BadRequestException('Cannot delete the default environment')
     }
 
-    if (environment.pendingCreation) {
-      throw new BadRequestException(
-        `Environment is pending creation and cannot be deleted. Delete the related approval to delete the environment.`
-      )
-    }
-
     if (
-      await workspaceApprovalEnabled(
+      !environment.pendingCreation &&
+      (await workspaceApprovalEnabled(
         environment.project.workspaceId,
         this.prisma
-      )
+      ))
     ) {
       return await createApproval(
         {
@@ -307,7 +303,7 @@ export class EnvironmentService {
       }
     })
 
-    if (environmentExists) {
+    if (environmentExists > 0) {
       throw new ConflictException(
         `Environment with name ${environment.name} already exists in project ${environment.projectId}`
       )
@@ -439,7 +435,9 @@ export class EnvironmentService {
         this.prisma.approval.deleteMany({
           where: {
             itemId: environment.id,
-            itemType: ApprovalItemType.ENVIRONMENT
+            itemType: ApprovalItemType.ENVIRONMENT,
+            action: ApprovalAction.CREATE,
+            status: ApprovalStatus.PENDING
           }
         })
       )

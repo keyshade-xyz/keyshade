@@ -1,12 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger
-} from '@nestjs/common'
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import {
   ApprovalAction,
   ApprovalItemType,
+  ApprovalStatus,
   Authority,
   EventSource,
   EventType,
@@ -267,12 +263,6 @@ export class ProjectService {
       this.prisma
     )
 
-    if (project.pendingCreation) {
-      throw new BadRequestException(
-        `Project is pending creation and cannot be deleted. Delete the related approval to delete the project.`
-      )
-    }
-
     if (await workspaceApprovalEnabled(project.workspaceId, this.prisma)) {
       return await createApproval(
         {
@@ -388,7 +378,7 @@ export class ProjectService {
       }
     })
 
-    if (projectExists > 1) {
+    if (projectExists > 0) {
       throw new ConflictException(
         `Project with this name ${project.name} already exists`
       )
@@ -549,7 +539,8 @@ export class ProjectService {
       })
     )
 
-    // If the project is pending creation, and the workspace has approval enabled, then delete the approval
+    // If the project is in pending creation and the workspace approval is enabled, we need to
+    // delete the approval as well
     if (
       project.pendingCreation &&
       (await workspaceApprovalEnabled(project.workspaceId, this.prisma))
@@ -558,7 +549,9 @@ export class ProjectService {
         this.prisma.approval.deleteMany({
           where: {
             itemId: project.id,
-            itemType: ApprovalItemType.PROJECT
+            itemType: ApprovalItemType.PROJECT,
+            action: ApprovalAction.DELETE,
+            status: ApprovalStatus.PENDING
           }
         })
       )

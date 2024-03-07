@@ -118,11 +118,11 @@ export class WorkspaceRoleService {
       )
     }
 
-    let workspaceRole = await this.getWorkspaceRoleWithAuthority(
+    let workspaceRole = (await this.getWorkspaceRoleWithAuthority(
       user.id,
       workspaceRoleId,
       Authority.UPDATE_WORKSPACE_ROLE
-    )
+    )) as WorkspaceRoleWithProjects
 
     if (
       dto.name &&
@@ -138,7 +138,22 @@ export class WorkspaceRoleService {
       )
     }
 
-    const query: any = {
+    if (dto.projectIds) {
+      await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
+        where: {
+          roleId: workspaceRoleId
+        }
+      })
+
+      await this.prisma.projectWorkspaceRoleAssociation.createMany({
+        data: dto.projectIds.map((projectId) => ({
+          roleId: workspaceRoleId,
+          projectId
+        }))
+      })
+    }
+
+    workspaceRole = await this.prisma.workspaceRole.update({
       where: {
         id: workspaceRoleId
       },
@@ -146,9 +161,7 @@ export class WorkspaceRoleService {
         name: dto.name,
         description: dto.description,
         colorCode: dto.colorCode,
-        projects: {
-          set: dto.projectIds?.map((id) => ({ id }))
-        }
+        authorities: dto.authorities
       },
       include: {
         projects: {
@@ -157,15 +170,7 @@ export class WorkspaceRoleService {
           }
         }
       }
-    }
-
-    if (dto.authorities) {
-      query.data.authorities = dto.authorities
-    }
-
-    workspaceRole = (await this.prisma.workspaceRole.update(
-      query
-    )) as WorkspaceRoleWithProjects
+    })
 
     createEvent(
       {
@@ -304,11 +309,7 @@ export class WorkspaceRoleService {
         id: workspaceRoleId
       },
       include: {
-        projects: {
-          select: {
-            projectId: true
-          }
-        }
+        projects: true
       }
     })) as WorkspaceRoleWithProjects
 

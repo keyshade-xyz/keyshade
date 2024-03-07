@@ -510,7 +510,7 @@ export class WorkspaceService {
       this.prisma
     )
 
-    return await this.prisma.workspaceMember.findMany({
+    return this.prisma.workspaceMember.findMany({
       skip: page * limit,
       take: limit,
       orderBy: {
@@ -745,53 +745,6 @@ export class WorkspaceService {
     )
   }
 
-  async getWorkspaceMembers(
-    user: User,
-    workspaceId: Workspace['id'],
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_USERS,
-      this.prisma
-    )
-
-    return await this.prisma.workspaceMember.findMany({
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        workspace: {
-          [sort]: order
-        }
-      },
-      where: {
-        workspaceId: workspaceId,
-        user: {
-          OR: [
-            {
-              name: {
-                contains: search
-              }
-            },
-            {
-              email: {
-                contains: search
-              }
-            }
-          ]
-        }
-      },
-      include: {
-        user: true
-      }
-    })
-  }
-
   async isUserMemberOfWorkspace(
     user: User,
     workspaceId: Workspace['id'],
@@ -827,7 +780,7 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    return await this.prisma.workspace.findMany({
+    return this.prisma.workspace.findMany({
       skip: page * limit,
       take: limit,
       orderBy: {

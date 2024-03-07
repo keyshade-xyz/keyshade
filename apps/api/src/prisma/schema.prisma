@@ -286,8 +286,6 @@ model Project {
   variables       Variable[]
   environments    Environment[]
   workspaceRoles  ProjectWorkspaceRoleAssociation[]
-
-  @@unique([workspaceId, name])
 }
 
 model ProjectWorkspaceRoleAssociation {
@@ -384,8 +382,6 @@ model Secret {
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   events Event[]
-
-  @@unique([projectId, environmentId, name])
 }
 
 model VariableVersion {
@@ -422,8 +418,6 @@ model Variable {
   environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   events Event[]
-
-  @@unique([projectId, environmentId, name])
 }
 
 model ApiKey {

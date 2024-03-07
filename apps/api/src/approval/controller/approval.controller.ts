@@ -104,11 +104,12 @@ export class ApprovalController {
     )
   }
 
-  @Get(':workspaceId/all-by-user')
+  @Get(':workspaceId/all-by-user/:userId')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getAllApprovalsByUser(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: string,
+    @Param('userId') userId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'createdAt',
@@ -136,6 +137,7 @@ export class ApprovalController {
   ) {
     return this.approvalService.getApprovalsOfUser(
       user,
+      userId,
       workspaceId,
       page,
       limit,
