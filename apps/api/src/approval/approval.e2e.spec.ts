@@ -1914,6 +1914,104 @@ describe('Approval Controller Tests', () => {
     expect(response.statusCode).toBe(400)
   })
 
+  it('should not approve an environment approval if the environment with the same name already exists', async () => {
+    const createEnvResponse = (await environmentService.createEnvironment(
+      user1,
+      {
+        name: 'Environment 9',
+        description: 'Environment 9 description'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      environment: Environment
+    }
+
+    const createEnvResponse2 = (await environmentService.createEnvironment(
+      user1,
+      {
+        name: 'Environment 9',
+        description: 'Environment 9 description'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      environment: Environment
+    }
+
+    const approval = createEnvResponse.approval
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    const approval2 = createEnvResponse2.approval
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval2.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
+  })
+
+  it('should not approve a variable if the variable with the same name already exists in the environment', async () => {
+    const createVariableResponse = (await variableService.createVariable(
+      user1,
+      {
+        environmentId: environment1.id,
+        name: 'KEY6',
+        value: 'VALUE6'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      variable: Variable
+    }
+
+    const createVariableResponse2 = (await variableService.createVariable(
+      user1,
+      {
+        environmentId: environment1.id,
+        name: 'KEY6',
+        value: 'VALUE6'
+      },
+      project1.id
+    )) as {
+      approval: Approval
+      variable: Variable
+    }
+
+    const approval = createVariableResponse.approval
+
+    await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    const approval2 = createVariableResponse2.approval
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/approval/${approval2.id}/approve`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
+  })
+
   afterAll(async () => {
     await cleanUp(prisma)
   })

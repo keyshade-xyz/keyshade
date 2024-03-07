@@ -161,30 +161,24 @@ describe('Secret Controller Tests', () => {
       }
     )) as Project
 
-    workspace2Environment = await prisma.environment.findUnique({
+    workspace2Environment = await prisma.environment.findFirst({
       where: {
-        projectId_name: {
-          projectId: workspace2Project.id,
-          name: 'Environment 1'
-        }
+        projectId: workspace2Project.id,
+        name: 'Environment 1'
       }
     })
 
-    environment1 = await prisma.environment.findUnique({
+    environment1 = await prisma.environment.findFirst({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Environment 1'
-        }
+        projectId: project1.id,
+        name: 'Environment 1'
       }
     })
 
-    environment2 = await prisma.environment.findUnique({
+    environment2 = await prisma.environment.findFirst({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Environment 2'
-        }
+        projectId: project1.id,
+        name: 'Environment 2'
       }
     })
   })
@@ -301,12 +295,10 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should fail if project has no default environment(hypothetical case)', async () => {
-    await prisma.environment.update({
+    await prisma.environment.updateMany({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Environment 1'
-        }
+        projectId: project1.id,
+        name: 'Environment 1'
       },
       data: {
         isDefault: false
@@ -331,12 +323,10 @@ describe('Secret Controller Tests', () => {
       `No default environment found for project: ${project1.id}`
     )
 
-    await prisma.environment.update({
+    await prisma.environment.updateMany({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Environment 1'
-        }
+        projectId: project1.id,
+        name: 'Environment 1'
       },
       data: {
         isDefault: true
@@ -520,12 +510,10 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should not be able to move to an environment in another project', async () => {
-    const otherEnvironment = await prisma.environment.findUnique({
+    const otherEnvironment = await prisma.environment.findFirst({
       where: {
-        projectId_name: {
-          projectId: project2.id,
-          name: 'Environment 1'
-        }
+        projectId: project2.id,
+        name: 'Environment 1'
       }
     })
 

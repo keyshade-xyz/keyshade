@@ -51,6 +51,9 @@ ALTER TYPE "NotificationType" ADD VALUE 'APPROVAL_REJECTED';
 ALTER TABLE "Project" DROP CONSTRAINT "Project_workspaceRoleId_fkey";
 
 -- DropIndex
+DROP INDEX "Environment_projectId_name_key";
+
+-- DropIndex
 DROP INDEX "Secret_projectId_environmentId_name_key";
 
 -- DropIndex

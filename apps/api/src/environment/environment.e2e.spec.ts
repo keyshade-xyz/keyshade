@@ -548,12 +548,10 @@ describe('Environment Controller Tests', () => {
   })
 
   it('should not be able to make the only environment non-default', async () => {
-    await prisma.environment.delete({
+    await prisma.environment.deleteMany({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Default'
-        }
+        projectId: project1.id,
+        name: 'Default'
       }
     })
 

@@ -458,6 +458,21 @@ describe('Workspace Role Controller Tests', () => {
     adminRole1 = response.json()
   })
 
+  it('should not be able to add WORKSPACE_ADMIN authority to the role', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/workspace-role/${adminRole1.id}`,
+      payload: {
+        authorities: [Authority.WORKSPACE_ADMIN]
+      },
+      headers: {
+        'x-e2e-user-email': alice.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+  })
+
   it('should not be able to update workspace role of other workspace', async () => {
     const response = await app.inject({
       method: 'PUT',

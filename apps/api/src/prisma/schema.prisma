@@ -258,8 +258,6 @@ model Environment {
   projectId String
 
   events Event[]
-
-  @@unique([projectId, name])
 }
 
 model Project {
@@ -281,11 +279,11 @@ model Project {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  events          Event[]
-  secrets         Secret[]
-  variables       Variable[]
-  environments    Environment[]
-  workspaceRoles  ProjectWorkspaceRoleAssociation[]
+  events         Event[]
+  secrets        Secret[]
+  variables      Variable[]
+  environments   Environment[]
+  workspaceRoles ProjectWorkspaceRoleAssociation[]
 }
 
 model ProjectWorkspaceRoleAssociation {

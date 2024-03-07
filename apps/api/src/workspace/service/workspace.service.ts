@@ -693,19 +693,6 @@ export class WorkspaceService {
       this.prisma
     )
 
-    // Get all the memberships of this workspace
-    const memberships = await this.prisma.workspaceMember.findMany({
-      where: {
-        workspaceId,
-        invitationAccepted: true
-      }
-    })
-
-    if (memberships.length === 0) {
-      // The workspace doesn't exist
-      throw new NotFoundException(`Workspace with id ${workspaceId} not found`)
-    }
-
     const workspaceOwnerId = await this.prisma.workspace
       .findUnique({
         where: {
