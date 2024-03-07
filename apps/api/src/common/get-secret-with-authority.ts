@@ -1,7 +1,11 @@
 import { Authority, PrismaClient, Secret, User } from '@prisma/client'
 import { SecretWithProjectAndVersion } from '../secret/secret.types'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
-import { NotFoundException, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 
 export default async function getSecretWithAuthority(
   userId: User['id'],
@@ -50,6 +54,19 @@ export default async function getSecretWithAuthority(
   ) {
     throw new UnauthorizedException(
       `User ${userId} does not have the required authorities`
+    )
+  }
+
+  // If the secret is pending creation, only the user who created the secret, a workspace admin or
+  // a user with the MANAGE_APPROVALS authority can fetch the secret
+  if (
+    secret.pendingCreation &&
+    !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
+    !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
+    secret.lastUpdatedById !== userId
+  ) {
+    throw new BadRequestException(
+      `The secret with id ${secretId} is pending creation and cannot be fetched by the user with id ${userId}`
     )
   }
 

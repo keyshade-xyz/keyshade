@@ -104,7 +104,7 @@ export class EventService {
     // Get the events
     return await this.prisma.event.findMany({
       where: whereCondition,
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       select: {
         id: true,

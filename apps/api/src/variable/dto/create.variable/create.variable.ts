@@ -10,9 +10,9 @@ export class CreateVariable {
   @IsString()
   @IsOptional()
   @Length(0, 100)
-  note: string
+  note?: string
 
   @IsString()
   @IsOptional()
-  environmentId: string
+  environmentId?: string
 }

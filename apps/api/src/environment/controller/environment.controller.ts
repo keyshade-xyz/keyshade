@@ -26,9 +26,15 @@ export class EnvironmentController {
   async createEnvironment(
     @CurrentUser() user: User,
     @Body() dto: CreateEnvironment,
-    @Param('projectId') projectId: string
+    @Param('projectId') projectId: string,
+    @Query('reason') reason: string
   ) {
-    return await this.environmentService.createEnvironment(user, dto, projectId)
+    return await this.environmentService.createEnvironment(
+      user,
+      dto,
+      projectId,
+      reason
+    )
   }
 
   @Put(':environmentId')
@@ -36,12 +42,14 @@ export class EnvironmentController {
   async updateEnvironment(
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
-    @Param('environmentId') environmentId: string
+    @Param('environmentId') environmentId: string,
+    @Query('reason') reason: string
   ) {
     return await this.environmentService.updateEnvironment(
       user,
       dto,
-      environmentId
+      environmentId,
+      reason
     )
   }
 
@@ -80,8 +88,13 @@ export class EnvironmentController {
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(
     @CurrentUser() user: User,
-    @Param('environmentId') environmentId: string
+    @Param('environmentId') environmentId: string,
+    @Query('reason') reason: string
   ) {
-    return await this.environmentService.deleteEnvironment(user, environmentId)
+    return await this.environmentService.deleteEnvironment(
+      user,
+      environmentId,
+      reason
+    )
   }
 }

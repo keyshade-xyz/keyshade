@@ -1,6 +1,10 @@
 import { Authority, PrismaClient, User, Variable } from '@prisma/client'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
-import { NotFoundException, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 
 export default async function getVariableWithAuthority(
@@ -50,6 +54,19 @@ export default async function getVariableWithAuthority(
   ) {
     throw new UnauthorizedException(
       `User ${userId} does not have the required authorities`
+    )
+  }
+
+  // If the variable is pending creation, only the user who created the variable, a workspace admin or
+  // a user with the MANAGE_APPROVALS authority can fetch the variable
+  if (
+    variable.pendingCreation &&
+    !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
+    !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
+    variable.lastUpdatedById !== userId
+  ) {
+    throw new BadRequestException(
+      `The variable with id ${variableId} is pending creation and cannot be fetched by the user with id ${userId}`
     )
   }
 

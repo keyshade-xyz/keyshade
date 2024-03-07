@@ -138,7 +138,6 @@ describe('Api Key Role Controller Tests', () => {
       url: `/api-key/${apiKey.id}`,
       payload: {
         name: 'Updated Test Key',
-        expiresAfter: '24',
         authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT']
       },
       headers: {

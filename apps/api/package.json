@@ -24,6 +24,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@prisma/client": "^5.10.1",
     "@supabase/supabase-js": "^2.39.6",
+    "@types/uuid": "^9.0.8",
     "chalk": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
