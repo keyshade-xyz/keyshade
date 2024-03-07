@@ -10,13 +10,13 @@ export class CreateSecret {
   @IsString()
   @IsOptional()
   @Length(0, 100)
-  note: string
+  note?: string
 
   @IsOptional()
   @IsString()
-  environmentId: string
+  environmentId?: string
 
   @IsString()
   @IsOptional()
-  rotateAfter: '24' | '168' | '720' | '8760' | 'never' = 'never'
+  rotateAfter?: '24' | '168' | '720' | '8760' | 'never' = 'never'
 }

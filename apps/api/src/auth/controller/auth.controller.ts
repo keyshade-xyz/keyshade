@@ -16,13 +16,15 @@ import { Public } from '../../decorators/public.decorator'
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private githubOAuthStrategyFactory: GithubOAuthStrategyFactory
+    private githubOAuthStrategyFactory: GithubOAuthStrategyFactory,
+    private googleOAuthStrategyFactory: GoogleOAuthStrategyFactory
   ) {}
 
   @Public()
@@ -130,7 +132,53 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
-    return await this.authService.handleGithubOAuth(
+    return await this.authService.handleOAuthLogin(
+      email,
+      name,
+      profilePictureUrl
+    )
+  }
+
+  /* istanbul ignore next */
+  @Public()
+  @Get('google')
+  @ApiOperation({
+    summary: 'Google OAuth',
+    description: 'Initiates Google OAuth'
+  })
+  async googleOAuthLogin(@Res() res) {
+    if (!this.googleOAuthStrategyFactory.isOAuthEnabled()) {
+      throw new HttpException(
+        'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    res.status(302).redirect('/api/auth/google/callback')
+  }
+
+  /* istanbul ignore next */
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({
+    summary: 'Google OAuth Callback',
+    description: 'Handles Google OAuth callback'
+  })
+  @ApiParam({
+    name: 'code',
+    description: 'Code for the Callback',
+    required: true
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logged in successfully'
+  })
+  async googleOAuthCallback(@Req() req) {
+    const { emails, displayName: name, photos } = req.user
+    const email = emails[0].value
+    const profilePictureUrl = photos[0].value
+    return await this.authService.handleOAuthLogin(
       email,
       name,
       profilePictureUrl

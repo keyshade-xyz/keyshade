@@ -27,7 +27,7 @@ export default async function getCollectiveProjectAuthorities(
         role: {
           projects: {
             some: {
-              id: project.id
+              projectId: project.id
             }
           }
         }

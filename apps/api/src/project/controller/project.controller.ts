@@ -26,9 +26,10 @@ export class ProjectController {
   async createProject(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Body() dto: CreateProject
+    @Body() dto: CreateProject,
+    @Query('reason') reason: string
   ) {
-    return await this.service.createProject(user, workspaceId, dto)
+    return await this.service.createProject(user, workspaceId, dto, reason)
   }
 
   @Put(':projectId')
@@ -36,18 +37,20 @@ export class ProjectController {
   async updateProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id'],
-    @Body() dto: UpdateProject
+    @Body() dto: UpdateProject,
+    @Query('reason') reason: string
   ) {
-    return await this.service.updateProject(user, projectId, dto)
+    return await this.service.updateProject(user, projectId, dto, reason)
   }
 
   @Delete(':projectId')
   @RequiredApiKeyAuthorities(Authority.DELETE_PROJECT)
   async deleteProject(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: Project['id']
+    @Param('projectId') projectId: Project['id'],
+    @Query('reason') reason: string
   ) {
-    return await this.service.deleteProject(user, projectId)
+    return await this.service.deleteProject(user, projectId, reason)
   }
 
   @Get(':projectId')

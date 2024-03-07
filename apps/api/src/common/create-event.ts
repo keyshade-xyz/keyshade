@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import {
   ApiKey,
   Environment,
@@ -11,9 +12,12 @@ import {
   User,
   Workspace,
   WorkspaceRole,
-  Variable
+  Variable,
+  Approval
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
+
+const logger = new Logger('CreateEvent')
 
 export default async function createEvent(
   data: {
@@ -28,6 +32,7 @@ export default async function createEvent(
       | ApiKey
       | Secret
       | Variable
+      | Approval
     type: EventType
     source: EventSource
     title: string
@@ -99,6 +104,12 @@ export default async function createEvent(
         }
         break
       }
+      case EventSource.APPROVAL: {
+        if (data.entity) {
+          baseData.sourceApprovalId = data.entity.id
+        }
+        break
+      }
       case EventSource.USER: {
         break
       }
@@ -110,7 +121,9 @@ export default async function createEvent(
     console.error('Error creating event', data, error)
   }
 
-  await prisma.event.create({
+  const event = await prisma.event.create({
     data: baseData
   })
+
+  logger.log(`Event with id ${event.id} created`)
 }

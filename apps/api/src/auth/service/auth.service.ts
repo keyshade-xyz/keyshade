@@ -111,7 +111,7 @@ export class AuthService {
   }
 
   /* istanbul ignore next */
-  async handleGithubOAuth(
+  async handleOAuthLogin(
     email: string,
     name: string,
     profilePictureUrl: string

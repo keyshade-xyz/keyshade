@@ -20,6 +20,7 @@ import getCollectiveWorkspaceAuthorities from '../../common/get-collective-works
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
 import { PrismaService } from '../../prisma/prisma.service'
 import createEvent from '../../common/create-event'
+import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -73,7 +74,7 @@ export class WorkspaceRoleService {
       include: {
         projects: {
           select: {
-            id: true
+            projectId: true
           }
         }
       }
@@ -117,11 +118,11 @@ export class WorkspaceRoleService {
       )
     }
 
-    let workspaceRole = await this.getWorkspaceRoleWithAuthority(
+    let workspaceRole = (await this.getWorkspaceRoleWithAuthority(
       user.id,
       workspaceRoleId,
       Authority.UPDATE_WORKSPACE_ROLE
-    )
+    )) as WorkspaceRoleWithProjects
 
     if (
       dto.name &&
@@ -137,48 +138,39 @@ export class WorkspaceRoleService {
       )
     }
 
-    workspaceRole = workspaceRole.hasAdminAuthority
-      ? await this.prisma.workspaceRole.update({
-          where: {
-            id: workspaceRoleId
-          },
-          data: {
-            name: dto.name,
-            description: dto.description,
-            colorCode: dto.colorCode,
-            projects: {
-              set: dto.projectIds?.map((id) => ({ id }))
-            }
-          },
-          include: {
-            projects: {
-              select: {
-                id: true
-              }
-            }
+    if (dto.projectIds) {
+      await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
+        where: {
+          roleId: workspaceRoleId
+        }
+      })
+
+      await this.prisma.projectWorkspaceRoleAssociation.createMany({
+        data: dto.projectIds.map((projectId) => ({
+          roleId: workspaceRoleId,
+          projectId
+        }))
+      })
+    }
+
+    workspaceRole = await this.prisma.workspaceRole.update({
+      where: {
+        id: workspaceRoleId
+      },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        colorCode: dto.colorCode,
+        authorities: dto.authorities
+      },
+      include: {
+        projects: {
+          select: {
+            projectId: true
           }
-        })
-      : await this.prisma.workspaceRole.update({
-          where: {
-            id: workspaceRoleId
-          },
-          data: {
-            name: dto.name,
-            description: dto.description,
-            colorCode: dto.colorCode,
-            authorities: dto.authorities ?? [],
-            projects: {
-              set: dto.projectIds?.map((id) => ({ id }))
-            }
-          },
-          include: {
-            projects: {
-              select: {
-                id: true
-              }
-            }
-          }
-        })
+        }
+      }
+    })
 
     createEvent(
       {
@@ -312,18 +304,14 @@ export class WorkspaceRoleService {
     workspaceRoleId: Workspace['id'],
     authority: Authority
   ) {
-    const workspaceRole = await this.prisma.workspaceRole.findUnique({
+    const workspaceRole = (await this.prisma.workspaceRole.findUnique({
       where: {
         id: workspaceRoleId
       },
       include: {
-        projects: {
-          select: {
-            id: true
-          }
-        }
+        projects: true
       }
-    })
+    })) as WorkspaceRoleWithProjects
 
     if (!workspaceRole) {
       throw new NotFoundException(

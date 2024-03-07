@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller'
 import { mockDeep } from 'jest-mock-extended'
 import { ConfigService } from '@nestjs/config'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -18,6 +19,7 @@ describe('AuthController', () => {
       providers: [
         AuthService,
         GithubOAuthStrategyFactory,
+        GoogleOAuthStrategyFactory,
         ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
