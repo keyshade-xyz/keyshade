@@ -64,7 +64,7 @@ export class ApprovalService {
 
     this.logger.log(`Approval with id ${approvalId} updated by ${user.id}`)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: approval,
@@ -73,7 +73,8 @@ export class ApprovalService {
         title: `Approval with id ${approvalId} updated`,
         metadata: {
           approvalId
-        }
+        },
+        workspaceId: approval.workspaceId
       },
       this.prisma
     )
@@ -102,15 +103,17 @@ export class ApprovalService {
 
     this.logger.log(`Approval with id ${approvalId} deleted by ${user.id}`)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
+        entity: approval,
         type: EventType.APPROVAL_DELETED,
         source: EventSource.APPROVAL,
         title: `Approval with id ${approvalId} deleted`,
         metadata: {
           approvalId
-        }
+        },
+        workspaceId: approval.workspaceId
       },
       this.prisma
     )
@@ -145,7 +148,7 @@ export class ApprovalService {
 
     this.logger.log(`Approval with id ${approvalId} rejected by ${user.id}`)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: approval,
@@ -154,7 +157,8 @@ export class ApprovalService {
         title: `Approval with id ${approvalId} rejected`,
         metadata: {
           approvalId
-        }
+        },
+        workspaceId: approval.workspaceId
       },
       this.prisma
     )
@@ -360,7 +364,7 @@ export class ApprovalService {
 
     this.logger.log(`Approval with id ${approvalId} approved by ${user.id}`)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: approval,
@@ -369,7 +373,8 @@ export class ApprovalService {
         title: `Approval with id ${approvalId} approved`,
         metadata: {
           approvalId
-        }
+        },
+        workspaceId: approval.workspaceId
       },
       this.prisma
     )

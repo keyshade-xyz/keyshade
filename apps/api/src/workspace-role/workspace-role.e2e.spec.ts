@@ -5,6 +5,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service'
 import {
   Authority,
+  EventSeverity,
+  EventSource,
+  EventTriggerer,
+  EventType,
   Project,
   User,
   Workspace,
@@ -17,10 +21,14 @@ import { MockMailService } from '../mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
 import cleanUp from '../common/cleanup'
+import fetchEvents from '../common/fetch-events'
+import { EventService } from '../event/service/event.service'
+import { EventModule } from '../event/event.module'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
+  let eventService: EventService
 
   let alice: User
   let bob: User
@@ -33,7 +41,7 @@ describe('Workspace Role Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, WorkspaceRoleModule]
+      imports: [AppModule, WorkspaceRoleModule, EventModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -42,6 +50,7 @@ describe('Workspace Role Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -337,6 +346,24 @@ describe('Workspace Role Controller Tests', () => {
     )
   })
 
+  it('should have created a WORKSPACE_ROLE_CREATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      alice,
+      workspaceAlice.id,
+      EventSource.WORKSPACE_ROLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_ROLE_CREATED)
+    expect(event.workspaceId).toBe(workspaceAlice.id)
+    expect(event.itemId).toBeDefined()
+  })
+
   it('should not be able to create a workspace role for other workspace', async () => {
     const response = await app.inject({
       method: 'POST',
@@ -456,6 +483,24 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     adminRole1 = response.json()
+  })
+
+  it('should have created a WORKSPACE_ROLE_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      alice,
+      workspaceAlice.id,
+      EventSource.WORKSPACE_ROLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_ROLE_UPDATED)
+    expect(event.workspaceId).toBe(workspaceAlice.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should not be able to add WORKSPACE_ADMIN authority to the role', async () => {
@@ -648,6 +693,24 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a WORKSPACE_ROLE_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      alice,
+      workspaceAlice.id,
+      EventSource.WORKSPACE_ROLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_ROLE_DELETED)
+    expect(event.workspaceId).toBe(workspaceAlice.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should not be able to delete the auto generated admin role', async () => {

@@ -127,7 +127,7 @@ export class SecretService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: secret,
@@ -141,7 +141,8 @@ export class SecretService {
           projectName: project.name,
           environmentId: environment.id,
           environmentName: environment.name
-        }
+        },
+        workspaceId: project.workspaceId
       },
       this.prisma
     )
@@ -596,7 +597,7 @@ export class SecretService {
       })
     }
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: secret,
@@ -608,7 +609,8 @@ export class SecretService {
           name: secret.name,
           projectId: secret.projectId,
           projectName: secret.project.name
-        }
+        },
+        workspaceId: secret.project.workspaceId
       },
       this.prisma
     )
@@ -633,7 +635,7 @@ export class SecretService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: secret,
@@ -647,7 +649,8 @@ export class SecretService {
           projectName: secret.project.name,
           environmentId: environment.id,
           environmentName: environment.name
-        }
+        },
+        workspaceId: secret.project.workspaceId
       },
       this.prisma
     )
@@ -672,7 +675,7 @@ export class SecretService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: secret,
@@ -684,7 +687,8 @@ export class SecretService {
           name: secret.name,
           projectId: secret.projectId,
           projectName: secret.project.name
-        }
+        },
+        workspaceId: secret.project.workspaceId
       },
       this.prisma
     )
@@ -726,15 +730,17 @@ export class SecretService {
 
     await this.prisma.$transaction(op)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         type: EventType.SECRET_DELETED,
         source: EventSource.SECRET,
+        entity: secret,
         title: `Secret deleted`,
         metadata: {
           secretId: secret.id
-        }
+        },
+        workspaceId: secret.project.workspaceId
       },
       this.prisma
     )

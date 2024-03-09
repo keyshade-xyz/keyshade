@@ -91,7 +91,7 @@ export class EnvironmentService {
     const result = await this.prisma.$transaction(ops)
     const environment: EnvironmentWithProject = result[result.length - 1]
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: environment,
@@ -103,7 +103,8 @@ export class EnvironmentService {
           name: environment.name,
           projectId,
           projectName: project.name
-        }
+        },
+        workspaceId: project.workspaceId
       },
       this.prisma
     )
@@ -382,6 +383,7 @@ export class EnvironmentService {
           lastUpdatedById: user.id
         },
         include: {
+          project: true,
           secrets: true,
           lastUpdatedBy: true
         }
@@ -391,7 +393,7 @@ export class EnvironmentService {
     const result = await this.prisma.$transaction(ops)
     const updatedEnvironment = result[result.length - 1]
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: updatedEnvironment,
@@ -402,7 +404,8 @@ export class EnvironmentService {
           environmentId: updatedEnvironment.id,
           name: updatedEnvironment.name,
           projectId: updatedEnvironment.projectId
-        }
+        },
+        workspaceId: updatedEnvironment.project.workspaceId
       },
       this.prisma
     )
@@ -445,17 +448,19 @@ export class EnvironmentService {
 
     await this.prisma.$transaction(op)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         type: EventType.ENVIRONMENT_DELETED,
         source: EventSource.ENVIRONMENT,
+        entity: environment,
         title: `Environment deleted`,
         metadata: {
           environmentId: environment.id,
           name: environment.name,
           projectId: environment.projectId
-        }
+        },
+        workspaceId: environment.project.workspaceId
       },
       this.prisma
     )

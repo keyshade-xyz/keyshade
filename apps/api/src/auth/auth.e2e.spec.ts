@@ -9,6 +9,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { AppModule } from '../app/app.module'
 import { Otp } from '@prisma/client'
+import cleanUp from '../common/cleanup'
 
 describe('Auth Controller Tests', () => {
   let app: NestFastifyApplication
@@ -31,6 +32,8 @@ describe('Auth Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+
+    await cleanUp(prisma)
   })
 
   it('should be defined', async () => {
@@ -121,5 +124,9 @@ describe('Auth Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
+  })
+
+  afterAll(async () => {
+    await cleanUp(prisma)
   })
 })

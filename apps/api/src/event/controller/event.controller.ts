@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Param, Query } from '@nestjs/common'
 import { EventService } from '../service/event.service'
-import { Authority, EventSeverity, User } from '@prisma/client'
+import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { ApiTags } from '@nestjs/swagger'
@@ -10,37 +10,25 @@ import { ApiTags } from '@nestjs/swagger'
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @Get()
+  @Get(':workspaceId')
   @RequiredApiKeyAuthorities(Authority.READ_EVENT)
   async getEvents(
     @CurrentUser() user: User,
-    @Query('page') page: number = 1,
+    @Param('workspaceId') workspaceId: string,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('search') search: string = '',
     @Query('severity') severity: EventSeverity,
-    @Query('workspaceId') workspaceId: string,
-    @Query('projectId') projectId: string,
-    @Query('environmentId') environmentId: string,
-    @Query('secretId') secretId: string,
-    @Query('variableId') variableId: string,
-    @Query('apiKeyId') apiKeyId: string,
-    @Query('workspaceRoleId') workspaceRoleId: string
+    @Query('source') source: EventSource
   ) {
-    return this.eventService.getEvents(
+    return await this.eventService.getEvents(
       user,
-      {
-        workspaceId,
-        projectId,
-        environmentId,
-        secretId,
-        variableId,
-        apiKeyId,
-        workspaceRoleId
-      },
+      workspaceId,
       page,
       limit,
       search,
-      severity
+      severity,
+      source
     )
   }
 }

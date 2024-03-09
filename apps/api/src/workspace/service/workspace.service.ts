@@ -111,7 +111,7 @@ export class WorkspaceService {
     ])
     const workspace = result[0]
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -121,7 +121,8 @@ export class WorkspaceService {
         metadata: {
           workspaceId: workspace.id,
           name: workspace.name
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -264,7 +265,7 @@ export class WorkspaceService {
       throw new InternalServerErrorException('Error in transaction')
     }
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -275,7 +276,8 @@ export class WorkspaceService {
           workspaceId: workspace.id,
           name: workspace.name,
           newOwnerId: userId
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -303,20 +305,6 @@ export class WorkspaceService {
       }
     })
 
-    createEvent(
-      {
-        triggeredBy: user,
-        type: EventType.WORKSPACE_DELETED,
-        source: EventSource.WORKSPACE,
-        title: `Workspace deleted`,
-        metadata: {
-          workspaceId: workspace.id,
-          name: workspace.name
-        }
-      },
-      this.prisma
-    )
-
     this.log.debug(`Deleted workspace ${workspace.name} (${workspace.id})`)
   }
 
@@ -336,7 +324,7 @@ export class WorkspaceService {
     if (members && members.length > 0) {
       await this.addMembersToWorkspace(workspace, user, members)
 
-      createEvent(
+      await createEvent(
         {
           triggeredBy: user,
           entity: workspace,
@@ -347,7 +335,8 @@ export class WorkspaceService {
             workspaceId: workspace.id,
             name: workspace.name,
             members: members.map((m) => m.email)
-          }
+          },
+          workspaceId: workspace.id
         },
         this.prisma
       )
@@ -395,7 +384,7 @@ export class WorkspaceService {
       })
     }
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -406,7 +395,8 @@ export class WorkspaceService {
           workspaceId: workspace.id,
           name: workspace.name,
           members: userIds
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -472,7 +462,7 @@ export class WorkspaceService {
       createNewAssociations
     ])
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -484,7 +474,8 @@ export class WorkspaceService {
           name: workspace.name,
           userId,
           roleIds
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -587,7 +578,7 @@ export class WorkspaceService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -596,7 +587,8 @@ export class WorkspaceService {
         title: `${user.name} accepted invitation to workspace ${workspace.name}`,
         metadata: {
           workspaceId: workspaceId
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -627,7 +619,7 @@ export class WorkspaceService {
     // Delete the membership
     await this.deleteMembership(workspaceId, inviteeId)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -637,7 +629,8 @@ export class WorkspaceService {
         metadata: {
           workspaceId: workspaceId,
           inviteeId
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -663,7 +656,7 @@ export class WorkspaceService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -672,7 +665,8 @@ export class WorkspaceService {
         title: `${user.name} declined invitation to workspace ${workspace.name}`,
         metadata: {
           workspaceId: workspaceId
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -713,7 +707,7 @@ export class WorkspaceService {
     // Delete the membership
     await this.deleteMembership(workspaceId, user.id)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -722,7 +716,8 @@ export class WorkspaceService {
         title: `User left workspace`,
         metadata: {
           workspaceId: workspaceId
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )
@@ -1076,7 +1071,7 @@ export class WorkspaceService {
     })
     this.log.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspace,
@@ -1086,7 +1081,8 @@ export class WorkspaceService {
         metadata: {
           workspaceId: workspace.id,
           name: workspace.name
-        }
+        },
+        workspaceId: workspace.id
       },
       this.prisma
     )

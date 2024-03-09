@@ -20,6 +20,8 @@ import {
 } from '@prisma/client'
 import cleanUp from '../common/cleanup'
 import fetchEvents from '../common/fetch-events'
+import { EventService } from '../event/service/event.service'
+import { EventModule } from '../event/event.module'
 
 const createMembership = async (
   adminRoleId: string,
@@ -47,6 +49,7 @@ const createMembership = async (
 describe('Workspace Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
+  let eventService: EventService
 
   let user1: User, user2: User, user3: User
   let workspace1: Workspace, workspace2: Workspace
@@ -54,7 +57,7 @@ describe('Workspace Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, WorkspaceModule]
+      imports: [AppModule, WorkspaceModule, EventModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -64,6 +67,7 @@ describe('Workspace Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -189,28 +193,24 @@ describe('Workspace Controller Tests', () => {
     workspace2 = response.json()
   })
 
-  // it('should have created a WORKSPACE_CREATED event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a WORKSPACE_CREATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.WORKSPACE_CREATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_CREATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should have created a new role with name Admin', async () => {
     adminRole = await prisma.workspaceRole.findUnique({
@@ -326,28 +326,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a WORKSPACE_UPDATED event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a WORKSPACE_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.WORKSPACE_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should do nothing if null or empty array is sent for invitation of user', async () => {
     const response = await app.inject({
@@ -428,28 +424,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a INVITED_TO_WORKSPACE event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a INVITED_TO_WORKSPACE event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.INVITED_TO_WORKSPACE,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.INVITED_TO_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to cancel the invitation', async () => {
     const response = await app.inject({
@@ -491,28 +483,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a CANCELLED_INVITATION event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a CANCELLED_INVITATION event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.CANCELLED_INVITATION,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.CANCELLED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to decline invitation to the workspace', async () => {
     await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
@@ -556,28 +544,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a DECLINED_INVITATION event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a DECLINED_INVITATION event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.DECLINED_INVITATION,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.DECLINED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to accept the invitation to the workspace', async () => {
     await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
@@ -627,28 +611,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a ACCEPT_INVITATION event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user2,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a ACCEPT_INVITATION event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user2,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.ACCEPTED_INVITATION,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ACCEPTED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to leave the workspace', async () => {
     const response = await app.inject({
@@ -707,28 +687,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a LEFT_WORKSPACE event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a LEFT_WORKSPACE event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.LEFT_WORKSPACE,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.LEFT_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to update the role of a member', async () => {
     await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
@@ -767,28 +743,24 @@ describe('Workspace Controller Tests', () => {
     ])
   })
 
-  // it('should have created a WORKSPACE_MEMBERSHIP_UPDATED event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a WORKSPACE_MEMBERSHIP_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.WORKSPACE_MEMBERSHIP_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_MEMBERSHIP_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to remove users from workspace', async () => {
     const response = await app.inject({
@@ -832,28 +804,24 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
-  // it('should have created a REMOVED_FROM_WORKSPACE event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user1,
-  //     'workspaceId=' + workspace1.id
-  //   )
+  it('should have created a REMOVED_FROM_WORKSPACE event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.REMOVED_FROM_WORKSPACE,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.REMOVED_FROM_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should not be able to update the role of a non existing member', async () => {
     const response = await app.inject({
@@ -1112,29 +1080,6 @@ describe('Workspace Controller Tests', () => {
       message: `User ${user1.id} does not have the required authorities to perform the action`
     })
   })
-
-  // it('should have created a WORKSPACE_UPDATED event', async () => {
-  //   const response = await fetchEvents(
-  //     app,
-  //     user2,
-  //     'workspaceId=' + workspace1.id
-  //   )
-
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.WORKSPACE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.WORKSPACE_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
-
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
 
   it('should not be able to export data of a non-existing workspace', async () => {
     const response = await app.inject({

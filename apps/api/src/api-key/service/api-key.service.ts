@@ -5,8 +5,7 @@ import { addHoursToDate } from '../../common/add-hours-to-date'
 import { generateApiKey } from '../../common/api-key-generator'
 import { toSHA256 } from '../../common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
-import { ApiKey, EventSource, EventType, User } from '@prisma/client'
-import createEvent from '../../common/create-event'
+import { User } from '@prisma/client'
 
 @Injectable()
 export class ApiKeyService {
@@ -43,21 +42,6 @@ export class ApiKeyService {
       }
     })
 
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: apiKey as ApiKey,
-        type: EventType.API_KEY_ADDED,
-        source: EventSource.API_KEY,
-        title: `API key created`,
-        metadata: {
-          apiKeyId: apiKey.id,
-          name: apiKey.name
-        }
-      },
-      this.prisma
-    )
-
     this.logger.log(`User ${user.id} created API key ${apiKey.id}`)
 
     return {
@@ -93,46 +77,20 @@ export class ApiKeyService {
       }
     })
 
-    createEvent(
-      {
-        triggeredBy: user,
-        entity: updatedApiKey as ApiKey,
-        type: EventType.API_KEY_UPDATED,
-        source: EventSource.API_KEY,
-        title: `API key updated`,
-        metadata: {
-          apiKeyId: updatedApiKey.id,
-          name: updatedApiKey.name
-        }
-      },
-      this.prisma
-    )
-
     this.logger.log(`User ${user.id} updated API key ${apiKeyId}`)
 
     return updatedApiKey
   }
 
   async deleteApiKey(user: User, apiKeyId: string) {
-    const apiKey = await this.prisma.apiKey.delete({
+    await this.prisma.apiKey.delete({
       where: {
         id: apiKeyId,
         userId: user.id
       }
     })
 
-    createEvent(
-      {
-        triggeredBy: user,
-        type: EventType.API_KEY_DELETED,
-        source: EventSource.API_KEY,
-        title: `API key deleted`,
-        metadata: {
-          name: apiKey.name
-        }
-      },
-      this.prisma
-    )
+    this.logger.log(`User ${user.id} deleted API key ${apiKeyId}`)
   }
 
   async getApiKeyById(user: User, apiKeyId: string) {
