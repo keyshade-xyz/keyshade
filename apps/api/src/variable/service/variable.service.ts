@@ -130,7 +130,7 @@ export class VariableService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: variable,
@@ -144,7 +144,8 @@ export class VariableService {
           projectName: project.name,
           environmentId: environment.id,
           environmentName: environment.name
-        }
+        },
+        workspaceId: project.workspaceId
       },
       this.prisma
     )
@@ -537,7 +538,7 @@ export class VariableService {
       })
     }
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: variable,
@@ -549,7 +550,8 @@ export class VariableService {
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name
-        }
+        },
+        workspaceId: variable.project.workspaceId
       },
       this.prisma
     )
@@ -578,7 +580,7 @@ export class VariableService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: variable,
@@ -592,7 +594,8 @@ export class VariableService {
           projectName: variable.project.name,
           environmentId: environment.id,
           environmentName: environment.name
-        }
+        },
+        workspaceId: variable.project.workspaceId
       },
       this.prisma
     )
@@ -617,7 +620,7 @@ export class VariableService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: variable,
@@ -630,7 +633,8 @@ export class VariableService {
           projectId: variable.projectId,
           projectName: variable.project.name,
           rollbackVersion
-        }
+        },
+        workspaceId: variable.project.workspaceId
       },
       this.prisma
     )
@@ -674,18 +678,20 @@ export class VariableService {
 
     await this.prisma.$transaction(op)
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         type: EventType.VARIABLE_DELETED,
         source: EventSource.VARIABLE,
         title: `Variable deleted`,
+        entity: variable,
         metadata: {
           variableId: variable.id,
           name: variable.name,
           projectId: variable.projectId,
           projectName: variable.project.name
-        }
+        },
+        workspaceId: variable.project.workspaceId
       },
       this.prisma
     )

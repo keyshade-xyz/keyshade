@@ -1,16 +1,20 @@
-import { User } from '@prisma/client'
-import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { EventSeverity, EventSource, User } from '@prisma/client'
+import { EventService } from 'src/event/service/event.service'
 
 export default async function fetchEvents(
-  app: NestFastifyApplication,
+  eventService: EventService,
   user: User,
-  query?: string
+  workspaceId: string,
+  source?: EventSource,
+  severity?: EventSeverity
 ): Promise<any> {
-  return app.inject({
-    method: 'GET',
-    headers: {
-      'x-e2e-user-email': user.email
-    },
-    url: `/event${query ? '?' + query : ''}`
-  })
+  return await eventService.getEvents(
+    user,
+    workspaceId,
+    0,
+    10,
+    '',
+    severity,
+    source
+  )
 }

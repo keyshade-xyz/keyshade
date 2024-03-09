@@ -31,6 +31,7 @@ import { EnvironmentService } from '../environment/service/environment.service'
 import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { VariableService } from './service/variable.service'
+import { EventService } from '../event/service/event.service'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -39,6 +40,7 @@ describe('Variable Controller Tests', () => {
   let workspaceService: WorkspaceService
   let environmentService: EnvironmentService
   let variableService: VariableService
+  let eventService: EventService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
@@ -71,6 +73,7 @@ describe('Variable Controller Tests', () => {
     workspaceService = moduleRef.get(WorkspaceService)
     environmentService = moduleRef.get(EnvironmentService)
     variableService = moduleRef.get(VariableService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -357,24 +360,23 @@ describe('Variable Controller Tests', () => {
     )
   })
 
-  // it('should have created a VARIABLE_ADDED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'variableId=' + variable1.id)
+  it('should have created a VARIABLE_ADDED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.VARIABLE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.VARIABLE_ADDED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should not be able to update a non-existing variable', async () => {
     const response = await app.inject({
@@ -467,24 +469,23 @@ describe('Variable Controller Tests', () => {
     expect(variableVersion.length).toBe(2)
   })
 
-  // it('should have created a VARIABLE_UPDATED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'variableId=' + variable1.id)
+  it('should have created a VARIABLE_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.VARIABLE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.VARIABLE_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should be able to update the environment of a variable', async () => {
     const response = await app.inject({
@@ -562,25 +563,6 @@ describe('Variable Controller Tests', () => {
       `User ${user1.id} does not have the required authorities`
     )
   })
-
-  // it('should have created a VARIABLE_UPDATED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'variableId=' + variable1.id)
-
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.VARIABLE,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.VARIABLE_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
-
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
 
   it('should not be able to move a variable of the same name to an environment', async () => {
     const newVariable = await prisma.variable.create({
@@ -839,6 +821,24 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a VARIABLE_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   afterAll(async () => {

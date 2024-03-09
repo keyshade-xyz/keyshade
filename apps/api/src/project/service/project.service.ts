@@ -168,7 +168,7 @@ export class ProjectService {
       ...createEnvironmentOps
     ])
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: newProject,
@@ -180,7 +180,8 @@ export class ProjectService {
           name: newProject.name,
           workspaceId,
           workspaceName: workspace.name
-        }
+        },
+        workspaceId
       },
       this.prisma
     )
@@ -505,7 +506,7 @@ export class ProjectService {
       ...versionUpdateOps
     ])
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: updatedProject,
@@ -515,7 +516,8 @@ export class ProjectService {
         metadata: {
           projectId: updatedProject.id,
           name: updatedProject.name
-        }
+        },
+        workspaceId: updatedProject.workspaceId
       },
       this.prisma
     )
@@ -559,23 +561,18 @@ export class ProjectService {
 
     await this.prisma.$transaction(op)
 
-    const workspace = await this.prisma.workspace.findUnique({
-      where: {
-        id: project.workspaceId
-      }
-    })
-
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         type: EventType.PROJECT_DELETED,
-        source: EventSource.WORKSPACE,
-        entity: workspace,
+        source: EventSource.PROJECT,
+        entity: project,
         title: `Project deleted`,
         metadata: {
           projectId: project.id,
           name: project.name
-        }
+        },
+        workspaceId: project.workspaceId
       },
       this.prisma
     )

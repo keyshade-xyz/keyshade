@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { EventSource, EventType, User } from '@prisma/client'
+import { User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
@@ -8,7 +8,6 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
-import createEvent from '../../common/create-event'
 
 @Injectable()
 export class UserService {
@@ -40,19 +39,6 @@ export class UserService {
       },
       data
     })
-
-    createEvent(
-      {
-        title: 'User updated',
-        type: EventType.USER_UPDATED,
-        triggeredBy: user,
-        source: EventSource.USER,
-        metadata: {
-          userId: user.id
-        }
-      },
-      this.prisma
-    )
 
     return updatedUser
   }

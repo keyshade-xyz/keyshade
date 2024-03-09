@@ -31,6 +31,7 @@ import { EnvironmentService } from '../environment/service/environment.service'
 import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { SecretService } from './service/secret.service'
+import { EventService } from '../event/service/event.service'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -39,6 +40,7 @@ describe('Secret Controller Tests', () => {
   let workspaceService: WorkspaceService
   let environmentService: EnvironmentService
   let secretService: SecretService
+  let eventService: EventService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
@@ -71,6 +73,7 @@ describe('Secret Controller Tests', () => {
     workspaceService = moduleRef.get(WorkspaceService)
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -355,24 +358,23 @@ describe('Secret Controller Tests', () => {
     )
   })
 
-  // it('should have created a SECRET_ADDED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'secretId=' + secret1.id)
+  it('should have created a SECRET_ADDED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.SECRET
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.SECRET,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.SECRET_ADDED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
 
   it('should not be able to update a non-existing secret', async () => {
     const response = await app.inject({
@@ -465,24 +467,23 @@ describe('Secret Controller Tests', () => {
     expect(secretVersion.length).toBe(2)
   })
 
-  // it('should have created a SECRET_UPDATED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'secretId=' + secret1.id)
+  it('should have created a SECRET_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.SECRET
+    )
 
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.SECRET,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.SECRET_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
+    const event = response[0]
 
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(secret1.id)
+  })
 
   it('should be able to update the environment of a secret', async () => {
     const response = await app.inject({
@@ -560,25 +561,6 @@ describe('Secret Controller Tests', () => {
       `User ${user1.id} does not have the required authorities`
     )
   })
-
-  // it('should have created a SECRET_UPDATED event', async () => {
-  //   const response = await fetchEvents(app, user1, 'secretId=' + secret1.id)
-
-  //   const event = {
-  //     id: expect.any(String),
-  //     title: expect.any(String),
-  //     description: expect.any(String),
-  //     source: EventSource.SECRET,
-  //     triggerer: EventTriggerer.USER,
-  //     severity: EventSeverity.INFO,
-  //     type: EventType.SECRET_UPDATED,
-  //     timestamp: expect.any(String),
-  //     metadata: expect.any(Object)
-  //   }
-
-  //   expect(response.statusCode).toBe(200)
-  //   expect(response.json()).toEqual(expect.arrayContaining([event]))
-  // })
 
   it('should not be able to move a secret of the same name to an environment', async () => {
     const newSecret = await prisma.secret.create({
@@ -964,6 +946,24 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a SECRET_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.SECRET
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(secret1.id)
   })
 
   afterAll(async () => {

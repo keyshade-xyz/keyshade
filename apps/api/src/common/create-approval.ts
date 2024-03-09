@@ -62,7 +62,7 @@ export default async function createApproval(
     `Approval for ${data.itemType} with id ${data.itemId} created by ${data.user.id}`
   )
 
-  createEvent(
+  await createEvent(
     {
       triggeredBy: data.user,
       entity: approval,
@@ -74,7 +74,8 @@ export default async function createApproval(
         itemId: data.itemId,
         action: data.action,
         reason: data.reason
-      }
+      },
+      workspaceId: data.workspaceId
     },
     prisma
   )

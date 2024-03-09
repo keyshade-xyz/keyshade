@@ -21,6 +21,7 @@ import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspa
 import { PrismaService } from '../../prisma/prisma.service'
 import createEvent from '../../common/create-event'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
+import { v4 } from 'uuid'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -55,44 +56,64 @@ export class WorkspaceRoleService {
       )
     }
 
-    const workspaceRole = await this.prisma.workspaceRole.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        colorCode: dto.colorCode,
-        authorities: dto.authorities ?? [],
-        hasAdminAuthority: false,
-        projects: {
-          connect: dto.projectIds?.map((id) => ({ id }))
-        },
-        workspace: {
-          connect: {
-            id: workspaceId
-          }
-        }
-      },
-      include: {
-        projects: {
-          select: {
-            projectId: true
-          }
-        }
-      }
-    })
+    const workspaceRoleId = v4()
 
-    createEvent(
+    const op = []
+
+    // Create the workspace role
+    op.push(
+      this.prisma.workspaceRole.create({
+        data: {
+          id: workspaceRoleId,
+          name: dto.name,
+          description: dto.description,
+          colorCode: dto.colorCode,
+          authorities: dto.authorities ?? [],
+          hasAdminAuthority: false,
+          workspace: {
+            connect: {
+              id: workspaceId
+            }
+          }
+        },
+        include: {
+          projects: {
+            select: {
+              projectId: true
+            }
+          }
+        }
+      })
+    )
+
+    // Create the project associations
+    if (dto.projectIds && dto.projectIds.length > 0) {
+      op.push(
+        this.prisma.projectWorkspaceRoleAssociation.createMany({
+          data: dto.projectIds.map((projectId) => ({
+            roleId: workspaceRoleId,
+            projectId
+          }))
+        })
+      )
+    }
+
+    const workspaceRole = (await this.prisma.$transaction(op))[0]
+
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspaceRole,
         type: EventType.WORKSPACE_ROLE_CREATED,
         source: EventSource.WORKSPACE_ROLE,
-        title: `Workspace deleted`,
+        title: `Workspace role created`,
         metadata: {
           workspaceRoleId: workspaceRole.id,
           name: workspaceRole.name,
           workspaceId,
           workspaceName: workspace.name
-        }
+        },
+        workspaceId
       },
       this.prisma
     )
@@ -172,7 +193,7 @@ export class WorkspaceRoleService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         entity: workspaceRole,
@@ -183,7 +204,8 @@ export class WorkspaceRoleService {
           workspaceRoleId: workspaceRole.id,
           name: workspaceRole.name,
           workspaceId: workspaceRole.workspaceId
-        }
+        },
+        workspaceId: workspaceRole.workspaceId
       },
       this.prisma
     )
@@ -214,17 +236,19 @@ export class WorkspaceRoleService {
       }
     })
 
-    createEvent(
+    await createEvent(
       {
         triggeredBy: user,
         type: EventType.WORKSPACE_ROLE_DELETED,
         source: EventSource.WORKSPACE_ROLE,
         title: `Workspace role deleted`,
+        entity: workspaceRole,
         metadata: {
           workspaceRoleId: workspaceRole.id,
           name: workspaceRole.name,
           workspaceId: workspaceRole.workspaceId
-        }
+        },
+        workspaceId: workspaceRole.workspaceId
       },
       this.prisma
     )

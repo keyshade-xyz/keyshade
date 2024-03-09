@@ -25,6 +25,10 @@ import {
   ApprovalStatus,
   Authority,
   Environment,
+  EventSeverity,
+  EventSource,
+  EventTriggerer,
+  EventType,
   Project,
   Secret,
   User,
@@ -36,6 +40,9 @@ import { VariableModule } from '../variable/variable.module'
 import { UserModule } from '../user/user.module'
 import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
 import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
+import { EventService } from '../event/service/event.service'
+import { EventModule } from '../event/event.module'
+import fetchEvents from '../common/fetch-events'
 
 describe('Approval Controller Tests', () => {
   let app: NestFastifyApplication
@@ -47,6 +54,7 @@ describe('Approval Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
+  let eventService: EventService
 
   let workspace1: Workspace
   let project1: Project
@@ -67,7 +75,8 @@ describe('Approval Controller Tests', () => {
         EnvironmentModule,
         SecretModule,
         VariableModule,
-        WorkspaceRoleModule
+        WorkspaceRoleModule,
+        EventModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -84,6 +93,7 @@ describe('Approval Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -155,6 +165,24 @@ describe('Approval Controller Tests', () => {
     expect(approval.metadata).toStrictEqual({
       name: 'Workspace 1 Updated'
     })
+  })
+
+  it('should have created a APPROVAL_CREATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.APPROVAL
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.APPROVAL)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.APPROVAL_CREATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should allow user with WORKSPACE_ADMIN to view the approval', async () => {
@@ -295,6 +323,24 @@ describe('Approval Controller Tests', () => {
     expect(response.json().reason).toBe('updated')
   })
 
+  it('should have created a APPROVAL_UPDATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.APPROVAL
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.APPROVAL)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.APPROVAL_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
   it('should update the workspace if the approval is approved', async () => {
     let approval = await prisma.approval.findFirst({
       where: {
@@ -332,6 +378,24 @@ describe('Approval Controller Tests', () => {
     expect(approval.approvedAt).toBeDefined()
 
     workspace1 = updatedWorkspace
+  })
+
+  it('should have created a APPROVAL_APPROVED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.APPROVAL
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.APPROVAL)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.APPROVAL_APPROVED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should not be able to approve an already approved approval', async () => {
@@ -440,6 +504,24 @@ describe('Approval Controller Tests', () => {
       }
     })
     expect(approval).toBeNull()
+  })
+
+  it('should have created a APPROVAL_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.APPROVAL
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.APPROVAL)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.APPROVAL_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should allow creating project with the same name till it is not approved', async () => {
@@ -1528,6 +1610,24 @@ describe('Approval Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a APPROVAL_REJECTED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.APPROVAL
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.APPROVAL)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.APPROVAL_REJECTED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should delete the item if the approval is rejected', async () => {
