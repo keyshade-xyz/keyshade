@@ -382,6 +382,18 @@ describe('Event Controller Tests', () => {
     expect(response.statusCode).toBe(400)
   })
 
+  it('should throw an error with wrong source value', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/event/${workspace.id}?source=INVALID`,
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+  })
+
   it('should throw an error if user is not provided in event creation for user-triggered event', async () => {
     try {
       await createEvent(
