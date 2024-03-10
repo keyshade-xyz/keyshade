@@ -5,6 +5,8 @@ import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from '../user/user.module'
 import { GithubStrategy } from '../config/oauth-strategy/github/github.strategy'
 import { GithubOAuthStrategyFactory } from '../config/factory/github/github-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '../config/factory/google/google-strategy.factory'
+import { GoogleStrategy } from '../config/oauth-strategy/google/google.strategy'
 
 @Module({
   imports: [
@@ -28,6 +30,14 @@ import { GithubOAuthStrategyFactory } from '../config/factory/github/github-stra
         githubOAuthStrategyFactory.createOAuthStrategy()
       },
       inject: [GithubOAuthStrategyFactory]
+    },
+    GoogleOAuthStrategyFactory,
+    {
+      provide: GoogleStrategy,
+      useFactory: (googleOAuthStrategyFactory: GoogleOAuthStrategyFactory) => {
+        googleOAuthStrategyFactory.createOAuthStrategy()
+      },
+      inject: [GoogleOAuthStrategyFactory]
     }
   ],
   controllers: [AuthController]

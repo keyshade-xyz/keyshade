@@ -109,3 +109,9 @@ We maintain an in-detailed documentation about how to get started with keyshade.
 ## Contributing
 
 We welcome contributions from everyone. Please read our [contributing guide](./CONTRIBUTING.md) to get started.
+
+## Contributors
+<a href="https://github.com/keyshade-xyz/keyshade/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=keyshade-xyz/keyshade&max=400&columns=20" />
+  <img src="https://us-central1-tooljet-hub.cloudfunctions.net/github" width="0" height="0" />
+</a>

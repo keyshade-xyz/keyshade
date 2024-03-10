@@ -1,21 +1,20 @@
-import { NotFoundException, UnauthorizedException } from '@nestjs/common'
 import {
-  Authority,
-  Environment,
-  PrismaClient,
-  Project,
-  User
-} from '@prisma/client'
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common'
+import { Authority, Environment, PrismaClient, User } from '@prisma/client'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
+import { EnvironmentWithProject } from 'src/environment/environment.types'
 
 export default async function getEnvironmentWithAuthority(
   userId: User['id'],
   environmentId: Environment['id'],
   authority: Authority,
   prisma: PrismaClient
-): Promise<Environment> {
+): Promise<EnvironmentWithProject> {
   // Fetch the environment
-  let environment: Environment & { project: Project }
+  let environment: EnvironmentWithProject
 
   try {
     environment = await prisma.environment.findUnique({
@@ -49,6 +48,19 @@ export default async function getEnvironmentWithAuthority(
   ) {
     throw new UnauthorizedException(
       `User ${userId} does not have the required authorities`
+    )
+  }
+
+  // If the environment is pending creation, only the user who created the environment, a workspace admin or
+  // a user with the MANAGE_APPROVALS authority can fetch the environment
+  if (
+    environment.pendingCreation &&
+    !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
+    !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
+    environment.lastUpdatedById !== userId
+  ) {
+    throw new BadRequestException(
+      `The environment with id ${environmentId} is pending creation and cannot be fetched by the user with id ${userId}`
     )
   }
 

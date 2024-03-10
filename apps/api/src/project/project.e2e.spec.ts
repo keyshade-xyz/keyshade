@@ -17,24 +17,25 @@ import {
   EventType,
   Project,
   User,
-  Workspace,
-  WorkspaceRole
+  Workspace
 } from '@prisma/client'
 import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
+import { EventService } from '../event/service/event.service'
+import { EventModule } from '../event/event.module'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
+  let eventService: EventService
 
   let user1: User, user2: User
   let workspace1: Workspace
   let project1: Project, project2: Project, otherProject: Project
-  let adminRole1: WorkspaceRole
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, ProjectModule]
+      imports: [AppModule, ProjectModule, EventModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -44,6 +45,7 @@ describe('Project Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -144,8 +146,6 @@ describe('Project Controller Tests', () => {
     workspace1 = result[2]
 
     otherProject = result[6]
-
-    adminRole1 = result[3]
   })
 
   it('should be defined', async () => {
@@ -181,7 +181,7 @@ describe('Project Controller Tests', () => {
       privateKey: expect.any(String),
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      workspaceRoleId: null
+      pendingCreation: false
     })
 
     project1 = response.json()
@@ -220,22 +220,21 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have created a PROJECT_CREATED event', async () => {
-    const response = await fetchEvents(app, user1, 'projectId=' + project1.id)
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.PROJECT
+    )
 
-    const event = {
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      source: EventSource.PROJECT,
-      triggerer: EventTriggerer.USER,
-      severity: EventSeverity.INFO,
-      type: EventType.PROJECT_CREATED,
-      timestamp: expect.any(String),
-      metadata: expect.any(Object)
-    }
+    const event = response[0]
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining([event]))
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_CREATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should have added the project to the admin role of the workspace', async () => {
@@ -247,13 +246,17 @@ describe('Project Controller Tests', () => {
         }
       },
       select: {
-        projects: true
+        projects: {
+          select: {
+            projectId: true
+          }
+        }
       }
     })
 
     expect(adminRole).toBeDefined()
     expect(adminRole.projects).toHaveLength(1)
-    expect(adminRole.projects[0].id).toBe(project1.id)
+    expect(adminRole.projects[0].projectId).toBe(project1.id)
   })
 
   it('should not let non-member create a project', async () => {
@@ -326,7 +329,7 @@ describe('Project Controller Tests', () => {
       publicKey: project1.publicKey,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      workspaceRoleId: adminRole1.id
+      pendingCreation: false
     })
 
     project1 = response.json()
@@ -396,22 +399,21 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have created a PROJECT_UPDATED event', async () => {
-    const response = await fetchEvents(app, user1, 'projectId=' + project1.id)
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.PROJECT
+    )
 
-    const event = {
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      source: EventSource.PROJECT,
-      triggerer: EventTriggerer.USER,
-      severity: EventSeverity.INFO,
-      type: EventType.PROJECT_UPDATED,
-      timestamp: expect.any(String),
-      metadata: expect.any(Object)
-    }
+    const event = response[0]
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining([event]))
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(project1.id)
   })
 
   it('should be able to fetch a project by its id', async () => {
@@ -482,9 +484,9 @@ describe('Project Controller Tests', () => {
       {
         ...project1,
         lastUpdatedById: user1.id,
-        publicKey: undefined,
         createdAt: expect.any(String),
-        updatedAt: expect.any(String)
+        updatedAt: expect.any(String),
+        publicKey: undefined
       }
     ])
   })
@@ -645,6 +647,24 @@ describe('Project Controller Tests', () => {
     expect(response.statusCode).toBe(200)
   })
 
+  it('should have created a PROJECT_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.PROJECT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(project1.id)
+  })
+
   it('should have removed all environments of the project', async () => {
     const environments = await prisma.environment.findMany({
       where: {
@@ -704,29 +724,6 @@ describe('Project Controller Tests', () => {
       error: 'Unauthorized',
       message: `User with id ${user1.id} does not have the authority in the project with id ${otherProject.id}`
     })
-  })
-
-  it('should have created a PROJECT_DELETED event', async () => {
-    const response = await fetchEvents(
-      app,
-      user1,
-      'workspaceId=' + workspace1.id
-    )
-
-    const event = {
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      source: EventSource.WORKSPACE,
-      triggerer: EventTriggerer.USER,
-      severity: EventSeverity.INFO,
-      type: EventType.PROJECT_DELETED,
-      timestamp: expect.any(String),
-      metadata: expect.any(Object)
-    }
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining([event]))
   })
 
   afterAll(async () => {

@@ -26,12 +26,14 @@ import { WorkspaceService } from '../workspace/service/workspace.service'
 import { ProjectService } from '../project/service/project.service'
 import { EventModule } from '../event/event.module'
 import { WorkspaceModule } from '../workspace/workspace.module'
+import { EventService } from '../event/service/event.service'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
   let projectService: ProjectService
   let workspaceService: WorkspaceService
+  let eventService: EventService
 
   let user1: User, user2: User
   let workspace1: Workspace
@@ -58,6 +60,7 @@ describe('Environment Controller Tests', () => {
     prisma = moduleRef.get(PrismaService)
     projectService = moduleRef.get(ProjectService)
     workspaceService = moduleRef.get(WorkspaceService)
+    eventService = moduleRef.get(EventService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -87,15 +90,22 @@ describe('Environment Controller Tests', () => {
 
     workspace1 = await workspaceService.createWorkspace(user1, {
       name: 'Workspace 1',
-      description: 'Workspace 1 description'
+      description: 'Workspace 1 description',
+      approvalEnabled: false
     })
 
-    project1 = await projectService.createProject(user1, workspace1.id, {
-      name: 'Project 1',
-      description: 'Project 1 description',
-      storePrivateKey: true,
-      environments: []
-    })
+    project1 = (await projectService.createProject(
+      user1,
+      workspace1.id,
+      {
+        name: 'Project 1',
+        description: 'Project 1 description',
+        storePrivateKey: true,
+        environments: [],
+        isPublic: false
+      },
+      ''
+    )) as Project
   })
 
   it('should be defined', () => {
@@ -126,7 +136,9 @@ describe('Environment Controller Tests', () => {
       projectId: project1.id,
       lastUpdatedById: user1.id,
       createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+      updatedAt: expect.any(String),
+      pendingCreation: false,
+      project: expect.any(Object)
     })
 
     environment1 = response.json()
@@ -234,25 +246,20 @@ describe('Environment Controller Tests', () => {
 
   it('should have created a ENVIRONMENT_ADDED event', async () => {
     const response = await fetchEvents(
-      app,
+      eventService,
       user1,
-      'environmentId=' + environment1.id
+      workspace1.id,
+      EventSource.ENVIRONMENT
     )
 
-    const event = {
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      source: EventSource.ENVIRONMENT,
-      triggerer: EventTriggerer.USER,
-      severity: EventSeverity.INFO,
-      type: EventType.ENVIRONMENT_ADDED,
-      timestamp: expect.any(String),
-      metadata: expect.any(Object)
-    }
+    const event = response[0]
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining([event]))
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should be able to update an environment', async () => {
@@ -279,7 +286,9 @@ describe('Environment Controller Tests', () => {
       lastUpdatedBy: expect.any(Object),
       secrets: [],
       createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+      updatedAt: expect.any(String),
+      pendingCreation: false,
+      project: expect.any(Object)
     })
 
     environment1 = response.json()
@@ -342,25 +351,20 @@ describe('Environment Controller Tests', () => {
 
   it('should create a ENVIRONMENT_UPDATED event', async () => {
     const response = await fetchEvents(
-      app,
+      eventService,
       user1,
-      'environmentId=' + environment1.id
+      workspace1.id,
+      EventSource.ENVIRONMENT
     )
 
-    const event = {
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      source: EventSource.ENVIRONMENT,
-      triggerer: EventTriggerer.USER,
-      severity: EventSeverity.INFO,
-      type: EventType.ENVIRONMENT_UPDATED,
-      timestamp: expect.any(String),
-      metadata: expect.any(Object)
-    }
+    const event = response[0]
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining([event]))
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
   })
 
   it('should make other environments non-default if the current environment is the default one', async () => {
@@ -494,6 +498,24 @@ describe('Environment Controller Tests', () => {
     expect(response.statusCode).toBe(200)
   })
 
+  it('should have created a ENVIRONMENT_DELETED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.ENVIRONMENT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
   it('should not be able to delete an environment that does not exist', async () => {
     const response = await app.inject({
       method: 'DELETE',
@@ -538,12 +560,10 @@ describe('Environment Controller Tests', () => {
   })
 
   it('should not be able to make the only environment non-default', async () => {
-    await prisma.environment.delete({
+    await prisma.environment.deleteMany({
       where: {
-        projectId_name: {
-          projectId: project1.id,
-          name: 'Default'
-        }
+        projectId: project1.id,
+        name: 'Default'
       }
     })
 
