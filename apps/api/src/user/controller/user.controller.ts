@@ -17,22 +17,53 @@ import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AdminGuard } from '../../auth/guard/admin/admin.guard'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
   ApiTags
 } from '@nestjs/swagger'
 import { BypassOnboarding } from '../../decorators/bypass-onboarding.decorator'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { ForbidApiKey } from '../../decorators/forbid-api-key.decorator'
+import { invalidAuthenticationResponse } from '../../common/static'
+
+const userSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    email: { type: 'string' },
+    name: { type: 'string' },
+    profilePictureUrl: { type: 'string' },
+    isAdmin: { type: 'boolean' },
+    isActive: { type: 'boolean' },
+    isOnboardingFinished: { type: 'boolean' }
+  }
+}
 
 @ApiTags('User Controller')
 @Controller('user')
+@ApiBearerAuth()
+@ApiSecurity('api_key')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
   @BypassOnboarding()
   @RequiredApiKeyAuthorities(Authority.READ_SELF)
+  @ApiOperation({
+    summary: 'Get current user',
+    description:
+      'This endpoint returns the details of the currently logged in user'
+  })
+  @ApiOkResponse({
+    description: 'User details',
+    schema: userSchema
+  })
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
   async getCurrentUser(@CurrentUser() user: User) {
     return this.userService.getSelf(user)
   }
@@ -40,6 +71,16 @@ export class UserController {
   @Put()
   @BypassOnboarding()
   @RequiredApiKeyAuthorities(Authority.UPDATE_SELF)
+  @ApiOperation({
+    summary: 'Update current user',
+    description:
+      'This endpoint updates the details of the currently logged in user'
+  })
+  @ApiOkResponse({
+    description: 'Updated user details',
+    schema: userSchema
+  })
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
   async updateSelf(@CurrentUser() user: User, @Body() dto: UpdateUserDto) {
     return await this.userService.updateSelf(user, dto)
   }
@@ -48,6 +89,15 @@ export class UserController {
   @ApiNoContentResponse()
   @HttpCode(204)
   @ForbidApiKey()
+  @ApiOperation({
+    summary: 'Delete current user',
+    description:
+      'This endpoint deletes the details of the currently logged in user'
+  })
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
+  @ApiNoContentResponse({
+    description: 'User deleted successfully'
+  })
   async deleteSelf(@CurrentUser() user: User) {
     await this.userService.deleteSelf(user)
   }
