@@ -9,9 +9,16 @@
         "lint": "next lint --fix"
     },
     "dependencies": {
+        "@radix-ui/react-slot": "^1.0.2",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.0",
+        "geist": "^1.2.2",
+        "lucide-react": "^0.340.0",
         "next": "^13.4.19",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "tailwind-merge": "^2.2.1",
+        "tailwindcss-animate": "^1.0.7"
     },
     "devDependencies": {
         "@next/eslint-plugin-next": "^13.4.19",
@@ -21,10 +28,10 @@
         "@types/react": "^18.0.22",
         "@types/react-dom": "^18.0.7",
         "autoprefixer": "^10.4.16",
+        "eslint-config-custom": "workspace:*",
         "postcss": "^8.4.31",
         "tailwindcss": "^3.3.3",
-        "typescript": "^4.5.3",
-        "eslint-config-custom": "workspace:*",
-        "tsconfig": "workspace:*"
+        "tsconfig": "workspace:*",
+        "typescript": "^4.5.3"
     }
 }
