@@ -29,29 +29,26 @@ import {
 } from '@nestjs/swagger'
 import { invalidAuthenticationResponse } from '../../common/static'
 
+const baseProperties = {
+  id: { type: 'string' },
+  name: { type: 'string' },
+  expiresAt: { type: 'string' },
+  authorities: { type: 'array', items: { type: 'string' } },
+  createdAt: { type: 'string' },
+  updatedAt: { type: 'string' }
+}
+
 const apiKeySchemaWithValue = {
   type: 'object',
   properties: {
-    id: { type: 'string' },
-    name: { type: 'string' },
-    value: { type: 'string' },
-    expiresAt: { type: 'string' },
-    authorities: { type: 'array', items: { type: 'string' } },
-    createdAt: { type: 'string' },
-    updatedAt: { type: 'string' }
+    ...baseProperties,
+    value: { type: 'string' }
   }
 }
 
 const apiKeySchema = {
   type: 'object',
-  properties: {
-    id: { type: 'string' },
-    name: { type: 'string' },
-    expiresAt: { type: 'string' },
-    authorities: { type: 'array', items: { type: 'string' } },
-    createdAt: { type: 'string' },
-    updatedAt: { type: 'string' }
-  }
+  properties: baseProperties
 }
 
 @Controller('api-key')
@@ -86,7 +83,7 @@ export class ApiKeyController {
     name: 'id',
     description: 'API key ID',
     required: true,
-    type: String
+    schema: { type: 'string' }
   })
   @ApiOkResponse({
     schema: apiKeySchema,
@@ -112,7 +109,7 @@ export class ApiKeyController {
     name: 'id',
     description: 'API key ID',
     required: true,
-    type: String
+    schema: { type: 'string' }
   })
   @ApiNoContentResponse({
     description: 'API key deleted successfully'
@@ -132,7 +129,7 @@ export class ApiKeyController {
     name: 'id',
     description: 'API key ID',
     required: true,
-    type: String
+    schema: { type: 'string' }
   })
   @ApiOkResponse({
     schema: apiKeySchemaWithValue,
