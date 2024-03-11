@@ -13,7 +13,13 @@ import {
 import { AuthService } from '../service/auth.service'
 import { UserAuthenticatedResponse } from '../auth.types'
 import { Public } from '../../decorators/public.decorator'
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
+import {
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
@@ -62,12 +68,12 @@ export class AuthController {
     description:
       'This endpoint validates OTPs. If the OTP is valid, it returns a valid token along with the user details'
   })
-  @ApiParam({
+  @ApiQuery({
     name: 'email',
     description: 'Email to send OTP',
     required: true
   })
-  @ApiParam({
+  @ApiQuery({
     name: 'otp',
     description: 'OTP to validate',
     required: true

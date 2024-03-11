@@ -97,6 +97,12 @@ async function initializeNestApp() {
     .setTitle('keyshade')
     .setDescription('The keyshade API description')
     .setVersion('1.0')
+    .addBearerAuth()
+    .addSecurity('api_key', {
+      type: 'apiKey',
+      in: 'header',
+      name: 'x-keyshade-token'
+    })
     .build()
   const document = SwaggerModule.createDocument(app, swaggerConfig)
   SwaggerModule.setup('docs', app, document)
