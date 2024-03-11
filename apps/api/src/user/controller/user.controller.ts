@@ -23,13 +23,13 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiSecurity,
   ApiTags
 } from '@nestjs/swagger'
 import { BypassOnboarding } from '../../decorators/bypass-onboarding.decorator'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { ForbidApiKey } from '../../decorators/forbid-api-key.decorator'
+import { invalidAuthenticationResponse } from '../../common/static'
 
 const userSchema = {
   type: 'object',
@@ -63,9 +63,7 @@ export class UserController {
     description: 'User details',
     schema: userSchema
   })
-  @ApiForbiddenResponse({
-    description: 'Invalid authentication token or API key'
-  })
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
   async getCurrentUser(@CurrentUser() user: User) {
     return this.userService.getSelf(user)
   }
@@ -82,9 +80,7 @@ export class UserController {
     description: 'Updated user details',
     schema: userSchema
   })
-  @ApiForbiddenResponse({
-    description: 'Invalid authentication token or API key'
-  })
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
   async updateSelf(@CurrentUser() user: User, @Body() dto: UpdateUserDto) {
     return await this.userService.updateSelf(user, dto)
   }
@@ -98,11 +94,8 @@ export class UserController {
     description:
       'This endpoint deletes the details of the currently logged in user'
   })
-  @ApiForbiddenResponse({
-    description: 'Invalid authentication token'
-  })
-  @ApiResponse({
-    status: 204,
+  @ApiForbiddenResponse(invalidAuthenticationResponse)
+  @ApiNoContentResponse({
     description: 'User deleted successfully'
   })
   async deleteSelf(@CurrentUser() user: User) {

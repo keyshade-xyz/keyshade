@@ -97,7 +97,7 @@ async function initializeNestApp() {
     .setTitle('keyshade')
     .setDescription('The keyshade API description')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .addSecurity('api_key', {
       type: 'apiKey',
       in: 'header',
