@@ -6,9 +6,7 @@ interface EncryptButtonProps extends React.HTMLProps<HTMLButtonElement> {
   TARGET_TEXT: string
 }
 
-function EncryptButton({
-  TARGET_TEXT,
-}: EncryptButtonProps): React.JSX.Element {
+function EncryptButton({ TARGET_TEXT }: EncryptButtonProps): React.JSX.Element {
   // const TARGET_TEXT = 'Join Waitlist'
   const CYCLES_PER_LETTER = 2
   const SHUFFLE_TIME = 50
@@ -19,7 +17,7 @@ function EncryptButton({
 
   const [text, setText] = useState(TARGET_TEXT)
 
-  const scramble = ():void => {
+  const scramble = (): void => {
     let pos = 0
 
     intervalRef.current = setInterval(() => {
@@ -56,14 +54,13 @@ function EncryptButton({
       className="bg-brandBlue/[12%] backdrop-blur hover:text-brandBlue group relative overflow-hidden rounded-full px-4 py-2 font-mono font-medium uppercase text-neutral-300 transition-colors"
       onMouseEnter={scramble}
       onMouseLeave={stopScramble}
-      type='submit'
+      type="submit"
       whileHover={{
         scale: 1.025
       }}
       whileTap={{
         scale: 0.975
       }}
-      
     >
       <div className="relative z-10 flex items-center gap-2">
         <span className="flex">

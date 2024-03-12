@@ -44,13 +44,15 @@ export function InputBorderSpotlight({
   return (
     <div className="relative w-80">
       <input
-        autoCapitalize='off'
+        autoCapitalize="off"
         autoComplete="off"
         className="border-brandBlue/[30%] backdrop-blur focus:border-brandBlue h-10 w-full cursor-text rounded-full border bg-transparent bg-gradient-to-b from-[#E2E8FF]/[0%] to-[#E2E8FF]/[6%] p-3.5 px-[0.94rem]  py-3 text-slate-100 transition-colors  duration-500 placeholder:select-none placeholder:text-[#E2E8FF]/[50%] placeholder:text-neutral-500 focus:outline-none"
-        id='mce-EMAIL'
+        id="mce-EMAIL"
         name="EMAIL"
         onBlur={handleBlur}
-        onChange={(e) => {setEmail(e.target.value)}}
+        onChange={(e) => {
+          setEmail(e.target.value)
+        }}
         onFocus={handleFocus}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

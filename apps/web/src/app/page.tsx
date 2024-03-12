@@ -2,13 +2,12 @@
 
 import { Poppins } from 'next/font/google'
 import { useState } from 'react'
-// eslint-disable-next-line import/no-extraneous-dependencies -- chill
 import { Toaster, toast } from 'sonner'
+import { InputBorderSpotlight } from '@/components/ui/input-spotlight'
+import EncryptButton from '@/components/ui/encrypt-btn'
 import Links from '../components/links'
 import Killers from '../components/killers'
 import { Logo, Grid, Stars, DiscordSVG, XSVG, LinkdinSVG } from '../../public'
-import { InputBorderSpotlight } from '@/components/ui/input-spotlight'
-import EncryptButton from '@/components/ui/encrypt-btn'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -112,24 +111,35 @@ function Index(): React.JSX.Element {
               </form>
 
               <div className="flex items-center justify-center gap-8 mt-16 md:gap-24 md:mt-20">
-                <a href="https://discord.gg/mV9PsXsjaH" rel="noopener referrer" target="_blank">
+                <a
+                  href="https://discord.gg/mV9PsXsjaH"
+                  rel="noopener referrer"
+                  target="_blank"
+                >
                   <Killers>
-                  <DiscordSVG width={26} />
-                </Killers>
+                    <DiscordSVG width={26} />
+                  </Killers>
                 </a>
-                
-                <a href="https://twitter.com/keyshade_xyz" rel="noopener referrer" target="_blank">
+
+                <a
+                  href="https://twitter.com/keyshade_xyz"
+                  rel="noopener referrer"
+                  target="_blank"
+                >
                   <Killers>
-                  <XSVG width={26} />
-                </Killers>
+                    <XSVG width={26} />
+                  </Killers>
                 </a>
-                
-                <a href="https://www.linkedin.com/company/keyshade-xyz/" rel="noopener referrer" target="_blank">
+
+                <a
+                  href="https://www.linkedin.com/company/keyshade-xyz/"
+                  rel="noopener referrer"
+                  target="_blank"
+                >
                   <Killers>
-                  <LinkdinSVG width={26} />
-                </Killers>
+                    <LinkdinSVG width={26} />
+                  </Killers>
                 </a>
-                
               </div>
             </div>
           </div>
