@@ -9,8 +9,6 @@ description: Get to know the environment you are working with
 Here's the description of the environment variables used in the project. You can find the values for these variables in \`.env.example\`.
 
 * **DATABASE\_URL**: The URL of the PSQL database to connect to. This is used by the [Prisma Client](https://www.prisma.io/docs/orm/prisma-client) to connect to the database.
-* **SUPABASE\_API\_URL**: The URL of the Supabase API. This is used by the [Supabase Client](https://supabase.io/docs/reference/javascript/supabase-client) to connect to the Supabase API. Make sure you create a Supabase project and get the API URL from the project settings.
-* **SUPABASE\_ANON\_KEY**: The anonymous key of the Supabase project. This is used by the Supabase Client to connect to the Supabase API. Make sure you create a Supabase project and get the anonymous key from the project settings.
 * **SMTP\_HOST**: This is used to send out emails from the backend.&#x20;
 * **SMTP\_PORT:** The SMTP port as specified by your SMTP provider.
 * **SMTP\_EMAIL\_ADDRESS:** The email address you want to be sending out the emails from.

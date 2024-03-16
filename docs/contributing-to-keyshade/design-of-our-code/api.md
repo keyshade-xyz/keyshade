@@ -12,7 +12,6 @@ Our API is developed using the following stack:
 
 * **NestJS** as the base
 * **Prisma** as the DDL and DML
-* **Supabase** as the database and bucket storage
 * **Node Mailer** as the mail agent
 
 ## Structure
