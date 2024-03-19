@@ -92,7 +92,7 @@ async function initializeNestApp() {
     }),
     new QueryTransformPipe()
   )
-  const port = 4200
+  const port = process.env.API_PORT || 4200
   const swaggerConfig = new DocumentBuilder()
     .setTitle('keyshade')
     .setDescription('The keyshade API description')
