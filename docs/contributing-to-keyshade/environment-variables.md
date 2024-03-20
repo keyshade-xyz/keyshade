@@ -23,3 +23,4 @@ Here's the description of the environment variables used in the project. You can
 * **FROM\_EMAIL**: The display of the email sender title.
 * **JWT\_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.
 * **WEB\_FRONTEND\_URL, WORKSPACE\_FRONTEND\_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
+* **API\_PORT**: The environmental variable that specifies the port number on which the API server should listen for incoming connections. If not explicitly set, it defaults to port 4200.
