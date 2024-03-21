@@ -27,6 +27,6 @@ RUN pnpm db:generate-types
 RUN pnpm build:api
 RUN pnpm sourcemaps:api
 
-EXPOSE 4200
+EXPOSE ${API_PORT:-4200}
 
 ENTRYPOINT ["node", "apps/api/dist/main.js"]
