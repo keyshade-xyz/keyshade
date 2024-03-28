@@ -6,7 +6,7 @@ import EncryptText from '@/components/ui/encrypt-text'
 
 function Footer(): React.JSX.Element {
   return (
-    <footer className="my-[10rem] flex w-full flex-col items-center">
+    <footer className="my-[10vw] flex w-full flex-col items-center">
       {/* <div className='w-full h-[1px] bg-gradient-to-r from-[#8EE8FF]/0 via-[#8EE8FF]/50 to-[#8EE8FF]/0 mb-5' /> */}
       <div className="flex w-full items-center justify-center">
         <div className="relative h-20 w-[80%]">
@@ -27,7 +27,10 @@ function Footer(): React.JSX.Element {
       </div>
 
       <div className="mt-5 flex w-[60%] justify-between">
-        <FooterLogoSVG />
+        {/* <div className='pr-[2vw]'> */}
+          <FooterLogoSVG />
+        {/* </div> */}
+
         {/* <EncryptButton TARGET_TEXT="email us" /> */}
         <div className="flex gap-x-9">
           <div>

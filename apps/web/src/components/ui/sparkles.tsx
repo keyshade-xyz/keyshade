@@ -48,7 +48,7 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
 
   const particlesLoaded = (container?: Container): void => {
     if (container) {
-      console.log(container)
+      
       void controls.start({
         opacity: 1,
         transition: {

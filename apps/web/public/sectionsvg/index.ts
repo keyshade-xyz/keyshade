@@ -9,6 +9,10 @@ import ImportExportSVG from './ImportExport.svg'
 import SeemlessIntegrationSVG from './SeemlessIntegration.svg'
 import CommandLineSVG from './CommandLine.svg'
 import SnapshotSVG from './Snapshot.svg'
+import WebhookSVG from "./webhooksvg.svg";
+import CustomrollSVG from "./customrollsvg.svg";
+import DiscussSVG from "./discusssvg.svg";
+import ApprovalSVG from "./approvalsvg.svg";
 
 export {
   SecrectRotationSVG,
@@ -21,5 +25,9 @@ export {
   ImportExportSVG,
   SeemlessIntegrationSVG,
   CommandLineSVG,
-  SnapshotSVG
+  SnapshotSVG,
+  WebhookSVG,
+  CustomrollSVG,
+  DiscussSVG,
+  ApprovalSVG
 }

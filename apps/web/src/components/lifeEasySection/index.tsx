@@ -20,7 +20,7 @@ function LifeEasySection(): React.JSX.Element {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-9">
+      <div className="grid gap-9 md:grid-cols-3">
         <div className="grid gap-9">
           <Card>
             <StandardKitSVG />
@@ -37,8 +37,8 @@ function LifeEasySection(): React.JSX.Element {
             <div className="p-6">
               <h3 className="text-lg font-medium">Import & Export</h3>
               <span className="text-base text-[#9394A1]">
-                Import, Manage, and Modify Secrets Directly in Your Environment
-                with Our SDK
+                Import Data from External Platforms and Export to Share or
+                Backup Your Configurations.
               </span>
             </div>
           </Card>
@@ -50,9 +50,8 @@ function LifeEasySection(): React.JSX.Element {
                 Seamless Integration
               </h3>
               <span className="text-center  text-[#9394A1]">
-                Tap into Keyshade&apos;s Partner Ecosystem to Seamlessly
-                Integrate into Your Infrastructure, Fortify Security, and
-                Streamline Operations.
+                Effortlessly Connect and Sync Your Data with Partner Platforms
+                to Ensure Enhanced Workflow Efficiency.
               </span>
             </div>
             <SeemlessIntegrationSVG />
@@ -63,7 +62,8 @@ function LifeEasySection(): React.JSX.Element {
             <div className="p-6">
               <h3 className="text-lg font-medium">Command Line Interface</h3>
               <span className="text-base text-[#9394A1]">
-                Simplify your Logins and Safeguard your code in Real-Time
+                Manage Your Configurations Directly from Your Terminal across
+                Multiple OS
               </span>
             </div>
             <CommandLineSVG />
@@ -72,8 +72,7 @@ function LifeEasySection(): React.JSX.Element {
             <div className="p-6">
               <h3 className="text-lg font-medium">Snapshot</h3>
               <span className="text-base text-[#9394A1]">
-                Import, Manage, and Modify Secrets Directly in Your Environment
-                with Our SDK
+              Capture &quot;Pictures&quot; of Your Entire Workspace for Easy Restoration at Any Time.
               </span>
             </div>
             <SnapshotSVG />

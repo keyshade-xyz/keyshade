@@ -1,5 +1,8 @@
+import Script from 'next/script'
 import './global.css'
 import type { Metadata } from 'next'
+// eslint-disable-next-line import/no-extraneous-dependencies -- required for mixpanel
+import { init } from 'mixpanel-browser'
 
 const description =
   'Manage all your secrets securely with public key encryption and realtime based tools, that seamlessly fits into your codebase'
@@ -79,6 +82,15 @@ export default function RootLayout({
 }): React.JSX.Element {
   return (
     <html lang="en">
+      <head>
+        <Script id="mixpanel-analytics">
+          {init(process.env.NEXT_PUBLIC_MIXPANEL_TOKEN, {
+            debug: process.env.NODE_ENV === 'development',
+            track_pageview: true,
+            persistence: 'localStorage'
+          })}
+        </Script>
+      </head>
       <body>{children}</body>
     </html>
   )

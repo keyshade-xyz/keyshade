@@ -13,37 +13,37 @@ const cardData = [
   {
     heading: 'Secret Rotation',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Safeguard sensitive credentials with our automated rotation protocols',
     svg: <SecrectRotationSVG />
   },
   {
     heading: 'Versioning',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Track configuration changes effortlessly, with seamless rollback and detailed analysis ',
     svg: <VersoningSVG />
   },
   {
     heading: 'Role Based Access Control',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Safeguard Your Data with Granular Access Control and Permissions',
     svg: <RoleBaseSVG />
   },
   {
     heading: 'Public Key Encryption',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Utilize Public Key Encryption to Safely Share Secrets Across Your Infrastructure',
     svg: <PublicKeySVG />
   },
   {
     heading: 'Variables',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Store and Manage Non-Sensitive Data for Enhanced Configuration Flexibility.',
     svg: <VairiablesSVG />
   },
   {
     heading: 'Auditing and Alerting',
     description:
-      'Import, Manage, and Modify Secrets Directly in Your Environment with Our SDK',
+      'Stay Informed and Secure with Real-Time Monitoring and Instant Notifications.',
     svg: <AudtingSVG />
   }
 ]
@@ -53,9 +53,9 @@ function SecrectSection(): React.JSX.Element {
     <section className="mt-[10vw] flex flex-col items-center gap-y-[9.69rem]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
         <h2 className={`${GeistSans.className}  text-center text-5xl`}>
-          Secrects
+        Secure Your Configurations with Confidence
         </h2>
-        <span>Built for your Seamless Secret Integration</span>
+        {/* <span>Built for your Seamless Secret Integration</span> */}
       </div>
 
       <div className="grid gap-3 md:grid-cols-3 2xl:gap-9">
