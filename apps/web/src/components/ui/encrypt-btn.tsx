@@ -1,12 +1,13 @@
 'use client'
+import type { HTMLProps} from 'react';
 import React, { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
-function EncryptButton({
-  TARGET_TEXT
-}: {
+interface EncryptButtonProps extends HTMLProps<HTMLButtonElement> {
   TARGET_TEXT: string
-}): React.JSX.Element {
+}
+
+function EncryptButton({ TARGET_TEXT }: EncryptButtonProps): React.JSX.Element {
   // const TARGET_TEXT = 'Join Waitlist'
   const CYCLES_PER_LETTER = 2
   const SHUFFLE_TIME = 50
@@ -17,7 +18,7 @@ function EncryptButton({
 
   const [text, setText] = useState(TARGET_TEXT)
 
-  const scramble = () => {
+  const scramble = (): void => {
     let pos = 0
 
     intervalRef.current = setInterval(() => {

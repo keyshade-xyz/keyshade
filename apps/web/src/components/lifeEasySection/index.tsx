@@ -10,14 +10,14 @@ import Card from '../shared/card'
 
 function LifeEasySection(): React.JSX.Element {
   return (
-    <section className="mt-[10vw] flex flex-col items-center gap-y-[9.69rem]">
+    <section className="mt-[10vw] flex flex-col items-center gap-y-[5rem] md:gap-y-[9.69rem]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
-        <h2 className={`${GeistSans.className}  text-center text-5xl`}>
+        <h2 className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}>
           Making Developers Life Easy
         </h2>
-        <span className="text-center">
+        {/* <span className="text-center">
           Built for your Seamless Secret Integration
-        </span>
+        </span> */}
       </div>
 
       <div className="grid gap-9 md:grid-cols-3">
@@ -72,7 +72,8 @@ function LifeEasySection(): React.JSX.Element {
             <div className="p-6">
               <h3 className="text-lg font-medium">Snapshot</h3>
               <span className="text-base text-[#9394A1]">
-              Capture &quot;Pictures&quot; of Your Entire Workspace for Easy Restoration at Any Time.
+                Capture &quot;Pictures&quot; of Your Entire Workspace for Easy
+                Restoration at Any Time.
               </span>
             </div>
             <SnapshotSVG />

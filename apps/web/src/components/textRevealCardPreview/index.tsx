@@ -15,8 +15,8 @@ export function TextRevealCardPreview(): React.JSX.Element {
       >
         <TextRevealCardTitle>Rethink privacy with us.</TextRevealCardTitle>
         <TextRevealCardDescription>
-          This is a text reveal card. Hover over the card to reveal the hidden
-          text.
+          We make sure your secrets are safe and secure. We provide a secure way
+          of storing and managing your secrets.
         </TextRevealCardDescription>
       </TextRevealCard>
     </div>

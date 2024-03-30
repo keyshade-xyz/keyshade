@@ -11,16 +11,7 @@ import {
 } from 'framer-motion'
 import { cn } from '@/utils/cn'
 
-export function Button({
-  borderRadius = '9999px',
-  children,
-  as: Component = 'button',
-  containerClassName,
-  borderClassName,
-  duration,
-  className,
-  ...otherProps
-}: {
+interface ButtonProps {
   borderRadius?: string
   children: React.ReactNode
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's okey
@@ -31,7 +22,17 @@ export function Button({
   className?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's okey
   [key: string]: any
-}): React.JSX.Element {
+}
+
+export function Button({
+  borderRadius = '9999px',
+  children,
+  as: Component = 'button',
+  containerClassName,
+  borderClassName,
+  duration,
+  className
+}: ButtonProps): React.JSX.Element {
   return (
     <Component
       className={cn(
@@ -41,7 +42,6 @@ export function Button({
       style={{
         borderRadius
       }}
-      {...otherProps}
     >
       <div
         className="absolute inset-0"

@@ -5,10 +5,13 @@ interface CardProps {
   children: React.ReactNode
 }
 
-export default function Card({ children, widthFull }: CardProps): React.JSX.Element {
+export default function Card({
+  children,
+  widthFull
+}: CardProps): React.JSX.Element {
   return (
     <div
-      className={`flex ${widthFull ? "w-full" :"md:w-[25rem] w-[20rem]"} h-full flex-col justify-end rounded-2xl backdrop-blur-2xl`}
+      className={`flex ${widthFull ? 'md:w-full w-[20rem]' : 'w-[20rem] md:w-[25rem]'} h-full flex-col justify-end rounded-2xl backdrop-blur-2xl`}
       style={{
         background:
           'linear-gradient(180deg, rgba(52, 52, 52, 0.20) 0%, rgba(0, 0, 0, 0.00) 100%), rgba(17, 18, 27, 0.24)',

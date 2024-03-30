@@ -2,12 +2,12 @@ import React from 'react'
 import { FooterLogoSVG } from '@public/shared'
 import { SparklesCore } from '@/components/ui/sparkles'
 import EncryptText from '@/components/ui/encrypt-text'
+import Link from 'next/link'
 // import EncryptButton from '@/components/ui/encrypt-btn'
 
 function Footer(): React.JSX.Element {
   return (
     <footer className="my-[10vw] flex w-full flex-col items-center">
-      {/* <div className='w-full h-[1px] bg-gradient-to-r from-[#8EE8FF]/0 via-[#8EE8FF]/50 to-[#8EE8FF]/0 mb-5' /> */}
       <div className="flex w-full items-center justify-center">
         <div className="relative h-20 w-[80%]">
           <div className="absolute inset-x-20 top-0 h-[2px] w-3/4 bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm" />
@@ -26,13 +26,13 @@ function Footer(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="mt-5 flex w-[60%] justify-between">
+      <div className="mt-5 w-[60%] justify-between md:flex">
         {/* <div className='pr-[2vw]'> */}
-          <FooterLogoSVG />
+        <FooterLogoSVG />
         {/* </div> */}
 
         {/* <EncryptButton TARGET_TEXT="email us" /> */}
-        <div className="flex gap-x-9">
+        <div className="gap-x-9 md:flex">
           <div>
             <span className="text-lg font-medium uppercase text-white/40">
               Resources
@@ -72,10 +72,14 @@ function Footer(): React.JSX.Element {
             </span>
             <ul className="mt-3 flex flex-col gap-y-3">
               <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="About" />
+                <Link href="/about">
+                  <EncryptText TARGET_TEXT="About" />
+                </Link>
               </li>
               <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="Careers" />
+                <Link href="/careers">
+                  <EncryptText TARGET_TEXT="Careers" />
+                </Link>
               </li>
               <li className="text-white/60 transition-colors hover:text-white">
                 <EncryptText TARGET_TEXT="Contact" />
