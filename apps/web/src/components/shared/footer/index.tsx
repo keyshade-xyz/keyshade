@@ -1,8 +1,8 @@
 import React from 'react'
+import Link from 'next/link'
 import { FooterLogoSVG } from '@public/shared'
 import { SparklesCore } from '@/components/ui/sparkles'
 import EncryptText from '@/components/ui/encrypt-text'
-import Link from 'next/link'
 // import EncryptButton from '@/components/ui/encrypt-btn'
 
 function Footer(): React.JSX.Element {

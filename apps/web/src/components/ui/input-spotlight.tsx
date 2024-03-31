@@ -1,5 +1,5 @@
 'use client'
-import type { Dispatch, SetStateAction} from 'react';
+import type { Dispatch, SetStateAction } from 'react'
 import React, { useRef, useState } from 'react'
 
 interface InputBorderSpotlightProps {
@@ -46,7 +46,7 @@ export function InputBorderSpotlight({
       <input
         autoCapitalize="off"
         autoComplete="off"
-        className="border-brandBlue/[30%] backdrop-blur focus:border-brandBlue h-10 w-full cursor-text rounded-full border bg-transparent bg-gradient-to-b from-[#E2E8FF]/[0%] to-[#E2E8FF]/[6%] p-3.5 px-[0.94rem]  py-3 text-slate-100 transition-colors  duration-500 placeholder:select-none placeholder:text-[#E2E8FF]/[50%] placeholder:text-neutral-500 focus:outline-none"
+        className="border-brandBlue/[30%] focus:border-brandBlue h-10 w-full cursor-text rounded-full border bg-transparent bg-gradient-to-b from-[#E2E8FF]/[0%] to-[#E2E8FF]/[6%] p-3.5 px-[0.94rem] py-3  text-slate-100 backdrop-blur transition-colors  duration-500 placeholder:select-none placeholder:text-[#E2E8FF]/[50%] placeholder:text-neutral-500 focus:outline-none"
         id="mce-EMAIL"
         name="EMAIL"
         onBlur={handleBlur}

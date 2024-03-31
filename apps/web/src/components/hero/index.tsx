@@ -1,9 +1,9 @@
 'use client'
 // import { GeistSans } from 'geist/font/sans'
 import Image from 'next/image'
-import { ColorBGSVG, HeroImage } from '@public/hero'
 import { useState } from 'react'
 import { Toaster, toast } from 'sonner'
+import { ColorBGSVG, HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
 import { InputBorderSpotlight } from '../ui/input-spotlight'
 

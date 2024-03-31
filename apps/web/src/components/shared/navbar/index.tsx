@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/moving-border'
 function Navbar(): React.JSX.Element {
   return (
     <nav
-      className="mt-5 flex mx-10 w-full md:w-[79.625rem] items-center justify-between rounded-full border border-[#728689]/60 px-2 md:px-[2.94rem] py-1"
+      className="mx-10 mt-5 flex w-full items-center justify-between rounded-full border border-[#728689]/60 px-2 py-1 md:w-[79.625rem] md:px-[2.94rem]"
       style={{
         background:
           'linear-gradient(180deg, rgba(226, 232, 255, 0.15) 0%, rgba(226, 232, 255, 0.03) 100%)'
@@ -15,7 +15,7 @@ function Navbar(): React.JSX.Element {
         <Logo className="hidden md:flex" />
         <LogoM className="flex md:hidden" />
       </Link>
-      <ul className="hidden md:flex gap-x-4 text-white/60">
+      <ul className="hidden gap-x-4 text-white/60 md:flex">
         <li>
           <a
             href="https://docs.keyshade.xyz/"

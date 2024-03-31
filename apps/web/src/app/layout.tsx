@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars -- Ignored because the env vars are declared in the .env file */
 import './global.css'
 import type { Metadata } from 'next'
 
@@ -78,7 +77,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }): React.JSX.Element {
-
   return (
     <html lang="en">
       <body>{children}</body>

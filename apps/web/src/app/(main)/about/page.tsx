@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import {
   AritraImg,
   AtanuImg,
@@ -7,7 +8,6 @@ import {
   SwatiImg
 } from '@public/about/team'
 import { ColorBGSVG } from '@public/hero'
-import Image from 'next/image'
 import { TracingBeam } from '@/components/ui/tracing-beam'
 
 const teamData = [
@@ -145,7 +145,7 @@ function About(): React.JSX.Element {
                 amazing software.
               </p>
             </div>
-            <div className="mt-10 grid md:w-[60%] grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="mt-10 grid grid-cols-2 gap-3 md:w-[60%] md:grid-cols-3">
               {teamData.map((members, index) => {
                 return (
                   <div
@@ -155,8 +155,8 @@ function About(): React.JSX.Element {
                   >
                     <Image
                       alt="Atanu"
-                      className="aspect-square object-center w-[10rem] rounded-md"
-                      placeholder='blur'
+                      className="aspect-square w-[10rem] rounded-md object-center"
+                      placeholder="blur"
                       src={members.img}
                     />
                     <div className="flex h-full flex-col justify-between">

@@ -1,5 +1,5 @@
 'use client'
-import type { HTMLProps} from 'react';
+import type { HTMLProps } from 'react'
 import React, { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 

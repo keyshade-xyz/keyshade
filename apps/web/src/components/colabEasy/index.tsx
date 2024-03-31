@@ -12,7 +12,9 @@ function ColabEasy(): React.JSX.Element {
   return (
     <section className="mt-[10vw] flex flex-col items-center gap-y-[5rem] md:gap-y-[9.69rem]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
-        <h2 className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}>
+        <h2
+          className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}
+        >
           Collaboration made easy
         </h2>
         <span className="text-center">
@@ -30,7 +32,7 @@ function ColabEasy(): React.JSX.Element {
           </div>
           <WebhookSVG />
         </Card>
-        <div className="flex-col space-y-5 md:space-y-0 gap-5 md:flex">
+        <div className="flex-col gap-5 space-y-5 md:flex md:space-y-0">
           <div className="gap-5 space-y-5 md:flex md:space-y-0">
             <Card>
               <div className="p-6">
