@@ -20,8 +20,7 @@ export function TextRevealCard({
   className
 }: TextRevealCardProps): React.JSX.Element {
   const [widthPercentage, setWidthPercentage] = useState(0)
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- ignore
-  const cardRef = useRef<HTMLDivElement | any>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const [left, setLeft] = useState<number>(0)
   const [localWidth, setLocalWidth] = useState<number>(0)
   const [isMouseOver, setIsMouseOver] = useState<boolean>(false)
@@ -30,11 +29,10 @@ export function TextRevealCard({
     if (cardRef.current) {
       // eslint-disable-next-line @typescript-eslint/no-shadow -- ignore
       const { left, width: localWidth } =
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- ignore
         cardRef.current.getBoundingClientRect()
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument --  ignore
+
       setLeft(left)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument --  ignore
+
       setLocalWidth(localWidth)
     }
   }, [])
