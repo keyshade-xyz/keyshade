@@ -77,8 +77,8 @@ function Footer(): React.JSX.Element {
                 </Link>
               </li>
               <li className="text-white/60 transition-colors hover:text-white">
-                <Link href="/careers">
-                  <EncryptText TARGET_TEXT="Careers" />
+                <Link href="/career">
+                  <EncryptText TARGET_TEXT="Career" />
                 </Link>
               </li>
               <li className="text-white/60 transition-colors hover:text-white">
