@@ -9,7 +9,7 @@ function Career(): React.JSX.Element {
         <h1 className="text-brandBlue text-4xl">Careers at KeyShade</h1>
         <p className="w-[80%]">
           We are booting up, keep an eye out for open positions. Meanwhile, you
-          can contribute to our projects.
+          can contribute to our project.
         </p>
         <div className="flex">
           <a

@@ -41,7 +41,7 @@ function ColabEasy(): React.JSX.Element {
                   Fine-tune Permissions, for allocated Team Members
                 </span>
               </div>
-              <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[50vh] md:translate-x-[3vw] md:py-0 md:pt-10" />
+              <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
             </Card>
             <FollowerPointerCard>
               <Card>

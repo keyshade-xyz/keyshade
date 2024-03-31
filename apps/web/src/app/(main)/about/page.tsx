@@ -40,7 +40,7 @@ const teamData = [
   },
   {
     name: 'Aritra Biswas',
-    role: 'CMO',
+    role: 'CFO',
     img: AritraImg,
     socials: {
       linkedin: 'https://www.linkedin.com/in/rajdip-bhattacharya-581119232/'
@@ -76,7 +76,7 @@ function About(): React.JSX.Element {
             <div className="flex flex-col gap-5">
               <h2 className="text-brandBlue/80 text-5xl">The Problem</h2>
               <p className="text-white/60">
-                We believe Configurations mangement is an easily overlooked part
+                We believe Configuration Mangement is an easily overlooked part
                 of software developement, all teams need it and all teams do it,
                 but not in a proper systematic way, sometimes secrets are shared
                 over slack ,sometimes over direct messages and often over email.

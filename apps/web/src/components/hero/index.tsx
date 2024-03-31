@@ -51,7 +51,7 @@ function Hero(): React.JSX.Element {
     <>
       <Toaster />
       <div className="relative flex h-screen flex-col items-center justify-center md:mt-[10rem]">
-        <ColorBGSVG className="absolute -z-10 -translate-y-[6vw]" />
+        <ColorBGSVG className="absolute -z-10 -translate-y-[12rem]" />
         <section className="flex flex-col items-center gap-8 py-[6.88rem]">
           <h1
             className={` text-brandBlue w-[25rem] text-center text-4xl font-extralight md:w-auto md:text-6xl`}
