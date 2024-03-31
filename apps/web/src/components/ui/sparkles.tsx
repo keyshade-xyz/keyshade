@@ -46,15 +46,29 @@ export function SparklesCore(props: ParticlesProps): React.JSX.Element {
   }, [])
   const controls = useAnimation()
 
-  const particlesLoaded = (container?: Container): void => {
-    if (container) {
-      void controls.start({
-        opacity: 1,
-        transition: {
-          duration: 1
-        }
-      })
-    }
+  const particlesLoaded = (
+    container?: Container | undefined
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (container) {
+        controls
+          .start({
+            opacity: 1,
+            transition: {
+              duration: 1
+            }
+          })
+          .then(() => {
+            resolve()
+          })
+          .catch((error) => {
+            console.error('Error starting animation: ', error)
+            reject(new Error(`${error}`))
+          })
+      } else {
+        resolve()
+      }
+    })
   }
 
   return (
