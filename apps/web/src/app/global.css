@@ -3,5 +3,18 @@
 @tailwind utilities;
 
 body {
-  background: #03080B;
+  background: #04050A;
+  color: white;
+  color-scheme: dark;
+}
+
+.gradBtnBg {
+  background: transparent;
+  background-size: 100% 100%;
+  transition: background .6s ease,background-size .6s ease-in-out
+}
+
+.gradBtnBg:hover {
+  background: radial-gradient(84.92% 150% at 50% 138.75%,hsla(0,0%,100%,.24) 0,hsla(0,0%,100%,0) 100%),hsla(0,0%,100%,.01);
+  background-size: 150% 150%
 }

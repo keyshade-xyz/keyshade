@@ -1,8 +1,9 @@
 'use client'
+import type { HTMLProps } from 'react'
 import React, { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
-interface EncryptButtonProps extends React.HTMLProps<HTMLButtonElement> {
+interface EncryptButtonProps extends HTMLProps<HTMLButtonElement> {
   TARGET_TEXT: string
 }
 
@@ -51,10 +52,9 @@ function EncryptButton({ TARGET_TEXT }: EncryptButtonProps): React.JSX.Element {
 
   return (
     <motion.button
-      className="bg-brandBlue/[12%] backdrop-blur hover:text-brandBlue group relative overflow-hidden rounded-full px-4 py-2 font-mono font-medium uppercase text-neutral-300 transition-colors"
+      className="bg-brandBlue/[12%] hover:text-brandBlue group relative overflow-hidden rounded-full px-4 py-2 font-mono font-medium uppercase text-neutral-300 transition-colors"
       onMouseEnter={scramble}
       onMouseLeave={stopScramble}
-      type="submit"
       whileHover={{
         scale: 1.025
       }}
