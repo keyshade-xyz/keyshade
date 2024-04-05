@@ -7,13 +7,13 @@ export default function AuthPage(): React.JSX.Element {
   return (
     <main className="flex h-screen items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-center mb-14">
+        <div className="mb-14 flex flex-col items-center">
           <KeyshadeBigSVG />
           <h1 className={`${GeistSans.className} text-[2.5rem] font-semibold`}>
             Welcome to Keyshade
           </h1>
         </div>
-        <div className='grid grid-cols-3 gap-x-6'>
+        <div className="grid grid-cols-3 gap-x-6">
           <Button>
             <GoogleSVG />
           </Button>
@@ -25,7 +25,7 @@ export default function AuthPage(): React.JSX.Element {
           </Button>
         </div>
 
-        <div className='text-center text-white/40'>or</div>
+        <div className="text-center text-white/40">or</div>
 
         <div className="flex flex-col gap-3">
           <Input placeholder="Enter your mail " type="email" />
