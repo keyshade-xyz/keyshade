@@ -131,7 +131,7 @@
     "turbo": "^1.12.4"
   },
   "dependencies": {
-    "@million/lint": "^0.0.66",
+    "@million/lint": "^0.0.73",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
     "million": "^3.0.5"
