@@ -261,7 +261,7 @@ describe('Api Key Role Controller Tests', () => {
       }
     })
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(204)
   })
 
   afterAll(async () => {

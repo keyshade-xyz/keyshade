@@ -3,15 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 6969",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix"
   },
   "dependencies": {
+    "@tsparticles/engine": "^3.3.0",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.3.0",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.0.6",
+    "geist": "^1.2.2",
     "next": "^13.5.6",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sharp": "^0.33.3",
+    "sonner": "^1.4.41",
+    "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.19",

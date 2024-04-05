@@ -92,11 +92,17 @@ async function initializeNestApp() {
     }),
     new QueryTransformPipe()
   )
-  const port = 4200
+  const port = process.env.API_PORT || 4200
   const swaggerConfig = new DocumentBuilder()
     .setTitle('keyshade')
     .setDescription('The keyshade API description')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
+    .addSecurity('api_key', {
+      type: 'apiKey',
+      in: 'header',
+      name: 'x-keyshade-token'
+    })
     .build()
   const document = SwaggerModule.createDocument(app, swaggerConfig)
   SwaggerModule.setup('docs', app, document)

@@ -18,6 +18,6 @@ primary_region = "bom"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "256mb"
+  memory = "512mb"
   cpus = 1
   cpu_kind = "shared"
