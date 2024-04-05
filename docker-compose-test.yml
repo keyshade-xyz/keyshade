@@ -15,7 +15,6 @@ services:
       POSTGRES_DB: tests
     networks:
       - keyshade-test
-
 networks:
   keyshade-test:
     driver: bridge
