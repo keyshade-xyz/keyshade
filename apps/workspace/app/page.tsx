@@ -4,7 +4,7 @@ export default function Index(): React.JSX.Element {
   return (
     <div>
       Workspace
-      <Button disabled>Hello</Button>
+      <Button>Hello !!!</Button>
     </div>
   )
 }

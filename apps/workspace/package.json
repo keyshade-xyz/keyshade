@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev -p 3025",
         "build": "next build",
         "start": "next start",
         "lint": "next lint --fix"
@@ -13,11 +13,12 @@
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.0",
         "geist": "^1.2.2",
+        "input-otp": "^1.2.4",
         "lucide-react": "^0.340.0",
         "next": "^13.4.19",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "tailwind-merge": "^2.2.1",
+        "tailwind-merge": "^2.2.2",
         "tailwindcss-animate": "^1.0.7"
     },
     "devDependencies": {
