@@ -13,7 +13,6 @@ services:
       - ./data:/var/lib/postgresql/data
     networks:
       - keyshade-dev
-
 networks:
   keyshade-dev:
     driver: bridge
