@@ -15,26 +15,6 @@ services:
       POSTGRES_DB: tests
     networks:
       - keyshade-test
-  web:
-    container_name: keyshade-web
-    build:
-      context: .
-      dockerfile: ./apps/web/Dockerfile
-    restart: always
-    ports:
-      - 3000:3000
-    networks:
-      - keyshade-test
-  api:
-    container_name: keyshade-api
-    build:
-      context: .
-      dockerfile: ./apps/api/Dockerfile
-    restart: always
-    ports:
-      - 3001:3001
-    networks:
-      - keyshade-test
 networks:
   keyshade-test:
     driver: bridge
