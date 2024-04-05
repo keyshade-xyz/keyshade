@@ -34,18 +34,18 @@ FROM base AS runner
 WORKDIR /app
 
 # Don't run production as root
-# RUN addgroup --system --gid 1001 nodejs
-# RUN adduser --system --uid 1001  nextjs
-# USER nextjs
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001  nextjs
+USER nextjs --chmod=644
 
 COPY --from=installer /app/apps/web/next.config.js .
 COPY --from=installer /app/apps/web/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer --chown=root:root --chmod=644  /app/apps/web/.next/standalone ./
-COPY --from=installer --chown=root:root --chmod=644  /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=installer --chown=root:root --chmod=644  /app/apps/web/public ./apps/web/public
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 
 ENV PORT=3000
