@@ -21,7 +21,7 @@ RUN npm install --ignore-scripts -g pnpm
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install
+RUN pnpm install --no-cache
 
 # Build the project
 COPY --from=builder /app/out/full/ .
@@ -38,17 +38,18 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001  nextjs
 USER nextjs
 
-COPY --chown=nextjs:nodejs --chmod=644 --from=installer /app/apps/web/next.config.js .
-COPY --chown=nextjs:nodejs --chmod=644 --from=installer /app/apps/web/package.json .
+COPY --from=installer /app/apps/web/next.config.js .
+COPY --from=installer /app/apps/web/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer --chmod=644  --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=installer --chmod=644  --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=installer --chmod=644  --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+COPY --from=installer  --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=installer  --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=installer  --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 
 ENV PORT=3000
+ENV NEXT_SHARP_PATH=/app/apps/web/.next/sharp
 EXPOSE 3000
 ENV HOSTNAME "0.0.0.0"
 
