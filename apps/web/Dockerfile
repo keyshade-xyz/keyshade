@@ -6,7 +6,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update && apk upgrade
 # working directory
 WORKDIR /app
-RUN npm install -g turbo
+RUN npm install --ignore-scripts -g turbo
 COPY . .
 RUN turbo prune web --docker
 
@@ -17,11 +17,11 @@ RUN apk update
 WORKDIR /app
 
 # install the dependencies
-RUN npm install -g pnpm
+RUN npm install --ignore-scripts -g pnpm
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm  install
+RUN pnpm install
 
 # Build the project
 COPY --from=builder /app/out/full/ .
