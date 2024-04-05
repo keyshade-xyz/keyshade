@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - develop
-    paths: ['apps/api/**', '.github/workflows/stage-api.yml']
+    paths: ['apps/api/**', '.github/workflows/stage-api.yml', 'fly.api.toml']
 
 env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

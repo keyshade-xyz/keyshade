@@ -131,7 +131,7 @@ export class ApiKeyService {
           contains: search
         }
       },
-      skip: (page - 1) * limit,
+      skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
