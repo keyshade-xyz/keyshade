@@ -22,8 +22,8 @@ function ColabEasy(): React.JSX.Element {
         </span>
       </div>
 
-      <div className="gap-5 space-y-5 md:flex md:space-y-0">
-        <Card>
+      <div className="auto-cols-min  gap-5 space-y-5 md:grid md:space-y-0">
+        <Card className="row-span-2">
           <div className="p-6">
             <h3 className="text-lg font-medium">Webhook Alerts</h3>
             <span className="text-base text-[#9394A1]">
@@ -32,46 +32,42 @@ function ColabEasy(): React.JSX.Element {
           </div>
           <WebhookSVG />
         </Card>
-        <div className="flex-col gap-5 space-y-5 md:flex md:space-y-0">
-          <div className="gap-5 space-y-5 md:flex md:space-y-0">
-            <Card>
-              <div className="p-6">
-                <h3 className="text-lg font-medium">Custom Roles</h3>
-                <span className="text-base text-[#9394A1]">
-                  Fine-tune Permissions, for allocated Team Members
-                </span>
-              </div>
-              <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
-            </Card>
-            <FollowerPointerCard>
-              <Card>
-                <div className="p-6">
-                  <h3 className="text-lg font-medium">Discussion & Notes</h3>
-                  <span className="text-base text-[#9394A1]">
-                    Collaborate on Secrets and Changes within your Organisation
-                  </span>
-                </div>
-                <DiscussSVG />
-              </Card>
-            </FollowerPointerCard>
+        <Card>
+          <div className="p-6">
+            <h3 className="text-lg font-medium">Custom Roles</h3>
+            <span className="text-base text-[#9394A1]">
+              Fine-tune Permissions, for allocated Team Members
+            </span>
           </div>
-          <Card widthFull>
-            <div className="items-center md:inline-flex">
-              <div className="flex flex-col p-6 md:w-[40%]">
-                <h3 className="flex text-lg font-medium">
-                  Approval before Commit
-                </h3>
-                <span className="flex text-base text-[#9394A1]">
-                  Integrate an additional validation layer to authorise every
-                  configuration change
-                </span>
-              </div>
-              <div>
-                <ApprovalSVG />
-              </div>
+          <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
+        </Card>
+        <FollowerPointerCard className="col-start-3 col-end-4">
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-medium">Discussion & Notes</h3>
+              <span className="text-base text-[#9394A1]">
+                Collaborate on Secrets and Changes within your Organisation
+              </span>
             </div>
+            <DiscussSVG />
           </Card>
-        </div>
+        </FollowerPointerCard>
+        <Card className="col-span-2" widthFull>
+          <div className="items-center md:inline-flex">
+            <div className="flex flex-col p-6 md:w-[40%]">
+              <h3 className="flex text-lg font-medium">
+                Approval before Commit
+              </h3>
+              <span className="flex text-base text-[#9394A1]">
+                Integrate an additional validation layer to authorise every
+                configuration change
+              </span>
+            </div>
+            <div>
+              <ApprovalSVG />
+            </div>
+          </div>
+        </Card>
       </div>
     </section>
   )
