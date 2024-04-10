@@ -15,6 +15,12 @@ services:
       POSTGRES_DB: tests
     networks:
       - keyshade-test
+  redis:
+    image: redis:6
+    ports:
+      - '6379:6379'
+    networks:
+      - keyshade-test
 networks:
   keyshade-test:
     driver: bridge

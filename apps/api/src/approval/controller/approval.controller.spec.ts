@@ -10,12 +10,17 @@ import { ApprovalService } from '../service/approval.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { RedisClientType } from 'redis'
+import { mockDeep } from 'jest-mock-extended'
+import { ProviderModule } from '../../provider/provider.module'
 
 describe('ApprovalController', () => {
   let controller: ApprovalController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ProviderModule],
       controllers: [ApprovalController],
       providers: [
         ApprovalService,
@@ -31,7 +36,10 @@ describe('ApprovalController', () => {
           useClass: MockMailService
         }
       ]
-    }).compile()
+    })
+      .overrideProvider(REDIS_CLIENT)
+      .useValue(mockDeep<RedisClientType>())
+      .compile()
 
     controller = module.get<ApprovalController>(ApprovalController)
   })

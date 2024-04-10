@@ -6,7 +6,6 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { Request } from 'express'
 import { Reflector } from '@nestjs/core'
 import { IS_PUBLIC_KEY } from '../../../decorators/public.decorator'
 import { PrismaService } from '../../../prisma/prisma.service'
@@ -41,6 +40,10 @@ export class AuthGuard implements CanActivate {
     let user: AuthenticatedUserContext | null = null
     const request = context.switchToHttp().getRequest()
     const authType = this.getAuthType(request)
+
+    if (process.env.NODE_ENV !== 'e2e' && authType === 'NONE') {
+      throw new ForbiddenException('No authentication provided')
+    }
 
     // In case the environment is e2e, we want to authenticate the user using the email
     // else we want to authenticate the user using the JWT token.
@@ -129,25 +132,32 @@ export class AuthGuard implements CanActivate {
     return true
   }
 
-  private getAuthType(request: Request): 'JWT' | 'API_KEY' | 'NONE' {
-    if (request.headers[X_KEYSHADE_TOKEN]) {
+  private getAuthType(request: any): 'JWT' | 'API_KEY' | 'NONE' {
+    const headers = this.getHeaders(request)
+    if (headers[X_KEYSHADE_TOKEN]) {
       return 'API_KEY'
     }
-    if (request.headers[AUTHORIZATION]) {
+    if (headers[AUTHORIZATION]) {
       return 'JWT'
     }
     return 'NONE'
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? []
+  private extractTokenFromHeader(request: any): string | undefined {
+    const headers = this.getHeaders(request)
+    const [type, token] = headers.authorization?.split(' ') ?? []
     return type === 'Bearer' ? token : undefined
   }
 
-  private extractApiKeyFromHeader(request: Request): string | undefined {
-    if (Array.isArray(request.headers[X_KEYSHADE_TOKEN])) {
+  private extractApiKeyFromHeader(request: any): string | undefined {
+    const headers = this.getHeaders(request)
+    if (Array.isArray(headers[X_KEYSHADE_TOKEN])) {
       throw new Error('Bad auth')
     }
-    return request.headers[X_KEYSHADE_TOKEN]
+    return headers[X_KEYSHADE_TOKEN]
+  }
+
+  private getHeaders(request: any): any {
+    return request.headers || request.handshake.headers // For websockets
   }
 }
