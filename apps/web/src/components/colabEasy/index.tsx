@@ -22,42 +22,48 @@ function ColabEasy(): React.JSX.Element {
         </span>
       </div>
 
-      <div className="gap-5 space-y-5 md:flex md:space-y-0">
-        <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-medium">Webhook Alerts</h3>
-            <span className="text-base text-[#9394A1]">
-              Receive Real-Time Alerts on your Favourite Collaboration Tool
-            </span>
-          </div>
-          <WebhookSVG />
-        </Card>
-        <div className="flex-col gap-5 space-y-5 md:flex md:space-y-0">
-          <div className="gap-5 space-y-5 md:flex md:space-y-0">
+      <div className="auto-cols-min grid-cols-3 gap-5 space-y-5 md:grid md:space-y-0">
+        <article className="row-span-2">
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-medium">Webhook Alerts</h3>
+              <span className="text-base text-[#9394A1]">
+                Receive Real-Time Alerts on your Favourite Collaboration Tool
+              </span>
+            </div>
+            <div className="mx-auto w-[85%]">
+              <WebhookSVG />
+            </div>
+          </Card>
+        </article>
+        <article className="row-span-1">
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-medium">Custom Roles</h3>
+              <span className="text-base text-[#9394A1]">
+                Fine-tune Permissions, for allocated Team Members
+              </span>
+            </div>
+            <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
+          </Card>
+        </article>
+        <article className="row-span-1">
+          <FollowerPointerCard className="h-full">
             <Card>
               <div className="p-6">
-                <h3 className="text-lg font-medium">Custom Roles</h3>
+                <h3 className="text-lg font-medium">Discussion & Notes</h3>
                 <span className="text-base text-[#9394A1]">
-                  Fine-tune Permissions, for allocated Team Members
+                  Collaborate on Secrets and Changes within your Organisation
                 </span>
               </div>
-              <CustomrollSVG className="w-[18rem] translate-x-[8vw] py-12 md:w-[21rem] md:translate-x-[4rem] md:py-0 md:pt-10" />
+              <DiscussSVG />
             </Card>
-            <FollowerPointerCard>
-              <Card>
-                <div className="p-6">
-                  <h3 className="text-lg font-medium">Discussion & Notes</h3>
-                  <span className="text-base text-[#9394A1]">
-                    Collaborate on Secrets and Changes within your Organisation
-                  </span>
-                </div>
-                <DiscussSVG />
-              </Card>
-            </FollowerPointerCard>
-          </div>
+          </FollowerPointerCard>
+        </article>
+        <article className="col-span-2 row-span-1 ">
           <Card widthFull>
-            <div className="items-center md:inline-flex">
-              <div className="flex flex-col p-6 md:w-[40%]">
+            <div className="items-center md:flex">
+              <div className="flex w-min flex-1 flex-col p-6">
                 <h3 className="flex text-lg font-medium">
                   Approval before Commit
                 </h3>
@@ -66,12 +72,12 @@ function ColabEasy(): React.JSX.Element {
                   configuration change
                 </span>
               </div>
-              <div>
+              <div className="flex flex-1">
                 <ApprovalSVG />
               </div>
             </div>
           </Card>
-        </div>
+        </article>
       </div>
     </section>
   )

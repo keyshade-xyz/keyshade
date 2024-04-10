@@ -42,13 +42,15 @@ To install the dependencies, run the following command:
 pnpm install
 ```
 
-## Installing NX
+## Installing Turbo
 
-The last step is to install NX. It is the monorepo management tool that we are using. Read more about it in [https://nx.dev](https://nx.dev). To install nx, you need to run the following command:
+The final step involves installing our monorepo management tool. We have transitioned to using Turbo to streamline our development process. To install Turbo, run the following command:
 
 ```bash
-npm i -g nx
+npm install turbo --global
 ```
+
+For more information on how to get started with Turbo, refer to the [official Turbo documentation](https://turbo.build/repo/docs).
 
 ## Installing nest CLI
 
