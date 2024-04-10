@@ -133,7 +133,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private getAuthType(request: any): 'JWT' | 'API_KEY' | 'NONE' {
-    const headers = request.headers || request.handshake.headers // For websockets
+    const headers = this.getHeaders(request)
     if (headers[X_KEYSHADE_TOKEN]) {
       return 'API_KEY'
     }
@@ -144,16 +144,20 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: any): string | undefined {
-    const headers = request.headers || request.handshake.headers // For websockets
+    const headers = this.getHeaders(request)
     const [type, token] = headers.authorization?.split(' ') ?? []
     return type === 'Bearer' ? token : undefined
   }
 
   private extractApiKeyFromHeader(request: any): string | undefined {
-    const headers = request.headers || request.handshake.headers // For websockets
+    const headers = this.getHeaders(request)
     if (Array.isArray(headers[X_KEYSHADE_TOKEN])) {
       throw new Error('Bad auth')
     }
     return headers[X_KEYSHADE_TOKEN]
+  }
+
+  private getHeaders(request: any): any {
+    return request.headers || request.handshake.headers // For websockets
   }
 }

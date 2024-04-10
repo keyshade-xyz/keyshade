@@ -80,7 +80,14 @@ async function initializeNestApp() {
   const logger = new CustomLogger()
   const app = await NestFactory.create(AppModule, {
     logger,
-    cors: false
+    cors: {
+      origin: process.env.CORS_ORIGIN || '*',
+      credentials: true,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type, Accept, Authorization, x-keyshade-token',
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    }
   })
   app.use(Sentry.Handlers.requestHandler())
   app.use(Sentry.Handlers.tracingHandler())

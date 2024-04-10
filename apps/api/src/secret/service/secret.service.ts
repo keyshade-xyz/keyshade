@@ -595,15 +595,21 @@ export class SecretService {
         }
       })
 
-      await this.redis.publish(
-        CHANGE_NOTIFIER_RSC,
-        JSON.stringify({
-          environmentId: secret.environmentId,
-          name: secret.name,
-          value: dto.value,
-          isSecret: true
-        })
-      )
+      try {
+        await this.redis.publish(
+          CHANGE_NOTIFIER_RSC,
+          JSON.stringify({
+            environmentId: secret.environmentId,
+            name: secret.name,
+            value: dto.value,
+            isSecret: true
+          })
+        )
+      } catch (error) {
+        this.logger.error(
+          this.logger.error(`Error publishing secret update to Redis: ${error}`)
+        )
+      }
     } else {
       result = await this.prisma.secret.update({
         where: {
@@ -698,15 +704,21 @@ export class SecretService {
       }
     })
 
-    await this.redis.publish(
-      CHANGE_NOTIFIER_RSC,
-      JSON.stringify({
-        environmentId: secret.environmentId,
-        name: secret.name,
-        value: secret.versions[rollbackVersion - 1].value,
-        isSecret: true
-      })
-    )
+    try {
+      await this.redis.publish(
+        CHANGE_NOTIFIER_RSC,
+        JSON.stringify({
+          environmentId: secret.environmentId,
+          name: secret.name,
+          value: secret.versions[rollbackVersion - 1].value,
+          isSecret: true
+        })
+      )
+    } catch (error) {
+      this.logger.error(
+        this.logger.error(`Error publishing secret update to Redis: ${error}`)
+      )
+    }
 
     await createEvent(
       {

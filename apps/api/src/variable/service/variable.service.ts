@@ -542,15 +542,19 @@ export class VariableService {
         }
       })
 
-      await this.redis.publish(
-        CHANGE_NOTIFIER_RSC,
-        JSON.stringify({
-          environmentId: variable.environmentId,
-          name: variable.name,
-          value: dto.value,
-          isSecret: false
-        })
-      )
+      try {
+        await this.redis.publish(
+          CHANGE_NOTIFIER_RSC,
+          JSON.stringify({
+            environmentId: variable.environmentId,
+            name: variable.name,
+            value: dto.value,
+            isSecret: false
+          })
+        )
+      } catch (error) {
+        this.logger.error(`Error publishing variable update to Redis: ${error}`)
+      }
     } else {
       result = await this.prisma.variable.update({
         where: {
@@ -646,15 +650,19 @@ export class VariableService {
       }
     })
 
-    await this.redis.publish(
-      CHANGE_NOTIFIER_RSC,
-      JSON.stringify({
-        environmentId: variable.environmentId,
-        name: variable.name,
-        value: variable.versions[rollbackVersion - 1].value,
-        isSecret: false
-      })
-    )
+    try {
+      await this.redis.publish(
+        CHANGE_NOTIFIER_RSC,
+        JSON.stringify({
+          environmentId: variable.environmentId,
+          name: variable.name,
+          value: variable.versions[rollbackVersion - 1].value,
+          isSecret: false
+        })
+      )
+    } catch (error) {
+      this.logger.error(`Error publishing variable update to Redis: ${error}`)
+    }
 
     await createEvent(
       {

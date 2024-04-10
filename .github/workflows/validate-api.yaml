@@ -58,6 +58,7 @@ jobs:
           GITHUB_CLIENT_ID: dummy
           GITHUB_CLIENT_SECRET: dummy
           GITHUB_CALLBACK_URL: dummy
+          REDIS_URL: redis://localhost:6379
         run: pnpm run e2e:api
 
       - name: Upload e2e test coverage reports to Codecov
