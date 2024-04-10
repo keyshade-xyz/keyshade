@@ -9,12 +9,17 @@ import { SecretService } from '../../secret/service/secret.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { RedisClientType } from 'redis'
+import { mockDeep } from 'jest-mock-extended'
+import { ProviderModule } from '../../provider/provider.module'
 
 describe('ApprovalService', () => {
   let service: ApprovalService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ProviderModule],
       providers: [
         ApprovalService,
         PrismaService,
@@ -29,7 +34,10 @@ describe('ApprovalService', () => {
           useClass: MockMailService
         }
       ]
-    }).compile()
+    })
+      .overrideProvider(REDIS_CLIENT)
+      .useValue(mockDeep<RedisClientType>())
+      .compile()
 
     service = module.get<ApprovalService>(ApprovalService)
   })

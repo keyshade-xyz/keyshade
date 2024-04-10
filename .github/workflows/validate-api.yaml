@@ -51,7 +51,7 @@ jobs:
       - name: Unit tests
         run: |
           pnpm run db:generate-types
-          pnpm run test:api
+          pnpm run unit:api
 
       - name: E2E tests
         env:

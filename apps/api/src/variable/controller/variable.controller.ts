@@ -14,6 +14,7 @@ import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-aut
 import { Authority, User } from '@prisma/client'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
+import { UpdateVariable } from '../dto/update.variable/update.variable'
 
 @ApiTags('Variable Controller')
 @Controller('variable')
@@ -41,7 +42,7 @@ export class VariableController {
   async updateVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Body() dto: CreateVariable,
+    @Body() dto: UpdateVariable,
     @Query('reason') reason: string
   ) {
     return await this.variableService.updateVariable(

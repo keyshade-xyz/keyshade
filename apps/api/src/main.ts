@@ -13,6 +13,7 @@ import { QueryTransformPipe } from './common/query.transform.pipe'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
+import { RedisIoAdapter } from './socket/redis.adapter'
 
 export const sentryEnv = process.env.SENTRY_ENV || 'production'
 
@@ -78,10 +79,15 @@ async function initializeSentry() {
 async function initializeNestApp() {
   const logger = new CustomLogger()
   const app = await NestFactory.create(AppModule, {
-    logger
+    logger,
+    cors: false
   })
   app.use(Sentry.Handlers.requestHandler())
   app.use(Sentry.Handlers.tracingHandler())
+
+  const redisIpoAdapter = new RedisIoAdapter(app)
+  await redisIpoAdapter.connectToRedis()
+  app.useWebSocketAdapter(redisIpoAdapter)
 
   const globalPrefix = 'api'
   app.setGlobalPrefix(globalPrefix)

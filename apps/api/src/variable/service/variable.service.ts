@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException
@@ -29,13 +30,28 @@ import getVariableWithAuthority from '../../common/get-variable-with-authority'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
 import { UpdateVariableMetadata } from '../../approval/approval.types'
-import { VariableWithProject } from '../variable.types'
+import {
+  VariableWithProject,
+  VariableWithProjectAndVersion
+} from '../variable.types'
+import { RedisClientType } from 'redis'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
 
 @Injectable()
 export class VariableService {
   private readonly logger = new Logger(VariableService.name)
+  private readonly redis: RedisClientType
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(REDIS_CLIENT)
+    readonly redisClient: {
+      publisher: RedisClientType
+    }
+  ) {
+    this.redis = redisClient.publisher
+  }
 
   async createVariable(
     user: User,
@@ -488,7 +504,7 @@ export class VariableService {
   async update(
     dto: UpdateVariable | UpdateVariableMetadata,
     user: User,
-    variable: VariableWithProject
+    variable: VariableWithProjectAndVersion
   ) {
     let result
 
@@ -525,6 +541,16 @@ export class VariableService {
           }
         }
       })
+
+      await this.redis.publish(
+        CHANGE_NOTIFIER_RSC,
+        JSON.stringify({
+          environmentId: variable.environmentId,
+          name: variable.name,
+          value: dto.value,
+          isSecret: false
+        })
+      )
     } else {
       result = await this.prisma.variable.update({
         where: {
@@ -607,7 +633,7 @@ export class VariableService {
 
   async rollback(
     user: User,
-    variable: VariableWithProject,
+    variable: VariableWithProjectAndVersion,
     rollbackVersion: VariableVersion['version']
   ) {
     // Rollback the variable
@@ -619,6 +645,16 @@ export class VariableService {
         }
       }
     })
+
+    await this.redis.publish(
+      CHANGE_NOTIFIER_RSC,
+      JSON.stringify({
+        environmentId: variable.environmentId,
+        name: variable.name,
+        value: variable.versions[rollbackVersion - 1].value,
+        isSecret: false
+      })
+    )
 
     await createEvent(
       {

@@ -20,9 +20,12 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-fastify": "^10.3.3",
+    "@nestjs/platform-socket.io": "^10.3.7",
     "@nestjs/schedule": "^4.0.1",
     "@nestjs/swagger": "^7.3.0",
+    "@nestjs/websockets": "^10.3.7",
     "@prisma/client": "^5.10.1",
+    "@socket.io/redis-adapter": "^8.3.0",
     "@supabase/supabase-js": "^2.39.6",
     "@types/uuid": "^9.0.8",
     "chalk": "^4.1.2",
@@ -34,8 +37,10 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "prisma": "^5.10.1",
+    "redis": "^4.6.13",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

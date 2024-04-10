@@ -455,3 +455,11 @@ model Approval {
 
   @@index([itemType, itemId])
 }
+
+model ChangeNotificationSocketMap {
+  id            String @id @default(cuid())
+  socketId      String
+  environmentId String
+  
+  @@index([environmentId, socketId])
+}

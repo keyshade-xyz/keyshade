@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException
@@ -37,12 +38,24 @@ import getDefaultEnvironmentOfProject from '../../common/get-default-project-env
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
 import { UpdateSecretMetadata } from '../../approval/approval.types'
+import { RedisClientType } from 'redis'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
 
 @Injectable()
 export class SecretService {
   private readonly logger = new Logger(SecretService.name)
+  private readonly redis: RedisClientType
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(REDIS_CLIENT)
+    readonly redisClient: {
+      publisher: RedisClientType
+    }
+  ) {
+    this.redis = redisClient.publisher
+  }
 
   async createSecret(
     user: User,
@@ -581,6 +594,16 @@ export class SecretService {
           }
         }
       })
+
+      await this.redis.publish(
+        CHANGE_NOTIFIER_RSC,
+        JSON.stringify({
+          environmentId: secret.environmentId,
+          name: secret.name,
+          value: dto.value,
+          isSecret: true
+        })
+      )
     } else {
       result = await this.prisma.secret.update({
         where: {
@@ -622,7 +645,7 @@ export class SecretService {
 
   async updateEnvironment(
     user: User,
-    secret: SecretWithProject,
+    secret: SecretWithProjectAndVersion,
     environment: Environment
   ) {
     // Update the secret
@@ -662,7 +685,7 @@ export class SecretService {
 
   async rollback(
     user: User,
-    secret: SecretWithProject,
+    secret: SecretWithProjectAndVersion,
     rollbackVersion: number
   ) {
     // Rollback the secret
@@ -674,6 +697,16 @@ export class SecretService {
         }
       }
     })
+
+    await this.redis.publish(
+      CHANGE_NOTIFIER_RSC,
+      JSON.stringify({
+        environmentId: secret.environmentId,
+        name: secret.name,
+        value: secret.versions[rollbackVersion - 1].value,
+        isSecret: true
+      })
+    )
 
     await createEvent(
       {

@@ -18,6 +18,9 @@ import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
 import { EventModule } from '../event/event.module'
 import { VariableModule } from '../variable/variable.module'
 import { ApprovalModule } from '../approval/approval.module'
+import { SocketModule } from '../socket/socket.module'
+import { ProviderModule } from '../provider/provider.module'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   controllers: [AppController],
@@ -25,6 +28,7 @@ import { ApprovalModule } from '../approval/approval.module'
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    ScheduleModule.forRoot(),
     PassportModule,
     AuthModule,
     PrismaModule,
@@ -38,7 +42,9 @@ import { ApprovalModule } from '../approval/approval.module'
     WorkspaceRoleModule,
     EventModule,
     VariableModule,
-    ApprovalModule
+    ApprovalModule,
+    SocketModule,
+    ProviderModule
   ],
   providers: [
     {
