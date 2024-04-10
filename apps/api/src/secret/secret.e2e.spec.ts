@@ -32,6 +32,9 @@ import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { SecretService } from './service/secret.service'
 import { EventService } from '../event/service/event.service'
+import { REDIS_CLIENT } from '../provider/redis.provider'
+import { RedisClientType } from 'redis'
+import { mockDeep } from 'jest-mock-extended'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -63,6 +66,8 @@ describe('Secret Controller Tests', () => {
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
+      .overrideProvider(REDIS_CLIENT)
+      .useValue(mockDeep<RedisClientType>())
       .compile()
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(

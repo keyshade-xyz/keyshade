@@ -1,5 +1,6 @@
 /* eslint-disable */
 export default {
+  forceExit: true,
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',

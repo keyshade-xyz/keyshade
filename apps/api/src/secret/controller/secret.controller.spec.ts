@@ -5,12 +5,16 @@ import { MockMailService } from '../../mail/services/mock.service'
 import { SecretService } from '../service/secret.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { RedisClientType } from 'redis'
+import { ProviderModule } from '../../provider/provider.module'
 
 describe('SecretController', () => {
   let controller: SecretController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ProviderModule],
       controllers: [SecretController],
       providers: [
         PrismaService,
@@ -21,6 +25,8 @@ describe('SecretController', () => {
         SecretService
       ]
     })
+      .overrideProvider(REDIS_CLIENT)
+      .useValue(mockDeep<RedisClientType>())
       .overrideProvider(PrismaService)
       .useValue(mockDeep<PrismaService>())
       .compile()
