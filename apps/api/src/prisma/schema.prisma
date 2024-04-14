@@ -418,6 +418,7 @@ model Workspace {
   updatedAt       DateTime @updatedAt
   ownerId         String
   approvalEnabled Boolean  @default(false)
+  isDefault       Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

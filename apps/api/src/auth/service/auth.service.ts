@@ -157,27 +157,15 @@ export class AuthService {
     let user = await this.findUserByEmail(email)
     // We need to create the user if it doesn't exist yet
     if (!user) {
-      user = await this.createUser(email, name, profilePictureUrl)
+      user = await createUser(
+        {
+          email,
+          name,
+          profilePictureUrl
+        },
+        this.prisma
+      )
     }
-    return user
-  }
-
-  private async createUser(
-    email: string,
-    name: string,
-    profilePictureUrl: string
-  ) {
-    // Create the user
-    const user = await createUser(
-      {
-        email,
-        name,
-        profilePictureUrl
-      },
-      this.prisma
-    )
-    this.logger.log(`User created: ${email}`)
-
     return user
   }
 

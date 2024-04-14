@@ -35,6 +35,7 @@ import createEvent from '../../common/create-event'
 import { UpdateWorkspaceMetadata } from '../../approval/approval.types'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
+import createWorkspace from '../../common/create-workspace'
 
 @Injectable()
 export class WorkspaceService {
@@ -51,85 +52,7 @@ export class WorkspaceService {
       throw new ConflictException('Workspace already exists')
     }
 
-    const workspaceId = v4()
-
-    const createNewWorkspace = this.prisma.workspace.create({
-      data: {
-        id: workspaceId,
-        name: dto.name,
-        description: dto.description,
-        approvalEnabled: dto.approvalEnabled,
-        isFreeTier: true,
-        ownerId: user.id,
-        roles: {
-          createMany: {
-            data: [
-              {
-                name: 'Admin',
-                authorities: [Authority.WORKSPACE_ADMIN],
-                hasAdminAuthority: true,
-                colorCode: '#FF0000'
-              }
-            ]
-          }
-        }
-      }
-    })
-
-    // Add the owner to the workspace
-    const assignOwnership = this.prisma.workspaceMember.create({
-      data: {
-        workspace: {
-          connect: {
-            id: workspaceId
-          }
-        },
-        user: {
-          connect: {
-            id: user.id
-          }
-        },
-        invitationAccepted: true,
-        roles: {
-          create: {
-            role: {
-              connect: {
-                workspaceId_name: {
-                  workspaceId: workspaceId,
-                  name: 'Admin'
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    const result = await this.prisma.$transaction([
-      createNewWorkspace,
-      assignOwnership
-    ])
-    const workspace = result[0]
-
-    await createEvent(
-      {
-        triggeredBy: user,
-        entity: workspace,
-        type: EventType.WORKSPACE_CREATED,
-        source: EventSource.WORKSPACE,
-        title: `Workspace created`,
-        metadata: {
-          workspaceId: workspace.id,
-          name: workspace.name
-        },
-        workspaceId: workspace.id
-      },
-      this.prisma
-    )
-
-    this.log.debug(`Created workspace ${dto.name} (${workspaceId})`)
-
-    return workspace
+    return await createWorkspace(user, dto, this.prisma)
   }
 
   async updateWorkspace(
@@ -189,6 +112,14 @@ export class WorkspaceService {
     if (userId === user.id) {
       throw new BadRequestException(
         `You are already the owner of the workspace ${workspace.name} (${workspace.id})`
+      )
+    }
+
+    // We don't want the users to be able to transfer
+    // ownership if the workspace is the default workspace
+    if (workspace.isDefault) {
+      throw new BadRequestException(
+        `You cannot transfer ownership of default workspace ${workspace.name} (${workspace.id})`
       )
     }
 
@@ -297,6 +228,13 @@ export class WorkspaceService {
       Authority.DELETE_WORKSPACE,
       this.prisma
     )
+
+    // We don't want the users to delete their default workspace
+    if (workspace.isDefault) {
+      throw new BadRequestException(
+        `You cannot delete the default workspace ${workspace.name} (${workspace.id})`
+      )
+    }
 
     // Delete the workspace
     await this.prisma.workspace.delete({
