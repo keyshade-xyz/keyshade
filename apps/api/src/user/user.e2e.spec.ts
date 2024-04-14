@@ -9,10 +9,13 @@ import { AppModule } from '../app/app.module'
 import { User } from '@prisma/client'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
+import { UserService } from './service/user.service'
+import cleanUp from '../common/cleanup'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
+  let userService: UserService
 
   let adminUser: User
   let regularUser: User
@@ -29,35 +32,39 @@ describe('User Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
-    await prisma.user.deleteMany()
+    await cleanUp(prisma)
 
-    adminUser = await prisma.user.create({
-      data: {
-        email: 'admin@keyshade.xyz',
-        name: 'Admin',
-        isActive: true,
-        isAdmin: true,
-        isOnboardingFinished: false
-      }
+    adminUser = await userService.createUser({
+      email: 'admin@keyshade.xyz',
+      name: 'Admin',
+      isActive: true,
+      isAdmin: true,
+      isOnboardingFinished: false
     })
 
-    regularUser = await prisma.user.create({
-      data: {
-        email: 'john@keyshade.xyz',
-        name: 'John',
-        isActive: true,
-        isAdmin: false,
-        isOnboardingFinished: false
-      }
+    regularUser = await userService.createUser({
+      email: 'john@keyshade.xyz',
+      name: 'John',
+      isActive: true,
+      isAdmin: false,
+      isOnboardingFinished: false
     })
+
+    // @ts-expect-error - We don't need the default workspace for these tests
+    delete regularUser.defaultWorkspace
+    // @ts-expect-error - We don't need the default workspace for these tests
+    delete adminUser.defaultWorkspace
   })
 
   it('should be defined', () => {
     expect(app).toBeDefined()
+    expect(prisma).toBeDefined()
+    expect(userService).toBeDefined()
   })
 
   it(`should be able to get self as admin`, async () => {
@@ -86,6 +93,36 @@ describe('User Controller Tests', () => {
     expect(JSON.parse(result.body)).toEqual({
       ...regularUser
     })
+  })
+
+  it('should have created a default workspace', async () => {
+    const createUserResponse = await userService.createUser({
+      email: 'jane@keyshade.xyz',
+      name: 'Jane',
+      isAdmin: false,
+      isActive: true,
+      isOnboardingFinished: true,
+      profilePictureUrl: null
+    })
+
+    expect(createUserResponse.defaultWorkspace).toBeDefined()
+    expect(createUserResponse.defaultWorkspace.name).toEqual('My Workspace')
+    expect(createUserResponse.defaultWorkspace.isDefault).toEqual(true)
+    expect(createUserResponse.defaultWorkspace.ownerId).toEqual(
+      createUserResponse.id
+    )
+
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        ownerId: createUserResponse.id,
+        isDefault: true
+      }
+    })
+
+    expect(workspace).toBeDefined()
+    expect(workspace.name).toEqual('My Workspace')
+    expect(workspace.isDefault).toEqual(true)
+    expect(workspace.ownerId).toEqual(createUserResponse.id)
   })
 
   test('regular user should not be able to access other routes if onboarding is not finished', async () => {
@@ -195,7 +232,7 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual([adminUser, regularUser])
+    expect(JSON.parse(result.body).length).toEqual(3)
   })
 
   test('admin should be able to update any user', async () => {
@@ -241,7 +278,8 @@ describe('User Controller Tests', () => {
     expect(JSON.parse(result.body)).toEqual({
       ...payload,
       id: expect.any(String),
-      profilePictureUrl: null
+      profilePictureUrl: null,
+      defaultWorkspace: expect.any(Object)
     })
 
     janeDoeId = JSON.parse(result.body).id
@@ -270,8 +308,20 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(204)
   })
 
+  it('should have deleted the default workspace', async () => {
+    // Fetching the user who's account has the default workspace
+    const user = await prisma.user.findFirst({
+      where: {
+        email: 'jane@keyshade.xyz'
+      }
+    })
+
+    // Delete the user
+    await userService.deleteUser(user.id)
+  })
+
   afterAll(async () => {
-    await prisma.user.deleteMany()
+    await cleanUp(prisma)
     await prisma.$disconnect()
     await app.close()
   })

@@ -8,11 +8,11 @@ export class CreateWorkspace {
 
   @IsString()
   @IsOptional()
-  description: string
+  description?: string
 
   @IsBoolean()
   @IsOptional()
-  approvalEnabled: boolean
+  approvalEnabled?: boolean
 }
 
 export interface WorkspaceMemberDTO {

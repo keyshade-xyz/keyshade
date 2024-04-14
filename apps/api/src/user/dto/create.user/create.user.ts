@@ -12,7 +12,7 @@ export class CreateUserDto {
     example: 'John Doe',
     default: null
   })
-  name: string
+  name?: string
 
   @IsString()
   @IsEmail()
@@ -37,7 +37,7 @@ export class CreateUserDto {
     example: 'https://example.com/profile.jpg',
     default: null
   })
-  profilePictureUrl: string
+  profilePictureUrl?: string
 
   @IsBoolean()
   @IsOptional()
@@ -49,7 +49,7 @@ export class CreateUserDto {
     example: true,
     default: true
   })
-  isActive: boolean
+  isActive?: boolean
 
   @IsBoolean()
   @IsOptional()
@@ -61,7 +61,7 @@ export class CreateUserDto {
     example: true,
     default: false
   })
-  isOnboardingFinished: boolean
+  isOnboardingFinished?: boolean
 
   @IsBoolean()
   @IsOptional()
@@ -73,5 +73,5 @@ export class CreateUserDto {
     example: false,
     default: false
   })
-  isAdmin: boolean
+  isAdmin?: boolean
 }
