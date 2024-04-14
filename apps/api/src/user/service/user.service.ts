@@ -107,12 +107,22 @@ export class UserService {
   }
 
   private async deleteUserById(userId: User['id']) {
+    // Delete the default workspace of this user
+    await this.prisma.workspace.deleteMany({
+      where: {
+        ownerId: userId,
+        isDefault: true
+      }
+    })
+
     // Delete the user
     await this.prisma.user.delete({
       where: {
         id: userId
       }
     })
+
+    this.log.log(`Deleted user ${userId}`)
   }
 
   async createUser(user: CreateUserDto) {
