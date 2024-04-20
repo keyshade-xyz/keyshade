@@ -7,6 +7,8 @@ import { GithubStrategy } from '../config/oauth-strategy/github/github.strategy'
 import { GithubOAuthStrategyFactory } from '../config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '../config/factory/google/google-strategy.factory'
 import { GoogleStrategy } from '../config/oauth-strategy/google/google.strategy'
+import { GitlabOAuthStrategyFactory } from '../config/factory/gitlab/gitlab-strategy.factory'
+import { GitlabStrategy } from '../config/oauth-strategy/gitlab/gitlab.strategy'
 
 @Module({
   imports: [
@@ -38,6 +40,14 @@ import { GoogleStrategy } from '../config/oauth-strategy/google/google.strategy'
         googleOAuthStrategyFactory.createOAuthStrategy()
       },
       inject: [GoogleOAuthStrategyFactory]
+    },
+    GitlabOAuthStrategyFactory,
+    {
+      provide: GitlabStrategy,
+      useFactory: (gitlabOAuthStrategyFactory: GitlabOAuthStrategyFactory) => {
+        gitlabOAuthStrategyFactory.createOAuthStrategy()
+      },
+      inject: [GitlabOAuthStrategyFactory]
     }
   ],
   controllers: [AuthController]
