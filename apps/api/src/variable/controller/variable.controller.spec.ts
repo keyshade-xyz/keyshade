@@ -9,13 +9,14 @@ import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { ProviderModule } from '../../provider/provider.module'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { LoggerModule } from '../../logger/logger.module'
 
 describe('VariableController', () => {
   let controller: VariableController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ProviderModule],
+      imports: [ProviderModule, LoggerModule],
       providers: [
         PrismaService,
         {

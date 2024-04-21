@@ -11,6 +11,7 @@ import getCollectiveWorkspaceAuthorities from './get-collective-workspace-author
 import { EnvironmentWithProject } from 'src/environment/environment.types'
 import { ProjectWithSecrets } from 'src/project/project.types'
 import { SecretWithProjectAndVersion } from 'src/secret/secret.types'
+import { CustomLoggerService } from '../logger/logger.service'
 
 export interface AuthorityInput {
   userId: string
@@ -24,6 +25,8 @@ export interface AuthorityInput {
 
 @Injectable()
 export class AuthorityCheckerService {
+  constructor(private customLoggerService: CustomLoggerService) {}
+
   public async checkAuthorityOverWorkspace(
     input: AuthorityInput
   ): Promise<Workspace> {
@@ -41,12 +44,14 @@ export class AuthorityCheckerService {
       } else {
         workspace = await prisma.workspace.findFirst({
           where: {
-            name: entity?.name
+            name: entity?.name,
+            members: { some: { userId: userId } }
           }
         })
       }
     } catch (error) {
-      /* empty */
+      this.customLoggerService.error(error)
+      throw new Error(error)
     }
 
     // Check if the workspace exists or not
@@ -81,7 +86,6 @@ export class AuthorityCheckerService {
     // Fetch the project
     let project: ProjectWithSecrets
 
-    // Fetch the project
     try {
       if (entity?.id) {
         project = await prisma.project.findUnique({
@@ -95,7 +99,8 @@ export class AuthorityCheckerService {
       } else {
         project = await prisma.project.findFirst({
           where: {
-            name: entity?.name
+            name: entity?.name,
+            workspace: { members: { some: { userId: userId } } }
           },
           include: {
             secrets: true
@@ -103,7 +108,8 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      /* empty */
+      this.customLoggerService.error(error)
+      throw new Error(error)
     }
 
     // If the project is not found, throw an error
@@ -165,15 +171,17 @@ export class AuthorityCheckerService {
       } else {
         environment = await prisma.environment.findFirst({
           where: {
-            name: entity?.name
+            name: entity?.name,
+            project: { workspace: { members: { some: { userId: userId } } } }
           },
           include: {
             project: true
           }
         })
       }
-    } catch (e) {
-      /* empty */
+    } catch (error) {
+      this.customLoggerService.error(error)
+      throw new Error(error)
     }
 
     if (!environment) {
@@ -240,7 +248,10 @@ export class AuthorityCheckerService {
       } else {
         variable = await prisma.variable.findFirst({
           where: {
-            name: entity?.name
+            name: entity?.name,
+            environment: {
+              project: { workspace: { members: { some: { userId: userId } } } }
+            }
           },
           include: {
             versions: true,
@@ -255,7 +266,8 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      /* empty */
+      this.customLoggerService.error(error)
+      throw new Error(error)
     }
 
     if (!variable) {
@@ -323,7 +335,10 @@ export class AuthorityCheckerService {
       } else {
         secret = await prisma.secret.findFirst({
           where: {
-            name: entity?.name
+            name: entity?.name,
+            environment: {
+              project: { workspace: { members: { some: { userId: userId } } } }
+            }
           },
           include: {
             versions: true,
@@ -338,7 +353,8 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      /* empty */
+      this.customLoggerService.error(error)
+      throw new Error(error)
     }
 
     if (!secret) {

@@ -498,7 +498,6 @@ export class ApprovalService {
       userId: user.id,
       entity: { id: workspaceId },
       authority: Authority.READ_WORKSPACE,
-
       prisma: this.prisma
     })
 

@@ -6,12 +6,14 @@ import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { LoggerModule } from '../../logger/logger.module'
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [LoggerModule],
       providers: [
         WorkspaceService,
         PrismaService,

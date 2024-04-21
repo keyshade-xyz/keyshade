@@ -8,13 +8,14 @@ import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { ProviderModule } from '../../provider/provider.module'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { LoggerModule } from '../../logger/logger.module'
 
 describe('SecretService', () => {
   let service: SecretService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ProviderModule],
+      imports: [ProviderModule, LoggerModule],
       providers: [
         PrismaService,
         {
