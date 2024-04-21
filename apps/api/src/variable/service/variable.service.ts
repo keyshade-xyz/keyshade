@@ -21,12 +21,9 @@ import {
   VariableVersion
 } from '@prisma/client'
 import { CreateVariable } from '../dto/create.variable/create.variable'
-import getProjectWithAuthority from '../../common/get-project-with-authority'
-import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
 import createEvent from '../../common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
-import getVariableWithAuthority from '../../common/get-variable-with-authority'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
 import { UpdateVariableMetadata } from '../../approval/approval.types'
@@ -37,6 +34,7 @@ import {
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class VariableService {
@@ -48,7 +46,8 @@ export class VariableService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    public authorityCheckerService: AuthorityCheckerService
   ) {
     this.redis = redisClient.publisher
   }
@@ -61,22 +60,24 @@ export class VariableService {
   ) {
     const environmentId = dto.environmentId
     // Fetch the project
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.CREATE_VARIABLE,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.CREATE_VARIABLE,
+        prisma: this.prisma
+      })
 
     // Check i the environment exists
     let environment: Environment | null = null
     if (environmentId) {
-      environment = await getEnvironmentWithAuthority(
-        user.id,
-        environmentId,
-        Authority.READ_ENVIRONMENT,
-        this.prisma
-      )
+      environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { id: environmentId },
+          authority: Authority.READ_ENVIRONMENT,
+          prisma: this.prisma
+        })
     }
     if (!environment) {
       environment = await getDefaultEnvironmentOfProject(projectId, this.prisma)
@@ -199,12 +200,13 @@ export class VariableService {
     dto: UpdateVariable,
     reason?: string
   ) {
-    const variable = await getVariableWithAuthority(
-      user.id,
-      variableId,
-      Authority.UPDATE_VARIABLE,
-      this.prisma
-    )
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.UPDATE_VARIABLE,
+        prisma: this.prisma
+      })
 
     // Check if the variable already exists in the environment
     if (
@@ -247,12 +249,13 @@ export class VariableService {
     environmentId: Environment['id'],
     reason?: string
   ) {
-    const variable = await getVariableWithAuthority(
-      user.id,
-      variableId,
-      Authority.UPDATE_VARIABLE,
-      this.prisma
-    )
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.UPDATE_VARIABLE,
+        prisma: this.prisma
+      })
 
     if (variable.environmentId === environmentId) {
       throw new BadRequestException(
@@ -261,12 +264,13 @@ export class VariableService {
     }
 
     // Check if the environment exists
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { id: environmentId },
+        authority: Authority.READ_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     // Check if the environment belongs to the same project
     if (environment.projectId !== variable.projectId) {
@@ -313,12 +317,13 @@ export class VariableService {
     rollbackVersion: VariableVersion['version'],
     reason?: string
   ) {
-    const variable = await getVariableWithAuthority(
-      user.id,
-      variableId,
-      Authority.UPDATE_VARIABLE,
-      this.prisma
-    )
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.UPDATE_VARIABLE,
+        prisma: this.prisma
+      })
 
     const maxVersion = variable.versions[variable.versions.length - 1].version
 
@@ -360,12 +365,13 @@ export class VariableService {
     variableId: Variable['id'],
     reason?: string
   ) {
-    const variable = await getVariableWithAuthority(
-      user.id,
-      variableId,
-      Authority.DELETE_VARIABLE,
-      this.prisma
-    )
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.DELETE_VARIABLE,
+        prisma: this.prisma
+      })
 
     if (
       !variable.pendingCreation &&
@@ -391,12 +397,12 @@ export class VariableService {
   }
 
   async getVariableById(user: User, variableId: Variable['id']) {
-    return getVariableWithAuthority(
-      user.id,
-      variableId,
-      Authority.READ_VARIABLE,
-      this.prisma
-    )
+    return this.authorityCheckerService.checkAuthorityOverVariable({
+      userId: user.id,
+      entity: { id: variableId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
   }
 
   async getAllVariablesOfProject(
@@ -409,12 +415,12 @@ export class VariableService {
     search: string
   ) {
     // Check if the user has the required authorities in the project
-    await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_VARIABLE,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
 
     return await this.prisma.variable.findMany({
       where: {

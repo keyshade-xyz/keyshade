@@ -29,13 +29,13 @@ import {
 } from '../../mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
-import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
 import { UpdateWorkspaceMetadata } from '../../approval/approval.types'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
 import createWorkspace from '../../common/create-workspace'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class WorkspaceService {
@@ -44,7 +44,8 @@ export class WorkspaceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
+    public authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async createWorkspace(user: User, dto: CreateWorkspace) {
@@ -62,12 +63,14 @@ export class WorkspaceService {
     reason?: string
   ) {
     // Fetch the workspace
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.UPDATE_WORKSPACE,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.UPDATE_WORKSPACE,
+
+        prisma: this.prisma
+      })
 
     // Check if a same named workspace already exists
     if (
@@ -102,12 +105,14 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     userId: User['id']
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.WORKSPACE_ADMIN,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.WORKSPACE_ADMIN,
+
+        prisma: this.prisma
+      })
 
     if (userId === user.id) {
       throw new BadRequestException(
@@ -222,12 +227,13 @@ export class WorkspaceService {
     user: User,
     workspaceId: Workspace['id']
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.DELETE_WORKSPACE,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.DELETE_WORKSPACE,
+        prisma: this.prisma
+      })
 
     // We don't want the users to delete their default workspace
     if (workspace.isDefault) {
@@ -251,12 +257,13 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     members: WorkspaceMemberDTO[]
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.ADD_USER,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.ADD_USER,
+        prisma: this.prisma
+      })
 
     // Add users to the workspace if any
     if (members && members.length > 0) {
@@ -296,12 +303,13 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     userIds: User['id'][]
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.REMOVE_USER,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.REMOVE_USER,
+        prisma: this.prisma
+      })
 
     // Remove users from the workspace if any
     if (userIds && userIds.length > 0) {
@@ -350,12 +358,13 @@ export class WorkspaceService {
     userId: User['id'],
     roleIds: WorkspaceRole['id'][]
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.UPDATE_USER_ROLE,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.UPDATE_USER_ROLE,
+        prisma: this.prisma
+      })
 
     if (!roleIds || roleIds.length === 0) {
       this.log.warn(
@@ -432,12 +441,12 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_USERS,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_USERS,
+      prisma: this.prisma
+    })
 
     return this.prisma.workspaceMember.findMany({
       skip: page * limit,
@@ -541,12 +550,13 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     inviteeId: User['id']
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.REMOVE_USER,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.REMOVE_USER,
+        prisma: this.prisma
+      })
 
     // Check if the user has a pending invitation to the workspace
     if (!(await this.invitationPending(workspaceId, inviteeId)))
@@ -618,12 +628,13 @@ export class WorkspaceService {
     user: User,
     workspaceId: Workspace['id']
   ): Promise<void> {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_WORKSPACE,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.READ_WORKSPACE,
+        prisma: this.prisma
+      })
 
     const workspaceOwnerId = await this.prisma.workspace
       .findUnique({
@@ -670,12 +681,12 @@ export class WorkspaceService {
     workspaceId: Workspace['id'],
     otherUserId: User['id']
   ): Promise<boolean> {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_USERS,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_USERS,
+      prisma: this.prisma
+    })
 
     return await this.memberExistsInWorkspace(workspaceId, otherUserId)
   }
@@ -684,12 +695,12 @@ export class WorkspaceService {
     user: User,
     workspaceId: Workspace['id']
   ): Promise<Workspace> {
-    return await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_USERS,
-      this.prisma
-    )
+    return await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_USERS,
+      prisma: this.prisma
+    })
   }
 
   async getWorkspacesOfUser(
@@ -729,12 +740,13 @@ export class WorkspaceService {
   }
 
   async exportData(user: User, workspaceId: Workspace['id']) {
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.WORKSPACE_ADMIN,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.WORKSPACE_ADMIN,
+        prisma: this.prisma
+      })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {}

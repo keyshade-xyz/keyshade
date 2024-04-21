@@ -25,9 +25,6 @@ import { decrypt } from '../../common/decrypt'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
-import getProjectWithAuthority from '../../common/get-project-with-authority'
-import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
-import getSecretWithAuthority from '../../common/get-secret-with-authority'
 import {
   SecretWithProject,
   SecretWithProjectAndVersion,
@@ -41,6 +38,7 @@ import { UpdateSecretMetadata } from '../../approval/approval.types'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class SecretService {
@@ -52,7 +50,8 @@ export class SecretService {
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    }
+    },
+    public authorityCheckerService: AuthorityCheckerService
   ) {
     this.redis = redisClient.publisher
   }
@@ -65,22 +64,24 @@ export class SecretService {
   ) {
     const environmentId = dto.environmentId
     // Fetch the project
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.CREATE_SECRET,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.CREATE_SECRET,
+        prisma: this.prisma
+      })
 
     // Check if the environment exists
     let environment: Environment | null = null
     if (environmentId) {
-      environment = await getEnvironmentWithAuthority(
-        user.id,
-        environmentId,
-        Authority.READ_ENVIRONMENT,
-        this.prisma
-      )
+      environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { id: environmentId },
+          authority: Authority.READ_ENVIRONMENT,
+          prisma: this.prisma
+        })
     }
     if (!environment) {
       environment = await getDefaultEnvironmentOfProject(projectId, this.prisma)
@@ -193,12 +194,12 @@ export class SecretService {
     dto: UpdateSecret,
     reason?: string
   ) {
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.UPDATE_SECRET,
-      this.prisma
-    )
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.UPDATE_SECRET,
+      prisma: this.prisma
+    })
 
     // Check if the secret already exists in the environment
     if (
@@ -242,12 +243,12 @@ export class SecretService {
     environmentId: Environment['id'],
     reason?: string
   ) {
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.UPDATE_SECRET,
-      this.prisma
-    )
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.UPDATE_SECRET,
+      prisma: this.prisma
+    })
 
     if (secret.environmentId === environmentId) {
       throw new BadRequestException(
@@ -256,12 +257,13 @@ export class SecretService {
     }
 
     // Check if the environment exists
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { id: environmentId },
+        authority: Authority.READ_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     if (environment.projectId !== secret.projectId) {
       throw new BadRequestException(
@@ -306,12 +308,12 @@ export class SecretService {
     reason?: string
   ) {
     // Fetch the secret
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.UPDATE_SECRET,
-      this.prisma
-    )
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.UPDATE_SECRET,
+      prisma: this.prisma
+    })
 
     const maxVersion = secret.versions[secret.versions.length - 1].version
 
@@ -347,12 +349,12 @@ export class SecretService {
 
   async deleteSecret(user: User, secretId: Secret['id'], reason?: string) {
     // Check if the user has the required role
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.DELETE_SECRET,
-      this.prisma
-    )
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.DELETE_SECRET,
+      prisma: this.prisma
+    })
 
     if (
       !secret.pendingCreation &&
@@ -380,12 +382,12 @@ export class SecretService {
     decryptValue: boolean
   ) {
     // Fetch the secret
-    const secret = await getSecretWithAuthority(
-      user.id,
-      secretId,
-      Authority.READ_SECRET,
-      this.prisma
-    )
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.READ_SECRET,
+      prisma: this.prisma
+    })
 
     const project = secret.project
 
@@ -430,12 +432,13 @@ export class SecretService {
     search: string
   ) {
     // Fetch the project
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_SECRET,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_SECRET,
+        prisma: this.prisma
+      })
 
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {

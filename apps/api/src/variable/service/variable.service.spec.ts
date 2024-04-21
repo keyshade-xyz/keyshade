@@ -7,6 +7,7 @@ import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { ProviderModule } from '../../provider/provider.module'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 describe('VariableService', () => {
   let service: VariableService
@@ -20,7 +21,8 @@ describe('VariableService', () => {
           provide: MAIL_SERVICE,
           useClass: MockMailService
         },
-        VariableService
+        VariableService,
+        AuthorityCheckerService
       ]
     })
       .overrideProvider(REDIS_CLIENT)

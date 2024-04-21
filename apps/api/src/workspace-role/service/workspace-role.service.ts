@@ -15,19 +15,22 @@ import {
   WorkspaceRole
 } from '@prisma/client'
 import { CreateWorkspaceRole } from '../dto/create-workspace-role/create-workspace-role'
-import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import getCollectiveWorkspaceAuthorities from '../../common/get-collective-workspace-authorities'
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
 import { PrismaService } from '../../prisma/prisma.service'
 import createEvent from '../../common/create-event'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class WorkspaceRoleService {
   private readonly logger: Logger = new Logger(WorkspaceRoleService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    public authorityCheckerService: AuthorityCheckerService
+  ) {}
 
   async createWorkspaceRole(
     user: User,
@@ -43,12 +46,13 @@ export class WorkspaceRoleService {
       )
     }
 
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.CREATE_WORKSPACE_ROLE,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.CREATE_WORKSPACE_ROLE,
+        prisma: this.prisma
+      })
 
     if (await this.checkWorkspaceRoleExists(user, workspaceId, dto.name)) {
       throw new ConflictException(
@@ -263,12 +267,12 @@ export class WorkspaceRoleService {
     workspaceId: Workspace['id'],
     name: string
   ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_WORKSPACE_ROLE,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_WORKSPACE_ROLE,
+      prisma: this.prisma
+    })
 
     return (
       (await this.prisma.workspaceRole.count({
@@ -300,12 +304,12 @@ export class WorkspaceRoleService {
     order: string,
     search: string
   ): Promise<WorkspaceRole[]> {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_WORKSPACE_ROLE,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_WORKSPACE_ROLE,
+      prisma: this.prisma
+    })
 
     return await this.prisma.workspaceRole.findMany({
       where: {

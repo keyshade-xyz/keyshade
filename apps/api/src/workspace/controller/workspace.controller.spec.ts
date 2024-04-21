@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController
@@ -18,7 +19,8 @@ describe('WorkspaceController', () => {
           provide: MAIL_SERVICE,
           useClass: MockMailService
         },
-        JwtService
+        JwtService,
+        AuthorityCheckerService
       ],
       controllers: [WorkspaceController]
     }).compile()

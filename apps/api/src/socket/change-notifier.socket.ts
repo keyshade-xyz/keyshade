@@ -15,10 +15,7 @@ import {
   ChangeNotifierRegistration
 } from './socket.types'
 import { Authority, User } from '@prisma/client'
-import getWorkspaceWithAuthority from '../common/get-workspace-with-authority'
 import { CurrentUser } from '../decorators/user.decorator'
-import getProjectWithAuthority from '../common/get-project-with-authority'
-import getEnvironmentWithAuthority from '../common/get-environment-with-authority'
 import { PrismaService } from '../prisma/prisma.service'
 import { REDIS_CLIENT } from '../provider/redis.provider'
 import { RedisClientType } from 'redis'
@@ -26,6 +23,7 @@ import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
 import { AuthGuard } from '../auth/guard/auth/auth.guard'
 import { RequiredApiKeyAuthorities } from '../decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { AuthorityCheckerService } from '../common/authority-checker.service'
 
 // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
@@ -52,7 +50,8 @@ export default class ChangeNotifier
       subscriber: RedisClientType
       publisher: RedisClientType
     },
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    public authorityCheckerService: AuthorityCheckerService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -106,12 +105,12 @@ export default class ChangeNotifier
         name: data.workspaceName
       }
     })
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspace.id,
-      Authority.READ_WORKSPACE,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspace.id },
+      authority: Authority.READ_WORKSPACE,
+      prisma: this.prisma
+    })
 
     // Check if the user has access to the project
     const project = await this.prisma.project.findFirst({
@@ -119,12 +118,12 @@ export default class ChangeNotifier
         name: data.projectName
       }
     })
-    await getProjectWithAuthority(
-      user.id,
-      project.id,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: project.id },
+      authority: Authority.READ_PROJECT,
+      prisma: this.prisma
+    })
 
     // Check if the user has access to the environment
     const environment = await this.prisma.environment.findFirst({
@@ -132,12 +131,12 @@ export default class ChangeNotifier
         name: data.environmentName
       }
     })
-    await getEnvironmentWithAuthority(
-      user.id,
-      environment.id,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environment.id },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
 
     // Add the client to the environment
     await this.addClientToEnvironment(client, environment.id)

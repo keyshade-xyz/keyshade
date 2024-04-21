@@ -1,8 +1,9 @@
 import { Global, Module } from '@nestjs/common'
+import { AuthorityCheckerService } from './authority-checker.service'
 
 @Global()
 @Module({
-  providers: [],
-  exports: []
+  providers: [AuthorityCheckerService],
+  exports: [AuthorityCheckerService]
 })
 export class CommonModule {}

@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
-import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
 import { PrismaService } from '../../prisma/prisma.service'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class EventService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    public authorityCheckerService: AuthorityCheckerService
+  ) {}
 
   async getEvents(
     user: User,
@@ -25,12 +28,12 @@ export class EventService {
     }
 
     // Check for workspace authority
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_EVENT,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_EVENT,
+      prisma: this.prisma
+    })
 
     const query = {
       where: {

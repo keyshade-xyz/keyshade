@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { EnvironmentService } from './environment.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 describe('EnvironmentService', () => {
   let service: EnvironmentService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [EnvironmentService, PrismaService]
+      providers: [EnvironmentService, PrismaService, AuthorityCheckerService]
     })
       .overrideProvider(PrismaService)
       .useValue(mockDeep<PrismaService>())

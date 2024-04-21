@@ -3,6 +3,7 @@ import { WorkspaceRoleService } from './workspace-role.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 describe('WorkspaceRoleService', () => {
   let service: WorkspaceRoleService
@@ -12,7 +13,8 @@ describe('WorkspaceRoleService', () => {
       providers: [
         WorkspaceRoleService,
         PrismaService,
-        { provide: MAIL_SERVICE, useClass: MockMailService }
+        { provide: MAIL_SERVICE, useClass: MockMailService },
+        AuthorityCheckerService
       ]
     }).compile()
 
