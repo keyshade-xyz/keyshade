@@ -23,6 +23,7 @@ import {
 import { AuthGuard } from '@nestjs/passport'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
+import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
@@ -30,7 +31,8 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private githubOAuthStrategyFactory: GithubOAuthStrategyFactory,
-    private googleOAuthStrategyFactory: GoogleOAuthStrategyFactory
+    private googleOAuthStrategyFactory: GoogleOAuthStrategyFactory,
+    private gitlabOAuthStrategyFactory: GitlabOAuthStrategyFactory
   ) {}
 
   @Public()
@@ -138,6 +140,53 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
+    return await this.authService.handleOAuthLogin(
+      email,
+      name,
+      profilePictureUrl
+    )
+  }
+
+  /* istanbul ignore next */
+  @Public()
+  @Get('gitlab')
+  @ApiOperation({
+    summary: 'Gitlab OAuth',
+    description:
+      'This endpoint validates Gitlab OAuth. If the OAuth is valid, it returns a valid token along with the user details'
+  })
+  async gitlabOAuthLogin(@Res() res) {
+    if (!this.gitlabOAuthStrategyFactory.isOAuthEnabled()) {
+      throw new HttpException(
+        'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    res.status(302).redirect('/api/auth/gitlab/callback')
+  }
+
+  /* istanbul ignore next */
+  @Public()
+  @Get('gitlab/callback')
+  @UseGuards(AuthGuard('gitlab'))
+  @ApiOperation({
+    summary: 'Gitlab OAuth Callback',
+    description:
+      'This endpoint validates Gitlab OAuth. If the OAuth is valid, it returns a valid token along with the user details'
+  })
+  @ApiParam({
+    name: 'code',
+    description: 'Code for the Callback',
+    required: true
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logged in successfully'
+  })
+  async gitlabOAuthCallback(@Req() req) {
+    const { emails, displayName: name, avatarUrl: profilePictureUrl } = req.user
+    const email = emails[0].value
     return await this.authService.handleOAuthLogin(
       email,
       name,
