@@ -3,52 +3,21 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger, LoggerService, ValidationPipe } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app/app.module'
-import * as chalk from 'chalk'
-import * as moment from 'moment'
 import { QueryTransformPipe } from './common/query.transform.pipe'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
+import { CustomLoggerService } from './common/logger.service'
 
 export const sentryEnv = process.env.SENTRY_ENV || 'production'
 
-class CustomLogger implements LoggerService {
-  log(message: string) {
-    this.info(message)
-  }
-
-  info(message: string) {
-    console.info(
-      `${chalk.green('[INFO]')} ${chalk.green(
-        moment().format('YYYY-MM-DD HH:mm:ss')
-      )} - ${message}`
-    )
-  }
-
-  error(message: string) {
-    console.error(
-      `${chalk.red('[ERROR]')} ${chalk.red(
-        moment().format('YYYY-MM-DD HH:mm:ss')
-      )} - ${message}`
-    )
-  }
-
-  warn(message: string) {
-    console.warn(
-      `${chalk.yellow('[WARN]')} ${chalk.yellow(
-        moment().format('YYYY-MM-DD HH:mm:ss')
-      )} - ${message}`
-    )
-  }
-}
-
 async function initializeSentry() {
-  const logger = new CustomLogger()
+  const logger = new CustomLoggerService()
 
   if (
     !process.env.SENTRY_DSN ||
@@ -77,7 +46,7 @@ async function initializeSentry() {
 }
 
 async function initializeNestApp() {
-  const logger = new CustomLogger()
+  const logger = new CustomLoggerService()
   const app = await NestFactory.create(AppModule, {
     logger,
     cors: {

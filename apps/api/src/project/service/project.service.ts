@@ -18,20 +18,22 @@ import { excludeFields } from '../../common/exclude-fields'
 import { PrismaService } from '../../prisma/prisma.service'
 import { decrypt } from '../../common/decrypt'
 import { encrypt } from '../../common/encrypt'
-import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
-import getProjectWithAuthority from '../../common/get-project-with-authority'
 import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import createApproval from '../../common/create-approval'
 import { UpdateProjectMetadata } from '../../approval/approval.types'
 import { ProjectWithSecrets } from '../project.types'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class ProjectService {
   private readonly log: Logger = new Logger(ProjectService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authorityCheckerService: AuthorityCheckerService
+  ) {}
 
   async createProject(
     user: User,
@@ -40,12 +42,13 @@ export class ProjectService {
     reason?: string
   ) {
     // Check if the workspace exists or not
-    const workspace = await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.CREATE_PROJECT,
-      this.prisma
-    )
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.CREATE_PROJECT,
+        prisma: this.prisma
+      })
 
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
@@ -219,12 +222,13 @@ export class ProjectService {
     dto: UpdateProject,
     reason?: string
   ) {
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.UPDATE_PROJECT,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.UPDATE_PROJECT,
+        prisma: this.prisma
+      })
 
     // Check if project with this name already exists for the user
     if (
@@ -257,12 +261,13 @@ export class ProjectService {
   }
 
   async deleteProject(user: User, projectId: Project['id'], reason?: string) {
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.DELETE_PROJECT,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.DELETE_PROJECT,
+        prisma: this.prisma
+      })
 
     if (await workspaceApprovalEnabled(project.workspaceId, this.prisma)) {
       return await createApproval(
@@ -282,12 +287,13 @@ export class ProjectService {
   }
 
   async getProjectByUserAndId(user: User, projectId: Project['id']) {
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_PROJECT,
+        prisma: this.prisma
+      })
 
     return project
   }
@@ -301,12 +307,12 @@ export class ProjectService {
     order: string,
     search: string
   ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_PROJECT,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_PROJECT,
+      prisma: this.prisma
+    })
 
     return (
       await this.prisma.project.findMany({

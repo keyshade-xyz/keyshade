@@ -13,13 +13,15 @@ import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { ProviderModule } from '../../provider/provider.module'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { CommonModule } from '../../common/common.module'
 
 describe('ApprovalService', () => {
   let service: ApprovalService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ProviderModule],
+      imports: [ProviderModule, CommonModule],
       providers: [
         ApprovalService,
         PrismaService,
@@ -32,7 +34,8 @@ describe('ApprovalService', () => {
         {
           provide: MAIL_SERVICE,
           useClass: MockMailService
-        }
+        },
+        AuthorityCheckerService
       ]
     })
       .overrideProvider(REDIS_CLIENT)
