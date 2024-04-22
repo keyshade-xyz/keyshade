@@ -12,7 +12,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
-import { CustomLoggerService } from './common/logger/logger.service'
+import { CustomLoggerService } from './common/logger.service'
 
 export const sentryEnv = process.env.SENTRY_ENV || 'production'
 
