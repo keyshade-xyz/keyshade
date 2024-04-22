@@ -6,14 +6,14 @@ import { MockMailService } from '../../mail/services/mock.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { LoggerModule } from '../../logger/logger.module'
+import { CommonModule } from '../../common/common.module'
 
 describe('ProjectController', () => {
   let controller: ProjectController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [LoggerModule],
+      imports: [CommonModule],
       controllers: [ProjectController],
       providers: [
         ProjectService,

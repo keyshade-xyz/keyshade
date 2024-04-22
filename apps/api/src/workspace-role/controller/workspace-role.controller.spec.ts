@@ -5,14 +5,14 @@ import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { WorkspaceRoleService } from '../service/workspace-role.service'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { LoggerModule } from '../../logger/logger.module'
+import { CommonModule } from '../../common/common.module'
 
 describe('WorkspaceRoleController', () => {
   let controller: WorkspaceRoleController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [LoggerModule],
+      imports: [CommonModule],
       providers: [
         WorkspaceRoleService,
         PrismaService,

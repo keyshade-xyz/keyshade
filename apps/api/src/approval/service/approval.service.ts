@@ -44,7 +44,7 @@ export class ApprovalService {
     private readonly environmentService: EnvironmentService,
     private readonly secretService: SecretService,
     private readonly variableService: VariableService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async updateApproval(user: User, reason: string, approvalId: Approval['id']) {

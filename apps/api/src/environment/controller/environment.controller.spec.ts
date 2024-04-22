@@ -4,14 +4,14 @@ import { EnvironmentService } from '../service/environment.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { LoggerModule } from '../../logger/logger.module'
+import { CommonModule } from '../../common/common.module'
 
 describe('EnvironmentController', () => {
   let controller: EnvironmentController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [LoggerModule],
+      imports: [CommonModule],
       controllers: [EnvironmentController],
       providers: [EnvironmentService, PrismaService, AuthorityCheckerService]
     })

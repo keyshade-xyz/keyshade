@@ -51,7 +51,7 @@ export default class ChangeNotifier
       publisher: RedisClientType
     },
     private readonly prisma: PrismaService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber

@@ -8,14 +8,14 @@ import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { ProviderModule } from '../../provider/provider.module'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { LoggerModule } from '../../logger/logger.module'
+import { CommonModule } from '../../common/common.module'
 
 describe('VariableService', () => {
   let service: VariableService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ProviderModule, LoggerModule],
+      imports: [ProviderModule, CommonModule],
       providers: [
         PrismaService,
         {

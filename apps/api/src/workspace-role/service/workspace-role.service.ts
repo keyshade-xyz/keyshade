@@ -29,7 +29,7 @@ export class WorkspaceRoleService {
 
   constructor(
     private readonly prisma: PrismaService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async createWorkspaceRole(

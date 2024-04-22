@@ -28,7 +28,7 @@ import { AuthorityCheckerService } from '../../common/authority-checker.service'
 export class EnvironmentService {
   constructor(
     private readonly prisma: PrismaService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async createEnvironment(

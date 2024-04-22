@@ -47,7 +47,7 @@ export class VariableService {
     readonly redisClient: {
       publisher: RedisClientType
     },
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {
     this.redis = redisClient.publisher
   }

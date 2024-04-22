@@ -32,7 +32,7 @@ export class ProjectService {
 
   constructor(
     private readonly prisma: PrismaService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async createProject(

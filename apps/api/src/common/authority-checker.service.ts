@@ -11,7 +11,7 @@ import getCollectiveWorkspaceAuthorities from './get-collective-workspace-author
 import { EnvironmentWithProject } from 'src/environment/environment.types'
 import { ProjectWithSecrets } from 'src/project/project.types'
 import { SecretWithProjectAndVersion } from 'src/secret/secret.types'
-import { CustomLoggerService } from '../logger/logger.service'
+import { CustomLoggerService } from './logger/logger.service'
 
 export interface AuthorityInput {
   userId: string

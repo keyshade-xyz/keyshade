@@ -45,7 +45,7 @@ export class WorkspaceService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    public authorityCheckerService: AuthorityCheckerService
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async createWorkspace(user: User, dto: CreateWorkspace) {
