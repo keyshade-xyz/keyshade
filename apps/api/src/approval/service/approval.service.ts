@@ -31,7 +31,7 @@ import {
   UpdateVariableMetadata,
   UpdateWorkspaceMetadata
 } from '../approval.types'
-import getWorkspaceWithAuthority from '../../common/get-workspace-with-authority'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class ApprovalService {
@@ -43,7 +43,8 @@ export class ApprovalService {
     private readonly projectService: ProjectService,
     private readonly environmentService: EnvironmentService,
     private readonly secretService: SecretService,
-    private readonly variableService: VariableService
+    private readonly variableService: VariableService,
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   async updateApproval(user: User, reason: string, approvalId: Approval['id']) {
@@ -453,12 +454,12 @@ export class ApprovalService {
     actions: ApprovalAction[],
     statuses: ApprovalStatus[]
   ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.MANAGE_APPROVALS,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.MANAGE_APPROVALS,
+      prisma: this.prisma
+    })
 
     return await this.prisma.approval.findMany({
       where: {
@@ -493,12 +494,12 @@ export class ApprovalService {
     actions: ApprovalAction[],
     statuses: ApprovalStatus[]
   ) {
-    await getWorkspaceWithAuthority(
-      user.id,
-      workspaceId,
-      Authority.READ_WORKSPACE,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_WORKSPACE,
+      prisma: this.prisma
+    })
 
     return this.prisma.approval.findMany({
       where: {

@@ -5,12 +5,15 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { MockMailService } from '../../mail/services/mock.service'
 import { JwtService } from '@nestjs/jwt'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { CommonModule } from '../../common/common.module'
 
 describe('WorkspaceController', () => {
   let controller: WorkspaceController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CommonModule],
       providers: [
         WorkspaceService,
         PrismaService,
@@ -18,7 +21,8 @@ describe('WorkspaceController', () => {
           provide: MAIL_SERVICE,
           useClass: MockMailService
         },
-        JwtService
+        JwtService,
+        AuthorityCheckerService
       ],
       controllers: [WorkspaceController]
     }).compile()

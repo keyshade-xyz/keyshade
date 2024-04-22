@@ -3,6 +3,7 @@ import { EventService } from './service/event.service'
 import { EventController } from './controller/event.controller'
 
 @Module({
+  imports: [],
   providers: [EventService],
   controllers: [EventController]
 })

@@ -17,17 +17,19 @@ import {
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '../../prisma/prisma.service'
-import getProjectWithAuthority from '../../common/get-project-with-authority'
-import getEnvironmentWithAuthority from '../../common/get-environment-with-authority'
 import createEvent from '../../common/create-event'
 import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
 import { EnvironmentWithProject } from '../environment.types'
 import createApproval from '../../common/create-approval'
 import { UpdateEnvironmentMetadata } from '../../approval/approval.types'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
 @Injectable()
 export class EnvironmentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authorityCheckerService: AuthorityCheckerService
+  ) {}
 
   async createEnvironment(
     user: User,
@@ -36,12 +38,13 @@ export class EnvironmentService {
     reason?: string
   ) {
     // Check if the user has the required role to create an environment
-    const project = await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.CREATE_ENVIRONMENT,
-      this.prisma
-    )
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.CREATE_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     // Check if an environment with the same name already exists
     if (await this.environmentExists(dto.name, projectId)) {
@@ -136,12 +139,13 @@ export class EnvironmentService {
     environmentId: Environment['id'],
     reason?: string
   ) {
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.UPDATE_ENVIRONMENT,
-      this.prisma
-    )
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { id: environmentId },
+        authority: Authority.UPDATE_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     // Check if an environment with the same name already exists
     if (
@@ -179,12 +183,13 @@ export class EnvironmentService {
   }
 
   async getEnvironment(user: User, environmentId: Environment['id']) {
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { id: environmentId },
+        authority: Authority.READ_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     return environment
   }
@@ -198,12 +203,12 @@ export class EnvironmentService {
     order: string,
     search: string
   ) {
-    await getProjectWithAuthority(
-      user.id,
-      projectId,
-      Authority.READ_ENVIRONMENT,
-      this.prisma
-    )
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
 
     // Get the environments
     return await this.prisma.environment.findMany({
@@ -230,12 +235,13 @@ export class EnvironmentService {
     environmentId: Environment['id'],
     reason?: string
   ) {
-    const environment = await getEnvironmentWithAuthority(
-      user.id,
-      environmentId,
-      Authority.DELETE_ENVIRONMENT,
-      this.prisma
-    )
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { id: environmentId },
+        authority: Authority.DELETE_ENVIRONMENT,
+        prisma: this.prisma
+      })
 
     // Check if the environment is the default one
     if (environment.isDefault) {
