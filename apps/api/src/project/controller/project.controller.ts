@@ -15,6 +15,7 @@ import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @ApiTags('Project Controller')
 @Controller('project')
@@ -27,7 +28,7 @@ export class ProjectController {
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() dto: CreateProject,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.service.createProject(user, workspaceId, dto, reason)
   }
@@ -38,7 +39,7 @@ export class ProjectController {
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id'],
     @Body() dto: UpdateProject,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.service.updateProject(user, projectId, dto, reason)
   }
@@ -48,7 +49,7 @@ export class ProjectController {
   async deleteProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id'],
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.service.deleteProject(user, projectId, reason)
   }

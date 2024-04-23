@@ -15,6 +15,7 @@ import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @ApiTags('Secret Controller')
 @Controller('secret')
@@ -27,7 +28,7 @@ export class SecretController {
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
     @Body() dto: CreateSecret,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.secretService.createSecret(user, dto, projectId, reason)
   }
@@ -38,7 +39,7 @@ export class SecretController {
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
     @Body() dto: UpdateSecret,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.secretService.updateSecret(user, secretId, dto, reason)
   }
@@ -52,7 +53,7 @@ export class SecretController {
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
     @Param('environmentId') environmentId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.secretService.updateSecretEnvironment(
       user,
@@ -68,7 +69,7 @@ export class SecretController {
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
     @Param('rollbackVersion') rollbackVersion: number,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.secretService.rollbackSecret(
       user,
@@ -83,7 +84,7 @@ export class SecretController {
   async deleteSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.secretService.deleteSecret(user, secretId, reason)
   }

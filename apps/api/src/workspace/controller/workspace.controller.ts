@@ -11,7 +11,8 @@ import {
 import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
-import {
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
+import{
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
@@ -34,7 +35,7 @@ export class WorkspaceController {
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Body() dto: UpdateWorkspace,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return this.workspaceService.updateWorkspace(user, workspaceId, dto, reason)
   }
