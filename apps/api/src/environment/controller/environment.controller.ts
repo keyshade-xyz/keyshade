@@ -90,7 +90,7 @@ export class EnvironmentController {
   async deleteEnvironment(
     @CurrentUser() user: User,
     @Param('environmentId') environmentId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.environmentService.deleteEnvironment(
       user,

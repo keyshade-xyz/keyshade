@@ -13,13 +13,17 @@ describe('AlphanumericReasonValidationPipe', () => {
     expect(pipe.transform(validInput)).toBe(validInput);
   });
 
+  it('should not allow strings with only spaces', () => {
+    expect(() => pipe.transform('   ')).toThrow(BadRequestException);
+  });
+
   it('should throw BadRequestException for non-alphanumeric string', () => {
     const invalidInput = 'Test123$%^';
     try {
       pipe.transform(invalidInput);
     } catch (e) {
       expect(e).toBeInstanceOf(BadRequestException);
-      expect(e.message).toBe('Reason must only contain alphanumeric characters and spaces.');
+      expect(e.message).toBe('Reason must contain only alphanumeric characters and no leading or trailing spaces.');
     }
   });
 });
