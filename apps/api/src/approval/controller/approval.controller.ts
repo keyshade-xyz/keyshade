@@ -10,6 +10,7 @@ import {
 } from '@prisma/client'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @Controller('approval')
 export class ApprovalController {
@@ -20,7 +21,7 @@ export class ApprovalController {
   async updateApproval(
     @CurrentUser() user: User,
     @Param('approvalId') approvalId: Approval['id'],
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return this.approvalService.updateApproval(user, reason, approvalId)
   }

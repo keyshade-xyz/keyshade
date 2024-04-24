@@ -15,6 +15,7 @@ import { Authority, User } from '@prisma/client'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @ApiTags('Environment Controller')
 @Controller('environment')
@@ -27,7 +28,7 @@ export class EnvironmentController {
     @CurrentUser() user: User,
     @Body() dto: CreateEnvironment,
     @Param('projectId') projectId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.environmentService.createEnvironment(
       user,
@@ -43,7 +44,7 @@ export class EnvironmentController {
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
     @Param('environmentId') environmentId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.environmentService.updateEnvironment(
       user,
@@ -89,7 +90,7 @@ export class EnvironmentController {
   async deleteEnvironment(
     @CurrentUser() user: User,
     @Param('environmentId') environmentId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.environmentService.deleteEnvironment(
       user,

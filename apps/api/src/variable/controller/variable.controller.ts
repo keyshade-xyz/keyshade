@@ -12,9 +12,9 @@ import { ApiTags } from '@nestjs/swagger'
 import { VariableService } from '../service/variable.service'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { Authority, User } from '@prisma/client'
+import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
-import { UpdateVariable } from '../dto/update.variable/update.variable'
 
 @ApiTags('Variable Controller')
 @Controller('variable')
@@ -27,7 +27,7 @@ export class VariableController {
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
     @Body() dto: CreateVariable,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe ) reason: string
   ) {
     return await this.variableService.createVariable(
       user,
@@ -42,8 +42,8 @@ export class VariableController {
   async updateVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Body() dto: UpdateVariable,
-    @Query('reason') reason: string
+    @Body() dto: CreateVariable,
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.variableService.updateVariable(
       user,
@@ -62,7 +62,7 @@ export class VariableController {
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
     @Param('environmentId') environmentId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.variableService.updateVariableEnvironment(
       user,
@@ -78,7 +78,7 @@ export class VariableController {
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
     @Param('rollbackVersion') rollbackVersion: number,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.variableService.rollbackVariable(
       user,
@@ -93,7 +93,7 @@ export class VariableController {
   async deleteVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Query('reason') reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.variableService.deleteVariable(user, variableId, reason)
   }
