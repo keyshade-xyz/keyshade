@@ -1,6 +1,6 @@
 'use client'
-import { GeistSans } from 'geist/font/sans'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
   InputOTP,
@@ -11,13 +11,21 @@ import {
 
 export default function AuthOTPPage(): React.JSX.Element {
   return (
-    <main className="flex h-screen items-center justify-center justify-items-center px-4">
+    <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
         <div className="mb-14 flex flex-col items-center">
           <KeyshadeBigSVG />
-          <h1 className={`${GeistSans.className} text-[2.5rem] font-semibold`}>
-            Welcome to Keyshade
+          <h1
+            className={`${GeistSansFont.className} text-center text-[2rem] font-semibold md:text-[2.5rem]`}
+          >
+            Verify your mail address
           </h1>
+          <div
+            className={`${GeistSansFont.className} flex flex-col items-center`}
+          >
+            <span>We&apos;ve sent a verification code to </span>
+            <span>abc@gmail.com</span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -34,14 +42,8 @@ export default function AuthOTPPage(): React.JSX.Element {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
-          <Button className="w-full">Get Started</Button>
-        </div>
-        <Button className="w-full" variant="outline">
-          Already have an account? Sign In
-        </Button>
-        <div className="text-center text-xs text-[#808080]">
-          By continueing, you acknowledge and agree to our <br />
-          Legal Terms and Privacy Policy.
+
+          <Button className="w-full">Verify</Button>
         </div>
       </div>
     </main>

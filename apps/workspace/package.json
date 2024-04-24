@@ -9,9 +9,17 @@
         "lint": "next lint --fix"
     },
     "dependencies": {
+        "@radix-ui/react-avatar": "^1.0.4",
+        "@radix-ui/react-dialog": "^1.0.5",
+        "@radix-ui/react-direction": "^1.0.1",
+        "@radix-ui/react-dropdown-menu": "^2.0.6",
+        "@radix-ui/react-menubar": "^1.0.4",
+        "@radix-ui/react-popover": "^1.0.7",
+        "@radix-ui/react-scroll-area": "^1.0.5",
         "@radix-ui/react-slot": "^1.0.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.0",
+        "cmdk": "^1.0.0",
         "geist": "^1.2.2",
         "input-otp": "^1.2.4",
         "lucide-react": "^0.340.0",

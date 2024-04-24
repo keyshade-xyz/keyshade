@@ -14,6 +14,7 @@ const nextConfig = {
     return config;
   },
   reactStrictMode: true,
+  transpilePackages: ["geist"],
 };
 
 module.exports = nextConfig;
