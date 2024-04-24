@@ -1,4 +1,3 @@
- 
 import * as React from 'react'
 import { type DialogProps } from '@radix-ui/react-dialog'
 import { Command as CommandPrimitive } from 'cmdk'
@@ -42,8 +41,11 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  // eslint-disable-next-line react/no-unknown-property -- for cmdk lib
-  <div className="flex items-center border-b border-white/10 px-3" cmdk-input-wrapper="">
+   
+  <div
+    className="flex items-center border-b border-white/10 px-3"
+    // cmdk-input-wrapper=""
+  >
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       className={cn(

@@ -1,9 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { ChevronsUpDown } from 'lucide-react'
+// import {Check} from 'lucide-react'
+// import { cn } from '@/lib/utils'
+// import { Button } from '@/components/ui/button'
 import {
   Command,
   CommandEmpty,
@@ -17,7 +18,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 
-const frameworks = [
+const _frameworks = [
   {
     value: 'next.js',
     label: 'Next.js'
@@ -41,8 +42,8 @@ const frameworks = [
 ]
 
 export function Combobox(): React.JSX.Element {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState('')
+  const [open, setOpen] = React.useState<boolean>(false)
+  // const [value, setValue] = React.useState('')
 
   return (
     <Popover onOpenChange={setOpen} open={open}>

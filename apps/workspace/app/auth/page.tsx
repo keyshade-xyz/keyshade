@@ -9,7 +9,9 @@ export default function AuthPage(): React.JSX.Element {
       <div className="flex flex-col gap-6">
         <div className="mb-14 flex flex-col items-center">
           <KeyshadeBigSVG />
-          <h1 className={`${GeistSans.className} text-[2rem] md:text-[2.5rem] font-semibold`}>
+          <h1
+            className={`${GeistSans.className} text-[2rem] font-semibold md:text-[2.5rem]`}
+          >
             Welcome to Keyshade
           </h1>
         </div>

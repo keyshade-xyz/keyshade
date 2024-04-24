@@ -36,7 +36,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
                 Add Email
               </span>
               <div
-                className={`${NunitoSansFont.className} flex h-[10vh] gap-1 cursor-text flex-col items-start rounded-md border border-white/10 bg-neutral-800 px-3 py-2 text-sm`}
+                className={`${NunitoSansFont.className} flex h-[10vh] cursor-text flex-col items-start gap-1 rounded-md border border-white/10 bg-neutral-800 px-3 py-2 text-sm`}
                 onClick={() => {
                   inputRef.current?.focus()
                 }}

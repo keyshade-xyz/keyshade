@@ -21,7 +21,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-12 rounded-xl bg-[#191A1C] px-10 py-5 md:py-8 2xl:py-12 md:px-[7vw]">
+        <div className="flex flex-col gap-y-12 rounded-xl bg-[#191A1C] px-10 py-5 md:px-[7vw] md:py-8 2xl:py-12">
           <div className="space-y-4 md:w-[20vw]">
             <div>
               <span className={`${NunitoSansFont.className} text-sm`}>

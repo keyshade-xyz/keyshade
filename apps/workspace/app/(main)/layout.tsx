@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <main className="flex h-dvh md:h-[90vh] 2xl:h-[93vh]">
       <Sidebar />
-      <div className="m-8 h-full md:w-[90vw] rounded-[1.125rem] bg-[#161819] ">
+      <div className="m-8 h-full rounded-[1.125rem] bg-[#161819] md:w-[90vw] ">
         <Navbar />
         <div className="p-4">{children}</div>
       </div>
