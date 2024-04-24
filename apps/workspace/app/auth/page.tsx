@@ -3,7 +3,7 @@ import { GithubSVG, GoogleSVG, KeyshadeBigSVG } from '@public/svg/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-export default function AuthPage(): React.JSX.Element {
+export default function AuthPage(): JSX.Element {
   return (
     <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
