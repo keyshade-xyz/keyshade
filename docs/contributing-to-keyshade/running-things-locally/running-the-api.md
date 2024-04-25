@@ -42,6 +42,5 @@ pnpm run e2e:api
 
 You can also skip these first two commands and perform the unit and e2e tests at the same time with:
 ```bash
-pnpm run unit:api
-pnpm run e2e:api
+pnpm run test:api
 ```
