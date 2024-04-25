@@ -39,3 +39,9 @@ After this is complete, you can run end-to-end tests to validate your entire app
 ```bash
 pnpm run e2e:api
 ```
+
+You can also skip these first two commands and perform the unit and e2e tests at the same time with:
+```bash
+pnpm run unit:api
+pnpm run e2e:api
+```
