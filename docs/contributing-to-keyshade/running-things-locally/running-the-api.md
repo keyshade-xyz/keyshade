@@ -26,7 +26,7 @@ pnpm run dev:api
 
 ## Testing your code
 
-We currently perform two kinds of tests: **unit tests** and **e2e tests.**&#x20;
+We currently perform two kinds of tests: **unit tests** and **integration tests.**&#x20;
 
 After you make sure that you have added your unit tests, or you have made some changes to the existing functionality, you can run them using:
 
