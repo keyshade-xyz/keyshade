@@ -31,13 +31,16 @@ We currently perform two kinds of tests: **unit tests** and **integration tests.
 After you make sure that you have added your unit tests, or you have made some changes to the existing functionality, you can run them using:
 
 ```bash
-pnpm run test:api
+pnpm run unit:api
 ```
 
-After this is complete, you can run the integration tests. But for that, you would first need your test DB to be up and running. These commands will do of that for you.
+After this is complete, you can run end-to-end tests to validate your entire application from start to finish. Use this command:
 
 ```bash
-docker compose up -d
 pnpm run e2e:api
-docker compose down
+```
+
+You can also skip these first two commands and perform the unit and e2e tests at the same time with:
+```bash
+pnpm run test:api
 ```
