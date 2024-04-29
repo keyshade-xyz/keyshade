@@ -1,16 +1,10 @@
-import { User, Workspace } from '@prisma/client'
-import { PrismaService } from '../prisma/prisma.service'
-import { CreateUserDto } from '../user/dto/create.user/create.user'
-import createWorkspace from './create-workspace'
-import { Logger } from '@nestjs/common'
-
 const createUser = async (
   dto: Partial<CreateUserDto>,
   prisma: PrismaService
 ): Promise<
   User & {
     defaultWorkspace: Workspace
-  }
+  } | User
 > => {
   const logger = new Logger('createUser')
 
@@ -25,6 +19,12 @@ const createUser = async (
       isOnboardingFinished: dto.isOnboardingFinished ?? false
     }
   })
+
+  // Check if the user is an admin
+  if (user.isAdmin) {
+    logger.log(`Created admin user ${user.id}`)
+    return user
+  }
 
   // Create the user's default workspace
   const workspace = await createWorkspace(
