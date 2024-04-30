@@ -63,7 +63,7 @@ export function Combobox(): React.JSX.Element {
               🔥
             </div>
             <div className="flex flex-col items-start">
-              <div className="text-lg text-white">TrueZk</div>
+              <div className="text-lg text-white">Zenversee</div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
           </div>

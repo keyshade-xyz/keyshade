@@ -11,7 +11,9 @@ export default function Card({
 }: CardProps): React.JSX.Element {
   return (
     <div
-      className={`flex ${widthFull ? 'w-[20rem] md:w-full' : 'w-[20rem] md:w-[25rem]'} h-full flex-col justify-end rounded-2xl backdrop-blur-2xl`}
+      className={`flex ${
+        widthFull ? 'w-[20rem] md:w-full' : 'w-[20rem] md:w-[25rem]'
+      } h-full flex-col justify-end rounded-2xl backdrop-blur-2xl`}
       style={{
         background:
           'linear-gradient(180deg, rgba(52, 52, 52, 0.20) 0%, rgba(0, 0, 0, 0.00) 100%), rgba(17, 18, 27, 0.24)',

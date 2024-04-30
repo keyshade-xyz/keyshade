@@ -1,4 +1,5 @@
 'use client'
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment -- This is a temporary fix */
 /* eslint-disable @typescript-eslint/no-explicit-any -- This is a temporary fix */
 // Core component that receives mouse positions and renders pointer and content

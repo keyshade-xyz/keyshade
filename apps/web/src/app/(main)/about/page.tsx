@@ -66,7 +66,7 @@ const teamData = [
   }
 ]
 
-function About(): React.JSX.Element {
+function About(): JSX.Element {
   return (
     <div className="relative flex  flex-col items-center justify-center ">
       <ColorBGSVG className="absolute -z-10 -translate-y-[6vw]" />

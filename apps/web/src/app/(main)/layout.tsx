@@ -1,3 +1,4 @@
+import React from 'react'
 import Footer from '@/components/shared/footer'
 import Navbar from '@/components/shared/navbar'
 

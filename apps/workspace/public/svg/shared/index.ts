@@ -5,6 +5,7 @@ import TeamSVG from './team.svg'
 import IntegrationSVG from './integration.svg'
 import SettingsSVG from './settings.svg'
 import ThreeDotOptionSVG from './3dotOption.svg'
+import AddSVG from './add.svg'
 
 export {
   DropdownSVG,
@@ -13,5 +14,6 @@ export {
   TeamSVG,
   IntegrationSVG,
   SettingsSVG,
-  ThreeDotOptionSVG
+  ThreeDotOptionSVG,
+  AddSVG
 }

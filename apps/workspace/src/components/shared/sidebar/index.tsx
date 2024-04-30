@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import React from 'react'
 import {
   DashboardSVG,
   IntegrationSVG,
@@ -7,8 +7,36 @@ import {
   TeamSVG
 } from '@public/svg/shared'
 import { Combobox } from '@/components/ui/combobox'
+import SidebarTab from './sidebarTab'
 
-function Sidebar(): React.JSX.Element {
+function Sidebar(): JSX.Element {
+  const sidebarTabData = [
+    {
+      name: 'Dashboard',
+      icon: <DashboardSVG />,
+      link: '/',
+      matchTo: ''
+    },
+    {
+      name: 'Teams',
+      icon: <TeamSVG />,
+      link: '/teams',
+      matchTo: 'teams'
+    },
+    {
+      name: 'Integrations',
+      icon: <IntegrationSVG />,
+      link: '/',
+      matchTo: 'integrations'
+    },
+    {
+      name: 'Settings',
+      icon: <SettingsSVG />,
+      link: '/settings?tab=workspace',
+      matchTo: 'settings'
+    }
+  ]
+
   return (
     <aside className="m-8 w-[20rem]">
       <div className="grid gap-y-[1.88rem]">
@@ -23,30 +51,17 @@ function Sidebar(): React.JSX.Element {
         </div>
         <Combobox />
         <div className="flex w-full flex-col">
-          <Link
-            className="flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:bg-white/10"
-            href="/"
-          >
-            <DashboardSVG /> Dashboard
-          </Link>
-          <Link
-            className="flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:bg-white/10"
-            href="/"
-          >
-            <TeamSVG /> Teams
-          </Link>
-          <Link
-            className="flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:bg-white/10"
-            href="/"
-          >
-            <IntegrationSVG /> Integrations
-          </Link>
-          <Link
-            className="flex w-full gap-x-3 rounded-md p-[0.625rem] capitalize transition-colors hover:bg-white/10"
-            href="/"
-          >
-            <SettingsSVG /> Workspace Settings
-          </Link>
+          {sidebarTabData.map((tabData) => {
+            return (
+              <SidebarTab
+                icon={tabData.icon}
+                key={tabData.name}
+                link={tabData.link}
+                matchTo={tabData.matchTo}
+                name={tabData.name}
+              />
+            )
+          })}
         </div>
       </div>
     </aside>

@@ -18,7 +18,7 @@ export function TextRevealCard({
   revealText,
   children,
   className
-}: TextRevealCardProps): React.JSX.Element {
+}: TextRevealCardProps): JSX.Element {
   const [widthPercentage, setWidthPercentage] = useState(0)
   const cardRef = useRef<HTMLDivElement>(null)
   const [left, setLeft] = useState<number>(0)
@@ -124,7 +124,7 @@ export function TextRevealCardTitle({
 }: {
   children: React.ReactNode
   className?: string
-}): React.JSX.Element {
+}): JSX.Element {
   return (
     <h2 className={twMerge('mb-2 text-lg text-white', className)}>
       {children}
@@ -138,13 +138,13 @@ export function TextRevealCardDescription({
 }: {
   children: React.ReactNode
   className?: string
-}): React.JSX.Element {
+}): JSX.Element {
   return (
     <p className={twMerge('text-sm text-[#a9a9a9]', className)}>{children}</p>
   )
 }
 
-function Stars(): React.JSX.Element {
+function Stars(): JSX.Element {
   const randomMove = (): number => Math.random() * 4 - 2
   const randomOpacity = (): number => Math.random()
   const random = (): number => Math.random()

@@ -4,7 +4,7 @@
 
 'use client'
 import React, { useEffect, useState } from 'react'
-import Particles, { initParticlesEngine } from '@tsparticles/react'
+import { Particles, initParticlesEngine } from '@tsparticles/react'
 import type { Container, SingleOrMultiple } from '@tsparticles/engine'
 import { loadSlim } from '@tsparticles/slim'
 import { motion, useAnimation } from 'framer-motion'
@@ -20,7 +20,7 @@ interface ParticlesProps {
   particleColor?: string
   particleDensity?: number
 }
-export function SparklesCore(props: ParticlesProps): React.JSX.Element {
+export function SparklesCore(props: ParticlesProps): JSX.Element {
   const {
     id,
     className,

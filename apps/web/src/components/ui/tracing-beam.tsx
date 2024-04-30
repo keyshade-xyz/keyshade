@@ -9,7 +9,7 @@ export function TracingBeam({
 }: {
   children: React.ReactNode
   className?: string
-}): React.JSX.Element {
+}): JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,

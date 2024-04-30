@@ -1,3 +1,4 @@
+import React from 'react'
 import { ColorBGSVG } from '@public/hero'
 import EncryptButton from '@/components/ui/encrypt-btn'
 

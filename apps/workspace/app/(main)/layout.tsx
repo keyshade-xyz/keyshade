@@ -1,3 +1,4 @@
+import React from 'react'
 import Navbar from '@/components/shared/navbar'
 import Sidebar from '@/components/shared/sidebar'
 
