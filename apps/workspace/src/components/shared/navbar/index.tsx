@@ -3,9 +3,8 @@
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { DropdownSVG } from '@public/svg/shared'
 import Link from 'next/link'
-import SearchModel from './searchModel'
+import { DropdownSVG } from '@public/svg/shared'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
+import SearchModel from './searchModel'
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -91,7 +91,7 @@ function Navbar(): React.JSX.Element {
               <Link href="/settings?tab=workspace">
                 <DropdownMenuItem>Workspace Settings</DropdownMenuItem>
               </Link>
-              
+
               <DropdownMenuSeparator />
               <DropdownMenuItem>Log out</DropdownMenuItem>
             </DropdownMenuContent>
