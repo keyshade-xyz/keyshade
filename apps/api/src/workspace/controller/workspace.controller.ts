@@ -12,7 +12,7 @@ import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
-import{
+import {
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
