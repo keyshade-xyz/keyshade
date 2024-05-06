@@ -10,7 +10,7 @@ So if you have your variable in the .env set to empty, zod turns a blind eye to 
 
 VARIABLE = ''
 
-To over come this you need to set a min length if you want zod to throw an error
+To over come this you need to set a min length (.min()) if you want zod to throw an error
 
 Zod only throws errors if a variable is missing completely from .env
 
@@ -46,15 +46,15 @@ export const EnvSchema = z.object({
   SENTRY_PROFILES_SAMPLE_RATE: z.string().optional(),
   SENTRY_ENV: z.string().optional(),
 
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().optional(),
-  SMTP_EMAIL_ADDRESS: z.string().optional(),
-  SMTP_PASSWORD: z.string().optional(),
+  SMTP_HOST: z.string(),
+  SMTP_PORT: z.string(),
+  SMTP_EMAIL_ADDRESS: z.string(),
+  SMTP_PASSWORD: z.string(),
   // TODO: add regex check for FORM_EMAIL value as represented in .env.example (your-name <your-name@email.com>)
   FROM_EMAIL: z.string(),
 
   JWT_SECRET: z.string(),
 
-  WEB_FRONTEND_URL: z.string().url(),
-  WORKSPACE_FRONTEND_URL: z.string().url()
+  WEB_FRONTEND_URL: z.string().url().optional(),
+  WORKSPACE_FRONTEND_URL: z.string().url().optional()
 })

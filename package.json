@@ -112,12 +112,12 @@
     "e2e:api:teardown": "docker compose -f docker-compose-test.yml down",
     "test:web": "turbo run test --filter=web",
     "test:workspace": "turbo run test --filter=workspace",
-    "db:generate-types": "pnpm dlx prisma generate --schema=apps/api/src/prisma/schema.prisma",
-    "db:generate-migrations": "pnpx prisma migrate dev --create-only --skip-seed --schema=apps/api/src/prisma/schema.prisma",
-    "db:deploy-migrations": " pnpx prisma migrate deploy --schema=apps/api/src/prisma/schema.prisma",
-    "db:validate": "pnpm dlx prisma validate --schema=apps/api/src/prisma/schema.prisma",
-    "db:format": "pnpm dlx prisma format --schema=apps/api/src/prisma/schema.prisma",
-    "db:reset": "pnpm dlx prisma migrate reset --force --schema=apps/api/src/prisma/schema.prisma",
+    "db:generate-types": "pnpm run --filter=api db:generate-types",
+    "db:generate-migrations": "pnpm run --filter=api db:generate-migrations",
+    "db:deploy-migrations": "pnpm run --filter=api db:deploy-migrations",
+    "db:validate": "pnpm run --filter=api db:validate",
+    "db:format": "pnpm run --filter=api db:format",
+    "db:reset": "pnpm run --filter=api db:reset",
     "format": "prettier apps/**/*.{ts,tsx} --write",
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api"
@@ -136,11 +136,10 @@
   },
   "dependencies": {
     "@million/lint": "^0.0.73",
-    "@prisma/client": "5.12.1",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
     "million": "^3.0.5",
     "sharp": "^0.33.3",
-    "zod": "^3.23.5"
+    "zod": "^3.23.6"
   }
 }

@@ -10,6 +10,12 @@
     "dev": "nest start --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "db:generate-types": "pnpm dlx prisma generate --schema=src/prisma/schema.prisma",
+    "db:generate-migrations": "pnpx prisma migrate dev --create-only --skip-seed --schema=src/prisma/schema.prisma",
+    "db:deploy-migrations": " pnpx prisma migrate deploy --schema=src/prisma/schema.prisma",
+    "db:validate": "pnpm dlx prisma validate --schema=src/prisma/schema.prisma",
+    "db:format": "pnpm dlx prisma format --schema=src/prisma/schema.prisma",
+    "db:reset": "pnpm dlx prisma migrate reset --force --schema=src/prisma/schema.prisma",
     "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'"
   },
   "dependencies": {
