@@ -118,7 +118,7 @@
     "db:format": "pnpm dlx prisma format --schema=apps/api/src/prisma/schema.prisma",
     "db:reset": "pnpm dlx prisma migrate reset --force --schema=apps/api/src/prisma/schema.prisma",
     "format": "prettier apps/**/*.{ts,tsx} --write",
-    "prepare": "husky install",
+    "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api"
   },
   "packageManager": "pnpm@9.0.5",
