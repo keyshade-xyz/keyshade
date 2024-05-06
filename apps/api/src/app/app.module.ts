@@ -21,6 +21,7 @@ import { ApprovalModule } from '../approval/approval.module'
 import { SocketModule } from '../socket/socket.module'
 import { ProviderModule } from '../provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
+import { IntegrationModule } from '../integration/integration.module'
 
 @Module({
   controllers: [AppController],
@@ -44,7 +45,8 @@ import { ScheduleModule } from '@nestjs/schedule'
     VariableModule,
     ApprovalModule,
     SocketModule,
-    ProviderModule
+    ProviderModule,
+    IntegrationModule
   ],
   providers: [
     {
