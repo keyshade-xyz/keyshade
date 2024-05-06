@@ -10,6 +10,7 @@ function ProfilePage(): React.JSX.Element {
 
   return (
     <main className="flex h-[78vh] flex-col gap-y-10 overflow-y-auto">
+      {/* Avatar */}
       <div className="flex gap-[5vw]">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Avatar</div>
@@ -20,11 +21,12 @@ function ProfilePage(): React.JSX.Element {
         <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />{' '}
         {/* //! This is will be replaced by an image tag */}
       </div>
+      {/* Name */}
       <div className="flex max-w-[20vw] flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <div className="text-xl font-semibold">Username</div>
+          <div className="text-xl font-semibold">Name</div>
           <span className="text-sm text-white/70">
-            Your username is how you&apos;re identified across Keyshade.
+            Your name is how you&apos;re identified across Keyshade.
           </span>
         </div>
         <Input
@@ -35,6 +37,7 @@ function ProfilePage(): React.JSX.Element {
           value={username}
         />
       </div>
+      {/* Email */}
       <div className="flex max-w-[20vw] flex-col gap-4">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Email</div>
@@ -85,9 +88,9 @@ function ProfilePage(): React.JSX.Element {
 
       <div className="flex max-w-[20vw] flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <div className="text-xl font-semibold">Workspaces</div>
+          <div className="text-xl font-semibold">API Keys</div>
           <span className="text-sm text-white/70">
-            Manage all your workspaces in one place.
+            Generate new API keys to use with the Keyshade CLI.
           </span>
         </div>
       </div>
