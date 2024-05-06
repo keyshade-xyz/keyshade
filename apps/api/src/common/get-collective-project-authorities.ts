@@ -48,7 +48,5 @@ export default async function getCollectiveProjectAuthorities(
     })
   })
 
-  // console.log('authorities: ', authorities)
-
   return authorities
 }

@@ -12,6 +12,7 @@ export default async function cleanUp(prisma: PrismaClient) {
     prisma.user.deleteMany(),
     prisma.event.deleteMany(),
     prisma.apiKey.deleteMany(),
-    prisma.variable.deleteMany()
+    prisma.variable.deleteMany(),
+    prisma.integration.deleteMany()
   ])
 }

@@ -1,4 +1,4 @@
-import { PrismaClient, Authority, Workspace } from '@prisma/client'
+import { PrismaClient, Authority, Workspace, Integration } from '@prisma/client'
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 import {
   BadRequestException,
@@ -392,5 +392,87 @@ export class AuthorityCheckerService {
     }
 
     return secret
+  }
+
+  public async checkAuthorityOverIntegration(
+    input: AuthorityInput
+  ): Promise<Integration> {
+    const { userId, entity, authority, prisma } = input
+
+    // Fetch the integration
+    let integration: Integration | null
+
+    try {
+      if (entity?.id) {
+        integration = await prisma.integration.findUnique({
+          where: {
+            id: entity.id
+          }
+        })
+      } else {
+        integration = await prisma.integration.findFirst({
+          where: {
+            name: entity?.name,
+            workspace: { members: { some: { userId: userId } } }
+          }
+        })
+      }
+    } catch (error) {
+      this.customLoggerService.error(error)
+      throw new Error(error)
+    }
+
+    if (!integration) {
+      throw new NotFoundException(`Integration with id ${entity.id} not found`)
+    }
+
+    // Check if the user has the required authorities
+    const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
+      integration.workspaceId,
+      userId,
+      prisma
+    )
+
+    if (
+      !permittedAuthorities.has(authority) &&
+      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
+    ) {
+      throw new UnauthorizedException(
+        `User ${userId} does not have the required authorities`
+      )
+    }
+
+    // Additionally, we would also like to check the project authorities,
+    // if the integration is associated with a project
+    if (integration.projectId) {
+      const project = await prisma.project.findUnique({
+        where: {
+          id: integration.projectId
+        }
+      })
+
+      if (!project) {
+        throw new NotFoundException(
+          `Project with id ${integration.projectId} not found`
+        )
+      }
+
+      const projectAuthorities = await getCollectiveProjectAuthorities(
+        userId,
+        project,
+        prisma
+      )
+
+      if (
+        !projectAuthorities.has(authority) &&
+        !projectAuthorities.has(Authority.WORKSPACE_ADMIN)
+      ) {
+        throw new UnauthorizedException(
+          `User ${userId} does not have the required authorities`
+        )
+      }
+    }
+
+    return integration
   }
 }

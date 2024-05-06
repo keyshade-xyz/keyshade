@@ -27,7 +27,7 @@ export class VariableController {
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
     @Body() dto: CreateVariable,
-    @Query('reason', AlphanumericReasonValidationPipe ) reason: string
+    @Query('reason', AlphanumericReasonValidationPipe) reason: string
   ) {
     return await this.variableService.createVariable(
       user,
