@@ -122,7 +122,7 @@
     "sourcemaps:api": "turbo run sourcemaps --filter=api"
   },
   "lint-staged": {
-    "*.{js,ts,tsx}": [
+    "*.{js,ts,tsx,css,yml,toml}": [
       "pnpm run lint --",
       "pnpm run format"
     ],
