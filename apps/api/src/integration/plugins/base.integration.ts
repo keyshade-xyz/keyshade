@@ -10,6 +10,8 @@ export abstract class BaseIntegration {
 
   /**
    * Call the actual API for the specific integration.
+   * You will need to extend this function in your plugin class, and use this function
+   * to make actual calls to the APIs that will perform the desired operations.
    * @param data The data that will be sent to the integration.
    * @param metadata The metadata data that will be used to authenticate with the integration and perform the tasks.
    */

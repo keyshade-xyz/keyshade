@@ -4,7 +4,8 @@ import { DiscordIntegration } from '../discord/discord.integration'
 
 /**
  * Factory class to create integrations. This class will be called to create an integration,
- * based on the integration type. This has only a single factory method.
+ * based on the integration type. This has only a single factory method. You will need to
+ * add your plugin to the switch case in the createIntegration method.
  */
 export default class IntegrationFactory {
   /**
