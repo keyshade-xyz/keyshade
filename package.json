@@ -136,6 +136,7 @@
   },
   "dependencies": {
     "@million/lint": "^0.0.73",
+    "@prisma/client": "^5.13.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
     "million": "^3.0.5",
