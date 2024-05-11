@@ -15,7 +15,6 @@ import { toSHA256 } from '../../../common/to-sha256'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
-const AUTHORIZATION = 'authorization'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -84,7 +83,7 @@ export class AuthGuard implements CanActivate {
         user.isAuthViaApiKey = true
         user.apiKeyAuthorities = new Set(apiKey.authorities)
       } else if (authType === 'JWT') {
-        const token = this.extractTokenFromHeader(request)
+        const token = this.extractTokenFromCookies(request)
         if (!token) {
           throw new ForbiddenException()
         }
@@ -134,18 +133,19 @@ export class AuthGuard implements CanActivate {
 
   private getAuthType(request: any): 'JWT' | 'API_KEY' | 'NONE' {
     const headers = this.getHeaders(request)
+    const cookies = request.cookies
     if (headers[X_KEYSHADE_TOKEN]) {
       return 'API_KEY'
     }
-    if (headers[AUTHORIZATION]) {
+    if (cookies && cookies['token']) {
       return 'JWT'
     }
     return 'NONE'
   }
 
-  private extractTokenFromHeader(request: any): string | undefined {
-    const headers = this.getHeaders(request)
-    const [type, token] = headers.authorization?.split(' ') ?? []
+  private extractTokenFromCookies(request: any): string | undefined {
+    const headers = this.getCookies(request)
+    const [type, token] = headers.token?.split(' ') ?? []
     return type === 'Bearer' ? token : undefined
   }
 
@@ -159,5 +159,9 @@ export class AuthGuard implements CanActivate {
 
   private getHeaders(request: any): any {
     return request.headers || request.handshake.headers // For websockets
+  }
+
+  private getCookies(request: any): any {
+    return request.cookies
   }
 }

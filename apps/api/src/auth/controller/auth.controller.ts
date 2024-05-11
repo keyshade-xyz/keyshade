@@ -11,7 +11,6 @@ import {
   UseGuards
 } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
-import { UserAuthenticatedResponse } from '../auth.types'
 import { Public } from '../../decorators/public.decorator'
 import {
   ApiOperation,
@@ -24,6 +23,7 @@ import { AuthGuard } from '@nestjs/passport'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
+import { Response } from 'express'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
@@ -94,9 +94,15 @@ export class AuthController {
   })
   async validateOtp(
     @Query('email') email: string,
-    @Query('otp') otp: string
-  ): Promise<UserAuthenticatedResponse> {
-    return await this.authService.validateOtp(email, otp)
+    @Query('otp') otp: string,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const { token, ...user } = await this.authService.validateOtp(email, otp)
+    response.cookie('token', `Bearer ${token}`, {
+      domain: process.env.DOMAIN ?? 'localhost',
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days,
+    })
+    return user
   }
 
   /* istanbul ignore next */
@@ -107,7 +113,7 @@ export class AuthController {
     description:
       'This endpoint validates Github OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  async githubOAuthLogin(@Res() res) {
+  async githubOAuthLogin(@Res() res: Response) {
     if (!this.githubOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
         'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
@@ -136,7 +142,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  async githubOAuthCallback(@Req() req) {
+  async githubOAuthCallback(@Req() req: any) {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
@@ -155,7 +161,7 @@ export class AuthController {
     description:
       'This endpoint validates Gitlab OAuth. If the OAuth is valid, it returns a valid token along with the user details'
   })
-  async gitlabOAuthLogin(@Res() res) {
+  async gitlabOAuthLogin(@Res() res: Response) {
     if (!this.gitlabOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
         'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
@@ -184,7 +190,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  async gitlabOAuthCallback(@Req() req) {
+  async gitlabOAuthCallback(@Req() req: any) {
     const { emails, displayName: name, avatarUrl: profilePictureUrl } = req.user
     const email = emails[0].value
     return await this.authService.handleOAuthLogin(
@@ -201,7 +207,7 @@ export class AuthController {
     summary: 'Google OAuth',
     description: 'Initiates Google OAuth'
   })
-  async googleOAuthLogin(@Res() res) {
+  async googleOAuthLogin(@Res() res: Response) {
     if (!this.googleOAuthStrategyFactory.isOAuthEnabled()) {
       throw new HttpException(
         'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.',
@@ -229,7 +235,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  async googleOAuthCallback(@Req() req) {
+  async googleOAuthCallback(@Req() req: any) {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
