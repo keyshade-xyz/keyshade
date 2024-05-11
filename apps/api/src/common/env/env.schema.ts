@@ -18,7 +18,16 @@ Use the .optional() property if you are okay with a variable being omitted from 
 
 */
 
-export const EnvSchema = z.object({
+const e2eEnvSchema = z.object({
+  NODE_ENV: z.literal('e2e'),
+  DATABASE_URL: z.string(),
+  API_PORT: z.string(),
+  REDIS_URL: z.string(),
+  JWT_SECRET: z.string()
+})
+
+const generalSchema = z.object({
+  NODE_ENV: z.literal('dev'),
   DATABASE_URL: z.string(),
   ADMIN_EMAIL: z.string(),
 
@@ -55,6 +64,13 @@ export const EnvSchema = z.object({
 
   JWT_SECRET: z.string(),
 
-  WEB_FRONTEND_URL: z.string().url().optional(),
-  WORKSPACE_FRONTEND_URL: z.string().url().optional()
+  WEB_FRONTEND_URL: z.string().url(),
+  WORKSPACE_FRONTEND_URL: z.string().url()
 })
+
+export type EnvSchemaType = z.infer<typeof generalSchema>
+
+export const EnvSchema = z.discriminatedUnion('NODE_ENV', [
+  e2eEnvSchema,
+  generalSchema
+])

@@ -29,6 +29,8 @@ import { IntegrationModule } from '../integration/integration.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // For some reason config module is looking for .env in the api directory so defining custom path
+      envFilePath: '../../.env',
       validate: EnvSchema.parse,
       validationOptions: {
         allowUnknown: false,
