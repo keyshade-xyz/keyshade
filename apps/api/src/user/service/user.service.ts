@@ -152,6 +152,8 @@ export class UserService {
   }
 
   private async checkIfAdminExistsOrCreate() {
+    // @ts-expect-error process.env.NODE_ENV parses to 'dev'
+    // FIXME
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
       return
     }
