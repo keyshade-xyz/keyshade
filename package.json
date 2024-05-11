@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "license": "MPL-2.0",
   "private": true,
+  "engineStrict": false,
   "release": {
     "branches": [
       "main"
@@ -121,7 +122,7 @@
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api"
   },
-  "packageManager": "pnpm@9.0.5",
+  "packageManager": "pnpm@9.1.0",
   "devDependencies": {
     "@sentry/cli": "^2.28.6",
     "@sentry/webpack-plugin": "^2.14.2",

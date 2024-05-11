@@ -13,6 +13,7 @@ import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
+import * as cookieParser from 'cookie-parser'
 
 export const sentryEnv = process.env.SENTRY_ENV || 'production'
 
@@ -74,6 +75,15 @@ async function initializeNestApp() {
     }),
     new QueryTransformPipe()
   )
+  app.enableCors({
+    credentials: true,
+    origin: [
+      'http://localhost:3000',
+      'https://keyshade.xyz',
+      'https://dashboard.keyshade.xyz'
+    ]
+  })
+  app.use(cookieParser())
   const port = process.env.API_PORT || 4200
   const swaggerConfig = new DocumentBuilder()
     .setTitle('keyshade')
