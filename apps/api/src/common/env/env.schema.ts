@@ -21,7 +21,6 @@ Use the .optional() property if you are okay with a variable being omitted from 
 const e2eEnvSchema = z.object({
   NODE_ENV: z.literal('e2e'),
   DATABASE_URL: z.string(),
-  API_PORT: z.string(),
   REDIS_URL: z.string(),
   JWT_SECRET: z.string()
 })
