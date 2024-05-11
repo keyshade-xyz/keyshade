@@ -21,13 +21,21 @@ import { ApprovalModule } from '../approval/approval.module'
 import { SocketModule } from '../socket/socket.module'
 import { ProviderModule } from '../provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
+import { EnvSchema } from '../common/env/env.schema'
 import { IntegrationModule } from '../integration/integration.module'
 
 @Module({
   controllers: [AppController],
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      // For some reason config module is looking for .env in the api directory so defining custom path
+      envFilePath: '../../.env',
+      validate: EnvSchema.parse,
+      validationOptions: {
+        allowUnknown: false,
+        abortEarly: true
+      }
     }),
     ScheduleModule.forRoot(),
     PassportModule,
