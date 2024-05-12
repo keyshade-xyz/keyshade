@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { User } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
@@ -142,7 +142,10 @@ export class UserService {
     }
 
     // Create the user's default workspace
-    const newUser = await createUser(user, this.prisma)
+    const newUser = await createUser(
+      { authProvider: AuthProvider.EMAIL_OTP, ...user },
+      this.prisma
+    )
     this.log.log(`Created user with email ${user.email}`)
 
     await this.mailService.accountLoginEmail(newUser.email)
