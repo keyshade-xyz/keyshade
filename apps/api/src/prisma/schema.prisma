@@ -165,6 +165,13 @@ enum IntegrationType {
   GITLAB
 }
 
+enum AuthProvider {
+  GOOGLE
+  GITHUB
+  GITLAB
+  EMAIL_OTP
+}
+
 model Event {
   id          String         @id @default(cuid())
   source      EventSource
@@ -202,6 +209,7 @@ model User {
   isActive             Boolean       @default(true)
   isOnboardingFinished Boolean       @default(false)
   isAdmin              Boolean       @default(false)
+  authProvider         AuthProvider?
   subscription         Subscription?
 
   workspaceMembers   WorkspaceMember[]

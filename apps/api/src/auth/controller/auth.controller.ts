@@ -3,11 +3,13 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Query,
   Req,
   Res,
+  UnprocessableEntityException,
   UseGuards
 } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
@@ -24,10 +26,18 @@ import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-s
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
 import { Response } from 'express'
+import { AuthProvider } from '@prisma/client'
+import setCookie from '../../common/set-cookie'
+import {
+  sendOAuthFailureRedirect,
+  sendOAuthSuccessRedirect
+} from '../../common/redirect'
 
 @ApiTags('Auth Controller')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name)
+
   constructor(
     private authService: AuthService,
     private githubOAuthStrategyFactory: GithubOAuthStrategyFactory,
@@ -97,12 +107,7 @@ export class AuthController {
     @Query('otp') otp: string,
     @Res({ passthrough: true }) response: Response
   ) {
-    const { token, ...user } = await this.authService.validateOtp(email, otp)
-    response.cookie('token', `Bearer ${token}`, {
-      domain: process.env.DOMAIN ?? 'localhost',
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days,
-    })
-    return user
+    return setCookie(response, await this.authService.validateOtp(email, otp))
   }
 
   /* istanbul ignore next */
@@ -144,12 +149,20 @@ export class AuthController {
   })
   async githubOAuthCallback(@Req() req: any) {
     const { emails, displayName: name, photos } = req.user
+
+    if (!emails.length) {
+      throw new UnprocessableEntityException(
+        'Email information is missing from the OAuth provider data.'
+      )
+    }
     const email = emails[0].value
-    const profilePictureUrl = photos[0].value
-    return await this.authService.handleOAuthLogin(
+    const profilePictureUrl = photos[0]?.value
+
+    return this.authService.handleOAuthLogin(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GITHUB
     )
   }
 
@@ -190,13 +203,22 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  async gitlabOAuthCallback(@Req() req: any) {
+  async gitlabOAuthCallback(@Req() req: any, @Res() res: Response) {
     const { emails, displayName: name, avatarUrl: profilePictureUrl } = req.user
+
+    if (!emails.length) {
+      throw new UnprocessableEntityException(
+        'Email information is missing from the OAuth provider data.'
+      )
+    }
     const email = emails[0].value
-    return await this.authService.handleOAuthLogin(
+
+    this.handleOAuthProcess(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GITLAB,
+      res
     )
   }
 
@@ -235,14 +257,51 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Logged in successfully'
   })
-  async googleOAuthCallback(@Req() req: any) {
+  async googleOAuthCallback(@Req() req: any, @Res() res: Response) {
     const { emails, displayName: name, photos } = req.user
+
+    if (!emails.length) {
+      throw new UnprocessableEntityException(
+        'Email information is missing from the OAuth provider data.'
+      )
+    }
     const email = emails[0].value
-    const profilePictureUrl = photos[0].value
-    return await this.authService.handleOAuthLogin(
+    const profilePictureUrl = photos[0]?.value
+
+    this.handleOAuthProcess(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GOOGLE,
+      res
     )
+  }
+
+  /* istanbul ignore next */
+  private async handleOAuthProcess(
+    email: string,
+    name: string,
+    profilePictureUrl: string,
+    oauthProvider: AuthProvider,
+    response: Response
+  ) {
+    try {
+      const data = await this.authService.handleOAuthLogin(
+        email,
+        name,
+        profilePictureUrl,
+        oauthProvider
+      )
+      const user = setCookie(response, data)
+      sendOAuthSuccessRedirect(response, user)
+    } catch (error) {
+      this.logger.warn(
+        'User attempted to log in with a different OAuth provider'
+      )
+      sendOAuthFailureRedirect(
+        response,
+        'User attempted to log in with a different OAuth provider'
+      )
+    }
   }
 }
