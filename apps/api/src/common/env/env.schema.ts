@@ -64,7 +64,9 @@ const generalSchema = z.object({
   JWT_SECRET: z.string(),
 
   WEB_FRONTEND_URL: z.string().url(),
-  WORKSPACE_FRONTEND_URL: z.string().url()
+  PLATFORM_FRONTEND_URL: z.string().url(),
+  PLATFORM_OAUTH_SUCCESS_REDIRECT_PATH: z.string(),
+  PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string()
 })
 
 export type EnvSchemaType = z.infer<typeof generalSchema>
