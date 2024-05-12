@@ -1,13 +1,7 @@
 import { Controller, Post, Body, HttpStatus } from '@nestjs/common'
 import { Public } from '../../decorators/public.decorator'
 import { FeedbackService } from '../service/feedback.service'
-import {
-  ApiTags,
-  ApiBody,
-  ApiResponse,
-  ApiOperation,
-  ApiProperty
-} from '@nestjs/swagger'
+import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger'
 
 @ApiTags('Feedback Controller')
 @Controller('feedback')
