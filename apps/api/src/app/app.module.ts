@@ -23,6 +23,7 @@ import { ProviderModule } from '../provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EnvSchema } from '../common/env/env.schema'
 import { IntegrationModule } from '../integration/integration.module'
+import { FeedbackModule } from '../feedback/feedback.module'
 
 @Module({
   controllers: [AppController],
@@ -54,7 +55,8 @@ import { IntegrationModule } from '../integration/integration.module'
     ApprovalModule,
     SocketModule,
     ProviderModule,
-    IntegrationModule
+    IntegrationModule,
+    FeedbackModule
   ],
   providers: [
     {

@@ -111,6 +111,28 @@ export class MailService implements IMailService {
     await this.sendEmail(process.env.ADMIN_EMAIL, subject, body)
   }
 
+  async feedbackEmail(email: string, feedback: string): Promise<void> {
+    const subject = 'New Feedback Received !'
+    const body = `<!DOCTYPE html>
+    <html>
+    <head>
+       <title>New Feedback Received !</title>
+    </head>
+    <body>
+       <h1>New Feedback Received</h1>
+       <p>Hello,</p>
+       <p>We have received new feedback from a user:</p>
+       <blockquote>${feedback}</blockquote>
+       <p>Please review this feedback as soon as possible.</p>
+       <p>Thank you.</p>
+       <p>Best Regards,</p>
+       <p>Keyshade Team</p>
+    </body>
+    </html>
+    `
+    await this.sendEmail(email, subject, body)
+  }
+
   private async sendEmail(
     email: string,
     subject: string,
