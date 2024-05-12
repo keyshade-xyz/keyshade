@@ -274,7 +274,9 @@ export class AuthController {
     response
       .status(302)
       .redirect(
-        `${platformOAuthRedirectUrl}?email=${user.email}&name=${user.name}&profilePictureUrl=${user.profilePictureUrl}&isActive=${user.isActive}&isAdmin=${user.isAdmin}&isOnboardingFinished=${user.isOnboardingFinished}`
+        `${platformOAuthRedirectUrl}?data=${encodeURIComponent(
+          JSON.stringify(user)
+        )}`
       )
   }
 }
