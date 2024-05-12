@@ -40,7 +40,9 @@ describe('Feedback Controller (E2E)', () => {
     await app.getHttpAdapter().getInstance().ready()
 
     await cleanUp(prisma)
+  })
 
+  beforeEach(async () => {
     user = await prisma.user.create({
       data: {
         email: 'john@keyshade.xyz',
@@ -52,8 +54,15 @@ describe('Feedback Controller (E2E)', () => {
     })
   })
 
+  afterEach(async () => {
+    if (user) {
+      await prisma.user.delete({
+        where: { id: user.id }
+      })
+    }
+  })
+
   afterAll(async () => {
-    await cleanUp(prisma)
     await prisma.$disconnect()
     await app.close()
   })
@@ -93,7 +102,7 @@ describe('Feedback Controller (E2E)', () => {
     expect(statusCode).toBe(400)
     expect(JSON.parse(payload)).toEqual({
       error: 'Bad Request',
-      message: 'Feedback cannot be null',
+      message: 'Feedback cannot be null or empty',
       statusCode: 400
     })
   })
