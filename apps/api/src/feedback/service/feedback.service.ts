@@ -11,11 +11,11 @@ export class FeedbackService {
   ) {}
 
   async registerFeedback(feedback: string): Promise<void> {
-    if (!feedback) {
-      throw new BadRequestException('Feedback cannot be null')
+    if (!feedback || feedback.trim().length === 0) {
+      throw new BadRequestException('Feedback cannot be null or empty')
     }
     const adminEmail = 'admin@keyshade.xyz'
 
-    await this.mailService.feedbackEmail(adminEmail, feedback)
+    await this.mailService.feedbackEmail(adminEmail, feedback.trim())
   }
 }
