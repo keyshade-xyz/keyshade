@@ -21,7 +21,7 @@
             ]
           },
           "presetConfig": {
-            "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci] --no-verify\n\n{{currentTag}}\n\n{{notes}}",
+            "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]\n\n{{currentTag}}\n\n{{notes}}",
             "types": [
               {
                 "type": "feat",

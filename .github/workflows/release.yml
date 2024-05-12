@@ -25,4 +25,9 @@ jobs:
       - name: release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: secret
         run: pnpx semantic-release
