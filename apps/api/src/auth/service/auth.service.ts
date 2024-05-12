@@ -17,6 +17,7 @@ import {
 } from '../../mail/services/interface.service'
 import { PrismaService } from '../../prisma/prisma.service'
 import createUser from '../../common/create-user'
+import { AuthProvider } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,7 @@ export class AuthService {
       throw new BadRequestException('Please enter a valid email address')
     }
 
-    const user = await this.createUserIfNotExists(email)
+    const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
 
     const otp = await this.prisma.otp.upsert({
       where: {
@@ -114,11 +115,13 @@ export class AuthService {
   async handleOAuthLogin(
     email: string,
     name: string,
-    profilePictureUrl: string
-  ) {
+    profilePictureUrl: string,
+    oauthProvider: AuthProvider
+  ): Promise<UserAuthenticatedResponse> {
     // We need to create the user if it doesn't exist yet
     const user = await this.createUserIfNotExists(
       email,
+      oauthProvider,
       name,
       profilePictureUrl
     )
@@ -151,21 +154,33 @@ export class AuthService {
 
   private async createUserIfNotExists(
     email: string,
+    authProvider: AuthProvider,
     name?: string,
     profilePictureUrl?: string
   ) {
     let user = await this.findUserByEmail(email)
+
     // We need to create the user if it doesn't exist yet
     if (!user) {
       user = await createUser(
         {
           email,
           name,
-          profilePictureUrl
+          profilePictureUrl,
+          authProvider
         },
         this.prisma
       )
     }
+
+    // If the user has used OAuth to log in, we need to check if the OAuth provider
+    // used in the current login is different from the one stored in the database
+    if (user.authProvider !== authProvider) {
+      throw new UnauthorizedException(
+        'The user has signed up with a different authentication provider.'
+      )
+    }
+
     return user
   }
 

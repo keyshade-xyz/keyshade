@@ -24,6 +24,12 @@ import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-s
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
 import { Response } from 'express'
+import { UserAuthenticatedResponse } from '../auth.types'
+import { AuthProvider, User } from '@prisma/client'
+
+const platformFrontendUrl = process.env.PLATFORM_FRONTEND_URL
+const platformOAuthRedirectPath = process.env.PLATFORM_OAUTH_REDIRECT_PATH
+const platformOAuthRedirectUrl = `${platformFrontendUrl}${platformOAuthRedirectPath}`
 
 @ApiTags('Auth Controller')
 @Controller('auth')
@@ -97,12 +103,10 @@ export class AuthController {
     @Query('otp') otp: string,
     @Res({ passthrough: true }) response: Response
   ) {
-    const { token, ...user } = await this.authService.validateOtp(email, otp)
-    response.cookie('token', `Bearer ${token}`, {
-      domain: process.env.DOMAIN ?? 'localhost',
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days,
-    })
-    return user
+    return this.setCookie(
+      response,
+      await this.authService.validateOtp(email, otp)
+    )
   }
 
   /* istanbul ignore next */
@@ -146,11 +150,15 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
-    return await this.authService.handleOAuthLogin(
+
+    const data = await this.authService.handleOAuthLogin(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GITHUB
     )
+    const user = this.setCookie(req.res, data)
+    this.sendRedirect(req.res, user)
   }
 
   /* istanbul ignore next */
@@ -193,11 +201,15 @@ export class AuthController {
   async gitlabOAuthCallback(@Req() req: any) {
     const { emails, displayName: name, avatarUrl: profilePictureUrl } = req.user
     const email = emails[0].value
-    return await this.authService.handleOAuthLogin(
+
+    const data = await this.authService.handleOAuthLogin(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GITLAB
     )
+    const user = this.setCookie(req.res, data)
+    this.sendRedirect(req.res, user)
   }
 
   /* istanbul ignore next */
@@ -239,10 +251,30 @@ export class AuthController {
     const { emails, displayName: name, photos } = req.user
     const email = emails[0].value
     const profilePictureUrl = photos[0].value
-    return await this.authService.handleOAuthLogin(
+    const data = await this.authService.handleOAuthLogin(
       email,
       name,
-      profilePictureUrl
+      profilePictureUrl,
+      AuthProvider.GOOGLE
     )
+    const user = this.setCookie(req.res, data)
+    this.sendRedirect(req.res, user)
+  }
+
+  setCookie(response: Response, data: UserAuthenticatedResponse): User {
+    const { token, ...user } = data
+    response.cookie('token', `Bearer ${token}`, {
+      domain: process.env.DOMAIN ?? 'localhost',
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days,
+    })
+    return user
+  }
+
+  sendRedirect(response: Response, user: User) {
+    response
+      .status(302)
+      .redirect(
+        `${platformOAuthRedirectUrl}?email=${user.email}&name=${user.name}&profilePictureUrl=${user.profilePictureUrl}&isActive=${user.isActive}&isAdmin=${user.isAdmin}&isOnboardingFinished=${user.isOnboardingFinished}`
+      )
   }
 }
