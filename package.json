@@ -135,8 +135,14 @@
   },
   "dependencies": {
     "@million/lint": "^0.0.73",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^12.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.0.3",
+    "@semantic-release/release-notes-generator": "^13.0.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
     "million": "^3.0.5",
     "sharp": "^0.33.3",
     "zod": "^3.23.6"
