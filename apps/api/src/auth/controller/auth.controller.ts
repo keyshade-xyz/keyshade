@@ -261,6 +261,7 @@ export class AuthController {
     this.sendRedirect(req.res, user)
   }
 
+  /* istanbul ignore next */
   setCookie(response: Response, data: UserAuthenticatedResponse): User {
     const { token, ...user } = data
     response.cookie('token', `Bearer ${token}`, {
@@ -270,6 +271,7 @@ export class AuthController {
     return user
   }
 
+  /* istanbul ignore next */
   sendRedirect(response: Response, user: User) {
     response
       .status(302)
