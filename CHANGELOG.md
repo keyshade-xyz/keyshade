@@ -1,3 +1,74 @@
+## [1.3.0](https://github.com/keyshade-xyz/keyshade/compare/v1.2.0...v1.3.0) (2024-05-12)
+
+
+### 🚀 Features
+
+* Add approval support ([#158](https://github.com/keyshade-xyz/keyshade/issues/158)) ([e09ae60](https://github.com/keyshade-xyz/keyshade/commit/e09ae60f48c2339c2000af2f45b3e07db2780f41))
+* **api:** Add configuration live update support ([#181](https://github.com/keyshade-xyz/keyshade/issues/181)) ([f7d6684](https://github.com/keyshade-xyz/keyshade/commit/f7d668449bfe84286ef973eb1751a2b6c377f2ba))
+* **api:** Add feature to export data of a workspace ([#152](https://github.com/keyshade-xyz/keyshade/issues/152)) ([46833aa](https://github.com/keyshade-xyz/keyshade/commit/46833aa8bd4362cfdf08817d2faaf2a8e8bdeb99))
+* **api:** Add Integration support ([#203](https://github.com/keyshade-xyz/keyshade/issues/203)) ([f1ae87e](https://github.com/keyshade-xyz/keyshade/commit/f1ae87ecca47e74ab4897f6e5d1c2457abd18a51))
+* **api:** Add note to [secure] and variable ([#151](https://github.com/keyshade-xyz/keyshade/issues/151)) ([2e62351](https://github.com/keyshade-xyz/keyshade/commit/2e6235104c6cfeb29889a3c9beee81b893b9a26d))
+* **api:** Add OAuth redirection and polished authentication ([#212](https://github.com/keyshade-xyz/keyshade/issues/212)) ([d2968bc](https://github.com/keyshade-xyz/keyshade/commit/d2968bc3122338599031f3671bbcd3a17b0b5129))
+* **api:** Add support for storing and managing variables ([#149](https://github.com/keyshade-xyz/keyshade/issues/149)) ([963a8ae](https://github.com/keyshade-xyz/keyshade/commit/963a8ae529ddee8716b6a688e272dd635cfeaafd))
+* **api:** Added GitLab OAuth ([#188](https://github.com/keyshade-xyz/keyshade/issues/188)) ([4d3bbe4](https://github.com/keyshade-xyz/keyshade/commit/4d3bbe482e84025201e4a02b7da3ded4972fcd9a))
+* **api:** Added validation for reason field ([#190](https://github.com/keyshade-xyz/keyshade/issues/190)) ([90b8ff2](https://github.com/keyshade-xyz/keyshade/commit/90b8ff20fa47799bf7267ba45a3deae70f234d9e))
+* **api:** Create default workspace on user's creation ([#182](https://github.com/keyshade-xyz/keyshade/issues/182)) ([3dc0c4c](https://github.com/keyshade-xyz/keyshade/commit/3dc0c4c95b6dd0a484806fdf0757754ce58a7200))
+* **api:** Reading `port` Dynamically ([#170](https://github.com/keyshade-xyz/keyshade/issues/170)) ([fd46e3e](https://github.com/keyshade-xyz/keyshade/commit/fd46e3e2d37bf90572d2c9c7ec0b042e644878e0))
+* **auth:** Add Google OAuth ([#156](https://github.com/keyshade-xyz/keyshade/issues/156)) ([cf387ea](https://github.com/keyshade-xyz/keyshade/commit/cf387eade9fd72d6894bb5375d791bc722040f00))
+* **web:** Added waitlist ([#168](https://github.com/keyshade-xyz/keyshade/issues/168)) ([1084c77](https://github.com/keyshade-xyz/keyshade/commit/1084c772199382ee56cb3c515032ae1cc05d211b))
+* **web:** Landing revamp ([#165](https://github.com/keyshade-xyz/keyshade/issues/165)) ([0bc723b](https://github.com/keyshade-xyz/keyshade/commit/0bc723b5c71f7db0c2ab6e99a6ffe5e49cfd0e3d))
+
+
+### 🐛 Bug Fixes
+
+* **web:** alignment issue in “Collaboration made easy” section ([#178](https://github.com/keyshade-xyz/keyshade/issues/178)) ([df5ca75](https://github.com/keyshade-xyz/keyshade/commit/df5ca75471e7bdf611406d76b276e05fccb36db0))
+* **workspace:** delete duplicate tailwind config ([99d922a](https://github.com/keyshade-xyz/keyshade/commit/99d922ac185474435303efd4613daeb251de4bf4))
+
+
+### 📚 Documentation
+
+* add contributor list ([f37569a](https://github.com/keyshade-xyz/keyshade/commit/f37569a21091e5cd4b982b588096cc9e116e33a9))
+* Add integration docs ([#204](https://github.com/keyshade-xyz/keyshade/issues/204)) ([406ddb7](https://github.com/keyshade-xyz/keyshade/commit/406ddb7e25198d98e8bf60e4b0273f05dc47435d))
+* Added integration docs to gitbook summary ([ab37530](https://github.com/keyshade-xyz/keyshade/commit/ab375309fc93218355d1ab12aefa20377c04604c))
+* **api:** Add swagger docs of API key controller ([#167](https://github.com/keyshade-xyz/keyshade/issues/167)) ([2910476](https://github.com/keyshade-xyz/keyshade/commit/2910476ce1fcf35abf1d6d196ec34811b7f1d943))
+* **api:** Add swagger docs of User Controller ([#166](https://github.com/keyshade-xyz/keyshade/issues/166)) ([fd59522](https://github.com/keyshade-xyz/keyshade/commit/fd5952227663a68393ef5a3a10bcc9faca1683b9))
+* fix typo in environment-variables.md ([#163](https://github.com/keyshade-xyz/keyshade/issues/163)) ([48294c9](https://github.com/keyshade-xyz/keyshade/commit/48294c978df805a0543dd05375d07aafa43e31c4))
+* Remove supabase from docs ([#169](https://github.com/keyshade-xyz/keyshade/issues/169)) ([eddbce8](https://github.com/keyshade-xyz/keyshade/commit/eddbce81fe11cca8e3e759aac1524b185e1c18f8))
+* **setup:** replace NX with Turbo in setup instructions ([#175](https://github.com/keyshade-xyz/keyshade/issues/175)) ([af8a460](https://github.com/keyshade-xyz/keyshade/commit/af8a460690b17e68b204d734a94705a61183b64d))
+* Update README.md ([b59f16b](https://github.com/keyshade-xyz/keyshade/commit/b59f16beead8b7a549182e41abba90592f31a8cb))
+* Update running-the-api.md ([177dbbf](https://github.com/keyshade-xyz/keyshade/commit/177dbbf9e7737246acf3a4c241688e3a000ce66f))
+* Update running-the-api.md ([#193](https://github.com/keyshade-xyz/keyshade/issues/193)) ([3d5bcac](https://github.com/keyshade-xyz/keyshade/commit/3d5bcac76d5c5f64b13eb0f8e7bbd14a3101e322))
+
+
+### 🔧 Miscellaneous Chores
+
+* Added lockfile ([60a3b9b](https://github.com/keyshade-xyz/keyshade/commit/60a3b9bbc643beb0af1f6ec4dd7861944c6a1547))
+* Added lockfile ([6bb512c](https://github.com/keyshade-xyz/keyshade/commit/6bb512c2e4ae2dd3bbdaecd2dc51c308772bbd84))
+* **api:** Added type inference and runtime validation to `process.env` ([#200](https://github.com/keyshade-xyz/keyshade/issues/200)) ([249e07d](https://github.com/keyshade-xyz/keyshade/commit/249e07d9b7d6ac699f4a2167eb5b4c3068acb4db))
+* **api:** Fixed prisma script env errors ([#209](https://github.com/keyshade-xyz/keyshade/issues/209)) ([8762354](https://github.com/keyshade-xyz/keyshade/commit/8762354f1f70e48614655d10760440cb7d7e60d9))
+* **API:** Refactor authority check functions in API ([#189](https://github.com/keyshade-xyz/keyshade/issues/189)) ([e9d710d](https://github.com/keyshade-xyz/keyshade/commit/e9d710d49a872f6c3ca974780bcf1039f31104de))
+* **api:** Refactor user e2e tests ([b38d45a](https://github.com/keyshade-xyz/keyshade/commit/b38d45a4314257030cc3bbcd90dd02cfd3574469))
+* **ci:** Disabled api stage release ([97877c4](https://github.com/keyshade-xyz/keyshade/commit/97877c4116d88ecd633345aede552b369a03cea7))
+* **ci:** Update stage deployment config ([868a6a1](https://github.com/keyshade-xyz/keyshade/commit/868a6a105563f8da2e57c97c29e9ad08700cf01b))
+* **codecov:** update api-e2e project coverage ([1e90d7e](https://github.com/keyshade-xyz/keyshade/commit/1e90d7e1356ebbd084a31e220a7c910fa52820b3))
+* **dockerfile:** Fixed web dockerfile ([6134bb2](https://github.com/keyshade-xyz/keyshade/commit/6134bb214dad37ba074eb0183eec325dcc4586f2))
+* **docker:** Optimized web Dockerfile to reduct image size ([#173](https://github.com/keyshade-xyz/keyshade/issues/173)) ([444286a](https://github.com/keyshade-xyz/keyshade/commit/444286a70a94ae1d14cfb63614f0bd9317f032e2))
+* **release:** Downgraded package version ([c173fee](https://github.com/keyshade-xyz/keyshade/commit/c173fee2bb3799b1a696f8cfeed863b6b2bcf8b4))
+* **release:** Fix failing release ([#213](https://github.com/keyshade-xyz/keyshade/issues/213)) ([40f64f3](https://github.com/keyshade-xyz/keyshade/commit/40f64f35f01994d6d17e7d72e4d3ebd6d3a0431a))
+* **release:** Install pnpm ([1081bea](https://github.com/keyshade-xyz/keyshade/commit/1081beafc669c38a92774d6da78ee4120e6ba8ed))
+* **release:** Updated release commit ([b8958e7](https://github.com/keyshade-xyz/keyshade/commit/b8958e7e4929a128f9468ff598296b6c57ee357c))
+* **release:** Updated release commit ([e270eb8](https://github.com/keyshade-xyz/keyshade/commit/e270eb8a5b7779116a36cb9a6bf7162c12b61229))
+* Update deprecated husky Install command ([#202](https://github.com/keyshade-xyz/keyshade/issues/202)) ([e61102c](https://github.com/keyshade-xyz/keyshade/commit/e61102cb549b107354d59508d487b358a80742b9))
+* Upgrade @million/lint from 0.0.66 to 0.0.73 ([#172](https://github.com/keyshade-xyz/keyshade/issues/172)) ([dd43ed9](https://github.com/keyshade-xyz/keyshade/commit/dd43ed9c37e3694b7869b9cd21c3f395f1b53d50))
+* **web:** Updated fly memory config ([4debc66](https://github.com/keyshade-xyz/keyshade/commit/4debc668c8421347e1bec8b6a7238f22476a4e58))
+
+
+### 🔨 Code Refactoring
+
+* **api:** Made events central to workspace ([#159](https://github.com/keyshade-xyz/keyshade/issues/159)) ([9bc00ae](https://github.com/keyshade-xyz/keyshade/commit/9bc00ae0d3b0e576c72816438a4654dbfb631899))
+* **api:** Migrated to cookie based authentication ([#206](https://github.com/keyshade-xyz/keyshade/issues/206)) ([ad6911f](https://github.com/keyshade-xyz/keyshade/commit/ad6911f530bec4c345be2b492efd873e0b5d9e33))
+* **monorepo:** Migrate from nx to turbo ([#153](https://github.com/keyshade-xyz/keyshade/issues/153)) ([88b4b00](https://github.com/keyshade-xyz/keyshade/commit/88b4b00f7795348a182f5076b6b06c973e71eb3e))
+
 ## [1.2.0](https://github.com/keyshade-xyz/keyshade/compare/v1.1.0...v1.2.0) (2024-02-18)
 
 
