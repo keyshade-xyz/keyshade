@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
+      - name: install pnpm
+        run: npm i -g pnpm
       - name: install
         run: pnpm i
       - name: release
