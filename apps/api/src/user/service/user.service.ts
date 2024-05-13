@@ -141,17 +141,17 @@ export class UserService {
       throw new ConflictException('User already exists with this email')
     }
 
-    // Create the user's default workspace
-    const newUser = await createUser(
+    // Create the user's default workspace along with user
+    const userWithWorkspace = await createUser(
       { authProvider: AuthProvider.EMAIL_OTP, ...user },
       this.prisma
     )
     this.log.log(`Created user with email ${user.email}`)
 
-    await this.mailService.accountLoginEmail(newUser.email)
+    await this.mailService.accountLoginEmail(userWithWorkspace.email)
     this.log.log(`Sent login email to ${user.email}`)
 
-    return newUser
+    return userWithWorkspace
   }
 
   private async checkIfAdminExistsOrCreate() {

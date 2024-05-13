@@ -14,7 +14,7 @@ import { GitlabStrategy } from '../config/oauth-strategy/gitlab/gitlab.strategy'
   imports: [
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET ?? 'secret',
       signOptions: {
         expiresIn: '1d',
         issuer: 'keyshade.xyz',
