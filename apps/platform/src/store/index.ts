@@ -1,3 +1,3 @@
-import { atom } from "jotai";
+import { atom } from 'jotai'
 
-export const authEmailAtom = atom<string>("");
+export const authEmailAtom = atom<string>('')
