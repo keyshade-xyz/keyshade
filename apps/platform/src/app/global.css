@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#0b0d0f] text-white;
+}
+
+/* For WebKit Browsers such as Chrome, Safari */
+
+::-webkit-scrollbar {
+  @apply m-20 h-[10px] w-[10px] bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-[10px] bg-[#a3a3a3ab];
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#a3a3a3e1];
+}
+
+::-webkit-scrollbar-thumb:active {
+  @apply bg-[#a3a3a3];
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #a3a3a3ab transparent;
+}
+
+/* For Edge */
+*::-webkit-scrollbar {
+  @apply w-[10px];
+}
+
+*::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  @apply rounded-[10px] bg-[#a3a3a3ab];
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#a3a3a3e1];
+}
+
+*::-webkit-scrollbar-thumb:active {
+  @apply bg-[#a3a3a3];
+}

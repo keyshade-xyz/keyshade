@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none">
+	<path
+		d="M5.83317 7.1665H3.33317C2.4165 7.1665 1.6665 6.4165 1.6665 5.49984V3.83317C1.6665 2.9165 2.4165 2.1665 3.33317 2.1665H5.83317C6.74984 2.1665 7.49984 2.9165 7.49984 3.83317V5.49984C7.49984 6.4165 6.74984 7.1665 5.83317 7.1665Z"
+		stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5" stroke-linecap="round"
+		stroke-linejoin="round" />
+	<path
+		d="M17.3335 6.33333H14.3335C13.7835 6.33333 13.3335 5.88332 13.3335 5.33332V4.00001C13.3335 3.45001 13.7835 3 14.3335 3H17.3335C17.8835 3 18.3335 3.45001 18.3335 4.00001V5.33332C18.3335 5.88332 17.8835 6.33333 17.3335 6.33333Z"
+		stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5" stroke-linecap="round"
+		stroke-linejoin="round" />
+	<path
+		d="M17.3335 12.5833H14.3335C13.7835 12.5833 13.3335 12.1333 13.3335 11.5833V10.25C13.3335 9.70001 13.7835 9.25 14.3335 9.25H17.3335C17.8835 9.25 18.3335 9.70001 18.3335 10.25V11.5833C18.3335 12.1333 17.8835 12.5833 17.3335 12.5833Z"
+		stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5" stroke-linecap="round"
+		stroke-linejoin="round" />
+	<path d="M7.5 4.6665H13.3333" stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5"
+		stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+	<path d="M10.4165 4.6665V15.4998C10.4165 16.4165 11.1665 17.1665 12.0832 17.1665H13.3332" stroke="currentColor"
+		stroke-opacity="0.866667" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+		stroke-linejoin="round" />
+	<path d="M10.4165 10.9165H13.3332" stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5"
+		stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+	<path
+		d="M17.3335 18.8333H14.3335C13.7835 18.8333 13.3335 18.3833 13.3335 17.8333V16.5C13.3335 15.95 13.7835 15.5 14.3335 15.5H17.3335C17.8835 15.5 18.3335 15.95 18.3335 16.5V17.8333C18.3335 18.3833 17.8835 18.8333 17.3335 18.8333Z"
+		stroke="currentColor" stroke-opacity="0.866667" stroke-width="1.5" stroke-linecap="round"
+		stroke-linejoin="round" />
+</svg>
