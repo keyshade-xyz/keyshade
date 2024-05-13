@@ -10,7 +10,6 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import cleanUp from '../common/cleanup'
 import {
-  Authority,
   EventSeverity,
   EventSource,
   EventTriggerer,
@@ -19,23 +18,36 @@ import {
   User,
   Workspace
 } from '@prisma/client'
-import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { EventService } from '../event/service/event.service'
 import { EventModule } from '../event/event.module'
+import { ProjectService } from './service/project.service'
+import { WorkspaceService } from '../workspace/service/workspace.service'
+import { UserService } from '../user/service/user.service'
+import { WorkspaceModule } from '../workspace/workspace.module'
+import { UserModule } from '../user/user.module'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
   let eventService: EventService
+  let projectService: ProjectService
+  let workspaceService: WorkspaceService
+  let userService: UserService
 
   let user1: User, user2: User
-  let workspace1: Workspace
-  let project1: Project, project2: Project, otherProject: Project
+  let workspace1: Workspace, workspace2: Workspace
+  let project1: Project, project2: Project
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, ProjectModule, EventModule]
+      imports: [
+        AppModule,
+        ProjectModule,
+        EventModule,
+        WorkspaceModule,
+        UserModule
+      ]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -46,111 +58,67 @@ describe('Project Controller Tests', () => {
     )
     prisma = moduleRef.get(PrismaService)
     eventService = moduleRef.get(EventService)
+    projectService = moduleRef.get(ProjectService)
+    workspaceService = moduleRef.get(WorkspaceService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
     await cleanUp(prisma)
+  })
 
-    const workspace1Id = v4()
-    const workspace2Id = v4()
-    const workspace1AdminRoleId = v4()
-    const user1Id = v4(),
-      user2Id = v4()
-
-    const createUser1 = prisma.user.create({
-      data: {
-        id: user1Id,
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
-      }
+  beforeEach(async () => {
+    const createUser1 = await userService.createUser({
+      name: 'John Doe',
+      email: 'johndoe@keyshade.xyz',
+      isOnboardingFinished: true,
+      isActive: true,
+      isAdmin: false
     })
 
-    const createUser2 = prisma.user.create({
-      data: {
-        id: user2Id,
-        email: 'jane@keyshade.xyz',
-        name: 'Jane Doe',
-        isOnboardingFinished: true
-      }
+    const createUser2 = await userService.createUser({
+      name: 'Jane Doe',
+      email: 'janedoe@keyshade.xyz',
+      isOnboardingFinished: true,
+      isActive: true,
+      isAdmin: false
     })
 
-    const createWorkspace1 = prisma.workspace.create({
-      data: {
-        id: workspace1Id,
-        name: 'Workspace 1',
-        ownerId: user1Id
-      }
-    })
+    workspace1 = createUser1.defaultWorkspace as Workspace
+    workspace2 = createUser2.defaultWorkspace as Workspace
 
-    const createWorkspace1AdminRole = prisma.workspaceRole.create({
-      data: {
-        id: workspace1AdminRoleId,
-        name: 'Admin',
-        hasAdminAuthority: true,
-        authorities: [Authority.WORKSPACE_ADMIN],
-        workspaceId: workspace1Id
-      }
-    })
+    delete createUser1.defaultWorkspace
+    delete createUser2.defaultWorkspace
 
-    const createWorkspace1Membership1 = prisma.workspaceMember.create({
-      data: {
-        userId: user1Id,
-        workspaceId: workspace1Id,
-        invitationAccepted: true,
-        roles: {
-          create: {
-            roleId: workspace1AdminRoleId
-          }
-        }
-      }
-    })
+    user1 = createUser1
+    user2 = createUser2
 
-    const createWorkspace2 = prisma.workspace.create({
-      data: {
-        id: workspace2Id,
-        name: 'Workspace 2',
-        ownerId: user2Id
-      }
-    })
+    project1 = (await projectService.createProject(user1, workspace1.id, {
+      name: 'Project 1',
+      description: 'Project 1 description',
+      storePrivateKey: true
+    })) as Project
 
-    const createOtherProject = prisma.project.create({
-      data: {
-        name: 'Other Project',
-        description: 'Other Project description',
-        publicKey: '',
-        privateKey: '',
-        isPublic: false,
-        workspace: {
-          connect: {
-            id: workspace2Id
-          }
-        }
-      }
-    })
+    project2 = (await projectService.createProject(user2, workspace2.id, {
+      name: 'Project 2',
+      description: 'Project 2 description',
+      storePrivateKey: false
+    })) as Project
+  })
 
-    const result = await prisma.$transaction([
-      createUser1,
-      createUser2,
-      createWorkspace1,
-      createWorkspace1AdminRole,
-      createWorkspace1Membership1,
-      createWorkspace2,
-      createOtherProject
-    ])
-
-    user1 = result[0]
-    user2 = result[1]
-
-    workspace1 = result[2]
-
-    otherProject = result[6]
+  afterEach(async () => {
+    await prisma.user.deleteMany()
+    await prisma.workspace.deleteMany()
   })
 
   it('should be defined', async () => {
     expect(app).toBeDefined()
     expect(prisma).toBeDefined()
+    expect(eventService).toBeDefined()
+    expect(projectService).toBeDefined()
+    expect(workspaceService).toBeDefined()
+    expect(userService).toBeDefined()
   })
 
   it('should allow workspace member to create a project', async () => {
@@ -158,8 +126,8 @@ describe('Project Controller Tests', () => {
       method: 'POST',
       url: `/project/${workspace1.id}`,
       payload: {
-        name: 'Project 1',
-        description: 'Project 1 description',
+        name: 'Project 3',
+        description: 'Project 3 description',
         storePrivateKey: true
       },
       headers: {
@@ -170,8 +138,8 @@ describe('Project Controller Tests', () => {
     expect(response.statusCode).toBe(201)
     expect(response.json()).toEqual({
       id: expect.any(String),
-      name: 'Project 1',
-      description: 'Project 1 description',
+      name: 'Project 3',
+      description: 'Project 3 description',
       storePrivateKey: true,
       workspaceId: workspace1.id,
       lastUpdatedById: user1.id,
@@ -183,8 +151,6 @@ describe('Project Controller Tests', () => {
       updatedAt: expect.any(String),
       pendingCreation: false
     })
-
-    project1 = response.json()
   })
 
   it('should have created a default environment', async () => {
@@ -340,8 +306,7 @@ describe('Project Controller Tests', () => {
       method: 'PUT',
       url: `/project/${project1.id}`,
       payload: {
-        name: 'Project 1 Updated',
-        description: 'Project 1 description updated'
+        name: 'Project 1'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -352,7 +317,7 @@ describe('Project Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 409,
       error: 'Conflict',
-      message: `Project with this name **Project 1 Updated** already exists`
+      message: `Project with this name **Project 1** already exists`
     })
   })
 
@@ -399,6 +364,11 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have created a PROJECT_UPDATED event', async () => {
+    await projectService.updateProject(user1, project1.id, {
+      name: 'Project 1 Updated',
+      description: 'Project 1 description'
+    })
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -431,7 +401,6 @@ describe('Project Controller Tests', () => {
       lastUpdatedById: user1.id,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      privateKey: null,
       secrets: []
     })
   })
@@ -486,7 +455,8 @@ describe('Project Controller Tests', () => {
         lastUpdatedById: user1.id,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
-        publicKey: undefined
+        publicKey: undefined,
+        privateKey: undefined
       }
     ])
   })
@@ -626,7 +596,7 @@ describe('Project Controller Tests', () => {
         regenerateKeyPair: true
       },
       headers: {
-        'x-e2e-user-email': user1.email
+        'x-e2e-user-email': user2.email
       }
     })
 
@@ -648,6 +618,8 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have created a PROJECT_DELETED event', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -666,6 +638,8 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have removed all environments of the project', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
     const environments = await prisma.environment.findMany({
       where: {
         projectId: project1.id
@@ -676,6 +650,8 @@ describe('Project Controller Tests', () => {
   })
 
   it('should have removed the project from the admin role of the workspace', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
     const adminRole = await prisma.workspaceRole.findUnique({
       where: {
         workspaceId_name: {
@@ -689,7 +665,7 @@ describe('Project Controller Tests', () => {
     })
 
     expect(adminRole).toBeDefined()
-    expect(adminRole.projects).toHaveLength(2)
+    expect(adminRole.projects).toHaveLength(0)
   })
 
   it('should not be able to delete a non existing project', async () => {
@@ -712,7 +688,7 @@ describe('Project Controller Tests', () => {
   it('should not be able to delete a project if the user is not a member of the workspace', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: `/project/${otherProject.id}`,
+      url: `/project/${project2.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -722,7 +698,7 @@ describe('Project Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User with id ${user1.id} does not have the authority in the project with id ${otherProject.id}`
+      message: `User with id ${user1.id} does not have the authority in the project with id ${project2.id}`
     })
   })
 

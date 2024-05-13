@@ -30,4 +30,8 @@ export class MockMailService implements IMailService {
   async accountLoginEmail(email: string): Promise<void> {
     this.log.log(`Account Login Email for ${email}`)
   }
+
+  async feedbackEmail(email: string, feedback: string): Promise<void> {
+    this.log.log(`Feedback is : ${feedback}, for email : ${email}`)
+  }
 }
