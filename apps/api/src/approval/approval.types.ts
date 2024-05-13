@@ -15,7 +15,7 @@ export interface UpdateProjectMetadata {
   name?: UpdateProject['name']
   description?: UpdateProject['description']
   storePrivateKey?: UpdateProject['storePrivateKey']
-  isPublic?: UpdateProject['isPublic']
+  accessLevel?: UpdateProject['accessLevel']
   regenerateKeyPair?: boolean
   privateKey?: UpdateProject['privateKey']
 }

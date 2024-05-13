@@ -1,4 +1,12 @@
-import { PrismaClient, Authority, Workspace, Integration } from '@prisma/client'
+//authority-checker.service.ts
+
+import {
+  PrismaClient,
+  Authority,
+  Workspace,
+  Integration,
+  ProjectAccessLevel
+} from '@prisma/client'
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 import {
   BadRequestException,
@@ -12,6 +20,7 @@ import { EnvironmentWithProject } from '../environment/environment.types'
 import { ProjectWithSecrets } from '../project/project.types'
 import { SecretWithProjectAndVersion } from '../secret/secret.types'
 import { CustomLoggerService } from './logger.service'
+import checkUserRoleAssociations from './check-user-role-associations'
 
 export interface AuthorityInput {
   userId: string
@@ -117,28 +126,51 @@ export class AuthorityCheckerService {
       throw new NotFoundException(`Project with id ${entity?.id} not found`)
     }
 
+    const projectAccessLevel = project.accessLevel
     // Get the authorities of the user in the workspace with the project
-    const permittedAuthorities = await getCollectiveProjectAuthorities(
-      userId,
-      project,
-      prisma
-    )
+    let permittedAuthorities: Set<Authority> =
+      await getCollectiveProjectAuthorities(userId, project, prisma)
 
-    // If the user does not have the required authority, or is not a workspace admin, throw an error
-    if (
-      !permittedAuthorities.has(authority) &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    ) {
-      throw new UnauthorizedException(
-        `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
-      )
+    if (permittedAuthorities.has(Authority.WORKSPACE_ADMIN)) {
+      return project
+    }
+
+    switch (projectAccessLevel) {
+      case ProjectAccessLevel.GLOBAL:
+        //everyone can access this
+        break
+      case ProjectAccessLevel.INTERNAL:
+        // Any member in the workspace with READ_PROJECT collective authority or the required authority will be able to access the project
+        if (
+          !permittedAuthorities.has(Authority.READ_PROJECT) &&
+          !permittedAuthorities.has(authority)
+        ) {
+          // If the user does not have the required authority or the READ_PROJECT authority and is neither a workspace admin, throw an error
+          throw new UnauthorizedException(
+            `User with id ${userId} does not have sufficient access to the project with id ${entity?.id} and access level ${project.accessLevel}`
+          )
+        }
+        break
+
+      case ProjectAccessLevel.PRIVATE:
+        // Check if the user's role association includes the project's ID in its projectIds field
+        const canAccessPrivateProject = checkUserRoleAssociations(
+          userId,
+          project,
+          prisma
+        )
+        if (!canAccessPrivateProject) {
+          throw new UnauthorizedException(
+            `User with id ${userId} does not have sufficient access to the project with id ${entity?.id} and access level ${project.accessLevel}`
+          )
+        }
+        break
     }
 
     // If the project is pending creation, only the user who created the project, a workspace admin or
     // a user with the MANAGE_APPROVALS authority can fetch the project
     if (
       project.pendingCreation &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
       !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
       project.lastUpdatedById !== userId
     ) {
