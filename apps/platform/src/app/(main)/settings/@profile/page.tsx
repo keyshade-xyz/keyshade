@@ -107,7 +107,9 @@ function ProfilePage(): React.JSX.Element {
         </div>
 
         <div className="flex items-center">
-          <Button aria-label="Delete account" variant="destructive" >Delete</Button>
+          <Button aria-label="Delete account" variant="destructive">
+            Delete
+          </Button>
         </div>
       </div>
     </main>
