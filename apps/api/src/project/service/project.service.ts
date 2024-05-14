@@ -441,7 +441,7 @@ export class ProjectService {
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? project.privateKey : null,
-      accessLevel: dto.accessLevelchome
+      accessLevel: dto.accessLevel
     }
 
     const versionUpdateOps = []

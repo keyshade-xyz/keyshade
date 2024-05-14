@@ -128,7 +128,7 @@ export class AuthorityCheckerService {
 
     const projectAccessLevel = project.accessLevel
     // Get the authorities of the user in the workspace with the project
-    let permittedAuthorities: Set<Authority> =
+    const permittedAuthorities: Set<Authority> =
       await getCollectiveProjectAuthorities(userId, project, prisma)
 
     if (permittedAuthorities.has(Authority.WORKSPACE_ADMIN)) {
