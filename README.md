@@ -76,32 +76,6 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 - **Integrations**: Our vast library of integration allows you to use keyshade with your favorite tools and platforms.
 
-## Architecture
-
-The following few diagrams try to explain the architecture of keyshade.
-
-### Control Flow
-
-![Control Flow](./blob/control-flow.png)
-
-### Hierarchical Structure
-
-![Hierarchical Structure](./blob/data-hierarchy.png)
-
-### Behind the curtain
-
-#### Projects
-
-![Projects](./blob/projects.png)
-
-#### Creating secrets
-
-![Creating secrets](./blob/secret-creation.png)
-
-#### Retrieving secrets
-
-![Retrieving secrets](./blob/secret-retrieval.png)
-
 ## Setting things up
 
 We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.xyz/).
@@ -111,6 +85,7 @@ We maintain an in-detailed documentation about how to get started with keyshade.
 We welcome contributions from everyone. Please read our [contributing guide](./CONTRIBUTING.md) to get started.
 
 ## Contributors
+
 <a href="https://github.com/keyshade-xyz/keyshade/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=keyshade-xyz/keyshade&max=400&columns=20" />
   <img src="https://us-central1-tooljet-hub.cloudfunctions.net/github" width="0" height="0" />
