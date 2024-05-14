@@ -102,7 +102,7 @@ describe('Environment Controller Tests', () => {
         description: 'Project 1 description',
         storePrivateKey: true,
         environments: [],
-        isPublic: false
+        accessLevel: 'GLOBAL'
       },
       ''
     )) as Project

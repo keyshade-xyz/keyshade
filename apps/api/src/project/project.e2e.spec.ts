@@ -121,7 +121,7 @@ describe('Project Controller Tests', () => {
         description: 'Other Project description',
         publicKey: '',
         privateKey: '',
-        isPublic: false,
+        accessLevel: 'GLOBAL',
         workspace: {
           connect: {
             id: workspace2Id

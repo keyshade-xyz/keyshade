@@ -122,7 +122,7 @@ describe('Variable Controller Tests', () => {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true,
-      isPublic: false,
+      accessLevel: 'GLOBAL',
       environments: [
         {
           name: 'Environment 1',
@@ -141,7 +141,7 @@ describe('Variable Controller Tests', () => {
       name: 'Project 2',
       description: 'Project 2 description',
       storePrivateKey: false,
-      isPublic: false,
+      accessLevel: 'GLOBAL',
       environments: [
         {
           name: 'Environment 1',
@@ -158,7 +158,7 @@ describe('Variable Controller Tests', () => {
         name: 'Workspace 2 Project',
         description: 'Workspace 2 Project description',
         storePrivateKey: true,
-        isPublic: false,
+        accessLevel: 'GLOBAL',
         environments: [
           {
             name: 'Environment 1',
