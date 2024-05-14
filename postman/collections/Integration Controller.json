@@ -149,46 +149,9 @@
 			},
 			"request": {
 				"method": "DELETE",
-				"header": []
-			},
-			"response": []
-		},
-		{
-			"name": "New Request",
-			"id": "a2d0683d-84bb-45be-8e0e-9da5336dcac5",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"content\": \"Update occurred on keyshade\",\n    \"embeds\": [\n          {\n            \"title\": \"data.title\",\n            \"description\": \"data.description\",\n            \"author\": {\n              \"name\": \"keyshade\",\n              \"url\": \"https://keyshade.xyz\"\n            },\n            \"fields\": [\n              {\n                \"name\": \"Event\",\n                \"value\": \"data.title\"\n              },\n              {\n                \"name\": \"Source\",\n                \"value\": \"data.source\"\n              }\n            ]\n          }\n        ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
+				"header": [],
 				"url": {
-					"raw": "https://discord.com/api/webhooks/1235179163615232020/VtQJrD7P30Q_NjUeH6_DYaq_f9H49zVJov9lweWG3SWZeh3A7SbuKNDYo3Dk4ngG7a8M",
-					"protocol": "https",
-					"host": [
-						"discord",
-						"com"
-					],
-					"path": [
-						"api",
-						"webhooks",
-						"1235179163615232020",
-						"VtQJrD7P30Q_NjUeH6_DYaq_f9H49zVJov9lweWG3SWZeh3A7SbuKNDYo3Dk4ngG7a8M"
-					]
+					"raw": ""
 				}
 			},
 			"response": []
