@@ -1,0 +1,249 @@
+{
+	"info": {
+		"_postman_id": "f5da875f-8bbe-430a-8664-ed2842ee3336",
+		"name": "Approval Controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-f5da875f-8bbe-430a-8664-ed2842ee3336"
+	},
+	"item": [
+		{
+			"name": "Get approval by id",
+			"id": "253c301b-c527-4c65-97db-b5455eaf92cd",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:approval_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":approval_id"
+					],
+					"variable": [
+						{
+							"key": "approval_id",
+							"value": "clt6xwg8g0000ggcd02ag7hyd"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all approvals of self",
+			"id": "ac4797d7-ac84-435c-a4c5-ac34cbf7c90e",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:workspace_id/all-by-user",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":workspace_id",
+						"all-by-user"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "89fe1b72-6438-4a25-9b43-1b55124b4315"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all approvals of workspace",
+			"id": "c46bc10a-d41f-4b37-8f78-dcf32e1cbbf5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:workspace_id/all-in-workspace",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":workspace_id",
+						"all-in-workspace"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "04140883-1266-4736-9908-b7aa893a3f83"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update approval",
+			"id": "3e4d40a6-84a0-4cc2-b785-3ea0eb2fc67d",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:approval_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":approval_id"
+					],
+					"variable": [
+						{
+							"key": "approval_id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Approve approval",
+			"id": "0eeb6317-928d-42e3-80a3-cd30a15b25ab",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:approval_id/approve",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":approval_id",
+						"approve"
+					],
+					"variable": [
+						{
+							"key": "approval_id",
+							"value": "cltczgj2w000j2jbnq32i07hq"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reject approval",
+			"id": "e6c53f03-2ebb-4535-97b2-8e6d457f02b4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:approval_id/reject",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":approval_id",
+						"reject"
+					],
+					"variable": [
+						{
+							"key": "approval_id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete approval",
+			"id": "8807d44d-311c-41ca-b0b5-17e28dbb03e0",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/approval/:approval_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"approval",
+						":approval_id"
+					],
+					"variable": [
+						{
+							"key": "approval_id",
+							"value": "clt6svocn0000ifl741ytkyku"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "beb5708f-4988-4ba6-83fd-ba814b58e2f1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "89a7af3a-3892-4b21-8d1e-13aba7863516",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

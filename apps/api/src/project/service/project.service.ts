@@ -286,7 +286,7 @@ export class ProjectService {
     }
   }
 
-  async getProjectByUserAndId(user: User, projectId: Project['id']) {
+  async getProjectById(user: User, projectId: Project['id']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,

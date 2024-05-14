@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "44c1e603-cb91-4620-8069-bc25b9befd25",
+		"name": "Api Kei Controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-44c1e603-cb91-4620-8069-bc25b9befd25"
+	},
+	"item": [
+		{
+			"name": "Create API key",
+			"id": "dec06f35-cd07-425c-9410-b524912eab40",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"key with expiry\",\n  \"expiresAfter\": \"24\",\n  \"authorities\": [\"READ_API_KEY\", \"READ_WORKSPACE\", \"READ_PROJECT\", \"READ_ENVIRONMENT\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get permissible roles of projects",
+			"id": "de180891-7c9c-49f6-8ea7-5a70ed0ca642",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/permissable-scopes-of-projects",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						"permissable-scopes-of-projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update API key",
+			"id": "52ccdc91-fd5d-4ccc-a434-4d248c940ac8",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"scopes\": [\n        {\n            \"projectId\": \"clrg285zc0001hrv304imjmeu\",\n            \"roles\": [\n                \"READ_PROJECT\",\n                \"READ_SECRET\",\n                \"READ_ENVIRONMENT\",\n                \"READ_USERS\",\n                \"CREATE_SECRET\"\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/:api_key_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						":api_key_id"
+					],
+					"variable": [
+						{
+							"key": "api_key_id",
+							"value": "clrg8vxe20001fz2thxfac8a1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get API key by ID",
+			"id": "799ca191-e303-47af-96dc-ef16fd4436ac",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/:api_key_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						":api_key_id"
+					],
+					"variable": [
+						{
+							"key": "api_key_id",
+							"value": "cls926mdx0000l1gw4a1mem6z"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get API keys",
+			"id": "39049364-6c83-4f92-a4dc-ee8b5b1fa6d1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/all/as-user",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						"all",
+						"as-user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update API key",
+			"id": "86ae83d5-57e9-4b7a-8bc6-5374e40ef4f7",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"TEST\",\n    \"expiresAfter\": \"168\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/:api_key_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						":api_key_id"
+					],
+					"variable": [
+						{
+							"key": "api_key_id",
+							"value": "clsbhpjqh0002qt9ovutpz1jq"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3fa7deff-aefe-4eb3-9b98-7a0be8e8ae2c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "b02b9e7a-a2a8-4a40-91ac-69ef9f5b2a60",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

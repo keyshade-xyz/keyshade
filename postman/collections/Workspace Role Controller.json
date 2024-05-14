@@ -1,0 +1,241 @@
+{
+	"info": {
+		"_postman_id": "a60c9ab2-7dd2-40a6-96b6-dc2c7f8ef3ea",
+		"name": "Workspace Role Controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-a60c9ab2-7dd2-40a6-96b6-dc2c7f8ef3ea"
+	},
+	"item": [
+		{
+			"name": "Create workspace role",
+			"id": "334a9efc-8094-42cf-a446-1f43bb56f2b4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test\",\n    \"colorCode\": \"abcdef\",\n    \"projectIds\": [\"c9ce7bb7-73c4-4934-9d98-0368abec595f\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "e67c66e0-cbfc-4b02-9e42-b4271eeb529f"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update workspace role",
+			"id": "5fc91173-257e-4371-84b3-f086b84cd286",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"projectIds\": [\n        \"1e73449b-3b43-4a09-82c9-c6ef034a7b50\",\n        \"e89b4eef-d1a3-4b99-b8d3-b3865b16f318\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_role_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_role_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_role_id",
+							"value": "clsj6awei00002hnjrq7myv05"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete workspace role",
+			"id": "4bfc6e3c-28c1-4d4e-8102-f0b86b04c62a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_role_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_role_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_role_id",
+							"value": "93fabd3b-9d4a-499a-9c72-2532a75c9aa9"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all workspace roles of workspace",
+			"id": "db04fbe8-e9af-4565-9155-f838ebd79e9f",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_id/all",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_id",
+						"all"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "e67c66e0-cbfc-4b02-9e42-b4271eeb529f"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get workspace role by id",
+			"id": "1a9e8e7f-d24e-44e0-8ad4-5a91a6172c61",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_role_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_role_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_role_id",
+							"value": "clti9rine0002109kbv12gegi"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check workspace role exists",
+			"id": "09ad98cf-fc5c-46e5-b929-cf9a5bea28ec",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/workspace-role/:workspace_id/exists/:workspace_role_name",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"workspace-role",
+						":workspace_id",
+						"exists",
+						":workspace_role_name"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "dac0937e-ffe1-4951-9966-90c24674e363"
+						},
+						{
+							"key": "workspace_role_name",
+							"value": "Admin"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "dd7423fc-0d64-4509-9d0a-eafe0c501066",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "c2dd9163-9199-4782-a8c8-b0ccb5fafddb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

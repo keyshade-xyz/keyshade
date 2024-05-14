@@ -1,0 +1,33 @@
+{
+	"info": {
+		"_postman_id": "2e2d8ae1-743f-4f2b-9876-3b10b544f60a",
+		"name": "Misc",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32744470-2e2d8ae1-743f-4f2b-9876-3b10b544f60a"
+	},
+	"item": [
+		{
+			"name": "Health Checkup",
+			"id": "e423c5c4-273d-4a75-bbd0-9372b56bc19e",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/health",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"health"
+					]
+				},
+				"description": "This endpoint is used to check if the server is up and running\n\n**Response:**\n\n```\nUP\n\n ```"
+			},
+			"response": []
+		}
+	]
+}
