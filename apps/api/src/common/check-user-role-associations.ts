@@ -18,8 +18,6 @@ export default async function checkUserRoleAssociations(
   authority: Authority,
   prisma: PrismaClient
 ): Promise<boolean> {
-  let hasAccess = false
-
   const workSpaceMembership = await prisma.workspaceMember.findUnique({
     where: {
       workspaceId_userId: {
@@ -42,14 +40,13 @@ export default async function checkUserRoleAssociations(
   })
   // checking if the user is a member of the workspace
   if (!workSpaceMembership) {
-    hasAccess = false
-  } else {
-    hasAccess = workSpaceMembership.roles.some(
-      (role) =>
-        role.role.authorities.includes(authority) &&
-        role.role.projects.some((project) => project.id === project.id)
-    )
+    return false
   }
+  const hasAccess = workSpaceMembership.roles.some(
+    (role) =>
+      role.role.authorities.includes(authority) &&
+      role.role.projects.some((p) => p.id === project.id)
+  )
 
   return hasAccess
 }

@@ -734,17 +734,6 @@ describe('Project Controller Tests', () => {
     })
 
     it('should allow any user to access a global project', async () => {
-      privateProject = (await projectService.createProject(
-        user1,
-        workspace1.id,
-        {
-          name: 'Private Project',
-          description: 'Private Project description',
-          storePrivateKey: true,
-          accessLevel: 'PRIVATE'
-        }
-      )) as Project
-
       const response = await app.inject({
         method: 'GET',
         url: `/project/${globalProject.id}`,

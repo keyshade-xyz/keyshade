@@ -135,6 +135,8 @@ export class AuthorityCheckerService {
       return project
     }
 
+    let canAccessPrivateProject = false
+
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
         //everyone can access this
@@ -154,7 +156,7 @@ export class AuthorityCheckerService {
 
       case ProjectAccessLevel.PRIVATE:
         // Check if the user's role association includes the project's ID in its projectIds field
-        const canAccessPrivateProject = await checkUserRoleAssociations(
+        canAccessPrivateProject = await checkUserRoleAssociations(
           userId,
           project,
           authority,
