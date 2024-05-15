@@ -3,9 +3,7 @@ import { EventService } from '../service/event.service'
 import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { ApiTags } from '@nestjs/swagger'
 
-@ApiTags('event')
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}

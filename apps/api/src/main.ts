@@ -8,7 +8,6 @@ import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app/app.module'
 import { QueryTransformPipe } from './common/query.transform.pipe'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
@@ -85,19 +84,6 @@ async function initializeNestApp() {
   })
   app.use(cookieParser())
   const port = process.env.API_PORT || 4200
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('keyshade')
-    .setDescription('The keyshade API description')
-    .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
-    .addSecurity('api_key', {
-      type: 'apiKey',
-      in: 'header',
-      name: 'x-keyshade-token'
-    })
-    .build()
-  const document = SwaggerModule.createDocument(app, swaggerConfig)
-  SwaggerModule.setup('docs', app, document)
   app.use(Sentry.Handlers.errorHandler())
   await app.listen(port)
   logger.log(
