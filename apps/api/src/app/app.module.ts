@@ -21,13 +21,21 @@ import { ApprovalModule } from '../approval/approval.module'
 import { SocketModule } from '../socket/socket.module'
 import { ProviderModule } from '../provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
+import { EnvSchema } from '../common/env/env.schema'
 import { IntegrationModule } from '../integration/integration.module'
+import { FeedbackModule } from '../feedback/feedback.module'
 
 @Module({
   controllers: [AppController],
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      envFilePath: '../../.env',
+      validate: EnvSchema.parse,
+      validationOptions: {
+        allowUnknown: false,
+        abortEarly: true
+      }
     }),
     ScheduleModule.forRoot(),
     PassportModule,
@@ -46,7 +54,8 @@ import { IntegrationModule } from '../integration/integration.module'
     ApprovalModule,
     SocketModule,
     ProviderModule,
-    IntegrationModule
+    IntegrationModule,
+    FeedbackModule
   ],
   providers: [
     {

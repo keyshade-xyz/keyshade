@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { User } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
@@ -141,17 +141,22 @@ export class UserService {
       throw new ConflictException('User already exists with this email')
     }
 
-    // Create the user's default workspace
-    const newUser = await createUser(user, this.prisma)
+    // Create the user's default workspace along with user
+    const userWithWorkspace = await createUser(
+      { authProvider: AuthProvider.EMAIL_OTP, ...user },
+      this.prisma
+    )
     this.log.log(`Created user with email ${user.email}`)
 
-    await this.mailService.accountLoginEmail(newUser.email)
+    await this.mailService.accountLoginEmail(userWithWorkspace.email)
     this.log.log(`Sent login email to ${user.email}`)
 
-    return newUser
+    return userWithWorkspace
   }
 
   private async checkIfAdminExistsOrCreate() {
+    // @ts-expect-error process.env.NODE_ENV parses to 'dev'
+    // FIXME
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
       return
     }

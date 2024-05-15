@@ -6,7 +6,7 @@ import { Test } from '@nestjs/testing'
 import { UserModule } from './user.module'
 import { PrismaService } from '../prisma/prisma.service'
 import { AppModule } from '../app/app.module'
-import { User } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { UserService } from './service/user.service'
@@ -305,6 +305,7 @@ describe('User Controller Tests', () => {
       ...payload,
       id: expect.any(String),
       profilePictureUrl: null,
+      authProvider: AuthProvider.EMAIL_OTP,
       defaultWorkspace: expect.any(Object)
     })
   })

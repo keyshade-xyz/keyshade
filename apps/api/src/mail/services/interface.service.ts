@@ -14,4 +14,6 @@ export interface IMailService {
   accountLoginEmail(email: string): Promise<void>
 
   adminUserCreateEmail(email: string): Promise<void>
+
+  feedbackEmail(email: string, feedback: string): Promise<void>
 }

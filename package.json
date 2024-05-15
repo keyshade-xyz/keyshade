@@ -1,8 +1,9 @@
 {
   "name": "keyshade-xyz",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MPL-2.0",
   "private": true,
+  "engineStrict": false,
   "release": {
     "branches": [
       "main"
@@ -57,6 +58,10 @@
               {
                 "type": "test",
                 "hidden": true
+              },
+              {
+                "type": "postman",
+                "hidden": true
               }
             ]
           }
@@ -106,38 +111,44 @@
     "test": "turbo run test",
     "test:api": "pnpm unit:api && pnpm e2e:api",
     "unit:api": "pnpm db:generate-types && turbo run test --filter=api -- --config=jest.config.ts",
-    "e2e:api:prepare": "docker compose down && docker compose -f docker-compose-test.yml up -d && pnpm db:generate-types && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
-    "e2e:api": "pnpm run e2e:api:prepare && NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' turbo run test --no-cache --filter=api -- --runInBand --config=jest.e2e-config.ts --coverage --coverageDirectory=../../coverage-e2e/api --coverageReporters=json && pnpm run e2e:api:teardown",
-    "e2e:api:teardown": "docker compose -f docker-compose-test.yml down",
+    "e2e:api:prepare": "pnpm run --filter=api e2e:prepare",
+    "e2e:api": "pnpm run --filter=api e2e",
+    "e2e:api:teardown": "pnpm run --filter=api e2e:teardown",
     "test:web": "turbo run test --filter=web",
     "test:workspace": "turbo run test --filter=workspace",
-    "db:generate-types": "pnpm dlx prisma generate --schema=apps/api/src/prisma/schema.prisma",
-    "db:generate-migrations": "pnpx prisma migrate dev --create-only --skip-seed --schema=apps/api/src/prisma/schema.prisma",
-    "db:deploy-migrations": " pnpx prisma migrate deploy --schema=apps/api/src/prisma/schema.prisma",
-    "db:validate": "pnpm dlx prisma validate --schema=apps/api/src/prisma/schema.prisma",
-    "db:format": "pnpm dlx prisma format --schema=apps/api/src/prisma/schema.prisma",
-    "db:reset": "pnpm dlx prisma migrate reset --force --schema=apps/api/src/prisma/schema.prisma",
+    "db:generate-types": "pnpm run --filter=api db:generate-types",
+    "db:generate-migrations": "pnpm run --filter=api db:generate-migrations",
+    "db:deploy-migrations": "pnpm run --filter=api db:deploy-migrations",
+    "db:validate": "pnpm run --filter=api db:validate",
+    "db:format": "pnpm run --filter=api db:format",
+    "db:reset": "pnpm run --filter=api db:reset",
     "format": "prettier apps/**/*.{ts,tsx} --write",
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api"
   },
-  "packageManager": "pnpm@9.0.5",
+  "packageManager": "pnpm@9.1.0",
   "devDependencies": {
     "@sentry/cli": "^2.28.6",
     "@sentry/webpack-plugin": "^2.14.2",
+    "cross-env": "^7.0.3",
     "husky": "^9.0.11",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "prisma": "5.12.1",
     "tsconfig": "workspace:*",
     "turbo": "^1.12.4"
   },
   "dependencies": {
     "@million/lint": "^0.0.73",
-    "@prisma/client": "5.12.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^12.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.0.3",
+    "@semantic-release/release-notes-generator": "^13.0.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
+    "conventional-changelog-conventionalcommits": "7.0.2",
     "million": "^3.0.5",
-    "sharp": "^0.33.3"
+    "sharp": "^0.33.3",
+    "zod": "^3.23.6"
   }
 }

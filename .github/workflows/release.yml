@@ -18,9 +18,16 @@ jobs:
         with:
           node-version: 20.x
           registry-url: https://registry.npmjs.org
+      - name: install pnpm
+        run: npm i -g pnpm
       - name: install
-        run: npm install --no-save @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git @semantic-release/github conventional-changelog-conventionalcommits
+        run: pnpm i
       - name: release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-        run: npx semantic-release
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: secret
+        run: pnpx semantic-release

@@ -1,11 +1,11 @@
-import { User, Workspace } from '@prisma/client'
+import { AuthProvider, User, Workspace } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateUserDto } from '../user/dto/create.user/create.user'
 import createWorkspace from './create-workspace'
 import { Logger } from '@nestjs/common'
 
 const createUser = async (
-  dto: Partial<CreateUserDto>,
+  dto: Partial<CreateUserDto> & { authProvider: AuthProvider },
   prisma: PrismaService
 ): Promise<
   User & {
@@ -22,7 +22,8 @@ const createUser = async (
       profilePictureUrl: dto.profilePictureUrl,
       isActive: dto.isActive ?? true,
       isAdmin: dto.isAdmin ?? false,
-      isOnboardingFinished: dto.isOnboardingFinished ?? false
+      isOnboardingFinished: dto.isOnboardingFinished ?? false,
+      authProvider: dto.authProvider
     }
   })
 

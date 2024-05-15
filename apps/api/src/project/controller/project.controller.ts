@@ -13,11 +13,9 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
-@ApiTags('Project Controller')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly service: ProjectService) {}
@@ -60,7 +58,7 @@ export class ProjectController {
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id']
   ) {
-    return await this.service.getProjectByUserAndId(user, projectId)
+    return await this.service.getProjectById(user, projectId)
   }
 
   @Get('/all/:workspaceId')

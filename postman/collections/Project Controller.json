@@ -1,0 +1,345 @@
+{
+	"info": {
+		"_postman_id": "ab92a671-83ca-4b50-b3e5-5a860fa7a86f",
+		"name": "Project Controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-ab92a671-83ca-4b50-b3e5-5a860fa7a86f"
+	},
+	"item": [
+		{
+			"name": "Create project",
+			"id": "08179d42-f30c-4c63-bbbf-3dbd1dfe75d9",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Project 2 - stores private key\",\n  \"description\": \"Dummy project 1\",\n  \"storePrivateKey\": true,\n  \"environments\": [\n    {\n        \"name\": \"Dev\",\n        \"description\": \"Development environment\",\n        \"isDefault\": true\n    },\n    {\n        \"name\": \"Stage\",\n        \"description\": \"Staging environment\"\n    },\n        {\n        \"name\": \"Production\",\n        \"description\": \"Production environment\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/:workspace_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						":workspace_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "800a42bd-eb5a-4d28-a920-ddd573ec4656"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update project",
+			"id": "6b144048-a725-455d-a60b-9348cead5dfe",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"NEW NAME\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/:project_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						":project_id"
+					],
+					"variable": [
+						{
+							"key": "project_id",
+							"value": "182b7115-35c7-4c3f-9a8c-9dac4f069a95"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete project",
+			"id": "61e3bc1b-5690-415f-aa1b-d65f5a126bb0",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw2y4zu00018b7hb30a4ejs",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw2y4zu00018b7hb30a4ejs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all projects of workspace",
+			"id": "70f7f868-3710-4ad3-aea4-2c4c3f6ea5e5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/all/:workspace_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"all",
+						":workspace_id"
+					],
+					"variable": [
+						{
+							"key": "workspace_id",
+							"value": "800a42bd-eb5a-4d28-a920-ddd573ec4656"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get project by id",
+			"id": "3e4449c7-4001-4785-ae32-9069ced9a454",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/:project_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						":project_id"
+					],
+					"variable": [
+						{
+							"key": "project_id",
+							"value": "a35de27e-cb35-4712-a0f9-b84addef89a3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get members of project",
+			"id": "350e0770-614d-4f16-9157-e4b61cbd9f73",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/members",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add user to project",
+			"id": "3d70ca5f-b51e-4d0d-8fa3-362170a9b295",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/member",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"member"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel invitation",
+			"id": "2004276a-e842-461d-8bf6-9b75147394b6",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/cancel-invitation/clqwm8icf0002bkv5esk6jwxc",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"cancel-invitation",
+						"clqwm8icf0002bkv5esk6jwxc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Join project",
+			"id": "bed35d9c-9c8b-4be2-b106-316abdd99e70",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/accept-invitation",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"accept-invitation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decline invitation to project",
+			"id": "e0ac65e9-9ece-4276-8f35-264c700d5fcc",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/decline-invitation",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"decline-invitation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Leave project",
+			"id": "9be78409-53ac-4396-9d66-40a68736ab18",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/project/clqw54c0g0001139m8zzfjmpd/leave",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"project",
+						"clqw54c0g0001139m8zzfjmpd",
+						"leave"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "d3fdb0a4-d818-4e56-aefc-e0d58ffcb9dd",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "4393a645-ef79-4fec-9895-2265d9f868ea",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

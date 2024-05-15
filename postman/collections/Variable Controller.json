@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "561bd86c-25cb-4a04-943b-7e6decd2c33c",
+		"name": "Variable Controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-561bd86c-25cb-4a04-943b-7e6decd2c33c"
+	},
+	"item": [
+		{
+			"name": "Create variable",
+			"id": "4509c015-3644-4900-a557-81001f6b226a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"some name\",\n    \"value\": \"some value\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:project_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":project_id"
+					],
+					"variable": [
+						{
+							"key": "project_id",
+							"value": "6bc24dce-bd94-46c1-a236-02018c58caf6"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update variable",
+			"id": "503fa96a-8a2a-47a4-8d09-d4c32195ae78",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"value\": \"2324\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:variableId",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":variableId"
+					],
+					"variable": [
+						{
+							"key": "variableId",
+							"value": "clv9jxpyc000e137p5uzq5zps"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update environment of variable",
+			"id": "fd043b40-9601-42f2-98ac-489f7accefe4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:variable_id/environment/:environment_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":variable_id",
+						"environment",
+						":environment_id"
+					],
+					"variable": [
+						{
+							"key": "variable_id",
+							"value": ""
+						},
+						{
+							"key": "environment_id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rollback variable",
+			"id": "99f67138-0e03-44f4-8ea0-c959daae7c37",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:variable_id/rollback/:rollback_version",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":variable_id",
+						"rollback",
+						":rollback_version"
+					],
+					"variable": [
+						{
+							"key": "variable_id",
+							"value": ""
+						},
+						{
+							"key": "rollback_version",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get variable by id",
+			"id": "8e2fc513-438a-444f-a83e-612b6ff88f78",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:variable_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":variable_id"
+					],
+					"variable": [
+						{
+							"key": "variable_id",
+							"value": "clv9jxpyc000e137p5uzq5zps"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all variables of project",
+			"id": "8761d2a2-238a-4643-92b0-6cda82442300",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/all/:project_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						"all",
+						":project_id"
+					],
+					"variable": [
+						{
+							"key": "project_id",
+							"value": "fbff8a6d-1a43-4b7d-87a2-ee1a5b4581bc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete variable",
+			"id": "a1337a9d-6aaa-4719-b2c6-ef1dd244e482",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/:variable_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						":variable_id"
+					],
+					"variable": [
+						{
+							"key": "variable_id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{JWT}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "3bc2675b-4d2f-42b8-9aec-6db8f6401c65",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "48bc1417-f907-4226-bfeb-d52ef80a591e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

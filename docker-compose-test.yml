@@ -14,6 +14,7 @@ services:
       - keyshade-test
   redis:
     image: redis:6
+    container_name: integration-tests-redis
     ports:
       - '6379:6379'
     networks:

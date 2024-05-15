@@ -10,4 +10,6 @@ When it comes to developing for us, we follow very strict norms! From proper ind
 
 ## Compilation of designs
 
+- [Organization Of Code](organization-of-code.md)
 * [API](api.md)
+* [Integrations](integrations.md)
