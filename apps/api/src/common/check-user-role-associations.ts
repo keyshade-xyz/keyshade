@@ -1,11 +1,13 @@
-import { PrismaClient, Project, User } from '@prisma/client'
+import { Authority, PrismaClient, Project, User } from '@prisma/client'
 
 /**
  * Given the userId and project, this function checks the set of roles associated
- * with the userId of the user, for associated projects where the project Id matches
- * with the passed in project and returns a boolean value.
+ * with the workspace member object of the user in the workspace of the
+ * current project for associated projects where the project Id matches
+ * with the current project's id and returns a boolean value.
  * @param userId The id of the user
  * @param project The project
+ * @param authority The authority
  * @param prisma The prisma client
  * @returns
  */
@@ -13,40 +15,41 @@ import { PrismaClient, Project, User } from '@prisma/client'
 export default async function checkUserRoleAssociations(
   userId: User['id'],
   project: Project,
+  authority: Authority,
   prisma: PrismaClient
-): Promise<Boolean> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      workspaceMembers: {
+): Promise<boolean> {
+  let hasAccess = false
+
+  const workSpaceMembership = await prisma.workspaceMember.findUnique({
+    where: {
+      workspaceId_userId: {
+        workspaceId: project.workspaceId,
+        userId
+      }
+    },
+    select: {
+      roles: {
         include: {
-          roles: {
-            include: {
-              role: {
-                include: {
-                  projects: {
-                    where: {
-                      projectId: project.id
-                    }
-                  }
-                }
-              }
+          role: {
+            select: {
+              authorities: true,
+              projects: true
             }
           }
         }
       }
     }
   })
-
-  if (!user) {
-    return false
+  // checking if the user is a member of the workspace
+  if (!workSpaceMembership) {
+    hasAccess = false
+  } else {
+    hasAccess = workSpaceMembership.roles.some(
+      (role) =>
+        role.role.authorities.includes(authority) &&
+        role.role.projects.some((project) => project.id === project.id)
+    )
   }
 
-  const userHasProjectAccess = user.workspaceMembers.some((workspaceMember) =>
-    workspaceMember.roles.some(
-      (association) => association.role.projects.length > 0
-    )
-  )
-
-  return userHasProjectAccess
+  return hasAccess
 }

@@ -147,23 +147,27 @@ export class AuthorityCheckerService {
         ) {
           // If the user does not have the required authority or the READ_PROJECT authority and is neither a workspace admin, throw an error
           throw new UnauthorizedException(
-            `User with id ${userId} does not have sufficient access to the project with id ${entity?.id} and access level ${project.accessLevel}`
+            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
           )
         }
         break
 
       case ProjectAccessLevel.PRIVATE:
         // Check if the user's role association includes the project's ID in its projectIds field
-        const canAccessPrivateProject = checkUserRoleAssociations(
+        const canAccessPrivateProject = await checkUserRoleAssociations(
           userId,
           project,
+          authority,
           prisma
         )
-        if (!canAccessPrivateProject) {
+
+        // If either the user does not have access or does not have required authority, throw an error
+        if (!canAccessPrivateProject || !permittedAuthorities.has(authority)) {
           throw new UnauthorizedException(
-            `User with id ${userId} does not have sufficient access to the project with id ${entity?.id} and access level ${project.accessLevel}`
+            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
           )
         }
+
         break
     }
 

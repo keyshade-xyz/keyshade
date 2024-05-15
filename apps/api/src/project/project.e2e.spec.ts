@@ -38,6 +38,7 @@ describe('Project Controller Tests', () => {
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project
+  let globalProject: Project, internalProject: Project, privateProject: Project
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -144,7 +145,7 @@ describe('Project Controller Tests', () => {
       workspaceId: workspace1.id,
       lastUpdatedById: user1.id,
       isDisabled: false,
-      isPublic: false,
+      accessLevel: 'PRIVATE',
       publicKey: expect.any(String),
       privateKey: expect.any(String),
       createdAt: expect.any(String),
@@ -291,7 +292,7 @@ describe('Project Controller Tests', () => {
       workspaceId: workspace1.id,
       lastUpdatedById: user1.id,
       isDisabled: false,
-      isPublic: false,
+      accessLevel: 'PRIVATE',
       publicKey: project1.publicKey,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
@@ -699,6 +700,193 @@ describe('Project Controller Tests', () => {
       statusCode: 401,
       error: 'Unauthorized',
       message: `User with id ${user1.id} does not have the authority in the project with id ${project2.id}`
+    })
+  })
+
+  describe('Project Controller tests for access levels', () => {
+    beforeEach(async () => {
+      globalProject = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Global Project',
+          description: 'Global Project description',
+          storePrivateKey: true,
+          accessLevel: 'GLOBAL'
+        }
+      )) as Project
+
+      internalProject = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Internal Project',
+          description: 'Internal Project description',
+          storePrivateKey: true,
+          accessLevel: 'INTERNAL'
+        }
+      )) as Project
+    })
+
+    afterEach(async () => {
+      await prisma.user.deleteMany()
+      await prisma.workspace.deleteMany()
+    })
+
+    it('should allow any user to access a global project', async () => {
+      privateProject = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Private Project',
+          description: 'Private Project description',
+          storePrivateKey: true,
+          accessLevel: 'PRIVATE'
+        }
+      )) as Project
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${globalProject.id}`,
+        headers: {
+          'x-e2e-user-email': user2.email // user2 is not a member of workspace1
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toEqual({
+        ...globalProject,
+        lastUpdatedById: user1.id,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        secrets: []
+      })
+    })
+
+    it('should allow workspace members with READ_PROJECT to access an internal project', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${internalProject.id}`,
+        headers: {
+          'x-e2e-user-email': user1.email // user1 is a member of workspace1
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toEqual({
+        ...internalProject,
+        lastUpdatedById: user1.id,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        secrets: []
+      })
+    })
+
+    it('should not allow non-members to access an internal project', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${internalProject.id}`,
+        headers: {
+          'x-e2e-user-email': user2.email // user2 is not a member of workspace1
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+      expect(response.json()).toEqual({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: `User with id ${user2.id} does not have the authority in the project with id ${internalProject.id}`
+      })
+    })
+  })
+
+  it('should allow users with sufficient access to access a private project', async () => {
+    const privateProject = (await projectService.createProject(
+      user1,
+      workspace1.id,
+      {
+        name: 'Private Project',
+        description: 'Private Project description',
+        storePrivateKey: true,
+        accessLevel: 'PRIVATE'
+      }
+    )) as Project
+
+    const adminRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_name: {
+          workspaceId: workspace1.id,
+          name: 'Admin'
+        }
+      }
+    })
+
+    const newUser = await prisma.user.create({
+      data: {
+        email: 'newuser@example.com',
+        name: 'New User',
+        isActive: true,
+        isAdmin: true,
+        isOnboardingFinished: true
+      }
+    })
+
+    await prisma.workspaceMember.create({
+      data: {
+        userId: newUser.id,
+        workspaceId: workspace1.id,
+        invitationAccepted: true,
+        roles: {
+          create: {
+            roleId: adminRole.id
+          }
+        }
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/${privateProject.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      ...privateProject,
+      lastUpdatedById: user1.id,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      secrets: []
+    })
+  })
+
+  it('should not allow users without sufficient access to access a private project', async () => {
+    const privateProject = (await projectService.createProject(
+      user1,
+      workspace1.id,
+      {
+        name: 'Private Project',
+        description: 'Private Project description',
+        storePrivateKey: true,
+        accessLevel: 'PRIVATE'
+      }
+    )) as Project
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/${privateProject.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email // user2 is not a member of workspace1
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User with id ${user2.id} does not have the authority in the project with id ${privateProject.id}`
     })
   })
 
