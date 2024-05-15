@@ -15,7 +15,6 @@ import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { Authority, User } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { invalidAuthenticationResponse } from '../../common/static'
 
 const baseProperties = {
   id: { type: 'string' },
