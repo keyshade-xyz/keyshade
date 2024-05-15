@@ -9,7 +9,6 @@ import {
   Query
 } from '@nestjs/common'
 import { IntegrationService } from '../service/integration.service'
-import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateIntegration } from '../dto/create.integration/create.integration'
 import { Authority, User } from '@prisma/client'
@@ -17,7 +16,6 @@ import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-aut
 import { UpdateIntegration } from '../dto/update.integration/update.integration'
 
 @Controller('integration')
-@ApiTags('Integration Controller')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 

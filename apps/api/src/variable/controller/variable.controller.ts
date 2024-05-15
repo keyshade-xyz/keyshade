@@ -8,7 +8,6 @@ import {
   Put,
   Query
 } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import { VariableService } from '../service/variable.service'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { Authority, User } from '@prisma/client'
@@ -16,7 +15,6 @@ import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reas
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
 
-@ApiTags('Variable Controller')
 @Controller('variable')
 export class VariableController {
   constructor(private readonly variableService: VariableService) {}
