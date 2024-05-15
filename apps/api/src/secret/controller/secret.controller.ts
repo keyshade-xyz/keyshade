@@ -13,11 +13,9 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
-@ApiTags('Secret Controller')
 @Controller('secret')
 export class SecretController {
   constructor(private readonly secretService: SecretService) {}

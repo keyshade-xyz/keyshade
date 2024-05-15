@@ -13,11 +13,9 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { Authority, User } from '@prisma/client'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
-import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
-@ApiTags('Environment Controller')
 @Controller('environment')
 export class EnvironmentController {
   constructor(private readonly environmentService: EnvironmentService) {}
