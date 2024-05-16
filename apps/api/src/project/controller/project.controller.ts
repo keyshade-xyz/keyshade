@@ -13,11 +13,9 @@ import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { ApiTags } from '@nestjs/swagger'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
-@ApiTags('Project Controller')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly service: ProjectService) {}
