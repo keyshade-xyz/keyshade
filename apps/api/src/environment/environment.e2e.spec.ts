@@ -16,6 +16,7 @@ import {
   EventTriggerer,
   EventType,
   Project,
+  ProjectAccessLevel,
   User,
   Workspace
 } from '@prisma/client'
@@ -102,7 +103,7 @@ describe('Environment Controller Tests', () => {
         description: 'Project 1 description',
         storePrivateKey: true,
         environments: [],
-        accessLevel: 'PRIVATE'
+        accessLevel: ProjectAccessLevel.PRIVATE
       },
       ''
     )) as Project

@@ -15,6 +15,7 @@ import {
   EventTriggerer,
   EventType,
   Project,
+  ProjectAccessLevel,
   User,
   Workspace
 } from '@prisma/client'
@@ -38,7 +39,7 @@ describe('Project Controller Tests', () => {
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project
-  let globalProject: Project, internalProject: Project, privateProject: Project
+  let globalProject: Project, internalProject: Project
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -145,7 +146,7 @@ describe('Project Controller Tests', () => {
       workspaceId: workspace1.id,
       lastUpdatedById: user1.id,
       isDisabled: false,
-      accessLevel: 'PRIVATE',
+      accessLevel: ProjectAccessLevel.PRIVATE,
       publicKey: expect.any(String),
       privateKey: expect.any(String),
       createdAt: expect.any(String),
@@ -292,7 +293,7 @@ describe('Project Controller Tests', () => {
       workspaceId: workspace1.id,
       lastUpdatedById: user1.id,
       isDisabled: false,
-      accessLevel: 'PRIVATE',
+      accessLevel: ProjectAccessLevel.PRIVATE,
       publicKey: project1.publicKey,
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
@@ -712,7 +713,7 @@ describe('Project Controller Tests', () => {
           name: 'Global Project',
           description: 'Global Project description',
           storePrivateKey: true,
-          accessLevel: 'GLOBAL'
+          accessLevel: ProjectAccessLevel.GLOBAL
         }
       )) as Project
 
@@ -723,7 +724,7 @@ describe('Project Controller Tests', () => {
           name: 'Internal Project',
           description: 'Internal Project description',
           storePrivateKey: true,
-          accessLevel: 'INTERNAL'
+          accessLevel: ProjectAccessLevel.INTERNAL
         }
       )) as Project
     })
@@ -797,41 +798,9 @@ describe('Project Controller Tests', () => {
         name: 'Private Project',
         description: 'Private Project description',
         storePrivateKey: true,
-        accessLevel: 'PRIVATE'
+        accessLevel: ProjectAccessLevel.PRIVATE
       }
     )) as Project
-
-    const adminRole = await prisma.workspaceRole.findUnique({
-      where: {
-        workspaceId_name: {
-          workspaceId: workspace1.id,
-          name: 'Admin'
-        }
-      }
-    })
-
-    const newUser = await prisma.user.create({
-      data: {
-        email: 'newuser@example.com',
-        name: 'New User',
-        isActive: true,
-        isAdmin: true,
-        isOnboardingFinished: true
-      }
-    })
-
-    await prisma.workspaceMember.create({
-      data: {
-        userId: newUser.id,
-        workspaceId: workspace1.id,
-        invitationAccepted: true,
-        roles: {
-          create: {
-            roleId: adminRole.id
-          }
-        }
-      }
-    })
 
     const response = await app.inject({
       method: 'GET',
@@ -859,7 +828,7 @@ describe('Project Controller Tests', () => {
         name: 'Private Project',
         description: 'Private Project description',
         storePrivateKey: true,
-        accessLevel: 'PRIVATE'
+        accessLevel: ProjectAccessLevel.PRIVATE
       }
     )) as Project
 
