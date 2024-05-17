@@ -10,6 +10,7 @@ import {
   EventTriggerer,
   EventType,
   Project,
+  ProjectAccessLevel,
   Secret,
   User,
   Variable,
@@ -138,7 +139,7 @@ describe('Event Controller Tests', () => {
       description: 'Some description',
       environments: [],
       storePrivateKey: false,
-      isPublic: false
+      accessLevel: ProjectAccessLevel.GLOBAL
     })) as Project
     project = newProject
 

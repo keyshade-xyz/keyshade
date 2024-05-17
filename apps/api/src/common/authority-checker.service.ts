@@ -1,4 +1,10 @@
-import { PrismaClient, Authority, Workspace, Integration } from '@prisma/client'
+import {
+  PrismaClient,
+  Authority,
+  Workspace,
+  Integration,
+  ProjectAccessLevel
+} from '@prisma/client'
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 import {
   BadRequestException,
@@ -118,33 +124,60 @@ export class AuthorityCheckerService {
     }
 
     // Get the authorities of the user in the workspace with the project
-    const permittedAuthorities = await getCollectiveProjectAuthorities(
-      userId,
-      project,
-      prisma
-    )
+    const permittedAuthoritiesForProject: Set<Authority> =
+      await getCollectiveProjectAuthorities(userId, project, prisma)
 
-    // If the user does not have the required authority, or is not a workspace admin, throw an error
-    if (
-      !permittedAuthorities.has(authority) &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    ) {
-      throw new UnauthorizedException(
-        `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+    const permittedAuthoritiesForWorkspace: Set<Authority> =
+      await getCollectiveWorkspaceAuthorities(
+        project.workspaceId,
+        userId,
+        prisma
       )
-    }
 
     // If the project is pending creation, only the user who created the project, a workspace admin or
     // a user with the MANAGE_APPROVALS authority can fetch the project
     if (
       project.pendingCreation &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
-      !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
+      !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN) &&
+      !permittedAuthoritiesForWorkspace.has(Authority.MANAGE_APPROVALS) &&
       project.lastUpdatedById !== userId
     ) {
       throw new BadRequestException(
         `The project with id ${entity?.id} is pending creation and cannot be fetched by the user with id ${userId}`
       )
+    }
+
+    const projectAccessLevel = project.accessLevel
+    switch (projectAccessLevel) {
+      case ProjectAccessLevel.GLOBAL:
+        //everyone can access this
+        break
+      case ProjectAccessLevel.INTERNAL:
+        // Any workspace member with the required collective authority over the workspace or
+        // WORKSPACE_ADMIN authority will be able to access the project
+        if (
+          !permittedAuthoritiesForWorkspace.has(authority) &&
+          !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
+        ) {
+          throw new UnauthorizedException(
+            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+          )
+        }
+        break
+
+      case ProjectAccessLevel.PRIVATE:
+        // Any member with the required collective authority over the project or
+        // a member with WORKSPACE_ADMIN authority will be able to access the project
+        if (
+          !permittedAuthoritiesForProject.has(authority) &&
+          !permittedAuthoritiesForProject.has(Authority.WORKSPACE_ADMIN)
+        ) {
+          throw new UnauthorizedException(
+            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+          )
+        }
+
+        break
     }
 
     return project

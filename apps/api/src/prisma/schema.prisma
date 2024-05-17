@@ -172,6 +172,12 @@ enum AuthProvider {
   EMAIL_OTP
 }
 
+enum ProjectAccessLevel {
+  GLOBAL
+  INTERNAL
+  PRIVATE
+}
+
 model Event {
   id          String         @id @default(cuid())
   source      EventSource
@@ -292,7 +298,7 @@ model Project {
   privateKey      String? // We store this only if the user wants us to do so! 
   storePrivateKey Boolean  @default(false)
   isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
-  isPublic        Boolean  @default(false)
+  accessLevel     ProjectAccessLevel  @default(PRIVATE) 
   pendingCreation Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
