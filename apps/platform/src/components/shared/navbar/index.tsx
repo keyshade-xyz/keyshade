@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
-import SearchModel from './searchModel'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
 import { zUser, type User } from '@/types'
+import SearchModel from './searchModel'
 
 interface UserNameImage {
   name: string | null
@@ -117,17 +117,14 @@ function Navbar(): React.JSX.Element {
             <DropdownMenuTrigger className=" flex items-center gap-x-2 rounded-xl bg-[#2A2C2E] px-3 py-2">
               {userData.name === null ? (
                 <>
-                <span className="h-6 w-6 animate-pulse rounded-full bg-white/20" />
-                <span className="h-5 w-20 animate-pulse rounded bg-white/20" />
+                  <span className="h-6 w-6 animate-pulse rounded-full bg-white/20" />
+                  <span className="h-5 w-20 animate-pulse rounded bg-white/20" />
                 </>
-                
               ) : (
                 <>
                   <Avatar>
                     <AvatarImage src={userData.image ?? ''} />
-                    <AvatarFallback>
-                      {userData.name.slice(0, 2)}
-                    </AvatarFallback>
+                    <AvatarFallback>{userData.name.slice(0, 2)}</AvatarFallback>
                   </Avatar>
                   <span>{userData.name}</span>
                 </>

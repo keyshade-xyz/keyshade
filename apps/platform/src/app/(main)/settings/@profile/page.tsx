@@ -1,13 +1,13 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import InputLoading from './loading'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import type { User } from '@/types'
 import { zUser } from '@/types'
 import { apiClient } from '@/lib/api-client'
-import { toast } from 'sonner'
+import InputLoading from './loading'
 
 type UserData = Omit<
   User,
@@ -122,11 +122,13 @@ function ProfilePage(): React.JSX.Element {
         <Button
           disabled={!isModified}
           onClick={() => {
-            updateUserDetails(userData).then(() => {
-              toast.success('User details updated successfully')
-            }).catch(() => {
-              toast.error('Failed to update user details')
-            })
+            updateUserDetails(userData)
+              .then(() => {
+                toast.success('User details updated successfully')
+              })
+              .catch(() => {
+                toast.error('Failed to update user details')
+              })
             setIsModified(false)
           }}
           variant="secondary"

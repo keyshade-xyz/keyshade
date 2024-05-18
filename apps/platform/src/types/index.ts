@@ -8,7 +8,7 @@ export const zUser = z.object({
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
-  authProvider: z.string(),
+  authProvider: z.string()
 })
 
 export type User = z.infer<typeof zUser>

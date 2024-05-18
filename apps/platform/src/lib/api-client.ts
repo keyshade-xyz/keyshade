@@ -53,13 +53,13 @@ class APIClient {
     })
   }
 
-/**
- * Sends a PUT request to the specified URL with the provided data.
- * 
- * @param url - The URL to send the request to.
- * @param data - The data to be sent in the request body.
- * @returns A Promise that resolves to the response data.
- */
+  /**
+   * Sends a PUT request to the specified URL with the provided data.
+   *
+   * @param url - The URL to send the request to.
+   * @param data - The data to be sent in the request body.
+   * @returns A Promise that resolves to the response data.
+   */
   put<T>(url: string, data: Record<string, unknown>): Promise<T> {
     return this.request<T>(url, {
       method: 'PUT',
