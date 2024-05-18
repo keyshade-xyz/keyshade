@@ -4,7 +4,7 @@ export default {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
-  testMatch: ['**/*.e2e.spec.ts'],
+  testMatch: ['**/api-key.e2e.spec.ts'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
   },

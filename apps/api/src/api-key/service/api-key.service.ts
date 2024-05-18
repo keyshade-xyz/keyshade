@@ -31,14 +31,6 @@ export class ApiKeyService {
             id: user.id
           }
         }
-      },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
       }
     })
 

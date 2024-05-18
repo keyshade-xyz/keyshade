@@ -16,28 +16,6 @@ import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { Authority, User } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 
-const baseProperties = {
-  id: { type: 'string' },
-  name: { type: 'string' },
-  expiresAt: { type: 'string' },
-  authorities: { type: 'array', items: { type: 'string' } },
-  createdAt: { type: 'string' },
-  updatedAt: { type: 'string' }
-}
-
-const apiKeySchemaWithValue = {
-  type: 'object',
-  properties: {
-    ...baseProperties,
-    value: { type: 'string' }
-  }
-}
-
-const apiKeySchema = {
-  type: 'object',
-  properties: baseProperties
-}
-
 @Controller('api-key')
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
