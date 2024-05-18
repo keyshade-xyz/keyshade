@@ -7,7 +7,8 @@ export const zUser = z.object({
   profilePictureUrl: z.string().url().or(z.null()),
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
-  isAdmin: z.boolean()
+  isAdmin: z.boolean(),
+  authProvider: z.string(),
 })
 
 export type User = z.infer<typeof zUser>

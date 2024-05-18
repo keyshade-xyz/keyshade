@@ -17,7 +17,7 @@ export default function RootLayout({
       <body>
         <JotaiProvider>{children}</JotaiProvider>
       </body>
-      <Toaster />
+      <Toaster richColors />
     </html>
   )
 }
