@@ -70,6 +70,22 @@ class APIClient {
       credentials: 'include'
     })
   }
+
+  /**
+   * Sends a DELETE request to the specified URL and returns a Promise that resolves to the response data.
+   *
+   * @param url - The URL to send the DELETE request to.
+   * @returns A Promise that resolves to the response data.
+   */
+  delete<T>(url: string): Promise<T> {
+    return this.request<T>(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+  }
 }
 
 export const apiClient = new APIClient(
