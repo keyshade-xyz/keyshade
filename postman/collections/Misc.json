@@ -27,7 +27,69 @@
 				},
 				"description": "This endpoint is used to check if the server is up and running\n\n**Response:**\n\n```\nUP\n\n ```"
 			},
-			"response": []
+			"response": [
+				{
+					"id": "8e964ee7-3e3a-461a-a5df-8ce124ca59b4",
+					"name": "API up",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/health",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "2"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"2-EaZoVMDtf9f7r1pWFmPF3IZ8nxk\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 17 May 2024 03:51:59 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "UP"
+				}
+			]
 		}
 	]
 }

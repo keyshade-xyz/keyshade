@@ -69,7 +69,7 @@ export class ProjectService {
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       publicKey,
-      isPublic: dto.isPublic,
+      accessLevel: dto.accessLevel,
       pendingCreation: approvalEnabled
     }
 
@@ -441,7 +441,7 @@ export class ProjectService {
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? project.privateKey : null,
-      isPublic: dto.isPublic
+      accessLevel: dto.accessLevel
     }
 
     const versionUpdateOps = []
