@@ -48,15 +48,7 @@ async function initializeSentry() {
 async function initializeNestApp() {
   const logger = new CustomLoggerService()
   const app = await NestFactory.create(AppModule, {
-    logger,
-    cors: {
-      origin: process.env.CORS_ORIGIN || '*',
-      credentials: true,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      allowedHeaders: 'Content-Type, Accept, Authorization, x-keyshade-token',
-      preflightContinue: false,
-      optionsSuccessStatus: 204
-    }
+    logger
   })
   app.use(Sentry.Handlers.requestHandler())
   app.use(Sentry.Handlers.tracingHandler())
@@ -77,7 +69,7 @@ async function initializeNestApp() {
   app.enableCors({
     credentials: true,
     origin: [
-      'http://localhost:3000',
+      'http://localhost:3025',
       'https://keyshade.xyz',
       'https://dashboard.keyshade.xyz'
     ]

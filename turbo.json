@@ -3,7 +3,8 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": ["NEXT_PUBLIC_BACKEND_URL"]
     },
     "deploy": {
       "dependsOn": ["build", "test", "lint"]
