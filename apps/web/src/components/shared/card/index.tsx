@@ -2,7 +2,7 @@
 import SpotlightCard from '@/components/ui/spotlight-card'
 
 interface CardProps {
-  widthFull?: boolean,
+  widthFull?: boolean
   children: any
 }
 

@@ -91,10 +91,16 @@ function Footer(): React.JSX.Element {
               legal
             </span>
             <ul className="mt-3 flex flex-col gap-y-3">
-              <Link className="text-white/60 transition-colors hover:text-white" href="/terms_and_condition">
+              <Link
+                className="text-white/60 transition-colors hover:text-white"
+                href="/terms_and_condition"
+              >
                 <EncryptText TARGET_TEXT="Terms and Conditions" />
               </Link>
-              <Link className="text-white/60 transition-colors hover:text-white" href="/privacy">
+              <Link
+                className="text-white/60 transition-colors hover:text-white"
+                href="/privacy"
+              >
                 <EncryptText TARGET_TEXT="Privacy Policy" />
               </Link>
             </ul>
