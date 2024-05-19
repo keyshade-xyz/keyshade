@@ -10,6 +10,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import cleanUp from '../common/cleanup'
 import {
+  Authority,
   EventSeverity,
   EventSource,
   EventTriggerer,
@@ -27,6 +28,8 @@ import { WorkspaceService } from '../workspace/service/workspace.service'
 import { UserService } from '../user/service/user.service'
 import { WorkspaceModule } from '../workspace/workspace.module'
 import { UserModule } from '../user/user.module'
+import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
+import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -35,6 +38,7 @@ describe('Project Controller Tests', () => {
   let projectService: ProjectService
   let workspaceService: WorkspaceService
   let userService: UserService
+  let workspaceRoleService: WorkspaceRoleService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
@@ -48,7 +52,8 @@ describe('Project Controller Tests', () => {
         ProjectModule,
         EventModule,
         WorkspaceModule,
-        UserModule
+        UserModule,
+        WorkspaceRoleModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -63,6 +68,7 @@ describe('Project Controller Tests', () => {
     projectService = moduleRef.get(ProjectService)
     workspaceService = moduleRef.get(WorkspaceService)
     userService = moduleRef.get(UserService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -602,9 +608,7 @@ describe('Project Controller Tests', () => {
       }
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json().publicKey).toEqual(project2.publicKey)
-    expect(response.json().privateKey).toBeUndefined()
+    expect(response.statusCode).toBe(400)
   })
 
   it('should be able to delete a project', async () => {
@@ -787,6 +791,178 @@ describe('Project Controller Tests', () => {
         error: 'Unauthorized',
         message: `User with id ${user2.id} does not have the authority in the project with id ${internalProject.id}`
       })
+    })
+
+    it('should not allow outsiders to update a GLOBAL project', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/project/${globalProject.id}`,
+        payload: {
+          name: 'Global Project Updated'
+        },
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+      expect(response.json()).toEqual({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: `User with id ${user2.id} does not have the authority in the project with id ${globalProject.id}`
+      })
+    })
+
+    it('should store private key even if specified not to in a global project', async () => {
+      const project = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Global Project 2',
+          description: 'Global Project description',
+          storePrivateKey: false,
+          accessLevel: ProjectAccessLevel.GLOBAL
+        }
+      )) as Project
+
+      expect(project).toBeDefined()
+      expect(project.privateKey).not.toBeNull()
+      expect(project.publicKey).not.toBeNull()
+      expect(project.storePrivateKey).toBe(true)
+    })
+
+    it('should require WORKSPACE_ADMIN authority to alter the access level', async () => {
+      // Create a user
+      const johnny = await userService.createUser({
+        name: 'Johnny Doe',
+        email: 'johhny@keyshade.xyz',
+        isOnboardingFinished: true,
+        isActive: true,
+        isAdmin: false
+      })
+
+      // Create a member role for the workspace
+      const role = await workspaceRoleService.createWorkspaceRole(
+        user1,
+        workspace1.id,
+        {
+          name: 'Member',
+          authorities: [Authority.READ_PROJECT]
+        }
+      )
+
+      // Add user to workspace as a member
+      await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+        {
+          email: johnny.email,
+          roleIds: [role.id]
+        }
+      ])
+
+      // Accept the invitation on behalf of the user
+      await workspaceService.acceptInvitation(johnny, workspace1.id)
+
+      // Update the access level of the project
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/project/${internalProject.id}`,
+        payload: {
+          accessLevel: ProjectAccessLevel.INTERNAL
+        },
+        headers: {
+          'x-e2e-user-email': johnny.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should store the private key if access level of INTERNAL/PRIVATE project is updated to GLOBAL', async () => {
+      // Create a project with access level INTERNAL
+      const project = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Internal Project 2',
+          description: 'Internal Project description',
+          storePrivateKey: true,
+          accessLevel: ProjectAccessLevel.INTERNAL
+        }
+      )) as Project
+
+      // Update the access level of the project to GLOBAL
+      const updatedProject = (await projectService.updateProject(
+        user1,
+        project.id,
+        {
+          accessLevel: ProjectAccessLevel.GLOBAL
+        }
+      )) as Project
+
+      expect(updatedProject).toBeDefined()
+      expect(updatedProject.privateKey).toBe(project.privateKey)
+      expect(updatedProject.publicKey).toBe(project.publicKey)
+      expect(updatedProject.storePrivateKey).toBe(true)
+    })
+
+    it('should throw an error while setting access level to GLOBAL if private key is not specified and project does not store private key', async () => {
+      const project = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Internal Project 2',
+          description: 'Internal Project description',
+          storePrivateKey: false,
+          accessLevel: ProjectAccessLevel.INTERNAL
+        }
+      )) as Project
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/project/${project.id}`,
+        payload: {
+          accessLevel: ProjectAccessLevel.GLOBAL
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json()).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Private key is required to make the project GLOBAL'
+      })
+    })
+
+    it('should regenerate key-pair if access level of GLOBAL project is updated to INTERNAL or PRIVATE', async () => {
+      const project = (await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Global Project 2',
+          description: 'Global Project description',
+          storePrivateKey: true,
+          accessLevel: ProjectAccessLevel.GLOBAL
+        }
+      )) as Project
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/project/${project.id}`,
+        payload: {
+          accessLevel: ProjectAccessLevel.INTERNAL
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().publicKey).not.toBe(project.publicKey)
+      expect(response.json().privateKey).not.toBe(project.privateKey)
+      expect(response.json().storePrivateKey).toBe(false)
     })
   })
 

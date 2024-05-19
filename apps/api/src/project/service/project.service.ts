@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger
+} from '@nestjs/common'
 import {
   ApprovalAction,
   ApprovalItemType,
@@ -7,6 +12,7 @@ import {
   EventSource,
   EventType,
   Project,
+  ProjectAccessLevel,
   SecretVersion,
   User,
   Workspace
@@ -67,7 +73,10 @@ export class ProjectService {
     const data: any = {
       name: dto.name,
       description: dto.description,
-      storePrivateKey: dto.storePrivateKey,
+      storePrivateKey:
+        dto.accessLevel === ProjectAccessLevel.GLOBAL
+          ? true
+          : dto.storePrivateKey, // If the project is global, the private key must be stored
       publicKey,
       accessLevel: dto.accessLevel,
       pendingCreation: approvalEnabled
@@ -222,11 +231,17 @@ export class ProjectService {
     dto: UpdateProject,
     reason?: string
   ) {
+    // Check if the user has the authority to update the project
+    let authority: Authority = Authority.UPDATE_PROJECT
+
+    // Only admins can change the visibility of the project
+    if (dto.accessLevel) authority = Authority.WORKSPACE_ADMIN
+
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.UPDATE_PROJECT,
+        authority,
         prisma: this.prisma
       })
 
@@ -238,6 +253,37 @@ export class ProjectService {
       throw new ConflictException(
         `Project with this name **${dto.name}** already exists`
       )
+
+    if (dto.accessLevel) {
+      const currentAccessLevel = project.accessLevel
+
+      if (
+        currentAccessLevel !== ProjectAccessLevel.GLOBAL &&
+        dto.accessLevel === ProjectAccessLevel.GLOBAL
+      ) {
+        // If the project is being made global, the private key must be stored
+        // This is because we want anyone to see the secrets in the project
+        dto.storePrivateKey = true
+        dto.privateKey = dto.privateKey || project.privateKey
+
+        // We can't make the project global if a private key isn't supplied,
+        // because we need to decrypt the secrets
+        if (!dto.privateKey) {
+          throw new BadRequestException(
+            'Private key is required to make the project GLOBAL'
+          )
+        }
+      } else if (
+        currentAccessLevel === ProjectAccessLevel.GLOBAL &&
+        dto.accessLevel !== ProjectAccessLevel.GLOBAL
+      ) {
+        dto.storePrivateKey = false
+        dto.regenerateKeyPair = true
+
+        // At this point, we already will have the private key since the project is global
+        dto.privateKey = project.privateKey
+      }
+    }
 
     if (
       !project.pendingCreation &&
@@ -431,6 +477,68 @@ export class ProjectService {
     })
   }
 
+  private async updateProjectKeyPair(
+    project: ProjectWithSecrets,
+    oldPrivateKey: string,
+    storePrivateKey: boolean
+  ) {
+    // A new key pair can be generated only if:
+    // - The existing private key is provided
+    // - Or, the private key was stored
+    const { privateKey: newPrivateKey, publicKey: newPublicKey } =
+      createKeyPair()
+
+    const txs = []
+
+    // Re-hash all secrets
+    for (const secret of project.secrets) {
+      const versions = await this.prisma.secretVersion.findMany({
+        where: {
+          secretId: secret.id
+        }
+      })
+
+      const updatedVersions: Partial<SecretVersion>[] = []
+
+      for (const version of versions) {
+        updatedVersions.push({
+          id: version.id,
+          value: await encrypt(
+            await decrypt(oldPrivateKey, version.value),
+            newPrivateKey
+          )
+        })
+      }
+
+      for (const version of updatedVersions) {
+        txs.push(
+          this.prisma.secretVersion.update({
+            where: {
+              id: version.id
+            },
+            data: {
+              value: version.value
+            }
+          })
+        )
+      }
+    }
+
+    txs.push(
+      this.prisma.project.update({
+        where: {
+          id: project.id
+        },
+        data: {
+          publicKey: newPublicKey,
+          privateKey: storePrivateKey ? newPrivateKey : null
+        }
+      })
+    )
+
+    return { txs, newPrivateKey, newPublicKey }
+  }
+
   async update(
     dto: UpdateProject | UpdateProjectMetadata,
     user: User,
@@ -440,59 +548,31 @@ export class ProjectService {
       name: dto.name,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
-      privateKey: dto.storePrivateKey ? project.privateKey : null,
+      privateKey: dto.storePrivateKey ? dto.privateKey : null,
       accessLevel: dto.accessLevel
     }
 
     const versionUpdateOps = []
+    let privateKey = dto.privateKey
+    let publicKey = project.publicKey
 
-    let privateKey = undefined,
-      publicKey = undefined
-    // A new key pair can be generated only if:
-    // - The existing private key is provided
-    // - Or, the private key was stored
-    // Only administrators can do this action since it's irreversible!
-    if (dto.regenerateKeyPair && (dto.privateKey || project.privateKey)) {
-      const res = createKeyPair()
-      privateKey = res.privateKey
-      publicKey = res.publicKey
-
-      data.publicKey = publicKey
-      // Check if the private key should be stored
-      data.privateKey = dto.storePrivateKey ? privateKey : null
-
-      // Re-hash all secrets
-      for (const secret of project.secrets) {
-        const versions = await this.prisma.secretVersion.findMany({
-          where: {
-            secretId: secret.id
-          }
-        })
-
-        const updatedVersions: Partial<SecretVersion>[] = []
-
-        for (const version of versions) {
-          updatedVersions.push({
-            id: version.id,
-            value: await encrypt(
-              await decrypt(project.privateKey, version.value),
-              privateKey
-            )
-          })
-        }
-
-        for (const version of updatedVersions) {
-          versionUpdateOps.push(
-            this.prisma.secretVersion.update({
-              where: {
-                id: version.id
-              },
-              data: {
-                value: version.value
-              }
-            })
+    if (dto.regenerateKeyPair) {
+      if (dto.privateKey || project.privateKey) {
+        const { txs, newPrivateKey, newPublicKey } =
+          await this.updateProjectKeyPair(
+            project,
+            dto.privateKey || project.privateKey,
+            dto.storePrivateKey
           )
-        }
+
+        privateKey = newPrivateKey
+        publicKey = newPublicKey
+
+        versionUpdateOps.push(...txs)
+      } else {
+        throw new BadRequestException(
+          'Private key is required to regenerate the key pair'
+        )
       }
     }
 
@@ -531,7 +611,8 @@ export class ProjectService {
     this.log.debug(`Updated project ${updatedProject.id}`)
     return {
       ...updatedProject,
-      privateKey
+      privateKey,
+      publicKey
     }
   }
 

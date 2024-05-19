@@ -150,7 +150,19 @@ export class AuthorityCheckerService {
     const projectAccessLevel = project.accessLevel
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
-        //everyone can access this
+        // We will only allow reads for the project. If the authority is READ_PROJECT, we will allow access
+        // For any other authority, the user needs to have the required collective authority over the workspace
+        // or WORKSPACE_ADMIN authority
+        if (authority !== Authority.READ_PROJECT) {
+          if (
+            !permittedAuthoritiesForWorkspace.has(authority) &&
+            !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
+          ) {
+            throw new UnauthorizedException(
+              `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+            )
+          }
+        }
         break
       case ProjectAccessLevel.INTERNAL:
         // Any workspace member with the required collective authority over the workspace or
