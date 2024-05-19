@@ -45,11 +45,11 @@ export class AuthService {
         userId: user.id
       },
       update: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
+        code: Math.random().toString().substring(2, 8),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
       },
       create: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
+        code: Math.random().toString().substring(2, 8),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
         user: {
           connect: {
