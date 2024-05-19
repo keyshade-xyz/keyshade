@@ -9,9 +9,13 @@
     "lint": "next lint --fix"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.0.1",
+    "@mdx-js/react": "^3.0.1",
+    "@next/mdx": "^14.2.3",
     "@tsparticles/engine": "^3.3.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.3.0",
+    "@types/mdx": "^2.0.13",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.6",
     "geist": "^1.2.2",
