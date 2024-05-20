@@ -179,7 +179,7 @@ enum ProjectAccessLevel {
 }
 
 model Event {
-  id          String         @id @default(cuid())
+  id          String         @id @default(uuid())
   source      EventSource
   triggerer   EventTriggerer
   severity    EventSeverity
@@ -197,7 +197,7 @@ model Event {
 }
 
 model Notification {
-  id        String           @id @default(cuid())
+  id        String           @id @default(uuid())
   createdAt DateTime         @default(now())
   readAt    DateTime?
   type      NotificationType
@@ -208,7 +208,7 @@ model Notification {
 }
 
 model User {
-  id                   String        @id @default(cuid())
+  id                   String        @id @default(uuid())
   email                String        @unique
   name                 String?
   profilePictureUrl    String?
@@ -238,7 +238,7 @@ model User {
 }
 
 model Subscription {
-  id       String  @id @default(cuid())
+  id       String  @id @default(uuid())
   plan     String
   isActive Boolean @default(true)
 
@@ -247,7 +247,7 @@ model Subscription {
 }
 
 model Integration {
-  id        String          @id @default(cuid())
+  id        String          @id @default(uuid())
   name      String
   metadata  Json
   createdAt DateTime        @default(now())
@@ -269,7 +269,7 @@ model Integration {
 }
 
 model Environment {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   name            String
   description     String?
   createdAt       DateTime @default(now())
@@ -289,7 +289,7 @@ model Environment {
 }
 
 model Project {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   name            String
   description     String?
   createdAt       DateTime @default(now())
@@ -314,7 +314,7 @@ model Project {
 }
 
 model ProjectWorkspaceRoleAssociation {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   role   WorkspaceRole @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   roleId String
@@ -326,7 +326,7 @@ model ProjectWorkspaceRoleAssociation {
 }
 
 model WorkspaceRole {
-  id                String   @id @default(cuid())
+  id                String   @id @default(uuid())
   name              String
   description       String?
   colorCode         String?
@@ -345,7 +345,7 @@ model WorkspaceRole {
 }
 
 model WorkspaceMemberRoleAssociation {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   role   WorkspaceRole @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   roleId String
@@ -358,7 +358,7 @@ model WorkspaceMemberRoleAssociation {
 
 // This model stores the membership of a workspace-user and their roles.
 model WorkspaceMember {
-  id                 String                           @id @default(cuid())
+  id                 String                           @id @default(uuid())
   user               User                             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId             String
   workspace          Workspace                        @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -370,7 +370,7 @@ model WorkspaceMember {
 }
 
 model SecretVersion {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   value   String
   version Int    @default(1)
 
@@ -385,7 +385,7 @@ model SecretVersion {
 }
 
 model Secret {
-  id              String          @id @default(cuid())
+  id              String          @id @default(uuid())
   name            String
   versions        SecretVersion[] // Stores the versions of the secret
   createdAt       DateTime        @default(now())
@@ -405,7 +405,7 @@ model Secret {
 }
 
 model VariableVersion {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   value   String
   version Int    @default(1)
 
@@ -420,7 +420,7 @@ model VariableVersion {
 }
 
 model Variable {
-  id              String            @id @default(cuid())
+  id              String            @id @default(uuid())
   name            String
   versions        VariableVersion[] // Stores the versions of the variable
   createdAt       DateTime          @default(now())
@@ -439,7 +439,7 @@ model Variable {
 }
 
 model ApiKey {
-  id          String      @id @default(cuid())
+  id          String      @id @default(uuid())
   name        String
   value       String      @unique
   expiresAt   DateTime?
@@ -463,7 +463,7 @@ model Otp {
 }
 
 model Workspace {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   name            String
   description     String?
   isFreeTier      Boolean  @default(true)
@@ -487,7 +487,7 @@ model Workspace {
 }
 
 model Approval {
-  id         String           @id @default(cuid())
+  id         String           @id @default(uuid())
   itemType   ApprovalItemType
   status     ApprovalStatus   @default(PENDING)
   action     ApprovalAction
@@ -512,7 +512,7 @@ model Approval {
 }
 
 model ChangeNotificationSocketMap {
-  id            String @id @default(cuid())
+  id            String @id @default(uuid())
   socketId      String
   environmentId String
 
