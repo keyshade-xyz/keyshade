@@ -34,4 +34,8 @@ export class MockMailService implements IMailService {
   async feedbackEmail(email: string, feedback: string): Promise<void> {
     this.log.log(`Feedback is : ${feedback}, for email : ${email}`)
   }
+
+  async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
+    this.log.log(`Email change OTP for email ${email} is ${otp}`)
+  }
 }

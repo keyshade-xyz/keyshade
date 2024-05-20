@@ -348,7 +348,7 @@ describe('User Controller Tests', () => {
     expect(userEmailChange.length).toEqual(1)
   })
 
-  it('should send otp when admin changes an user email', async () => {
+  it('should allow admin to change an user email', async () => {
     const result = await app.inject({
       method: 'PUT',
       url: `/user/${regularUser.id}`,
@@ -395,13 +395,22 @@ describe('User Controller Tests', () => {
       data: {
         newEmail: 'newjohn@keyshade.xyz',
         userId: regularUser.id,
-        otp: '123456'
+        otp: '123456',
+        expiresOn: new Date(new Date().getTime() + 5 * 60 * 1000)
+      }
+    })
+
+    await prisma.otp.create({
+      data: {
+        code: '123456',
+        userId: regularUser.id,
+        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000)
       }
     })
 
     const result = await app.inject({
       method: 'POST',
-      url: `/user/validate-otp/${regularUser.id}`,
+      url: `/user/validate-email-change-otp`,
       query: {
         otp: '123456'
       },
@@ -431,13 +440,13 @@ describe('User Controller Tests', () => {
         newEmail: 'newjohn@keyshade.xyz',
         userId: regularUser.id,
         otp: '123456',
-        createdOn: new Date(new Date().getTime() - (5 * 60 * 1000 + 1)) // Expired OTP
+        expiresOn: new Date(new Date().getTime() - 1)
       }
     })
 
     const result = await app.inject({
       method: 'POST',
-      url: `/user/validate-otp/${regularUser.id}`,
+      url: `/user/validate-email-change-otp`,
       query: {
         otp: '123456'
       },
@@ -463,17 +472,26 @@ describe('User Controller Tests', () => {
   })
 
   it('should resend OTP successfully', async () => {
+    await prisma.otp.create({
+      data: {
+        code: '123456',
+        userId: regularUser.id,
+        expiresAt: new Date(new Date().getTime() + 5 * 1000 * 60)
+      }
+    })
+
     await prisma.userEmailChange.create({
       data: {
         newEmail: 'newjohn@keyshade.xyz',
         userId: regularUser.id,
-        otp: '123456'
+        otp: '123456',
+        expiresOn: new Date(new Date().getTime() + 5 * 1000 * 60)
       }
     })
 
     const result = await app.inject({
       method: 'POST',
-      url: `/user/resend-otp/${regularUser.id}`,
+      url: `/user/resend-email-change-otp`,
       headers: {
         'x-e2e-user-email': regularUser.email
       }

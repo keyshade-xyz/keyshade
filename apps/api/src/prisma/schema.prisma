@@ -525,6 +525,9 @@ model UserEmailChange {
   newEmail      String
   otp           String
   createdOn     DateTime  @default(now())
+  expiresOn     DateTime
 
-  @@unique([userId])
+  @@unique([userId,otp])
+  @@index([expiresOn], name:"expiresOn")
+  
 }

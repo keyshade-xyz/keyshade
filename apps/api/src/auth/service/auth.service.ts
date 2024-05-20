@@ -7,7 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
@@ -18,10 +17,10 @@ import {
 import { PrismaService } from '../../prisma/prisma.service'
 import createUser from '../../common/create-user'
 import { AuthProvider } from '@prisma/client'
+import generateOtp from '../../common/generate-otp'
 
 @Injectable()
 export class AuthService {
-  private readonly OTP_EXPIRY = 5 * 60 * 1000 // 5 minutes
   private readonly logger: LoggerService
 
   constructor(
@@ -40,24 +39,7 @@ export class AuthService {
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
 
-    const otp = await this.prisma.otp.upsert({
-      where: {
-        userId: user.id
-      },
-      update: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
-        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
-      },
-      create: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
-        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
-        user: {
-          connect: {
-            email
-          }
-        }
-      }
-    })
+    const otp = await generateOtp(email, user.id, this.prisma)
 
     await this.mailService.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}`)
