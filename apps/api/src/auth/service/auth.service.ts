@@ -7,7 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
