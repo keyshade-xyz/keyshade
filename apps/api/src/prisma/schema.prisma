@@ -518,3 +518,13 @@ model ChangeNotificationSocketMap {
 
   @@index([environmentId, socketId])
 }
+
+model UserEmailChange {
+  id            String    @id @default(cuid())
+  userId        String    
+  newEmail      String
+  otp           String
+  createdOn     DateTime  @default(now())
+
+  @@unique([userId])
+}

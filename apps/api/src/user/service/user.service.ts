@@ -1,4 +1,11 @@
-import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException
+} from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
@@ -8,10 +15,12 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
+import { randomUUID } from 'crypto'
 
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
+  private readonly OTP_EXPIRY = 5 * 60 * 1000 // 5 minutes
 
   constructor(
     private readonly prisma: PrismaService,
@@ -32,6 +41,28 @@ export class UserService {
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
     }
+    if (dto?.email) {
+      const userwithEmail = await this.prisma.user.findFirst({
+        where: {
+          email: dto.email
+        }
+      })
+
+      if (userwithEmail) {
+        throw new ConflictException('User with this email already exists')
+      }
+
+      const otp = await this.prisma.userEmailChange.create({
+        data: {
+          newEmail: dto.email,
+          userId: user.id,
+          otp: randomUUID().slice(0, 6).toUpperCase()
+        }
+      })
+
+      await this.mailService.sendOtp(dto.email, otp.otp)
+    }
+
     this.log.log(`Updating user ${user.id} with data ${dto}`)
     const updatedUser = await this.prisma.user.update({
       where: {
@@ -51,6 +82,29 @@ export class UserService {
       isActive: dto.isActive,
       isOnboardingFinished: dto.isOnboardingFinished
     }
+
+    if (dto.email) {
+      const userwithEmail = await this.prisma.user.findFirst({
+        where: {
+          email: dto.email
+        }
+      })
+
+      if (userwithEmail) {
+        throw new ConflictException('User with this email already exists')
+      }
+
+      const otp = await this.prisma.userEmailChange.create({
+        data: {
+          newEmail: dto.email,
+          userId: userId,
+          otp: randomUUID().slice(0, 6).toUpperCase()
+        }
+      })
+
+      await this.mailService.sendOtp(dto.email, otp.otp)
+    }
+
     this.log.log(`Updating user ${userId} with data ${dto}`)
     return await this.prisma.user.update({
       where: {
@@ -58,6 +112,66 @@ export class UserService {
       },
       data
     })
+  }
+
+  async validateOtp(userId: User['id'], otp: string): Promise<User> {
+    const user = await this.getUserById(userId)
+    if (!user) {
+      throw new BadRequestException(`User ${userId} does not exist`)
+    }
+
+    const userEmailChange = await this.prisma.userEmailChange.findUnique({
+      where: {
+        otp: otp,
+        userId: userId,
+        createdOn: {
+          gt: new Date(new Date().getTime() - this.OTP_EXPIRY)
+        }
+      }
+    })
+
+    if (!userEmailChange) {
+      this.log.log(`OTP expired or invalid`)
+      throw new UnauthorizedException('Invalid or expired OTP')
+    }
+
+    await this.prisma.userEmailChange.delete({
+      where: {
+        userId: userId,
+        otp: otp
+      }
+    })
+
+    this.log.log(
+      `Changing email to ${userEmailChange.newEmail} for user ${userId}`
+    )
+    return await this.prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        email: userEmailChange.newEmail
+      }
+    })
+  }
+
+  async resendOtp(userId: User['id']) {
+    const user = await this.getUserById(userId)
+    if (!user) {
+      throw new BadRequestException(`User ${userId} does not exist`)
+    }
+
+    const newOtp = await this.prisma.userEmailChange.update({
+      where: {
+        userId: userId
+      },
+      data: {
+        otp: randomUUID().slice(0, 6).toUpperCase(),
+        createdOn: new Date()
+      }
+    })
+
+    await this.mailService.sendOtp(newOtp.newEmail, newOtp.otp)
   }
 
   async getUserById(userId: string) {
