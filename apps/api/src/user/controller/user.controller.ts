@@ -143,4 +143,17 @@ export class UserController {
   async createUser(@Body() dto: CreateUserDto) {
     return await this.userService.createUser(dto)
   }
+
+  @Post('validate-otp/:userId')
+  async validateOtp(
+    @Param('userId') userId: User['id'],
+    @Query('otp') otp: string
+  ) {
+    return await this.userService.validateOtp(userId, otp.trim())
+  }
+
+  @Post('resend-otp/:userId')
+  async resendOtp(@Param('userId') userId: User['id']) {
+    return await this.userService.resendOtp(userId)
+  }
 }
