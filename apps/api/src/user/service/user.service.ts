@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -15,12 +14,11 @@ import {
   MAIL_SERVICE
 } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
-import { randomUUID } from 'crypto'
+import generateOtp from '../../common/generate-otp'
 
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
-  private readonly OTP_EXPIRY = 5 * 60 * 1000 // 5 minutes
 
   constructor(
     private readonly prisma: PrismaService,
@@ -42,25 +40,29 @@ export class UserService {
       isOnboardingFinished: dto.isOnboardingFinished
     }
     if (dto?.email) {
-      const userwithEmail = await this.prisma.user.findFirst({
-        where: {
-          email: dto.email
-        }
-      })
+      const userExists =
+        (await this.prisma.user.count({
+          where: {
+            email: dto.email
+          }
+        })) > 0
 
-      if (userwithEmail) {
+      if (userExists) {
         throw new ConflictException('User with this email already exists')
       }
 
-      const otp = await this.prisma.userEmailChange.create({
+      const otp = await generateOtp(user.email, user.id, this.prisma)
+
+      await this.prisma.userEmailChange.create({
         data: {
           newEmail: dto.email,
           userId: user.id,
-          otp: randomUUID().slice(0, 6).toUpperCase()
+          otp: otp.code,
+          expiresOn: otp.expiresAt
         }
       })
 
-      await this.mailService.sendOtp(dto.email, otp.otp)
+      await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
     }
 
     this.log.log(`Updating user ${user.id} with data ${dto}`)
@@ -84,25 +86,36 @@ export class UserService {
     }
 
     if (dto.email) {
-      const userwithEmail = await this.prisma.user.findFirst({
-        where: {
-          email: dto.email
-        }
-      })
+      const userExists =
+        (await this.prisma.user.count({
+          where: {
+            email: dto.email
+          }
+        })) > 0
 
-      if (userwithEmail) {
+      if (userExists) {
         throw new ConflictException('User with this email already exists')
       }
 
-      const otp = await this.prisma.userEmailChange.create({
-        data: {
-          newEmail: dto.email,
-          userId: userId,
-          otp: randomUUID().slice(0, 6).toUpperCase()
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId
+        },
+        select: {
+          email: true
         }
       })
 
-      await this.mailService.sendOtp(dto.email, otp.otp)
+      const otp = await generateOtp(user.email, userId, this.prisma)
+
+      await this.prisma.userEmailChange.create({
+        data: {
+          newEmail: dto.email,
+          userId: userId,
+          otp: otp.code,
+          expiresOn: otp.expiresAt
+        }
+      })
     }
 
     this.log.log(`Updating user ${userId} with data ${dto}`)
@@ -114,18 +127,15 @@ export class UserService {
     })
   }
 
-  async validateOtp(userId: User['id'], otp: string): Promise<User> {
-    const user = await this.getUserById(userId)
-    if (!user) {
-      throw new BadRequestException(`User ${userId} does not exist`)
-    }
-
+  async validateEmailChangeOtp(user: User, otp: string): Promise<User> {
     const userEmailChange = await this.prisma.userEmailChange.findUnique({
       where: {
-        otp: otp,
-        userId: userId,
-        createdOn: {
-          gt: new Date(new Date().getTime() - this.OTP_EXPIRY)
+        userId_otp: {
+          userId: user.id,
+          otp: otp
+        },
+        expiresOn: {
+          gt: new Date()
         }
       }
     })
@@ -135,43 +145,75 @@ export class UserService {
       throw new UnauthorizedException('Invalid or expired OTP')
     }
 
-    await this.prisma.userEmailChange.delete({
+    const deleteEmailChangeRecord = this.prisma.userEmailChange.delete({
       where: {
-        userId: userId,
-        otp: otp
+        userId_otp: {
+          userId: user.id,
+          otp: otp
+        }
+      }
+    })
+
+    const deleteOtp = this.prisma.otp.delete({
+      where: {
+        userId: user.id,
+        code: otp
+      }
+    })
+
+    const updateUserOp = this.prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        email: userEmailChange.newEmail,
+        authProvider: AuthProvider.EMAIL_OTP
       }
     })
 
     this.log.log(
-      `Changing email to ${userEmailChange.newEmail} for user ${userId}`
+      `Changing email to ${userEmailChange.newEmail} for user ${user.id}`
     )
-    return await this.prisma.user.update({
-      where: {
-        id: userId
-      },
-      data: {
-        email: userEmailChange.newEmail
-      }
-    })
+    const results = await this.prisma.$transaction([
+      deleteEmailChangeRecord,
+      deleteOtp,
+      updateUserOp
+    ])
+
+    return results[2]
   }
 
-  async resendOtp(userId: User['id']) {
-    const user = await this.getUserById(userId)
-    if (!user) {
-      throw new BadRequestException(`User ${userId} does not exist`)
-    }
-
-    const newOtp = await this.prisma.userEmailChange.update({
+  async resendEmailChangeOtp(user: User) {
+    const oldOtp = await this.prisma.otp.findUnique({
       where: {
-        userId: userId
-      },
-      data: {
-        otp: randomUUID().slice(0, 6).toUpperCase(),
-        createdOn: new Date()
+        userId: user.id
       }
     })
 
-    await this.mailService.sendOtp(newOtp.newEmail, newOtp.otp)
+    if (!oldOtp) {
+      throw new ConflictException(`No previous OTP exists for user ${user.id}`)
+    }
+
+    const newOtp = await generateOtp(user.email, user.id, this.prisma)
+
+    const newUserEmailChange = await this.prisma.userEmailChange.update({
+      where: {
+        userId_otp: {
+          userId: user.id,
+          otp: oldOtp.code
+        }
+      },
+      data: {
+        otp: newOtp.code,
+        createdOn: new Date(),
+        expiresOn: newOtp.expiresAt
+      }
+    })
+
+    await this.mailService.sendEmailChangedOtp(
+      newUserEmailChange.newEmail,
+      newOtp.code
+    )
   }
 
   async getUserById(userId: string) {

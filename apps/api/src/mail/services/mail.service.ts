@@ -70,7 +70,28 @@ export class MailService implements IMailService {
         `
     await this.sendEmail(email, subject, body)
   }
-
+  async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
+    const subject = 'Your OTP for Email Change'
+    const body = `<!DOCTYPE html>
+        <html>
+        <head>
+           <title>OTP Verification</title>
+        </head>
+        <body>
+           <h1>Are you trying to change your email?</h1>
+           <p>Hello there!</p>
+           <p>We have sent you this email to verify your new email.</p>
+           <p>Your One Time Password (OTP) is: <strong>${otp}</strong></p>
+           <p>This OTP will expire in <strong>5 minutes</strong>.</p>
+           <p>Please enter this OTP in the application to verify your new email.</p>
+           <p>Thank you.</p>
+           <p>Best Regards,</p>
+           <p>keyshade Team</p>
+        </body>
+        </html>
+        `
+    await this.sendEmail(email, subject, body)
+  }
   async accountLoginEmail(email: string): Promise<void> {
     const subject = 'LogIn Invitation Accepted'
     const body = `<!DOCTYPE html>
