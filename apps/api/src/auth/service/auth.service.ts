@@ -44,11 +44,11 @@ export class AuthService {
         userId: user.id
       },
       update: {
-        code: Math.random().toString().substring(2, 8),
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
       },
       create: {
-        code: Math.random().toString().substring(2, 8),
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
         user: {
           connect: {
