@@ -53,12 +53,16 @@ export class UserService {
 
       const otp = await generateOtp(user.email, user.id, this.prisma)
 
-      await this.prisma.userEmailChange.create({
-        data: {
+      await this.prisma.userEmailChange.upsert({
+        where: {
+          otpId: otp.id
+        },
+        update: {
+          newEmail: dto.email
+        },
+        create: {
           newEmail: dto.email,
-          userId: user.id,
-          otp: otp.code,
-          expiresOn: otp.expiresAt
+          otpId: otp.id
         }
       })
 
@@ -97,23 +101,14 @@ export class UserService {
         throw new ConflictException('User with this email already exists')
       }
 
-      const user = await this.prisma.user.findUnique({
+      //directly updating email when admin triggered
+      await this.prisma.user.update({
         where: {
           id: userId
         },
-        select: {
-          email: true
-        }
-      })
-
-      const otp = await generateOtp(user.email, userId, this.prisma)
-
-      await this.prisma.userEmailChange.create({
         data: {
-          newEmail: dto.email,
-          userId: userId,
-          otp: otp.code,
-          expiresOn: otp.expiresAt
+          email: dto.email,
+          authProvider: AuthProvider.EMAIL_OTP
         }
       })
     }
@@ -127,37 +122,34 @@ export class UserService {
     })
   }
 
-  async validateEmailChangeOtp(user: User, otp: string): Promise<User> {
-    const userEmailChange = await this.prisma.userEmailChange.findUnique({
+  async validateEmailChangeOtp(user: User, otpCode: string): Promise<User> {
+    const otp = await this.prisma.otp.findUnique({
       where: {
-        userId_otp: {
-          userId: user.id,
-          otp: otp
-        },
-        expiresOn: {
-          gt: new Date()
-        }
+        userId: user.id,
+        code: otpCode
       }
     })
 
-    if (!userEmailChange) {
+    if (!otp || otp.expiresAt < new Date()) {
       this.log.log(`OTP expired or invalid`)
       throw new UnauthorizedException('Invalid or expired OTP')
     }
+    const userEmailChange = await this.prisma.userEmailChange.findUnique({
+      where: {
+        otpId: otp.id
+      }
+    })
 
     const deleteEmailChangeRecord = this.prisma.userEmailChange.delete({
       where: {
-        userId_otp: {
-          userId: user.id,
-          otp: otp
-        }
+        otpId: otp.id
       }
     })
 
     const deleteOtp = this.prisma.otp.delete({
       where: {
         userId: user.id,
-        code: otp
+        code: otpCode
       }
     })
 
@@ -187,31 +179,22 @@ export class UserService {
     const oldOtp = await this.prisma.otp.findUnique({
       where: {
         userId: user.id
+      },
+      include: {
+        emailChange: true
       }
     })
 
-    if (!oldOtp) {
-      throw new ConflictException(`No previous OTP exists for user ${user.id}`)
+    if (!oldOtp || !oldOtp.emailChange) {
+      throw new ConflictException(
+        `No previous OTP for email change exists for user ${user.id}`
+      )
     }
 
     const newOtp = await generateOtp(user.email, user.id, this.prisma)
 
-    const newUserEmailChange = await this.prisma.userEmailChange.update({
-      where: {
-        userId_otp: {
-          userId: user.id,
-          otp: oldOtp.code
-        }
-      },
-      data: {
-        otp: newOtp.code,
-        createdOn: new Date(),
-        expiresOn: newOtp.expiresAt
-      }
-    })
-
     await this.mailService.sendEmailChangedOtp(
-      newUserEmailChange.newEmail,
+      oldOtp.emailChange.newEmail,
       newOtp.code
     )
   }

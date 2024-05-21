@@ -338,10 +338,14 @@ describe('User Controller Tests', () => {
       ...regularUser
     })
 
-    const userEmailChange = await prisma.userEmailChange.findMany({
+    const userEmailChange = await prisma.otp.findMany({
       where: {
         userId: regularUser.id,
-        newEmail: 'newEmail@keyshade.xyz'
+        AND: {
+          emailChange: {
+            newEmail: 'newEmail@keyshade.xyz'
+          }
+        }
       }
     })
 
@@ -362,17 +366,17 @@ describe('User Controller Tests', () => {
 
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
+      ...regularUser,
+      email: 'newEmail@keyshade.xyz'
     })
 
-    const userEmailChange = await prisma.userEmailChange.findMany({
+    const updatedUser = await prisma.user.findUnique({
       where: {
-        userId: regularUser.id,
-        newEmail: 'newEmail@keyshade.xyz'
+        id: regularUser.id
       }
     })
 
-    expect(userEmailChange.length).toEqual(1)
+    expect(updatedUser.email).toEqual('newEmail@keyshade.xyz')
   })
 
   it('should give error when new email is used by an existing user', async () => {
@@ -391,20 +395,16 @@ describe('User Controller Tests', () => {
   })
 
   it('should validate OTP successfully', async () => {
-    await prisma.userEmailChange.create({
-      data: {
-        newEmail: 'newjohn@keyshade.xyz',
-        userId: regularUser.id,
-        otp: '123456',
-        expiresOn: new Date(new Date().getTime() + 5 * 60 * 1000)
-      }
-    })
-
     await prisma.otp.create({
       data: {
         code: '123456',
         userId: regularUser.id,
-        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000)
+        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
       }
     })
 
@@ -435,12 +435,16 @@ describe('User Controller Tests', () => {
   })
 
   it('should fail to validate expired or invalid OTP', async () => {
-    await prisma.userEmailChange.create({
+    await prisma.otp.create({
       data: {
-        newEmail: 'newjohn@keyshade.xyz',
+        code: '123456',
         userId: regularUser.id,
-        otp: '123456',
-        expiresOn: new Date(new Date().getTime() - 1)
+        expiresAt: new Date(new Date().getTime() - 1),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
       }
     })
 
@@ -476,16 +480,12 @@ describe('User Controller Tests', () => {
       data: {
         code: '123456',
         userId: regularUser.id,
-        expiresAt: new Date(new Date().getTime() + 5 * 1000 * 60)
-      }
-    })
-
-    await prisma.userEmailChange.create({
-      data: {
-        newEmail: 'newjohn@keyshade.xyz',
-        userId: regularUser.id,
-        otp: '123456',
-        expiresOn: new Date(new Date().getTime() + 5 * 1000 * 60)
+        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
       }
     })
 
@@ -499,14 +499,16 @@ describe('User Controller Tests', () => {
 
     expect(result.statusCode).toEqual(201)
 
-    const updatedEmailChange = await prisma.userEmailChange.findFirst({
+    const updatedOtp = await prisma.otp.findUnique({
       where: {
         userId: regularUser.id,
-        newEmail: 'newjohn@keyshade.xyz'
+        emailChange: {
+          newEmail: 'newjohn@keyshade.xyz'
+        }
       }
     })
 
-    expect(updatedEmailChange.otp).not.toEqual('123456')
+    expect(updatedOtp.code).not.toEqual('123456')
   })
 
   // test('user should be able to delete their own account', async () => {
