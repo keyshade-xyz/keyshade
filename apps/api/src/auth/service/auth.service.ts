@@ -7,7 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { randomUUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
@@ -45,11 +44,11 @@ export class AuthService {
         userId: user.id
       },
       update: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
       },
       create: {
-        code: randomUUID().slice(0, 6).toUpperCase(),
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
         expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
         user: {
           connect: {
