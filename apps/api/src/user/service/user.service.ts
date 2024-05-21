@@ -185,7 +185,7 @@ export class UserService {
       }
     })
 
-    if (!oldOtp || !oldOtp.emailChange) {
+    if (!oldOtp?.emailChange) {
       throw new ConflictException(
         `No previous OTP for email change exists for user ${user.id}`
       )
