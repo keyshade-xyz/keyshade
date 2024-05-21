@@ -211,7 +211,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{BASE_URL}}/api/auth/validate-otp?email=sawan@keyshade.xyz&otp=BBF66C",
+					"raw": "{{BASE_URL}}/api/auth/validate-otp?email=rajdip@keyshade.xyz&otp=102435",
 					"host": [
 						"{{BASE_URL}}"
 					],
@@ -223,12 +223,12 @@
 					"query": [
 						{
 							"key": "email",
-							"value": "sawan@keyshade.xyz",
+							"value": "rajdip@keyshade.xyz",
 							"description": "Email the OTP was sent on"
 						},
 						{
 							"key": "otp",
-							"value": "BBF66C",
+							"value": "102435",
 							"description": "OTP that was sent"
 						}
 					]
@@ -243,7 +243,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=rajdip@keyshade.xyz&otp=564F7B",
+							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=rajdip@keyshade.xyz&otp=102435",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -260,7 +260,7 @@
 								},
 								{
 									"key": "otp",
-									"value": "564F7B",
+									"value": "102435",
 									"description": "OTP that was sent"
 								}
 							]
@@ -317,7 +317,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=sawan@keyshade.xyz&otp=564F7B",
+							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=sawan@keyshade.xyz&otp=102432",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -334,7 +334,7 @@
 								},
 								{
 									"key": "otp",
-									"value": "564F7B",
+									"value": "102432",
 									"description": "OTP that was sent"
 								}
 							]
@@ -391,7 +391,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=sawan@keyshade.xyz&otp=BBF66C",
+							"raw": "{{BASE_URL}}/api/auth/validate-otp?email=sawan@keyshade.xyz&otp=102435",
 							"host": [
 								"{{BASE_URL}}"
 							],
@@ -408,7 +408,7 @@
 								},
 								{
 									"key": "otp",
-									"value": "BBF66C",
+									"value": "102435",
 									"description": "OTP that was sent"
 								}
 							]
