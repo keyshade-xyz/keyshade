@@ -143,4 +143,17 @@ export class UserController {
   async createUser(@Body() dto: CreateUserDto) {
     return await this.userService.createUser(dto)
   }
+
+  @Post('validate-email-change-otp')
+  async validateEmailChangeOtp(
+    @CurrentUser() user: User,
+    @Query('otp') otp: string
+  ) {
+    return await this.userService.validateEmailChangeOtp(user, otp.trim())
+  }
+
+  @Post('resend-email-change-otp')
+  async resendEmailChangeOtp(@CurrentUser() user: User) {
+    return await this.userService.resendEmailChangeOtp(user)
+  }
 }

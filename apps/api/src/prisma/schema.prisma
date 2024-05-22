@@ -452,11 +452,13 @@ model ApiKey {
 }
 
 model Otp {
-  code      String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  id          String    @id @default(cuid())
+  code        String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      String    @unique
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  emailChange UserEmailChange?
 
   @@unique([userId, code], name: "userCode")
   @@index([expiresAt], name: "expiresAt")
@@ -517,4 +519,11 @@ model ChangeNotificationSocketMap {
   environmentId String
 
   @@index([environmentId, socketId])
+}
+
+model UserEmailChange {
+  id        String  @id @default(cuid())
+  otp       Otp     @relation(fields: [otpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  otpId     String  @unique
+  newEmail  String
 }

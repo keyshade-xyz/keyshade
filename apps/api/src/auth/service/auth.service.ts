@@ -17,10 +17,10 @@ import {
 import { PrismaService } from '../../prisma/prisma.service'
 import createUser from '../../common/create-user'
 import { AuthProvider } from '@prisma/client'
+import generateOtp from '../../common/generate-otp'
 
 @Injectable()
 export class AuthService {
-  private readonly OTP_EXPIRY = 5 * 60 * 1000 // 5 minutes
   private readonly logger: LoggerService
 
   constructor(
@@ -39,24 +39,7 @@ export class AuthService {
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
 
-    const otp = await this.prisma.otp.upsert({
-      where: {
-        userId: user.id
-      },
-      update: {
-        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
-        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY)
-      },
-      create: {
-        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`).toString().substring(0, 6),
-        expiresAt: new Date(new Date().getTime() + this.OTP_EXPIRY),
-        user: {
-          connect: {
-            email
-          }
-        }
-      }
-    })
+    const otp = await generateOtp(email, user.id, this.prisma)
 
     await this.mailService.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}`)
