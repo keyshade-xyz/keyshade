@@ -41,7 +41,7 @@ describe('User Controller Tests', () => {
 
   beforeEach(async () => {
     adminUser = await userService.createUser({
-      email: 'admin@keyshade.xyz',
+      email: process.env.FEEDBACK_FORWARD_EMAIL,
       name: 'Admin',
       isActive: true,
       isAdmin: true,
