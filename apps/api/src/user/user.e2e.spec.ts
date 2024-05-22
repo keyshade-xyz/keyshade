@@ -511,6 +511,43 @@ describe('User Controller Tests', () => {
     expect(updatedOtp.code).not.toEqual('123456')
   })
 
+  it('should return 409 Conflict if the email already exists', async () => {
+    const result = await app.inject({
+      method: 'PUT',
+      url: `/user/${regularUser.id}`,
+      headers: {
+        'x-e2e-user-email': adminUser.email
+      },
+      payload: {
+        email: adminUser.email // existing email
+      }
+    })
+
+    expect(result.statusCode).toEqual(409)
+    expect(JSON.parse(result.body)).toEqual({
+      statusCode: 409,
+      message: 'User with this email already exists',
+      error: 'Conflict'
+    })
+  })
+
+  it('should return 409 Conflict if no previous OTP exists for email change', async () => {
+    const result = await app.inject({
+      method: 'POST',
+      url: `/user/resend-email-change-otp`,
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(409)
+    expect(JSON.parse(result.body)).toEqual({
+      statusCode: 409,
+      message: `No previous OTP for email change exists for user ${regularUser.id}`,
+      error: 'Conflict'
+    })
+  })
+
   // test('user should be able to delete their own account', async () => {
   //   const result = await app.inject({
   //     method: 'DELETE',
