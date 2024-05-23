@@ -1,5 +1,6 @@
 import { InternalServerErrorException, Logger, Provider } from '@nestjs/common'
 import * as Minio from 'minio'
+import { exit } from 'process'
 
 export const MINIO_CLIENT = 'MinioClient'
 
@@ -33,7 +34,7 @@ export const MinioProvider: Provider = {
       })
     } catch (error) {
       logger.error('Error initializing Minio Client', error)
-      throw new InternalServerErrorException('Error initializing Minio Client')
+      exit(1)
     }
 
     const bucketName = process.env.MINIO_BUCKET_NAME
