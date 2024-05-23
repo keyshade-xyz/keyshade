@@ -66,7 +66,14 @@ const generalSchema = z.object({
   WEB_FRONTEND_URL: z.string().url(),
   PLATFORM_FRONTEND_URL: z.string().url(),
   PLATFORM_OAUTH_SUCCESS_REDIRECT_PATH: z.string(),
-  PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string()
+  PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string(),
+
+  MINIO_ENDPOINT: z.string().optional(),
+  MINIO_PORT: z.string().optional(),
+  MINIO_ACCESS_KEY: z.string().optional(),
+  MINIO_SECRET_KEY: z.string().optional(),
+  MINIO_BUCKET_NAME: z.string().optional(),
+  MINIO_USE_SSL: z.string().optional()
 })
 
 export type EnvSchemaType = z.infer<typeof generalSchema>

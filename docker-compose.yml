@@ -11,6 +11,7 @@ services:
       - ./data/db:/var/lib/postgresql/data
     networks:
       - keyshade-dev
+
   redis:
     image: redis:6
     ports:
@@ -19,6 +20,22 @@ services:
       - keyshade-dev
     volumes:
       - ./data/redis:/data
+
+  minio:
+    image: docker.io/bitnami/minio:2022
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: supersecret
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - 'minio_data:/data'
+
 networks:
   keyshade-dev:
     driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
