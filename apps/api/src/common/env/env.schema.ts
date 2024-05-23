@@ -73,7 +73,10 @@ const generalSchema = z.object({
   MINIO_ACCESS_KEY: z.string().optional(),
   MINIO_SECRET_KEY: z.string().optional(),
   MINIO_BUCKET_NAME: z.string().optional(),
-  MINIO_USE_SSL: z.string().optional()
+  MINIO_USE_SSL: z.string().optional(),
+  
+  FEEDBACK_FORWARD_EMAIL: z.string()
+
 })
 
 export type EnvSchemaType = z.infer<typeof generalSchema>
