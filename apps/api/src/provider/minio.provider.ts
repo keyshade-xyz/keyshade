@@ -5,7 +5,8 @@ export const MINIO_CLIENT = 'MinioClient'
 
 export const MinioProvider: Provider = {
   provide: MINIO_CLIENT,
-  useFactory: () => {
+  useFactory: async () => {
+    let minioClient: Minio.Client
     let isServiceLoaded: boolean = false
 
     const logger = new Logger('MinioProvider')
@@ -22,16 +23,21 @@ export const MinioProvider: Provider = {
       return
     }
 
-    const minioClient: Minio.Client = new Minio.Client({
-      endPoint: process.env.MINIO_ENDPOINT,
-      port: Number(process.env.MINIO_PORT),
-      useSSL: process.env.MINIO_USE_SSL === 'true',
-      accessKey: process.env.MINIO_ACCESS_KEY,
-      secretKey: process.env.MINIO_SECRET_KEY
-    })
+    try {
+      minioClient = new Minio.Client({
+        endPoint: process.env.MINIO_ENDPOINT,
+        port: Number(process.env.MINIO_PORT),
+        useSSL: process.env.MINIO_USE_SSL === 'true',
+        accessKey: process.env.MINIO_ACCESS_KEY,
+        secretKey: process.env.MINIO_SECRET_KEY
+      })
+    } catch (error) {
+      logger.error('Error initializing Minio Client', error)
+      throw new InternalServerErrorException('Error initializing Minio Client')
+    }
 
     const bucketName = process.env.MINIO_BUCKET_NAME
-    createBucketIfNotExists()
+    await createBucketIfNotExists()
     if (isServiceLoaded) {
       logger.log('Minio Provider Loaded Successfully.')
     }
@@ -42,7 +48,14 @@ export const MinioProvider: Provider = {
       const bucketExists = await minioClient.bucketExists(bucketName)
       if (!bucketExists) {
         logger.warn(`Bucket ${bucketName} does not exist. Creating it.`)
-        await minioClient.makeBucket(bucketName, 'ap-south-1')
+        try {
+          await minioClient.makeBucket(bucketName, 'ap-south-1')
+        } catch (error) {
+          logger.error('Error creating bucket in Minio', error)
+          throw new InternalServerErrorException(
+            'Error creating bucket in Minio'
+          )
+        }
         logger.log(`Bucket ${bucketName} created.`)
       }
       isServiceLoaded = true
@@ -53,7 +66,17 @@ export const MinioProvider: Provider = {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
       const fileName = `${Date.now()}-${file.originalname}`
-      await minioClient.putObject(bucketName, fileName, file.buffer, file.size)
+      try {
+        await minioClient.putObject(
+          bucketName,
+          fileName,
+          file.buffer,
+          file.size
+        )
+      } catch (error) {
+        logger.error('Error uploading file to Minio', error)
+        throw new InternalServerErrorException('Error uploading file to Minio')
+      }
       return fileName
     }
 
@@ -61,14 +84,26 @@ export const MinioProvider: Provider = {
       if (!isServiceLoaded) {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
-      return await minioClient.presignedUrl('GET', bucketName, fileName)
+      try {
+        return await minioClient.presignedUrl('GET', bucketName, fileName)
+      } catch (error) {
+        logger.error('Error generating file URL from Minio', error)
+        throw new InternalServerErrorException(
+          'Error generating file URL from Minio'
+        )
+      }
     }
 
     async function deleteFile(fileName: string) {
       if (!isServiceLoaded) {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
-      await minioClient.removeObject(bucketName, fileName)
+      try {
+        await minioClient.removeObject(bucketName, fileName)
+      } catch (error) {
+        logger.error('Error deleting file from Minio', error)
+        throw new InternalServerErrorException('Error deleting file from Minio')
+      }
     }
   }
 }
