@@ -21,9 +21,17 @@ Here's the description of the environment variables used in the project. You can
 - **SENTRY_PROJECT**: The project ID within your Sentry organization where events will be reported.
 - **SENTRY_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry. It determines the percentage of transactions to capture traces for.
 - **SENTRY_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry. It determines the percentage of requests to capture performance profiles for.
-- **SENTRY_ENV**: The The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration.
+- **SENTRY_ENV**: The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration.
 - **FROM_EMAIL**: The display of the email sender title.
 - **JWT_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.
 - **WEB_FRONTEND_URL, WORKSPACE_FRONTEND_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
 - **API_PORT**: The environmental variable that specifies the port number on which the API server should listen for incoming connections. If not explicitly set, it defaults to port 4200.
+
+- **MINIO_ENDPOINT**: This is the endpoint of the Minio server. Minio is an open-source object storage server. 
+- **MINIO_PORT**: The port on which the Minio server is running.
+- **MINIO_ACCESS_KEY**: The access key to the Minio server.
+- **MINIO_SECRET_KEY**: The secret key to the Minio server.
+- **MINIO_USE_SSL**: Whether to use SSL for the Minio connection or not.
+- **MINIO_BUCKET_NAME**: The name of the bucket in the Minio server where the files are stored.
+- 
 - **FEEDBACK_FORWARD_EMAIL**: Feedbacks submitted by the user would be sent to this email address for the concerned authorities to view it. Ideally, in development environment, this would be your personal email address
