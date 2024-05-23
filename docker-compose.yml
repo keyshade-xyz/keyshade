@@ -30,12 +30,8 @@ services:
       - '9000:9000'
       - '9001:9001'
     volumes:
-      - 'minio_data:/data'
+      - './data/minio/'
 
 networks:
   keyshade-dev:
     driver: bridge
-
-volumes:
-  minio_data:
-    driver: local
