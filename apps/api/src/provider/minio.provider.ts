@@ -45,8 +45,16 @@ export const MinioProvider: Provider = {
 
     async function createBucketIfNotExists() {
       if (!minioClient) return
+      let bucketExists: boolean = false
 
-      const bucketExists = await minioClient.bucketExists(bucketName)
+      try {
+        bucketExists = await minioClient.bucketExists(bucketName)
+      } catch (error) {
+        logger.error('Error while checking if bucket exists in Minio', error)
+        throw new InternalServerErrorException(
+          'Error while checking if bucket exists in Minio'
+        )
+      }
       if (!bucketExists) {
         logger.warn(`Bucket ${bucketName} does not exist. Creating it.`)
         try {
@@ -66,7 +74,9 @@ export const MinioProvider: Provider = {
       if (!isServiceLoaded) {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
+
       const fileName = `${Date.now()}-${file.originalname}`
+
       try {
         await minioClient.putObject(
           bucketName,
@@ -85,6 +95,7 @@ export const MinioProvider: Provider = {
       if (!isServiceLoaded) {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
+
       try {
         return await minioClient.presignedUrl('GET', bucketName, fileName)
       } catch (error) {
@@ -99,8 +110,10 @@ export const MinioProvider: Provider = {
       if (!isServiceLoaded) {
         return new InternalServerErrorException('Minio Client has not loaded')
       }
+
       try {
         await minioClient.removeObject(bucketName, fileName)
+        return true
       } catch (error) {
         logger.error('Error deleting file from Minio', error)
         throw new InternalServerErrorException('Error deleting file from Minio')
