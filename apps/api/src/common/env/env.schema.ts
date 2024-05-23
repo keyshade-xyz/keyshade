@@ -66,7 +66,9 @@ const generalSchema = z.object({
   WEB_FRONTEND_URL: z.string().url(),
   PLATFORM_FRONTEND_URL: z.string().url(),
   PLATFORM_OAUTH_SUCCESS_REDIRECT_PATH: z.string(),
-  PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string()
+  PLATFORM_OAUTH_FAILURE_REDIRECT_PATH: z.string(),
+
+  FEEDBACK_FORWARD_EMAIL: z.string()
 })
 
 export type EnvSchemaType = z.infer<typeof generalSchema>

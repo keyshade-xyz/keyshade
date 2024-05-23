@@ -14,7 +14,7 @@ export class FeedbackService {
     if (!feedback || feedback.trim().length === 0) {
       throw new BadRequestException('Feedback cannot be null or empty')
     }
-    const adminEmail = 'admin@keyshade.xyz'
+    const adminEmail = process.env.FEEDBACK_FORWARD_EMAIL;
 
     await this.mailService.feedbackEmail(adminEmail, feedback.trim())
   }
