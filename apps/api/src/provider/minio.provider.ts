@@ -1,4 +1,4 @@
-import { Logger, Provider } from '@nestjs/common'
+import { InternalServerErrorException, Logger, Provider } from '@nestjs/common'
 import * as Minio from 'minio'
 
 export const MINIO_CLIENT = 'MinioClient'
@@ -49,16 +49,25 @@ export const MinioProvider: Provider = {
     }
 
     async function uploadFile(file) {
+      if (!isServiceLoaded) {
+        return new InternalServerErrorException('Minio Client has not loaded')
+      }
       const fileName = `${Date.now()}-${file.originalname}`
       await minioClient.putObject(bucketName, fileName, file.buffer, file.size)
       return fileName
     }
 
     async function getFileUrl(fileName: string) {
+      if (!isServiceLoaded) {
+        return new InternalServerErrorException('Minio Client has not loaded')
+      }
       return await minioClient.presignedUrl('GET', bucketName, fileName)
     }
 
     async function deleteFile(fileName: string) {
+      if (!isServiceLoaded) {
+        return new InternalServerErrorException('Minio Client has not loaded')
+      }
       await minioClient.removeObject(bucketName, fileName)
     }
   }
