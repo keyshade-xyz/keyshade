@@ -9,12 +9,15 @@ import {
   ApprovalItemType,
   ApprovalStatus,
   Authority,
+  Environment,
   EventSource,
   EventType,
   Project,
   ProjectAccessLevel,
+  Secret,
   SecretVersion,
   User,
+  Variable,
   Workspace
 } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
@@ -31,6 +34,9 @@ import createApproval from '../../common/create-approval'
 import { UpdateProjectMetadata } from '../../approval/approval.types'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { ForkProject } from '../dto/fork.project/fork.project'
+import { SecretWithEnvironment } from 'src/secret/secret.types'
+import { VariableWithEnvironment } from 'src/variable/variable.types'
 
 @Injectable()
 export class ProjectService {
@@ -306,6 +312,197 @@ export class ProjectService {
     }
   }
 
+  async forkProject(
+    user: User,
+    projectId: Project['id'],
+    forkMetadata: ForkProject
+  ) {
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_PROJECT,
+        prisma: this.prisma
+      })
+
+    let workspaceId = forkMetadata.workspaceId
+
+    if (workspaceId) {
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { id: workspaceId },
+        authority: Authority.CREATE_PROJECT,
+        prisma: this.prisma
+      })
+    } else {
+      const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
+        where: {
+          userId: user.id,
+          workspace: {
+            isDefault: true
+          }
+        }
+      })
+      workspaceId = defaultWorkspace.workspaceId
+    }
+
+    const newProjectName = forkMetadata.name || project.name
+
+    // Check if project with this name already exists for the user
+    if (await this.projectExists(newProjectName, workspaceId))
+      throw new ConflictException(
+        `Project with this name **${newProjectName}** already exists in the selected workspace`
+      )
+
+    const { privateKey, publicKey } = createKeyPair()
+    const userId = user.id
+    const newProjectId = v4()
+    const adminRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId,
+        hasAdminAuthority: true
+      }
+    })
+
+    // Create and return the project
+    const createNewProject = this.prisma.project.create({
+      data: {
+        id: newProjectId,
+        name: newProjectName,
+        description: project.description,
+        storePrivateKey:
+          forkMetadata.storePrivateKey || project.storePrivateKey,
+        publicKey: publicKey,
+        privateKey:
+          forkMetadata.storePrivateKey || project.storePrivateKey
+            ? privateKey
+            : null,
+        accessLevel: project.accessLevel,
+        pendingCreation: false,
+        isForked: true,
+        forkedFromId: project.id,
+        workspaceId: workspaceId,
+        lastUpdatedById: userId
+      }
+    })
+
+    const addProjectToAdminRoleOfItsWorkspace =
+      this.prisma.workspaceRole.update({
+        where: {
+          id: adminRole.id
+        },
+        data: {
+          projects: {
+            create: {
+              project: {
+                connect: {
+                  id: newProjectId
+                }
+              }
+            }
+          }
+        }
+      })
+
+    const copyProjectOp = await this.copyProjectData(
+      user,
+      {
+        id: project.id,
+        privateKey: project.privateKey
+      },
+      {
+        id: newProjectId,
+        publicKey
+      },
+      true
+    )
+
+    const [newProject] = await this.prisma.$transaction([
+      createNewProject,
+      addProjectToAdminRoleOfItsWorkspace,
+      ...copyProjectOp
+    ])
+
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: newProject,
+        type: EventType.PROJECT_CREATED,
+        source: EventSource.PROJECT,
+        title: `Project created`,
+        metadata: {
+          projectId: newProject.id,
+          name: newProject.name,
+          workspaceId,
+          workspaceName: workspaceId
+        },
+        workspaceId
+      },
+      this.prisma
+    )
+
+    this.log.debug(`Created project ${newProject}`)
+    return newProject
+  }
+
+  async unlinkParentOfFork(user: User, projectId: Project['id']) {
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.UPDATE_PROJECT,
+      prisma: this.prisma
+    })
+
+    await this.prisma.project.update({
+      where: {
+        id: projectId
+      },
+      data: {
+        isForked: false,
+        forkedFromId: null
+      }
+    })
+  }
+
+  async syncFork(user: User, projectId: Project['id'], hardSync: boolean) {
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.UPDATE_PROJECT,
+        prisma: this.prisma
+      })
+
+    if (!project.isForked || project.forkedFromId == null) {
+      throw new BadRequestException(
+        `Project with id ${projectId} is not a forked project`
+      )
+    }
+
+    const parentProject =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: project.forkedFromId },
+        authority: Authority.READ_PROJECT,
+        prisma: this.prisma
+      })
+
+    const copyProjectOp = await this.copyProjectData(
+      user,
+      {
+        id: parentProject.id,
+        privateKey: parentProject.privateKey
+      },
+      {
+        id: projectId,
+        publicKey: project.publicKey
+      },
+      hardSync
+    )
+
+    await this.prisma.$transaction(copyProjectOp)
+  }
+
   async deleteProject(user: User, projectId: Project['id'], reason?: string) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -332,6 +529,40 @@ export class ProjectService {
     }
   }
 
+  async getAllProjectForks(
+    user: User,
+    projectId: Project['id'],
+    page: number,
+    limit: number
+  ) {
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_PROJECT,
+      prisma: this.prisma
+    })
+
+    const forks = await this.prisma.project.findMany({
+      where: {
+        forkedFromId: projectId
+      }
+    })
+
+    return forks
+      .slice(page * limit, (page + 1) * limit)
+      .filter(async (fork) => {
+        const allowed =
+          (await this.authorityCheckerService.checkAuthorityOverProject({
+            userId: user.id,
+            entity: { id: fork.id },
+            authority: Authority.READ_PROJECT,
+            prisma: this.prisma
+          })) != null
+
+        return allowed
+      })
+  }
+
   async getProjectById(user: User, projectId: Project['id']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -340,6 +571,8 @@ export class ProjectService {
         authority: Authority.READ_PROJECT,
         prisma: this.prisma
       })
+
+    delete project.secrets
 
     return project
   }
@@ -477,6 +710,212 @@ export class ProjectService {
     })
   }
 
+  private async copyProjectData(
+    user: User,
+    fromProject: {
+      id: Project['id']
+      privateKey: string
+    },
+    toProject: {
+      id: Project['id']
+      publicKey: string
+    },
+    hardCopy: boolean = false
+  ) {
+    // Get all the environments that belongs to the parent project
+    // and replicate them for the new project
+    const createEnvironmentOps = []
+    const envNameToIdMap = {}
+
+    // These fields will be populated if hardCopy is false
+    // When we are doing a soft copy, we would only like to add those
+    // items in the toProject that are not already present in it with
+    // comparison to the fromProject
+    const toProjectEnvironments: Set<Environment['name']> = new Set()
+    const toProjectSecrets: Set<{
+      secret: Secret['name']
+      environment: Environment['name']
+    }> = new Set()
+    const toProjectVariables: Set<{
+      variable: Variable['name']
+      environment: Environment['name']
+    }> = new Set()
+
+    if (!hardCopy) {
+      const environments: Environment[] =
+        await this.prisma.environment.findMany({
+          where: {
+            projectId: toProject.id
+          }
+        })
+
+      environments.forEach((env) => {
+        envNameToIdMap[env.name] = env.id
+        toProjectEnvironments.add(env.name)
+      })
+
+      const secrets: SecretWithEnvironment[] =
+        await this.prisma.secret.findMany({
+          where: {
+            projectId: toProject.id
+          },
+          include: {
+            environment: true
+          }
+        })
+
+      secrets.forEach((secret) => {
+        toProjectSecrets.add({
+          secret: secret.name,
+          environment: secret.environment.name
+        })
+      })
+
+      const variables: VariableWithEnvironment[] =
+        await this.prisma.variable.findMany({
+          where: {
+            projectId: toProject.id
+          },
+          include: {
+            environment: true
+          }
+        })
+
+      variables.forEach((variable) => {
+        toProjectVariables.add({
+          variable: variable.name,
+          environment: variable.environment.name
+        })
+      })
+    }
+
+    const environments = await this.prisma.environment.findMany({
+      where: {
+        projectId: fromProject.id,
+        name: {
+          notIn: Array.from(toProjectEnvironments)
+        }
+      }
+    })
+
+    for (const environment of environments) {
+      const newEnvironmentId = v4()
+      envNameToIdMap[environment.name] = newEnvironmentId
+
+      createEnvironmentOps.push(
+        this.prisma.environment.create({
+          data: {
+            id: newEnvironmentId,
+            name: environment.name,
+            description: environment.description,
+            isDefault: environment.isDefault,
+            projectId: toProject.id,
+            lastUpdatedById: user.id
+          }
+        })
+      )
+    }
+
+    // Get all the secrets that belongs to the parent project and
+    // replicate them for the new project
+    const createSecretOps = []
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId: fromProject.id,
+        name: {
+          notIn: Array.from(toProjectSecrets).map((s) => s.secret)
+        },
+        environment: {
+          name: {
+            notIn: Array.from(toProjectSecrets).map((s) => s.environment)
+          }
+        }
+      },
+      include: {
+        environment: true,
+        versions: true
+      }
+    })
+
+    for (const secret of secrets) {
+      const secretVersions = secret.versions.map(async (version) => ({
+        value: await encrypt(
+          toProject.publicKey,
+          await decrypt(fromProject.privateKey, version.value)
+        ),
+        version: version.version
+      }))
+
+      createSecretOps.push(
+        this.prisma.secret.create({
+          data: {
+            name: secret.name,
+            environmentId: envNameToIdMap[secret.environment.name],
+            projectId: toProject.id,
+            lastUpdatedById: user.id,
+            note: secret.note,
+            rotateAt: secret.rotateAt,
+            versions: {
+              create: await Promise.all(
+                secretVersions.map(async (secretVersion) => ({
+                  value: (await secretVersion).value,
+                  version: (await secretVersion).version,
+                  createdById: user.id
+                }))
+              )
+            }
+          }
+        })
+      )
+    }
+
+    // Get all the variables that belongs to the parent project and
+    // replicate them for the new project
+    const createVariableOps = []
+
+    const variables = await this.prisma.variable.findMany({
+      where: {
+        projectId: fromProject.id,
+        name: {
+          notIn: Array.from(toProjectVariables).map((v) => v.variable)
+        },
+        environment: {
+          name: {
+            notIn: Array.from(toProjectVariables).map((v) => v.environment)
+          }
+        }
+      },
+      include: {
+        environment: true,
+        versions: true
+      }
+    })
+
+    for (const variable of variables) {
+      createVariableOps.push(
+        this.prisma.variable.create({
+          data: {
+            name: variable.name,
+            environmentId: envNameToIdMap[variable.environment.name],
+            projectId: toProject.id,
+            lastUpdatedById: user.id,
+            note: variable.note,
+            versions: {
+              create: variable.versions.map((version) => ({
+                value: version.value,
+                version: version.version,
+                createdById: user.id
+              }))
+            }
+          }
+        })
+      )
+    }
+
+    return [...createEnvironmentOps, ...createSecretOps, ...createVariableOps]
+  }
+
   private async updateProjectKeyPair(
     project: ProjectWithSecrets,
     oldPrivateKey: string,
@@ -552,6 +991,16 @@ export class ProjectService {
       accessLevel: dto.accessLevel
     }
 
+    // If the access level is changed to PRIVATE or internal, we would
+    // also need to unlink all the forks
+    if (
+      dto.accessLevel !== ProjectAccessLevel.GLOBAL &&
+      project.accessLevel === ProjectAccessLevel.GLOBAL
+    ) {
+      data.isForked = false
+      data.forkedFromId = null
+    }
+
     const versionUpdateOps = []
     let privateKey = dto.privateKey
     let publicKey = project.publicKey
@@ -618,6 +1067,19 @@ export class ProjectService {
 
   async delete(user: User, project: Project) {
     const op = []
+
+    // Remove the fork relationships
+    op.push(
+      this.prisma.project.updateMany({
+        where: {
+          forkedFromId: project.id
+        },
+        data: {
+          isForked: false,
+          forkedFromId: null
+        }
+      })
+    )
 
     // Delete the project
     op.push(

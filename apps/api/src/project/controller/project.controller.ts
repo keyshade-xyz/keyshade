@@ -15,6 +15,7 @@ import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
+import { ForkProject } from '../dto/fork.project/fork.project'
 
 @Controller('project')
 export class ProjectController {
@@ -61,12 +62,52 @@ export class ProjectController {
     return await this.service.getProjectById(user, projectId)
   }
 
+  @Post(':projectId/fork')
+  @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.CREATE_PROJECT)
+  async forkProject(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: Project['id'],
+    @Body() forkMetadata: ForkProject
+  ) {
+    return await this.service.forkProject(user, projectId, forkMetadata)
+  }
+
+  @Put(':projectId/sync-fork')
+  @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.UPDATE_PROJECT)
+  async syncFork(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: Project['id'],
+    @Param('hardSync') hardSync: boolean = false
+  ) {
+    return await this.service.syncFork(user, projectId, hardSync)
+  }
+
+  @Put(':projectId/unlink-fork')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
+  async unlinkFork(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: Project['id']
+  ) {
+    return await this.service.unlinkParentOfFork(user, projectId)
+  }
+
+  @Get(':projectId/forks')
+  @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
+  async getForks(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: Project['id'],
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.service.getAllProjectForks(user, projectId, page, limit)
+  }
+
   @Get('/all/:workspaceId')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getAllProjects(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
