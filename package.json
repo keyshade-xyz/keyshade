@@ -110,10 +110,8 @@
     "start:platform": "turbo run start --filter=platform",
     "test": "turbo run test",
     "test:api": "pnpm unit:api && pnpm e2e:api",
-    "unit:api": "pnpm db:generate-types && turbo run test --filter=api -- --config=jest.config.ts",
-    "e2e:api:prepare": "pnpm run --filter=api e2e:prepare",
+    "unit:api": "pnpm run --filter=api unit",
     "e2e:api": "pnpm run --filter=api e2e",
-    "e2e:api:teardown": "pnpm run --filter=api e2e:teardown",
     "test:web": "turbo run test --filter=web",
     "test:platform": "turbo run test --filter=platform",
     "db:generate-types": "pnpm run --filter=api db:generate-types",
@@ -148,6 +146,7 @@
     "conventional-changelog-conventionalcommits": "7.0.2",
     "million": "^3.0.5",
     "sharp": "^0.33.3",
+    "ts-node": "^10.9.2",
     "zod": "^3.23.6"
   }
 }
