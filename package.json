@@ -146,6 +146,7 @@
     "conventional-changelog-conventionalcommits": "7.0.2",
     "million": "^3.0.5",
     "sharp": "^0.33.3",
+    "ts-node": "^10.9.2",
     "zod": "^3.23.6"
   }
 }
