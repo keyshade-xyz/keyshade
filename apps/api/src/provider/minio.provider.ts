@@ -72,7 +72,7 @@ export const MinioProvider: Provider = {
 
     async function uploadFile(file) {
       if (!isServiceLoaded) {
-        return new InternalServerErrorException('Minio Client has not loaded')
+        throw new InternalServerErrorException('Minio Client has not loaded')
       }
 
       const fileName = `${Date.now()}-${file.originalname}`
@@ -93,7 +93,7 @@ export const MinioProvider: Provider = {
 
     async function getFileUrl(fileName: string) {
       if (!isServiceLoaded) {
-        return new InternalServerErrorException('Minio Client has not loaded')
+        throw new InternalServerErrorException('Minio Client has not loaded')
       }
 
       try {
@@ -108,7 +108,7 @@ export const MinioProvider: Provider = {
 
     async function deleteFile(fileName: string) {
       if (!isServiceLoaded) {
-        return new InternalServerErrorException('Minio Client has not loaded')
+        throw new InternalServerErrorException('Minio Client has not loaded')
       }
 
       try {
