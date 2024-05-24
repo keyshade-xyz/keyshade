@@ -9,7 +9,7 @@ The API resides in the `apps/api` directory. It is a NestJS project. To run the 
 * Get the database and cache up and running:
 
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 
 * Generate the prisma types:
