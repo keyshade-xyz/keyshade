@@ -58,8 +58,7 @@ const generalSchema = z.object({
   SMTP_PORT: z.string(),
   SMTP_EMAIL_ADDRESS: z.string(),
   SMTP_PASSWORD: z.string(),
-  // TODO: add regex check for FORM_EMAIL value as represented in .env.example (your-name <your-name@email.com>)
-  FROM_EMAIL: z.string(),
+  FROM_EMAIL: z.string().regex(/^[a-zA-Z0-9._%+-]+ [<][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[>]$/),
 
   JWT_SECRET: z.string(),
 
