@@ -77,7 +77,7 @@ function ProjectCard({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className='flex h-[7rem]'>
+      <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] max-w-[30.25rem] justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
           href={`/project/${title}`}
@@ -85,7 +85,7 @@ function ProjectCard({
         >
           <div className="flex items-center gap-x-5">
             {/* <div className="aspect-square h-14 w-14 rounded-full bg-white/35" /> */}
-            <Avvvatars size={56} style='shape' value={idForImage} />
+            <Avvvatars size={56} style="shape" value={idForImage} />
             <div>
               <div className="font-semibold">{title}</div>
               <span className="text-xs font-semibold text-white/60">
