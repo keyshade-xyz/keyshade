@@ -15,7 +15,7 @@ import {
 } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
 import generateOtp from '../../common/generate-otp'
-import { EnvSchema } from 'src/common/env/env.schema'
+import { EnvSchema } from '../../common/env/env.schema'
 
 @Injectable()
 export class UserService {

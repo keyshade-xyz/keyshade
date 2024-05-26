@@ -12,7 +12,7 @@ import { PrismaService } from '../../../prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '../../../decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
 import { toSHA256 } from '../../../common/to-sha256'
-import { EnvSchema } from 'src/common/env/env.schema'
+import { EnvSchema } from '../../../common/env/env.schema'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
