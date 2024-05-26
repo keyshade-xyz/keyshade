@@ -28,7 +28,7 @@ const e2eEnvSchema = z.object({
 const generalSchema = z.object({
   NODE_ENV: z.literal('dev'),
   DATABASE_URL: z.string(),
-  ADMIN_EMAIL: z.string(),
+  ADMIN_EMAIL: z.string().email(),
 
   REDIS_URL: z.string(),
   REDIS_PASSWORD: z.string().optional(),
@@ -56,7 +56,7 @@ const generalSchema = z.object({
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
-  SMTP_EMAIL_ADDRESS: z.string(),
+  SMTP_EMAIL_ADDRESS: z.string().email(),
   SMTP_PASSWORD: z.string(),
   FROM_EMAIL: z.string().regex(/^[a-zA-Z0-9._%+-]+ [<][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[>]$/),
 
@@ -74,7 +74,7 @@ const generalSchema = z.object({
   MINIO_BUCKET_NAME: z.string().optional(),
   MINIO_USE_SSL: z.string().optional(),
 
-  FEEDBACK_FORWARD_EMAIL: z.string()
+  FEEDBACK_FORWARD_EMAIL: z.string().email()
 })
 
 export type EnvSchemaType = z.infer<typeof generalSchema>
