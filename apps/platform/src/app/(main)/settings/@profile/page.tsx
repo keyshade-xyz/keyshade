@@ -1,13 +1,13 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import type { User } from '@/types'
 import { zUser } from '@/types'
 import { apiClient } from '@/lib/api-client'
-import InputLoading from './loading'
 
 type UserData = Omit<
   User,
@@ -109,10 +109,11 @@ function ProfilePage(): React.JSX.Element {
           <InputLoading />
         ) : (
           <Input
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setIsModified(true)
-              setUserData((prev) => ({ ...prev, email: e.target.value }))
-            }}
+          disabled
+            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            //   setIsModified(true)
+            //   setUserData((prev) => ({ ...prev, email: e.target.value }))
+            // }}
             placeholder="email"
             value={userData.email}
           />

@@ -1,49 +1,97 @@
 'use client'
 
-import * as React from 'react'
-import { ChevronsUpDown } from 'lucide-react'
-// import {Check} from 'lucide-react'
-// import { cn } from '@/lib/utils'
-// import { Button } from '@/components/ui/button'
+import { ChevronsUpDown, Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { AddSVG } from '@public/svg/shared'
+import { Button } from './button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from './dialog'
+import { Label } from './label'
+import { Input } from './input'
+import { cn } from '@/lib/utils'
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
-  CommandItem
+  CommandItem,
+  CommandList
 } from '@/components/ui/command'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import { apiClient } from '@/lib/api-client'
+import type { Workspace } from '@/types'
+import { zWorkspace } from '@/types'
+import {
+  getCurrentWorkspace,
+  setCurrentWorkspace,
+  setWorkspace
+} from '@/lib/workspace-storage'
+import { toast } from 'sonner'
 
-const _frameworks = [
-  {
-    value: 'next.js',
-    label: 'Next.js'
-  },
-  {
-    value: 'sveltekit',
-    label: 'SvelteKit'
-  },
-  {
-    value: 'nuxt.js',
-    label: 'Nuxt.js'
-  },
-  {
-    value: 'remix',
-    label: 'Remix'
-  },
-  {
-    value: 'astro',
-    label: 'Astro'
+async function getAllWorkspace(): Promise<Workspace[] | undefined> {
+  try {
+    const workspaceData: Workspace[] =
+      await apiClient.get<Workspace[]>('/workspace')
+    const { success, data } = zWorkspace.array().safeParse(workspaceData)
+    if (!success) {
+      throw new Error('Invalid data')
+    }
+    return data
+  } catch (error) {
+    // eslint-disable-next-line no-console -- we need to log the error
+    console.error(error)
   }
-]
+}
 
 export function Combobox(): React.JSX.Element {
-  const [open, setOpen] = React.useState<boolean>(false)
-  // const [value, setValue] = React.useState('')
+  const [open, setOpen] = useState<boolean>(false)
+  const [allWorkspace, setAllWorkspace] = useState<Workspace[]>([])
+  const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
+  const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+
+  const router = useRouter()
+
+  async function createWorkspace(name: string): Promise<void> {
+    if (name === '') {
+      setIsNameEmpty(true)
+      return
+    }
+    setIsNameEmpty(false)
+    try {
+      const response = await apiClient.post<Workspace>('/workspace', {
+        name
+      })
+      setCurrentWorkspace(response)
+      setOpen(false)
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getAllWorkspace()
+      .then((data) => {
+        if (data) {
+          setAllWorkspace(data)
+          setWorkspace(data)
+        }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      })
+  }, [])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -55,15 +103,14 @@ export function Combobox(): React.JSX.Element {
           role="combobox"
           type="button"
         >
-          {/* {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : 'Select framework...'} */}
           <div className="flex gap-x-[0.88rem]">
             <div className="flex aspect-square items-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
               🔥
             </div>
             <div className="flex flex-col items-start">
-              <div className="text-lg text-white">Zenversee</div>
+              <div className="text-lg text-white">
+                {getCurrentWorkspace()?.name || 'No workspace'}
+              </div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
           </div>
@@ -71,40 +118,93 @@ export function Combobox(): React.JSX.Element {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className=" p-0">
-        <Command>
-          <CommandInput placeholder="Search framework..." />
-          <CommandEmpty>No framework found.</CommandEmpty>
-          <CommandGroup>
-            <CommandItem>Calendar</CommandItem>
-            <CommandItem>Search Emoji</CommandItem>
-            <CommandItem>Calculator</CommandItem>
-          </CommandGroup>
-          {/* <CommandGroup>
-            {frameworks
-              ? frameworks.map((framework) => (
+      <PopoverContent className="bg-[#161819] text-white md:w-[16rem]">
+        <div>
+          <Command>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList className="max-h-[10rem]">
+              <CommandEmpty>No workspace found.</CommandEmpty>
+              {allWorkspace.map((workspace) => {
+                return (
                   <CommandItem
-                    key={framework.value}
-                    onSelect={(currentValue) => {
-                      console.log('currentValue:', currentValue)
-                      console.log('value:', value)
-                      setValue(currentValue === value ? '' : currentValue)
+                    key={workspace.id}
+                    onSelect={() => {
+                      setCurrentWorkspace(workspace)
+                      router.refresh()
                       setOpen(false)
                     }}
-                    value={framework.value}
                   >
+                    {' '}
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        value === framework.value ? 'opacity-100' : 'opacity-0'
+                        getCurrentWorkspace()?.name === workspace.name
+                          ? 'opacity-100'
+                          : 'opacity-0'
                       )}
-                    />
-                    {framework.label}
+                    />{' '}
+                    {workspace.name}
                   </CommandItem>
-                ))
-              : null}
-          </CommandGroup> */}
-        </Command>
+                )
+              })}
+            </CommandList>
+          </Command>
+          <Dialog>
+            <DialogTrigger className="w-full">
+              <Button className="mt-5 w-full">
+                <AddSVG /> New workspace
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Make a new workspace</DialogTitle>
+                <DialogDescription>
+                  Create a new workspace to organize your projects.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-y-8">
+                <div className="flex w-full flex-col">
+                  <div className="flex flex-row items-center gap-4">
+                    <Label className="text-right" htmlFor="name">
+                      Name
+                    </Label>
+                    <Input
+                      className="col-span-3"
+                      id="name"
+                      onChange={(e) => {
+                        setNewWorkspaceName(e.target.value)
+                      }}
+                      placeholder="Enter the name"
+                    />
+                  </div>
+                  {isNameEmpty ? (
+                    <span className="ml-[3.5rem] mt-1 text-red-500">
+                      Name cannot be empty
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="flex w-full justify-end">
+                  <Button
+                    onClick={() => {
+                      createWorkspace(newWorkspaceName)
+                        .then(() => {
+                          toast.success('User details updated successfully')
+                          router.refresh()
+                        })
+                        .catch(() => {
+                          toast.error('Failed to update user details')
+                        })
+                    }}
+                    variant="secondary"
+                  >
+                    Add workspace
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </PopoverContent>
     </Popover>
   )

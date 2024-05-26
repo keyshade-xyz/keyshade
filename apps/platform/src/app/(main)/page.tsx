@@ -1,5 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { z } from 'zod'
+import { AddSVG } from '@public/svg/shared'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
   Sheet,
@@ -15,45 +19,197 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { apiClient } from '@/lib/api-client'
+import type { NewProject, ProjectWithoutKeys, Workspace } from '@/types'
+import { zProjectWithoutKeys } from '@/types'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTrigger
+} from '@/components/ui/dialog'
 
-const details = [
-  {
-    title: 'backend-server',
-    description: 'This a description for your project',
-    environment: 2,
-    config: 10,
-    secret: 5
-  },
-  {
-    title: 'frontend-server',
-    description: 'This a description for your project',
-    environment: 2,
-    config: 10,
-    secret: 5
+async function getProjects(
+  currentWorkspaceID: string
+): Promise<ProjectWithoutKeys[] | [] | undefined> {
+  try {
+    const projectData = await apiClient.get<ProjectWithoutKeys[] | []>(
+      `/project/all/${currentWorkspaceID}`
+    )
+    const zProjectWithoutKeysArray = z.array(zProjectWithoutKeys)
+    const { success, data } = zProjectWithoutKeysArray.safeParse(projectData)
+    if (!success) {
+      throw new Error('Invalid data')
+    }
+    return data
+  } catch (error) {
+    // eslint-disable-next-line no-console -- we need to log the error
+    console.error(error)
   }
-]
+}
+
+async function createProject(
+  newProjectData: NewProject,
+  currentWorkspaceID: string
+): Promise<void> {
+  try {
+    await apiClient.post<NewProject>(`/project/${currentWorkspaceID}`, {
+      newProjectData
+    })
+  } catch (error) {
+    // eslint-disable-next-line no-console -- we need to log the error
+    console.error(error)
+  }
+}
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
+  const [projects, setProjects] = useState<ProjectWithoutKeys[] | []>([])
+  const [newProjectData, setNewProjectData] = useState<NewProject>({
+    name: '',
+    description: '',
+    storePrivateKey: false,
+    environments: [
+      {
+        name: 'Dev',
+        description: 'Development environment',
+        isDefault: true
+      },
+      {
+        name: 'Stage',
+        description: 'Staging environment',
+        isDefault: false
+      },
+      {
+        name: 'Prod',
+        description: 'Production environment',
+        isDefault: false
+      }
+    ]
+  })
+
+  const router = useRouter()
+
+  const currentWorkspace = JSON.parse(
+    localStorage.getItem('currentWorkspace') ?? '{}'
+  ) as Workspace
+
+  useEffect(() => {
+    getProjects(currentWorkspace.id)
+      .then((data: ProjectWithoutKeys[] | [] | undefined) => {
+        if (data) {
+          setProjects(data)
+        }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      })
+  }, [currentWorkspace.id])
+
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
-      <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
-        {details.map((projectDetails, index) => {
-          return (
-            <ProjectCard
-              config={projectDetails.config}
-              description={projectDetails.description}
-              environment={projectDetails.environment}
-              // eslint-disable-next-line react/no-array-index-key -- key is not used as a prop
-              key={index}
-              secret={projectDetails.secret}
-              setIsSheetOpen={setIsSheetOpen}
-              title={projectDetails.title}
-            />
-          )
-        })}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+
+        <Dialog>
+          <DialogTrigger>
+            <Button>
+              {' '}
+              <AddSVG /> Create a new Project
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>Create a new project</DialogHeader>
+            <DialogDescription>
+              Fill in the details to create a new project
+            </DialogDescription>
+            <div className="flex flex-col gap-y-8">
+              <div className="flex w-full flex-col gap-y-4">
+                <div className="flex flex-col items-start gap-4">
+                  <Label className="text-right" htmlFor="name">
+                    Name
+                  </Label>
+                  <Input
+                    className="col-span-3"
+                    id="name"
+                    onChange={(e) => {
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        name: e.target.value
+                      }))
+                    }}
+                    placeholder="Enter the name"
+                  />
+                </div>
+                <div className="flex flex-col items-start gap-4">
+                  <Label className="text-right" htmlFor="name">
+                    Description
+                  </Label>
+                  <Input
+                    className="col-span-3"
+                    id="name"
+                    onChange={(e) => {
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        description: e.target.value
+                      }))
+                    }}
+                    placeholder="Enter the name"
+                  />
+                </div>
+                {/* {isNameEmpty ? (
+                  <span className="ml-[3.5rem] mt-1 text-red-500">
+                    Name cannot be empty
+                  </span>
+                ) : null} */}
+              </div>
+            </div>
+            <div className="flex w-full justify-end">
+              <Button
+                onClick={() => {
+                  createProject(newProjectData, currentWorkspace.id)
+                    .then(() => {
+                      toast.success('New project added successfully')
+                      router.refresh()
+                    })
+                    .catch(() => {
+                      toast.error('Failed to add new project')
+                    })
+                }}
+                variant="secondary"
+              >
+                Add project
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {projects.length !== 0 ? (
+        <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
+          {projects.map((project: ProjectWithoutKeys) => {
+            return (
+              <ProjectCard
+                config={10}
+                description={project.description ?? ''}
+                environment={2}
+                idForImage={project.id}
+                key={project.id}
+                secret={5}
+                setIsSheetOpen={setIsSheetOpen}
+                title={project.name}
+              />
+            )
+          })}
+        </div>
+      ) : (
+        <div className="mt-[10vh] flex justify-center">
+          <div>No projects yet? Get started by creating a new project.</div>
+        </div>
+      )}
+
       <Sheet
         onOpenChange={(open) => {
           setIsSheetOpen(open)
