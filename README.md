@@ -5,9 +5,9 @@
 <div align="left">
 
 <p align="center">
-    <a href="https://keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
+    <a href="https://www.keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
     <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
-    <a href="https://discord.gg/m6TcpWBSdt" target="_blank"><b>Join our Community</b></a> • 
+    <a href="https://discord.gg/akDnHRhW" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
 </p>
@@ -78,7 +78,7 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 ## Setting things up
 
-We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.xyz/).
+We maintain an in-detailed documentation about how to get started with keyshade. You can find it [here](https://docs.keyshade.xyz/contributing-to-keyshade/setting-things-up).
 
 ## Contributing
 
