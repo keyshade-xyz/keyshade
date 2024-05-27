@@ -939,7 +939,8 @@ export class WorkspaceService {
         const createMember = this.prisma.user.create({
           data: {
             id: userId,
-            email: member.email
+            email: member.email,
+            isOnboardingFinished: false
           }
         })
 

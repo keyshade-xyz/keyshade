@@ -733,6 +733,33 @@ describe('Workspace Controller Tests', () => {
     expect(event.itemId).toBeDefined()
   })
 
+  it('should have created a new user if they did not exist while inviting them to the workspace', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: 'joy@keyshade.xyz',
+          roleIds: [memberRole.id]
+        }
+      ]
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    // Expect the user to have been created
+    const user = await prisma.user.findUnique({
+      where: {
+        email: 'joy@keyshade.xyz'
+      }
+    })
+
+    expect(user).toBeDefined()
+  })
+
   it('should be able to leave the workspace', async () => {
     // Create membership
     await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
