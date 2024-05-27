@@ -58,7 +58,11 @@ const generalSchema = z.object({
   SMTP_PORT: z.string(),
   SMTP_EMAIL_ADDRESS: z.string().email(),
   SMTP_PASSWORD: z.string(),
-  FROM_EMAIL: z.string().regex(/^[a-zA-Z0-9._%+-]+(?: [a-zA-Z0-9._%+-]+)* <[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}>$/),
+  FROM_EMAIL: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9._%+-]+(?: [a-zA-Z0-9._%+-]+)* <[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}>$/
+    ),
 
   JWT_SECRET: z.string(),
 
