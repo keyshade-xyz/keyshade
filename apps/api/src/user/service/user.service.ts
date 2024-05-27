@@ -15,6 +15,7 @@ import {
 } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
 import generateOtp from '../../common/generate-otp'
+import { EnvSchema } from '../../common/env/env.schema'
 
 @Injectable()
 export class UserService {
@@ -294,9 +295,16 @@ export class UserService {
   }
 
   private async checkIfAdminExistsOrCreate() {
-    // @ts-expect-error process.env.NODE_ENV parses to 'dev'
-    // FIXME
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
+    const parsedEnv = EnvSchema.safeParse(process.env)
+    let nodeEnv
+
+    if (!parsedEnv.success) {
+      nodeEnv = 'dev' // Default to a valid value or handle appropriately
+    } else {
+      nodeEnv = parsedEnv.data.NODE_ENV
+    }
+
+    if (nodeEnv === 'test' || nodeEnv === 'e2e') {
       return
     }
 

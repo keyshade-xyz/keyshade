@@ -12,6 +12,7 @@ import { PrismaService } from '../../../prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '../../../decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
 import { toSHA256 } from '../../../common/to-sha256'
+import { EnvSchema } from '../../../common/env/env.schema'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -41,17 +42,23 @@ export class AuthGuard implements CanActivate {
     let user: AuthenticatedUserContext | null = null
     const request = context.switchToHttp().getRequest()
     const authType = this.getAuthType(request)
+    const parsedEnv = EnvSchema.safeParse(process.env)
+    let nodeEnv
 
-    //@ts-expect-error process.env.NODE_ENV parses to 'dev'
-    if (process.env.NODE_ENV !== 'e2e' && authType === 'NONE') {
+    if (!parsedEnv.success) {
+      nodeEnv = 'dev' // Default to a valid value or handle appropriately
+    } else {
+      nodeEnv = parsedEnv.data.NODE_ENV
+    }
+
+    if (nodeEnv !== 'e2e' && authType === 'NONE') {
       throw new ForbiddenException('No authentication provided')
     }
 
     // In case the environment is e2e, we want to authenticate the user using the email
     // else we want to authenticate the user using the JWT token.
 
-    // @ts-expect-error process.env.NODE_ENV parses to 'dev'
-    if (authType !== 'API_KEY' && process.env.NODE_ENV === 'e2e') {
+    if (authType !== 'API_KEY' && nodeEnv === 'e2e') {
       const email = request.headers[X_E2E_USER_EMAIL]
       if (!email) {
         throw new ForbiddenException()
