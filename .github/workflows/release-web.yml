@@ -29,10 +29,12 @@ jobs:
         env:
           ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
         run: |
           # Build a docker container and push it to ECR 
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t keyshade/keyshade-web:alpha-${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
+          docker build -t web:alpha-${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
@@ -40,4 +42,4 @@ jobs:
       - name: Force re-deploy task in service
         id: force-redeploy
         run: |
-          aws ecs update-service --cluster shaer-stage-cluster --service backend-stage-service --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
