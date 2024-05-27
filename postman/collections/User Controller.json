@@ -26,7 +26,130 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "3b49ae25-0cf4-4e8e-8687-2e284506d0fa",
+					"name": "After getting OTP",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/user",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "188"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"bc-KPSVqn39TBRZTs0puMheyQOUDKU\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 17 May 2024 04:18:56 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clwa5yf4x000010rtkjgmtb4n\",\n    \"email\": \"sawan@keyshade.xyz\",\n    \"name\": null,\n    \"profilePictureUrl\": null,\n    \"isActive\": true,\n    \"isOnboardingFinished\": false,\n    \"isAdmin\": false,\n    \"authProvider\": \"EMAIL_OTP\"\n}"
+				},
+				{
+					"id": "20e6d7ef-7785-4d14-9aea-ea8b851812c0",
+					"name": "Unauthorised",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/user",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"status": "Forbidden",
+					"code": 403,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "77"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"4d-hyTDm+N3xmFi8CH5RdpjoU9oCH0\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 17 May 2024 05:34:40 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"No authentication provided\",\n    \"error\": \"Forbidden\",\n    \"statusCode\": 403\n}"
+				}
+			]
 		},
 		{
 			"name": "Update self",
@@ -57,7 +180,148 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "c454681d-73d1-4789-aaa6-ffeea3f9815b",
+					"name": "Update self",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isOnboardingFinished\": true,\n    \"name\": \"Sawan\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/user",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "190"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"be-yvlV+oLg8XvqhoHFbrrkJpteimw\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 17 May 2024 04:20:07 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clwa5yf4x000010rtkjgmtb4n\",\n    \"email\": \"sawan@keyshade.xyz\",\n    \"name\": \"Sawan\",\n    \"profilePictureUrl\": null,\n    \"isActive\": true,\n    \"isOnboardingFinished\": true,\n    \"isAdmin\": false,\n    \"authProvider\": \"EMAIL_OTP\"\n}"
+				},
+				{
+					"id": "4e2b59b6-223a-409d-906e-96031f75eeb8",
+					"name": "Unauthorised",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isOnboardingFinished\": true,\n    \"name\": \"Sawan\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/user",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"status": "Forbidden",
+					"code": 403,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "77"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"4d-hyTDm+N3xmFi8CH5RdpjoU9oCH0\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 17 May 2024 05:36:17 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"No authentication provided\",\n    \"error\": \"Forbidden\",\n    \"statusCode\": 403\n}"
+				}
+			]
 		},
 		{
 			"name": "Delete self",

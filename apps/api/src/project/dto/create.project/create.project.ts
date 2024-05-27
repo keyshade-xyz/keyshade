@@ -1,7 +1,9 @@
+import { ProjectAccessLevel } from '@prisma/client'
 import { CreateEnvironment } from '../../../environment/dto/create.environment/create.environment'
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString
@@ -24,7 +26,7 @@ export class CreateProject {
   @IsOptional()
   environments?: CreateEnvironment[]
 
-  @IsBoolean()
+  @IsEnum(ProjectAccessLevel)
   @IsOptional()
-  isPublic?: boolean
+  accessLevel?: ProjectAccessLevel
 }

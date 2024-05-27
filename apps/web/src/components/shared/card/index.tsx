@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any  -- //Todo: remove any */
 import SpotlightCard from '@/components/ui/spotlight-card'
 
 interface CardProps {
   widthFull?: boolean
-  children: React.ReactNode
+  children: any
 }
 
 export default function Card({

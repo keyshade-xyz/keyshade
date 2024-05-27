@@ -1,3 +1,43 @@
+## [1.4.0](https://github.com/keyshade-xyz/keyshade/compare/v1.3.0...v1.4.0) (2024-05-24)
+
+
+### 🚀 Features
+
+* add example for health and email auth ([b834d25](https://github.com/keyshade-xyz/keyshade/commit/b834d254a8d9bc506021b8ab07b6e94c80997b9f))
+* **api:** Add `minio-client` provider ([#237](https://github.com/keyshade-xyz/keyshade/issues/237)) ([cd71c5a](https://github.com/keyshade-xyz/keyshade/commit/cd71c5aae15711ab7309069cf6416d0b25eed9e7))
+* **api:** Add feature to fork projects ([#239](https://github.com/keyshade-xyz/keyshade/issues/239)) ([3bab653](https://github.com/keyshade-xyz/keyshade/commit/3bab653eb801fa561cd9f3c7c375ba32dda00c36))
+* **api:** Added feedback form module ([#210](https://github.com/keyshade-xyz/keyshade/issues/210)) ([ae1efd8](https://github.com/keyshade-xyz/keyshade/commit/ae1efd8a9a3437ed8d3955e6091f4f50d0596f39))
+* **api:** Added Project Level Access  ([#221](https://github.com/keyshade-xyz/keyshade/issues/221)) ([564f5ed](https://github.com/keyshade-xyz/keyshade/commit/564f5ed52672dc1e7c47c67c60af9cb142594a8a))
+* **api:** Added support for changing email of users ([#233](https://github.com/keyshade-xyz/keyshade/issues/233)) ([5ea9a10](https://github.com/keyshade-xyz/keyshade/commit/5ea9a10d1972cf6865faa0c051ed9de595eb6d47))
+* implemented auth, ui for most, and fixed cors ([#217](https://github.com/keyshade-xyz/keyshade/issues/217)) ([feace86](https://github.com/keyshade-xyz/keyshade/commit/feace865d60442fea96b5074e16d0d0f48792aa9))
+* **platfrom:** add delete method in api client ([#225](https://github.com/keyshade-xyz/keyshade/issues/225)) ([55cf09f](https://github.com/keyshade-xyz/keyshade/commit/55cf09f7d9c977b7ab5e1a832ea82fd94b7f9984))
+* **postman:** add example for get_self and update_self ([e015acf](https://github.com/keyshade-xyz/keyshade/commit/e015acfdca0f694898f27d49ffd447b70faee215))
+* **web:** Add and link privacy and tnc page ([#226](https://github.com/keyshade-xyz/keyshade/issues/226)) ([ec81eb9](https://github.com/keyshade-xyz/keyshade/commit/ec81eb919d9370ff3772ed2732f30a0f9ac74be8))
+
+
+### 🐛 Bug Fixes
+
+* **web:** docker next config not found ([#228](https://github.com/keyshade-xyz/keyshade/issues/228)) ([afe3160](https://github.com/keyshade-xyz/keyshade/commit/afe3160d5c25db863e40000d2c4b82ccb82978aa))
+
+
+### 📚 Documentation
+
+* Added docs regarding postman, and refactored architecture diagrams ([f1c9777](https://github.com/keyshade-xyz/keyshade/commit/f1c9777e037bcf7f627624f5ca2a46b087b4a6af))
+* Fix typo in organization-of-code.md ([#234](https://github.com/keyshade-xyz/keyshade/issues/234)) ([11244a2](https://github.com/keyshade-xyz/keyshade/commit/11244a26b26c915d3bdd62b4ef93b505a274f35b))
+
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Get feedback forward email from process.env ([#236](https://github.com/keyshade-xyz/keyshade/issues/236)) ([204c9d1](https://github.com/keyshade-xyz/keyshade/commit/204c9d133df04fb93f965cdb58ea948bcf44df12))
+* **postman:** Initialized postman ([bb76384](https://github.com/keyshade-xyz/keyshade/commit/bb763842a4ab3ba0aa199c6837f6e45c8f900a59))
+* **release:** Update changelog config ([af91283](https://github.com/keyshade-xyz/keyshade/commit/af912831d260a0bc3e7cc9e07ed5a19d4534395d))
+* Remove swagger docs ([#220](https://github.com/keyshade-xyz/keyshade/issues/220)) ([7640299](https://github.com/keyshade-xyz/keyshade/commit/76402998fb148b147ec116a17aeb4c1f0b46b7d2))
+
+
+### 🔨 Code Refactoring
+
+* **api:** Replaced OTP code from alphanumeric to numeric ([#230](https://github.com/keyshade-xyz/keyshade/issues/230)) ([f16162a](https://github.com/keyshade-xyz/keyshade/commit/f16162a6b3c076f1f84c4432cf1b0ed238138550))
+
 ## [1.3.0](https://github.com/keyshade-xyz/keyshade/compare/v1.2.0...v1.3.0) (2024-05-12)
 
 

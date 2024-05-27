@@ -11,7 +11,7 @@ In this section, we will discuss how our codebase is organized. We have tried to
 The `apps` directory contains all the applications that are part of the project. Each application is a separate package and has its own `package.json` file. The applications are:
 
 - [**`api`**](../../../apps/api/): The main API server that serves the REST API.
-- [**`api`**](../../../apps/web/): The web application that serves the homepage.
+- [**`web`**](../../../apps/web/): The web application that serves the homepage.
 - [**`platform`**](../../../apps/workspace/): The platform application hosts the UI that allows users to do the actual work.
 
 ## Packages under `packages` directory

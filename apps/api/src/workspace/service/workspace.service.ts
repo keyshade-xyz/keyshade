@@ -784,7 +784,7 @@ export class WorkspaceService {
         publicKey: true,
         privateKey: true,
         storePrivateKey: true,
-        isPublic: true,
+        accessLevel: true,
         environments: {
           select: {
             name: true,

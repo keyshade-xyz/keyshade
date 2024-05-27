@@ -37,12 +37,61 @@
 					"variable": [
 						{
 							"key": "project_id",
-							"value": "6bc24dce-bd94-46c1-a236-02018c58caf6"
+							"value": "6976dff6-b320-470c-86c5-eaceaed57625"
 						}
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "f0cc57ed-2ef5-4052-ba9f-bf53c925e29f",
+					"name": "Variable created successfully",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"some name\",\n    \"value\": \"some value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/:project_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "6976dff6-b320-470c-86c5-eaceaed57625"
+								}
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clwknus4i0000f3zxd1yvbtei\",\n    \"name\": \"some name\",\n    \"createdAt\": \"2024-05-24T12:31:11.587Z\",\n    \"updatedAt\": \"2024-05-24T12:31:11.587Z\",\n    \"note\": null,\n    \"pendingCreation\": false,\n    \"lastUpdatedById\": \"clwgaaldo00016gia8n46jtas\",\n    \"projectId\": \"6976dff6-b320-470c-86c5-eaceaed57625\",\n    \"environmentId\": \"clwgasu790002x815zlvblp21\",\n    \"project\": {\n        \"workspaceId\": \"36f928f9-bb1e-41fc-a185-8e1099aad3f6\"\n    }\n}"
+				}
+			]
 		},
 		{
 			"name": "Update variable",

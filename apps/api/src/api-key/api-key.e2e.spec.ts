@@ -9,14 +9,15 @@ import { MockMailService } from '../mail/services/mock.service'
 import { AppModule } from '../app/app.module'
 import { Test } from '@nestjs/testing'
 import { ApiKey, User } from '@prisma/client'
-import cleanUp from '../common/cleanup'
+import { ApiKeyService } from './service/api-key.service'
 
 describe('Api Key Role Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
+  let apiKeyService: ApiKeyService
+
   let user: User
   let apiKey: ApiKey
-  let apiKeyValue: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -29,13 +30,13 @@ describe('Api Key Role Controller Tests', () => {
       new FastifyAdapter()
     )
     prisma = moduleRef.get(PrismaService)
+    apiKeyService = moduleRef.get(ApiKeyService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await prisma.apiKey.deleteMany()
-    await prisma.user.deleteMany()
-
+  beforeEach(async () => {
     user = await prisma.user.create({
       data: {
         email: 'john@keyshade.xyz',
@@ -45,11 +46,23 @@ describe('Api Key Role Controller Tests', () => {
         isOnboardingFinished: true
       }
     })
+
+    apiKey = await apiKeyService.createApiKey(user, {
+      name: 'Test Key',
+      expiresAfter: '24',
+      authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT']
+    })
+  })
+
+  afterEach(async () => {
+    await prisma.apiKey.deleteMany()
+    await prisma.user.deleteMany()
   })
 
   it('should be defined', async () => {
     expect(app).toBeDefined()
     expect(prisma).toBeDefined()
+    expect(apiKeyService).toBeDefined()
   })
 
   it('should be able to create api key', async () => {
@@ -67,18 +80,19 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(201)
-    expect(response.json()).toEqual({
-      id: expect.any(String),
-      name: 'Test Key',
-      value: expect.stringMatching(/^ks_*/),
-      authorities: ['READ_API_KEY'],
-      expiresAt: expect.any(String),
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+    expect(response.json().id).toBeDefined()
+    expect(response.json().name).toBe('Test Key')
+    expect(response.json().value).toMatch(/^ks_*/)
+    expect(response.json().authorities).toEqual(['READ_API_KEY'])
+
+    const apiKey = await prisma.apiKey.findUnique({
+      where: {
+        id: response.json().id
+      }
     })
 
-    apiKey = response.json()
-    apiKeyValue = response.json().value
+    expect(apiKey).toBeDefined()
+    expect(apiKey!.name).toBe('Test Key')
   })
 
   it('should not have any authorities if none are provided', async () => {
@@ -86,7 +100,7 @@ describe('Api Key Role Controller Tests', () => {
       method: 'POST',
       url: '/api-key',
       payload: {
-        name: 'Test Key 2',
+        name: 'Test Key 1',
         expiresAfter: '24'
       },
       headers: {
@@ -95,15 +109,10 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(201)
-    expect(response.json()).toEqual({
-      id: expect.any(String),
-      name: 'Test Key 2',
-      value: expect.stringMatching(/^ks_*/),
-      authorities: [],
-      expiresAt: expect.any(String),
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
-    })
+    expect(response.json().id).toBeDefined()
+    expect(response.json().name).toBe('Test Key 1')
+    expect(response.json().value).toMatch(/^ks_*/)
+    expect(response.json().authorities).toEqual([])
   })
 
   it('should be able to update the api key without without changing the authorities', async () => {
@@ -120,16 +129,21 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      id: apiKey.id,
-      name: 'Updated Test Key',
-      authorities: ['READ_API_KEY'],
-      expiresAt: expect.any(String),
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+    expect(response.json().id).toBe(apiKey.id)
+    expect(response.json().name).toBe('Updated Test Key')
+    expect(response.json().authorities).toEqual([
+      'READ_API_KEY',
+      'CREATE_ENVIRONMENT'
+    ])
+
+    const updatedApiKey = await prisma.apiKey.findUnique({
+      where: {
+        id: apiKey.id
+      }
     })
 
-    apiKey = response.json()
+    expect(updatedApiKey).toBeDefined()
+    expect(updatedApiKey!.name).toBe('Updated Test Key')
   })
 
   it('should be able to update the api key with changing the expiry', async () => {
@@ -146,14 +160,12 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      id: apiKey.id,
-      name: 'Updated Test Key',
-      authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
-      expiresAt: expect.any(String),
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
-    })
+    expect(response.json().id).toBe(apiKey.id)
+    expect(response.json().name).toBe('Updated Test Key')
+    expect(response.json().authorities).toEqual([
+      'READ_API_KEY',
+      'CREATE_ENVIRONMENT'
+    ])
   })
 
   it('should be able to get the api key', async () => {
@@ -168,7 +180,7 @@ describe('Api Key Role Controller Tests', () => {
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({
       id: apiKey.id,
-      name: 'Updated Test Key',
+      name: 'Test Key',
       authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
       expiresAt: expect.any(String),
       createdAt: expect.any(String),
@@ -198,18 +210,12 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(
-      expect.arrayContaining([
-        {
-          id: apiKey.id,
-          name: 'Updated Test Key',
-          authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
-          expiresAt: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String)
-        }
-      ])
-    )
+    expect(response.json()[0].id).toBe(apiKey.id)
+    expect(response.json()[0].name).toBe('Test Key')
+    expect(response.json()[0].authorities).toEqual([
+      'READ_API_KEY',
+      'CREATE_ENVIRONMENT'
+    ])
   })
 
   it('should be able to get all api keys using the API key', async () => {
@@ -217,23 +223,17 @@ describe('Api Key Role Controller Tests', () => {
       method: 'GET',
       url: '/api-key/all',
       headers: {
-        'x-keyshade-token': apiKeyValue
+        'x-keyshade-token': apiKey.value
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(
-      expect.arrayContaining([
-        {
-          id: apiKey.id,
-          name: 'Updated Test Key',
-          authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
-          expiresAt: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String)
-        }
-      ])
-    )
+    expect(response.json()[0].id).toBe(apiKey.id)
+    expect(response.json()[0].name).toBe('Test Key')
+    expect(response.json()[0].authorities).toEqual([
+      'READ_API_KEY',
+      'CREATE_ENVIRONMENT'
+    ])
   })
 
   it('should not be able to create api key with invalid authorities of API key', async () => {
@@ -245,7 +245,7 @@ describe('Api Key Role Controller Tests', () => {
         expiresAfter: '24'
       },
       headers: {
-        'x-keyshade-token': apiKeyValue
+        'x-keyshade-token': apiKey.value
       }
     })
 
@@ -265,6 +265,6 @@ describe('Api Key Role Controller Tests', () => {
   })
 
   afterAll(async () => {
-    await cleanUp(prisma)
+    await app.close()
   })
 })
