@@ -109,10 +109,11 @@ function ProfilePage(): React.JSX.Element {
           <InputLoading />
         ) : (
           <Input
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setIsModified(true)
-              setUserData((prev) => ({ ...prev, email: e.target.value }))
-            }}
+            disabled
+            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            //   setIsModified(true)
+            //   setUserData((prev) => ({ ...prev, email: e.target.value }))
+            // }}
             placeholder="email"
             value={userData.email}
           />
