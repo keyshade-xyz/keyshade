@@ -295,14 +295,13 @@ export class UserService {
   }
 
   private async checkIfAdminExistsOrCreate() {
-
-    const parsedEnv = EnvSchema.safeParse(process.env.NODE_ENV);
-    let nodeEnv;
+    const parsedEnv = EnvSchema.safeParse(process.env)
+    let nodeEnv
 
     if (!parsedEnv.success) {
-      nodeEnv = 'dev'; // Default to a valid value or handle appropriately
+      nodeEnv = 'dev' // Default to a valid value or handle appropriately
     } else {
-      nodeEnv = parsedEnv.data;
+      nodeEnv = parsedEnv.data.NODE_ENV
     }
 
     if (nodeEnv === 'test' || nodeEnv === 'e2e') {
