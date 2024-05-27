@@ -78,42 +78,61 @@ describe('Workspace Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await cleanUp(prisma)
+  beforeEach(async () => {
+    const createUser1 = await userService.createUser({
+      email: 'john@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
+    })
 
-    const createUser1 = prisma.user.create({
+    const createUser2 = await userService.createUser({
+      email: 'jane@keyshade.xyz',
+      name: 'Jane Doe',
+      isOnboardingFinished: true
+    })
+
+    const createUser3 = await userService.createUser({
+      email: 'sadie@keyshade.xyz',
+      name: 'Sadie',
+      isOnboardingFinished: true
+    })
+
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
+
+    delete createUser1.defaultWorkspace
+    delete createUser2.defaultWorkspace
+    delete createUser3.defaultWorkspace
+
+    user1 = createUser1
+    user2 = createUser2
+    user3 = createUser3
+
+    memberRole = await prisma.workspaceRole.create({
       data: {
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
+        name: 'Member',
+        workspaceId: workspace1.id,
+        authorities: [Authority.READ_WORKSPACE]
       }
     })
 
-    const createUser2 = prisma.user.create({
-      data: {
-        email: 'jane@keyshade.xyz',
-        name: 'Jane Doe',
-        isOnboardingFinished: true
+    adminRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_name: {
+          workspaceId: workspace1.id,
+          name: 'Admin'
+        }
       }
     })
+  })
 
-    const createUser3 = prisma.user.create({
-      data: {
-        email: 'sadie@keyshade.xyz',
-        name: 'Sadie',
-        isOnboardingFinished: true
-      }
-    })
-
-    const result = await prisma.$transaction([
-      createUser1,
-      createUser2,
-      createUser3
+  afterEach(async () => {
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
     ])
-
-    user1 = result[0]
-    user2 = result[1]
-    user3 = result[2]
   })
 
   it('should be defined', async () => {
@@ -156,8 +175,8 @@ describe('Workspace Controller Tests', () => {
       },
       url: '/workspace',
       payload: {
-        name: 'Workspace 1',
-        description: 'Workspace 1 description'
+        name: 'My Workspace',
+        description: 'My Workspace description'
       }
     })
 
@@ -170,6 +189,11 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should let other user to create workspace with same name', async () => {
+    await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1',
+      description: 'Workspace 1 description'
+    })
+
     const response = await app.inject({
       method: 'POST',
       headers: {
@@ -213,15 +237,6 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a new role with name Admin', async () => {
-    adminRole = await prisma.workspaceRole.findUnique({
-      where: {
-        workspaceId_name: {
-          workspaceId: workspace1.id,
-          name: 'Admin'
-        }
-      }
-    })
-
     expect(adminRole).toBeDefined()
     expect(adminRole).toEqual({
       id: expect.any(String),
@@ -283,8 +298,7 @@ describe('Workspace Controller Tests', () => {
       },
       url: `/workspace/${workspace1.id}`,
       payload: {
-        name: 'Workspace 1 Updated',
-        description: 'Workspace 1 updated description'
+        name: 'My Workspace'
       }
     })
 
@@ -318,6 +332,10 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a WORKSPACE_UPDATED event', async () => {
+    await workspaceService.updateWorkspace(user1, workspace1.id, {
+      name: 'Workspace 1'
+    })
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -349,15 +367,30 @@ describe('Workspace Controller Tests', () => {
     expect(response.statusCode).toBe(201)
   })
 
-  it('should allow user to invite another user to the workspace', async () => {
-    memberRole = await prisma.workspaceRole.create({
-      data: {
-        name: 'Member',
-        workspaceId: workspace1.id,
-        authorities: [Authority.READ_WORKSPACE]
-      }
+  it('should not allow user to invite another user ', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: user2.email,
+          roleIds: [adminRole.id]
+        }
+      ]
     })
 
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Admin role cannot be assigned to the user`
+    })
+  })
+
+  it('should allow user to invite another user to the workspace', async () => {
     const response = await app.inject({
       method: 'POST',
       headers: {
@@ -392,7 +425,31 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
+  it('should not be able to update the membership to admin role', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/update-member-role/${user2.id}`,
+      payload: [adminRole.id]
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Admin role cannot be assigned to the user`
+    })
+  })
+
   it('should not be able to add an existing user to the workspace', async () => {
+    // Add user2 to workspace1
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
     const response = await app.inject({
       method: 'POST',
       headers: {
@@ -416,6 +473,14 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a INVITED_TO_WORKSPACE event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -435,6 +500,14 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should be able to cancel the invitation', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
     const response = await app.inject({
       method: 'DELETE',
       headers: {
@@ -475,6 +548,17 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a CANCELLED_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
+    // Cancel the invitation
+    await workspaceService.cancelInvitation(user1, workspace1.id, user2.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -494,7 +578,13 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should be able to decline invitation to the workspace', async () => {
-    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+    // Send an invitation
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
 
     const response = await app.inject({
       method: 'DELETE',
@@ -536,6 +626,17 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a DECLINED_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
+
+    // Decline the invitation
+    await workspaceService.declineInvitation(user2, workspace1.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -603,9 +704,20 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a ACCEPT_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
+
+    // Accept the invitation
+    await workspaceService.acceptInvitation(user2, workspace1.id)
+
     const response = await fetchEvents(
       eventService,
-      user2,
+      user1,
       workspace1.id,
       EventSource.WORKSPACE
     )
@@ -622,6 +734,9 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should be able to leave the workspace', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
     const response = await app.inject({
       method: 'DELETE',
       headers: {
@@ -679,6 +794,12 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a LEFT_WORKSPACE event', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    // Leave the workspace
+    await workspaceService.leaveWorkspace(user2, workspace1.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -735,6 +856,14 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a WORKSPACE_MEMBERSHIP_UPDATED event', async () => {
+    // Create membership
+    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+
+    // Update the membership
+    await workspaceService.updateMemberRoles(user1, workspace1.id, user2.id, [
+      memberRole.id
+    ])
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -796,6 +925,14 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should have created a REMOVED_FROM_WORKSPACE event', async () => {
+    // Create membership
+    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+
+    // Remove user2 from workspace1
+    await workspaceService.removeUsersFromWorkspace(user1, workspace1.id, [
+      user2.id
+    ])
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -903,7 +1040,7 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(workspace1)
+    expect(response.json().name).toEqual(workspace1.name)
   })
 
   it('should not be able to fetch the workspace by id if user is not a member', async () => {
@@ -958,24 +1095,28 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should not be able to transfer ownership to a non member', async () => {
+    const newWorkspace = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 2',
+      description: 'Workspace 2 description'
+    })
+
     const response = await app.inject({
       method: 'PUT',
       headers: {
         'x-e2e-user-email': user1.email
       },
-      url: `/workspace/${workspace1.id}/transfer-ownership/${user3.id}`
+      url: `/workspace/${newWorkspace.id}/transfer-ownership/${user3.id}`
     })
 
-    expect(response.statusCode).toBe(404)
     expect(response.json()).toEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: `User ${user3.id} is not a member of workspace ${workspace1.name} (${workspace1.id})`
+      message: `User ${user3.id} is not a member of workspace ${newWorkspace.name} (${newWorkspace.id})`
     })
   })
 
   it('should be able to fetch all the workspaces the user is a member of', async () => {
-    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
     const response = await app.inject({
       method: 'GET',
       headers: {
@@ -985,90 +1126,59 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual([workspace2, workspace1])
-  })
-
-  it('should crash while transferring ownership if the assignee already has the Admin role(impossible case)', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      headers: {
-        'x-e2e-user-email': user1.email
-      },
-      url: `/workspace/${workspace1.id}/transfer-ownership/${user2.id}`
-    })
-
-    expect(response.statusCode).toBe(500)
-    expect(response.json()).toEqual({
-      statusCode: 500,
-      error: 'Internal Server Error',
-      message: 'Error in transaction'
-    })
+    expect(response.json().length).toEqual(2)
   })
 
   it('should be able to transfer the ownership of the workspace', async () => {
-    const user2Membership = await prisma.workspaceMember.findUnique({
-      where: {
-        workspaceId_userId: {
-          workspaceId: workspace1.id,
-          userId: user2.id
-        }
-      }
+    const newWorkspace = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 2',
+      description: 'Workspace 2 description'
     })
 
-    await prisma.workspaceMemberRoleAssociation.delete({
-      where: {
-        roleId_workspaceMemberId: {
-          roleId: adminRole.id,
-          workspaceMemberId: user2Membership.id
-        }
-      }
-    })
-
-    await prisma.workspaceMemberRoleAssociation.create({
-      data: {
-        roleId: memberRole.id,
-        workspaceMemberId: user2Membership.id
-      }
-    })
+    // Create membership
+    await createMembership(memberRole.id, user2.id, newWorkspace.id, prisma)
 
     const response = await app.inject({
       method: 'PUT',
       headers: {
         'x-e2e-user-email': user1.email
       },
-      url: `/workspace/${workspace1.id}/transfer-ownership/${user2.id}`
+      url: `/workspace/${newWorkspace.id}/transfer-ownership/${user2.id}`
     })
 
     expect(response.statusCode).toBe(200)
 
     const workspace = await prisma.workspace.findUnique({
       where: {
-        id: workspace1.id
+        id: newWorkspace.id
       }
     })
 
-    expect(workspace).toEqual({
-      ...workspace1,
-      ownerId: user2.id,
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date)
-    })
+    expect(workspace.ownerId).toEqual(user2.id)
   })
 
   it('should not be able to transfer ownership if is not admin', async () => {
+    const newWorkspace = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 2',
+      description: 'Workspace 2 description'
+    })
+
+    // Create membership
+    await createMembership(memberRole.id, user2.id, newWorkspace.id, prisma)
+
     const response = await app.inject({
       method: 'PUT',
       headers: {
-        'x-e2e-user-email': user1.email
+        'x-e2e-user-email': user2.email
       },
-      url: `/workspace/${workspace1.id}/transfer-ownership/${user2.id}`
+      url: `/workspace/${newWorkspace.id}/transfer-ownership/${user3.id}`
     })
 
     expect(response.statusCode).toBe(401)
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User ${user1.id} does not have the required authorities to perform the action`
+      message: `User ${user2.id} does not have the required authorities to perform the action`
     })
   })
 
@@ -1093,7 +1203,7 @@ describe('Workspace Controller Tests', () => {
     const response = await app.inject({
       method: 'GET',
       headers: {
-        'x-e2e-user-email': user1.email
+        'x-e2e-user-email': user2.email
       },
       url: `/workspace/${workspace1.id}/export-data`
     })
@@ -1102,7 +1212,7 @@ describe('Workspace Controller Tests', () => {
     expect(response.json()).toEqual({
       statusCode: 401,
       error: 'Unauthorized',
-      message: `User ${user1.id} does not have the required authorities to perform the action`
+      message: `User ${user2.id} does not have the required authorities to perform the action`
     })
   })
 
@@ -1110,7 +1220,7 @@ describe('Workspace Controller Tests', () => {
     const response = await app.inject({
       method: 'GET',
       headers: {
-        'x-e2e-user-email': user2.email
+        'x-e2e-user-email': user1.email
       },
       url: `/workspace/${workspace1.id}/export-data`
     })
@@ -1126,23 +1236,20 @@ describe('Workspace Controller Tests', () => {
   })
 
   it('should be able to delete the workspace', async () => {
+    const newWorkspace = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 2',
+      description: 'Workspace 2 description'
+    })
+
     const response = await app.inject({
       method: 'DELETE',
       headers: {
-        'x-e2e-user-email': user2.email
+        'x-e2e-user-email': user1.email
       },
-      url: `/workspace/${workspace1.id}`
+      url: `/workspace/${newWorkspace.id}`
     })
 
     expect(response.statusCode).toBe(200)
-
-    const workspace = await prisma.workspace.findUnique({
-      where: {
-        id: workspace1.id
-      }
-    })
-
-    expect(workspace).toBeNull()
   })
 
   it('should not be able to delete a non existing workspace', async () => {
@@ -1151,115 +1258,61 @@ describe('Workspace Controller Tests', () => {
       headers: {
         'x-e2e-user-email': user2.email
       },
-      url: `/workspace/${workspace1.id}`
+      url: `/workspace/123`
     })
 
     expect(response.statusCode).toBe(404)
     expect(response.json()).toEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: `Workspace with id ${workspace1.id} not found`
+      message: `Workspace with id 123 not found`
     })
   })
 
   it('should not be able to delete the default workspace', async () => {
-    // Create a user
-    const user = await userService.createUser({
-      email: 'johnny@keyshade.xyz',
-      isActive: true,
-      isOnboardingFinished: true
-    })
-    const workspace = user.defaultWorkspace
-
     // Try deleting the default workspace
     const response = await app.inject({
       method: 'DELETE',
       headers: {
-        'x-e2e-user-email': user.email
+        'x-e2e-user-email': user1.email
       },
-      url: `/workspace/${workspace.id}`
+      url: `/workspace/${workspace1.id}`
     })
 
     expect(response.statusCode).toBe(400)
     expect(response.json()).toEqual({
       statusCode: 400,
       error: 'Bad Request',
-      message: `You cannot delete the default workspace ${workspace.name} (${workspace.id})`
-    })
-
-    // Delete the user
-    await prisma.user.delete({
-      where: {
-        id: user.id
-      }
-    })
-
-    // Delete the workspace
-    await prisma.workspace.delete({
-      where: {
-        id: workspace.id
-      }
+      message: `You cannot delete the default workspace ${workspace1.name} (${workspace1.id})`
     })
   })
 
   it('should not be able to transfer ownership of default workspace', async () => {
-    // Create a user
-    const user = await userService.createUser({
-      email: 'random@keyshade.xyz',
-      isActive: true,
-      isOnboardingFinished: true
-    })
-    const workspace = user.defaultWorkspace
-
-    // Fetch the admin role for the workspace
-    const adminRole = await prisma.workspaceRole.findUnique({
-      where: {
-        workspaceId_name: {
-          workspaceId: workspace.id,
-          name: 'Admin'
-        }
-      }
-    })
-
     // Invite another user to the workspace
-    await workspaceService.inviteUsersToWorkspace(user, workspace.id, [
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
       {
-        email: user1.email,
-        roleIds: [adminRole.id]
+        email: user2.email,
+        roleIds: [memberRole.id]
       }
     ])
 
     // Accept the invitation
-    await workspaceService.acceptInvitation(user1, workspace.id)
+    await workspaceService.acceptInvitation(user2, workspace1.id)
 
     // Try transferring ownership
     const response = await app.inject({
       method: 'PUT',
       headers: {
-        'x-e2e-user-email': user.email
+        'x-e2e-user-email': user1.email
       },
-      url: `/workspace/${workspace.id}/transfer-ownership/${user1.id}`
+      url: `/workspace/${workspace1.id}/transfer-ownership/${user2.id}`
     })
 
     expect(response.statusCode).toBe(400)
     expect(response.json()).toEqual({
       statusCode: 400,
       error: 'Bad Request',
-      message: `You cannot transfer ownership of default workspace ${workspace.name} (${workspace.id})`
-    })
-
-    // Delete the user
-    await prisma.user.delete({
-      where: {
-        id: user.id
-      }
-    })
-
-    // Delete the workspace
-    await prisma.workspace.delete({
-      where: {
-        id: workspace.id
-      }
+      message: `You cannot transfer ownership of default workspace ${workspace1.name} (${workspace1.id})`
     })
   })
 

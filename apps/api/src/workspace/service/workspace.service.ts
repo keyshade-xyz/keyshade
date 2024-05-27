@@ -378,6 +378,13 @@ export class WorkspaceService {
         `User ${userId} is not a member of workspace ${workspace.name} (${workspace.id})`
       )
 
+    const workspaceAdminRole = await this.getWorkspaceAdminRole(workspaceId)
+
+    // Check if the admin role is tried to be assigned to the user
+    if (roleIds.includes(workspaceAdminRole.id)) {
+      throw new BadRequestException(`Admin role cannot be assigned to the user`)
+    }
+
     // Update the role of the user
     const membership = await this.prisma.workspaceMember.findUnique({
       where: {
@@ -396,6 +403,7 @@ export class WorkspaceService {
         }
       })
 
+    // Create new associations
     const createNewAssociations =
       this.prisma.workspaceMemberRoleAssociation.createMany({
         data: roleIds.map((roleId) => ({
@@ -837,12 +845,40 @@ export class WorkspaceService {
     )
   }
 
+  private async getWorkspaceAdminRole(
+    workspaceId: Workspace['id']
+  ): Promise<WorkspaceRole> {
+    const adminRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        hasAdminAuthority: true,
+        workspaceId
+      }
+    })
+
+    if (!adminRole) {
+      throw new InternalServerErrorException(
+        `Admin role not found for workspace ${workspaceId}`
+      )
+    }
+
+    return adminRole
+  }
+
   private async addMembersToWorkspace(
     workspace: Workspace,
     currentUser: User,
     members: WorkspaceMemberDTO[]
   ) {
+    const workspaceAdminRole = await this.getWorkspaceAdminRole(workspace.id)
+
     for (const member of members) {
+      // Check if the admin role is tried to be assigned to the user
+      if (member.roleIds.includes(workspaceAdminRole.id)) {
+        throw new BadRequestException(
+          `Admin role cannot be assigned to the user`
+        )
+      }
+
       const memberUser: User | null = await this.prisma.user.findUnique({
         where: {
           email: member.email
