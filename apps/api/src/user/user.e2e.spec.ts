@@ -321,6 +321,233 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(204)
   })
 
+  it('should send otp when user changes email', async () => {
+    const result = await app.inject({
+      method: 'PUT',
+      url: `/user`,
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      },
+      payload: {
+        email: 'newEmail@keyshade.xyz'
+      }
+    })
+
+    expect(result.statusCode).toEqual(200)
+    expect(JSON.parse(result.body)).toEqual({
+      ...regularUser
+    })
+
+    const userEmailChange = await prisma.otp.findMany({
+      where: {
+        userId: regularUser.id,
+        AND: {
+          emailChange: {
+            newEmail: 'newEmail@keyshade.xyz'
+          }
+        }
+      }
+    })
+
+    expect(userEmailChange.length).toEqual(1)
+  })
+
+  it('should allow admin to change an user email', async () => {
+    const result = await app.inject({
+      method: 'PUT',
+      url: `/user/${regularUser.id}`,
+      headers: {
+        'x-e2e-user-email': adminUser.email
+      },
+      payload: {
+        email: 'newEmail@keyshade.xyz'
+      }
+    })
+
+    expect(result.statusCode).toEqual(200)
+    expect(JSON.parse(result.body)).toEqual({
+      ...regularUser,
+      email: 'newEmail@keyshade.xyz'
+    })
+
+    const updatedUser = await prisma.user.findUnique({
+      where: {
+        id: regularUser.id
+      }
+    })
+
+    expect(updatedUser.email).toEqual('newEmail@keyshade.xyz')
+  })
+
+  it('should give error when new email is used by an existing user', async () => {
+    const result = await app.inject({
+      method: 'PUT',
+      url: `/user`,
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      },
+      payload: {
+        email: 'john@keyshade.xyz'
+      }
+    })
+
+    expect(result.statusCode).toEqual(409)
+  })
+
+  it('should validate OTP successfully', async () => {
+    await prisma.otp.create({
+      data: {
+        code: '123456',
+        userId: regularUser.id,
+        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
+      }
+    })
+
+    const result = await app.inject({
+      method: 'POST',
+      url: `/user/validate-email-change-otp`,
+      query: {
+        otp: '123456'
+      },
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(201)
+    expect(JSON.parse(result.body)).toEqual({
+      ...regularUser,
+      email: 'newjohn@keyshade.xyz'
+    })
+
+    const updatedUser = await prisma.user.findUnique({
+      where: {
+        id: regularUser.id
+      }
+    })
+
+    expect(updatedUser.email).toEqual('newjohn@keyshade.xyz')
+  })
+
+  it('should fail to validate expired or invalid OTP', async () => {
+    await prisma.otp.create({
+      data: {
+        code: '123456',
+        userId: regularUser.id,
+        expiresAt: new Date(new Date().getTime() - 1),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
+      }
+    })
+
+    const result = await app.inject({
+      method: 'POST',
+      url: `/user/validate-email-change-otp`,
+      query: {
+        otp: '123456'
+      },
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(401)
+    expect(JSON.parse(result.body)).toEqual({
+      message: 'Invalid or expired OTP',
+      error: 'Unauthorized',
+      statusCode: 401
+    })
+
+    const nonUpdatedUser = await prisma.user.findUnique({
+      where: {
+        id: regularUser.id
+      }
+    })
+
+    expect(nonUpdatedUser.email).toEqual('john@keyshade.xyz')
+  })
+
+  it('should resend OTP successfully', async () => {
+    await prisma.otp.create({
+      data: {
+        code: '123456',
+        userId: regularUser.id,
+        expiresAt: new Date(new Date().getTime() + 5 * 60 * 1000),
+        emailChange: {
+          create: {
+            newEmail: 'newjohn@keyshade.xyz'
+          }
+        }
+      }
+    })
+
+    const result = await app.inject({
+      method: 'POST',
+      url: `/user/resend-email-change-otp`,
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(201)
+
+    const updatedOtp = await prisma.otp.findUnique({
+      where: {
+        userId: regularUser.id,
+        emailChange: {
+          newEmail: 'newjohn@keyshade.xyz'
+        }
+      }
+    })
+
+    expect(updatedOtp.code).not.toEqual('123456')
+  })
+
+  it('should return 409 Conflict if the email already exists', async () => {
+    const result = await app.inject({
+      method: 'PUT',
+      url: `/user/${regularUser.id}`,
+      headers: {
+        'x-e2e-user-email': adminUser.email
+      },
+      payload: {
+        email: adminUser.email // existing email
+      }
+    })
+
+    expect(result.statusCode).toEqual(409)
+    expect(JSON.parse(result.body)).toEqual({
+      statusCode: 409,
+      message: 'User with this email already exists',
+      error: 'Conflict'
+    })
+  })
+
+  it('should return 409 Conflict if no previous OTP exists for email change', async () => {
+    const result = await app.inject({
+      method: 'POST',
+      url: `/user/resend-email-change-otp`,
+      headers: {
+        'x-e2e-user-email': regularUser.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(409)
+    expect(JSON.parse(result.body)).toEqual({
+      statusCode: 409,
+      message: `No previous OTP for email change exists for user ${regularUser.id}`,
+      error: 'Conflict'
+    })
+  })
+
   // test('user should be able to delete their own account', async () => {
   //   const result = await app.inject({
   //     method: 'DELETE',

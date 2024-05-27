@@ -300,6 +300,7 @@ model Project {
   isDisabled      Boolean  @default(false) // This is set to true when the user stops his subscription and still has premium features in use
   accessLevel     ProjectAccessLevel  @default(PRIVATE) 
   pendingCreation Boolean  @default(false)
+  isForked        Boolean  @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -311,6 +312,10 @@ model Project {
   environments   Environment[]
   workspaceRoles ProjectWorkspaceRoleAssociation[]
   integrations   Integration[]
+  forks          Project[]                         @relation("Fork")
+
+  forkedFromId String?
+  forkedFrom   Project? @relation("Fork", fields: [forkedFromId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 }
 
 model ProjectWorkspaceRoleAssociation {
@@ -452,11 +457,13 @@ model ApiKey {
 }
 
 model Otp {
-  code      String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  id          String    @id @default(cuid())
+  code        String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId      String    @unique
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  emailChange UserEmailChange?
 
   @@unique([userId, code], name: "userCode")
   @@index([expiresAt], name: "expiresAt")
@@ -517,4 +524,11 @@ model ChangeNotificationSocketMap {
   environmentId String
 
   @@index([environmentId, socketId])
+}
+
+model UserEmailChange {
+  id        String  @id @default(cuid())
+  otp       Otp     @relation(fields: [otpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  otpId     String  @unique
+  newEmail  String
 }

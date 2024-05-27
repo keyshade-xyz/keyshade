@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common'
 import { REDIS_CLIENT, RedisProvider } from './redis.provider'
+import { MINIO_CLIENT, MinioProvider } from './minio.provider'
 
 @Global()
 @Module({
@@ -7,8 +8,12 @@ import { REDIS_CLIENT, RedisProvider } from './redis.provider'
     {
       provide: REDIS_CLIENT,
       useValue: RedisProvider
+    },
+    {
+      provide: MINIO_CLIENT,
+      useValue: MinioProvider
     }
   ],
-  providers: [RedisProvider]
+  providers: [RedisProvider, MinioProvider]
 })
 export class ProviderModule {}

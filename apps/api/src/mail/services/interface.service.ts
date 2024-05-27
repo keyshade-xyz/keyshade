@@ -3,6 +3,8 @@ export const MAIL_SERVICE = 'MAIL_SERVICE'
 export interface IMailService {
   sendOtp(email: string, otp: string): Promise<void>
 
+  sendEmailChangedOtp(email: string, otp: string): Promise<void>
+
   workspaceInvitationMailForUsers(
     email: string,
     workspace: string,

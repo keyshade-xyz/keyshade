@@ -12,6 +12,7 @@ services:
       POSTGRES_DB: tests
     networks:
       - keyshade-test
+
   redis:
     image: redis:6
     container_name: integration-tests-redis
@@ -19,6 +20,18 @@ services:
       - '6379:6379'
     networks:
       - keyshade-test
+
+  minio:
+    image: docker.io/bitnami/minio:2022
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: supersecret
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - './data/minio:/data'
+
 networks:
   keyshade-test:
     driver: bridge

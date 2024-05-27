@@ -6,7 +6,7 @@ export class CreateEnvironment {
 
   @IsString()
   @IsOptional()
-  description: string
+  description?: string
 
   @IsBoolean()
   @IsOptional()
