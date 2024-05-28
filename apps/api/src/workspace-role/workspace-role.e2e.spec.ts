@@ -20,15 +20,19 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
-import cleanUp from '../common/cleanup'
 import fetchEvents from '../common/fetch-events'
 import { EventService } from '../event/service/event.service'
 import { EventModule } from '../event/event.module'
+import { WorkspaceRoleService } from './service/workspace-role.service'
+import { UserService } from '../user/service/user.service'
+import { UserModule } from '../user/user.module'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
   let eventService: EventService
+  let workspaceRoleService: WorkspaceRoleService
+  let userService: UserService
 
   let alice: User
   let bob: User
@@ -41,7 +45,13 @@ describe('Workspace Role Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, WorkspaceRoleModule, EventModule]
+      imports: [
+        AppModule,
+        WorkspaceRoleModule,
+        EventModule,
+        WorkspaceRoleModule,
+        UserModule
+      ]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -51,202 +61,49 @@ describe('Workspace Role Controller Tests', () => {
     )
     prisma = moduleRef.get(PrismaService)
     eventService = moduleRef.get(EventService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await cleanUp(prisma)
-
-    const aliceId = v4()
-    const bobId = v4()
-    const charlieId = v4()
-    const workspaceAliceId = v4()
-    const workspaceBobId = v4()
-
+  beforeEach(async () => {
     // Create the users
-    const createAlice = prisma.user.create({
-      data: {
-        id: aliceId,
-        email: 'alice@keyshade.xyz',
-        name: 'Alice',
-        isActive: true,
-        isAdmin: false,
-        isOnboardingFinished: true
-      }
+    const createAlice = await userService.createUser({
+      email: 'alice@keyshade.xyz',
+      name: 'Alice',
+      isActive: true,
+      isAdmin: false,
+      isOnboardingFinished: true
     })
 
-    const createBob = prisma.user.create({
-      data: {
-        id: bobId,
-        email: 'bob@keyshade.xyz',
-        name: 'Bob',
-        isActive: true,
-        isAdmin: false,
-        isOnboardingFinished: true
-      }
+    const createBob = await userService.createUser({
+      email: 'bob@keyshade.xyz',
+      name: 'Bob',
+      isActive: true,
+      isAdmin: false,
+      isOnboardingFinished: true
     })
 
-    const createCharlie = prisma.user.create({
-      data: {
-        id: charlieId,
-        email: 'charlie@keyshade.xyz',
-        name: 'Charlie',
-        isActive: true,
-        isAdmin: false,
-        isOnboardingFinished: true
-      }
+    const createCharlie = await userService.createUser({
+      email: 'charlie@keyshade.xyz',
+      name: 'Charlie',
+      isActive: true,
+      isAdmin: false,
+      isOnboardingFinished: true
     })
 
-    // Create the workspaces
-    const createWorkspaceAlice = prisma.workspace.create({
-      data: {
-        id: workspaceAliceId,
-        name: 'Test Workspace for Alice',
-        description: 'Test Workspace Description',
-        isFreeTier: true,
-        ownerId: workspaceBobId,
-        roles: {
-          createMany: {
-            data: [
-              {
-                name: 'Admin',
-                authorities: [Authority.WORKSPACE_ADMIN],
-                hasAdminAuthority: true,
-                colorCode: '#FF0000'
-              },
-              {
-                name: 'Viewer',
-                authorities: [Authority.READ_WORKSPACE_ROLE]
-              }
-            ]
-          }
-        }
-      }
-    })
+    workspaceAlice = createAlice.defaultWorkspace
+    workspaceBob = createBob.defaultWorkspace
 
-    const createWorkspaceBob = prisma.workspace.create({
-      data: {
-        id: workspaceBobId,
-        name: 'Test Workspace for Bob',
-        description: 'Test Workspace Description',
-        isFreeTier: true,
-        ownerId: bobId,
-        roles: {
-          createMany: {
-            data: [
-              {
-                name: 'Admin',
-                authorities: [Authority.WORKSPACE_ADMIN],
-                hasAdminAuthority: true,
-                colorCode: '#FF0000'
-              }
-            ]
-          }
-        }
-      }
-    })
+    delete createAlice.defaultWorkspace
+    delete createBob.defaultWorkspace
+    delete createCharlie.defaultWorkspace
 
-    // Add the owners to the workspaces
-    const assignOwnershipForAlice = prisma.workspaceMember.create({
-      data: {
-        workspace: {
-          connect: {
-            id: workspaceAliceId
-          }
-        },
-        user: {
-          connect: {
-            id: aliceId
-          }
-        },
-        invitationAccepted: true,
-        roles: {
-          create: {
-            role: {
-              connect: {
-                workspaceId_name: {
-                  workspaceId: workspaceAliceId,
-                  name: 'Admin'
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    const assignOwnershipForBob = prisma.workspaceMember.create({
-      data: {
-        workspace: {
-          connect: {
-            id: workspaceBobId
-          }
-        },
-        user: {
-          connect: {
-            id: bobId
-          }
-        },
-        invitationAccepted: true,
-        roles: {
-          create: {
-            role: {
-              connect: {
-                workspaceId_name: {
-                  workspaceId: workspaceBobId,
-                  name: 'Admin'
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    const assignRoleForCharlie = prisma.workspaceMember.create({
-      data: {
-        workspace: {
-          connect: {
-            id: workspaceAliceId
-          }
-        },
-        user: {
-          connect: {
-            id: charlieId
-          }
-        },
-        invitationAccepted: true,
-        roles: {
-          create: {
-            role: {
-              connect: {
-                workspaceId_name: {
-                  workspaceId: workspaceAliceId,
-                  name: 'Viewer'
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    const result = await prisma.$transaction([
-      createAlice,
-      createBob,
-      createCharlie,
-      createWorkspaceAlice,
-      createWorkspaceBob,
-      assignOwnershipForAlice,
-      assignOwnershipForBob,
-      assignRoleForCharlie
-    ])
-
-    alice = result[0]
-    bob = result[1]
-    charlie = result[2]
-    workspaceAlice = result[3]
-    workspaceBob = result[4]
+    alice = createAlice
+    bob = createBob
+    charlie = createCharlie
 
     adminRole1 = await prisma.workspaceRole.findFirst({
       where: {
@@ -259,6 +116,41 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId: workspaceBob.id,
         hasAdminAuthority: true
+      }
+    })
+
+    await workspaceRoleService.createWorkspaceRole(alice, workspaceAlice.id, {
+      name: 'Member',
+      description: 'Member Role',
+      colorCode: '#0000FF',
+      authorities: [Authority.READ_WORKSPACE_ROLE, Authority.READ_WORKSPACE]
+    })
+
+    await prisma.workspaceMember.create({
+      data: {
+        workspace: {
+          connect: {
+            id: workspaceAlice.id
+          }
+        },
+        user: {
+          connect: {
+            id: charlie.id
+          }
+        },
+        invitationAccepted: true,
+        roles: {
+          create: {
+            role: {
+              connect: {
+                workspaceId_name: {
+                  workspaceId: workspaceAlice.id,
+                  name: 'Member'
+                }
+              }
+            }
+          }
+        }
       }
     })
 
@@ -282,9 +174,19 @@ describe('Workspace Role Controller Tests', () => {
     ])
   })
 
+  afterEach(async () => {
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
+  })
+
   it('should be defined', async () => {
     expect(app).toBeDefined()
     expect(prisma).toBeDefined()
+    expect(eventService).toBeDefined()
+    expect(workspaceRoleService).toBeDefined()
+    expect(userService).toBeDefined()
   })
 
   it('should be able to get the auto generated admin role', async () => {
@@ -401,6 +303,14 @@ describe('Workspace Role Controller Tests', () => {
   })
 
   it('should not be able to create a workspace role with the same name', async () => {
+    // Create a role with the same name
+    await workspaceRoleService.createWorkspaceRole(alice, workspaceAlice.id, {
+      name: 'Test Role',
+      description: 'Test Role Description',
+      colorCode: '#0000FF',
+      authorities: [Authority.CREATE_SECRET, Authority.CREATE_WORKSPACE_ROLE]
+    })
+
     const response = await app.inject({
       method: 'POST',
       url: `/workspace-role/${workspaceAlice.id}`,
@@ -486,6 +396,13 @@ describe('Workspace Role Controller Tests', () => {
   })
 
   it('should have created a WORKSPACE_ROLE_UPDATED event', async () => {
+    // Update the workspace role
+    await workspaceRoleService.updateWorkspaceRole(alice, adminRole1.id, {
+      name: 'Updated Admin',
+      description: 'Updated Description',
+      colorCode: '#00FF00'
+    })
+
     const response = await fetchEvents(
       eventService,
       alice,
@@ -541,8 +458,8 @@ describe('Workspace Role Controller Tests', () => {
       method: 'PUT',
       url: `/workspace-role/${adminRole1.id}`,
       payload: {
-        name: 'Updated Admin',
-        description: 'Updated Description',
+        name: 'Admin',
+        description: 'Description',
         colorCode: '#00FF00',
         authorities: [Authority.CREATE_SECRET, Authority.CREATE_WORKSPACE_ROLE]
       },
@@ -577,7 +494,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -646,7 +563,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -696,6 +613,17 @@ describe('Workspace Role Controller Tests', () => {
   })
 
   it('should have created a WORKSPACE_ROLE_DELETED event', async () => {
+    // Fetch the member role
+    const memberRole = await prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId: workspaceAlice.id,
+        name: 'Member'
+      }
+    })
+
+    // Delete the workspace role
+    await workspaceRoleService.deleteWorkspaceRole(alice, memberRole.id)
+
     const response = await fetchEvents(
       eventService,
       alice,
@@ -740,7 +668,7 @@ describe('Workspace Role Controller Tests', () => {
   it('should be able to check if the workspace role exists', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/workspace-role/${workspaceAlice.id}/exists/Viewer`,
+      url: `/workspace-role/${workspaceAlice.id}/exists/Member`,
       headers: {
         'x-e2e-user-email': charlie.email
       }
@@ -811,7 +739,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -852,7 +780,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -906,7 +834,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -955,7 +883,7 @@ describe('Workspace Role Controller Tests', () => {
       where: {
         workspaceId_name: {
           workspaceId: workspaceAlice.id,
-          name: 'Viewer'
+          name: 'Member'
         }
       },
       data: {
@@ -977,9 +905,5 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-  })
-
-  afterAll(async () => {
-    await cleanUp(prisma)
   })
 })
