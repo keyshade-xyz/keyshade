@@ -45,13 +45,7 @@ describe('Workspace Role Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        AppModule,
-        WorkspaceRoleModule,
-        EventModule,
-        WorkspaceRoleModule,
-        UserModule
-      ]
+      imports: [AppModule, WorkspaceRoleModule, EventModule, UserModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
