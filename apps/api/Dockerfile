@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:20.0.0-alpine AS build
 
 WORKDIR /app
 
@@ -8,25 +8,42 @@ ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
 ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ARG DATABASE_URL=${DATABASE_URL}
 
-RUN npm i -g pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
-COPY package.json .
-COPY turbo.json .
-COPY pnpm-workspace.yaml . 
+RUN corepack enable
 
-COPY apps/api/package.json apps/api/package.json
-COPY apps/api/tsconfig.json apps/api/tsconfig.json
+COPY --chown=node:node package.json turbo.json pnpm-*.yaml ./
+COPY --chown=node:node apps/api/package.json apps/api/tsconfig.json apps/api/
+COPY --chown=node:node packages packages
 
-COPY apps/api/src apps/api/src
+# installing python for node-gyp
+# RUN apk add --update --no-cache python3 build-base gcc && \
+# 	ln -sf /usr/bin/python3 /usr/bin/python
 
-COPY packages packages
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+	pnpm install --frozen-lockfile && \
+	rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
 
-RUN pnpm install
+COPY --chown=node:node apps/api/src apps/api/src
 
-RUN pnpm db:generate-types
-RUN pnpm build:api
-RUN pnpm sourcemaps:api
+RUN pnpm db:generate-types && \
+	pnpm build:api && \
+	pnpm sourcemaps:api
 
-EXPOSE ${API_PORT:-4200}
+FROM node:20-alpine as prod
 
-ENTRYPOINT ["node", "apps/api/dist/main.js"]
+# Don't run production as root
+USER node
+
+ENV NODE_ENV=dev
+
+WORKDIR /app
+
+COPY --chown=node:node --from=build /app/node_modules /app/node_modules
+COPY --chown=node:node --from=build /app/apps/api/node_modules /app/apps/api/node_modules
+COPY --chown=node:node --from=build /app/apps/api/dist /app/apps/api/dist
+
+EXPOSE ${API_PORT}
+
+ENTRYPOINT ["node", "/app/apps/api/dist/main.js"]
