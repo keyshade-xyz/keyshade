@@ -10,7 +10,6 @@ import { AuthProvider, User } from '@prisma/client'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { UserService } from './service/user.service'
-import cleanUp from '../common/cleanup'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -35,8 +34,6 @@ describe('User Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    await cleanUp(prisma)
   })
 
   beforeEach(async () => {
@@ -575,7 +572,6 @@ describe('User Controller Tests', () => {
   // })
 
   afterAll(async () => {
-    await cleanUp(prisma)
     await prisma.$disconnect()
     await app.close()
   })
