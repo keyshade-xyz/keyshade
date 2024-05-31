@@ -135,7 +135,6 @@
     "turbo": "^1.12.4"
   },
   "dependencies": {
-    "@million/lint": "^0.0.73",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",
@@ -144,7 +143,6 @@
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
     "conventional-changelog-conventionalcommits": "7.0.2",
-    "million": "^3.0.5",
     "sharp": "^0.33.3",
     "ts-node": "^10.9.2",
     "zod": "^3.23.6"
