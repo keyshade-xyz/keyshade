@@ -11,7 +11,6 @@ import { FeedbackModule } from './feedback.module'
 import { MailModule } from '../mail/mail.module'
 import { PrismaService } from '../prisma/prisma.service'
 import { User } from '@prisma/client'
-import cleanUp from '../common/cleanup'
 
 describe('Feedback Controller (E2E)', () => {
   let app: NestFastifyApplication
@@ -38,8 +37,6 @@ describe('Feedback Controller (E2E)', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    await cleanUp(prisma)
   })
 
   beforeEach(async () => {
@@ -55,11 +52,7 @@ describe('Feedback Controller (E2E)', () => {
   })
 
   afterEach(async () => {
-    if (user) {
-      await prisma.user.delete({
-        where: { id: user.id }
-      })
-    }
+    await prisma.user.deleteMany()
   })
 
   afterAll(async () => {

@@ -24,7 +24,6 @@ import { ProjectService } from '../project/service/project.service'
 import { ProjectModule } from '../project/project.module'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
-import cleanUp from '../common/cleanup'
 import { EnvironmentModule } from '../environment/environment.module'
 import { EnvironmentService } from '../environment/service/environment.service'
 
@@ -69,8 +68,6 @@ describe('Integration Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    await cleanUp(prisma)
   })
 
   beforeEach(async () => {
@@ -149,7 +146,6 @@ describe('Integration Controller Tests', () => {
   })
 
   afterAll(async () => {
-    await cleanUp(prisma)
     await prisma.$disconnect()
     await app.close()
   })
