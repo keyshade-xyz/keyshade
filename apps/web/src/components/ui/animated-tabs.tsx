@@ -12,12 +12,12 @@ function AnimatedTab({ tabs }: AnimatedTabProps): React.JSX.Element {
   const [activeTab, setActiveTab] = useState(tabs[0].id)
 
   return (
-    <div className="flex space-x-1 rounded-full border-[1px] border-white border-opacity-[.06] bg-white bg-opacity-[.08] p-1">
+    <div className="flex rounded-full border-[1px] border-white border-opacity-[.06] bg-white bg-opacity-[.08] p-1">
       {tabs.map((tab) => (
         <button
           className={cn(
             activeTab === tab.id ? '' : 'hover:text-white',
-            `font-mediumtransition relative rounded-full px-3 py-1.5 text-sm focus-visible:outline-2 ${tab.special ? 'text-brandBlue/80 hover:text-brandBlue/90' : ' text-white/80 hover:text-white/90'}`
+            `font-mediumtransition relative rounded-full px-3 py-1.5 text-sm focus-visible:outline-2 ${tab.special ? 'text-brandBlue/70 hover:text-brandBlue/80' : ' text-white/70 hover:text-white/80'}`
           )}
           key={tab.id}
           onClick={() => {
@@ -38,7 +38,7 @@ function AnimatedTab({ tabs }: AnimatedTabProps): React.JSX.Element {
           )}
           {tab.label}{' '}
           {tab.tag ? (
-            <span className="from-brandBlue/80 ml-1 h-6 w-14 rounded-full border-[1px] border-white border-opacity-[0.04] bg-white bg-opacity-[.06] bg-gradient-to-t to-[#8EE8FF]/80 bg-clip-text p-1 text-xs tracking-wide text-transparent">
+            <span className="ml-1 h-6 w-14 rounded-full border-[1px] border-white border-opacity-[0.04] bg-white bg-opacity-[.06] p-1 text-xs tracking-wide">
               {tab.tag}
             </span>
           ) : null}
