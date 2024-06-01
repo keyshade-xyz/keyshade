@@ -8,6 +8,42 @@ function About(): React.JSX.Element {
     { id: 'yearly', label: 'Yearly', tag: '-20%', special: true }
   ]
 
+  const priceCardData = [
+    {
+      title: 'Free',
+      description: 'For hobbyists and beginners',
+      price: 0,
+      is_popular: false,
+      space_projects: 1,
+      space_users: 1,
+      space_email_support: true,
+      space_live_support: false,
+      misc_features: ['Unlimited Users', '1 Workspace']
+    },
+    {
+      title: 'Pro',
+      description: 'For small teams and startups',
+      price: 15,
+      is_popular: true,
+      space_projects: 5,
+      space_users: 5,
+      space_email_support: true,
+      space_live_support: true,
+      misc_features: ['Unlimited Users', '5 Workspaces']
+    },
+    {
+      title: 'Enterprise',
+      description: 'For large teams and enterprises',
+      price: 45,
+      is_popular: false,
+      space_projects: 100,
+      space_users: 1000,
+      space_email_support: true,
+      space_live_support: true,
+      misc_features: ['Unlimited Users', '10 Workspaces']
+    }
+  ]
+
   return (
     <div className="relative flex flex-col items-center justify-center ">
       <ColorBGSVG className="absolute -z-10 translate-y-[20rem]" />
@@ -34,39 +70,7 @@ function About(): React.JSX.Element {
       </div>
       <div className="mt-10 md:mt-16">
         <div className="flex flex-col gap-8 md:flex-row ">
-          {priceCard({
-            title: 'Free',
-            description: 'For hobbyists and beginners',
-            price: 0,
-            is_popular: false,
-            space_projects: 1,
-            space_storage: 1,
-            space_email_support: false,
-            space_live_support: false,
-            misc_features: ['Unlimited Users', '1 Workspace']
-          })}
-          {priceCard({
-            title: 'Pro',
-            description: 'For small teams and startups',
-            price: 10,
-            is_popular: true,
-            space_projects: 5,
-            space_storage: 5,
-            space_email_support: true,
-            space_live_support: false,
-            misc_features: ['Unlimited Users', '5 Workspaces']
-          })}
-          {priceCard({
-            title: 'Enterprise',
-            description: 'For large teams and enterprises',
-            price: 20,
-            is_popular: false,
-            space_projects: 10,
-            space_storage: 10,
-            space_email_support: true,
-            space_live_support: true,
-            misc_features: ['Unlimited Users', '10 Workspaces']
-          })}
+          {priceCardData.map((card) => priceCard(card))}
         </div>
       </div>
     </div>
