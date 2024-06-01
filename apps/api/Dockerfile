@@ -17,10 +17,6 @@ COPY --chown=root:root --chmod=755 package.json turbo.json pnpm-*.yaml ./
 COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json apps/api/
 COPY --chown=root:root --chmod=755 packages packages
 
-# installing python for node-gyp
-# RUN apk add --update --no-cache python3 build-base gcc && \
-# 	ln -sf /usr/bin/python3 /usr/bin/python
-
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 	pnpm install --ignore-scripts --frozen-lockfile && \
 	rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
