@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import gridImage from '@public/pricing/grid.png'
 import {
   ProjectSVG,
@@ -6,9 +7,8 @@ import {
   SupportSVG,
   TickSVG
 } from '@public/pricing'
-import Image from 'next/image'
 
-interface cardProps {
+interface CardProps {
   title: string
   description: string
   price: number
@@ -23,7 +23,7 @@ interface cardProps {
   misc_features: string[]
 }
 
-function priceCard(card: cardProps) {
+function priceCard(card: CardProps) {
   return (
     <div
       className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[14rem] lg:w-[17rem]"
@@ -35,8 +35,8 @@ function priceCard(card: cardProps) {
       {/* {card.is_popular && <div>todo</div>} */}
 
       <Image
-        className="absolute left-[8px] top-[8px] h-[108.39px] w-[246px]"
         alt="grid image"
+        className="absolute left-[8px] top-[8px] h-[108.39px] w-[246px]"
         src={gridImage}
       />
 
@@ -49,14 +49,12 @@ function priceCard(card: cardProps) {
       </div>
 
       {card.price === 0 ? (
-        <div className="mt-2 text-sm text-white/80 sm:mt-4 sm:text-3xl">
+        <div className="mt-2 text-xl text-white/80 sm:mt-4 sm:text-3xl">
           Free
         </div>
       ) : (
         <div className="mt-2 flex flex-row items-end justify-start gap-1  text-sm sm:mt-4">
-          <div className="text-2xl text-white/80 md:text-3xl">
-            ${card.price}
-          </div>
+          <div className="text-xl text-white/80 md:text-3xl">${card.price}</div>
           <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
             /month
           </div>
@@ -67,9 +65,8 @@ function priceCard(card: cardProps) {
         {card.price === 0 ? 'Get Started' : 'Try For Free'}
       </button>
 
-      {/* // TODO: fix the witdh of the svg */}
       <div className="my-5 md:-mx-6 lg:-mx-4">
-        <DividerSVG />
+        <DividerSVG className="w-full" />
       </div>
 
       <div className="text-brandBlue/90 text-sm font-light tracking-widest md:text-base">
@@ -89,14 +86,10 @@ function priceCard(card: cardProps) {
 
         <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
           <SupportSVG />
-          {card.space_email_support ? (
-            card.space_live_support ? (
-              <div> Email & Live Support</div>
-            ) : (
-              <div> Email Support</div>
-            )
+          {card.space_live_support ? (
+            <div> Email & Live Support</div>
           ) : (
-            <div> No Support</div>
+            <div> Email Support</div>
           )}
         </div>
       </div>
@@ -108,8 +101,8 @@ function priceCard(card: cardProps) {
       <div className="mt-2 flex flex-col space-y-2">
         {card.misc_features.map((feature) => (
           <div
-            key={feature}
             className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm"
+            key={feature}
           >
             <div>
               <TickSVG />
