@@ -23,7 +23,7 @@ interface CardProps {
   misc_features: string[]
 }
 
-function priceCard(card: CardProps) {
+function priceCard(card: Readonly<CardProps>): React.JSX.Element {
   return (
     <div
       className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[14rem] lg:w-[17rem]"
@@ -32,7 +32,7 @@ function priceCard(card: CardProps) {
           ' linear-gradient(180deg, rgba(37, 45, 63, 0.00) 0%, #252D3F 100%), #252D3F'
       }}
     >
-      {/* {card.is_popular && <div>todo</div>} */}
+      {/* // TODO: add most popular implementation */}
 
       <Image
         alt="grid image"

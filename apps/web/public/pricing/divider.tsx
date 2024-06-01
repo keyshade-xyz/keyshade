@@ -24,10 +24,10 @@ const DividerSVG = ({ className }) => {
           y2="1"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.002" stop-color="#8EE8FF" stop-opacity="0" />
-          <stop offset="0.4539" stop-color="#8EE8FF" />
-          <stop offset="0.5354" stop-color="#8EE8FF" />
-          <stop offset="1" stop-color="#8EE8FF" stop-opacity="0" />
+          <stop offset="0.002" stopColor="#8EE8FF" stopOpacity="0" />
+          <stop offset="0.4539" stopColor="#8EE8FF" />
+          <stop offset="0.5354" stopColor="#8EE8FF" />
+          <stop offset="1" stopColor="#8EE8FF" stopOpacity="0" />
         </linearGradient>
       </defs>
     </svg>
