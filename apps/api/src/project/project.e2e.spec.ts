@@ -8,7 +8,6 @@ import { AppModule } from '../app/app.module'
 import { ProjectModule } from './project.module'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
-import cleanUp from '../common/cleanup'
 import {
   Authority,
   Environment,
@@ -89,8 +88,6 @@ describe('Project Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
-
-    await cleanUp(prisma)
   })
 
   beforeEach(async () => {

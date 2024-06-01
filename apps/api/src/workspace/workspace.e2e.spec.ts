@@ -18,7 +18,6 @@ import {
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import cleanUp from '../common/cleanup'
 import fetchEvents from '../common/fetch-events'
 import { EventService } from '../event/service/event.service'
 import { EventModule } from '../event/event.module'
@@ -1341,9 +1340,5 @@ describe('Workspace Controller Tests', () => {
       error: 'Bad Request',
       message: `You cannot transfer ownership of default workspace ${workspace1.name} (${workspace1.id})`
     })
-  })
-
-  afterAll(async () => {
-    await cleanUp(prisma)
   })
 })

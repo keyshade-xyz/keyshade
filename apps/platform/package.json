@@ -24,6 +24,7 @@
         "@radix-ui/react-slot": "^1.0.2",
         "@radix-ui/react-switch": "^1.0.3",
         "@tanstack/react-table": "^8.16.0",
+        "avvvatars-react": "^0.4.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.0",
         "cmdk": "^1.0.0",

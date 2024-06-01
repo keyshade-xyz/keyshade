@@ -95,12 +95,29 @@ export default function AuthPage(): React.JSX.Element {
             {isLoading ? <LoadingSVG className="w-10" /> : 'Get Started'}
           </Button>
         </form>
-        <Button className="w-full" variant="outline">
+        {/* <Button className="w-full" variant="outline">
           Already have an account? Sign In
-        </Button>
+        </Button> */}
         <div className="text-center text-xs text-[#808080]">
           By continueing, you acknowledge and agree to our <br />
-          Legal Terms and Privacy Policy.
+          <a
+            className="underline"
+            href="https://keyshade.xyz/terms_and_condition"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Legal Terms
+          </a>{' '}
+          and{' '}
+          <a
+            className="underline"
+            href="https://keyshade.xyz/privacy"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Privacy Policy
+          </a>{' '}
+          .
         </div>
       </div>
     </main>

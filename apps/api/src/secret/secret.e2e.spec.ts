@@ -27,15 +27,15 @@ import { EnvironmentModule } from '../environment/environment.module'
 import { SecretModule } from './secret.module'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
-import cleanUp from '../common/cleanup'
 import { EnvironmentService } from '../environment/service/environment.service'
-import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { SecretService } from './service/secret.service'
 import { EventService } from '../event/service/event.service'
 import { REDIS_CLIENT } from '../provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
+import { UserService } from '../user/service/user.service'
+import { UserModule } from '../user/user.module'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -45,13 +45,14 @@ describe('Secret Controller Tests', () => {
   let environmentService: EnvironmentService
   let secretService: SecretService
   let eventService: EventService
+  let userService: UserService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project, workspace2Project: Project
-  let environment1: Environment,
-    environment2: Environment,
-    workspace2Environment: Environment
+  let environment1: Environment
+  let environment2: Environment
+  let workspace2Environment: Environment
   let secret1: Secret
 
   beforeAll(async () => {
@@ -62,7 +63,8 @@ describe('Secret Controller Tests', () => {
         WorkspaceModule,
         ProjectModule,
         EnvironmentModule,
-        SecretModule
+        SecretModule,
+        UserModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -80,44 +82,33 @@ describe('Secret Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await cleanUp(prisma)
-
-    const user1Id = v4()
-    const user2Id = v4()
-
-    user1 = await prisma.user.create({
-      data: {
-        id: user1Id,
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
-      }
+  beforeEach(async () => {
+    const createUser1 = await userService.createUser({
+      email: 'johndoe@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
     })
 
-    user2 = await prisma.user.create({
-      data: {
-        id: user2Id,
-        email: 'janedoe@keyshade.xyz',
-        name: 'Jane Doe',
-        isOnboardingFinished: true
-      }
+    const createUser2 = await userService.createUser({
+      email: 'janedoe@keyshade.xyz',
+      name: 'Jane Doe',
+      isOnboardingFinished: true
     })
 
-    workspace1 = await workspaceService.createWorkspace(user1, {
-      name: 'Workspace 1',
-      description: 'Workspace 1 description',
-      approvalEnabled: false
-    })
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
 
-    workspace2 = await workspaceService.createWorkspace(user2, {
-      name: 'Workspace 2',
-      description: 'Workspace 2 description',
-      approvalEnabled: false
-    })
+    delete createUser1.defaultWorkspace
+    delete createUser2.defaultWorkspace
+
+    user1 = createUser1
+    user2 = createUser2
 
     project1 = (await projectService.createProject(user1, workspace1.id, {
       name: 'Project 1',
@@ -190,6 +181,25 @@ describe('Secret Controller Tests', () => {
         name: 'Environment 2'
       }
     })
+
+    secret1 = (await secretService.createSecret(
+      user1,
+      {
+        environmentId: environment2.id,
+        name: 'Secret 1',
+        value: 'Secret 1 value',
+        rotateAfter: '24',
+        note: 'Secret 1 note'
+      },
+      project1.id
+    )) as Secret
+  })
+
+  afterEach(async () => {
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
   })
 
   it('should be defined', async () => {
@@ -206,9 +216,9 @@ describe('Secret Controller Tests', () => {
       url: `/secret/${project1.id}`,
       payload: {
         environmentId: environment2.id,
-        name: 'Secret 1',
-        note: 'Secret 1 note',
-        value: 'Secret 1 value',
+        name: 'Secret 2',
+        note: 'Secret 2 note',
+        value: 'Secret 2 value',
         rotateAfter: '24'
       },
       headers: {
@@ -221,12 +231,10 @@ describe('Secret Controller Tests', () => {
     const body = response.json()
 
     expect(body).toBeDefined()
-    expect(body.name).toBe('Secret 1')
-    expect(body.note).toBe('Secret 1 note')
+    expect(body.name).toBe('Secret 2')
+    expect(body.note).toBe('Secret 2 note')
     expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
-
-    secret1 = body
   })
 
   it('should have created a secret version', async () => {
@@ -446,8 +454,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(secretVersion.length).toBe(1)
-
-    secret1 = response.json()
   })
 
   it('should create a new version if the value is updated', async () => {
@@ -474,6 +480,11 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should have created a SECRET_UPDATED event', async () => {
+    // Update a secret
+    await secretService.updateSecret(user1, secret1.id, {
+      name: 'Updated Secret 1'
+    })
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -541,7 +552,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to move the secret to the same environment', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/environment/${environment1.id}`,
+      url: `/secret/${secret1.id}/environment/${environment2.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -549,7 +560,7 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(400)
     expect(response.json().message).toEqual(
-      `Can not update the environment of the secret to the same environment: ${environment1.id} in project ${project1.id}`
+      `Can not update the environment of the secret to the same environment: ${environment2.id} in project ${project1.id}`
     )
   })
 
@@ -569,17 +580,19 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should not be able to move a secret of the same name to an environment', async () => {
-    const newSecret = await prisma.secret.create({
-      data: {
-        projectId: project1.id,
-        environmentId: environment2.id,
-        name: 'Updated Secret 1'
-      }
-    })
+    const newSecret = (await secretService.createSecret(
+      user1,
+      {
+        environmentId: environment1.id,
+        name: 'Secret 1',
+        value: 'Some value'
+      },
+      project1.id
+    )) as Secret
 
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${newSecret.id}/environment/${environment1.id}`,
+      url: `/secret/${newSecret.id}/environment/${environment2.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -587,7 +600,7 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toEqual(
-      `Secret already exists: Updated Secret 1 in environment ${environment1.id} in project ${project1.id}`
+      `Secret already exists: Secret 1 in environment ${environment2.id} in project ${project1.id}`
     )
   })
 
@@ -654,7 +667,7 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    expect(versions.length).toBe(4)
+    expect(versions.length).toBe(3)
 
     const response = await app.inject({
       method: 'PUT',
@@ -665,7 +678,7 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().count).toEqual(3)
+    expect(response.json().count).toEqual(2)
 
     versions = await prisma.secretVersion.findMany({
       where: {
@@ -813,7 +826,7 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(3)
+    expect(response.json().length).toBe(1)
   })
 
   it('should be able to fetch all secrets decrypted', async () => {
@@ -826,11 +839,11 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(3)
+    expect(response.json().length).toBe(1)
 
     const secret = response.json()[0]
 
-    expect(secret.versions[0].value).toEqual('Secret 2 value')
+    expect(secret.versions[0].value).toEqual('Secret 1 value')
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
@@ -955,6 +968,9 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should have created a SECRET_DELETED event', async () => {
+    // Delete a secret
+    await secretService.deleteSecret(user1, secret1.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -970,9 +986,5 @@ describe('Secret Controller Tests', () => {
     expect(event.type).toBe(EventType.SECRET_DELETED)
     expect(event.workspaceId).toBe(workspace1.id)
     expect(event.itemId).toBe(secret1.id)
-  })
-
-  afterAll(async () => {
-    await app.close()
   })
 })

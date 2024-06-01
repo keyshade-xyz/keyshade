@@ -55,20 +55,25 @@ function SearchModel({
         <CommandGroup heading="Settings">
           <CommandItem
             onSelect={() => {
-              router.push('/profile')
+              router.push('/settings?tab=profile')
               setIsOpen(false)
             }}
           >
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </CommandItem>
-          <CommandItem>
+          <CommandItem
+            onSelect={() => {
+              router.push('/settings?tab=billing')
+              setIsOpen(false)
+            }}
+          >
             <CreditCard className="mr-2 h-4 w-4" />
             <span>Billing</span>
           </CommandItem>
           <CommandItem
             onSelect={() => {
-              router.push('/settings')
+              router.push('/settings?tab=workspace')
               setIsOpen(false)
             }}
           >
