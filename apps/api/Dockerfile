@@ -29,7 +29,7 @@ RUN pnpm db:generate-types && \
 
 USER node
 
-FROM node:20-alpine as prod
+FROM node:20-alpine AS prod
 
 # Don't run production as root
 USER node
