@@ -33,5 +33,7 @@ Here's the description of the environment variables used in the project. You can
 - **MINIO_SECRET_KEY**: The secret key to the Minio server.
 - **MINIO_USE_SSL**: Whether to use SSL for the Minio connection or not.
 - **MINIO_BUCKET_NAME**: The name of the bucket in the Minio server where the files are stored.
-- 
+- **REDIS_URL**: The required parameter URL that is used by the API to connect to the Redis instance.
+- **REDIS_PASSWORD**: The optional parameter that is used by the API. This is specified only if the Redis instance is configured to use a password.
+
 - **FEEDBACK_FORWARD_EMAIL**: Feedbacks submitted by the user would be sent to this email address for the concerned authorities to view it. Ideally, in development environment, this would be your personal email address
