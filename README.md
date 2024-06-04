@@ -14,7 +14,7 @@
 
 <div align = "center">
 
-[![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/pbBghfnC)
+[![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/acfN4k6dxU)
 <a href="https://twitter.com/keyshade_xyz"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
 <a href="https://www.linkedin.com/company/keyshade-xyz/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
 
