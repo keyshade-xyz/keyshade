@@ -7,7 +7,7 @@
 <p align="center">
     <a href="https://www.keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
     <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
-    <a href="https://discord.gg/akDnHRhW" target="_blank"><b>Join our Community</b></a> • 
+    <a href="https://discord.gg/acfN4k6dxU" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
 </p>
