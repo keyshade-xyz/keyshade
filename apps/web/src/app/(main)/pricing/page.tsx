@@ -46,7 +46,7 @@ function About(): React.JSX.Element {
 
   return (
     <div className="relative flex flex-col items-center justify-center ">
-      <ColorBGSVG className="absolute -z-10 translate-y-[20rem]" />
+      <ColorBGSVG className="absolute -z-10 h-screen w-screen" />
 
       <div className="pb-4 pt-14">
         <h3 className="w-24 rounded-full border-[1px] border-white border-opacity-[.04] bg-white bg-opacity-5 p-2 text-center text-xs tracking-widest text-white md:text-sm">
