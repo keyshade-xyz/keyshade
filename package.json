@@ -4,6 +4,7 @@
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
+  "packageManager": "pnpm@9.2.0",
   "release": {
     "branches": [
       "main"

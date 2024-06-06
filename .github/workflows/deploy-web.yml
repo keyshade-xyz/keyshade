@@ -4,10 +4,11 @@ on:
       - main
 
 jobs:
-  build-web-release:
+  deploy-alpha:
     runs-on: ubuntu-latest
     environment: alpha
     name: Build and push Web docker image for release
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
@@ -32,9 +33,10 @@ jobs:
         run: |
           # Build a docker container and push it to ECR 
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t web:alpha-${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
       - name: Force re-deploy task in service
