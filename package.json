@@ -124,9 +124,9 @@
     "format": "prettier apps/**/*.{ts,tsx} --write",
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api",
-    "docker:run:web": "docker run --env-file .env -p 3000:3000 ks-web",
+    "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
     "docker:build:web": "docker build -t ks-web -f apps/web/Dockerfile .",
-    "docker:run:api": "docker run --env-file .env -p 4200:4200 ks-api",
+    "docker:run:api": "docker run --env-file .env --name ks-api --rm -p 4200:4200 ks-api",
     "docker:build:api": "docker build -t ks-api -f apps/api/Dockerfile ."
   },
   "devDependencies": {
