@@ -413,49 +413,79 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ) {
-    // Check if the user has the required authorities in the project
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authority: Authority.READ_VARIABLE,
-      prisma: this.prisma
-    })
+  ): Promise<
+    { environmentName: string; environmentId: string; variables: any[] }[]
+  > {
+    try {
+      // Check if the user has the required authorities in the project
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_VARIABLE,
+        prisma: this.prisma
+      })
 
-    return await this.prisma.variable.findMany({
-      where: {
-        projectId,
-        pendingCreation: false,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        versions: {
-          orderBy: {
-            version: 'desc'
+      const variables = await this.prisma.variable.findMany({
+        where: {
+          projectId,
+          pendingCreation: false,
+          name: {
+            contains: search
+          }
+        },
+        include: {
+          versions: {
+            orderBy: {
+              version: 'desc'
+            },
+            take: 1
           },
-          take: 1
-        },
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
+          lastUpdatedBy: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          environment: {
+            select: {
+              id: true,
+              name: true
+            }
           }
         },
-        environment: {
-          select: {
-            id: true,
-            name: true
+        skip: page * limit,
+        take: limit,
+        orderBy: {
+          [sort]: order
+        }
+      })
+
+      // Group variables by environment
+      const variablesByEnvironment: {
+        [key: string]: {
+          environmentName: string
+          environmentId: string
+          variables: any[]
+        }
+      } = {}
+      for (const variable of variables) {
+        const { id, name } = variable.environment
+        if (!variablesByEnvironment[id]) {
+          variablesByEnvironment[id] = {
+            environmentName: name,
+            environmentId: id,
+            variables: []
           }
         }
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
+        variablesByEnvironment[id].variables.push(variable)
       }
-    })
+
+      // Convert the object to an array and return
+      return Object.values(variablesByEnvironment)
+    } catch (error) {
+      console.error('Error fetching variables:', error)
+      throw error // Or handle the error as per your application's requirement
+    }
   }
 
   private async variableExists(

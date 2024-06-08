@@ -503,7 +503,59 @@ export class SecretService {
       }
     }
 
-    return secrets
+    // Group secrets by environment
+    const secretsByEnvironment = await secrets.reduce(
+      async (accPromise, secret) => {
+        const acc = await accPromise
+        const environmentName = await this.getEnvironmentName(
+          secret.environmentId
+        )
+
+        if (!acc[secret.environmentId]) {
+          acc[secret.environmentId] = {
+            environmentName: environmentName,
+            environmentId: secret.environmentId,
+            secrets: []
+          }
+        }
+
+        acc[secret.environmentId].secrets.push(secret)
+        return acc
+      },
+      Promise.resolve({})
+    )
+
+    // Convert the result to an array
+    const clusteredSecrets = Object.values(secretsByEnvironment)
+
+    console.log(clusteredSecrets)
+
+    return clusteredSecrets
+  }
+
+  private async getEnvironmentName(
+    environmentId: string
+  ): Promise<string | null> {
+    try {
+      // Fetch the environment using its unique ID
+      const environment = await this.prisma.environment.findUnique({
+        where: {
+          id: environmentId
+        }
+      })
+
+      // Check if the environment exists
+      if (environment) {
+        // Access and return the name property
+        return environment.name
+      } else {
+        console.log('Environment not found')
+        return null
+      }
+    } catch (error) {
+      console.error('Error fetching environment:', error)
+      return null
+    }
   }
 
   private async secretExists(

@@ -840,10 +840,8 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
-
     const secret = response.json()[0]
-
-    expect(secret.versions[0].value).toEqual('Secret 1 value')
+    expect(secret.secrets[0].versions[0].value).toEqual('Secret 1 value')
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
