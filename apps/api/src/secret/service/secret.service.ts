@@ -26,9 +26,12 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
 import {
+  SecretWithEnvironment,
   SecretWithProject,
   SecretWithProjectAndVersion,
-  SecretWithVersion
+  SecretWithVersion,
+  SecretWithVersionAndEnvironment,
+  SecretsByEnvironment
 } from '../secret.types'
 import createEvent from '../../common/create-event'
 import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
@@ -488,7 +491,7 @@ export class SecretService {
       orderBy: {
         [sort]: order
       }
-    })) as SecretWithVersion[]
+    })) as unknown as SecretWithVersionAndEnvironment[]
 
     if (decryptValue) {
       for (const secret of secrets) {
@@ -502,60 +505,26 @@ export class SecretService {
         }
       }
     }
-
     // Group secrets by environment
-    const secretsByEnvironment = await secrets.reduce(
-      async (accPromise, secret) => {
-        const acc = await accPromise
-        const environmentName = await this.getEnvironmentName(
-          secret.environmentId
-        )
-
-        if (!acc[secret.environmentId]) {
-          acc[secret.environmentId] = {
-            environmentName: environmentName,
-            environmentId: secret.environmentId,
+    const secretsByEnvironment = secrets.reduce((acc, secret) => {
+      const { environment } = secret
+      if (environment) {
+        const { id, name } = environment
+        if (!acc[id]) {
+          acc[id] = {
+            environment: { id, name },
             secrets: []
           }
         }
-
-        acc[secret.environmentId].secrets.push(secret)
-        return acc
-      },
-      Promise.resolve({})
-    )
+        acc[id].secrets.push(secret)
+      }
+      return acc
+    }, {} as SecretsByEnvironment)
 
     // Convert the result to an array
     const clusteredSecrets = Object.values(secretsByEnvironment)
 
-    console.log(clusteredSecrets)
-
     return clusteredSecrets
-  }
-
-  private async getEnvironmentName(
-    environmentId: string
-  ): Promise<string | null> {
-    try {
-      // Fetch the environment using its unique ID
-      const environment = await this.prisma.environment.findUnique({
-        where: {
-          id: environmentId
-        }
-      })
-
-      // Check if the environment exists
-      if (environment) {
-        // Access and return the name property
-        return environment.name
-      } else {
-        console.log('Environment not found')
-        return null
-      }
-    } catch (error) {
-      console.error('Error fetching environment:', error)
-      return null
-    }
   }
 
   private async secretExists(

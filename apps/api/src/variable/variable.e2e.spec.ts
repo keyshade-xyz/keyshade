@@ -774,6 +774,9 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
+    const envvariable = response.json()[0]
+    expect(envvariable.environment).toHaveProperty('id')
+    expect(envvariable.environment).toHaveProperty('name')
   })
 
   it('should not be able to fetch all variables if the user has no access to the project', async () => {

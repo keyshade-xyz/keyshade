@@ -29,7 +29,8 @@ import createApproval from '../../common/create-approval'
 import { UpdateVariableMetadata } from '../../approval/approval.types'
 import {
   VariableWithProject,
-  VariableWithProjectAndVersion
+  VariableWithProjectAndVersion,
+  VariablesByEnvironment
 } from '../variable.types'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
@@ -413,79 +414,70 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ): Promise<
-    { environmentName: string; environmentId: string; variables: any[] }[]
-  > {
-    try {
-      // Check if the user has the required authorities in the project
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { id: projectId },
-        authority: Authority.READ_VARIABLE,
-        prisma: this.prisma
-      })
+  ): Promise<VariablesByEnvironment[]> {
+    // Check if the user has the required authorities in the project
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
 
-      const variables = await this.prisma.variable.findMany({
-        where: {
-          projectId,
-          pendingCreation: false,
-          name: {
-            contains: search
+    const variables = await this.prisma.variable.findMany({
+      where: {
+        projectId,
+        pendingCreation: false,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        versions: {
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        },
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
           }
         },
-        include: {
-          versions: {
-            orderBy: {
-              version: 'desc'
-            },
-            take: 1
-          },
-          lastUpdatedBy: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
-          environment: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
-        },
-        skip: page * limit,
-        take: limit,
-        orderBy: {
-          [sort]: order
-        }
-      })
-
-      // Group variables by environment
-      const variablesByEnvironment: {
-        [key: string]: {
-          environmentName: string
-          environmentId: string
-          variables: any[]
-        }
-      } = {}
-      for (const variable of variables) {
-        const { id, name } = variable.environment
-        if (!variablesByEnvironment[id]) {
-          variablesByEnvironment[id] = {
-            environmentName: name,
-            environmentId: id,
-            variables: []
+        environment: {
+          select: {
+            id: true,
+            name: true
           }
         }
-        variablesByEnvironment[id].variables.push(variable)
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
       }
+    })
 
-      // Convert the object to an array and return
-      return Object.values(variablesByEnvironment)
-    } catch (error) {
-      console.error('Error fetching variables:', error)
-      throw error // Or handle the error as per your application's requirement
+    // Group variables by environment
+    const variablesByEnvironment: {
+      [key: string]: {
+        environment: { id: string; name: string }
+        variables: any[]
+      }
+    } = {}
+    for (const variable of variables) {
+      const { id, name } = variable.environment
+      if (!variablesByEnvironment[id]) {
+        variablesByEnvironment[id] = {
+          environment: { id, name },
+          variables: []
+        }
+      }
+      variablesByEnvironment[id].variables.push(variable)
     }
+
+    // Convert the object to an array and return
+    return Object.values(variablesByEnvironment)
   }
 
   private async variableExists(
