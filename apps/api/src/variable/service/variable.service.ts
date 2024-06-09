@@ -29,8 +29,7 @@ import createApproval from '../../common/create-approval'
 import { UpdateVariableMetadata } from '../../approval/approval.types'
 import {
   VariableWithProject,
-  VariableWithProjectAndVersion,
-  VariablesByEnvironment
+  VariableWithProjectAndVersion
 } from '../variable.types'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
@@ -414,7 +413,12 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ): Promise<VariablesByEnvironment[]> {
+  ): Promise<
+    {
+      environment: { id: string; name: string }
+      variables: any[]
+    }[]
+  > {
     // Check if the user has the required authorities in the project
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,

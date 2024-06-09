@@ -26,12 +26,9 @@ import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
 import {
-  SecretWithEnvironment,
   SecretWithProject,
   SecretWithProjectAndVersion,
-  SecretWithVersion,
-  SecretWithVersionAndEnvironment,
-  SecretsByEnvironment
+  SecretWithVersionAndEnvironment
 } from '../secret.types'
 import createEvent from '../../common/create-event'
 import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
@@ -433,7 +430,12 @@ export class SecretService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<
+    {
+      environment: { id: string; name: string }
+      secrets: any[]
+    }[]
+  > {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -493,38 +495,41 @@ export class SecretService {
       }
     })) as unknown as SecretWithVersionAndEnvironment[]
 
-    if (decryptValue) {
-      for (const secret of secrets) {
-        // Decrypt the secret value
-        for (let i = 0; i < secret.versions.length; i++) {
+    for (const secret of secrets) {
+      // Decrypt the secret value
+      for (let i = 0; i < secret.versions.length; i++) {
+        const version = secret.versions[i]
+        // Optionally decrypt secret value if decryptValue is true
+        if (decryptValue) {
           const decryptedValue = await decrypt(
             project.privateKey,
-            secret.versions[i].value
+            version.value
           )
-          secret.versions[i].value = decryptedValue
+          version.value = decryptedValue
         }
       }
     }
-    // Group secrets by environment
-    const secretsByEnvironment = secrets.reduce((acc, secret) => {
-      const { environment } = secret
-      if (environment) {
-        const { id, name } = environment
-        if (!acc[id]) {
-          acc[id] = {
-            environment: { id, name },
-            secrets: []
-          }
-        }
-        acc[id].secrets.push(secret)
+
+    // Group variables by environment
+    const secretsByEnvironment: {
+      [key: string]: {
+        environment: { id: string; name: string }
+        secrets: any[]
       }
-      return acc
-    }, {} as SecretsByEnvironment)
+    } = {}
+    for (const secret of secrets) {
+      const { id, name } = secret.environment
+      if (!secretsByEnvironment[id]) {
+        secretsByEnvironment[id] = {
+          environment: { id, name },
+          secrets: []
+        }
+      }
+      secretsByEnvironment[id].secrets.push(secret)
+    }
 
-    // Convert the result to an array
-    const clusteredSecrets = Object.values(secretsByEnvironment)
-
-    return clusteredSecrets
+    // Convert the object to an array and return
+    return Object.values(secretsByEnvironment)
   }
 
   private async secretExists(

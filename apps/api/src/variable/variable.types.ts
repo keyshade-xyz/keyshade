@@ -16,10 +16,5 @@ export interface VariableWithEnvironment extends Variable {
   environment: Environment
 }
 
-export type VariablesByEnvironment = {
-  environment: { id: string; name: string }
-  variables: any[]
-}
-
 export type VariableWithProjectAndVersion = VariableWithProject &
   VariableWithVersion

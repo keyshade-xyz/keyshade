@@ -16,10 +16,6 @@ export interface SecretWithEnvironment extends Secret {
   environment: Environment
 }
 
-export type SecretsByEnvironment = {
-  environment: { id: string; name: string }
-  secrets: any[]
-}
 export type SecretWithProjectAndVersion = SecretWithProject & SecretWithVersion
 export type SecretWithVersionAndEnvironment = SecretWithVersion &
   SecretWithEnvironment

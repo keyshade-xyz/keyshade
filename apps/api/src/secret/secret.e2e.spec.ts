@@ -840,9 +840,9 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
-    const envsecret = response.json()[0]
-    expect(envsecret.environment).toHaveProperty('id')
-    expect(envsecret.environment).toHaveProperty('name')
+    const envSecret = response.json()[0]
+    expect(envSecret.environment).toHaveProperty('id')
+    expect(envSecret.environment).toHaveProperty('name')
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
