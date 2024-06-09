@@ -460,7 +460,7 @@ export class SecretService {
       )
     }
 
-    const secrets = (await this.prisma.secret.findMany({
+    const secrets = await this.prisma.secret.findMany({
       where: {
         projectId,
         pendingCreation: false,
@@ -493,7 +493,15 @@ export class SecretService {
       orderBy: {
         [sort]: order
       }
-    })) as unknown as SecretWithVersionAndEnvironment[]
+    })
+
+    // Group variables by environment
+    const secretsByEnvironment: {
+      [key: string]: {
+        environment: { id: string; name: string }
+        secrets: any[]
+      }
+    } = {}
 
     for (const secret of secrets) {
       // Decrypt the secret value
@@ -508,16 +516,7 @@ export class SecretService {
           version.value = decryptedValue
         }
       }
-    }
 
-    // Group variables by environment
-    const secretsByEnvironment: {
-      [key: string]: {
-        environment: { id: string; name: string }
-        secrets: any[]
-      }
-    } = {}
-    for (const secret of secrets) {
       const { id, name } = secret.environment
       if (!secretsByEnvironment[id]) {
         secretsByEnvironment[id] = {
