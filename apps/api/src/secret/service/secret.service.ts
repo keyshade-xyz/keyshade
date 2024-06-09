@@ -28,7 +28,7 @@ import { encrypt } from '../../common/encrypt'
 import {
   SecretWithProject,
   SecretWithProjectAndVersion,
-  SecretWithVersion
+  SecretWithVersionAndEnvironment
 } from '../secret.types'
 import createEvent from '../../common/create-event'
 import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
@@ -430,7 +430,12 @@ export class SecretService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<
+    {
+      environment: { id: string; name: string }
+      secrets: any[]
+    }[]
+  > {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -455,7 +460,7 @@ export class SecretService {
       )
     }
 
-    const secrets = (await this.prisma.secret.findMany({
+    const secrets = await this.prisma.secret.findMany({
       where: {
         projectId,
         pendingCreation: false,
@@ -488,22 +493,42 @@ export class SecretService {
       orderBy: {
         [sort]: order
       }
-    })) as SecretWithVersion[]
+    })
 
-    if (decryptValue) {
-      for (const secret of secrets) {
-        // Decrypt the secret value
-        for (let i = 0; i < secret.versions.length; i++) {
+    // Group variables by environment
+    const secretsByEnvironment: {
+      [key: string]: {
+        environment: { id: string; name: string }
+        secrets: any[]
+      }
+    } = {}
+
+    for (const secret of secrets) {
+      // Decrypt the secret value
+      for (let i = 0; i < secret.versions.length; i++) {
+        const version = secret.versions[i]
+        // Optionally decrypt secret value if decryptValue is true
+        if (decryptValue) {
           const decryptedValue = await decrypt(
             project.privateKey,
-            secret.versions[i].value
+            version.value
           )
-          secret.versions[i].value = decryptedValue
+          version.value = decryptedValue
         }
       }
+
+      const { id, name } = secret.environment
+      if (!secretsByEnvironment[id]) {
+        secretsByEnvironment[id] = {
+          environment: { id, name },
+          secrets: []
+        }
+      }
+      secretsByEnvironment[id].secrets.push(secret)
     }
 
-    return secrets
+    // Convert the object to an array and return
+    return Object.values(secretsByEnvironment)
   }
 
   private async secretExists(

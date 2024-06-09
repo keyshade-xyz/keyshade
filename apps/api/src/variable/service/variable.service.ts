@@ -413,7 +413,12 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<
+    {
+      environment: { id: string; name: string }
+      variables: any[]
+    }[]
+  > {
     // Check if the user has the required authorities in the project
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,
@@ -422,7 +427,7 @@ export class VariableService {
       prisma: this.prisma
     })
 
-    return await this.prisma.variable.findMany({
+    const variables = await this.prisma.variable.findMany({
       where: {
         projectId,
         pendingCreation: false,
@@ -456,6 +461,27 @@ export class VariableService {
         [sort]: order
       }
     })
+
+    // Group variables by environment
+    const variablesByEnvironment: {
+      [key: string]: {
+        environment: { id: string; name: string }
+        variables: any[]
+      }
+    } = {}
+    for (const variable of variables) {
+      const { id, name } = variable.environment
+      if (!variablesByEnvironment[id]) {
+        variablesByEnvironment[id] = {
+          environment: { id, name },
+          variables: []
+        }
+      }
+      variablesByEnvironment[id].variables.push(variable)
+    }
+
+    // Convert the object to an array and return
+    return Object.values(variablesByEnvironment)
   }
 
   private async variableExists(
