@@ -505,11 +505,14 @@ export class SecretService {
 
     for (const secret of secrets) {
       // Decrypt the secret value
-      const version = secret.versions[0]
       // Optionally decrypt secret value if decryptValue is true
       if (decryptValue) {
-        const decryptedValue = await decrypt(project.privateKey, version.value)
-        version.value = decryptedValue
+        const latestSecretVersion = secret.versions[0]
+        const decryptedValue = await decrypt(
+          project.privateKey,
+          latestSecretVersion.value
+        )
+        latestSecretVersion.value = decryptedValue
       }
 
       const { id, name } = secret.environment
