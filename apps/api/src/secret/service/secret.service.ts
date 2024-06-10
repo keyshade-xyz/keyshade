@@ -504,7 +504,6 @@ export class SecretService {
     } = {}
 
     for (const secret of secrets) {
-      // Decrypt the secret value
       // Optionally decrypt secret value if decryptValue is true
       if (decryptValue) {
         const latestSecretVersion = secret.versions[0]
