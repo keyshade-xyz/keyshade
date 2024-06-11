@@ -27,15 +27,15 @@ import { EnvironmentModule } from '../environment/environment.module'
 import { VariableModule } from './variable.module'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
-import cleanUp from '../common/cleanup'
 import { EnvironmentService } from '../environment/service/environment.service'
-import { v4 } from 'uuid'
 import fetchEvents from '../common/fetch-events'
 import { VariableService } from './service/variable.service'
 import { EventService } from '../event/service/event.service'
 import { REDIS_CLIENT } from '../provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
+import { UserService } from '../user/service/user.service'
+import { UserModule } from '../user/user.module'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -45,13 +45,14 @@ describe('Variable Controller Tests', () => {
   let environmentService: EnvironmentService
   let variableService: VariableService
   let eventService: EventService
+  let userService: UserService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project, workspace2Project: Project
-  let environment1: Environment,
-    environment2: Environment,
-    workspace2Environment: Environment
+  let environment1: Environment
+  let environment2: Environment
+  let workspace2Environment: Environment
   let variable1: Variable
 
   beforeAll(async () => {
@@ -62,7 +63,8 @@ describe('Variable Controller Tests', () => {
         WorkspaceModule,
         ProjectModule,
         EnvironmentModule,
-        VariableModule
+        VariableModule,
+        UserModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -80,44 +82,33 @@ describe('Variable Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     variableService = moduleRef.get(VariableService)
     eventService = moduleRef.get(EventService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await cleanUp(prisma)
-
-    const user1Id = v4()
-    const user2Id = v4()
-
-    user1 = await prisma.user.create({
-      data: {
-        id: user1Id,
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
-      }
+  beforeEach(async () => {
+    const createUser1 = await userService.createUser({
+      email: 'johndoe@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
     })
 
-    user2 = await prisma.user.create({
-      data: {
-        id: user2Id,
-        email: 'janedoe@keyshade.xyz',
-        name: 'Jane Doe',
-        isOnboardingFinished: true
-      }
+    const createUser2 = await userService.createUser({
+      email: 'janedoe@keyshade.xyz',
+      name: 'Jane Doe',
+      isOnboardingFinished: true
     })
 
-    workspace1 = await workspaceService.createWorkspace(user1, {
-      name: 'Workspace 1',
-      description: 'Workspace 1 description',
-      approvalEnabled: false
-    })
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
 
-    workspace2 = await workspaceService.createWorkspace(user2, {
-      name: 'Workspace 2',
-      description: 'Workspace 2 description',
-      approvalEnabled: false
-    })
+    delete createUser1.defaultWorkspace
+    delete createUser2.defaultWorkspace
+
+    user1 = createUser1
+    user2 = createUser2
 
     project1 = (await projectService.createProject(user1, workspace1.id, {
       name: 'Project 1',
@@ -190,6 +181,23 @@ describe('Variable Controller Tests', () => {
         name: 'Environment 2'
       }
     })
+
+    variable1 = (await variableService.createVariable(
+      user1,
+      {
+        name: 'Variable 1',
+        value: 'Variable 1 value',
+        environmentId: environment2.id
+      },
+      project1.id
+    )) as Variable
+  })
+
+  afterEach(async () => {
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
   })
 
   it('should be defined', async () => {
@@ -206,9 +214,9 @@ describe('Variable Controller Tests', () => {
       url: `/variable/${project1.id}`,
       payload: {
         environmentId: environment2.id,
-        name: 'Variable 1',
-        value: 'Variable 1 value',
-        note: 'Variable 1 note',
+        name: 'Variable 3',
+        value: 'Variable 3 value',
+        note: 'Variable 3 note',
         rotateAfter: '24'
       },
       headers: {
@@ -221,12 +229,18 @@ describe('Variable Controller Tests', () => {
     const body = response.json()
 
     expect(body).toBeDefined()
-    expect(body.name).toBe('Variable 1')
-    expect(body.note).toBe('Variable 1 note')
+    expect(body.name).toBe('Variable 3')
+    expect(body.note).toBe('Variable 3 note')
     expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
 
-    variable1 = body
+    const variable = await prisma.variable.findUnique({
+      where: {
+        id: body.id
+      }
+    })
+
+    expect(variable).toBeDefined()
   })
 
   it('should have created a variable version', async () => {
@@ -448,8 +462,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(variableVersion.length).toBe(1)
-
-    variable1 = response.json()
   })
 
   it('should create a new version if the value is updated', async () => {
@@ -476,6 +488,11 @@ describe('Variable Controller Tests', () => {
   })
 
   it('should have created a VARIABLE_UPDATED event', async () => {
+    // Update a variable
+    await variableService.updateVariable(user1, variable1.id, {
+      value: 'Updated Variable 1 value'
+    })
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -543,7 +560,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to move the variable to the same environment', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/${variable1.id}/environment/${environment1.id}`,
+      url: `/variable/${variable1.id}/environment/${environment2.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -551,7 +568,7 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(400)
     expect(response.json().message).toEqual(
-      `Can not update the environment of the variable to the same environment: ${environment1.id}`
+      `Can not update the environment of the variable to the same environment: ${environment2.id}`
     )
   })
 
@@ -571,17 +588,19 @@ describe('Variable Controller Tests', () => {
   })
 
   it('should not be able to move a variable of the same name to an environment', async () => {
-    const newVariable = await prisma.variable.create({
-      data: {
-        projectId: project1.id,
-        environmentId: environment2.id,
-        name: 'Updated Variable 1'
-      }
-    })
+    const newVariable = (await variableService.createVariable(
+      user1,
+      {
+        environmentId: environment1.id,
+        name: 'Variable 1',
+        value: 'Variable 1 value'
+      },
+      project1.id
+    )) as Variable
 
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/${newVariable.id}/environment/${environment1.id}`,
+      url: `/variable/${newVariable.id}/environment/${environment2.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -589,7 +608,7 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toEqual(
-      `Variable already exists: Updated Variable 1 in environment ${environment1.id} in project ${project1.id}`
+      `Variable already exists: Variable 1 in environment ${environment2.id} in project ${project1.id}`
     )
   })
 
@@ -656,7 +675,7 @@ describe('Variable Controller Tests', () => {
       }
     })
 
-    expect(versions.length).toBe(4)
+    expect(versions.length).toBe(3)
 
     const response = await app.inject({
       method: 'PUT',
@@ -667,7 +686,7 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().count).toEqual(3)
+    expect(response.json().count).toEqual(2)
 
     versions = await prisma.variableVersion.findMany({
       where: {
@@ -754,7 +773,10 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(3)
+    expect(response.json().length).toBe(1)
+    const envVariable = response.json()[0]
+    expect(envVariable.environment).toHaveProperty('id')
+    expect(envVariable.environment).toHaveProperty('name')
   })
 
   it('should not be able to fetch all variables if the user has no access to the project', async () => {
@@ -830,6 +852,9 @@ describe('Variable Controller Tests', () => {
   })
 
   it('should have created a VARIABLE_DELETED event', async () => {
+    // Delete a variable
+    await variableService.deleteVariable(user1, variable1.id)
+
     const response = await fetchEvents(
       eventService,
       user1,
@@ -845,9 +870,5 @@ describe('Variable Controller Tests', () => {
     expect(event.type).toBe(EventType.VARIABLE_DELETED)
     expect(event.workspaceId).toBe(workspace1.id)
     expect(event.itemId).toBeDefined()
-  })
-
-  afterAll(async () => {
-    await app.close()
   })
 })

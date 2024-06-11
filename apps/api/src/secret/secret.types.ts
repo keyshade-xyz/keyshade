@@ -17,3 +17,5 @@ export interface SecretWithEnvironment extends Secret {
 }
 
 export type SecretWithProjectAndVersion = SecretWithProject & SecretWithVersion
+export type SecretWithVersionAndEnvironment = SecretWithVersion &
+  SecretWithEnvironment
