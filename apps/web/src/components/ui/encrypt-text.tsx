@@ -55,7 +55,7 @@ function EncryptText({
   }
 
   return (
-    <motion.button
+    <motion.div
       className="group relative w-full overflow-hidden text-white/60 transition-colors hover:text-white"
       onMouseEnter={scramble}
       onMouseLeave={stopScramble}
@@ -64,10 +64,10 @@ function EncryptText({
       <span className="invisible absolute" ref={textRef}>
         {TARGET_TEXT}
       </span>
-      <div className="relative z-10 flex items-center gap-2">
+      <motion.button className="relative z-10 flex items-center gap-2">
         <span className="flex whitespace-nowrap">{text}</span>
-      </div>
-    </motion.button>
+      </motion.button>
+    </motion.div>
   )
 }
 
