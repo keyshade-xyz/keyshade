@@ -13,34 +13,31 @@ function About(): React.JSX.Element {
       title: 'Free',
       description: 'For hobbyists and beginners',
       price: 0,
-      is_popular: false,
-      space_projects: 1,
-      space_users: 1,
-      space_email_support: true,
-      space_live_support: false,
-      misc_features: ['Unlimited Users', '1 Workspace']
+      isPopular: false,
+      spaceProjects: 1,
+      spaceUsers: 1,
+      spaceLiveSupport: false,
+      miscFeatures: ['Unlimited Users', '1 Workspace']
     },
     {
       title: 'Pro',
       description: 'For small teams and startups',
       price: 15,
-      is_popular: true,
-      space_projects: 5,
-      space_users: 5,
-      space_email_support: true,
-      space_live_support: true,
-      misc_features: ['Unlimited Users', '5 Workspaces']
+      isPopular: true,
+      spaceProjects: 5,
+      spaceUsers: 5,
+      spaceLiveSupport: true,
+      miscFeatures: ['Unlimited Users', '5 Workspaces']
     },
     {
       title: 'Enterprise',
       description: 'For large teams and enterprises',
       price: 45,
-      is_popular: false,
-      space_projects: 100,
-      space_users: 1000,
-      space_email_support: true,
-      space_live_support: true,
-      misc_features: ['Unlimited Users', '10 Workspaces']
+      isPopular: false,
+      spaceProjects: 100,
+      spaceUsers: 1000,
+      spaceLiveSupport: true,
+      miscFeatures: ['Unlimited Users', '10 Workspaces']
     }
   ]
 
@@ -72,16 +69,15 @@ function About(): React.JSX.Element {
         <div className="flex flex-col gap-8 md:flex-row">
           {priceCardData.map((card) => (
             <PriceCard
-              key={card.title}
-              title={card.title}
               description={card.description}
+              isPopular={card.isPopular}
+              key={card.title}
+              miscFeatures={card.miscFeatures}
               price={card.price}
-              is_popular={card.is_popular}
-              space_projects={card.space_projects}
-              space_users={card.space_users}
-              space_email_support={card.space_email_support}
-              space_live_support={card.space_live_support}
-              misc_features={card.misc_features}
+              spaceLiveSupport={card.spaceLiveSupport}
+              spaceProjects={card.spaceProjects}
+              spaceUsers={card.spaceUsers}
+              title={card.title}
             />
           ))}
         </div>

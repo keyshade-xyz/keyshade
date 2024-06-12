@@ -3,10 +3,8 @@ import gridImage from '@public/pricing/grid.png'
 import {
   ProjectSVG,
   UserSVG,
-  DividerSVG,
   SupportSVG,
   TickSVG,
-  PopularSVG,
   StarsLeftSVG,
   StarsRightSVG
 } from '@public/pricing'
@@ -16,48 +14,46 @@ interface CardProps {
   description: string
   price: number
 
-  is_popular: boolean
+  isPopular: boolean
 
-  space_projects: number
-  space_users: number
-  space_email_support: boolean
-  space_live_support: boolean
+  spaceProjects: number
+  spaceUsers: number
+  spaceLiveSupport: boolean
 
-  misc_features: string[]
+  miscFeatures: string[]
 }
 
 function PriceCard({
   title,
   description,
   price,
-  is_popular,
-  space_projects,
-  space_users,
-  space_email_support,
-  space_live_support,
-  misc_features
+  isPopular,
+  spaceProjects,
+  spaceUsers,
+  spaceLiveSupport,
+  miscFeatures
 }: Readonly<CardProps>): React.JSX.Element {
   return (
     <div className="relative mt-5 md:mt-0">
-      {is_popular && (
+      {isPopular ? (
         <div className="absolute -mt-[2.2rem] w-full ">
           <div className="item h-[4.5rem] translate-y-[2px] overflow-hidden rounded-xl bg-[#1E3F51] bg-clip-border text-center align-middle">
             <div className="bg h-full w-full bg-gradient-to-b from-[#96D4F8]/5 via-[#96D4F8]/30 to-[#96D4F8]/50">
               <div className="flex items-center justify-evenly pt-1">
-                <StarsLeftSVG className={'aspect-video w-10'} />
+                <StarsLeftSVG className="aspect-video w-10" />
                 <div className="bg-gradient-to-b from-white to-white/70 bg-clip-text text-xs uppercase text-transparent">
                   Most Popular Plan
                 </div>
-                <StarsRightSVG className={'aspect-video w-10'} />
+                <StarsRightSVG className="aspect-video w-10" />
               </div>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div
-        key={title}
         className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[14rem] lg:w-[17rem]"
+        key={title}
         style={{
           background:
             'linear-gradient(180deg, rgba(50, 60, 80, 0.00) 0%, #252D3F 100%), #313e58'
@@ -90,12 +86,15 @@ function PriceCard({
           </div>
         )}
 
-        <button className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32">
+        <button
+          className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
+          type="button"
+        >
           {price === 0 ? 'Get Started' : 'Try For Free'}
         </button>
 
         <div className="my-5 md:-mx-6 lg:-mx-4">
-          <div className="via-ble h-[2px] w-full bg-gradient-to-r from-transparent via-[#8EE8FF] to-transparent"></div>
+          <div className="via-ble h-[2px] w-full bg-gradient-to-r from-transparent via-[#8EE8FF] to-transparent" />
         </div>
 
         <div className="text-brandBlue/90 text-sm font-light tracking-widest md:text-base">
@@ -105,17 +104,17 @@ function PriceCard({
         <div className="flex flex-col space-y-2">
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <ProjectSVG />
-            <div>{space_projects} Projects</div>
+            <div>{spaceProjects} Projects</div>
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{space_users} Users </div>
+            <div>{spaceUsers} Users </div>
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
             <SupportSVG />
-            {space_live_support ? (
+            {spaceLiveSupport ? (
               <div> Email & Live Support</div>
             ) : (
               <div> Email Support</div>
@@ -128,7 +127,7 @@ function PriceCard({
         </div>
 
         <div className="mt-2 flex flex-col space-y-2">
-          {misc_features.map((feature) => (
+          {miscFeatures.map((feature) => (
             <div
               className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm"
               key={title + feature}
