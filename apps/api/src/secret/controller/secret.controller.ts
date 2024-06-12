@@ -14,7 +14,6 @@ import { Authority, User } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @Controller('secret')
 export class SecretController {
@@ -25,10 +24,9 @@ export class SecretController {
   async createSecret(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Body() dto: CreateSecret,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: CreateSecret
   ) {
-    return await this.secretService.createSecret(user, dto, projectId, reason)
+    return await this.secretService.createSecret(user, dto, projectId)
   }
 
   @Put(':secretId')
@@ -36,29 +34,9 @@ export class SecretController {
   async updateSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Body() dto: UpdateSecret,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: UpdateSecret
   ) {
-    return await this.secretService.updateSecret(user, secretId, dto, reason)
-  }
-
-  @Put(':secretId/environment/:environmentId')
-  @RequiredApiKeyAuthorities(
-    Authority.UPDATE_SECRET,
-    Authority.READ_ENVIRONMENT
-  )
-  async updateSecretEnvironment(
-    @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
-    @Param('environmentId') environmentId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
-  ) {
-    return await this.secretService.updateSecretEnvironment(
-      user,
-      secretId,
-      environmentId,
-      reason
-    )
+    return await this.secretService.updateSecret(user, secretId, dto)
   }
 
   @Put(':secretId/rollback/:rollbackVersion')
@@ -66,14 +44,14 @@ export class SecretController {
   async rollbackSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Param('rollbackVersion') rollbackVersion: number,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Query('environmentId') environmentId: string,
+    @Param('rollbackVersion') rollbackVersion: number
   ) {
     return await this.secretService.rollbackSecret(
       user,
       secretId,
-      rollbackVersion,
-      reason
+      environmentId,
+      rollbackVersion
     )
   }
 
@@ -81,20 +59,9 @@ export class SecretController {
   @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Param('secretId') secretId: string
   ) {
-    return await this.secretService.deleteSecret(user, secretId, reason)
-  }
-
-  @Get(':secretId')
-  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
-  async getSecret(
-    @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
-    @Query('decryptValue') decryptValue: boolean = false
-  ) {
-    return await this.secretService.getSecretById(user, secretId, decryptValue)
+    return await this.secretService.deleteSecret(user, secretId)
   }
 
   @Get('/all/:projectId')

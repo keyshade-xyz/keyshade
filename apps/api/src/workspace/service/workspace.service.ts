@@ -9,8 +9,6 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import {
-  ApprovalAction,
-  ApprovalItemType,
   Authority,
   EventSource,
   EventType,
@@ -31,9 +29,6 @@ import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
 import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
-import { UpdateWorkspaceMetadata } from '../../approval/approval.types'
-import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
-import createApproval from '../../common/create-approval'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 
@@ -59,8 +54,7 @@ export class WorkspaceService {
   async updateWorkspace(
     user: User,
     workspaceId: Workspace['id'],
-    dto: UpdateWorkspace,
-    reason?: string
+    dto: UpdateWorkspace
   ) {
     // Fetch the workspace
     const workspace =
@@ -80,24 +74,39 @@ export class WorkspaceService {
       throw new ConflictException('Workspace already exists')
     }
 
-    if (await workspaceApprovalEnabled(workspaceId, this.prisma)) {
-      // Create the update approval
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.WORKSPACE,
-          itemId: workspaceId,
-          reason,
-          user,
-          workspaceId,
-          metadata: dto as UpdateWorkspaceMetadata
+    const updatedWorkspace = await this.prisma.workspace.update({
+      where: {
+        id: workspaceId
+      },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        lastUpdatedBy: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    })
+    this.log.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
+
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_UPDATED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace updated`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name
         },
-        this.prisma
-      )
-    } else {
-      // Update the workspace
-      return await this.update(workspaceId, dto, user)
-    }
+        workspaceId: workspace.id
+      },
+      this.prisma
+    )
+
+    return updatedWorkspace
   }
 
   async transferOwnership(
@@ -796,31 +805,30 @@ export class WorkspaceService {
         environments: {
           select: {
             name: true,
-            description: true,
-            isDefault: true,
-            secrets: {
+            description: true
+          }
+        },
+        secrets: {
+          select: {
+            name: true,
+            rotateAt: true,
+            note: true,
+            versions: {
               select: {
-                name: true,
-                rotateAt: true,
-                note: true,
-                versions: {
-                  select: {
-                    value: true,
-                    version: true
-                  }
-                }
+                value: true,
+                version: true
               }
-            },
-            variables: {
+            }
+          }
+        },
+        variables: {
+          select: {
+            name: true,
+            note: true,
+            versions: {
               select: {
-                name: true,
-                note: true,
-                versions: {
-                  select: {
-                    value: true,
-                    version: true
-                  }
-                }
+                value: true,
+                version: true
               }
             }
           }
@@ -1034,46 +1042,5 @@ export class WorkspaceService {
       throw new BadRequestException(
         `User ${userId} is not invited to workspace ${workspaceId}`
       )
-  }
-
-  async update(
-    workspaceId: Workspace['id'],
-    data: UpdateWorkspace | UpdateWorkspaceMetadata,
-    user: User
-  ) {
-    const workspace = await this.prisma.workspace.update({
-      where: {
-        id: workspaceId
-      },
-      data: {
-        name: data.name,
-        description: data.description,
-        approvalEnabled: data.approvalEnabled,
-        lastUpdatedBy: {
-          connect: {
-            id: user.id
-          }
-        }
-      }
-    })
-    this.log.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
-
-    await createEvent(
-      {
-        triggeredBy: user,
-        entity: workspace,
-        type: EventType.WORKSPACE_UPDATED,
-        source: EventSource.WORKSPACE,
-        title: `Workspace updated`,
-        metadata: {
-          workspaceId: workspace.id,
-          name: workspace.name
-        },
-        workspaceId: workspace.id
-      },
-      this.prisma
-    )
-
-    return workspace
   }
 }

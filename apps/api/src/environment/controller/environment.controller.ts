@@ -14,7 +14,6 @@ import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { Authority, User } from '@prisma/client'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 
 @Controller('environment')
 export class EnvironmentController {
@@ -25,15 +24,9 @@ export class EnvironmentController {
   async createEnvironment(
     @CurrentUser() user: User,
     @Body() dto: CreateEnvironment,
-    @Param('projectId') projectId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Param('projectId') projectId: string
   ) {
-    return await this.environmentService.createEnvironment(
-      user,
-      dto,
-      projectId,
-      reason
-    )
+    return await this.environmentService.createEnvironment(user, dto, projectId)
   }
 
   @Put(':environmentId')
@@ -41,14 +34,12 @@ export class EnvironmentController {
   async updateEnvironment(
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
-    @Param('environmentId') environmentId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Param('environmentId') environmentId: string
   ) {
     return await this.environmentService.updateEnvironment(
       user,
       dto,
-      environmentId,
-      reason
+      environmentId
     )
   }
 
@@ -87,13 +78,8 @@ export class EnvironmentController {
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(
     @CurrentUser() user: User,
-    @Param('environmentId') environmentId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Param('environmentId') environmentId: string
   ) {
-    return await this.environmentService.deleteEnvironment(
-      user,
-      environmentId,
-      reason
-    )
+    return await this.environmentService.deleteEnvironment(user, environmentId)
   }
 }

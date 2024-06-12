@@ -14,7 +14,6 @@ import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 import { ForkProject } from '../dto/fork.project/fork.project'
 
 @Controller('project')
@@ -26,10 +25,9 @@ export class ProjectController {
   async createProject(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Body() dto: CreateProject,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: CreateProject
   ) {
-    return await this.service.createProject(user, workspaceId, dto, reason)
+    return await this.service.createProject(user, workspaceId, dto)
   }
 
   @Put(':projectId')
@@ -37,20 +35,18 @@ export class ProjectController {
   async updateProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: Project['id'],
-    @Body() dto: UpdateProject,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: UpdateProject
   ) {
-    return await this.service.updateProject(user, projectId, dto, reason)
+    return await this.service.updateProject(user, projectId, dto)
   }
 
   @Delete(':projectId')
   @RequiredApiKeyAuthorities(Authority.DELETE_PROJECT)
   async deleteProject(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: Project['id'],
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Param('projectId') projectId: Project['id']
   ) {
-    return await this.service.deleteProject(user, projectId, reason)
+    return await this.service.deleteProject(user, projectId)
   }
 
   @Get(':projectId')

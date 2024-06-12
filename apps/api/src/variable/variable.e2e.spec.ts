@@ -48,11 +48,10 @@ describe('Variable Controller Tests', () => {
   let userService: UserService
 
   let user1: User, user2: User
-  let workspace1: Workspace, workspace2: Workspace
-  let project1: Project, project2: Project, workspace2Project: Project
+  let workspace1: Workspace
+  let project1: Project
   let environment1: Environment
   let environment2: Environment
-  let workspace2Environment: Environment
   let variable1: Variable
 
   beforeAll(async () => {
@@ -102,7 +101,6 @@ describe('Variable Controller Tests', () => {
     })
 
     workspace1 = createUser1.defaultWorkspace
-    workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
@@ -118,55 +116,14 @@ describe('Variable Controller Tests', () => {
       environments: [
         {
           name: 'Environment 1',
-          description: 'Environment 1 description',
-          isDefault: true
+          description: 'Environment 1 description'
         },
         {
           name: 'Environment 2',
-          description: 'Environment 2 description',
-          isDefault: false
+          description: 'Environment 2 description'
         }
       ]
     })) as Project
-
-    project2 = (await projectService.createProject(user1, workspace1.id, {
-      name: 'Project 2',
-      description: 'Project 2 description',
-      storePrivateKey: false,
-      accessLevel: ProjectAccessLevel.PRIVATE,
-      environments: [
-        {
-          name: 'Environment 1',
-          description: 'Environment 1 description',
-          isDefault: true
-        }
-      ]
-    })) as Project
-
-    workspace2Project = (await projectService.createProject(
-      user2,
-      workspace2.id,
-      {
-        name: 'Workspace 2 Project',
-        description: 'Workspace 2 Project description',
-        storePrivateKey: true,
-        accessLevel: ProjectAccessLevel.PRIVATE,
-        environments: [
-          {
-            name: 'Environment 1',
-            description: 'Environment 1 description',
-            isDefault: true
-          }
-        ]
-      }
-    )) as Project
-
-    workspace2Environment = await prisma.environment.findFirst({
-      where: {
-        projectId: workspace2Project.id,
-        name: 'Environment 1'
-      }
-    })
 
     environment1 = await prisma.environment.findFirst({
       where: {
@@ -186,8 +143,12 @@ describe('Variable Controller Tests', () => {
       user1,
       {
         name: 'Variable 1',
-        value: 'Variable 1 value',
-        environmentId: environment2.id
+        entries: [
+          {
+            environmentId: environment1.id,
+            value: 'Variable 1 value'
+          }
+        ]
       },
       project1.id
     )) as Variable
@@ -213,11 +174,15 @@ describe('Variable Controller Tests', () => {
       method: 'POST',
       url: `/variable/${project1.id}`,
       payload: {
-        environmentId: environment2.id,
         name: 'Variable 3',
-        value: 'Variable 3 value',
         note: 'Variable 3 note',
-        rotateAfter: '24'
+        rotateAfter: '24',
+        entries: [
+          {
+            value: 'Variable 3 value',
+            environmentId: environment2.id
+          }
+        ]
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -231,8 +196,9 @@ describe('Variable Controller Tests', () => {
     expect(body).toBeDefined()
     expect(body.name).toBe('Variable 3')
     expect(body.note).toBe('Variable 3 note')
-    expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
+    expect(body.versions.length).toBe(1)
+    expect(body.versions[0].value).toBe('Variable 3 value')
 
     const variable = await prisma.variable.findUnique({
       where: {
@@ -255,41 +221,19 @@ describe('Variable Controller Tests', () => {
     expect(variableVersion.version).toBe(1)
   })
 
-  it('should create variable in default environment if environmentId is not provided', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/variable/${project1.id}`,
-      payload: {
-        name: 'Variable 2',
-        value: 'Variable 2 value',
-        note: 'Variable 2 note',
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(201)
-
-    const body = response.json()
-
-    expect(body).toBeDefined()
-    expect(body.name).toBe('Variable 2')
-    expect(body.note).toBe('Variable 2 note')
-    expect(body.environmentId).toBe(environment1.id)
-    expect(body.projectId).toBe(project1.id)
-  })
-
   it('should not be able to create a variable with a non-existing environment', async () => {
     const response = await app.inject({
       method: 'POST',
       url: `/variable/${project1.id}`,
       payload: {
-        environmentId: 'non-existing-environment-id',
         name: 'Variable 3',
-        value: 'Variable 3 value',
-        rotateAfter: '24'
+        rotateAfter: '24',
+        entries: [
+          {
+            value: 'Variable 3 value',
+            environmentId: 'non-existing-environment-id'
+          }
+        ]
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -305,7 +249,6 @@ describe('Variable Controller Tests', () => {
       url: `/variable/${project1.id}`,
       payload: {
         name: 'Variable 3',
-        value: 'Variable 3 value',
         rotateAfter: '24'
       },
       headers: {
@@ -319,54 +262,12 @@ describe('Variable Controller Tests', () => {
     )
   })
 
-  it('should fail if project has no default environment(hypothetical case)', async () => {
-    await prisma.environment.updateMany({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 1'
-      },
-      data: {
-        isDefault: false
-      }
-    })
-
+  it('should not be able to create a duplicate variable in the same project', async () => {
     const response = await app.inject({
       method: 'POST',
       url: `/variable/${project1.id}`,
       payload: {
-        name: 'Variable 4',
-        value: 'Variable 4 value',
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toEqual(
-      `No default environment found for project with id ${project1.id}`
-    )
-
-    await prisma.environment.updateMany({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 1'
-      },
-      data: {
-        isDefault: true
-      }
-    })
-  })
-
-  it('should not be able to create a duplicate variable in the same environment', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/variable/${project1.id}`,
-      payload: {
-        environmentId: environment2.id,
         name: 'Variable 1',
-        value: 'Variable 1 value',
         rotateAfter: '24'
       },
       headers: {
@@ -376,7 +277,7 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toEqual(
-      `Variable already exists: Variable 1 in environment ${environment2.id} in project ${project1.id}`
+      `Variable already exists: Variable 1 in project ${project1.id}`
     )
   })
 
@@ -404,7 +305,6 @@ describe('Variable Controller Tests', () => {
       url: `/variable/non-existing-variable-id`,
       payload: {
         name: 'Updated Variable 1',
-        value: 'Updated Variable 1 value',
         rotateAfter: '24'
       },
       headers: {
@@ -418,13 +318,12 @@ describe('Variable Controller Tests', () => {
     )
   })
 
-  it('should not be able to update a variable with same name in the same environment', async () => {
+  it('should not be able to update a variable with same name in the same project', async () => {
     const response = await app.inject({
       method: 'PUT',
       url: `/variable/${variable1.id}`,
       payload: {
         name: 'Variable 1',
-        value: 'Updated Variable 1 value',
         rotateAfter: '24'
       },
       headers: {
@@ -434,7 +333,7 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toEqual(
-      `Variable already exists: Variable 1 in environment ${environment2.id}`
+      `Variable already exists: Variable 1 in project ${project1.id}`
     )
   })
 
@@ -469,7 +368,12 @@ describe('Variable Controller Tests', () => {
       method: 'PUT',
       url: `/variable/${variable1.id}`,
       payload: {
-        value: 'Updated Variable 1 value'
+        entries: [
+          {
+            value: 'Updated Variable 1 value',
+            environmentId: environment1.id
+          }
+        ]
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -480,7 +384,8 @@ describe('Variable Controller Tests', () => {
 
     const variableVersion = await prisma.variableVersion.findMany({
       where: {
-        variableId: variable1.id
+        variableId: variable1.id,
+        environmentId: environment1.id
       }
     })
 
@@ -490,7 +395,7 @@ describe('Variable Controller Tests', () => {
   it('should have created a VARIABLE_UPDATED event', async () => {
     // Update a variable
     await variableService.updateVariable(user1, variable1.id, {
-      value: 'Updated Variable 1 value'
+      name: 'Updated Variable 1'
     })
 
     const response = await fetchEvents(
@@ -510,112 +415,10 @@ describe('Variable Controller Tests', () => {
     expect(event.itemId).toBeDefined()
   })
 
-  it('should be able to update the environment of a variable', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${variable1.id}/environment/${environment1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().environmentId).toBe(environment1.id)
-  })
-
-  it('should not be able to move to a non-existing environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${variable1.id}/environment/non-existing-environment-id`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-  })
-
-  it('should not be able to move to an environment in another project', async () => {
-    const otherEnvironment = await prisma.environment.findFirst({
-      where: {
-        projectId: project2.id,
-        name: 'Environment 1'
-      }
-    })
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${variable1.id}/environment/${otherEnvironment.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toEqual(
-      `Environment ${otherEnvironment.id} does not belong to the same project ${project1.id}`
-    )
-  })
-
-  it('should not be able to move the variable to the same environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${variable1.id}/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toEqual(
-      `Can not update the environment of the variable to the same environment: ${environment2.id}`
-    )
-  })
-
-  it('should not be able to move the variable if the user has no access to the project', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${variable1.id}/environment/${workspace2Environment.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user1.id} does not have the required authorities`
-    )
-  })
-
-  it('should not be able to move a variable of the same name to an environment', async () => {
-    const newVariable = (await variableService.createVariable(
-      user1,
-      {
-        environmentId: environment1.id,
-        name: 'Variable 1',
-        value: 'Variable 1 value'
-      },
-      project1.id
-    )) as Variable
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/variable/${newVariable.id}/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(409)
-    expect(response.json().message).toEqual(
-      `Variable already exists: Variable 1 in environment ${environment2.id} in project ${project1.id}`
-    )
-  })
-
   it('should not be able to roll back a non-existing variable', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/non-existing-variable-id/rollback/1`,
+      url: `/variable/non-existing-variable-id/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -630,7 +433,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to roll back a variable it does not have access to', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/${variable1.id}/rollback/1`,
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -645,7 +448,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to roll back to a non-existing version', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/${variable1.id}/rollback/2`,
+      url: `/variable/${variable1.id}/rollback/2?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -660,11 +463,21 @@ describe('Variable Controller Tests', () => {
   it('should be able to roll back a variable', async () => {
     // Creating a few versions first
     await variableService.updateVariable(user1, variable1.id, {
-      value: 'Updated Variable 1 value'
+      entries: [
+        {
+          value: 'Updated Variable 1 value',
+          environmentId: environment1.id
+        }
+      ]
     })
 
     await variableService.updateVariable(user1, variable1.id, {
-      value: 'Updated Variable 1 value 2'
+      entries: [
+        {
+          value: 'Updated Variable 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
     })
 
     let versions: VariableVersion[]
@@ -679,7 +492,7 @@ describe('Variable Controller Tests', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: `/variable/${variable1.id}/rollback/1`,
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -697,10 +510,16 @@ describe('Variable Controller Tests', () => {
     expect(versions.length).toBe(1)
   })
 
-  it('should not be able to fetch a non existing variable', async () => {
+  it('should not be able to roll back if the variable has no versions', async () => {
+    await prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
     const response = await app.inject({
-      method: 'GET',
-      url: `/variable/non-existing-variable-id`,
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -708,59 +527,27 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(404)
     expect(response.json().message).toEqual(
-      'Variable with id non-existing-variable-id not found'
+      `No versions found for environment: ${environment1.id} for variable: ${variable1.id}`
     )
   })
 
-  it('should not be able to fetch a variable it does not have access to', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/variable/${variable1.id}`,
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
-    })
-
-    expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const variable = await variableService.createVariable(
+      user1,
+      {
+        name: 'Var 3',
+        note: 'Var 3 note'
+      },
+      project1.id
     )
-  })
 
-  it('should be able to fetch a variable', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/variable/${variable1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
+    const variableVersions = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id
       }
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toEqual(variable1.id)
-
-    const versions = await response.json().versions
-
-    expect(versions.length).toBe(1)
-    expect(versions[0].value).toEqual('Variable 1 value') // Variable should be in encrypted form until specified otherwise
-  })
-
-  it('should be able to fetch a variable', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/variable/${variable1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toEqual(variable1.id)
-
-    const versions = await response.json().versions
-
-    expect(versions.length).toBe(1)
-    expect(versions[0].value).toEqual('Variable 1 value')
+    expect(variableVersions.length).toBe(0)
   })
 
   it('should be able to fetch all variables', async () => {
@@ -774,9 +561,15 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
-    const envVariable = response.json()[0]
-    expect(envVariable.environment).toHaveProperty('id')
-    expect(envVariable.environment).toHaveProperty('name')
+
+    const { variable, values } = response.json()[0]
+    expect(variable).toBeDefined()
+    expect(values).toBeDefined()
+    expect(values.length).toBe(1)
+    expect(values[0].value).toBe('Variable 1 value')
+    expect(values[0].environment.id).toBe(environment1.id)
+    expect(variable.id).toBe(variable1.id)
+    expect(variable.name).toBe('Variable 1')
   })
 
   it('should not be able to fetch all variables if the user has no access to the project', async () => {
