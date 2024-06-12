@@ -1,10 +1,10 @@
 ---
-description: Get to know how you can run the web package!
+description: Get to know how you can run the web app!
 ---
 
-## Running the Web Package
+## Running the Web App
 
-The Web Package resides in the `apps/web` directory. It is powered by NextJS and TypeScript. To run the Web Package locally, do the following:
+The Web App resides in the `apps/web` directory. It is powered by NextJS and TypeScript. To run the Web App locally, do the following:
 
 * In the project root, set up the web app for development with:
 
