@@ -17,7 +17,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"some name\",\n    \"value\": \"some value\"\n}",
+					"raw": "{\n    \"name\": \"PORT_NUMBER\",\n    \"entries\": [\n        {\n            \"environmentId\": \"clxa8d18o000bes3qejcz60n2\",\n            \"value\": \"8080\"\n        },\n        {\n            \"environmentId\": \"clxa8d18o000fes3qxaj2zmrr\",\n            \"value\": \"80\"\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -37,21 +37,21 @@
 					"variable": [
 						{
 							"key": "project_id",
-							"value": "6976dff6-b320-470c-86c5-eaceaed57625"
+							"value": "76397fd8-e902-485a-8f46-a717a7170eae"
 						}
 					]
 				}
 			},
 			"response": [
 				{
-					"id": "f0cc57ed-2ef5-4052-ba9f-bf53c925e29f",
-					"name": "Variable created successfully",
+					"id": "7d7a8f59-c056-4951-ad30-99e5e4d2e111",
+					"name": "Successfully created variable",
 					"originalRequest": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"some name\",\n    \"value\": \"some value\"\n}",
+							"raw": "{\n    \"name\": \"PORT_NUMBER\",\n    \"entries\": [\n        {\n            \"environmentId\": \"clxa8d18o000bes3qejcz60n2\",\n            \"value\": \"8080\"\n        },\n        {\n            \"environmentId\": \"clxa8d18o000fes3qxaj2zmrr\",\n            \"value\": \"80\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -71,7 +71,7 @@
 							"variable": [
 								{
 									"key": "project_id",
-									"value": "6976dff6-b320-470c-86c5-eaceaed57625"
+									"value": "76397fd8-e902-485a-8f46-a717a7170eae"
 								}
 							]
 						}
@@ -81,15 +81,121 @@
 					"_postman_previewlanguage": "json",
 					"header": [
 						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
 							"key": "Content-Type",
-							"name": "Content-Type",
-							"value": "application/json",
-							"description": "",
-							"type": "text"
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "440"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"1b8-DeKnHYqUZ39YGZT3Ooq3Kn/PqPg\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 10:14:48 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"id\": \"clwknus4i0000f3zxd1yvbtei\",\n    \"name\": \"some name\",\n    \"createdAt\": \"2024-05-24T12:31:11.587Z\",\n    \"updatedAt\": \"2024-05-24T12:31:11.587Z\",\n    \"note\": null,\n    \"pendingCreation\": false,\n    \"lastUpdatedById\": \"clwgaaldo00016gia8n46jtas\",\n    \"projectId\": \"6976dff6-b320-470c-86c5-eaceaed57625\",\n    \"environmentId\": \"clwgasu790002x815zlvblp21\",\n    \"project\": {\n        \"workspaceId\": \"36f928f9-bb1e-41fc-a185-8e1099aad3f6\"\n    }\n}"
+					"body": "{\n    \"id\": \"clxa8wqct00023q8osy6a6r1x\",\n    \"name\": \"PORT_NUMBER\",\n    \"createdAt\": \"2024-06-11T10:14:48.941Z\",\n    \"updatedAt\": \"2024-06-11T10:14:48.941Z\",\n    \"note\": null,\n    \"lastUpdatedById\": \"clxa891aj0001es3qhg5jxa23\",\n    \"projectId\": \"76397fd8-e902-485a-8f46-a717a7170eae\",\n    \"project\": {\n        \"workspaceId\": \"5ac43146-bbd3-416a-bb0d-160ff27706c9\"\n    },\n    \"versions\": [\n        {\n            \"environmentId\": \"clxa8d18o000bes3qejcz60n2\",\n            \"value\": \"8080\"\n        },\n        {\n            \"environmentId\": \"clxa8d18o000fes3qxaj2zmrr\",\n            \"value\": \"80\"\n        }\n    ]\n}"
+				},
+				{
+					"id": "cf4ce24a-d148-4c5a-9204-7e747115e510",
+					"name": "Variable already exists",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PORT_NUMBER\",\n    \"entries\": [\n        {\n            \"environmentId\": \"clxa8d18o000bes3qejcz60n2\",\n            \"value\": \"8080\"\n        },\n        {\n            \"environmentId\": \"clxa8d18o000fes3qxaj2zmrr\",\n            \"value\": \"80\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/:project_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "76397fd8-e902-485a-8f46-a717a7170eae"
+								}
+							]
+						}
+					},
+					"status": "Conflict",
+					"code": 409,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "134"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"86-/npvGE9P6aGdtbpfNTYWE+jgagE\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 10:15:08 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Variable already exists: PORT_NUMBER in project 76397fd8-e902-485a-8f46-a717a7170eae\",\n    \"error\": \"Conflict\",\n    \"statusCode\": 409\n}"
 				}
 			]
 		},
@@ -202,35 +308,6 @@
 			"response": []
 		},
 		{
-			"name": "Get variable by id",
-			"id": "8e2fc513-438a-444f-a83e-612b6ff88f78",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{BASE_URL}}/api/variable/:variable_id",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"api",
-						"variable",
-						":variable_id"
-					],
-					"variable": [
-						{
-							"key": "variable_id",
-							"value": "clv9jxpyc000e137p5uzq5zps"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get all variables of project",
 			"id": "8761d2a2-238a-4643-92b0-6cda82442300",
 			"protocolProfileBehavior": {
@@ -253,12 +330,82 @@
 					"variable": [
 						{
 							"key": "project_id",
-							"value": "fbff8a6d-1a43-4b7d-87a2-ee1a5b4581bc"
+							"value": "76397fd8-e902-485a-8f46-a717a7170eae"
 						}
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "8c5c10cb-ce57-413d-a995-c5d57414c3b1",
+					"name": "Successfully fetched variables",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/all/:project_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								"all",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "76397fd8-e902-485a-8f46-a717a7170eae"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "495"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"1ef-mBVgdh+I0QwCob4kp28vwCS3Ud4\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 10:30:39 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"variable\": {\n            \"id\": \"clxa8wqct00023q8osy6a6r1x\",\n            \"name\": \"PORT_NUMBER\",\n            \"createdAt\": \"2024-06-11T10:14:48.941Z\",\n            \"updatedAt\": \"2024-06-11T10:14:48.941Z\",\n            \"note\": null,\n            \"lastUpdatedById\": \"clxa891aj0001es3qhg5jxa23\",\n            \"projectId\": \"76397fd8-e902-485a-8f46-a717a7170eae\",\n            \"lastUpdatedBy\": {\n                \"id\": \"clxa891aj0001es3qhg5jxa23\",\n                \"name\": \"Raj\"\n            }\n        },\n        \"values\": [\n            {\n                \"environment\": {\n                    \"id\": \"clxa8d18o000bes3qejcz60n2\",\n                    \"name\": \"Dev\"\n                },\n                \"value\": \"8080\"\n            },\n            {\n                \"environment\": {\n                    \"id\": \"clxa8d18o000fes3qxaj2zmrr\",\n                    \"name\": \"Production\"\n                },\n                \"value\": \"80\"\n            }\n        ]\n    }\n]"
+				}
+			]
 		},
 		{
 			"name": "Delete variable",
@@ -282,12 +429,140 @@
 					"variable": [
 						{
 							"key": "variable_id",
-							"value": ""
+							"value": "clxa8t7c30000r9ij4cpuomr0"
 						}
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "7b00244b-469e-444b-88e3-4416cadaf3d0",
+					"name": "Variable not found",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/:variable_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								":variable_id"
+							],
+							"variable": [
+								{
+									"key": "variable_id",
+									"value": "clxa8t7c30000r9ij4cpuomr0s"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "104"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"68-jgPflU4YDBCh4BI2TFa/nbQE3H8\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 10:14:23 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Variable with id clxa8t7c30000r9ij4cpuomr0s not found\",\n    \"error\": \"Not Found\",\n    \"statusCode\": 404\n}"
+				},
+				{
+					"id": "e24c585f-6234-4b62-888f-baf0e6b38a8c",
+					"name": "Deleted successfully",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/:variable_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								":variable_id"
+							],
+							"variable": [
+								{
+									"key": "variable_id",
+									"value": "clxa8t7c30000r9ij4cpuomr0"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 10:14:32 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						},
+						{
+							"key": "Content-Length",
+							"value": "0"
+						}
+					],
+					"cookie": []
+				}
+			]
 		}
 	],
 	"auth": {
