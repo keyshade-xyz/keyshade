@@ -61,12 +61,20 @@ export class SecretService {
     if (dto.entries && dto.entries.length > 0) {
       const environmentIds = dto.entries.map((entry) => entry.environmentId)
       for (const environmentId of environmentIds) {
-        await this.authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
-          entity: { id: environmentId },
-          authority: Authority.READ_ENVIRONMENT,
-          prisma: this.prisma
-        })
+        const environment =
+          await this.authorityCheckerService.checkAuthorityOverEnvironment({
+            userId: user.id,
+            entity: { id: environmentId },
+            authority: Authority.READ_ENVIRONMENT,
+            prisma: this.prisma
+          })
+
+        // Check if the environment belongs to the project
+        if (environment.projectId !== projectId) {
+          throw new BadRequestException(
+            `Environment: ${environmentId} does not belong to project: ${projectId}`
+          )
+        }
       }
     }
 
@@ -151,14 +159,24 @@ export class SecretService {
     // Check if the user has access to the environments
     if (dto.entries && dto.entries.length > 0) {
       const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      for (const environmentId of environmentIds) {
-        await this.authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
-          entity: { id: environmentId },
-          authority: Authority.READ_ENVIRONMENT,
-          prisma: this.prisma
+      await Promise.all(
+        environmentIds.map(async (environmentId) => {
+          const environment =
+            await this.authorityCheckerService.checkAuthorityOverEnvironment({
+              userId: user.id,
+              entity: { id: environmentId },
+              authority: Authority.READ_ENVIRONMENT,
+              prisma: this.prisma
+            })
+
+          // Check if the environment belongs to the project
+          if (environment.projectId !== secret.projectId) {
+            throw new BadRequestException(
+              `Environment: ${environmentId} does not belong to project: ${secret.projectId}`
+            )
+          }
         })
-      }
+      )
     }
 
     const op = []
