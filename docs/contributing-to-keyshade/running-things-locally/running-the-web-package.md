@@ -15,7 +15,7 @@ pnpm dev:web
 * Or cd into `apps/web` and run:
 
 ```
-pnpm run dev
+pnpm dev
 ```
 
 ## Testing your code
