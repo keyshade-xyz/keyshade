@@ -1,5 +1,4 @@
 import {
-  Approval,
   Environment,
   EventSource,
   EventType,
@@ -22,7 +21,6 @@ export interface IntegrationEventData {
     | WorkspaceRole
     | Secret
     | Variable
-    | Approval
     | Integration
   source: EventSource
   eventType: EventType

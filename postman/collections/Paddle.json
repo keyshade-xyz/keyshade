@@ -1,0 +1,762 @@
+{
+	"info": {
+		"_postman_id": "20cfb20b-6565-4fcb-baa6-f34b6372aee2",
+		"name": "Paddle",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "32733901-20cfb20b-6565-4fcb-baa6-f34b6372aee2"
+	},
+	"item": [
+		{
+			"name": "Create customer",
+			"id": "4ccc476b-356a-4732-aa32-428e5f2f92c3",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Rajdip Bhattacharya\",\n    \"email\": \"rajdip@keyshade.xyz\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PADDLE_BASE_URL}}/customers",
+					"host": [
+						"{{PADDLE_BASE_URL}}"
+					],
+					"path": [
+						"customers"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "41a28c90-e757-4716-b78f-ae04dcb7bba7",
+					"name": "Customer exists",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Rajdip Bhattacharya\",\n    \"email\": \"rajdip@keyshade.xyz\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PADDLE_BASE_URL}}/customers",
+							"host": [
+								"{{PADDLE_BASE_URL}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"status": "Conflict",
+					"code": 409,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 07 Jun 2024 07:23:44 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "310"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-store, max-age=0"
+						},
+						{
+							"key": "content-security-policy",
+							"value": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+						},
+						{
+							"key": "cross-origin-embedder-policy",
+							"value": "require-corp"
+						},
+						{
+							"key": "cross-origin-opener-policy",
+							"value": "same-origin"
+						},
+						{
+							"key": "cross-origin-resource-policy",
+							"value": "same-site"
+						},
+						{
+							"key": "permissions-policy",
+							"value": "accelerometer=(),ambient-light-sensor=(),autoplay=(),battery=(),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),gamepad=(),geolocation=(),gyroscope=(),layout-animations=(self),legacy-image-formats=(self),magnetometer=(),microphone=(),midi=(),oversized-images=(self),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),speaker-selection=(),sync-xhr=(self),unoptimized-images=(self),unsized-media=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+						},
+						{
+							"key": "pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "referrer-policy",
+							"value": "no-referrer"
+						},
+						{
+							"key": "request-id",
+							"value": "a210c411-aabc-44d7-b16b-2bb3423955ae"
+						},
+						{
+							"key": "strict-transport-security",
+							"value": "max-age=31536000; includeSubDomains; preload"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-frame-options",
+							"value": "deny"
+						},
+						{
+							"key": "x-permitted-cross-domain-policies",
+							"value": "none"
+						},
+						{
+							"key": "x-robots-tag",
+							"value": "noindex, nofollow"
+						},
+						{
+							"key": "CF-Cache-Status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "88fee6003dd09395-BBI"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": {\n        \"type\": \"request_error\",\n        \"code\": \"customer_already_exists\",\n        \"detail\": \"customer email conflicts with customer of id ctm_01hzgwk4md0t4wb12835wxwhsv\",\n        \"documentation_url\": \"https://developer.paddle.com/v1/errors/customers/customer_already_exists\"\n    },\n    \"meta\": {\n        \"request_id\": \"a210c411-aabc-44d7-b16b-2bb3423955ae\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "List customers",
+			"id": "f4a95fbc-5583-4985-8b5f-5e3a431e8bb9",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PADDLE_BASE_URL}}/customers?email=rajdip@keyshade.xyz&status=active,archived",
+					"host": [
+						"{{PADDLE_BASE_URL}}"
+					],
+					"path": [
+						"customers"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "rajdip@keyshade.xyz"
+						},
+						{
+							"key": "status",
+							"value": "active,archived"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "1088acf1-136f-4b2c-b219-a3e49716a09a",
+					"name": "Successfully fetched customers",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PADDLE_BASE_URL}}/customers?email=rajdip@keyshade.xyz&status=active,archived",
+							"host": [
+								"{{PADDLE_BASE_URL}}"
+							],
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "rajdip@keyshade.xyz",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "active,archived",
+									"type": "text"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 07 Jun 2024 07:25:26 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-store, max-age=0"
+						},
+						{
+							"key": "content-security-policy",
+							"value": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+						},
+						{
+							"key": "cross-origin-embedder-policy",
+							"value": "require-corp"
+						},
+						{
+							"key": "cross-origin-opener-policy",
+							"value": "same-origin"
+						},
+						{
+							"key": "cross-origin-resource-policy",
+							"value": "same-site"
+						},
+						{
+							"key": "permissions-policy",
+							"value": "accelerometer=(),ambient-light-sensor=(),autoplay=(),battery=(),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),gamepad=(),geolocation=(),gyroscope=(),layout-animations=(self),legacy-image-formats=(self),magnetometer=(),microphone=(),midi=(),oversized-images=(self),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),speaker-selection=(),sync-xhr=(self),unoptimized-images=(self),unsized-media=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+						},
+						{
+							"key": "pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "referrer-policy",
+							"value": "no-referrer"
+						},
+						{
+							"key": "request-id",
+							"value": "b32e11ce-c363-4eed-95ea-257698949f4d"
+						},
+						{
+							"key": "strict-transport-security",
+							"value": "max-age=31536000; includeSubDomains; preload"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-frame-options",
+							"value": "deny"
+						},
+						{
+							"key": "x-permitted-cross-domain-policies",
+							"value": "none"
+						},
+						{
+							"key": "x-robots-tag",
+							"value": "noindex, nofollow"
+						},
+						{
+							"key": "CF-Cache-Status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "88fee87d2d389395-BBI"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "br"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": [\n        {\n            \"id\": \"ctm_01hzgwk4md0t4wb12835wxwhsv\",\n            \"status\": \"archived\",\n            \"custom_data\": null,\n            \"name\": \"Raj\",\n            \"email\": \"rajdip@keyshade.xyz\",\n            \"marketing_consent\": false,\n            \"locale\": \"en\",\n            \"created_at\": \"2024-06-04T05:47:14.957Z\",\n            \"updated_at\": \"2024-06-04T05:47:38.260741Z\",\n            \"import_meta\": null\n        }\n    ],\n    \"meta\": {\n        \"request_id\": \"b32e11ce-c363-4eed-95ea-257698949f4d\",\n        \"pagination\": {\n            \"per_page\": 50,\n            \"next\": \"https://sandbox-api.paddle.com/customers?after=ctm_01hzgwk4md0t4wb12835wxwhsv&email=rajdip%40keyshade.xyz&status=active&status=archived\",\n            \"has_more\": false,\n            \"estimated_total\": 1\n        }\n    }\n}"
+				},
+				{
+					"id": "4dbcf5f0-4fae-44ca-ab30-c492f48b1f9a",
+					"name": "No customers found",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PADDLE_BASE_URL}}/customers?email=rajdip@keyshade.xyzs&status=active,archived",
+							"host": [
+								"{{PADDLE_BASE_URL}}"
+							],
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "rajdip@keyshade.xyzs",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "active,archived",
+									"type": "text"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 07 Jun 2024 07:25:52 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-store, max-age=0"
+						},
+						{
+							"key": "content-security-policy",
+							"value": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+						},
+						{
+							"key": "cross-origin-embedder-policy",
+							"value": "require-corp"
+						},
+						{
+							"key": "cross-origin-opener-policy",
+							"value": "same-origin"
+						},
+						{
+							"key": "cross-origin-resource-policy",
+							"value": "same-site"
+						},
+						{
+							"key": "permissions-policy",
+							"value": "accelerometer=(),ambient-light-sensor=(),autoplay=(),battery=(),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),gamepad=(),geolocation=(),gyroscope=(),layout-animations=(self),legacy-image-formats=(self),magnetometer=(),microphone=(),midi=(),oversized-images=(self),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),speaker-selection=(),sync-xhr=(self),unoptimized-images=(self),unsized-media=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+						},
+						{
+							"key": "pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "referrer-policy",
+							"value": "no-referrer"
+						},
+						{
+							"key": "request-id",
+							"value": "e59b1c2e-30f5-4225-b23f-39f3dc5be53c"
+						},
+						{
+							"key": "strict-transport-security",
+							"value": "max-age=31536000; includeSubDomains; preload"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-frame-options",
+							"value": "deny"
+						},
+						{
+							"key": "x-permitted-cross-domain-policies",
+							"value": "none"
+						},
+						{
+							"key": "x-robots-tag",
+							"value": "noindex, nofollow"
+						},
+						{
+							"key": "CF-Cache-Status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "88fee921df909395-BBI"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "br"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": [],\n    \"meta\": {\n        \"request_id\": \"e59b1c2e-30f5-4225-b23f-39f3dc5be53c\",\n        \"pagination\": {\n            \"per_page\": 50,\n            \"next\": \"https://sandbox-api.paddle.com/customers?email=rajdip%40keyshade.xyzs&status=active&status=archived\",\n            \"has_more\": false,\n            \"estimated_total\": 0\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Update customer",
+			"id": "0093a711-374d-4862-92bd-f27de7a52f43",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Rajdip\",\n    \"email\": \"rajdip@keyshade.xyz\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PADDLE_BASE_URL}}/customers/:customerId",
+					"host": [
+						"{{PADDLE_BASE_URL}}"
+					],
+					"path": [
+						"customers",
+						":customerId"
+					],
+					"variable": [
+						{
+							"key": "customerId",
+							"value": "ctm_01hzgwk4md0t4wb12835wxwhsv"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "653efc60-50c9-413d-b250-feebee17e2ac",
+					"name": "Successfully updated customer",
+					"originalRequest": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Rajdip\",\n    \"email\": \"rajdip@keyshade.xyz\",\n    \"status\": \"active\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PADDLE_BASE_URL}}/customers/:customerId",
+							"host": [
+								"{{PADDLE_BASE_URL}}"
+							],
+							"path": [
+								"customers",
+								":customerId"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "ctm_01hzgwk4md0t4wb12835wxwhsv"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 07 Jun 2024 07:39:52 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-store, max-age=0"
+						},
+						{
+							"key": "content-security-policy",
+							"value": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+						},
+						{
+							"key": "cross-origin-embedder-policy",
+							"value": "require-corp"
+						},
+						{
+							"key": "cross-origin-opener-policy",
+							"value": "same-origin"
+						},
+						{
+							"key": "cross-origin-resource-policy",
+							"value": "same-site"
+						},
+						{
+							"key": "permissions-policy",
+							"value": "accelerometer=(),ambient-light-sensor=(),autoplay=(),battery=(),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),gamepad=(),geolocation=(),gyroscope=(),layout-animations=(self),legacy-image-formats=(self),magnetometer=(),microphone=(),midi=(),oversized-images=(self),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),speaker-selection=(),sync-xhr=(self),unoptimized-images=(self),unsized-media=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+						},
+						{
+							"key": "pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "referrer-policy",
+							"value": "no-referrer"
+						},
+						{
+							"key": "request-id",
+							"value": "434f0eb5-7239-4ac6-af39-789315267c40"
+						},
+						{
+							"key": "strict-transport-security",
+							"value": "max-age=31536000; includeSubDomains; preload"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-frame-options",
+							"value": "deny"
+						},
+						{
+							"key": "x-permitted-cross-domain-policies",
+							"value": "none"
+						},
+						{
+							"key": "x-robots-tag",
+							"value": "noindex, nofollow"
+						},
+						{
+							"key": "CF-Cache-Status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "88fefda00c6e9389-BBI"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "br"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": \"ctm_01hzgwk4md0t4wb12835wxwhsv\",\n        \"status\": \"active\",\n        \"custom_data\": null,\n        \"name\": \"Rajdip\",\n        \"email\": \"rajdip@keyshade.xyz\",\n        \"marketing_consent\": false,\n        \"locale\": \"en\",\n        \"created_at\": \"2024-06-04T05:47:14.957Z\",\n        \"updated_at\": \"2024-06-07T07:39:51.915661Z\",\n        \"import_meta\": null\n    },\n    \"meta\": {\n        \"request_id\": \"434f0eb5-7239-4ac6-af39-789315267c40\"\n    }\n}"
+				},
+				{
+					"id": "473dff3d-61b2-4d07-a34a-4cb7c4c8fc51",
+					"name": "Customer not found",
+					"originalRequest": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Rajdip\",\n    \"email\": \"rajdip@keyshade.xyz\",\n    \"status\": \"active\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PADDLE_BASE_URL}}/customers/:customerId",
+							"host": [
+								"{{PADDLE_BASE_URL}}"
+							],
+							"path": [
+								"customers",
+								":customerId"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "ctm_01hzgwk4md0t4wb12835wxwhs"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 07 Jun 2024 07:40:12 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "283"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-store, max-age=0"
+						},
+						{
+							"key": "content-security-policy",
+							"value": "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+						},
+						{
+							"key": "cross-origin-embedder-policy",
+							"value": "require-corp"
+						},
+						{
+							"key": "cross-origin-opener-policy",
+							"value": "same-origin"
+						},
+						{
+							"key": "cross-origin-resource-policy",
+							"value": "same-site"
+						},
+						{
+							"key": "permissions-policy",
+							"value": "accelerometer=(),ambient-light-sensor=(),autoplay=(),battery=(),camera=(),display-capture=(),document-domain=(),encrypted-media=(),fullscreen=(),gamepad=(),geolocation=(),gyroscope=(),layout-animations=(self),legacy-image-formats=(self),magnetometer=(),microphone=(),midi=(),oversized-images=(self),payment=(),picture-in-picture=(),publickey-credentials-get=(),screen-wake-lock=(),speaker-selection=(),sync-xhr=(self),unoptimized-images=(self),unsized-media=(self),usb=(),web-share=(),xr-spatial-tracking=()"
+						},
+						{
+							"key": "pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "referrer-policy",
+							"value": "no-referrer"
+						},
+						{
+							"key": "request-id",
+							"value": "82b702a4-6eb1-4e92-8ee6-96462200ce0a"
+						},
+						{
+							"key": "strict-transport-security",
+							"value": "max-age=31536000; includeSubDomains; preload"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-frame-options",
+							"value": "deny"
+						},
+						{
+							"key": "x-permitted-cross-domain-policies",
+							"value": "none"
+						},
+						{
+							"key": "x-robots-tag",
+							"value": "noindex, nofollow"
+						},
+						{
+							"key": "CF-Cache-Status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "88fefe1e08699389-BBI"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": {\n        \"type\": \"request_error\",\n        \"code\": \"bad_request\",\n        \"detail\": \"Invalid request\",\n        \"documentation_url\": \"https://developer.paddle.com/v1/errors/shared/bad_request\",\n        \"errors\": [\n            {\n                \"field\": \"customerID\",\n                \"message\": \"invalid input\"\n            }\n        ]\n    },\n    \"meta\": {\n        \"request_id\": \"82b702a4-6eb1-4e92-8ee6-96462200ce0a\"\n    }\n}"
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{PADDLE_API_KEY}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b9d05c8a-60d5-4c56-8ba6-44cf62524f63",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "263d322f-fad7-4b3b-b5c4-64f66af233f8",
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

@@ -17,7 +17,6 @@ import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
 import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
 import { EventModule } from '../event/event.module'
 import { VariableModule } from '../variable/variable.module'
-import { ApprovalModule } from '../approval/approval.module'
 import { SocketModule } from '../socket/socket.module'
 import { ProviderModule } from '../provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -51,7 +50,6 @@ import { FeedbackModule } from '../feedback/feedback.module'
     WorkspaceRoleModule,
     EventModule,
     VariableModule,
-    ApprovalModule,
     SocketModule,
     ProviderModule,
     IntegrationModule,

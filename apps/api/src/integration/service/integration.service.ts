@@ -109,7 +109,7 @@ export class IntegrationService {
       {
         triggeredBy: user,
         entity: integration,
-        type: EventType.APPROVAL_REJECTED,
+        type: EventType.INTEGRATION_ADDED,
         source: EventSource.INTEGRATION,
         title: `Integration ${integration.name} created`,
         metadata: {

@@ -1,4 +1,4 @@
-name: "Lint PR"
+name: 'Lint PR'
 
 on:
   pull_request:
@@ -18,6 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Lint PR
-        uses: amannn/action-semantic-pull-request@v4.6.0
+        uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

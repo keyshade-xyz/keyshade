@@ -1,4 +1,4 @@
-import { Environment, Project, Secret, SecretVersion } from '@prisma/client'
+import { Project, Secret, SecretVersion } from '@prisma/client'
 
 export interface SecretWithValue extends Secret {
   value: string
@@ -10,10 +10,6 @@ export interface SecretWithVersion extends Secret {
 
 export interface SecretWithProject extends Secret {
   project: Project
-}
-
-export interface SecretWithEnvironment extends Secret {
-  environment: Environment
 }
 
 export type SecretWithProjectAndVersion = SecretWithProject & SecretWithVersion

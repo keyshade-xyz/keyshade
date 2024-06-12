@@ -12,7 +12,6 @@ import {
   Workspace,
   WorkspaceRole,
   Variable,
-  Approval,
   Integration
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
@@ -32,7 +31,6 @@ export default async function createEvent(
       | WorkspaceRole
       | Secret
       | Variable
-      | Approval
       | Integration
     type: EventType
     source: EventSource
@@ -95,16 +93,11 @@ export default async function createEvent(
       case EventSource.SECRET:
         const secret = data.entity as Secret
         projectId = secret.projectId
-        environmentId = secret?.environmentId
         break
 
       case EventSource.VARIABLE:
         const variable = data.entity as Variable
         projectId = variable.projectId
-        environmentId = variable?.environmentId
-        break
-
-      case EventSource.APPROVAL:
         break
 
       case EventSource.INTEGRATION:
