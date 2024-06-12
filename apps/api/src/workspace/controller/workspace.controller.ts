@@ -11,7 +11,6 @@ import {
 import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
-import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 import {
   CreateWorkspace,
   WorkspaceMemberDTO
@@ -34,10 +33,9 @@ export class WorkspaceController {
   async update(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
-    @Body() dto: UpdateWorkspace,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: UpdateWorkspace
   ) {
-    return this.workspaceService.updateWorkspace(user, workspaceId, dto, reason)
+    return this.workspaceService.updateWorkspace(user, workspaceId, dto)
   }
 
   @Put(':workspaceId/transfer-ownership/:userId')

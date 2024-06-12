@@ -7,7 +7,6 @@ import {
 } from '@prisma/client'
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException
@@ -21,12 +20,9 @@ import { CustomLoggerService } from './logger.service'
 
 export interface AuthorityInput {
   userId: string
-  entity: {
-    id?: string
-    name?: string
-  }
   authority: Authority
   prisma: PrismaClient
+  entity: { id?: string; name?: string }
 }
 
 @Injectable()
@@ -41,7 +37,7 @@ export class AuthorityCheckerService {
     let workspace: Workspace
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         workspace = await prisma.workspace.findUnique({
           where: {
             id: entity.id
@@ -50,7 +46,7 @@ export class AuthorityCheckerService {
       } else {
         workspace = await prisma.workspace.findFirst({
           where: {
-            name: entity?.name,
+            name: entity.name,
             members: { some: { userId: userId } }
           }
         })
@@ -93,7 +89,7 @@ export class AuthorityCheckerService {
     let project: ProjectWithSecrets
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         project = await prisma.project.findUnique({
           where: {
             id: entity.id
@@ -105,7 +101,7 @@ export class AuthorityCheckerService {
       } else {
         project = await prisma.project.findFirst({
           where: {
-            name: entity?.name,
+            name: entity.name,
             workspace: { members: { some: { userId: userId } } }
           },
           include: {
@@ -120,7 +116,7 @@ export class AuthorityCheckerService {
 
     // If the project is not found, throw an error
     if (!project) {
-      throw new NotFoundException(`Project with id ${entity?.id} not found`)
+      throw new NotFoundException(`Project with id ${entity.id} not found`)
     }
 
     // Get the authorities of the user in the workspace with the project
@@ -134,19 +130,6 @@ export class AuthorityCheckerService {
         prisma
       )
 
-    // If the project is pending creation, only the user who created the project, a workspace admin or
-    // a user with the MANAGE_APPROVALS authority can fetch the project
-    if (
-      project.pendingCreation &&
-      !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN) &&
-      !permittedAuthoritiesForWorkspace.has(Authority.MANAGE_APPROVALS) &&
-      project.lastUpdatedById !== userId
-    ) {
-      throw new BadRequestException(
-        `The project with id ${entity?.id} is pending creation and cannot be fetched by the user with id ${userId}`
-      )
-    }
-
     const projectAccessLevel = project.accessLevel
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
@@ -159,7 +142,7 @@ export class AuthorityCheckerService {
             !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
           ) {
             throw new UnauthorizedException(
-              `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+              `User with id ${userId} does not have the authority in the project with id ${entity.id}`
             )
           }
         }
@@ -172,7 +155,7 @@ export class AuthorityCheckerService {
           !permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
         ) {
           throw new UnauthorizedException(
-            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+            `User with id ${userId} does not have the authority in the project with id ${entity.id}`
           )
         }
         break
@@ -185,7 +168,7 @@ export class AuthorityCheckerService {
           !permittedAuthoritiesForProject.has(Authority.WORKSPACE_ADMIN)
         ) {
           throw new UnauthorizedException(
-            `User with id ${userId} does not have the authority in the project with id ${entity?.id}`
+            `User with id ${userId} does not have the authority in the project with id ${entity.id}`
           )
         }
 
@@ -204,7 +187,7 @@ export class AuthorityCheckerService {
     let environment: EnvironmentWithProject
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         environment = await prisma.environment.findUnique({
           where: {
             id: entity.id
@@ -216,7 +199,7 @@ export class AuthorityCheckerService {
       } else {
         environment = await prisma.environment.findFirst({
           where: {
-            name: entity?.name,
+            name: entity.name,
             project: { workspace: { members: { some: { userId: userId } } } }
           },
           include: {
@@ -249,19 +232,6 @@ export class AuthorityCheckerService {
       )
     }
 
-    // If the environment is pending creation, only the user who created the environment, a workspace admin or
-    // a user with the MANAGE_APPROVALS authority can fetch the environment
-    if (
-      environment.pendingCreation &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
-      !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
-      environment.lastUpdatedById !== userId
-    ) {
-      throw new BadRequestException(
-        `The environment with id ${entity.id} is pending creation and cannot be fetched by the user with id ${userId}`
-      )
-    }
-
     return environment
   }
 
@@ -274,39 +244,25 @@ export class AuthorityCheckerService {
     let variable: VariableWithProjectAndVersion
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         variable = await prisma.variable.findUnique({
           where: {
             id: entity.id
           },
           include: {
             versions: true,
-            project: true,
-            environment: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            project: true
           }
         })
       } else {
         variable = await prisma.variable.findFirst({
           where: {
-            name: entity?.name,
-            environment: {
-              project: { workspace: { members: { some: { userId: userId } } } }
-            }
+            name: entity.name,
+            project: { workspace: { members: { some: { userId: userId } } } }
           },
           include: {
             versions: true,
-            project: true,
-            environment: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            project: true
           }
         })
       }
@@ -336,19 +292,6 @@ export class AuthorityCheckerService {
       )
     }
 
-    // If the variable is pending creation, only the user who created the variable, a workspace admin or
-    // a user with the MANAGE_APPROVALS authority can fetch the variable
-    if (
-      variable.pendingCreation &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
-      !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
-      variable.lastUpdatedById !== userId
-    ) {
-      throw new BadRequestException(
-        `The variable with id ${entity.id} is pending creation and cannot be fetched by the user with id ${userId}`
-      )
-    }
-
     return variable
   }
 
@@ -361,39 +304,25 @@ export class AuthorityCheckerService {
     let secret: SecretWithProjectAndVersion
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         secret = await prisma.secret.findUnique({
           where: {
             id: entity.id
           },
           include: {
             versions: true,
-            project: true,
-            environment: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            project: true
           }
         })
       } else {
         secret = await prisma.secret.findFirst({
           where: {
-            name: entity?.name,
-            environment: {
-              project: { workspace: { members: { some: { userId: userId } } } }
-            }
+            name: entity.name,
+            project: { workspace: { members: { some: { userId: userId } } } }
           },
           include: {
             versions: true,
-            project: true,
-            environment: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
+            project: true
           }
         })
       }
@@ -423,19 +352,6 @@ export class AuthorityCheckerService {
       )
     }
 
-    // If the secret is pending creation, only the user who created the secret, a workspace admin or
-    // a user with the MANAGE_APPROVALS authority can fetch the secret
-    if (
-      secret.pendingCreation &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN) &&
-      !permittedAuthorities.has(Authority.MANAGE_APPROVALS) &&
-      secret.lastUpdatedById !== userId
-    ) {
-      throw new BadRequestException(
-        `The secret with id ${entity.id} is pending creation and cannot be fetched by the user with id ${userId}`
-      )
-    }
-
     return secret
   }
 
@@ -448,7 +364,7 @@ export class AuthorityCheckerService {
     let integration: Integration | null
 
     try {
-      if (entity?.id) {
+      if (entity.id) {
         integration = await prisma.integration.findUnique({
           where: {
             id: entity.id
@@ -457,7 +373,7 @@ export class AuthorityCheckerService {
       } else {
         integration = await prisma.integration.findFirst({
           where: {
-            name: entity?.name,
+            name: entity.name,
             workspace: { members: { some: { userId: userId } } }
           }
         })

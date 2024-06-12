@@ -11,7 +11,6 @@ import {
 import { VariableService } from '../service/variable.service'
 import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
 import { Authority, User } from '@prisma/client'
-import { AlphanumericReasonValidationPipe } from '../../common/alphanumeric-reason-pipe'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
 
@@ -24,15 +23,9 @@ export class VariableController {
   async createVariable(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Body() dto: CreateVariable,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: CreateVariable
   ) {
-    return await this.variableService.createVariable(
-      user,
-      dto,
-      projectId,
-      reason
-    )
+    return await this.variableService.createVariable(user, dto, projectId)
   }
 
   @Put(':variableId')
@@ -40,34 +33,9 @@ export class VariableController {
   async updateVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Body() dto: CreateVariable,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Body() dto: CreateVariable
   ) {
-    return await this.variableService.updateVariable(
-      user,
-      variableId,
-      dto,
-      reason
-    )
-  }
-
-  @Put(':variableId/environment/:environmentId')
-  @RequiredApiKeyAuthorities(
-    Authority.UPDATE_VARIABLE,
-    Authority.READ_ENVIRONMENT
-  )
-  async updateVariableEnvironment(
-    @CurrentUser() user: User,
-    @Param('variableId') variableId: string,
-    @Param('environmentId') environmentId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
-  ) {
-    return await this.variableService.updateVariableEnvironment(
-      user,
-      variableId,
-      environmentId,
-      reason
-    )
+    return await this.variableService.updateVariable(user, variableId, dto)
   }
 
   @Put(':variableId/rollback/:rollbackVersion')
@@ -75,14 +43,14 @@ export class VariableController {
   async rollbackVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Param('rollbackVersion') rollbackVersion: number,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
+    @Query('environmentId') environmentId: string,
+    @Param('rollbackVersion') rollbackVersion: number
   ) {
     return await this.variableService.rollbackVariable(
       user,
       variableId,
-      rollbackVersion,
-      reason
+      environmentId,
+      rollbackVersion
     )
   }
 
@@ -90,19 +58,9 @@ export class VariableController {
   @RequiredApiKeyAuthorities(Authority.DELETE_VARIABLE)
   async deleteVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string,
-    @Query('reason', AlphanumericReasonValidationPipe) reason: string
-  ) {
-    return await this.variableService.deleteVariable(user, variableId, reason)
-  }
-
-  @Get(':variableId')
-  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
-  async getVariable(
-    @CurrentUser() user: User,
     @Param('variableId') variableId: string
   ) {
-    return await this.variableService.getVariableById(user, variableId)
+    return await this.variableService.deleteVariable(user, variableId)
   }
 
   @Get('/all/:projectId')

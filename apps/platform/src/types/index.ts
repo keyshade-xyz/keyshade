@@ -43,7 +43,7 @@ export const zProject = z.object({
 export const zEnvironment = z.object({
   name: z.string(),
   description: z.string().nullable(),
-  isDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional()
 })
 
 export const zNewProject = z.object({

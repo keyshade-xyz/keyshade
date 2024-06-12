@@ -96,8 +96,7 @@ describe('Environment Controller Tests', () => {
       environments: [
         {
           name: 'Environment 1',
-          description: 'Default environment',
-          isDefault: true
+          description: 'Environment 1 description'
         },
         {
           name: 'Environment 2',
@@ -144,8 +143,7 @@ describe('Environment Controller Tests', () => {
       url: `/environment/${project1.id}`,
       payload: {
         name: 'Environment 3',
-        description: 'Environment 3 description',
-        isDefault: true
+        description: 'Environment 3 description'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -155,7 +153,6 @@ describe('Environment Controller Tests', () => {
     expect(response.statusCode).toBe(201)
     expect(response.json().name).toBe('Environment 3')
     expect(response.json().description).toBe('Environment 3 description')
-    expect(response.json().isDefault).toBe(true)
 
     const environmentFromDb = await prisma.environment.findUnique({
       where: {
@@ -166,24 +163,13 @@ describe('Environment Controller Tests', () => {
     expect(environmentFromDb).toBeDefined()
   })
 
-  it('should ensure there is only one default environment per project', async () => {
-    const environments = await prisma.environment.findMany({
-      where: {
-        projectId: project1.id
-      }
-    })
-
-    expect(environments.filter((e) => e.isDefault).length).toBe(1)
-  })
-
   it('should not be able to create an environment in a project that does not exist', async () => {
     const response = await app.inject({
       method: 'POST',
       url: `/environment/123`,
       payload: {
         name: 'Environment 1',
-        description: 'Environment 1 description',
-        isDefault: true
+        description: 'Environment 1 description'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -200,8 +186,7 @@ describe('Environment Controller Tests', () => {
       url: `/environment/${project1.id}`,
       payload: {
         name: 'Environment 1',
-        description: 'Environment 1 description',
-        isDefault: true
+        description: 'Environment 1 description'
       },
       headers: {
         'x-e2e-user-email': user2.email
@@ -220,8 +205,7 @@ describe('Environment Controller Tests', () => {
       url: `/environment/${project1.id}`,
       payload: {
         name: 'Environment 1',
-        description: 'Environment 1 description',
-        isDefault: true
+        description: 'Environment 1 description'
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -230,37 +214,8 @@ describe('Environment Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toBe(
-      `Environment with name Environment 1 already exists in project ${project1.name} (${project1.id})`
+      `Environment with name Environment 1 already exists in project ${project1.id}`
     )
-  })
-
-  it('should not make other environments non-default if the current environment is not the default one', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/environment/${project1.id}`,
-      payload: {
-        name: 'Environment 3',
-        description: 'Environment 3 description',
-        isDefault: false
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(201)
-    expect(response.json().name).toBe('Environment 3')
-    expect(response.json().description).toBe('Environment 3 description')
-    expect(response.json().isDefault).toBe(false)
-
-    const environments = await prisma.environment.findMany({
-      where: {
-        projectId: project1.id
-      }
-    })
-
-    expect(environments.length).toBe(3)
-    expect(environments.filter((e) => e.isDefault).length).toBe(1)
   })
 
   it('should have created a ENVIRONMENT_ADDED event', async () => {
@@ -308,14 +263,11 @@ describe('Environment Controller Tests', () => {
       id: environment1.id,
       name: 'Environment 1 Updated',
       description: 'Environment 1 description updated',
-      isDefault: true,
       projectId: project1.id,
       lastUpdatedById: user1.id,
       lastUpdatedBy: expect.any(Object),
-      secrets: [],
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      pendingCreation: false,
       project: expect.any(Object)
     })
 
@@ -404,40 +356,6 @@ describe('Environment Controller Tests', () => {
     expect(event.itemId).toBeDefined()
   })
 
-  it('should make other environments non-default if the current environment is the default one', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/${environment2.id}`,
-      payload: {
-        name: 'Environment 2 Updated',
-        description: 'Environment 2 description updated',
-        isDefault: true
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().name).toBe('Environment 2 Updated')
-    expect(response.json().description).toBe(
-      'Environment 2 description updated'
-    )
-    expect(response.json().isDefault).toBe(true)
-
-    const environments = await prisma.environment.findMany({
-      where: {
-        projectId: project1.id
-      }
-    })
-
-    expect(environments.length).toBe(2)
-    expect(environments.filter((e) => e.isDefault).length).toBe(1)
-
-    environment2 = response.json()
-    environment1.isDefault = false
-  })
-
   it('should be able to fetch an environment', async () => {
     const response = await app.inject({
       method: 'GET',
@@ -449,8 +367,7 @@ describe('Environment Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().name).toBe('Environment 1')
-    expect(response.json().description).toBe('Default environment')
-    expect(response.json().isDefault).toBe(true)
+    expect(response.json().description).toBe('Environment 1 description')
   })
 
   it('should not be able to fetch an environment that does not exist', async () => {
@@ -582,7 +499,10 @@ describe('Environment Controller Tests', () => {
     )
   })
 
-  it('should not be able to delete the default environment of a project', async () => {
+  it('should not be able to delete the only environment in a project', async () => {
+    // Delete the other environment
+    await environmentService.deleteEnvironment(user1, environment2.id)
+
     const response = await app.inject({
       method: 'DELETE',
       url: `/environment/${environment1.id}`,
@@ -593,32 +513,7 @@ describe('Environment Controller Tests', () => {
 
     expect(response.statusCode).toBe(400)
     expect(response.json().message).toBe(
-      'Cannot delete the default environment'
-    )
-  })
-
-  it('should not be able to make the only environment non-default', async () => {
-    await prisma.environment.deleteMany({
-      where: {
-        projectId: project1.id,
-        isDefault: false
-      }
-    })
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/${environment1.id}`,
-      payload: {
-        isDefault: false
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toBe(
-      'Cannot make the last environment non-default'
+      'Cannot delete the last environment in the project'
     )
   })
 })

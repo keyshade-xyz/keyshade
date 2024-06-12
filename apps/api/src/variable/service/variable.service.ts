@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -8,9 +7,6 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import {
-  ApprovalAction,
-  ApprovalItemType,
-  ApprovalStatus,
   Authority,
   Environment,
   EventSource,
@@ -21,16 +17,8 @@ import {
   VariableVersion
 } from '@prisma/client'
 import { CreateVariable } from '../dto/create.variable/create.variable'
-import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
 import createEvent from '../../common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
-import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
-import createApproval from '../../common/create-approval'
-import { UpdateVariableMetadata } from '../../approval/approval.types'
-import {
-  VariableWithProject,
-  VariableWithProjectAndVersion
-} from '../variable.types'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
@@ -55,10 +43,8 @@ export class VariableService {
   async createVariable(
     user: User,
     dto: CreateVariable,
-    projectId: Project['id'],
-    reason?: string
+    projectId: Project['id']
   ) {
-    const environmentId = dto.environmentId
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -68,63 +54,34 @@ export class VariableService {
         prisma: this.prisma
       })
 
-    // Check i the environment exists
-    let environment: Environment | null = null
-    if (environmentId) {
-      environment =
+    // Check if a variable with the same name already exists in the project
+    await this.variableExists(dto.name, projectId)
+
+    // Check if the user has access to the environments
+    if (dto.entries && dto.entries.length > 0) {
+      const environmentIds = dto.entries.map((entry) => entry.environmentId)
+      for (const environmentId of environmentIds) {
         await this.authorityCheckerService.checkAuthorityOverEnvironment({
           userId: user.id,
           entity: { id: environmentId },
           authority: Authority.READ_ENVIRONMENT,
           prisma: this.prisma
         })
+      }
     }
-    if (!environment) {
-      environment = await getDefaultEnvironmentOfProject(projectId, this.prisma)
-    }
-
-    // If any default environment was not found, throw an error
-    if (!environment) {
-      throw new NotFoundException(
-        `No default environment found for project with id ${projectId}`
-      )
-    }
-
-    // Check if the variable already exists in the environment
-    if (await this.variableExists(dto.name, environment.id)) {
-      throw new ConflictException(
-        `Variable already exists: ${dto.name} in environment ${environment.id} in project ${projectId}`
-      )
-    }
-
-    const approvalEnabled = await workspaceApprovalEnabled(
-      project.workspaceId,
-      this.prisma
-    )
 
     // Create the variable
     const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
         note: dto.note,
-        pendingCreation:
-          project.pendingCreation ||
-          environment.pendingCreation ||
-          approvalEnabled,
         versions: {
-          create: {
-            value: dto.value,
-            version: 1,
-            createdBy: {
-              connect: {
-                id: user.id
-              }
-            }
-          }
-        },
-        environment: {
-          connect: {
-            id: environment.id
+          createMany: {
+            data: dto.entries.map((entry) => ({
+              value: entry.value,
+              createdById: user.id,
+              environmentId: entry.environmentId
+            }))
           }
         },
         project: {
@@ -143,6 +100,12 @@ export class VariableService {
           select: {
             workspaceId: true
           }
+        },
+        versions: {
+          select: {
+            environmentId: true,
+            value: true
+          }
         }
       }
     })
@@ -158,9 +121,7 @@ export class VariableService {
           variableId: variable.id,
           name: variable.name,
           projectId,
-          projectName: project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
+          projectName: project.name
         },
         workspaceId: project.workspaceId
       },
@@ -169,36 +130,13 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} created variable ${variable.id}`)
 
-    if (
-      !project.pendingCreation &&
-      !environment.pendingCreation &&
-      approvalEnabled
-    ) {
-      const approval = await createApproval(
-        {
-          action: ApprovalAction.CREATE,
-          itemType: ApprovalItemType.VARIABLE,
-          itemId: variable.id,
-          reason,
-          user,
-          workspaceId: project.workspaceId
-        },
-        this.prisma
-      )
-      return {
-        variable,
-        approval
-      }
-    } else {
-      return variable
-    }
+    return variable
   }
 
   async updateVariable(
     user: User,
     variableId: Variable['id'],
-    dto: UpdateVariable,
-    reason?: string
+    dto: UpdateVariable
   ) {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
@@ -208,396 +146,110 @@ export class VariableService {
         prisma: this.prisma
       })
 
-    // Check if the variable already exists in the environment
-    if (
-      (dto.name &&
-        (await this.variableExists(dto.name, variable.environmentId))) ||
-      variable.name === dto.name
-    ) {
-      throw new ConflictException(
-        `Variable already exists: ${dto.name} in environment ${variable.environmentId}`
-      )
-    }
+    // Check if the variable already exists in the project
+    dto.name && (await this.variableExists(dto.name, variable.projectId))
 
-    if (
-      !variable.pendingCreation &&
-      (await workspaceApprovalEnabled(
-        variable.project.workspaceId,
-        this.prisma
-      ))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.VARIABLE,
-          itemId: variable.id,
-          reason,
-          user,
-          workspaceId: variable.project.workspaceId,
-          metadata: dto
-        },
-        this.prisma
-      )
-    } else {
-      return this.update(dto, user, variable)
-    }
-  }
-
-  async updateVariableEnvironment(
-    user: User,
-    variableId: Variable['id'],
-    environmentId: Environment['id'],
-    reason?: string
-  ) {
-    const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
-        entity: { id: variableId },
-        authority: Authority.UPDATE_VARIABLE,
-        prisma: this.prisma
-      })
-
-    if (variable.environmentId === environmentId) {
-      throw new BadRequestException(
-        `Can not update the environment of the variable to the same environment: ${environmentId}`
-      )
-    }
-
-    // Check if the environment exists
-    const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
-        entity: { id: environmentId },
-        authority: Authority.READ_ENVIRONMENT,
-        prisma: this.prisma
-      })
-
-    // Check if the environment belongs to the same project
-    if (environment.projectId !== variable.projectId) {
-      throw new BadRequestException(
-        `Environment ${environmentId} does not belong to the same project ${variable.projectId}`
-      )
-    }
-
-    // Check if the variable already exists in the environment
-    if (
-      !variable.pendingCreation &&
-      (await this.variableExists(variable.name, environment.id))
-    ) {
-      throw new ConflictException(
-        `Variable already exists: ${variable.name} in environment ${environment.id} in project ${variable.projectId}`
-      )
-    }
-
-    if (
-      await workspaceApprovalEnabled(variable.project.workspaceId, this.prisma)
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.VARIABLE,
-          itemId: variable.id,
-          reason,
-          user,
-          workspaceId: variable.project.workspaceId,
-          metadata: {
-            environmentId
-          }
-        },
-        this.prisma
-      )
-    } else {
-      return this.updateEnvironment(user, variable, environment)
-    }
-  }
-
-  async rollbackVariable(
-    user: User,
-    variableId: Variable['id'],
-    rollbackVersion: VariableVersion['version'],
-    reason?: string
-  ) {
-    const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
-        entity: { id: variableId },
-        authority: Authority.UPDATE_VARIABLE,
-        prisma: this.prisma
-      })
-
-    const maxVersion = variable.versions[variable.versions.length - 1].version
-
-    // Check if the rollback version is valid
-    if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
-      throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for variable: ${variableId}`
-      )
-    }
-
-    if (
-      !variable.pendingCreation &&
-      (await workspaceApprovalEnabled(
-        variable.project.workspaceId,
-        this.prisma
-      ))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.VARIABLE,
-          itemId: variable.id,
-          reason,
-          user,
-          workspaceId: variable.project.workspaceId,
-          metadata: {
-            rollbackVersion
-          }
-        },
-        this.prisma
-      )
-    } else {
-      return this.rollback(user, variable, rollbackVersion)
-    }
-  }
-
-  async deleteVariable(
-    user: User,
-    variableId: Variable['id'],
-    reason?: string
-  ) {
-    const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
-        entity: { id: variableId },
-        authority: Authority.DELETE_VARIABLE,
-        prisma: this.prisma
-      })
-
-    if (
-      !variable.pendingCreation &&
-      (await workspaceApprovalEnabled(
-        variable.project.workspaceId,
-        this.prisma
-      ))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.DELETE,
-          itemType: ApprovalItemType.VARIABLE,
-          itemId: variable.id,
-          reason,
-          user,
-          workspaceId: variable.project.workspaceId
-        },
-        this.prisma
-      )
-    } else {
-      return this.delete(user, variable)
-    }
-  }
-
-  async getVariableById(user: User, variableId: Variable['id']) {
-    return this.authorityCheckerService.checkAuthorityOverVariable({
-      userId: user.id,
-      entity: { id: variableId },
-      authority: Authority.READ_VARIABLE,
-      prisma: this.prisma
-    })
-  }
-
-  async getAllVariablesOfProject(
-    user: User,
-    projectId: Project['id'],
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ): Promise<
-    {
-      environment: { id: string; name: string }
-      variables: any[]
-    }[]
-  > {
-    // Check if the user has the required authorities in the project
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authority: Authority.READ_VARIABLE,
-      prisma: this.prisma
-    })
-
-    const variables = await this.prisma.variable.findMany({
-      where: {
-        projectId,
-        pendingCreation: false,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        versions: {
-          orderBy: {
-            version: 'desc'
-          },
-          take: 1
-        },
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        environment: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
+    // Check if the user has access to the environments
+    if (dto.entries && dto.entries.length > 0) {
+      const environmentIds = dto.entries.map((entry) => entry.environmentId)
+      for (const environmentId of environmentIds) {
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { id: environmentId },
+          authority: Authority.READ_ENVIRONMENT,
+          prisma: this.prisma
+        })
       }
-    })
-
-    // Group variables by environment
-    const variablesByEnvironment: {
-      [key: string]: {
-        environment: { id: string; name: string }
-        variables: any[]
-      }
-    } = {}
-    for (const variable of variables) {
-      const { id, name } = variable.environment
-      if (!variablesByEnvironment[id]) {
-        variablesByEnvironment[id] = {
-          environment: { id, name },
-          variables: []
-        }
-      }
-      variablesByEnvironment[id].variables.push(variable)
     }
 
-    // Convert the object to an array and return
-    return Object.values(variablesByEnvironment)
-  }
-
-  private async variableExists(
-    variableName: Variable['name'],
-    environmentId: Environment['id']
-  ): Promise<boolean> {
-    return (
-      (await this.prisma.variable.count({
-        where: {
-          name: variableName,
-          pendingCreation: false,
-          environment: {
-            id: environmentId
-          }
-        }
-      })) > 0
-    )
-  }
-
-  async makeVariableApproved(variableId: Variable['id']): Promise<any> {
-    const variable = await this.prisma.variable.findUnique({
-      where: {
-        id: variableId
-      }
-    })
-
-    const variableExists = await this.prisma.variable.count({
-      where: {
-        name: variable.name,
-        pendingCreation: false,
-        environmentId: variable.environmentId,
-        projectId: variable.projectId
-      }
-    })
-
-    if (variableExists > 0) {
-      throw new ConflictException(
-        `Variable already exists: ${variable.name} in environment ${variable.environmentId} in project ${variable.projectId}`
-      )
-    }
-
-    return this.prisma.variable.update({
-      where: {
-        id: variableId
-      },
-      data: {
-        pendingCreation: false
-      }
-    })
-  }
-
-  async update(
-    dto: UpdateVariable | UpdateVariableMetadata,
-    user: User,
-    variable: VariableWithProjectAndVersion
-  ) {
-    let result
+    const op = []
 
     // Update the variable
-    // If a new variable value is proposed, we want to create a new version for that variable
-    if (dto.value) {
-      const previousVersion = await this.prisma.variableVersion.findFirst({
-        where: {
-          variableId: variable.id
-        },
-        select: {
-          version: true
-        },
-        orderBy: {
-          version: 'desc'
-        },
-        take: 1
-      })
 
-      result = await this.prisma.variable.update({
+    // Update the fields
+    op.push(
+      this.prisma.variable.update({
         where: {
           id: variable.id
         },
         data: {
           name: dto.name,
           note: dto.note,
-          lastUpdatedById: user.id,
+          lastUpdatedById: user.id
+        },
+        include: {
+          project: {
+            select: {
+              workspaceId: true
+            }
+          },
           versions: {
-            create: {
-              value: dto.value,
-              version: previousVersion.version + 1,
-              createdById: user.id
+            select: {
+              environmentId: true,
+              value: true
             }
           }
         }
       })
+    )
 
-      try {
-        await this.redis.publish(
-          CHANGE_NOTIFIER_RSC,
-          JSON.stringify({
-            environmentId: variable.environmentId,
-            name: variable.name,
-            value: dto.value,
-            isSecret: false
+    // If new values for various environments are proposed,
+    // we want to create new versions for those environments
+    if (dto.entries && dto.entries.length > 0) {
+      for (const entry of dto.entries) {
+        // Fetch the latest version of the variable for the environment
+        const latestVersion = await this.prisma.variableVersion.findFirst({
+          where: {
+            variableId: variable.id,
+            environmentId: entry.environmentId
+          },
+          select: {
+            version: true
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        })
+
+        // Create the new version
+        op.push(
+          this.prisma.variableVersion.create({
+            data: {
+              value: entry.value,
+              version: latestVersion ? latestVersion.version + 1 : 1,
+              createdById: user.id,
+              environmentId: entry.environmentId,
+              variableId: variable.id
+            }
           })
         )
-      } catch (error) {
-        this.logger.error(`Error publishing variable update to Redis: ${error}`)
       }
-    } else {
-      result = await this.prisma.variable.update({
-        where: {
-          id: variable.id
-        },
-        data: {
-          note: dto.note,
-          name: dto.name,
-          lastUpdatedById: user.id
+    }
+
+    // Make the transaction
+    const tx = await this.prisma.$transaction(op)
+    const updatedVariable = tx[0]
+
+    // Notify the new variable version through Redis
+    if (dto.entries && dto.entries.length > 0) {
+      for (const entry of dto.entries) {
+        try {
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: entry.environmentId,
+              name: updatedVariable.name,
+              value: entry.value,
+              isSecret: false
+            })
+          )
+        } catch (error) {
+          this.logger.error(
+            `Error publishing variable update to Redis: ${error}`
+          )
         }
-      })
+      }
     }
 
     await createEvent(
@@ -620,58 +272,44 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} updated variable ${variable.id}`)
 
-    return result
+    return updatedVariable
   }
 
-  async updateEnvironment(
+  async rollbackVariable(
     user: User,
-    variable: VariableWithProject,
-    environment: Environment
-  ) {
-    // Update the variable
-    const result = await this.prisma.variable.update({
-      where: {
-        id: variable.id
-      },
-      data: {
-        environment: {
-          connect: {
-            id: environment.id
-          }
-        }
-      }
-    })
-
-    await createEvent(
-      {
-        triggeredBy: user,
-        entity: variable,
-        type: EventType.VARIABLE_UPDATED,
-        source: EventSource.VARIABLE,
-        title: `Variable environment updated`,
-        metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
-        },
-        workspaceId: variable.project.workspaceId
-      },
-      this.prisma
-    )
-
-    this.logger.log(`User ${user.id} updated variable ${variable.id}`)
-
-    return result
-  }
-
-  async rollback(
-    user: User,
-    variable: VariableWithProjectAndVersion,
+    variableId: Variable['id'],
+    environmentId: Environment['id'],
     rollbackVersion: VariableVersion['version']
   ) {
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.UPDATE_VARIABLE,
+        prisma: this.prisma
+      })
+
+    // Filter the variable versions by the environment
+    variable.versions = variable.versions.filter(
+      (version) => version.environmentId === environmentId
+    )
+
+    if (variable.versions.length === 0) {
+      throw new NotFoundException(
+        `No versions found for environment: ${environmentId} for variable: ${variableId}`
+      )
+    }
+
+    // Sorting is in ascending order of dates. So the last element is the latest version
+    const maxVersion = variable.versions[variable.versions.length - 1].version
+
+    // Check if the rollback version is valid
+    if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
+      throw new NotFoundException(
+        `Invalid rollback version: ${rollbackVersion} for variable: ${variableId}`
+      )
+    }
+
     // Rollback the variable
     const result = await this.prisma.variableVersion.deleteMany({
       where: {
@@ -683,10 +321,11 @@ export class VariableService {
     })
 
     try {
+      // Notify the new variable version through Redis
       await this.redis.publish(
         CHANGE_NOTIFIER_RSC,
         JSON.stringify({
-          environmentId: variable.environmentId,
+          environmentId,
           name: variable.name,
           value: variable.versions[rollbackVersion - 1].value,
           isSecret: false
@@ -720,39 +359,21 @@ export class VariableService {
     return result
   }
 
-  async delete(user: User, variable: VariableWithProject) {
-    const op = []
+  async deleteVariable(user: User, variableId: Variable['id']) {
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.DELETE_VARIABLE,
+        prisma: this.prisma
+      })
 
     // Delete the variable
-    op.push(
-      this.prisma.variable.delete({
-        where: {
-          id: variable.id
-        }
-      })
-    )
-
-    // If the variable is in pending creation and the workspace approval is enabled, we need to delete the approval
-    if (
-      variable.pendingCreation &&
-      (await workspaceApprovalEnabled(
-        variable.project.workspaceId,
-        this.prisma
-      ))
-    ) {
-      op.push(
-        this.prisma.approval.deleteMany({
-          where: {
-            itemId: variable.id,
-            itemType: ApprovalItemType.VARIABLE,
-            status: ApprovalStatus.PENDING,
-            action: ApprovalAction.CREATE
-          }
-        })
-      )
-    }
-
-    await this.prisma.$transaction(op)
+    await this.prisma.variable.delete({
+      where: {
+        id: variable.id
+      }
+    })
 
     await createEvent(
       {
@@ -773,5 +394,137 @@ export class VariableService {
     )
 
     this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
+  }
+
+  async getAllVariablesOfProject(
+    user: User,
+    projectId: Project['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    // Check if the user has the required authorities in the project
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
+
+    const variables = await this.prisma.variable.findMany({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+
+    const variablesWithEnvironmentalValues = new Map<
+      Variable['id'],
+      {
+        variable: Variable
+        values: {
+          environment: {
+            name: Environment['name']
+            id: Environment['id']
+          }
+          value: VariableVersion['value']
+        }[]
+      }
+    >()
+
+    // Find all the environments for this project
+    const environments = await this.prisma.environment.findMany({
+      where: {
+        projectId
+      }
+    })
+    const environmentIds = new Map(
+      environments.map((env) => [env.id, env.name])
+    )
+
+    for (const variable of variables) {
+      // Make a copy of the environment IDs
+      const envIds = new Map(environmentIds)
+      let iterations = envIds.size
+
+      // Find the latest version for each environment
+      while (iterations--) {
+        const latestVersion = await this.prisma.variableVersion.findFirst({
+          where: {
+            variableId: variable.id,
+            environmentId: {
+              in: Array.from(envIds.keys())
+            }
+          },
+          orderBy: {
+            version: 'desc'
+          }
+        })
+
+        if (!latestVersion) continue
+
+        if (variablesWithEnvironmentalValues.has(variable.id)) {
+          variablesWithEnvironmentalValues.get(variable.id).values.push({
+            environment: {
+              id: latestVersion.environmentId,
+              name: envIds.get(latestVersion.environmentId)
+            },
+            value: latestVersion.value
+          })
+        } else {
+          variablesWithEnvironmentalValues.set(variable.id, {
+            variable,
+            values: [
+              {
+                environment: {
+                  id: latestVersion.environmentId,
+                  name: envIds.get(latestVersion.environmentId)
+                },
+                value: latestVersion.value
+              }
+            ]
+          })
+        }
+
+        envIds.delete(latestVersion.environmentId)
+      }
+    }
+
+    return Array.from(variablesWithEnvironmentalValues.values())
+  }
+
+  private async variableExists(
+    variableName: Variable['name'],
+    projectId: Project['id']
+  ) {
+    if (
+      (await this.prisma.variable.findFirst({
+        where: {
+          name: variableName,
+          projectId
+        }
+      })) !== null
+    ) {
+      throw new ConflictException(
+        `Variable already exists: ${variableName} in project ${projectId}`
+      )
+    }
   }
 }

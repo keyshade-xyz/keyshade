@@ -3,7 +3,6 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import {
-  Approval,
   Environment,
   EventSeverity,
   EventSource,
@@ -103,8 +102,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a workspace event', async () => {
     const newWorkspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description',
-      approvalEnabled: false
+      description: 'Some description'
     })
     workspace = newWorkspace
 
@@ -173,8 +171,7 @@ describe('Event Controller Tests', () => {
       user,
       {
         name: 'My environment',
-        description: 'Some description',
-        isDefault: false
+        description: 'Some description'
       },
       project.id
     )) as Environment
@@ -210,9 +207,13 @@ describe('Event Controller Tests', () => {
       user,
       {
         name: 'My secret',
-        value: 'My value',
+        entries: [
+          {
+            value: 'My value',
+            environmentId: environment.id
+          }
+        ],
         note: 'Some note',
-        environmentId: environment.id,
         rotateAfter: '720'
       },
       project.id
@@ -248,9 +249,13 @@ describe('Event Controller Tests', () => {
       user,
       {
         name: 'My variable',
-        value: 'My value',
-        note: 'Some note',
-        environmentId: environment.id
+        entries: [
+          {
+            value: 'My value',
+            environmentId: environment.id
+          }
+        ],
+        note: 'Some note'
       },
       project.id
     )) as Variable
@@ -317,45 +322,6 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newWorkspaceRole.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
-  })
-
-  it('should be able to fetch a approval event', async () => {
-    const workspace = await workspaceService.createWorkspace(user, {
-      name: 'My workspace 100',
-      description: 'Some description',
-      approvalEnabled: true
-    })
-
-    const updateWorkspaceResponse = (await workspaceService.updateWorkspace(
-      user,
-      workspace.id,
-      {
-        name: 'My workspace 10'
-      }
-    )) as Approval
-
-    expect(updateWorkspaceResponse).toBeDefined()
-
-    const response = await app.inject({
-      method: 'GET',
-      url: `/event/${workspace.id}?source=APPROVAL`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
-
-    expect(event.id).toBeDefined()
-    expect(event.title).toBeDefined()
-    expect(event.source).toBe(EventSource.APPROVAL)
-    expect(event.triggerer).toBe(EventTriggerer.USER)
-    expect(event.severity).toBe(EventSeverity.INFO)
-    expect(event.type).toBe(EventType.APPROVAL_CREATED)
-    expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(updateWorkspaceResponse.id)
-    expect(event.userId).toBe(user.id)
   })
 
   it('should be able to fetch all events', async () => {

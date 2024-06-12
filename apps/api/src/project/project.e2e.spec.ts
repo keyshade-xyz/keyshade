@@ -175,13 +175,11 @@ describe('Project Controller Tests', () => {
     expect(response.json().storePrivateKey).toBe(true)
     expect(response.json().workspaceId).toBe(workspace1.id)
     expect(response.json().lastUpdatedById).toBe(user1.id)
-    expect(response.json().isDisabled).toBe(false)
     expect(response.json().accessLevel).toBe(ProjectAccessLevel.PRIVATE)
     expect(response.json().publicKey).toBeDefined()
     expect(response.json().privateKey).toBeDefined()
     expect(response.json().createdAt).toBeDefined()
     expect(response.json().updatedAt).toBeDefined()
-    expect(response.json().pendingCreation).toBe(false)
   })
 
   it('should have created a default environment', async () => {
@@ -578,9 +576,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(environments).toHaveLength(3)
-    expect(environments[0].isDefault).toBe(true)
-    expect(environments[1].isDefault).toBe(false)
-    expect(environments[2].isDefault).toBe(false)
   })
 
   it('should generate new key-pair if regenerateKeyPair is true and and the project stores the private key or a private key is specified', async () => {
@@ -1175,8 +1170,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'API_KEY',
-          value: 'some_key',
-          environmentId: environment.id
+          entries: [
+            {
+              value: 'some_key',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )) as Secret
@@ -1185,7 +1184,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'DB_PASSWORD',
-          value: 'password'
+          entries: [
+            {
+              value: 'password',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )) as Secret
@@ -1195,8 +1199,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'PORT',
-          value: '8080',
-          environmentId: environment.id
+          entries: [
+            {
+              value: '8080',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )) as Variable
@@ -1205,7 +1213,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'EXPIRY',
-          value: '3600'
+          entries: [
+            {
+              value: '3600',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )) as Variable
@@ -1251,24 +1264,22 @@ describe('Project Controller Tests', () => {
         forkedVariables
 
       expect(secretInDefaultEnvironment).toBeDefined()
-      expect(secretInDefaultEnvironment.name).toBe(secret2.name)
-      expect(secretInDefaultEnvironment.environmentId).toBe(
-        defaultEnvironment.id
-      )
+      expect(secretInDefaultEnvironment.name).toBe(secret1.name)
 
       expect(secretInDevEnvironment).toBeDefined()
-      expect(secretInDevEnvironment.name).toBe(secret1.name)
-      expect(secretInDevEnvironment.environmentId).toBe(devEnvironment.id)
+      expect(secretInDevEnvironment.name).toBe(secret2.name)
 
       expect(variableInDefaultEnvironment).toBeDefined()
-      expect(variableInDefaultEnvironment.name).toBe(variable2.name)
-      expect(variableInDefaultEnvironment.environmentId).toBe(
-        defaultEnvironment.id
-      )
+      expect(variableInDefaultEnvironment.name).toBe(variable1.name)
 
       expect(variableInDevEnvironment).toBeDefined()
-      expect(variableInDevEnvironment.name).toBe(variable1.name)
-      expect(variableInDevEnvironment.environmentId).toBe(devEnvironment.id)
+      expect(variableInDevEnvironment.name).toBe(variable2.name)
+
+      expect(devEnvironment).toBeDefined()
+      expect(devEnvironment.name).toBe(environment.name)
+
+      expect(defaultEnvironment).toBeDefined()
+      expect(defaultEnvironment.name).toBe('Default')
     })
 
     it('should only copy new environments, secrets and variables if sync is not hard', async () => {
@@ -1286,8 +1297,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'API_KEY',
-          value: 'some_key',
-          environmentId: environment.id
+          entries: [
+            {
+              value: 'some_key',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1296,7 +1311,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'DB_PASSWORD',
-          value: 'password'
+          entries: [
+            {
+              value: 'password',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1306,8 +1326,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'PORT',
-          value: '8080',
-          environmentId: environment.id
+          entries: [
+            {
+              value: '8080',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1316,7 +1340,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'EXPIRY',
-          value: '3600'
+          entries: [
+            {
+              value: '3600',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1345,8 +1374,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'NEW_SECRET',
-          value: 'new_secret',
-          environmentId: newEnvironmentOriginal.id
+          entries: [
+            {
+              value: 'new_secret',
+              environmentId: newEnvironmentOriginal.id
+            }
+          ]
         },
         project3.id
       )
@@ -1356,8 +1389,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'NEW_VARIABLE',
-          value: 'new_variable',
-          environmentId: newEnvironmentOriginal.id
+          entries: [
+            {
+              value: 'new_variable',
+              environmentId: newEnvironmentOriginal.id
+            }
+          ]
         },
         project3.id
       )
@@ -1376,8 +1413,12 @@ describe('Project Controller Tests', () => {
         user2,
         {
           name: 'NEW_SECRET_2',
-          value: 'new_secret',
-          environmentId: newEnvironmentForked.id
+          entries: [
+            {
+              value: 'new_secret',
+              environmentId: newEnvironmentForked.id
+            }
+          ]
         },
         forkedProject.id
       )
@@ -1387,8 +1428,12 @@ describe('Project Controller Tests', () => {
         user2,
         {
           name: 'NEW_VARIABLE_2',
-          value: 'new_variable',
-          environmentId: newEnvironmentForked.id
+          entries: [
+            {
+              value: 'new_variable',
+              environmentId: newEnvironmentForked.id
+            }
+          ]
         },
         forkedProject.id
       )
@@ -1442,8 +1487,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'API_KEY',
-          value: 'some_key',
-          environmentId: environment.id
+          entries: [
+            {
+              value: 'some_key',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1452,7 +1501,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'DB_PASSWORD',
-          value: 'password'
+          entries: [
+            {
+              value: 'password',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1462,8 +1516,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'PORT',
-          value: '8080',
-          environmentId: environment.id
+          entries: [
+            {
+              value: '8080',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1472,7 +1530,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'EXPIRY',
-          value: '3600'
+          entries: [
+            {
+              value: '3600',
+              environmentId: environment.id
+            }
+          ]
         },
         project3.id
       )
@@ -1501,8 +1564,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'NEW_SECRET',
-          value: 'new_secret',
-          environmentId: newEnvironmentOriginal.id
+          entries: [
+            {
+              value: 'new_secret',
+              environmentId: newEnvironmentOriginal.id
+            }
+          ]
         },
         project3.id
       )
@@ -1512,8 +1579,12 @@ describe('Project Controller Tests', () => {
         user1,
         {
           name: 'NEW_VARIABLE',
-          value: 'new_variable',
-          environmentId: newEnvironmentOriginal.id
+          entries: [
+            {
+              value: 'new_variable',
+              environmentId: newEnvironmentOriginal.id
+            }
+          ]
         },
         project3.id
       )
@@ -1532,8 +1603,12 @@ describe('Project Controller Tests', () => {
         user2,
         {
           name: 'NEW_SECRET',
-          value: 'new_secret',
-          environmentId: newEnvironmentForked.id
+          entries: [
+            {
+              value: 'new_secret',
+              environmentId: newEnvironmentForked.id
+            }
+          ]
         },
         forkedProject.id
       )
@@ -1543,8 +1618,12 @@ describe('Project Controller Tests', () => {
         user2,
         {
           name: 'NEW_VARIABLE',
-          value: 'new_variable',
-          environmentId: newEnvironmentForked.id
+          entries: [
+            {
+              value: 'new_variable',
+              environmentId: newEnvironmentForked.id
+            }
+          ]
         },
         forkedProject.id
       )

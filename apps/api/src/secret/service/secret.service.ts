@@ -7,9 +7,6 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import {
-  ApprovalAction,
-  ApprovalItemType,
-  ApprovalStatus,
   Authority,
   Environment,
   EventSource,
@@ -25,16 +22,7 @@ import { decrypt } from '../../common/decrypt'
 import { PrismaService } from '../../prisma/prisma.service'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { encrypt } from '../../common/encrypt'
-import {
-  SecretWithProject,
-  SecretWithProjectAndVersion,
-  SecretWithVersionAndEnvironment
-} from '../secret.types'
 import createEvent from '../../common/create-event'
-import getDefaultEnvironmentOfProject from '../../common/get-default-project-environment'
-import workspaceApprovalEnabled from '../../common/workspace-approval-enabled'
-import createApproval from '../../common/create-approval'
-import { UpdateSecretMetadata } from '../../approval/approval.types'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
@@ -56,13 +44,7 @@ export class SecretService {
     this.redis = redisClient.publisher
   }
 
-  async createSecret(
-    user: User,
-    dto: CreateSecret,
-    projectId: Project['id'],
-    reason?: string
-  ) {
-    const environmentId = dto.environmentId
+  async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -72,39 +54,21 @@ export class SecretService {
         prisma: this.prisma
       })
 
-    // Check if the environment exists
-    let environment: Environment | null = null
-    if (environmentId) {
-      environment =
+    // Check if the secret with the same name already exists in the project
+    await this.secretExists(dto.name, projectId)
+
+    // Check if the user has access to the environments
+    if (dto.entries && dto.entries.length > 0) {
+      const environmentIds = dto.entries.map((entry) => entry.environmentId)
+      for (const environmentId of environmentIds) {
         await this.authorityCheckerService.checkAuthorityOverEnvironment({
           userId: user.id,
           entity: { id: environmentId },
           authority: Authority.READ_ENVIRONMENT,
           prisma: this.prisma
         })
+      }
     }
-    if (!environment) {
-      environment = await getDefaultEnvironmentOfProject(projectId, this.prisma)
-    }
-
-    // If any default environment was not found, throw an error
-    if (!environment) {
-      throw new NotFoundException(
-        `No default environment found for project: ${projectId}`
-      )
-    }
-
-    // Check if the secret already exists in the environment
-    if (await this.secretExists(dto.name, environment.id)) {
-      throw new ConflictException(
-        `Secret already exists: ${dto.name} in environment ${environment.name} in project ${projectId}`
-      )
-    }
-
-    const approvalEnabled = await workspaceApprovalEnabled(
-      project.workspaceId,
-      this.prisma
-    )
 
     // Create the secret
     const secret = await this.prisma.secret.create({
@@ -112,20 +76,16 @@ export class SecretService {
         name: dto.name,
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
-        pendingCreation:
-          project.pendingCreation ||
-          environment.pendingCreation ||
-          approvalEnabled,
         versions: {
-          create: {
-            value: await encrypt(project.publicKey, dto.value),
-            version: 1,
-            createdById: user.id
-          }
-        },
-        environment: {
-          connect: {
-            id: environment.id
+          createMany: {
+            data: await Promise.all(
+              dto.entries.map(async (entry) => ({
+                value: await encrypt(project.publicKey, entry.value),
+                version: 1,
+                createdById: user.id,
+                environmentId: entry.environmentId
+              }))
+            )
           }
         },
         project: {
@@ -136,6 +96,19 @@ export class SecretService {
         lastUpdatedBy: {
           connect: {
             id: user.id
+          }
+        }
+      },
+      include: {
+        project: {
+          select: {
+            workspaceId: true
+          }
+        },
+        versions: {
+          select: {
+            environmentId: true,
+            value: true
           }
         }
       }
@@ -152,9 +125,7 @@ export class SecretService {
           secretId: secret.id,
           name: secret.name,
           projectId,
-          projectName: project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
+          projectName: project.name
         },
         workspaceId: project.workspaceId
       },
@@ -163,492 +134,123 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} created secret ${secret.id}`)
 
-    if (
-      !project.pendingCreation &&
-      !environment.pendingCreation &&
-      approvalEnabled
-    ) {
-      const approval = await createApproval(
-        {
-          action: ApprovalAction.CREATE,
-          itemType: ApprovalItemType.SECRET,
-          itemId: secret.id,
-          reason,
-          user,
-          workspaceId: project.workspaceId
-        },
-        this.prisma
-      )
-      return {
-        secret,
-        approval
-      }
-    } else {
-      return secret
-    }
-  }
-
-  async updateSecret(
-    user: User,
-    secretId: Secret['id'],
-    dto: UpdateSecret,
-    reason?: string
-  ) {
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
-      entity: { id: secretId },
-      authority: Authority.UPDATE_SECRET,
-      prisma: this.prisma
-    })
-
-    // Check if the secret already exists in the environment
-    if (
-      (dto.name && (await this.secretExists(dto.name, secret.environmentId))) ||
-      secret.name === dto.name
-    ) {
-      throw new ConflictException(
-        `Secret already exists: ${dto.name} in environment ${secret.environmentId}`
-      )
-    }
-
-    // Encrypt the secret value before storing/processing it
-    if (dto.value) {
-      dto.value = await encrypt(secret.project.publicKey, dto.value)
-    }
-
-    if (
-      !secret.pendingCreation &&
-      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.SECRET,
-          itemId: secret.id,
-          reason,
-          user,
-          workspaceId: secret.project.workspaceId,
-          metadata: dto
-        },
-        this.prisma
-      )
-    } else {
-      return this.update(dto, user, secret)
-    }
-  }
-
-  async updateSecretEnvironment(
-    user: User,
-    secretId: Secret['id'],
-    environmentId: Environment['id'],
-    reason?: string
-  ) {
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
-      entity: { id: secretId },
-      authority: Authority.UPDATE_SECRET,
-      prisma: this.prisma
-    })
-
-    if (secret.environmentId === environmentId) {
-      throw new BadRequestException(
-        `Can not update the environment of the secret to the same environment: ${environmentId} in project ${secret.projectId}`
-      )
-    }
-
-    // Check if the environment exists
-    const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
-        entity: { id: environmentId },
-        authority: Authority.READ_ENVIRONMENT,
-        prisma: this.prisma
-      })
-
-    if (environment.projectId !== secret.projectId) {
-      throw new BadRequestException(
-        `Environment ${environmentId} does not belong to project ${secret.projectId}`
-      )
-    }
-
-    // Check if the secret already exists in the environment
-    if (await this.secretExists(secret.name, environmentId)) {
-      throw new ConflictException(
-        `Secret already exists: ${secret.name} in environment ${environmentId} in project ${secret.projectId}`
-      )
-    }
-
-    if (
-      !secret.pendingCreation &&
-      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.SECRET,
-          itemId: secret.id,
-          reason,
-          user,
-          workspaceId: secret.project.workspaceId,
-          metadata: {
-            environmentId
-          }
-        },
-        this.prisma
-      )
-    } else {
-      return this.updateEnvironment(user, secret, environment)
-    }
-  }
-
-  async rollbackSecret(
-    user: User,
-    secretId: Secret['id'],
-    rollbackVersion: SecretVersion['version'],
-    reason?: string
-  ) {
-    // Fetch the secret
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
-      entity: { id: secretId },
-      authority: Authority.UPDATE_SECRET,
-      prisma: this.prisma
-    })
-
-    const maxVersion = secret.versions[secret.versions.length - 1].version
-
-    // Check if the rollback version is valid
-    if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
-      throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
-      )
-    }
-
-    if (
-      !secret.pendingCreation &&
-      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.UPDATE,
-          itemType: ApprovalItemType.SECRET,
-          itemId: secret.id,
-          reason,
-          user,
-          workspaceId: secret.project.workspaceId,
-          metadata: {
-            rollbackVersion
-          }
-        },
-        this.prisma
-      )
-    } else {
-      return this.rollback(user, secret, rollbackVersion)
-    }
-  }
-
-  async deleteSecret(user: User, secretId: Secret['id'], reason?: string) {
-    // Check if the user has the required role
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
-      entity: { id: secretId },
-      authority: Authority.DELETE_SECRET,
-      prisma: this.prisma
-    })
-
-    if (
-      !secret.pendingCreation &&
-      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
-    ) {
-      return await createApproval(
-        {
-          action: ApprovalAction.DELETE,
-          itemType: ApprovalItemType.SECRET,
-          itemId: secretId,
-          reason,
-          user,
-          workspaceId: secret.project.workspaceId
-        },
-        this.prisma
-      )
-    } else {
-      return this.delete(user, secret)
-    }
-  }
-
-  async getSecretById(
-    user: User,
-    secretId: Secret['id'],
-    decryptValue: boolean
-  ) {
-    // Fetch the secret
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
-      entity: { id: secretId },
-      authority: Authority.READ_SECRET,
-      prisma: this.prisma
-    })
-
-    const project = secret.project
-
-    // Check if the project is allowed to store the private key
-    if (decryptValue && !project.storePrivateKey) {
-      throw new BadRequestException(
-        `Cannot decrypt secret value: ${secretId} as the project does not store the private key`
-      )
-    }
-
-    // Check if the project has a private key. This is just to ensure that we don't run into any
-    // problems while decrypting the secret
-    if (decryptValue && !project.privateKey) {
-      throw new NotFoundException(
-        `Cannot decrypt secret value: ${secretId} as the project does not have a private key`
-      )
-    }
-
-    if (decryptValue) {
-      // Decrypt the secret value
-      for (let i = 0; i < secret.versions.length; i++) {
-        const decryptedValue = await decrypt(
-          project.privateKey,
-          secret.versions[i].value
-        )
-        secret.versions[i].value = decryptedValue
-      }
-    }
-
-    // Return the secret
     return secret
   }
 
-  async getAllSecretsOfProject(
-    user: User,
-    projectId: Project['id'],
-    decryptValue: boolean,
-    page: number,
-    limit: number,
-    sort: string,
-    order: string,
-    search: string
-  ): Promise<
-    {
-      environment: { id: string; name: string }
-      secrets: any[]
-    }[]
-  > {
-    // Fetch the project
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { id: projectId },
-        authority: Authority.READ_SECRET,
-        prisma: this.prisma
-      })
-
-    // Check if the project is allowed to store the private key
-    if (decryptValue && !project.storePrivateKey) {
-      throw new BadRequestException(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
-    }
-
-    // Check if the project has a private key. This is just to ensure that we don't run into any
-    // problems while decrypting the secret
-    if (decryptValue && !project.privateKey) {
-      throw new NotFoundException(
-        `Cannot decrypt secret values as the project does not have a private key`
-      )
-    }
-
-    const secrets = await this.prisma.secret.findMany({
-      where: {
-        projectId,
-        pendingCreation: false,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        versions: {
-          orderBy: {
-            version: 'desc'
-          },
-          take: 1
-        },
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        environment: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limit,
-      orderBy: {
-        [sort]: order
-      }
+  async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.UPDATE_SECRET,
+      prisma: this.prisma
     })
 
-    // Group variables by environment
-    const secretsByEnvironment: {
-      [key: string]: {
-        environment: { id: string; name: string }
-        secrets: any[]
-      }
-    } = {}
+    // Check if the secret with the same name already exists in the project
+    dto.name && (await this.secretExists(dto.name, secret.projectId))
 
-    for (const secret of secrets) {
-      // Optionally decrypt secret value if decryptValue is true
-      if (decryptValue) {
-        const latestSecretVersion = secret.versions[0]
-        const decryptedValue = await decrypt(
-          project.privateKey,
-          latestSecretVersion.value
-        )
-        latestSecretVersion.value = decryptedValue
+    // Check if the user has access to the environments
+    if (dto.entries && dto.entries.length > 0) {
+      const environmentIds = dto.entries.map((entry) => entry.environmentId)
+      for (const environmentId of environmentIds) {
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { id: environmentId },
+          authority: Authority.READ_ENVIRONMENT,
+          prisma: this.prisma
+        })
       }
-
-      const { id, name } = secret.environment
-      if (!secretsByEnvironment[id]) {
-        secretsByEnvironment[id] = {
-          environment: { id, name },
-          secrets: []
-        }
-      }
-      secretsByEnvironment[id].secrets.push(secret)
     }
 
-    // Convert the object to an array and return
-    return Object.values(secretsByEnvironment)
-  }
-
-  private async secretExists(
-    secretName: Secret['name'],
-    environmentId: Environment['id']
-  ): Promise<boolean> {
-    return (
-      (await this.prisma.secret.count({
-        where: {
-          pendingCreation: false,
-          name: secretName,
-          environment: {
-            id: environmentId
-          }
-        }
-      })) > 0
-    )
-  }
-
-  async makeSecretApproved(secretId: Secret['id']) {
-    const secret = await this.prisma.secret.findUnique({
-      where: {
-        id: secretId
-      }
-    })
-
-    const secretExists = await this.prisma.secret.count({
-      where: {
-        name: secret.name,
-        environmentId: secret.environmentId,
-        pendingCreation: false,
-        projectId: secret.projectId
-      }
-    })
-
-    if (secretExists > 0) {
-      throw new ConflictException(
-        `Secret already exists: ${secret.name} in environment ${secret.environmentId} in project ${secret.projectId}`
-      )
-    }
-
-    return this.prisma.secret.update({
-      where: {
-        id: secretId
-      },
-      data: {
-        pendingCreation: false
-      }
-    })
-  }
-
-  async update(
-    dto: UpdateSecret | UpdateSecretMetadata,
-    user: User,
-    secret: SecretWithProjectAndVersion
-  ) {
-    let result
+    const op = []
 
     // Update the secret
-    // If a new secret value is proposed, we want to create a new version for
-    // that secret
-    if (dto.value) {
-      const previousVersion = await this.prisma.secretVersion.findFirst({
-        where: {
-          secretId: secret.id
-        },
-        select: {
-          version: true
-        },
-        orderBy: {
-          version: 'desc'
-        },
-        take: 1
-      })
 
-      result = await this.prisma.secret.update({
+    // Update the other fields
+    op.push(
+      this.prisma.secret.update({
         where: {
           id: secret.id
         },
         data: {
           name: dto.name,
           note: dto.note,
-          rotateAt: addHoursToDate(dto.rotateAfter),
-          lastUpdatedById: user.id,
-          versions: {
-            create: {
-              value: dto.value, // The value is already encrypted
-              version: previousVersion.version + 1,
-              createdById: user.id
-            }
-          }
-        }
-      })
-
-      try {
-        await this.redis.publish(
-          CHANGE_NOTIFIER_RSC,
-          JSON.stringify({
-            environmentId: secret.environmentId,
-            name: secret.name,
-            value: dto.value,
-            isSecret: true
-          })
-        )
-      } catch (error) {
-        this.logger.error(
-          this.logger.error(`Error publishing secret update to Redis: ${error}`)
-        )
-      }
-    } else {
-      result = await this.prisma.secret.update({
-        where: {
-          id: secret.id
-        },
-        data: {
-          note: dto.note,
-          name: dto.name,
           rotateAt: dto.rotateAfter
             ? addHoursToDate(dto.rotateAfter)
             : undefined,
           lastUpdatedById: user.id
+        },
+        include: {
+          project: {
+            select: {
+              workspaceId: true
+            }
+          },
+          versions: {
+            select: {
+              environmentId: true,
+              value: true
+            }
+          }
         }
       })
+    )
+
+    // If new values for various environments are proposed,
+    // we want to create new versions for those environments
+    if (dto.entries && dto.entries.length > 0) {
+      for (const entry of dto.entries) {
+        // Fetch the latest version of the secret for the environment
+        const latestVersion = await this.prisma.secretVersion.findFirst({
+          where: {
+            secretId: secret.id,
+            environmentId: entry.environmentId
+          },
+          select: {
+            version: true
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        })
+
+        // Create the new version
+        // Create the new version
+        op.push(
+          this.prisma.secretVersion.create({
+            data: {
+              value: await encrypt(secret.project.publicKey, entry.value),
+              version: latestVersion ? latestVersion.version + 1 : 1,
+              createdById: user.id,
+              environmentId: entry.environmentId,
+              secretId: secret.id
+            }
+          })
+        )
+      }
+    }
+
+    // Make the transaction
+    const tx = await this.prisma.$transaction(op)
+    const updatedSecret = tx[0]
+
+    // Notify the new secret version through Redis
+    if (dto.entries && dto.entries.length > 0) {
+      for (const entry of dto.entries) {
+        try {
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: entry.environmentId,
+              name: updatedSecret.name,
+              value: entry.value,
+              isSecret: true
+            })
+          )
+        } catch (error) {
+          this.logger.error(`Error publishing secret update to Redis: ${error}`)
+        }
+      }
     }
 
     await createEvent(
@@ -671,54 +273,44 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
-    return result
+    return updatedSecret
   }
 
-  async updateEnvironment(
+  async rollbackSecret(
     user: User,
-    secret: SecretWithProjectAndVersion,
-    environment: Environment
+    secretId: Secret['id'],
+    environmentId: Environment['id'],
+    rollbackVersion: SecretVersion['version']
   ) {
-    // Update the secret
-    const result = await this.prisma.secret.update({
-      where: {
-        id: secret.id
-      },
-      data: {
-        environmentId: environment.id
-      }
+    // Fetch the secret
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.UPDATE_SECRET,
+      prisma: this.prisma
     })
 
-    await createEvent(
-      {
-        triggeredBy: user,
-        entity: secret,
-        type: EventType.SECRET_UPDATED,
-        source: EventSource.SECRET,
-        title: `Secret environment updated`,
-        metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name,
-          environmentId: environment.id,
-          environmentName: environment.name
-        },
-        workspaceId: secret.project.workspaceId
-      },
-      this.prisma
+    // Filter the secret versions by the environment
+    secret.versions = secret.versions.filter(
+      (version) => version.environmentId === environmentId
     )
 
-    this.logger.log(`User ${user.id} updated secret ${secret.id}`)
+    if (secret.versions.length === 0) {
+      throw new NotFoundException(
+        `No versions found for environment: ${environmentId} for secret: ${secretId}`
+      )
+    }
 
-    return result
-  }
+    // Sorting is in ascending order of dates. So the last element is the latest version
+    const maxVersion = secret.versions[secret.versions.length - 1].version
 
-  async rollback(
-    user: User,
-    secret: SecretWithProjectAndVersion,
-    rollbackVersion: number
-  ) {
+    // Check if the rollback version is valid
+    if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
+      throw new NotFoundException(
+        `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
+      )
+    }
+
     // Rollback the secret
     const result = await this.prisma.secretVersion.deleteMany({
       where: {
@@ -733,16 +325,14 @@ export class SecretService {
       await this.redis.publish(
         CHANGE_NOTIFIER_RSC,
         JSON.stringify({
-          environmentId: secret.environmentId,
+          environmentId,
           name: secret.name,
           value: secret.versions[rollbackVersion - 1].value,
           isSecret: true
         })
       )
     } catch (error) {
-      this.logger.error(
-        this.logger.error(`Error publishing secret update to Redis: ${error}`)
-      )
+      this.logger.error(`Error publishing secret update to Redis: ${error}`)
     }
 
     await createEvent(
@@ -768,37 +358,21 @@ export class SecretService {
     return result
   }
 
-  async delete(user: User, secret: SecretWithProject) {
-    const op = []
+  async deleteSecret(user: User, secretId: Secret['id']) {
+    // Check if the user has the required role
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.DELETE_SECRET,
+      prisma: this.prisma
+    })
 
     // Delete the secret
-    op.push(
-      this.prisma.secret.delete({
-        where: {
-          id: secret.id
-        }
-      })
-    )
-
-    // If the secret is in pending creation and the workspace approval is enabled, we need to
-    // delete the approval as well
-    if (
-      secret.pendingCreation &&
-      (await workspaceApprovalEnabled(secret.project.workspaceId, this.prisma))
-    ) {
-      op.push(
-        this.prisma.approval.deleteMany({
-          where: {
-            itemId: secret.id,
-            itemType: ApprovalItemType.SECRET,
-            action: ApprovalAction.CREATE,
-            status: ApprovalStatus.PENDING
-          }
-        })
-      )
-    }
-
-    await this.prisma.$transaction(op)
+    await this.prisma.secret.delete({
+      where: {
+        id: secret.id
+      }
+    })
 
     await createEvent(
       {
@@ -816,5 +390,163 @@ export class SecretService {
     )
 
     this.logger.log(`User ${user.id} deleted secret ${secret.id}`)
+  }
+
+  async getAllSecretsOfProject(
+    user: User,
+    projectId: Project['id'],
+    decryptValue: boolean,
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    // Fetch the project
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_SECRET,
+        prisma: this.prisma
+      })
+
+    // Check if the secret values can be decrypted
+    await this.checkAutoDecrypt(decryptValue, project)
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
+      }
+    })
+
+    const secretsWithEnvironmentalValues = new Map<
+      Secret['id'],
+      {
+        secret: Secret
+        values: {
+          environment: {
+            name: Environment['name']
+            id: Environment['id']
+          }
+          value: SecretVersion['value']
+        }[]
+      }
+    >()
+
+    // Find all the environments for this project
+    const environments = await this.prisma.environment.findMany({
+      where: {
+        projectId
+      }
+    })
+    const environmentIds = new Map(
+      environments.map((env) => [env.id, env.name])
+    )
+
+    for (const secret of secrets) {
+      // Make a copy of the environment IDs
+      const envIds = new Map(environmentIds)
+      let iterations = envIds.size
+
+      // Find the latest version for each environment
+      while (iterations--) {
+        const latestVersion = await this.prisma.secretVersion.findFirst({
+          where: {
+            secretId: secret.id,
+            environmentId: {
+              in: Array.from(envIds.keys())
+            }
+          },
+          orderBy: {
+            version: 'desc'
+          }
+        })
+
+        if (!latestVersion) continue
+
+        if (secretsWithEnvironmentalValues.has(secret.id)) {
+          secretsWithEnvironmentalValues.get(secret.id).values.push({
+            environment: {
+              id: latestVersion.environmentId,
+              name: envIds.get(latestVersion.environmentId)
+            },
+            value: decryptValue
+              ? await decrypt(project.privateKey, latestVersion.value)
+              : latestVersion.value
+          })
+        } else {
+          secretsWithEnvironmentalValues.set(secret.id, {
+            secret,
+            values: [
+              {
+                environment: {
+                  id: latestVersion.environmentId,
+                  name: envIds.get(latestVersion.environmentId)
+                },
+                value: decryptValue
+                  ? await decrypt(project.privateKey, latestVersion.value)
+                  : latestVersion.value
+              }
+            ]
+          })
+        }
+
+        envIds.delete(latestVersion.environmentId)
+      }
+    }
+
+    return Array.from(secretsWithEnvironmentalValues.values())
+  }
+
+  private async secretExists(
+    secretName: Secret['name'],
+    projectId: Project['id']
+  ) {
+    if (
+      (await this.prisma.secret.findFirst({
+        where: {
+          name: secretName,
+          projectId
+        }
+      })) !== null
+    ) {
+      throw new ConflictException(
+        `Secret already exists: ${secretName} in project ${projectId}`
+      )
+    }
+  }
+
+  private async checkAutoDecrypt(decryptValue: boolean, project: Project) {
+    // Check if the project is allowed to store the private key
+    if (decryptValue && !project.storePrivateKey) {
+      throw new BadRequestException(
+        `Cannot decrypt secret values as the project does not store the private key`
+      )
+    }
+
+    // Check if the project has a private key. This is just to ensure that we don't run into any
+    // problems while decrypting the secret
+    if (decryptValue && !project.privateKey) {
+      throw new NotFoundException(
+        `Cannot decrypt secret values as the project does not have a private key`
+      )
+    }
   }
 }

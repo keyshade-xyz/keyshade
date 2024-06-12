@@ -19,7 +19,6 @@ export default async function createWorkspace(
       id: workspaceId,
       name: dto.name,
       description: dto.description,
-      approvalEnabled: dto.approvalEnabled,
       isFreeTier: true,
       ownerId: user.id,
       isDefault,

@@ -162,7 +162,6 @@ describe('Workspace Controller Tests', () => {
     expect(workspace1.description).toBe('Workspace 1 description')
     expect(workspace1.ownerId).toBe(user1.id)
     expect(workspace1.isFreeTier).toBe(true)
-    expect(workspace1.approvalEnabled).toBe(false)
     expect(workspace1.isDefault).toBe(false)
   })
 
@@ -212,7 +211,6 @@ describe('Workspace Controller Tests', () => {
     expect(workspace2.description).toBe('Workspace 1 description')
     expect(workspace2.ownerId).toBe(user2.id)
     expect(workspace2.isFreeTier).toBe(true)
-    expect(workspace2.approvalEnabled).toBe(false)
     expect(workspace2.isDefault).toBe(false)
   })
 

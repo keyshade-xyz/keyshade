@@ -16,7 +16,7 @@ describe('Discord Integration Test', () => {
   it('should have the correct permitted events', () => {
     const events = integration.getPermittedEvents()
     expect(events).toBeDefined()
-    expect(events.size).toBe(31)
+    expect(events.size).toBe(26)
   })
 
   it('should have the correct required metadata parameters', () => {
