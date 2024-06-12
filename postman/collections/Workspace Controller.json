@@ -126,8 +126,8 @@
 			},
 			"response": [
 				{
-					"id": "16ee65a4-5b1a-4a80-86b2-a505d13064e4",
-					"name": "Listing of all workspaces",
+					"id": "dd039cb7-dace-42a7-bb38-5ddd15615b09",
+					"name": "Successfully listed all workspaces of user",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
@@ -142,18 +142,49 @@
 							]
 						}
 					},
+					"status": "OK",
+					"code": 200,
 					"_postman_previewlanguage": "json",
 					"header": [
 						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
 							"key": "Content-Type",
-							"name": "Content-Type",
-							"value": "application/json",
-							"description": "",
-							"type": "text"
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "262"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"106-Puu9o9TPpg01BJvqBnRwASSl6PA\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 11 Jun 2024 09:58:25 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
 						}
 					],
 					"cookie": [],
-					"body": "[\n    {\n        \"id\": \"800a42bd-eb5a-4d28-a920-ddd573ec4656\",\n        \"name\": \"My Workspace\",\n        \"description\": null,\n        \"isFreeTier\": true,\n        \"createdAt\": \"2024-05-13T06:54:55.376Z\",\n        \"updatedAt\": \"2024-05-13T06:54:55.376Z\",\n        \"ownerId\": \"clw4lzyq30001n8ond1hfiejp\",\n        \"approvalEnabled\": false,\n        \"isDefault\": true,\n        \"lastUpdatedById\": null\n    }\n]"
+					"body": "[\n    {\n        \"id\": \"5ac43146-bbd3-416a-bb0d-160ff27706c9\",\n        \"name\": \"My Workspace\",\n        \"description\": null,\n        \"isFreeTier\": true,\n        \"createdAt\": \"2024-06-11T09:56:23.377Z\",\n        \"updatedAt\": \"2024-06-11T09:56:23.377Z\",\n        \"ownerId\": \"clxa891aj0001es3qhg5jxa23\",\n        \"isDefault\": true,\n        \"lastUpdatedById\": null\n    }\n]"
 				}
 			]
 		},
