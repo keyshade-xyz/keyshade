@@ -1,6 +1,6 @@
 import AnimatedTab from '@/components/ui/animated-tabs'
 import { ColorBGSVG } from '@public/hero'
-import priceCard from '@/components/pricing/card'
+import PriceCard from '@/components/pricing/card'
 
 function About(): React.JSX.Element {
   const tabsData = [
@@ -69,8 +69,21 @@ function About(): React.JSX.Element {
         <AnimatedTab tabs={tabsData} />
       </div>
       <div className="mt-10 md:mt-16">
-        <div className="flex flex-col gap-8 md:flex-row ">
-          {priceCardData.map((card) => priceCard(card))}
+        <div className="flex flex-col gap-8 md:flex-row">
+          {priceCardData.map((card) => (
+            <PriceCard
+              key={card.title}
+              title={card.title}
+              description={card.description}
+              price={card.price}
+              is_popular={card.is_popular}
+              space_projects={card.space_projects}
+              space_users={card.space_users}
+              space_email_support={card.space_email_support}
+              space_live_support={card.space_live_support}
+              misc_features={card.misc_features}
+            />
+          ))}
         </div>
       </div>
     </div>

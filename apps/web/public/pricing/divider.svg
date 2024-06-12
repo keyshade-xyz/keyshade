@@ -1,9 +1,4 @@
-const DividerSVG = ({ className }) => {
-  return (
     <svg
-      className={className}
-      width="263"
-      height="2"
       viewBox="0 0 263 2"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +26,3 @@ const DividerSVG = ({ className }) => {
         </linearGradient>
       </defs>
     </svg>
-  )
-}
-
-export default DividerSVG
