@@ -46,12 +46,10 @@ describe('Secret Controller Tests', () => {
   let secretService: SecretService
   let eventService: EventService
   let userService: UserService
-
   let user1: User, user2: User
   let workspace1: Workspace
   let project1: Project, project2: Project
   let environment1: Environment
-  let environment2: Environment
   let secret1: Secret
 
   beforeAll(async () => {
@@ -145,13 +143,6 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    environment2 = await prisma.environment.findFirst({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 2'
-      }
-    })
-
     secret1 = (await secretService.createSecret(
       user1,
       {
@@ -160,7 +151,7 @@ describe('Secret Controller Tests', () => {
         note: 'Secret 1 note',
         entries: [
           {
-            environmentId: environment2.id,
+            environmentId: environment1.id,
             value: 'Secret 1 value'
           }
         ]
@@ -194,7 +185,7 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Secret 2 value',
-            environmentId: environment2.id
+            environmentId: environment1.id
           }
         ],
         rotateAfter: '24'
@@ -226,7 +217,7 @@ describe('Secret Controller Tests', () => {
     expect(secretVersion).toBeDefined()
     expect(secretVersion.value).not.toBe('Secret 1 value')
     expect(secretVersion.version).toBe(1)
-    expect(secretVersion.environmentId).toBe(environment2.id)
+    expect(secretVersion.environmentId).toBe(environment1.id)
   })
 
   it('should not be able to create a secret with a non-existing environment', async () => {
@@ -360,7 +351,7 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentId: environment2.id
+            environmentId: environment1.id
           }
         ]
       },
@@ -374,7 +365,7 @@ describe('Secret Controller Tests', () => {
     const secretVersion = await prisma.secretVersion.findMany({
       where: {
         secretId: secret1.id,
-        environmentId: environment2.id
+        environmentId: environment1.id
       }
     })
 
@@ -407,7 +398,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to roll back a non-existing secret', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/non-existing-secret-id/rollback/1?environmentId=${environment2.id}`,
+      url: `/secret/non-existing-secret-id/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -422,7 +413,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to roll back a secret it does not have access to', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment2.id}`,
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -437,7 +428,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to roll back to a non-existing version', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/2?environmentId=${environment2.id}`,
+      url: `/secret/${secret1.id}/rollback/2?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -449,13 +440,54 @@ describe('Secret Controller Tests', () => {
     )
   })
 
+  it('should not be able to roll back if the secret has no versions', async () => {
+    await prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `No versions found for environment: ${environment1.id} for secret: ${secret1.id}`
+    )
+  })
+
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const secret = await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 4',
+        note: 'Secret 4 note',
+        rotateAfter: '24'
+      },
+      project1.id
+    )
+
+    const secretVersion = await prisma.secretVersion.findMany({
+      where: {
+        secretId: secret.id
+      }
+    })
+
+    expect(secretVersion.length).toBe(0)
+  })
+
   it('should be able to roll back a secret', async () => {
     // Creating a few versions first
     await secretService.updateSecret(user1, secret1.id, {
       entries: [
         {
           value: 'Updated Secret 1 value',
-          environmentId: environment2.id
+          environmentId: environment1.id
         }
       ]
     })
@@ -464,7 +496,7 @@ describe('Secret Controller Tests', () => {
       entries: [
         {
           value: 'Updated Secret 1 value 2',
-          environmentId: environment2.id
+          environmentId: environment1.id
         }
       ]
     })
@@ -481,7 +513,7 @@ describe('Secret Controller Tests', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment2.id}`,
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -500,13 +532,20 @@ describe('Secret Controller Tests', () => {
   })
 
   it('should not be able to fetch decrypted secrets if the project does not store the private key', async () => {
+    // Fetch the environment of the project
+    const environment = await prisma.environment.findFirst({
+      where: {
+        projectId: project2.id
+      }
+    })
+
     await secretService.createSecret(
       user1,
       {
         name: 'Secret 20',
         entries: [
           {
-            environmentId: environment1.id,
+            environmentId: environment.id,
             value: 'Secret 20 value'
           }
         ],

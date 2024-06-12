@@ -25,7 +25,7 @@ export class CreateSecret {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Entry)
-  entries: Entry[]
+  entries?: Entry[]
 }
 
 class Entry {

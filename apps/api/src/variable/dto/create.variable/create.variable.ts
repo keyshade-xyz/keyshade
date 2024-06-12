@@ -23,7 +23,7 @@ export class CreateVariable {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Entry)
-  entries: Entry[]
+  entries?: Entry[]
 }
 
 class Entry {

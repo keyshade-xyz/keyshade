@@ -1663,6 +1663,23 @@ describe('Project Controller Tests', () => {
       expect(forkedVariables).toHaveLength(3)
     })
 
+    it('should not be able to sync a project that is not forked', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/project/${project3.id}/sync-fork`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json()).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: `Project with id ${project3.id} is not a forked project`
+      })
+    })
+
     it('should be able to unlink a forked project', async () => {
       const forkedProject = await projectService.forkProject(
         user2,
@@ -1703,6 +1720,36 @@ describe('Project Controller Tests', () => {
         url: `/project/${project3.id}/forks`,
         headers: {
           'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toHaveLength(1)
+    })
+
+    it('should not contain a forked project that has access level other than GLOBAL', async () => {
+      // Make a hidden fork
+      const hiddenProject = await projectService.forkProject(
+        user2,
+        project3.id,
+        {
+          name: 'Hidden Forked Project'
+        }
+      )
+      await projectService.updateProject(user2, hiddenProject.id, {
+        accessLevel: ProjectAccessLevel.INTERNAL
+      })
+
+      // Make a public fork
+      await projectService.forkProject(user2, project3.id, {
+        name: 'Forked Project'
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${project3.id}/forks`,
+        headers: {
+          'x-e2e-user-email': user1.email
         }
       })
 

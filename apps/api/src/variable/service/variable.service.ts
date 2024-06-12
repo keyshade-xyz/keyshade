@@ -58,25 +58,29 @@ export class VariableService {
     // Check if a variable with the same name already exists in the project
     await this.variableExists(dto.name, projectId)
 
-    // Check if the user has access to the environments
-    if (dto.entries && dto.entries.length > 0) {
-      const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      for (const environmentId of environmentIds) {
-        const environment =
-          await this.authorityCheckerService.checkAuthorityOverEnvironment({
-            userId: user.id,
-            entity: { id: environmentId },
-            authority: Authority.READ_ENVIRONMENT,
-            prisma: this.prisma
-          })
+    const shouldCreateRevisions = dto.entries && dto.entries.length > 0
 
-        // Check if the environment belongs to the project
-        if (environment.projectId !== projectId) {
-          throw new BadRequestException(
-            `Environment: ${environmentId} does not belong to project: ${projectId}`
-          )
-        }
-      }
+    // Check if the user has access to the environments
+    if (shouldCreateRevisions) {
+      const environmentIds = dto.entries.map((entry) => entry.environmentId)
+      await Promise.all(
+        environmentIds.map(async (environmentId) => {
+          const environment =
+            await this.authorityCheckerService.checkAuthorityOverEnvironment({
+              userId: user.id,
+              entity: { id: environmentId },
+              authority: Authority.READ_ENVIRONMENT,
+              prisma: this.prisma
+            })
+
+          // Check if the environment belongs to the project
+          if (environment.projectId !== projectId) {
+            throw new BadRequestException(
+              `Environment: ${environmentId} does not belong to project: ${projectId}`
+            )
+          }
+        })
+      )
     }
 
     // Create the variable
@@ -84,7 +88,7 @@ export class VariableService {
       data: {
         name: dto.name,
         note: dto.note,
-        versions: {
+        versions: shouldCreateRevisions && {
           createMany: {
             data: dto.entries.map((entry) => ({
               value: entry.value,
@@ -158,8 +162,10 @@ export class VariableService {
     // Check if the variable already exists in the project
     dto.name && (await this.variableExists(dto.name, variable.projectId))
 
+    const shouldCreateRevisions = dto.entries && dto.entries.length > 0
+
     // Check if the user has access to the environments
-    if (dto.entries && dto.entries.length > 0) {
+    if (shouldCreateRevisions) {
       const environmentIds = dto.entries.map((entry) => entry.environmentId)
       await Promise.all(
         environmentIds.map(async (environmentId) => {
@@ -214,7 +220,7 @@ export class VariableService {
 
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
-    if (dto.entries && dto.entries.length > 0) {
+    if (shouldCreateRevisions) {
       for (const entry of dto.entries) {
         // Fetch the latest version of the variable for the environment
         const latestVersion = await this.prisma.variableVersion.findFirst({

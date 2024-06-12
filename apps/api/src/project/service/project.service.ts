@@ -919,6 +919,8 @@ export class ProjectService {
 
       const updatedVersions: Partial<SecretVersion>[] = []
 
+      // First, encrypt the values with the new key and store
+      // them in a temporary array
       for (const version of versions) {
         updatedVersions.push({
           id: version.id,
@@ -929,6 +931,7 @@ export class ProjectService {
         })
       }
 
+      // Apply the changes to the database
       for (const version of updatedVersions) {
         txs.push(
           this.prisma.secretVersion.update({
@@ -943,6 +946,7 @@ export class ProjectService {
       }
     }
 
+    // Update the project with the new key pair
     txs.push(
       this.prisma.project.update({
         where: {

@@ -510,6 +510,46 @@ describe('Variable Controller Tests', () => {
     expect(versions.length).toBe(1)
   })
 
+  it('should not be able to roll back if the variable has no versions', async () => {
+    await prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `No versions found for environment: ${environment1.id} for variable: ${variable1.id}`
+    )
+  })
+
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const variable = await variableService.createVariable(
+      user1,
+      {
+        name: 'Var 3',
+        note: 'Var 3 note'
+      },
+      project1.id
+    )
+
+    const variableVersions = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id
+      }
+    })
+
+    expect(variableVersions.length).toBe(0)
+  })
+
   it('should be able to fetch all variables', async () => {
     const response = await app.inject({
       method: 'GET',
