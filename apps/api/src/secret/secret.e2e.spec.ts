@@ -46,13 +46,10 @@ describe('Secret Controller Tests', () => {
   let secretService: SecretService
   let eventService: EventService
   let userService: UserService
-
   let user1: User, user2: User
-  let workspace1: Workspace, workspace2: Workspace
-  let project1: Project, project2: Project, workspace2Project: Project
+  let workspace1: Workspace
+  let project1: Project, project2: Project
   let environment1: Environment
-  let environment2: Environment
-  let workspace2Environment: Environment
   let secret1: Secret
 
   beforeAll(async () => {
@@ -102,7 +99,6 @@ describe('Secret Controller Tests', () => {
     })
 
     workspace1 = createUser1.defaultWorkspace
-    workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
@@ -118,13 +114,11 @@ describe('Secret Controller Tests', () => {
       environments: [
         {
           name: 'Environment 1',
-          description: 'Environment 1 description',
-          isDefault: true
+          description: 'Environment 1 description'
         },
         {
           name: 'Environment 2',
-          description: 'Environment 2 description',
-          isDefault: false
+          description: 'Environment 2 description'
         }
       ]
     })) as Project
@@ -137,36 +131,10 @@ describe('Secret Controller Tests', () => {
       environments: [
         {
           name: 'Environment 1',
-          description: 'Environment 1 description',
-          isDefault: true
+          description: 'Environment 1 description'
         }
       ]
     })) as Project
-
-    workspace2Project = (await projectService.createProject(
-      user2,
-      workspace2.id,
-      {
-        name: 'Workspace 2 Project',
-        description: 'Workspace 2 Project description',
-        storePrivateKey: true,
-        accessLevel: ProjectAccessLevel.PRIVATE,
-        environments: [
-          {
-            name: 'Environment 1',
-            description: 'Environment 1 description',
-            isDefault: true
-          }
-        ]
-      }
-    )) as Project
-
-    workspace2Environment = await prisma.environment.findFirst({
-      where: {
-        projectId: workspace2Project.id,
-        name: 'Environment 1'
-      }
-    })
 
     environment1 = await prisma.environment.findFirst({
       where: {
@@ -175,21 +143,18 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    environment2 = await prisma.environment.findFirst({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 2'
-      }
-    })
-
     secret1 = (await secretService.createSecret(
       user1,
       {
-        environmentId: environment2.id,
         name: 'Secret 1',
-        value: 'Secret 1 value',
         rotateAfter: '24',
-        note: 'Secret 1 note'
+        note: 'Secret 1 note',
+        entries: [
+          {
+            environmentId: environment1.id,
+            value: 'Secret 1 value'
+          }
+        ]
       },
       project1.id
     )) as Secret
@@ -215,10 +180,14 @@ describe('Secret Controller Tests', () => {
       method: 'POST',
       url: `/secret/${project1.id}`,
       payload: {
-        environmentId: environment2.id,
         name: 'Secret 2',
         note: 'Secret 2 note',
-        value: 'Secret 2 value',
+        entries: [
+          {
+            value: 'Secret 2 value',
+            environmentId: environment1.id
+          }
+        ],
         rotateAfter: '24'
       },
       headers: {
@@ -233,8 +202,9 @@ describe('Secret Controller Tests', () => {
     expect(body).toBeDefined()
     expect(body.name).toBe('Secret 2')
     expect(body.note).toBe('Secret 2 note')
-    expect(body.environmentId).toBe(environment2.id)
     expect(body.projectId).toBe(project1.id)
+    expect(body.versions.length).toBe(1)
+    expect(body.versions[0].value).not.toBe('Secret 2 value')
   })
 
   it('should have created a secret version', async () => {
@@ -247,30 +217,7 @@ describe('Secret Controller Tests', () => {
     expect(secretVersion).toBeDefined()
     expect(secretVersion.value).not.toBe('Secret 1 value')
     expect(secretVersion.version).toBe(1)
-  })
-
-  it('should create secret in default environment if environmentId is not provided', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/secret/${project1.id}`,
-      payload: {
-        name: 'Secret 2',
-        value: 'Secret 2 value',
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(201)
-
-    const body = response.json()
-
-    expect(body).toBeDefined()
-    expect(body.name).toBe('Secret 2')
-    expect(body.environmentId).toBe(environment1.id)
-    expect(body.projectId).toBe(project1.id)
+    expect(secretVersion.environmentId).toBe(environment1.id)
   })
 
   it('should not be able to create a secret with a non-existing environment', async () => {
@@ -278,10 +225,14 @@ describe('Secret Controller Tests', () => {
       method: 'POST',
       url: `/secret/${project1.id}`,
       payload: {
-        environmentId: 'non-existing-environment-id',
         name: 'Secret 3',
-        value: 'Secret 3 value',
-        rotateAfter: '24'
+        rotateAfter: '24',
+        entries: [
+          {
+            value: 'Secret 3 value',
+            environmentId: 'non-existing-environment-id'
+          }
+        ]
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -297,7 +248,6 @@ describe('Secret Controller Tests', () => {
       url: `/secret/${project1.id}`,
       payload: {
         name: 'Secret 3',
-        value: 'Secret 3 value',
         rotateAfter: '24'
       },
       headers: {
@@ -311,54 +261,12 @@ describe('Secret Controller Tests', () => {
     )
   })
 
-  it('should fail if project has no default environment(hypothetical case)', async () => {
-    await prisma.environment.updateMany({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 1'
-      },
-      data: {
-        isDefault: false
-      }
-    })
-
+  it('should not be able to create a duplicate secret in the same project', async () => {
     const response = await app.inject({
       method: 'POST',
       url: `/secret/${project1.id}`,
       payload: {
-        name: 'Secret 4',
-        value: 'Secret 4 value',
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toEqual(
-      `No default environment found for project: ${project1.id}`
-    )
-
-    await prisma.environment.updateMany({
-      where: {
-        projectId: project1.id,
-        name: 'Environment 1'
-      },
-      data: {
-        isDefault: true
-      }
-    })
-  })
-
-  it('should not be able to create a duplicate secret in the same environment', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/secret/${project1.id}`,
-      payload: {
-        environmentId: environment2.id,
         name: 'Secret 1',
-        value: 'Secret 1 value',
         rotateAfter: '24'
       },
       headers: {
@@ -368,7 +276,7 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(409)
     expect(response.json().message).toEqual(
-      `Secret already exists: Secret 1 in environment ${environment2.name} in project ${project1.id}`
+      `Secret already exists: Secret 1 in project ${project1.id}`
     )
   })
 
@@ -396,7 +304,6 @@ describe('Secret Controller Tests', () => {
       url: `/secret/non-existing-secret-id`,
       payload: {
         name: 'Updated Secret 1',
-        value: 'Updated Secret 1 value',
         rotateAfter: '24'
       },
       headers: {
@@ -407,26 +314,6 @@ describe('Secret Controller Tests', () => {
     expect(response.statusCode).toBe(404)
     expect(response.json().message).toEqual(
       'Secret with id non-existing-secret-id not found'
-    )
-  })
-
-  it('should not be able to update a secret with same name in the same environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}`,
-      payload: {
-        name: 'Secret 1',
-        value: 'Updated Secret 1 value',
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(409)
-    expect(response.json().message).toEqual(
-      `Secret already exists: Secret 1 in environment ${environment2.id}`
     )
   })
 
@@ -461,7 +348,12 @@ describe('Secret Controller Tests', () => {
       method: 'PUT',
       url: `/secret/${secret1.id}`,
       payload: {
-        value: 'Updated Secret 1 value'
+        entries: [
+          {
+            value: 'Updated Secret 1 value',
+            environmentId: environment1.id
+          }
+        ]
       },
       headers: {
         'x-e2e-user-email': user1.email
@@ -472,7 +364,8 @@ describe('Secret Controller Tests', () => {
 
     const secretVersion = await prisma.secretVersion.findMany({
       where: {
-        secretId: secret1.id
+        secretId: secret1.id,
+        environmentId: environment1.id
       }
     })
 
@@ -502,112 +395,10 @@ describe('Secret Controller Tests', () => {
     expect(event.itemId).toBe(secret1.id)
   })
 
-  it('should be able to update the environment of a secret', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}/environment/${environment1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().environmentId).toBe(environment1.id)
-  })
-
-  it('should not be able to move to a non-existing environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}/environment/non-existing-environment-id`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-  })
-
-  it('should not be able to move to an environment in another project', async () => {
-    const otherEnvironment = await prisma.environment.findFirst({
-      where: {
-        projectId: project2.id,
-        name: 'Environment 1'
-      }
-    })
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}/environment/${otherEnvironment.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toEqual(
-      `Environment ${otherEnvironment.id} does not belong to project ${project1.id}`
-    )
-  })
-
-  it('should not be able to move the secret to the same environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toEqual(
-      `Can not update the environment of the secret to the same environment: ${environment2.id} in project ${project1.id}`
-    )
-  })
-
-  it('should not be able to move the secret if the user has no access to the project', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}/environment/${workspace2Environment.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user1.id} does not have the required authorities`
-    )
-  })
-
-  it('should not be able to move a secret of the same name to an environment', async () => {
-    const newSecret = (await secretService.createSecret(
-      user1,
-      {
-        environmentId: environment1.id,
-        name: 'Secret 1',
-        value: 'Some value'
-      },
-      project1.id
-    )) as Secret
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${newSecret.id}/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(409)
-    expect(response.json().message).toEqual(
-      `Secret already exists: Secret 1 in environment ${environment2.id} in project ${project1.id}`
-    )
-  })
-
   it('should not be able to roll back a non-existing secret', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/non-existing-secret-id/rollback/1`,
+      url: `/secret/non-existing-secret-id/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -622,7 +413,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to roll back a secret it does not have access to', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/1`,
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -637,7 +428,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to roll back to a non-existing version', async () => {
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/2`,
+      url: `/secret/${secret1.id}/rollback/2?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -649,14 +440,65 @@ describe('Secret Controller Tests', () => {
     )
   })
 
+  it('should not be able to roll back if the secret has no versions', async () => {
+    await prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `No versions found for environment: ${environment1.id} for secret: ${secret1.id}`
+    )
+  })
+
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const secret = await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 4',
+        note: 'Secret 4 note',
+        rotateAfter: '24'
+      },
+      project1.id
+    )
+
+    const secretVersion = await prisma.secretVersion.findMany({
+      where: {
+        secretId: secret.id
+      }
+    })
+
+    expect(secretVersion.length).toBe(0)
+  })
+
   it('should be able to roll back a secret', async () => {
     // Creating a few versions first
     await secretService.updateSecret(user1, secret1.id, {
-      value: 'Updated Secret 1 value'
+      entries: [
+        {
+          value: 'Updated Secret 1 value',
+          environmentId: environment1.id
+        }
+      ]
     })
 
     await secretService.updateSecret(user1, secret1.id, {
-      value: 'Updated Secret 1 value 2'
+      entries: [
+        {
+          value: 'Updated Secret 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
     })
 
     let versions: SecretVersion[]
@@ -671,7 +513,7 @@ describe('Secret Controller Tests', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: `/secret/${secret1.id}/rollback/1`,
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -689,88 +531,33 @@ describe('Secret Controller Tests', () => {
     expect(versions.length).toBe(1)
   })
 
-  it('should not be able to fetch a non existing secret', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/secret/non-existing-secret-id`,
-      headers: {
-        'x-e2e-user-email': user1.email
+  it('should not be able to fetch decrypted secrets if the project does not store the private key', async () => {
+    // Fetch the environment of the project
+    const environment = await prisma.environment.findFirst({
+      where: {
+        projectId: project2.id
       }
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toEqual(
-      'Secret with id non-existing-secret-id not found'
-    )
-  })
-
-  it('should not be able to fetch a secret it does not have access to', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/secret/${secret1.id}`,
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
-    })
-
-    expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
-  })
-
-  it('should be able to fetch a secret', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/secret/${secret1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toEqual(secret1.id)
-
-    const versions = await response.json().versions
-
-    expect(versions.length).toBe(1)
-    expect(versions[0].value).not.toEqual('Secret 1 value') // Secret should be in encrypted form until specified otherwise
-  })
-
-  it('should be able to fetch a decrypted secret', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/secret/${secret1.id}?decryptValue=true`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toEqual(secret1.id)
-
-    const versions = await response.json().versions
-
-    expect(versions.length).toBe(1)
-    expect(versions[0].value).toEqual('Secret 1 value')
-  })
-
-  it('should not be able to fetch a decrypted secret if the project does not store the private key', async () => {
-    const secret = (await secretService.createSecret(
+    await secretService.createSecret(
       user1,
       {
-        environmentId: environment1.id,
         name: 'Secret 20',
-        value: 'Secret 20 value',
+        entries: [
+          {
+            environmentId: environment.id,
+            value: 'Secret 20 value'
+          }
+        ],
         rotateAfter: '24',
         note: 'Secret 20 note'
       },
       project2.id
-    )) as Secret
+    )
 
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/${secret.id}?decryptValue=true`,
+      url: `/secret/all/${project2.id}?decryptValue=true`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -778,42 +565,8 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(400)
     expect(response.json().message).toEqual(
-      `Cannot decrypt secret value: ${secret.id} as the project does not store the private key`
+      `Cannot decrypt secret values as the project does not store the private key`
     )
-  })
-
-  it('should not be able to fetch a decrypted secret if somehow the project does not have a private key even though it stores it (hypothetical)', async () => {
-    await prisma.project.update({
-      where: {
-        id: project1.id
-      },
-      data: {
-        storePrivateKey: true,
-        privateKey: null
-      }
-    })
-
-    const response = await app.inject({
-      method: 'GET',
-      url: `/secret/${secret1.id}?decryptValue=true`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toEqual(
-      `Cannot decrypt secret value: ${secret1.id} as the project does not have a private key`
-    )
-
-    await prisma.project.update({
-      where: {
-        id: project1.id
-      },
-      data: {
-        privateKey: project1.privateKey
-      }
-    })
   })
 
   it('should be able to fetch all secrets', async () => {
@@ -827,6 +580,17 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
+
+    const { secret, values } = response.json()[0]
+    expect(secret.id).toBeDefined()
+    expect(secret.name).toBeDefined()
+    expect(secret.note).toBeDefined()
+    expect(secret.projectId).toBeDefined()
+    expect(values.length).toBe(1)
+
+    const value = values[0]
+    expect(value.environment).toBeDefined()
+    expect(value.value).not.toEqual('Secret 1 value')
   })
 
   it('should be able to fetch all secrets decrypted', async () => {
@@ -840,9 +604,17 @@ describe('Secret Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.json().length).toBe(1)
-    const envSecret = response.json()[0]
-    expect(envSecret.environment).toHaveProperty('id')
-    expect(envSecret.environment).toHaveProperty('name')
+
+    const { secret, values } = response.json()[0]
+    expect(secret.id).toBeDefined()
+    expect(secret.name).toBeDefined()
+    expect(secret.note).toBeDefined()
+    expect(secret.projectId).toBeDefined()
+    expect(values.length).toBe(1)
+
+    const value = values[0]
+    expect(value.environment).toBeDefined()
+    expect(value.value).toEqual('Secret 1 value')
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {

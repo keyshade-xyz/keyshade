@@ -17,7 +17,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"Project 1 - stores private key\",\n  \"description\": \"Dummy project 1\",\n  \"storePrivateKey\": true,\n  \"environments\": [\n    {\n        \"name\": \"Dev\",\n        \"description\": \"Development environment\",\n        \"isDefault\": true\n    },\n    {\n        \"name\": \"Stage\",\n        \"description\": \"Staging environment\"\n    },\n        {\n        \"name\": \"Production\",\n        \"description\": \"Production environment\"\n    }\n  ]\n}",
+					"raw": "{\n  \"name\": \"Project 1 - stores private key\",\n  \"description\": \"Dummy project 1\",\n  \"storePrivateKey\": true,\n  \"environments\": [\n    {\n        \"name\": \"Dev\",\n        \"description\": \"Development environment\"\n    },\n    {\n        \"name\": \"Stage\",\n        \"description\": \"Staging environment\"\n    },\n        {\n        \"name\": \"Production\",\n        \"description\": \"Production environment\"\n    }\n  ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -37,7 +37,7 @@
 					"variable": [
 						{
 							"key": "workspace_id",
-							"value": "36f928f9-bb1e-41fc-a185-8e1099aad3f6"
+							"value": "5ac43146-bbd3-416a-bb0d-160ff27706c9"
 						}
 					]
 				},
@@ -52,7 +52,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Project 1 - stores private key\",\n  \"description\": \"Dummy project 1\",\n  \"storePrivateKey\": true,\n  \"environments\": [\n    {\n        \"name\": \"Dev\",\n        \"description\": \"Development environment\",\n        \"isDefault\": true\n    },\n    {\n        \"name\": \"Stage\",\n        \"description\": \"Staging environment\"\n    },\n        {\n        \"name\": \"Production\",\n        \"description\": \"Production environment\"\n    }\n  ]\n}",
+							"raw": "{\n  \"name\": \"Project 1 - stores private key\",\n  \"description\": \"Dummy project 1\",\n  \"storePrivateKey\": true,\n  \"environments\": [\n    {\n        \"name\": \"Dev\",\n        \"description\": \"Development environment\"\n    },\n    {\n        \"name\": \"Stage\",\n        \"description\": \"Staging environment\"\n    },\n        {\n        \"name\": \"Production\",\n        \"description\": \"Production environment\"\n    }\n  ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"

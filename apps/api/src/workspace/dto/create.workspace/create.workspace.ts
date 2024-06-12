@@ -1,5 +1,5 @@
 import { WorkspaceRole } from '@prisma/client'
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class CreateWorkspace {
   @IsString()
@@ -9,10 +9,6 @@ export class CreateWorkspace {
   @IsString()
   @IsOptional()
   description?: string
-
-  @IsBoolean()
-  @IsOptional()
-  approvalEnabled?: boolean
 }
 
 export interface WorkspaceMemberDTO {

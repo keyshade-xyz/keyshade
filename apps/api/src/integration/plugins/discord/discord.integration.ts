@@ -15,8 +15,6 @@ export class DiscordIntegration extends BaseIntegration {
 
   public getPermittedEvents(): Set<EventType> {
     return new Set([
-      EventType.APPROVAL_APPROVED,
-      EventType.APPROVAL_REJECTED,
       EventType.INTEGRATION_ADDED,
       EventType.INTEGRATION_UPDATED,
       EventType.INTEGRATION_DELETED,
@@ -43,11 +41,6 @@ export class DiscordIntegration extends BaseIntegration {
       EventType.ENVIRONMENT_UPDATED,
       EventType.ENVIRONMENT_DELETED,
       EventType.ENVIRONMENT_ADDED,
-      EventType.APPROVAL_CREATED,
-      EventType.APPROVAL_UPDATED,
-      EventType.APPROVAL_DELETED,
-      EventType.APPROVAL_APPROVED,
-      EventType.APPROVAL_REJECTED,
       EventType.INTEGRATION_ADDED,
       EventType.INTEGRATION_UPDATED,
       EventType.INTEGRATION_DELETED

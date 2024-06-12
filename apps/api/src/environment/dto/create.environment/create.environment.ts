@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator'
 
 export class CreateEnvironment {
   @IsString()
@@ -7,8 +7,4 @@ export class CreateEnvironment {
   @IsString()
   @IsOptional()
   description?: string
-
-  @IsBoolean()
-  @IsOptional()
-  isDefault?: boolean
 }
