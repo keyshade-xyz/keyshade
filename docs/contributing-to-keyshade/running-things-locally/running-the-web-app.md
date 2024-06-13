@@ -26,12 +26,12 @@ pnpm dev
 
 ## Testing your code
 
-We use Jest for testing.
+We use Jest for testing. Run the tests when unit testing, or mock testing the web app separately from the rest of the project.
 
-To run tests, use this command:
+* To run tests in the root, use this command:
 
 ```sh
-turbo run test --filter=web
+pnpm test:web
 ```
 
 ## Viewing the Web App
