@@ -64,7 +64,10 @@ function EncryptText({
       <span className="invisible absolute" ref={textRef}>
         {TARGET_TEXT}
       </span>
-      <motion.button className="relative z-10 flex items-center gap-2">
+      <motion.button
+        className="relative z-10 flex items-center gap-2"
+        role="link"
+      >
         <span className="flex whitespace-nowrap">{text}</span>
       </motion.button>
     </motion.div>
