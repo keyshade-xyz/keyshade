@@ -4,8 +4,14 @@ import { motion } from 'framer-motion'
 import React, { useState } from 'react'
 import { cn } from '@/utils/cn'
 
+export interface TabDataProps {
+  id: string
+  label: string
+  tag?: string
+  special?: boolean
+}
 interface AnimatedTabProps {
-  tabs: { id: string; label: string; tag?: string; special?: boolean }[]
+  tabs: TabDataProps[]
 }
 
 function AnimatedTab({ tabs }: Readonly<AnimatedTabProps>): React.JSX.Element {
@@ -48,13 +54,10 @@ function AnimatedTab({ tabs }: Readonly<AnimatedTabProps>): React.JSX.Element {
           {tab.label}{' '}
           {tab.tag ? (
             <span
-              className="ml-1 h-6 w-14 rounded-full border-[1px] border-white border-opacity-[0.04] bg-white bg-opacity-[.06] p-1 text-xs tracking-wide"
+              className="ml-1 h-6 w-14 rounded-full border-[1px] border-white border-opacity-[0.04] bg-opacity-[.06] p-1 text-xs tracking-wide"
               style={{
-                borderRadius: 99,
-                border: '1px solid rgba(255, 255, 255, 0.06)',
                 background:
-                  'radial-gradient(89.06% 89.06% at 50% 100%, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 48.41%), rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(1.5px)'
+                  'radial-gradient(89.06% 89.06% at 50% 100%, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.00) 48.41%), rgba(255, 255, 255, 0.08)'
               }}
             >
               {tab.tag}

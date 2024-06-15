@@ -1,14 +1,16 @@
+import type { TabDataProps } from '@/components/ui/animated-tabs'
 import AnimatedTab from '@/components/ui/animated-tabs'
 import { ColorBGSVG } from '@public/hero'
+import type { CardProps } from '@/components/pricing/card'
 import PriceCard from '@/components/pricing/card'
 
 function About(): React.JSX.Element {
-  const tabsData = [
+  const tabsData: TabDataProps[] = [
     { id: 'monthly', label: 'Monthly' },
     { id: 'yearly', label: 'Yearly', tag: '-20%', special: true }
   ]
 
-  const priceCardData = [
+  const priceCardData: CardProps[] = [
     {
       title: 'Free',
       description: 'For hobbyists and beginners',
@@ -46,14 +48,12 @@ function About(): React.JSX.Element {
       <ColorBGSVG className="absolute -z-10 h-screen w-screen" />
 
       <div className="pb-4 pt-14">
-        <h3 className="w-24 rounded-full border-[1px] border-white border-opacity-[.04] bg-white bg-opacity-5 p-2 text-center text-xs tracking-widest text-white md:text-sm">
-          PRICING
+        <h3 className="w-24 rounded-full border-[1px] border-white border-opacity-[.04] bg-white bg-opacity-5 p-2 text-center text-xs uppercase tracking-widest text-white md:text-sm">
+          pricing
         </h3>
       </div>
 
-      <h1
-        className={` text-brandBlue/90 w-[25rem] text-center text-4xl font-extralight md:w-auto md:text-6xl`}
-      >
+      <h1 className="text-brandBlue/90 w-[25rem] text-center text-4xl font-extralight md:w-auto md:text-6xl">
         <span className="self-center font-bold tracking-wide">
           Transparent Pricing
         </span>
