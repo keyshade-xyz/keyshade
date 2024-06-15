@@ -15,7 +15,7 @@ interface AnimatedTabProps {
 }
 
 function AnimatedTab({ tabs }: Readonly<AnimatedTabProps>): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState(tabs[0].id)
+  const [activeTab, setActiveTab] = useState<string>(tabs[0].id)
 
   return (
     <div
