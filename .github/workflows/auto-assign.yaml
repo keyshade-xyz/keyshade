@@ -29,7 +29,7 @@ jobs:
                   owner,
                   repo,
                   issue_number: issue.number,
-                  body: 'Assigned the issue to you!'
+                  body: `Assigned the issue to ${comment.user.login}!`
                 });
               } else {
                 await github.rest.issues.createComment({
