@@ -150,7 +150,7 @@ function PriceCard({
         </div>
 
         <div className="text-brandBlue/90 mt-5 text-sm font-light uppercase tracking-widest md:text-base">
-          research
+          Features
         </div>
 
         <div className="mt-2 flex flex-col space-y-2">
