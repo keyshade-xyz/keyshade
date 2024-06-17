@@ -20,7 +20,6 @@ function PriceCard({
   spaceAccessSpecifier,
   spaceIntegerations,
   spaceSecrets,
-  spaceWorkspace,
   spaceEnvironment,
   spaceLiveSupport,
   miscFeatures
@@ -106,13 +105,6 @@ function PriceCard({
         </div>
 
         <div className="flex flex-col space-y-2">
-          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
-            <ProjectSVG />
-            <div>
-              {spaceWorkspace < 0 ? 'Unlimited' : spaceWorkspace} Workspace
-            </div>
-          </div>
-
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <ProjectSVG />
             <div>
