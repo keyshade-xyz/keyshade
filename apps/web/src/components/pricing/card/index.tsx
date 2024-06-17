@@ -56,7 +56,7 @@ function PriceCard({
       ) : null}
 
       <div
-        className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[18rem] lg:w-[16rem] xl:w-[18rem]"
+        className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[19rem] lg:w-[15rem] xl:w-[18rem]"
         key={title}
         style={{
           background:
@@ -103,10 +103,6 @@ function PriceCard({
 
         <div className="my-5 md:-mx-6 lg:-mx-4">
           <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#8EE8FF] to-transparent" />
-        </div>
-
-        <div className="text-brandBlue/90 text-sm font-light uppercase tracking-widest md:text-base">
-          space
         </div>
 
         <div className="flex flex-col space-y-2">
