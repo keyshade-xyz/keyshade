@@ -88,11 +88,11 @@ export const PriceCardsData: PriceCardDataType = [
     description: 'For large organizations with complex requirements.',
     price: -1, // -1 => Custom Pricing
     isPopular: false,
-    spaceWorkspace: 5,
-    spaceProjects: 5,
-    spaceSecrets: 50,
-    spaceEnvironment: 10,
-    spaceIntegerations: 10,
+    spaceWorkspace: -1,
+    spaceProjects: -1,
+    spaceSecrets: -1,
+    spaceEnvironment: -1,
+    spaceIntegerations: -1,
     spaceAccessSpecifier: 'All Types',
     spaceUsers: -1, // -1 => Unlimited
     miscFeatures: [

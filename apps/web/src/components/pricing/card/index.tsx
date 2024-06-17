@@ -112,13 +112,15 @@ function PriceCard({
         <div className="flex flex-col space-y-2">
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <ProjectSVG />
-            <div>{spaceWorkspace} Workspace</div>
+            <div>
+              {spaceWorkspace < 0 ? 'Unlimited' : spaceWorkspace} Workspace
+            </div>
           </div>
 
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <ProjectSVG />
             <div>
-              {spaceProjects < 0 ? 'unlimited' : spaceProjects} Projects
+              {spaceProjects < 0 ? 'Unlimited' : spaceProjects} Projects
             </div>
           </div>
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
@@ -128,17 +130,20 @@ function PriceCard({
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
-              {spaceEnvironment < 0 ? 'unlimited' : spaceEnvironment}{' '}
+              {spaceEnvironment < 0 ? 'Unlimited' : spaceEnvironment}{' '}
               Environments
             </div>
           </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{spaceSecrets < 0 ? 'unlimited' : spaceSecrets} Secrets</div>
+            <div>{spaceSecrets < 0 ? 'Unlimited' : spaceSecrets} Secrets</div>
           </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{spaceIntegerations} Integerations</div>
+            <div>
+              {spaceIntegerations < 0 ? 'Unlimited' : spaceIntegerations}{' '}
+              Integerations
+            </div>
           </div>
 
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
