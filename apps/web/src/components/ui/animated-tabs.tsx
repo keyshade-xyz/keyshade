@@ -3,18 +3,13 @@
 import { motion } from 'framer-motion'
 import React, { useState } from 'react'
 import { cn } from '@/utils/cn'
+import type { PriceTabDataType } from '@/types'
 
-export interface TabDataProps {
-  id: string
-  label: string
-  tag?: string
-  special?: boolean
-}
-interface AnimatedTabProps {
-  tabs: TabDataProps[]
-}
-
-function AnimatedTab({ tabs }: Readonly<AnimatedTabProps>): React.JSX.Element {
+function AnimatedTab({
+  tabs
+}: {
+  tabs: Readonly<PriceTabDataType>
+}): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<string>(tabs[0].id)
 
   return (
@@ -45,9 +40,8 @@ function AnimatedTab({ tabs }: Readonly<AnimatedTabProps>): React.JSX.Element {
         >
           {activeTab === tab.id && (
             <motion.span
-              className="absolute inset-0 z-10 border-[1px] border-[#A9A3C2] border-opacity-[.05] bg-white bg-opacity-[.08]"
+              className="absolute inset-0 z-10 rounded-full border-[1px] border-[#A9A3C2] border-opacity-[.05] bg-white bg-opacity-[.08]"
               layoutId="bubble"
-              style={{ borderRadius: 9999 }}
               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
             />
           )}

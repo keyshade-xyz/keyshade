@@ -8,20 +8,7 @@ import {
   StarsLeftSVG,
   StarsRightSVG
 } from '@public/pricing'
-
-export interface CardProps {
-  title: string
-  description: string
-  price: number
-
-  isPopular: boolean
-
-  spaceProjects: number
-  spaceUsers: number
-  spaceLiveSupport: boolean
-
-  miscFeatures: string[]
-}
+import type { PriceCardPropsType } from '@/types'
 
 function PriceCard({
   title,
@@ -30,21 +17,38 @@ function PriceCard({
   isPopular,
   spaceProjects,
   spaceUsers,
+  spaceAccessSpecifier,
+  spaceIntegerations,
+  spaceSecrets,
+  spaceWorkspace,
+  spaceEnvironment,
   spaceLiveSupport,
   miscFeatures
-}: Readonly<CardProps>): React.JSX.Element {
+}: Readonly<PriceCardPropsType>): React.JSX.Element {
+  const returnButtonLabel = () => {
+    if (price === 0) {
+      return 'Get Started'
+    }
+    if (price < 0) {
+      return 'Contact Us'
+    }
+    return 'Buy Now'
+  }
+
   return (
     <div className="relative mt-5 md:mt-0">
       {isPopular ? (
-        <div className="absolute -mt-[2.2rem] w-full ">
-          <div className="item h-[4.5rem] translate-y-[2px] overflow-hidden rounded-xl bg-[#1E3F51] bg-clip-border text-center align-middle">
-            <div className="bg h-full w-full bg-gradient-to-b from-[#96D4F8]/5 via-[#96D4F8]/30 to-[#96D4F8]/50">
-              <div className="flex items-center justify-evenly pt-1">
-                <StarsLeftSVG className="aspect-video w-10" />
-                <div className="bg-gradient-to-b from-white to-white/70 bg-clip-text text-xs uppercase text-transparent">
-                  Most Popular Plan
+        <div className="mt-6 md:mt-0">
+          <div className="absolute -mt-[2.2rem] w-full ">
+            <div className="item h-[4.5rem] translate-y-[2px] overflow-hidden rounded-xl bg-[#1E3F51] bg-clip-border text-center align-middle">
+              <div className="bg h-full w-full bg-gradient-to-b from-[#96D4F8]/5 via-[#96D4F8]/30 to-[#96D4F8]/50">
+                <div className="flex items-center justify-evenly pt-1">
+                  <StarsLeftSVG className="aspect-video w-10" />
+                  <div className="bg-gradient-to-b from-white to-white/70 bg-clip-text text-xs uppercase text-transparent">
+                    Most Popular Plan
+                  </div>
+                  <StarsRightSVG className="aspect-video w-10" />
                 </div>
-                <StarsRightSVG className="aspect-video w-10" />
               </div>
             </div>
           </div>
@@ -52,7 +56,7 @@ function PriceCard({
       ) : null}
 
       <div
-        className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[14rem] lg:w-[17rem]"
+        className="border-1 border-brandBlue/30 hover:border-brandBlue/50 relative flex w-[20rem] flex-shrink-0 flex-col rounded-2xl border border-opacity-5 p-5 text-start md:w-[18rem] lg:w-[16rem] xl:w-[18rem]"
         key={title}
         style={{
           background:
@@ -79,10 +83,14 @@ function PriceCard({
           </div>
         ) : (
           <div className="mt-2 flex flex-row items-end justify-start gap-1  text-sm sm:mt-4">
-            <div className="text-xl text-white/80 md:text-3xl">${price}</div>
-            <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-              /month
+            <div className="text-xl text-white/80 md:text-3xl">
+              {price < 0 ? 'Custom Pricing' : `$${price}`}
             </div>
+            {price > 0 ? (
+              <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
+                /month
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -90,26 +98,52 @@ function PriceCard({
           className="border-1 border-brandBlue/80 hover:border-brandBlue/90 bg-brandBlue/30 mb-2 mt-3 h-8 w-28 rounded-full text-white/60 hover:text-white/70 md:mt-4 md:w-32"
           type="button"
         >
-          {price === 0 ? 'Get Started' : 'Try For Free'}
+          {returnButtonLabel()}
         </button>
 
         <div className="my-5 md:-mx-6 lg:-mx-4">
-          <div className="via-ble h-[2px] w-full bg-gradient-to-r from-transparent via-[#8EE8FF] to-transparent" />
+          <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#8EE8FF] to-transparent" />
         </div>
 
-        <div className="text-brandBlue/90 text-sm font-light tracking-widest md:text-base">
-          SPACE
+        <div className="text-brandBlue/90 text-sm font-light uppercase tracking-widest md:text-base">
+          space
         </div>
 
         <div className="flex flex-col space-y-2">
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <ProjectSVG />
-            <div>{spaceProjects} Projects</div>
+            <div>{spaceWorkspace} Workspace</div>
           </div>
 
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <ProjectSVG />
+            <div>
+              {spaceProjects < 0 ? 'unlimited' : spaceProjects} Projects
+            </div>
+          </div>
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{spaceUsers} Users </div>
+            <div>{spaceUsers < 0 ? 'Unlimited' : spaceUsers} Users</div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {spaceEnvironment < 0 ? 'unlimited' : spaceEnvironment}{' '}
+              Environments
+            </div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>{spaceSecrets < 0 ? 'unlimited' : spaceSecrets} Secrets</div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>{spaceIntegerations} Integerations</div>
+          </div>
+
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>{spaceAccessSpecifier} Of Access Specifier </div>
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">

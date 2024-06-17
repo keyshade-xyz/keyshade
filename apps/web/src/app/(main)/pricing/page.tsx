@@ -1,48 +1,9 @@
-import type { TabDataProps } from '@/components/ui/animated-tabs'
 import AnimatedTab from '@/components/ui/animated-tabs'
 import { ColorBGSVG } from '@public/hero'
-import type { CardProps } from '@/components/pricing/card'
 import PriceCard from '@/components/pricing/card'
+import { PriceCardsData, tabsData } from '@/constants/pricing'
 
 function About(): React.JSX.Element {
-  const tabsData: TabDataProps[] = [
-    { id: 'monthly', label: 'Monthly' },
-    { id: 'yearly', label: 'Yearly', tag: '-20%', special: true }
-  ]
-
-  const priceCardData: CardProps[] = [
-    {
-      title: 'Free',
-      description: 'For hobbyists and beginners',
-      price: 0,
-      isPopular: false,
-      spaceProjects: 1,
-      spaceUsers: 1,
-      spaceLiveSupport: false,
-      miscFeatures: ['Unlimited Users', '1 Workspace']
-    },
-    {
-      title: 'Pro',
-      description: 'For small teams and startups',
-      price: 15,
-      isPopular: true,
-      spaceProjects: 5,
-      spaceUsers: 5,
-      spaceLiveSupport: true,
-      miscFeatures: ['Unlimited Users', '5 Workspaces']
-    },
-    {
-      title: 'Enterprise',
-      description: 'For large teams and enterprises',
-      price: 45,
-      isPopular: false,
-      spaceProjects: 100,
-      spaceUsers: 1000,
-      spaceLiveSupport: true,
-      miscFeatures: ['Unlimited Users', '10 Workspaces']
-    }
-  ]
-
   return (
     <div className="relative flex flex-col items-center justify-center ">
       <ColorBGSVG className="absolute -z-10 h-screen w-screen" />
@@ -65,21 +26,36 @@ function About(): React.JSX.Element {
       <div className="mt-8 md:mt-12">
         <AnimatedTab tabs={tabsData} />
       </div>
-      <div className="mt-10 md:mt-16">
-        <div className="flex flex-col gap-8 md:flex-row">
-          {priceCardData.map((card) => (
-            <PriceCard
-              description={card.description}
-              isPopular={card.isPopular}
-              key={card.title}
-              miscFeatures={card.miscFeatures}
-              price={card.price}
-              spaceLiveSupport={card.spaceLiveSupport}
-              spaceProjects={card.spaceProjects}
-              spaceUsers={card.spaceUsers}
-              title={card.title}
-            />
-          ))}
+      <div className="flex h-fit w-fit justify-center">
+        {/* //TODO: Make the below block responsive */}
+        {/* <div className="absolute z-10 hidden h-2/3 w-full bg-gradient-to-b from-transparent to-black md:flex">
+          <div className="absolute bottom-0 h-[1px] w-1/3 bg-gradient-to-r from-white/5 to-white/15 lg:left-[10%]" />
+          <button className="absolute -bottom-6 left-[44.5%] z-10 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-base">
+            See more features
+          </button>
+          <div className="absolute bottom-0 h-[1px] w-1/3 bg-gradient-to-r from-white/15 to-white/5 lg:right-[10%]" />
+        </div> */}
+        <div className="mt-10 w-fit md:mt-20 ">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 ">
+            {PriceCardsData.map((card) => (
+              <PriceCard
+                description={card.description}
+                isPopular={card.isPopular}
+                key={card.title}
+                miscFeatures={card.miscFeatures}
+                price={card.price}
+                spaceAccessSpecifier={card.spaceAccessSpecifier}
+                spaceEnvironment={card.spaceEnvironment}
+                spaceIntegerations={card.spaceIntegerations}
+                spaceLiveSupport={card.spaceLiveSupport}
+                spaceProjects={card.spaceProjects}
+                spaceSecrets={card.spaceSecrets}
+                spaceUsers={card.spaceUsers}
+                spaceWorkspace={card.spaceWorkspace}
+                title={card.title}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
