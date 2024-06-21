@@ -3,19 +3,20 @@ import { OTPInput, OTPInputContext } from 'input-otp'
 import { Dot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>>(
-  ({ className, containerClassName, ...props }, ref) => (
-    <OTPInput
-      className={cn('disabled:cursor-not-allowed', className as string)}
-      containerClassName={cn(
-        'flex items-center justify-center gap-2 has-[:disabled]:opacity-50',
-        containerClassName as string
-      )}
-      ref={ref}
-      {...props}
-    />
-  )
-)
+const InputOTP = React.forwardRef<
+  React.ElementRef<typeof OTPInput>,
+  React.ComponentPropsWithoutRef<typeof OTPInput>
+>(({ className, containerClassName, ...props }, ref) => (
+  <OTPInput
+    className={cn('disabled:cursor-not-allowed', className)}
+    containerClassName={cn(
+      'flex items-center justify-center gap-2 has-[:disabled]:opacity-50',
+      containerClassName
+    )}
+    ref={ref}
+    {...props}
+  />
+))
 InputOTP.displayName = 'InputOTP'
 
 const InputOTPGroup = React.forwardRef<

@@ -108,7 +108,7 @@ export default function AuthOTPPage(): React.JSX.Element {
               <InputOTP
                 maxLength={6}
                 onChange={(otpVal) => {
-                  setOtp(otpVal as string)
+                  setOtp(otpVal)
                 }}
                 pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
                 value={otp}
