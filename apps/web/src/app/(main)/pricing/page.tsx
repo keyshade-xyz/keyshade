@@ -1,9 +1,14 @@
+'use client'
+
+import { useState } from 'react'
 import AnimatedTab from '@/components/ui/animated-tabs'
 import { ColorBGSVG } from '@public/hero'
 import PriceCard from '@/components/pricing/card'
 import { PriceCardsData, tabsData } from '@/constants/pricing'
 
 function About(): React.JSX.Element {
+  const [activeTab, setActiveTab] = useState<string>(tabsData[0].id)
+
   return (
     <div className="relative flex flex-col items-center justify-center ">
       <ColorBGSVG className="absolute -z-10 h-screen w-screen" />
@@ -24,7 +29,11 @@ function About(): React.JSX.Element {
         plans tailored to users of all levels.
       </span>
       <div className="mt-8 md:mt-12">
-        <AnimatedTab tabs={tabsData} />
+        <AnimatedTab
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          tabs={tabsData}
+        />
       </div>
       <div className="flex h-fit w-fit justify-center">
         {/* //TODO: Make the below block responsive */}
@@ -39,6 +48,7 @@ function About(): React.JSX.Element {
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 ">
             {PriceCardsData.map((card) => (
               <PriceCard
+                PricingType={activeTab}
                 description={card.description}
                 isPopular={card.isPopular}
                 key={card.title}
@@ -53,6 +63,7 @@ function About(): React.JSX.Element {
                 spaceUsers={card.spaceUsers}
                 spaceWorkspace={card.spaceWorkspace}
                 title={card.title}
+                yearlyPrice={card.yearlyPrice}
               />
             ))}
           </div>

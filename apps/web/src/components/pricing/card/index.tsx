@@ -14,6 +14,7 @@ function PriceCard({
   title,
   description,
   price,
+  yearlyPrice,
   isPopular,
   spaceProjects,
   spaceUsers,
@@ -22,7 +23,8 @@ function PriceCard({
   spaceSecrets,
   spaceEnvironment,
   spaceLiveSupport,
-  miscFeatures
+  miscFeatures,
+  PricingType
 }: Readonly<PriceCardPropsType>): React.JSX.Element {
   const returnButtonLabel = () => {
     if (price === 0) {
@@ -83,11 +85,13 @@ function PriceCard({
         ) : (
           <div className="mt-2 flex flex-row items-end justify-start gap-1  text-sm sm:mt-4">
             <div className="text-xl text-white/80 md:text-3xl">
-              {price < 0 ? 'Custom Pricing' : `$${price}`}
+              {price < 0
+                ? 'Custom Pricing'
+                : `$${PricingType === 'monthly' ? price : yearlyPrice}`}
             </div>
             {price > 0 ? (
               <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-                /month
+                {PricingType === 'monthly' ? '/ month' : '/ year'}
               </div>
             ) : null}
           </div>

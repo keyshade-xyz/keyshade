@@ -37,6 +37,7 @@ export const PriceCardsData: PriceCardDataType = [
     description:
       'For Power Users Shipping their ideas to become future products.',
     price: 9.99,
+    yearlyPrice: 95.99,
     isPopular: true,
     spaceWorkspace: 5,
     spaceProjects: 5,
@@ -62,6 +63,7 @@ export const PriceCardsData: PriceCardDataType = [
     title: 'Team',
     description: 'For professional teams shipping to production.',
     price: 19.99,
+    yearlyPrice: 215.99,
     isPopular: false,
     spaceWorkspace: 10,
     spaceProjects: -1,

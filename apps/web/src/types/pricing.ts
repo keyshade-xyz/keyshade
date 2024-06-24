@@ -2,6 +2,7 @@ export interface PriceCardPropsType {
   title: string
   description: string
   price: number
+  yearlyPrice?: number
 
   isPopular: boolean
 
@@ -17,6 +18,7 @@ export interface PriceCardPropsType {
   spaceUsers: number
 
   miscFeatures: string[]
+  PricingType?: string
 }
 
 export interface PriceTabPropsType {

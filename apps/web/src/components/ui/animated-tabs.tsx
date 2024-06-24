@@ -1,17 +1,19 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import React, { useState } from 'react'
+import React from 'react'
 import { cn } from '@/utils/cn'
 import type { PriceTabDataType } from '@/types'
 
 function AnimatedTab({
-  tabs
+  tabs,
+  activeTab,
+  setActiveTab
 }: {
   tabs: Readonly<PriceTabDataType>
+  activeTab: string
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>
 }): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<string>(tabs[0].id)
-
   return (
     <div
       className="flex rounded-full border-[1px] border-white border-opacity-[.06] bg-white bg-opacity-[.08] p-1"
