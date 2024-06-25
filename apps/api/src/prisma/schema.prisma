@@ -365,6 +365,7 @@ model Secret {
   updatedAt DateTime        @updatedAt
   rotateAt  DateTime?
   note      String?
+  requireRestart Boolean?        @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -400,6 +401,7 @@ model Variable {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   note      String?
+  requireRestart Boolean     @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

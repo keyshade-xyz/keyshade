@@ -4,6 +4,7 @@ import {
   IsArray,
   IsOptional,
   IsString,
+  IsBoolean,
   Length,
   ValidateNested
 } from 'class-validator'
@@ -20,6 +21,10 @@ export class CreateSecret {
   @IsString()
   @IsOptional()
   rotateAfter?: '24' | '168' | '720' | '8760' | 'never' = 'never'
+
+  @IsBoolean()
+  @IsOptional()
+  requireRestart?: boolean
 
   @IsOptional()
   @IsArray()
