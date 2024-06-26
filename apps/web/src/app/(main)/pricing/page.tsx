@@ -36,14 +36,6 @@ function About(): React.JSX.Element {
         />
       </div>
       <div className="flex h-fit w-fit justify-center">
-        {/* //TODO: Make the below block responsive */}
-        {/* <div className="absolute z-10 hidden h-2/3 w-full bg-gradient-to-b from-transparent to-black md:flex">
-          <div className="absolute bottom-0 h-[1px] w-1/3 bg-gradient-to-r from-white/5 to-white/15 lg:left-[10%]" />
-          <button className="absolute -bottom-6 left-[44.5%] z-10 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-base">
-            See more features
-          </button>
-          <div className="absolute bottom-0 h-[1px] w-1/3 bg-gradient-to-r from-white/15 to-white/5 lg:right-[10%]" />
-        </div> */}
         <div className="mt-10 w-fit md:mt-20 ">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 ">
             {PriceCardsData.map((card) => (
