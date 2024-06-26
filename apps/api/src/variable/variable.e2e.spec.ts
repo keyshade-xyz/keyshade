@@ -209,6 +209,48 @@ describe('Variable Controller Tests', () => {
     expect(variable).toBeDefined()
   })
 
+  it('should be able to create a variable with requireRestart set to true', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/variable/${project1.id}`,
+      payload: {
+        name: 'Variable 4',
+        note: 'Variable 4 note',
+        requireRestart: true,
+        rotateAfter: '24',
+        entries: [
+          {
+            value: 'Variable 4 value',
+            environmentId: environment2.id
+          }
+        ]
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    const body = response.json()
+
+    expect(body).toBeDefined()
+    expect(body.name).toBe('Variable 4')
+    expect(body.note).toBe('Variable 4 note')
+    expect(body.requireRestart).toBe(true)
+    expect(body.projectId).toBe(project1.id)
+    expect(body.versions.length).toBe(1)
+    expect(body.versions[0].value).toBe('Variable 4 value')
+
+    const variable = await prisma.variable.findUnique({
+      where: {
+        id: body.id
+      }
+    })
+
+    expect(variable).toBeDefined()
+  })
+
   it('should have created a variable version', async () => {
     const variableVersion = await prisma.variableVersion.findFirst({
       where: {
@@ -353,6 +395,30 @@ describe('Variable Controller Tests', () => {
     expect(response.statusCode).toBe(200)
     expect(response.json().name).toEqual('Updated Variable 1')
     expect(response.json().note).toEqual('Updated Variable 1 note')
+
+    const variableVersion = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    expect(variableVersion.length).toBe(1)
+  })
+
+  it('should be able to update requireRestart param without creating a new version', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}`,
+      payload: {
+        requireRestart: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().requireRestart).toEqual(true)
 
     const variableVersion = await prisma.variableVersion.findMany({
       where: {

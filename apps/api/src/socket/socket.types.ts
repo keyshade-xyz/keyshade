@@ -7,6 +7,7 @@ export interface ChangeNotifierRegistration {
 export interface ChangeNotification {
   name: string
   value: string
+  requireRestart: boolean
   isSecret: boolean
 }
 

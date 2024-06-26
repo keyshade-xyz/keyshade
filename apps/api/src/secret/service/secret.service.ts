@@ -88,6 +88,7 @@ export class SecretService {
         name: dto.name,
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
+        requireRestart: dto.requireRestart,
         versions: shouldCreateRevisions && {
           createMany: {
             data: await Promise.all(
@@ -198,6 +199,7 @@ export class SecretService {
         data: {
           name: dto.name,
           note: dto.note,
+          requireRestart: dto.requireRestart,
           rotateAt: dto.rotateAfter
             ? addHoursToDate(dto.rotateAfter)
             : undefined,
@@ -268,6 +270,7 @@ export class SecretService {
               environmentId: entry.environmentId,
               name: updatedSecret.name,
               value: entry.value,
+              requireRestart: dto.requireRestart,
               isSecret: true
             })
           )
@@ -352,6 +355,7 @@ export class SecretService {
           environmentId,
           name: secret.name,
           value: secret.versions[rollbackVersion - 1].value,
+          requireRestart: secret.requireRestart,
           isSecret: true
         })
       )
