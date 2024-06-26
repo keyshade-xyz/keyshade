@@ -539,6 +539,28 @@ export class VariableService {
     return Array.from(variablesWithEnvironmentalValues.values())
   }
 
+  async getRevisionsOfVariable(
+    user: User,
+    variableId: Variable['id'],
+    environmentId: Environment['id']
+  ) {
+    // Fetch the project
+    const variable =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { id: variableId },
+        authority: Authority.READ_VARIABLE,
+        prisma: this.prisma
+      })
+
+    // Filter the variable versions by the environment
+    const revisions = variable.versions.filter(
+      (version) => version.environmentId === environmentId
+    )
+
+    return revisions
+  }
+
   private async variableExists(
     variableName: Variable['name'],
     projectId: Project['id']
