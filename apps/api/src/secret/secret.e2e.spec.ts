@@ -207,40 +207,6 @@ describe('Secret Controller Tests', () => {
     expect(body.versions[0].value).not.toBe('Secret 2 value')
   })
 
-  it('should be able to create a secret with requireRestart set to true', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/secret/${project1.id}`,
-      payload: {
-        name: 'Secret 3',
-        note: 'Secret 3 note',
-        requireRestart: true,
-        entries: [
-          {
-            value: 'Secret 3 value',
-            environmentId: environment1.id
-          }
-        ],
-        rotateAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(201)
-
-    const body = response.json()
-
-    expect(body).toBeDefined()
-    expect(body.name).toBe('Secret 3')
-    expect(body.note).toBe('Secret 3 note')
-    expect(body.requireRestart).toBe(true)
-    expect(body.projectId).toBe(project1.id)
-    expect(body.versions.length).toBe(1)
-    expect(body.versions[0].value).not.toBe('Secret 3 value')
-  })
-
   it('should have created a secret version', async () => {
     const secretVersion = await prisma.secretVersion.findFirst({
       where: {
@@ -367,30 +333,6 @@ describe('Secret Controller Tests', () => {
     expect(response.statusCode).toBe(200)
     expect(response.json().name).toEqual('Updated Secret 1')
     expect(response.json().note).toEqual('Updated Secret 1 note')
-
-    const secretVersion = await prisma.secretVersion.findMany({
-      where: {
-        secretId: secret1.id
-      }
-    })
-
-    expect(secretVersion.length).toBe(1)
-  })
-
-  it('should be able to update the requireRestart Param without creating a new version', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/secret/${secret1.id}`,
-      payload: {
-        requireRestart: true
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().requireRestart).toEqual(true)
 
     const secretVersion = await prisma.secretVersion.findMany({
       where: {

@@ -35,3 +35,11 @@ services:
 networks:
   keyshade-dev:
     driver: bridge
+
+volumes:
+  keyshade-db:
+    driver: local
+  keyshade-redis:
+    driver: local
+  keyshade-minio:
+    driver: local
