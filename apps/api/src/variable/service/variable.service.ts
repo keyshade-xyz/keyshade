@@ -88,6 +88,7 @@ export class VariableService {
       data: {
         name: dto.name,
         note: dto.note,
+        requireRestart: dto.requireRestart,
         versions: shouldCreateRevisions && {
           createMany: {
             data: dto.entries.map((entry) => ({
@@ -200,6 +201,7 @@ export class VariableService {
         data: {
           name: dto.name,
           note: dto.note,
+          requireRestart: dto.requireRestart,
           lastUpdatedById: user.id
         },
         include: {
@@ -266,6 +268,7 @@ export class VariableService {
               environmentId: entry.environmentId,
               name: updatedVariable.name,
               value: entry.value,
+              requireRestart: dto.requireRestart,
               isSecret: false
             })
           )
@@ -353,6 +356,7 @@ export class VariableService {
           environmentId,
           name: variable.name,
           value: variable.versions[rollbackVersion - 1].value,
+          requireRestart: variable.requireRestart,
           isSecret: false
         })
       )
