@@ -358,14 +358,14 @@ model SecretVersion {
 }
 
 model Secret {
-  id        String          @id @default(cuid())
-  name      String
-  versions  SecretVersion[] // Stores the versions of the secret
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  rotateAt  DateTime?
-  note      String?
-  requireRestart Boolean        @default(false)
+  id             String          @id @default(cuid())
+  name           String
+  versions       SecretVersion[] // Stores the versions of the secret
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  rotateAt       DateTime?
+  note           String?
+  requireRestart Boolean         @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -395,13 +395,13 @@ model VariableVersion {
 }
 
 model Variable {
-  id        String            @id @default(cuid())
-  name      String
-  versions  VariableVersion[] // Stores the versions of the variable
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  note      String?
-  requireRestart Boolean     @default(false)
+  id             String            @id @default(cuid())
+  name           String
+  versions       VariableVersion[] // Stores the versions of the variable
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  note           String?
+  requireRestart Boolean           @default(false)
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

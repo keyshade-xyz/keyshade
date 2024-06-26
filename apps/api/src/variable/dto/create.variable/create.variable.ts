@@ -22,6 +22,7 @@ export class CreateVariable {
 
   @IsBoolean()
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   requireRestart?: boolean
 
   @IsOptional()
