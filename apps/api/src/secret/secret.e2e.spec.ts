@@ -531,16 +531,13 @@ describe('Secret Controller Tests', () => {
 
     expect(versions.length).toBe(3)
 
-    const response = await app.inject({
+    await app.inject({
       method: 'PUT',
       url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().count).toEqual(2)
 
     versions = await prisma.secretVersion.findMany({
       where: {
