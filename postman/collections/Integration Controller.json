@@ -17,7 +17,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Discord second\",\n    \"type\": \"DISCORD\",\n    \"notifyOn\": [\"WORKSPACE_UPDATED\"],\n    \"projectId\": \"63a0bd10-a03d-4abe-9cd0-b4659b1f632b\",\n    \"metadata\": {\n        \"webhookUrl\": \"https://discord.com/api/webhooks/1235179163615232020/VtQJrD7P30Q_NjUeH6_DYaq_f9H49zVJov9lweWG3SWZeh3A7SbuKNDYo3Dk4ngG7a8M\"\n    }\n}",
+					"raw": "{\n    \"name\": \"Discord second\",\n    \"type\": \"DISCORD\",\n    \"notifyOn\": [\"WORKSPACE_UPDATED\"],\n    \"projectId\": \"63a0bd10-a03d-4abe-9cd0-b4659b1f632b\",\n    \"metadata\": {\n        \"webhookUrl\": \"{{vault:WEBHOOK_URL}}\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"

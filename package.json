@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "1.4.0",
+  "version": "2.1.0",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -97,6 +97,7 @@
     "add:api": "pnpm add --filter=api",
     "add:web": "pnpm add --filter=web",
     "add:platform": "pnpm add --filter=platform",
+    "add:cli": "pnpm add --filter=cli",
     "lint": "turbo run lint",
     "lint:api": "turbo run lint --filter=api",
     "lint:web": "turbo run lint --filter=web",
@@ -105,10 +106,12 @@
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
     "build:web": "turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
+    "build:cli": "turbo run build --filter=cli",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
     "start:web": "turbo run start --filter=web",
     "start:platform": "turbo run start --filter=platform",
+    "start:cli": "turbo run start --filter=cli",
     "test": "turbo run test",
     "test:api": "pnpm unit:api && pnpm e2e:api",
     "unit:api": "pnpm run --filter=api unit",
@@ -153,6 +156,8 @@
     "million": "^3.0.5",
     "sharp": "^0.33.3",
     "ts-node": "^10.9.2",
-    "zod": "^3.23.6"
+    "zod": "^3.23.6",
+    "chalk": "^4.1.2",
+    "moment": "^2.30.1"
   }
 }

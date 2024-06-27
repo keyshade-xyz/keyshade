@@ -392,6 +392,26 @@ describe('Variable Controller Tests', () => {
     expect(variableVersion.length).toBe(2)
   })
 
+  it('should fail to create a new version if the environment does not exist', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}`,
+      payload: {
+        entries: [
+          {
+            value: 'Updated Variable 1 value',
+            environmentId: 'non-existing-environment-id'
+          }
+        ]
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+  })
+
   it('should have created a VARIABLE_UPDATED event', async () => {
     // Update a variable
     await variableService.updateVariable(user1, variable1.id, {
@@ -600,6 +620,66 @@ describe('Variable Controller Tests', () => {
     expect(response.json().message).toEqual(
       'Project with id non-existing-project-id not found'
     )
+  })
+
+  it('should be able to fetch all variables by project and environment', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/all/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const variable = response.json()[0]
+    expect(variable.name).toBe('Variable 1')
+    expect(variable.value).toBe('Variable 1 value')
+    expect(variable.isPlaintext).toBe(true)
+  })
+
+  it('should not be able to fetch all variables by project and environment if the user has no access to the project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/all/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
+
+  it('should not be able to fetch all variables by project and environment if the project does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/all/non-existing-project-id/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Project with id non-existing-project-id not found'
+    )
+  })
+
+  it('should not be able to fetch all variables by project and environment if the environment does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/all/${project1.id}/non-existing-environment-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
   })
 
   it('should not be able to delete a non-existing variable', async () => {

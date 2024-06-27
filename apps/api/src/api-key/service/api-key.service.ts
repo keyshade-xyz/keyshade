@@ -43,6 +43,21 @@ export class ApiKeyService {
   }
 
   async updateApiKey(user: User, apiKeyId: string, dto: UpdateApiKey) {
+    const apiKey = await this.prisma.apiKey.findUnique({
+      where: {
+        id: apiKeyId,
+        userId: user.id
+      }
+    })
+
+    if (!apiKey) {
+      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+    }
+
+    const existingAuthorities = new Set(apiKey.authorities)
+    dto.authorities &&
+      dto.authorities.forEach((auth) => existingAuthorities.add(auth))
+
     const updatedApiKey = await this.prisma.apiKey.update({
       where: {
         id: apiKeyId,
@@ -50,11 +65,9 @@ export class ApiKeyService {
       },
       data: {
         name: dto.name,
-        authorities: dto.authorities
-          ? {
-              set: dto.authorities
-            }
-          : undefined,
+        authorities: {
+          set: Array.from(existingAuthorities)
+        },
         expiresAt: dto.expiresAfter
           ? addHoursToDate(dto.expiresAfter)
           : undefined
