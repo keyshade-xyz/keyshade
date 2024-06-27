@@ -155,7 +155,6 @@ export class VariableService {
     variableId: Variable['id'],
     dto: UpdateVariable
   ) {
-    console.log(dto)
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
         userId: user.id,

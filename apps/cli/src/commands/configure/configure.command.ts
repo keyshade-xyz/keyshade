@@ -52,7 +52,7 @@ export default class ConfigureCommand implements BaseCommand {
     intro('Configurations present: ')
 
     const configurations = await fetchUserRootConfigurationFiles()
-    console.log(configurations)
+    Logger.info(configurations)
   }
 
   private async createConfiguration(parsedData) {

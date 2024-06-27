@@ -362,7 +362,7 @@ export class SecretService {
           value: project.storePrivateKey
             ? await decrypt(project.privateKey, secret.versions[0].value)
             : secret.versions[0].value,
-          isPlaintext: !project.storePrivateKey
+          isPlaintext: project.storePrivateKey
         } as ChangeNotificationEvent)
       )
     } catch (error) {
@@ -440,6 +440,14 @@ export class SecretService {
         prisma: this.prisma
       })
 
+    // Check access to the environment
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
     const secrets = await this.prisma.secret.findMany({
       where: {
         projectId,
@@ -476,7 +484,7 @@ export class SecretService {
         value: project.storePrivateKey
           ? await decrypt(project.privateKey, secret.versions[0].value)
           : secret.versions[0].value,
-        isPlaintext: !project.storePrivateKey
+        isPlaintext: project.storePrivateKey
       })
     }
 
