@@ -27,6 +27,10 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import {
+  ChangeNotification,
+  ChangeNotificationEvent
+} from 'src/socket/socket.types'
 
 @Injectable()
 export class SecretService {
@@ -88,7 +92,6 @@ export class SecretService {
         name: dto.name,
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
-        requireRestart: dto.requireRestart,
         versions: shouldCreateRevisions && {
           createMany: {
             data: await Promise.all(
@@ -199,7 +202,6 @@ export class SecretService {
         data: {
           name: dto.name,
           note: dto.note,
-          requireRestart: dto.requireRestart,
           rotateAt: dto.rotateAfter
             ? addHoursToDate(dto.rotateAfter)
             : undefined,
@@ -215,6 +217,9 @@ export class SecretService {
             select: {
               environmentId: true,
               value: true
+            },
+            orderBy: {
+              version: 'desc'
             }
           }
         }
@@ -240,7 +245,6 @@ export class SecretService {
           take: 1
         })
 
-        // Create the new version
         // Create the new version
         op.push(
           this.prisma.secretVersion.create({
@@ -270,9 +274,8 @@ export class SecretService {
               environmentId: entry.environmentId,
               name: updatedSecret.name,
               value: entry.value,
-              requireRestart: dto.requireRestart,
-              isSecret: true
-            })
+              isPlaintext: true
+            } as ChangeNotificationEvent)
           )
         } catch (error) {
           this.logger.error(`Error publishing secret update to Redis: ${error}`)
@@ -317,6 +320,8 @@ export class SecretService {
       prisma: this.prisma
     })
 
+    const project = secret.project
+
     // Filter the secret versions by the environment
     secret.versions = secret.versions.filter(
       (version) => version.environmentId === environmentId
@@ -354,10 +359,11 @@ export class SecretService {
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: secret.versions[rollbackVersion - 1].value,
-          requireRestart: secret.requireRestart,
-          isSecret: true
-        })
+          value: project.storePrivateKey
+            ? await decrypt(project.privateKey, secret.versions[0].value)
+            : secret.versions[0].value,
+          isPlaintext: project.storePrivateKey
+        } as ChangeNotificationEvent)
       )
     } catch (error) {
       this.logger.error(`Error publishing secret update to Redis: ${error}`)
@@ -420,6 +426,71 @@ export class SecretService {
     this.logger.log(`User ${user.id} deleted secret ${secret.id}`)
   }
 
+  async getAllSecretsOfProjectAndEnvironment(
+    user: User,
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    // Fetch the project
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_SECRET,
+        prisma: this.prisma
+      })
+
+    // Check access to the environment
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        versions: {
+          some: {
+            environmentId
+          }
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        versions: {
+          where: {
+            environmentId
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        }
+      }
+    })
+
+    const response: ChangeNotification[] = []
+
+    for (const secret of secrets) {
+      response.push({
+        name: secret.name,
+        value: project.storePrivateKey
+          ? await decrypt(project.privateKey, secret.versions[0].value)
+          : secret.versions[0].value,
+        isPlaintext: project.storePrivateKey
+      })
+    }
+
+    return response
+  }
+
   async getAllSecretsOfProject(
     user: User,
     projectId: Project['id'],
@@ -474,6 +545,7 @@ export class SecretService {
             id: Environment['id']
           }
           value: SecretVersion['value']
+          version: SecretVersion['version']
         }[]
       }
     >()
@@ -517,7 +589,8 @@ export class SecretService {
             },
             value: decryptValue
               ? await decrypt(project.privateKey, latestVersion.value)
-              : latestVersion.value
+              : latestVersion.value,
+            version: latestVersion.version
           })
         } else {
           secretsWithEnvironmentalValues.set(secret.id, {
@@ -530,7 +603,8 @@ export class SecretService {
                 },
                 value: decryptValue
                   ? await decrypt(project.privateKey, latestVersion.value)
-                  : latestVersion.value
+                  : latestVersion.value,
+                version: latestVersion.version
               }
             ]
           })

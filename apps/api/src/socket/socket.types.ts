@@ -4,11 +4,16 @@ export interface ChangeNotifierRegistration {
   environmentName: string
 }
 
+export interface ClientRegisteredResponse {
+  workspaceId: string
+  projectId: string
+  environmentId: string
+}
+
 export interface ChangeNotification {
   name: string
   value: string
-  requireRestart: boolean
-  isSecret: boolean
+  isPlaintext: boolean
 }
 
 export interface ChangeNotificationEvent extends ChangeNotification {

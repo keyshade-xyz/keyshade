@@ -210,7 +210,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"value\": \"2324\"\n}",
+					"raw": "{\n    \"entries\": [\n        {\n            \"environmentId\": \"clxuc64x20009h5wpd9gefx0x\",\n            \"value\": \"4200\"\n        }\n    ],\n    \"name\": \"PORT\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -230,12 +230,90 @@
 					"variable": [
 						{
 							"key": "variableId",
-							"value": "clv9jxpyc000e137p5uzq5zps"
+							"value": "clxuc885c000oh5wpipbubkcn"
 						}
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "5ca843b4-6644-4f5a-b311-ef2ffa8758eb",
+					"name": "Variable updated successfully",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entries\": [\n        {\n            \"environmentId\": \"clxuc64x20009h5wpd9gefx0x\",\n            \"value\": \"4200\"\n        }\n    ],\n    \"name\": \"PORT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/:variableId",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								":variableId"
+							],
+							"variable": [
+								{
+									"key": "variableId",
+									"value": "clxuc885c000oh5wpipbubkcn"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "374"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"176-8gwJsArq5140lCqdjz7uEzlSTG8\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 25 Jun 2024 11:49:36 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clxuc885c000oh5wpipbubkcn\",\n    \"name\": \"PORT\",\n    \"createdAt\": \"2024-06-25T11:43:07.584Z\",\n    \"updatedAt\": \"2024-06-25T11:49:36.270Z\",\n    \"note\": null,\n    \"lastUpdatedById\": \"clxuc3xu40000h5wpiolii17x\",\n    \"projectId\": \"56b420f7-b4e3-4721-84fb-b4856013f42f\",\n    \"project\": {\n        \"workspaceId\": \"73649bd2-9aa3-4dfd-81e4-48ecd698757a\"\n    },\n    \"versions\": [\n        {\n            \"environmentId\": \"clxuc64x20009h5wpd9gefx0x\",\n            \"value\": \"8080\"\n        }\n    ]\n}"
+				}
+			]
 		},
 		{
 			"name": "Update environment of variable",
@@ -282,7 +360,7 @@
 				"method": "PUT",
 				"header": [],
 				"url": {
-					"raw": "{{BASE_URL}}/api/variable/:variable_id/rollback/:rollback_version",
+					"raw": "{{BASE_URL}}/api/variable/:variable_id/rollback/:rollback_version?environmentId=clxvlpw770009n2nvhh3rl8wn",
 					"host": [
 						"{{BASE_URL}}"
 					],
@@ -293,14 +371,20 @@
 						"rollback",
 						":rollback_version"
 					],
+					"query": [
+						{
+							"key": "environmentId",
+							"value": "clxvlpw770009n2nvhh3rl8wn"
+						}
+					],
 					"variable": [
 						{
 							"key": "variable_id",
-							"value": ""
+							"value": "clxvlrmht000kn2nvrujutm3s"
 						},
 						{
 							"key": "rollback_version",
-							"value": ""
+							"value": "1"
 						}
 					]
 				}
@@ -330,7 +414,7 @@
 					"variable": [
 						{
 							"key": "project_id",
-							"value": "76397fd8-e902-485a-8f46-a717a7170eae"
+							"value": "56b420f7-b4e3-4721-84fb-b4856013f42f"
 						}
 					]
 				}
@@ -561,6 +645,116 @@
 						}
 					],
 					"cookie": []
+				}
+			]
+		},
+		{
+			"name": "Fetch all by project and environment",
+			"id": "9ddaffcc-92bf-49da-a252-1c1c7ffd5641",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/variable/all/:project_id/:environment_id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"variable",
+						"all",
+						":project_id",
+						":environment_id"
+					],
+					"variable": [
+						{
+							"key": "project_id",
+							"value": "c2f78c83-c9f8-4f79-8cb1-860e39dd8178"
+						},
+						{
+							"key": "environment_id",
+							"value": "clxvlpw770009n2nvhh3rl8wn"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "c0632198-7a7d-434b-8292-50de8fe0a50f",
+					"name": "Successfully fetched variables",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/variable/all/:project_id/:environment_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"variable",
+								"all",
+								":project_id",
+								":environment_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "c2f78c83-c9f8-4f79-8cb1-860e39dd8178"
+								},
+								{
+									"key": "environment_id",
+									"value": "clxvlpw770009n2nvhh3rl8wn"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "58"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"3a-ldmbOaqzMCI9P2Otx3wiF+r4paM\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 26 Jun 2024 10:37:28 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"name\": \"PORT_NUMBER\",\n        \"value\": \"8080\",\n        \"isPlaintext\": true\n    }\n]"
 				}
 			]
 		}
