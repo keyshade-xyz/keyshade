@@ -1,3 +1,19 @@
+## [2.1.0](https://github.com/keyshade-xyz/keyshade/compare/v2.0.0...v2.1.0) (2024-06-27)
+
+### 🚀 Features
+
+* **api:** Add `requireRestart` parameter ([#286](https://github.com/keyshade-xyz/keyshade/issues/286)) ([fb447a1](https://github.com/keyshade-xyz/keyshade/commit/fb447a1852a95dcacfdb0aa896fd1521430fa095))
+* **cli:** Added CLI ([#289](https://github.com/keyshade-xyz/keyshade/issues/289)) ([1143d95](https://github.com/keyshade-xyz/keyshade/commit/1143d9547705808230b3cbcf81a3ff2a8604eaa2))
+* **workflows:** Tag user on attempt's reply body ([9d01698](https://github.com/keyshade-xyz/keyshade/commit/9d0169881d9ba7a0d84cee6d4de0e5e9c7c1e6ad))
+
+### 🐛 Bug Fixes
+
+* **web:** Resolve encryption glitch in footer text  ([#267](https://github.com/keyshade-xyz/keyshade/issues/267)) ([2b5cb39](https://github.com/keyshade-xyz/keyshade/commit/2b5cb39351d7412002514fd5a7ee6f75e02006aa))
+
+### 📚 Documentation
+
+* added running-the-web-app.md ([#269](https://github.com/keyshade-xyz/keyshade/issues/269)) ([755ea12](https://github.com/keyshade-xyz/keyshade/commit/755ea120ae90e62aaaf6b5dccf62d1d633b38c46))
+
 ## [2.0.0](https://github.com/keyshade-xyz/keyshade/compare/v1.4.0...v2.0.0) (2024-06-12)
 
 ### ⚠ BREAKING CHANGES
