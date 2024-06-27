@@ -17,7 +17,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"key with expiry\",\n  \"expiresAfter\": \"24\",\n  \"authorities\": [\"READ_API_KEY\", \"READ_WORKSPACE\", \"READ_PROJECT\", \"READ_ENVIRONMENT\"]\n}",
+					"raw": "{\n    \"name\": \"My key\",\n    \"authorities\": [\n        \"READ_API_KEY\",\n        \"READ_WORKSPACE\",\n        \"READ_PROJECT\",\n        \"READ_ENVIRONMENT\",\n        \"READ_VARIABLE\",\n        \"READ_SECRET\"\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -35,7 +35,78 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "4053afd9-9286-4c4b-99d4-67d5cc3f2c7e",
+					"name": "API Key created",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"My key\",\n  \"authorities\": [\"READ_API_KEY\", \"READ_WORKSPACE\", \"READ_PROJECT\", \"READ_ENVIRONMENT\", \"READ_VARIABLE\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/api-key",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"api-key"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "342"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"156-Jeqq5PKmcQaPGICYvKD6n2JOP4c\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 25 Jun 2024 12:13:14 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clxudaynl000010etp9xyf0k6\",\n    \"name\": \"My key\",\n    \"value\": \"ks_1e09ca8706dd9179cd635a040a4f7b6d8e7885e1d4e7981d\",\n    \"expiresAt\": null,\n    \"createdAt\": \"2024-06-25T12:13:14.865Z\",\n    \"updatedAt\": \"2024-06-25T12:13:14.865Z\",\n    \"authorities\": [\n        \"READ_API_KEY\",\n        \"READ_WORKSPACE\",\n        \"READ_PROJECT\",\n        \"READ_ENVIRONMENT\",\n        \"READ_VARIABLE\"\n    ],\n    \"userId\": \"clxuc3xu40000h5wpiolii17x\"\n}"
+				}
+			]
 		},
 		{
 			"name": "Get permissible roles of projects",
@@ -71,7 +142,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"scopes\": [\n        {\n            \"projectId\": \"clrg285zc0001hrv304imjmeu\",\n            \"roles\": [\n                \"READ_PROJECT\",\n                \"READ_SECRET\",\n                \"READ_ENVIRONMENT\",\n                \"READ_USERS\",\n                \"CREATE_SECRET\"\n            ]\n        }\n    ]\n}",
+					"raw": "{\n    \"authorities\": [\n        \"READ_SECRET\"\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -91,7 +162,7 @@
 					"variable": [
 						{
 							"key": "api_key_id",
-							"value": "clrg8vxe20001fz2thxfac8a1"
+							"value": "clxudaynl000010etp9xyf0k6"
 						}
 					]
 				}
@@ -120,12 +191,81 @@
 					"variable": [
 						{
 							"key": "api_key_id",
-							"value": "cls926mdx0000l1gw4a1mem6z"
+							"value": "clxudaynl000010etp9xyf0k6"
 						}
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "566e251c-3c41-4d67-a406-733c972d96da",
+					"name": "Fetched api key",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/api-key/:api_key_id",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"api-key",
+								":api_key_id"
+							],
+							"variable": [
+								{
+									"key": "api_key_id",
+									"value": "clxudaynl000010etp9xyf0k6"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Access-Control-Allow-Credentials",
+							"value": "true"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "175"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"af-J2pZovF7g62N5Z0xgM1/khphDtg\""
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 25 Jun 2024 12:32:24 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"clxudaynl000010etp9xyf0k6\",\n    \"expiresAt\": null,\n    \"name\": \"My key\",\n    \"authorities\": [\n        \"READ_SECRET\"\n    ],\n    \"createdAt\": \"2024-06-25T12:13:14.865Z\",\n    \"updatedAt\": \"2024-06-25T12:32:09.265Z\"\n}"
+				}
+			]
 		},
 		{
 			"name": "Get API keys",
@@ -184,6 +324,45 @@
 							"key": "api_key_id",
 							"value": "clsbhpjqh0002qt9ovutpz1jq"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Can access live updates",
+			"id": "a9e16e8f-c9f4-4679-b7ea-0f5495e8adae",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "ks_1e09ca8706dd9179cd635a040a4f7b6d8e7885e1d4e7981d",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "x-keyshade-token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/api-key/access/live-updates",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"api",
+						"api-key",
+						"access",
+						"live-updates"
 					]
 				}
 			},
