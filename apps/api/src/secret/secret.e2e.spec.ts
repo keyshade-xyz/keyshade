@@ -920,4 +920,108 @@ describe('Secret Controller Tests', () => {
     expect(event.workspaceId).toBe(workspace1.id)
     expect(event.itemId).toBe(secret1.id)
   })
+
+  //revisions test
+  it('should be able to fetch all revisions of secrets', async () => {
+    // create two more entries,totalling three versions
+    // checks if its able to fetch multiple revisions
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(3)
+  })
+
+  it('should return [] if the secret has no revision', async () => {
+    //returns [] if secret has no revision
+    await prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(0)
+  })
+
+  it('should return error if secret doesnt exist', async () => {
+    //return error if secret doesnt exist
+    const secretid = 'nonexistentsecret'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secretid}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Secret with id ${secretid} not found`
+    )
+  })
+
+  it('should return error if environment doesnt exist', async () => {
+    //return error if environment doesnt exist
+    const environmentid = 'nonexistentenv'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environmentid}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Environment with id ${environmentid} not found`
+    )
+  })
+
+  it('returns error if secret isnt accessible', async () => {
+    //return error if user has no access to secret
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
 })

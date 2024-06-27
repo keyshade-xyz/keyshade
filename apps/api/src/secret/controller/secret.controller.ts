@@ -101,4 +101,18 @@ export class SecretController {
       environmentId
     )
   }
+
+  @Get(':secretId/revisions/:environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
+  async getRevisionsOfSecret(
+    @CurrentUser() user: User,
+    @Param('secretId') secretId: string,
+    @Param('environmentId') environmentId: string
+  ) {
+    return await this.secretService.getRevisionsOfSecret(
+      user,
+      secretId,
+      environmentId
+    )
+  }
 }
