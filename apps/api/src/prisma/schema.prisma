@@ -421,6 +421,8 @@ model ApiKey {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
+
+  @@unique([userId, name])
 }
 
 model Otp {
