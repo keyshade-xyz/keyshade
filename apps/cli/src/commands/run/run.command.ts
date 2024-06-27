@@ -80,17 +80,27 @@ export default class RunCommand implements BaseCommand {
     }
   }
 
+  private async getWebsocketType(baseUrl: string) {
+    if (baseUrl.startsWith('https')) {
+      return 'wss'
+    }
+    return 'ws'
+  }
+
   private async connectToSocket(data: ProjectRootConfig & UserRootConfig) {
     Logger.info('Connecting to socket...')
     const host = data.baseUrl.substring(data.baseUrl.lastIndexOf('/') + 1)
 
-    const ioClient = io(`ws://${host}/change-notifier`, {
-      autoConnect: false,
-      extraHeaders: {
-        'x-keyshade-token': data.apiKey
-      },
-      transports: ['websocket']
-    })
+    const ioClient = io(
+      `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`,
+      {
+        autoConnect: false,
+        extraHeaders: {
+          'x-keyshade-token': data.apiKey
+        },
+        transports: ['websocket']
+      }
+    )
 
     ioClient.connect()
 

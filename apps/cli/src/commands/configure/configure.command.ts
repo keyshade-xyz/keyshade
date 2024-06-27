@@ -8,6 +8,7 @@ import {
   writeUserRootConfig
 } from '../../util/configuration'
 import { existsSync } from 'fs'
+import Logger from 'src/util/logger'
 
 export default class ConfigureCommand implements BaseCommand {
   prepareCommand(program: Command): void {
@@ -33,12 +34,17 @@ export default class ConfigureCommand implements BaseCommand {
   }
 
   private async action(parsedData) {
-    const { list } = parsedData
+    try {
+      const { list } = parsedData
 
-    if (list) {
-      await this.listConfigurations()
-    } else {
-      await this.createConfiguration(parsedData)
+      if (list) {
+        await this.listConfigurations()
+      } else {
+        await this.createConfiguration(parsedData)
+      }
+    } catch (error) {
+      Logger.error(error)
+      process.exit(1)
     }
   }
 
@@ -50,11 +56,8 @@ export default class ConfigureCommand implements BaseCommand {
   }
 
   private async createConfiguration(parsedData) {
-    const { force, baseUrl } = parsedData
+    const { baseUrl } = parsedData
     let { workspace, project, environment, apiKey, privateKey } = parsedData
-
-    let upsertUserRootConfig = true
-    let upsertProjectRootConfig = true
 
     // If a flag isn't set, prompt the user for the value
 
@@ -90,6 +93,44 @@ export default class ConfigureCommand implements BaseCommand {
       })
     }
 
+    const s = spinner()
+    s.start('Configuring the CLI')
+
+    const { upsertProjectRootConfig, upsertUserRootConfig } =
+      await this.handleExistingConfigurations(parsedData)
+
+    if (upsertUserRootConfig) {
+      Logger.info('Writing user root config')
+      writeUserRootConfig(project, {
+        apiKey,
+        privateKey
+      })
+    }
+
+    if (upsertProjectRootConfig) {
+      Logger.info('Writing project root config')
+      writeProjectRootConfig({
+        workspace,
+        project,
+        environment,
+        baseUrl: baseUrl || undefined
+      })
+    }
+
+    s.stop()
+
+    outro('Configuration complete!')
+  }
+
+  private async handleExistingConfigurations(parsedData: {
+    force: boolean
+    project: string
+  }) {
+    const { force, project } = parsedData
+
+    let upsertProjectRootConfig = true
+    let upsertUserRootConfig = true
+
     if (!force) {
       const userRootConfigExists = existsSync(
         getUserRootConfigurationFilePath(project)
@@ -118,30 +159,6 @@ export default class ConfigureCommand implements BaseCommand {
       }
     }
 
-    const s = spinner()
-    s.start('Configuring the CLI')
-
-    console.log(upsertProjectRootConfig, upsertUserRootConfig)
-    if (upsertUserRootConfig) {
-      console.log('writing user root config')
-      writeUserRootConfig(project, {
-        apiKey,
-        privateKey
-      })
-    }
-
-    if (upsertProjectRootConfig) {
-      console.log('writing project root config')
-      writeProjectRootConfig({
-        workspace,
-        project,
-        environment,
-        baseUrl: baseUrl || undefined
-      })
-    }
-
-    s.stop()
-
-    outro('Configuration complete!')
+    return { upsertProjectRootConfig, upsertUserRootConfig }
   }
 }
