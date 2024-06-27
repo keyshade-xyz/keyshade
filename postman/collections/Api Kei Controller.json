@@ -341,7 +341,7 @@
 					"apikey": [
 						{
 							"key": "value",
-							"value": "ks_1e09ca8706dd9179cd635a040a4f7b6d8e7885e1d4e7981d",
+							"value": "<API_KEY_HERE>",
 							"type": "string"
 						},
 						{
