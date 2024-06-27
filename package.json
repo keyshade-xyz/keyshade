@@ -143,7 +143,6 @@
     "turbo": "^1.12.4"
   },
   "dependencies": {
-    "@million/lint": "^0.0.73",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",
@@ -151,10 +150,13 @@
     "@semantic-release/release-notes-generator": "^14.0.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.2.9",
     "conventional-changelog-writer": "8.0.0",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "million": "^3.0.5",
     "sharp": "^0.33.3",
+    "tailwind-merge": "^2.3.0",
     "ts-node": "^10.9.2",
     "zod": "^3.23.6",
     "chalk": "^4.1.2",
