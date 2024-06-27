@@ -13,6 +13,7 @@ import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-aut
 import { Authority, User } from '@prisma/client'
 import { CurrentUser } from '../../decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
+import { UpdateVariable } from '../dto/update.variable/update.variable'
 
 @Controller('variable')
 export class VariableController {
@@ -33,7 +34,7 @@ export class VariableController {
   async updateVariable(
     @CurrentUser() user: User,
     @Param('variableId') variableId: string,
-    @Body() dto: CreateVariable
+    @Body() dto: UpdateVariable
   ) {
     return await this.variableService.updateVariable(user, variableId, dto)
   }
@@ -82,6 +83,20 @@ export class VariableController {
       sort,
       order,
       search
+    )
+  }
+
+  @Get('/all/:projectId/:environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getAllSecretsOfEnvironment(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: string,
+    @Param('environmentId') environmentId: string
+  ) {
+    return await this.variableService.getAllVariablesOfProjectAndEnvironment(
+      user,
+      projectId,
+      environmentId
     )
   }
 }

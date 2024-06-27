@@ -24,6 +24,10 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import {
+  ChangeNotification,
+  ChangeNotificationEvent
+} from 'src/socket/socket.types'
 
 @Injectable()
 export class VariableService {
@@ -212,6 +216,9 @@ export class VariableService {
             select: {
               environmentId: true,
               value: true
+            },
+            orderBy: {
+              version: 'desc'
             }
           }
         }
@@ -266,8 +273,8 @@ export class VariableService {
               environmentId: entry.environmentId,
               name: updatedVariable.name,
               value: entry.value,
-              isSecret: false
-            })
+              isPlaintext: true
+            } as ChangeNotificationEvent)
           )
         } catch (error) {
           this.logger.error(
@@ -353,8 +360,8 @@ export class VariableService {
           environmentId,
           name: variable.name,
           value: variable.versions[rollbackVersion - 1].value,
-          isSecret: false
-        })
+          isPlaintext: true
+        } as ChangeNotificationEvent)
       )
     } catch (error) {
       this.logger.error(`Error publishing variable update to Redis: ${error}`)
@@ -421,6 +428,65 @@ export class VariableService {
     this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
   }
 
+  async getAllVariablesOfProjectAndEnvironment(
+    user: User,
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    // Check if the user has the required authorities in the project
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { id: projectId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
+
+    // Check if the user has the required authorities in the environment
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    const variables = await this.prisma.variable.findMany({
+      where: {
+        projectId,
+        versions: {
+          some: {
+            environmentId
+          }
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        versions: {
+          where: {
+            environmentId
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        }
+      }
+    })
+
+    return variables.map(
+      (variable) =>
+        ({
+          name: variable.name,
+          value: variable.versions[0].value,
+          isPlaintext: true
+        }) as ChangeNotification
+    )
+  }
+
   async getAllVariablesOfProject(
     user: User,
     projectId: Project['id'],
@@ -470,6 +536,7 @@ export class VariableService {
             id: Environment['id']
           }
           value: VariableVersion['value']
+          version: VariableVersion['version']
         }[]
       }
     >()
@@ -511,7 +578,8 @@ export class VariableService {
               id: latestVersion.environmentId,
               name: envIds.get(latestVersion.environmentId)
             },
-            value: latestVersion.value
+            value: latestVersion.value,
+            version: latestVersion.version
           })
         } else {
           variablesWithEnvironmentalValues.set(variable.id, {
@@ -522,7 +590,8 @@ export class VariableService {
                   id: latestVersion.environmentId,
                   name: envIds.get(latestVersion.environmentId)
                 },
-                value: latestVersion.value
+                value: latestVersion.value,
+                version: latestVersion.version
               }
             ]
           })

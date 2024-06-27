@@ -87,4 +87,18 @@ export class SecretController {
       search
     )
   }
+
+  @Get('/all/:projectId/:environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
+  async getAllSecretsOfEnvironment(
+    @CurrentUser() user: User,
+    @Param('projectId') projectId: string,
+    @Param('environmentId') environmentId: string
+  ) {
+    return await this.secretService.getAllSecretsOfProjectAndEnvironment(
+      user,
+      projectId,
+      environmentId
+    )
+  }
 }

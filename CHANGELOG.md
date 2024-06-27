@@ -1,3 +1,49 @@
+## [2.1.0](https://github.com/keyshade-xyz/keyshade/compare/v2.0.0...v2.1.0) (2024-06-27)
+
+### 🚀 Features
+
+* **api:** Add `requireRestart` parameter ([#286](https://github.com/keyshade-xyz/keyshade/issues/286)) ([fb447a1](https://github.com/keyshade-xyz/keyshade/commit/fb447a1852a95dcacfdb0aa896fd1521430fa095))
+* **cli:** Added CLI ([#289](https://github.com/keyshade-xyz/keyshade/issues/289)) ([1143d95](https://github.com/keyshade-xyz/keyshade/commit/1143d9547705808230b3cbcf81a3ff2a8604eaa2))
+* **workflows:** Tag user on attempt's reply body ([9d01698](https://github.com/keyshade-xyz/keyshade/commit/9d0169881d9ba7a0d84cee6d4de0e5e9c7c1e6ad))
+
+### 🐛 Bug Fixes
+
+* **web:** Resolve encryption glitch in footer text  ([#267](https://github.com/keyshade-xyz/keyshade/issues/267)) ([2b5cb39](https://github.com/keyshade-xyz/keyshade/commit/2b5cb39351d7412002514fd5a7ee6f75e02006aa))
+
+### 📚 Documentation
+
+* added running-the-web-app.md ([#269](https://github.com/keyshade-xyz/keyshade/issues/269)) ([755ea12](https://github.com/keyshade-xyz/keyshade/commit/755ea120ae90e62aaaf6b5dccf62d1d633b38c46))
+
+## [2.0.0](https://github.com/keyshade-xyz/keyshade/compare/v1.4.0...v2.0.0) (2024-06-12)
+
+### ⚠ BREAKING CHANGES
+
+* **api:** Refactor environment, [secure] and variable functionality
+
+### 🚀 Features
+
+* **platform:** Workspace integrate ([#241](https://github.com/keyshade-xyz/keyshade/issues/241)) ([6107e7d](https://github.com/keyshade-xyz/keyshade/commit/6107e7dd14c1e167a1a12f1c4b189e73f01dde88))
+
+### 📚 Documentation
+
+* Fix broken links in README.md ([9266788](https://github.com/keyshade-xyz/keyshade/commit/92667881bbce4d0c2cce186178806054d998808a))
+* Modified environment-variable.md ([#256](https://github.com/keyshade-xyz/keyshade/issues/256)) ([4974756](https://github.com/keyshade-xyz/keyshade/commit/497475600467e039745a695a6e69635cebd8f8da))
+
+### 🔧 Miscellaneous Chores
+
+* Added docker build and run commands to` package.json` ([#258](https://github.com/keyshade-xyz/keyshade/issues/258)) ([af61791](https://github.com/keyshade-xyz/keyshade/commit/af61791b18b827de8369cbeac51a22a93ce8be2e))
+* **api:** Fix inconsistencies in zod schema ([#240](https://github.com/keyshade-xyz/keyshade/issues/240)) ([f3a3632](https://github.com/keyshade-xyz/keyshade/commit/f3a36326b4f5c945fb2725620ff92ab31e44e053))
+* **ci:** Update deploy web ([e80d47d](https://github.com/keyshade-xyz/keyshade/commit/e80d47dbf93699ba5c9296ee0e5029397e0f215b))
+* **docker:** Grant correct permissions to docker image ([#251](https://github.com/keyshade-xyz/keyshade/issues/251)) ([49546aa](https://github.com/keyshade-xyz/keyshade/commit/49546aa5b0ad6e3ec3b9679e79e96ee0608f8c74))
+* Update GitHub Action plugin versions  ([#263](https://github.com/keyshade-xyz/keyshade/issues/263)) ([020bbf6](https://github.com/keyshade-xyz/keyshade/commit/020bbf642335fb98db59e83ec722f24490f36d03))
+* Update package versions for release ([93785be](https://github.com/keyshade-xyz/keyshade/commit/93785be23dfd168ea3d2c85390c51e0649e9ee9e))
+
+### 🔨 Code Refactoring
+
+* **api:** Refactor environment, [secure] and variable functionality ([#270](https://github.com/keyshade-xyz/keyshade/issues/270)) ([55a6d37](https://github.com/keyshade-xyz/keyshade/commit/55a6d3727e670957b61183bac741b132fcad800f))
+* **api:** Replace for loop with array indexing while decrypting [secure]s during bulk fetch [#265](https://github.com/keyshade-xyz/keyshade/issues/265) ([#266](https://github.com/keyshade-xyz/keyshade/issues/266)) ([62a1731](https://github.com/keyshade-xyz/keyshade/commit/62a173111afd40dfa2c5f52e0def086cf5156fc0))
+* **api:** Update return type while fetching [secure]s and variables ([#264](https://github.com/keyshade-xyz/keyshade/issues/264)) ([fd36abd](https://github.com/keyshade-xyz/keyshade/commit/fd36abd31ab4b2020e4b3e76bf5a155c6e56bb09))
+
 ## [1.4.0](https://github.com/keyshade-xyz/keyshade/compare/v1.3.0...v1.4.0) (2024-05-24)
 
 
