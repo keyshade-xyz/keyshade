@@ -8,7 +8,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { AppModule } from '../app/app.module'
 import { Test } from '@nestjs/testing'
-import { ApiKey, User } from '@prisma/client'
+import { ApiKey, Authority, User } from '@prisma/client'
 import { ApiKeyService } from './service/api-key.service'
 
 describe('Api Key Role Controller Tests', () => {
@@ -244,6 +244,42 @@ describe('Api Key Role Controller Tests', () => {
         name: 'Test Key',
         expiresAfter: '24'
       },
+      headers: {
+        'x-keyshade-token': apiKey.value
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+  })
+
+  it('should be able to access live updates if API key has the required authorities', async () => {
+    // Create a new API key with the required authorities
+    const newApiKey = await apiKeyService.createApiKey(user, {
+      name: 'Test Key 2',
+      authorities: [
+        Authority.READ_SECRET,
+        Authority.READ_VARIABLE,
+        Authority.READ_ENVIRONMENT,
+        Authority.READ_PROJECT,
+        Authority.READ_WORKSPACE
+      ]
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api-key/access/live-updates',
+      headers: {
+        'x-keyshade-token': newApiKey.value
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should not be able to access live updates if API key does not have the required authorities', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api-key/access/live-updates',
       headers: {
         'x-keyshade-token': apiKey.value
       }
