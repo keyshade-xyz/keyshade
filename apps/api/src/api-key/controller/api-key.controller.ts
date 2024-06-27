@@ -68,4 +68,18 @@ export class ApiKeyController {
       search
     )
   }
+
+  @Get('/access/live-updates')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_SECRET,
+    Authority.READ_VARIABLE,
+    Authority.READ_ENVIRONMENT,
+    Authority.READ_PROJECT,
+    Authority.READ_WORKSPACE
+  )
+  async canAccessLiveUpdates() {
+    return {
+      canAccessLiveUpdates: true
+    }
+  }
 }

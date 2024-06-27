@@ -4,7 +4,6 @@ import {
   IsArray,
   IsOptional,
   IsString,
-  IsBoolean,
   Length,
   ValidateNested
 } from 'class-validator'
@@ -19,11 +18,6 @@ export class CreateVariable {
   @Length(0, 100)
   @Transform(({ value }) => (value ? value.trim() : null))
   note?: string
-
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
-  requireRestart?: boolean
 
   @IsOptional()
   @IsArray()
