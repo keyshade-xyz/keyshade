@@ -13,3 +13,4 @@ When it comes to developing for us, we follow very strict norms! From proper ind
 - [Organization Of Code](organization-of-code.md)
 * [API](api.md)
 * [Integrations](integrations.md)
+* [Web](web.md)
