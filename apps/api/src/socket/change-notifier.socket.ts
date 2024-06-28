@@ -141,10 +141,18 @@ export default class ChangeNotifier
     // Add the client to the environment
     await this.addClientToEnvironment(client, environment.id)
 
+    const clientRegisteredResponse = {
+      workspaceId: workspace.id,
+      projectId: project.id,
+      environmentId: environment.id
+    }
+
     // Send ACK to client
-    client.send({
-      status: 200
-    })
+    client.emit('client-registered', clientRegisteredResponse)
+
+    this.logger.log(
+      `Client registered: ${client.id} for configuration: ${clientRegisteredResponse}`
+    )
   }
 
   private async addClientToEnvironment(client: Socket, environmentId: string) {

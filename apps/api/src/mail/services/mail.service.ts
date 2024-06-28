@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common'
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger
+} from '@nestjs/common'
 import { IMailService } from './interface.service'
 import { Transporter, createTransport } from 'nodemailer'
 
@@ -169,7 +173,9 @@ export class MailService implements IMailService {
       this.log.log(`Email sent to ${email}`)
     } catch (error) {
       this.log.error(`Error sending email to ${email}: ${error.message}`)
-      throw new Error(`Error sending email to ${email}: ${error.message}`)
+      throw new InternalServerErrorException(
+        `Error sending email to ${email}: ${error.message}`
+      )
     }
   }
 }

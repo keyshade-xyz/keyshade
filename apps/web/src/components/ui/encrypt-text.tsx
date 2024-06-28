@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 function EncryptText({
@@ -10,12 +10,18 @@ function EncryptText({
   // const TARGET_TEXT = 'Join Waitlist'
   const CYCLES_PER_LETTER = 2
   const SHUFFLE_TIME = 50
-
   const CHARS = '!@#$%^&*():{};|,.<>/?'
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
   const [text, setText] = useState(TARGET_TEXT)
+  const [width, setWidth] = useState<number | null>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (textRef.current) {
+      setWidth(textRef.current.offsetWidth)
+    }
+  }, [TARGET_TEXT])
 
   const scramble = (): void => {
     let pos = 0
@@ -45,20 +51,26 @@ function EncryptText({
 
   const stopScramble = (): void => {
     clearInterval(intervalRef.current || undefined)
-
     setText(TARGET_TEXT)
   }
 
   return (
-    <motion.button
-      className=" group relative w-full overflow-hidden text-white/60 transition-colors hover:text-white"
+    <motion.div
+      className="group relative w-full overflow-hidden text-white/60 transition-colors hover:text-white"
       onMouseEnter={scramble}
       onMouseLeave={stopScramble}
+      style={{ width: width ? `${width}px` : 'auto' }}
     >
-      <div className="relative z-10 flex items-center gap-2">
-        <span className="flex">{text}</span>
-      </div>
-    </motion.button>
+      <span className="invisible absolute" ref={textRef}>
+        {TARGET_TEXT}
+      </span>
+      <motion.button
+        className="relative z-10 flex items-center gap-2"
+        role="link"
+      >
+        <span className="flex whitespace-nowrap">{text}</span>
+      </motion.button>
+    </motion.div>
   )
 }
 

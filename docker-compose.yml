@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: keyshade_db
     volumes:
-      - ./data/db:/var/lib/postgresql/data 700
+      - db:/var/lib/postgresql/data
     networks:
       - keyshade-dev
 
@@ -19,7 +19,7 @@ services:
     networks:
       - keyshade-dev
     volumes:
-      - ./data/redis:/data
+      - redis:/data
 
   minio:
     image: docker.io/bitnami/minio:2022
@@ -30,8 +30,13 @@ services:
       - '9000:9000'
       - '9001:9001'
     volumes:
-      - './data/minio:/data'
+      - minio:/data
 
 networks:
   keyshade-dev:
     driver: bridge
+
+volumes:
+  db:
+  redis:
+  minio:
