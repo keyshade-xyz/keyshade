@@ -490,6 +490,43 @@ export class SecretService {
 
     return response
   }
+  async getRevisionsOfSecret(
+    user: User,
+    secretId: Secret['id'],
+    environmentId: Environment['id'],
+    page: number,
+    limit: number,
+    sort: string
+  ) {
+    //check access to secret
+    await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.READ_SECRET,
+      prisma: this.prisma
+    })
+
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    // get the revisions
+    const revisions = await this.prisma.secretVersion.findMany({
+      where: {
+        secretId: secretId,
+        environmentId: environmentId
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: 'desc'
+      }
+    })
+    return revisions
+  }
 
   async getAllSecretsOfProject(
     user: User,
