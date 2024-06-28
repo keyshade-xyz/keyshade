@@ -498,9 +498,7 @@ export class SecretService {
     environmentId: Environment['id'],
     page: number,
     limit: number,
-    sort: string,
-    order: string,
-    search: string
+    sort: string
   ) {
     //check access to secret
     await this.authorityCheckerService.checkAuthorityOverSecret({
@@ -526,7 +524,7 @@ export class SecretService {
       skip: page * limit,
       take: limit,
       orderBy: {
-        [sort]: order
+        [sort]: 'desc'
       }
     })
     return revisions
