@@ -493,7 +493,12 @@ export class SecretService {
   async getRevisionsOfSecret(
     user: User,
     secretId: Secret['id'],
-    environmentId: Environment['id']
+    environmentId: Environment['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
   ) {
     //check access to secret
     await this.authorityCheckerService.checkAuthorityOverSecret({
@@ -515,6 +520,11 @@ export class SecretService {
       where: {
         secretId: secretId,
         environmentId: environmentId
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        [sort]: order
       }
     })
     return revisions
