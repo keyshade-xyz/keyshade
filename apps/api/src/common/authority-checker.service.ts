@@ -8,6 +8,7 @@ import {
 import { VariableWithProjectAndVersion } from '../variable/variable.types'
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
@@ -53,7 +54,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     // Check if the workspace exists or not
@@ -111,7 +112,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     // If the project is not found, throw an error
@@ -209,7 +210,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     if (!environment) {
@@ -268,7 +269,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     if (!variable) {
@@ -328,7 +329,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     if (!secret) {
@@ -380,7 +381,7 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.customLoggerService.error(error)
-      throw new Error(error)
+      throw new InternalServerErrorException(error)
     }
 
     if (!integration) {

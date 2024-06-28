@@ -1,6 +1,7 @@
 import { IntegrationType } from '@prisma/client'
 import { BaseIntegration } from '../base.integration'
 import { DiscordIntegration } from '../discord/discord.integration'
+import { InternalServerErrorException } from '@nestjs/common'
 
 /**
  * Factory class to create integrations. This class will be called to create an integration,
@@ -20,7 +21,7 @@ export default class IntegrationFactory {
       case IntegrationType.DISCORD:
         return new DiscordIntegration()
       default:
-        throw new Error('Integration type not found')
+        throw new InternalServerErrorException('Integration type not found')
     }
   }
 }
