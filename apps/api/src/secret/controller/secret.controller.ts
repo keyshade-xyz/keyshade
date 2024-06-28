@@ -107,12 +107,22 @@ export class SecretController {
   async getRevisionsOfSecret(
     @CurrentUser() user: User,
     @Param('secretId') secretId: string,
-    @Param('environmentId') environmentId: string
+    @Param('environmentId') environmentId: string,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+    @Query('sort') sort: string = 'version',
+    @Query('order') order: string = 'desc',
+    @Query('search') search: string = ''
   ) {
     return await this.secretService.getRevisionsOfSecret(
       user,
       secretId,
-      environmentId
+      environmentId,
+      page,
+      limit,
+      sort,
+      order,
+      search
     )
   }
 }
