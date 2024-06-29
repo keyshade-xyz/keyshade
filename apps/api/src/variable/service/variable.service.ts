@@ -607,7 +607,9 @@ export class VariableService {
   async getRevisionsOfVariable(
     user: User,
     variableId: Variable['id'],
-    environmentId: Environment['id']
+    environmentId: Environment['id'],
+    page: number,
+    limit: number
   ) {
     await this.authorityCheckerService.checkAuthorityOverVariable({
       userId: user.id,
@@ -620,7 +622,9 @@ export class VariableService {
       where: {
         variableId: variableId,
         environmentId: environmentId
-      }
+      },
+      skip: page * limit,
+      take: limit
     })
 
     return revisions
