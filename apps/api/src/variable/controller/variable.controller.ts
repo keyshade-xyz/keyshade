@@ -99,4 +99,22 @@ export class VariableController {
       environmentId
     )
   }
+
+  @Get('/:variableId/revisions/:environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getRevisionsOfVariable(
+    @CurrentUser() user: User,
+    @Param('variableId') variableId: string,
+    @Param('environmentId') environmentId: string,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.variableService.getRevisionsOfVariable(
+      user,
+      variableId,
+      environmentId,
+      page,
+      limit
+    )
+  }
 }
