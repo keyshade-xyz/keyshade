@@ -1,4 +1,4 @@
-import { Project, ProjectData } from "src/commands/project/project.types"
+import { Project, ProjectData } from 'src/commands/project/project.types'
 
 const ProjectController = {
   async listProjects(
@@ -6,18 +6,18 @@ const ProjectController = {
     apiKey: string,
     workspaceId: string
   ): Promise<Project[]> {
-    const response = await fetch(
-      `${baseUrl}/api/project/all/${workspaceId}`,
-      {
-        method: 'GET',
-        headers: {
-          'x-keyshade-token': apiKey
-        }
+    const response = await fetch(`${baseUrl}/api/project/all/${workspaceId}`, {
+      method: 'GET',
+      headers: {
+        'x-keyshade-token': apiKey
       }
-    )
+    })
 
-    if(!response.ok) {
-      throw new Error(`Failed to fetch projects for workspace: ${workspaceId} ` + response.statusText)
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch projects for workspace: ${workspaceId} ` +
+          response.statusText
+      )
     }
 
     return (await response.json()) as Project[]
@@ -28,18 +28,17 @@ const ProjectController = {
     apikey: string,
     projectId: string
   ): Promise<Project> {
-    const response = await fetch(
-      `${baseUrl}/api/project/${projectId}`,
-      {
-        method: 'GET',
-        headers: {
-          'x-keyshade-token': apikey
-        }
+    const response = await fetch(`${baseUrl}/api/project/${projectId}`, {
+      method: 'GET',
+      headers: {
+        'x-keyshade-token': apikey
       }
-    )
+    })
 
-    if(!response.ok) {
-      throw new Error(`Error fetching Project: ${projectId} ` + response.statusText)
+    if (!response.ok) {
+      throw new Error(
+        `Error fetching Project: ${projectId} ` + response.statusText
+      )
     }
 
     return (await response.json()) as Project
@@ -51,20 +50,17 @@ const ProjectController = {
     workspaceId: string,
     projectData: ProjectData
   ): Promise<Project> {
-    const response = await fetch(
-      `${baseUrl}/api/project/${workspaceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-keyshade-token': apikey
-        },
-        body: JSON.stringify(projectData)
-      }
-    )
+    const response = await fetch(`${baseUrl}/api/project/${workspaceId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-keyshade-token': apikey
+      },
+      body: JSON.stringify(projectData)
+    })
 
-    if(!response.ok) {
-      throw new Error('Cannot Create new Project '+ response.statusText)
+    if (!response.ok) {
+      throw new Error('Cannot Create new Project ' + response.statusText)
     }
 
     return (await response.json()) as Project

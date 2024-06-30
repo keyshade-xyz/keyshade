@@ -4,7 +4,6 @@ import Logger from 'src/util/logger'
 import ProjectController from 'src/http/project'
 import { ProjectData } from './project.types'
 
-
 export default class ProjectCommand implements BaseCommand {
   prepareCommand(program: Command): void {
     program
@@ -61,7 +60,11 @@ export default class ProjectCommand implements BaseCommand {
 
   private async listProjects(workspaceId: string) {
     Logger.info(`Fetching projects from workspace: ${workspaceId}`)
-    const response = await ProjectController.listProjects("baseurl", "apikey", workspaceId)
+    const response = await ProjectController.listProjects(
+      'baseurl',
+      'apikey',
+      workspaceId
+    )
     response.forEach((project, index) => {
       Logger.log(`Project ${index + 1}: ${JSON.stringify(project)}`)
     })
@@ -69,7 +72,11 @@ export default class ProjectCommand implements BaseCommand {
 
   private async getProject(projectId: string) {
     Logger.info(`Fetching project: ${projectId}`)
-    const response = await ProjectController.getProject("baseurl", "apikey", projectId)
+    const response = await ProjectController.getProject(
+      'baseurl',
+      'apikey',
+      projectId
+    )
     Logger.log(JSON.stringify(response))
   }
 
@@ -77,20 +84,18 @@ export default class ProjectCommand implements BaseCommand {
     // need to correct this
     let projectData: ProjectData
     Logger.info(`creating the project`)
-    const response = await ProjectController.createProject("baseurl", "apikey", workspaceId, projectData)
-    Logger.log(JSON.stringify(response)) 
+    const response = await ProjectController.createProject(
+      'baseurl',
+      'apikey',
+      workspaceId,
+      projectData
+    )
+    Logger.log(JSON.stringify(response))
   }
 
-  private async updateProject(projectId: string) {
+  private async updateProject(projectId: string) {}
 
-  }
+  private async deleteProject(projectId: string) {}
 
-  private async deleteProject(projectId: string) {
-    
-  }
-
-  private async forkProject(projectId: string) {
-    
-  }
+  private async forkProject(projectId: string) {}
 }
-
