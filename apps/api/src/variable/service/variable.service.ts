@@ -609,7 +609,8 @@ export class VariableService {
     variableId: Variable['id'],
     environmentId: Environment['id'],
     page: number,
-    limit: number
+    limit: number,
+    order: 'asc' | 'desc'
   ) {
     await this.authorityCheckerService.checkAuthorityOverVariable({
       userId: user.id,
@@ -631,7 +632,10 @@ export class VariableService {
         environmentId: environmentId
       },
       skip: page * limit,
-      take: limit
+      take: limit,
+      orderBy: {
+        version: order
+      }
     })
 
     return revisions
