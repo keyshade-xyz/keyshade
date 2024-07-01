@@ -1,7 +1,7 @@
 import type { Configuration } from '@/types/command/run.types'
 
-const VariableController = {
-  async fetchVariables(
+class VariableControllerClass{
+  static async fetchVariables(
     baseUrl: string,
     apiKey: string,
     projectId: string,
@@ -24,5 +24,7 @@ const VariableController = {
     return (await response.json()) as Configuration[]
   }
 }
+
+const VariableController = new VariableControllerClass();
 
 export default VariableController
