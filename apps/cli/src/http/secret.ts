@@ -1,6 +1,6 @@
 import { Configuration } from '../commands/run/run.types'
 
-class SecretControllerClass {
+class SecretController {
   static async fetchSecrets(
     baseUrl: string,
     apiKey: string,
@@ -25,6 +25,5 @@ class SecretControllerClass {
   }
 }
 
-const SecretController = new SecretControllerClass();
 
 export default SecretController
