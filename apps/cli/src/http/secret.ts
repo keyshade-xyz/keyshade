@@ -1,7 +1,7 @@
 import { Configuration } from '../commands/run/run.types'
 
-const SecretController = {
-  async fetchSecrets(
+class SecretController {
+  static async fetchSecrets(
     baseUrl: string,
     apiKey: string,
     projectId: string,
@@ -24,5 +24,6 @@ const SecretController = {
     return (await response.json()) as Configuration[]
   }
 }
+
 
 export default SecretController
