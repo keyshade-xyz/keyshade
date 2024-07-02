@@ -108,7 +108,7 @@ export class VariableController {
     @Param('environmentId') environmentId: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
-    @Query('order') order: 'asc' | 'desc' = 'asc'
+    @Query('order') order: 'asc' | 'desc' = 'desc'
   ) {
     return await this.variableService.getRevisionsOfVariable(
       user,
