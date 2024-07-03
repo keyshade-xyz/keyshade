@@ -29,6 +29,9 @@ import createEvent from '../../common/create-event'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
+import getEnvironmentsOfProject from 'src/common/get-environmets-of-project'
+import getAllVariablesOfProject from 'src/common/get-variables-of-project'
+import getAllSecretsOfProject from 'src/common/get-secrets-of-project'
 
 @Injectable()
 export class ProjectService {
@@ -638,7 +641,7 @@ export class ProjectService {
       prisma: this.prisma
     })
 
-    return (
+    const projects = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limit,
@@ -669,6 +672,49 @@ export class ProjectService {
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+
+    const response = await Promise.all(
+      projects.map(async (project) => {
+        const totalenvironmets = await getEnvironmentsOfProject(
+          this.prisma,
+          this.authorityCheckerService,
+          user,
+          project.id,
+          'name',
+          'asc',
+          ''
+        )
+        const totalvariables = await getAllVariablesOfProject(
+          this.prisma,
+          this.authorityCheckerService,
+          user,
+          project.id,
+          'name',
+          'asc',
+          ''
+        )
+        const totalsecrets = await getAllSecretsOfProject(
+          this.prisma,
+          this.authorityCheckerService,
+          user,
+          project.id,
+          false,
+          'name',
+          'asc',
+          ''
+        )
+
+        // Append counts to the project object
+        return {
+          ...project,
+          totalenvironmets,
+          totalvariables,
+          totalsecrets
+        }
+      })
+    )
+
+    return response
   }
 
   private async projectExists(

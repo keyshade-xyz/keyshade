@@ -34,8 +34,6 @@ export default async function getAllSecretsOfProject(
   user: User,
   projectId: Project['id'],
   decryptValue: boolean,
-  page: number,
-  limit: number,
   sort: string,
   order: string,
   search: string
@@ -66,8 +64,6 @@ export default async function getAllSecretsOfProject(
         }
       }
     },
-    skip: page * limit,
-    take: limit,
     orderBy: {
       [sort]: order
     }

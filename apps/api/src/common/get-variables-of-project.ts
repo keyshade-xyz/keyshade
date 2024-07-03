@@ -14,8 +14,6 @@ export default async function getAllVariablesOfProject(
   authorityCheckerService: AuthorityCheckerService,
   user: User,
   projectId: Project['id'],
-  page: number,
-  limit: number,
   sort: string,
   order: string,
   search: string
@@ -43,8 +41,6 @@ export default async function getAllVariablesOfProject(
         }
       }
     },
-    skip: page * limit,
-    take: limit,
     orderBy: {
       [sort]: order
     }
