@@ -1,106 +1,94 @@
-import { Command } from 'commander'
-import BaseCommand from '../base/command.interface'
+import BaseCommand from './base.command'
 import { io } from 'socket.io-client'
 import {
-  fetchProjectRootConfig,
-  fetchUserRootConfig
-} from '../../util/configuration'
-import { API_BASE_URL } from '../../util/constants'
-import { ProjectRootConfig, UserRootConfig } from '../configure/configure.types'
+  fetchPrivateKeyConfig,
+  fetchProjectRootConfig
+} from '../util/configuration'
+import { ProjectRootConfig } from '../types/index.types'
 import { spawn } from 'child_process'
-import { Configuration, ClientRegisteredResponse } from './run.types'
-import Logger from '../../util/logger'
 import {
-  SecretController,
-  VariableController,
-  AuthController
-} from '../../http'
+  Configuration,
+  ClientRegisteredResponse
+} from '../types/command/run.types'
+import Logger from '../util/logger'
+import { SecretController, VariableController, AuthController } from '../http'
+import {
+  CommandActionData,
+  CommandArgument
+} from '../types/command/command.types'
 
-export default class RunCommand implements BaseCommand {
+export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
 
-  private baseUrl: string
-  private apiKey: string
   private projectId: string
   private environmentId: string
 
   private shouldRestart = false
 
-  prepareCommand(program: Command): void {
-    program
-      .command('run')
-      .description('Run a command')
-      .helpCommand('-h, --help', 'Display this help message')
-      .argument('<command>', 'Command to run')
-      .action((command) => {
-        this.action(command)
-      })
+  getName(): string {
+    return 'run'
   }
 
-  private async action(command: string) {
-    try {
-      const configurations = await this.fetchConfigurations()
+  getDescription(): string {
+    return 'Run a command'
+  }
 
-      await AuthController.checkApiKeyValidity(
-        configurations.baseUrl,
-        configurations.apiKey
-      )
+  getArguments(): CommandArgument[] {
+    return [{ name: '<command>', description: 'Command to run' }]
+  }
 
-      await this.connectToSocket(configurations)
+  canMakeHttpRequests(): boolean {
+    return true
+  }
 
-      await this.sleep(3000)
-
-      await this.prefetchConfigurations()
-
-      await this.executeCommand(command)
-    } catch (error) {
-      Logger.error(error.message)
-      process.exit(1)
-    }
+  async action({ args }: CommandActionData): Promise<void> {
+    const configurations = await this.fetchConfigurations()
+    await AuthController.checkApiKeyValidity(this.baseUrl, this.apiKey)
+    await this.connectToSocket(configurations)
+    await this.sleep(3000)
+    await this.prefetchConfigurations()
+    await this.executeCommand(args[0])
   }
 
   private async fetchConfigurations(): Promise<
-    ProjectRootConfig & UserRootConfig
+    ProjectRootConfig & { privateKey: string }
   > {
-    const {
-      environment,
-      project,
-      workspace,
-      baseUrl = API_BASE_URL
-    } = await fetchProjectRootConfig()
-    const { apiKey, privateKey } = await fetchUserRootConfig(project)
+    const { environment, project, workspace } = await fetchProjectRootConfig()
+    const privateKeyConfig = await fetchPrivateKeyConfig()
+    const privateKey =
+      privateKeyConfig[`${workspace}_${project}_${environment}`]
+
+    if (!privateKey) {
+      throw new Error('Private key not found. Please run `keyshade init`')
+    }
 
     return {
       environment,
       project,
       workspace,
-      baseUrl,
-      apiKey,
       privateKey
     }
   }
 
-  private async getWebsocketType(baseUrl: string) {
+  private getWebsocketType(baseUrl: string) {
     if (baseUrl.startsWith('https')) {
       return 'wss'
     }
     return 'ws'
   }
 
-  private async connectToSocket(data: ProjectRootConfig & UserRootConfig) {
+  private async connectToSocket(data: ProjectRootConfig) {
     Logger.info('Connecting to socket...')
-    const host = data.baseUrl.substring(data.baseUrl.lastIndexOf('/') + 1)
+    const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
+    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
 
-    const ioClient = io(
-      `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`,
-      {
-        autoConnect: false,
-        extraHeaders: {
-          'x-keyshade-token': data.apiKey
-        },
-        transports: ['websocket']
-      }
-    )
+    const ioClient = io(websocketUrl, {
+      autoConnect: false,
+      extraHeaders: {
+        'x-keyshade-token': this.apiKey
+      },
+      transports: ['websocket']
+    })
 
     ioClient.connect()
 
@@ -126,8 +114,8 @@ export default class RunCommand implements BaseCommand {
 
           this.projectId = registrationResponse.projectId
           this.environmentId = registrationResponse.environmentId
-          this.baseUrl = data.baseUrl
-          this.apiKey = data.apiKey
+          this.baseUrl = this.baseUrl
+          this.apiKey = this.apiKey
         }
       )
     })
