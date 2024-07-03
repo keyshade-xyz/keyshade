@@ -1,4 +1,4 @@
-import { Configuration } from '../commands/run/run.types'
+import { Configuration } from '../types/command/run.types'
 
 const VariableController = {
   async fetchVariables(

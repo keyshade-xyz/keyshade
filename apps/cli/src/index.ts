@@ -1,20 +1,21 @@
 import { Command } from 'commander'
-import BaseCommand from './commands/base/command.interface'
-import ConfigureCommand from './commands/configure/configure.command'
-import RunCommand from './commands/run/run.command'
+import BaseCommand from './commands/base.command'
+import ProfileCommand from './commands/profile.command'
+import InitCommand from './commands/init.command'
+import RunCommand from './commands/run.command'
 
 const program = new Command()
 
-const COMMANDS: BaseCommand[] = [new ConfigureCommand(), new RunCommand()]
+program.option('--profile <string>', 'The profile to use')
+program.option('--api-key <string>', 'The API key to use')
+program.option('--base-url <string>', 'The base URL to use')
 
-program
-  .version('1.0.0')
-  .description('CLI for keyshade')
-  .helpCommand('-h, --help', 'Display this help message')
-  .action(() => {
-    program.help()
-  })
+const COMMANDS: BaseCommand[] = [
+  new RunCommand(),
+  new InitCommand(),
+  new ProfileCommand()
+]
 
-COMMANDS.forEach((command) => command.prepareCommand(program))
+COMMANDS.forEach((command) => command.prepare(program))
 
 program.parse(process.argv)
