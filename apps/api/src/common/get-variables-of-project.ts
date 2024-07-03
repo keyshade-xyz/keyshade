@@ -1,6 +1,13 @@
-import { Authority, Environment, Project, User, Variable, VariableVersion } from "@prisma/client"
-import { PrismaService } from "src/prisma/prisma.service"
-import { AuthorityCheckerService } from "./authority-checker.service"
+import {
+  Authority,
+  Environment,
+  Project,
+  User,
+  Variable,
+  VariableVersion
+} from '@prisma/client'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { AuthorityCheckerService } from './authority-checker.service'
 
 export default async function getAllVariablesOfProject(
   prisma: PrismaService,
@@ -64,9 +71,7 @@ export default async function getAllVariablesOfProject(
       projectId
     }
   })
-  const environmentIds = new Map(
-    environments.map((env) => [env.id, env.name])
-  )
+  const environmentIds = new Map(environments.map((env) => [env.id, env.name]))
 
   for (const variable of variables) {
     // Make a copy of the environment IDs

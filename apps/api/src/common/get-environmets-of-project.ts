@@ -1,6 +1,6 @@
-import { PrismaService } from "src/prisma/prisma.service";
-import { AuthorityCheckerService } from "./authority-checker.service";
-import { Authority, Project, User } from "@prisma/client";
+import { PrismaService } from 'src/prisma/prisma.service'
+import { AuthorityCheckerService } from './authority-checker.service'
+import { Authority, Project, User } from '@prisma/client'
 
 export default async function getEnvironmentsOfProject(
   prisma: PrismaService,
@@ -17,7 +17,7 @@ export default async function getEnvironmentsOfProject(
     entity: { id: projectId },
     authority: Authority.READ_ENVIRONMENT,
     prisma
-  });
+  })
 
   // Get the environments
   return await prisma.environment.findMany({
@@ -33,5 +33,5 @@ export default async function getEnvironmentsOfProject(
     orderBy: {
       [sort]: order
     }
-  });
+  })
 }

@@ -1,8 +1,15 @@
-import { User, Project, Authority, Secret, Environment, SecretVersion } from "@prisma/client"
-import { PrismaService } from "src/prisma/prisma.service"
-import { AuthorityCheckerService } from "./authority-checker.service"
-import { decrypt } from "./decrypt"
-import { BadRequestException, NotFoundException } from "@nestjs/common"
+import {
+  User,
+  Project,
+  Authority,
+  Secret,
+  Environment,
+  SecretVersion
+} from '@prisma/client'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { AuthorityCheckerService } from './authority-checker.service'
+import { decrypt } from './decrypt'
+import { BadRequestException, NotFoundException } from '@nestjs/common'
 
 async function checkAutoDecrypt(decryptValue: boolean, project: Project) {
   // Check if the project is allowed to store the private key
@@ -34,13 +41,12 @@ export default async function getAllSecretsOfProject(
   search: string
 ) {
   // Fetch the project
-  const project =
-    await authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authority: Authority.READ_SECRET,
-      prisma: prisma
-    })
+  const project = await authorityCheckerService.checkAuthorityOverProject({
+    userId: user.id,
+    entity: { id: projectId },
+    authority: Authority.READ_SECRET,
+    prisma: prisma
+  })
 
   // Check if the secret values can be decrypted
   await checkAutoDecrypt(decryptValue, project)
@@ -88,9 +94,7 @@ export default async function getAllSecretsOfProject(
       projectId
     }
   })
-  const environmentIds = new Map(
-    environments.map((env) => [env.id, env.name])
-  )
+  const environmentIds = new Map(environments.map((env) => [env.id, env.name]))
 
   for (const secret of secrets) {
     // Make a copy of the environment IDs
@@ -148,4 +152,3 @@ export default async function getAllSecretsOfProject(
 
   return Array.from(secretsWithEnvironmentalValues.values())
 }
-
