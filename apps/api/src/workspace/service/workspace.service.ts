@@ -31,6 +31,11 @@ import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { EnvironmentService } from '../../environment/service/environment.service'
+import { ProjectService } from '../../project/service/project.service'
+import { SecretService } from '../../secret/service/secret.service'
+import { VariableService } from '../../variable/service/variable.service'
+
 
 @Injectable()
 export class WorkspaceService {
@@ -837,6 +842,20 @@ export class WorkspaceService {
     })
 
     return data
+  }
+  
+  async globalSearch(workspaceId: string, searchTerm: string, user: User) {
+    const projects = await this.projectService.getProjectsOfWorkspace(user, workspaceId, searchTerm);
+    const environments = await this.environmentService.getEnvironmentsOfWorkspace(user, workspaceId, searchTerm);
+    const secrets = await this.secretService.getSecretsOfWorkspace(user, workspaceId, searchTerm);
+    const variables = await this.variableService.getVariablesOfWorkspace(user, workspaceId, searchTerm);
+
+    return {
+      projects,
+      environments,
+      secrets,
+      variables,
+    };
   }
 
   private async existsByName(
