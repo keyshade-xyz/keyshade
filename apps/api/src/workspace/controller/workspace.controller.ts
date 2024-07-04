@@ -214,30 +214,12 @@ export class WorkspaceController {
   }
   
   @Get(':workspaceId/global-search/:searchTerm')
-  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE,Authority.READ_ENVIRONMENT, Authority.READ_SECRET, Authority.READ_VARIABLE, Authority.READ_PROJECT)
   async globalSearch(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: Workspace['id'],
     @Param('searchTerm') searchTerm: string
   ) {
-    // Check permissions before proceeding
-    if (
-      !user ||
-      !(await this.workspaceService.hasAuthorities(
-        user.id,
-        workspaceId,
-        [
-          Authority.READ_WORKSPACE,
-          Authority.READ_PROJECT,
-          Authority.READ_ENVIRONMENT,
-          Authority.READ_SECRET,
-          Authority.READ_VARIABLE,
-        ]
-      ))
-    ) {
-      throw new DOMException('You do not have permission to perform this action.');
-    }
-
     // Call service method to perform global search
     return this.workspaceService.globalSearch(user, workspaceId, searchTerm);
   }
