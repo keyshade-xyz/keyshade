@@ -8,7 +8,7 @@ const SecretController = {
     environmentId: string
   ): Promise<Configuration[]> {
     const response = await fetch(
-      `${baseUrl}/api/secret/all/${projectId}/${environmentId}`,
+      `${baseUrl}/api/secret/${projectId}/${environmentId}`,
       {
         method: 'GET',
         headers: {

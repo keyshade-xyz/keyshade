@@ -64,7 +64,7 @@ export class VariableController {
     return await this.variableService.deleteVariable(user, variableId)
   }
 
-  @Get('/all/:projectId')
+  @Get('/:projectId')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getAllVariablesOfProject(
     @CurrentUser() user: User,
@@ -86,7 +86,7 @@ export class VariableController {
     )
   }
 
-  @Get('/all/:projectId/:environmentId')
+  @Get('/:projectId/:environmentId')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getAllSecretsOfEnvironment(
     @CurrentUser() user: User,

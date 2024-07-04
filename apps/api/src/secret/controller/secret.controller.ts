@@ -64,7 +64,7 @@ export class SecretController {
     return await this.secretService.deleteSecret(user, secretId)
   }
 
-  @Get('/all/:projectId')
+  @Get('/:projectId')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfProject(
     @CurrentUser() user: User,
@@ -88,7 +88,7 @@ export class SecretController {
     )
   }
 
-  @Get('/all/:projectId/:environmentId')
+  @Get('/:projectId/:environmentId')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfEnvironment(
     @CurrentUser() user: User,
