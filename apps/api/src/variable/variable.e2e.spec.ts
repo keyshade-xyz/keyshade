@@ -351,8 +351,9 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().name).toEqual('Updated Variable 1')
-    expect(response.json().note).toEqual('Updated Variable 1 note')
+    expect(response.json().variable.name).toEqual('Updated Variable 1')
+    expect(response.json().variable.note).toEqual('Updated Variable 1 note')
+    expect(response.json().updatedVersions.length).toEqual(0)
 
     const variableVersion = await prisma.variableVersion.findMany({
       where: {
@@ -381,6 +382,7 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+    expect(response.json().updatedVersions.length).toEqual(1)
 
     const variableVersion = await prisma.variableVersion.findMany({
       where: {
@@ -573,7 +575,7 @@ describe('Variable Controller Tests', () => {
   it('should be able to fetch all variables', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/${project1.id}`,
+      url: `/variable/${project1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -595,7 +597,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to fetch all variables if the user has no access to the project', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/${project1.id}`,
+      url: `/variable/${project1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -610,7 +612,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to fetch all variables if the project does not exist', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/non-existing-project-id`,
+      url: `/variable/non-existing-project-id`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -625,7 +627,7 @@ describe('Variable Controller Tests', () => {
   it('should be able to fetch all variables by project and environment', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/${project1.id}/${environment1.id}`,
+      url: `/variable/${project1.id}/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -643,7 +645,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to fetch all variables by project and environment if the user has no access to the project', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/${project1.id}/${environment1.id}`,
+      url: `/variable/${project1.id}/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -658,7 +660,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to fetch all variables by project and environment if the project does not exist', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/non-existing-project-id/${environment1.id}`,
+      url: `/variable/non-existing-project-id/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -673,7 +675,7 @@ describe('Variable Controller Tests', () => {
   it('should not be able to fetch all variables by project and environment if the environment does not exist', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/all/${project1.id}/non-existing-environment-id`,
+      url: `/variable/${project1.id}/non-existing-environment-id`,
       headers: {
         'x-e2e-user-email': user1.email
       }
