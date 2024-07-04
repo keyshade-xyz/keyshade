@@ -857,121 +857,111 @@ export class WorkspaceService {
       authority: Authority.READ_WORKSPACE,
       prisma: this.prisma,
     });
+    const accessibleProjectIds = await this.getAccessibleProjectIds(user.id, workspaceId);
 
     // Query all entities based on the search term and permissions
-    const projects = await this.queryProjects(workspaceId, searchTerm, user.id);
-    const environments = await this.queryEnvironments(workspaceId, searchTerm, user.id);
-    const secrets = await this.querySecrets(workspaceId, searchTerm, user.id);
-    const variables = await this.queryVariables(workspaceId, searchTerm, user.id);
+    const projects = await this.queryProjects(accessibleProjectIds, searchTerm, user.id);
+    const environments = await this.queryEnvironments(accessibleProjectIds, searchTerm, user.id);
+    const secrets = await this.querySecrets(accessibleProjectIds, searchTerm, user.id);
+    const variables = await this.queryVariables(accessibleProjectIds, searchTerm, user.id);
 
     return { projects, environments, secrets, variables };
   }
+  private async getAccessibleProjectIds(userId: string, workspaceId: string): Promise<string[]> {
+    const projects = await this.prisma.project.findMany({
+      where: { workspaceId },
+    });
+
+    const accessibleProjectIds : string[]=[];
+    for (const project of projects) {
+      const authorities = await getCollectiveProjectAuthorities(userId, project, this.prisma);
+      if (
+        authorities.has(Authority.READ_WORKSPACE) &&
+        authorities.has(Authority.READ_PROJECT) &&
+        authorities.has(Authority.READ_ENVIRONMENT) &&
+        authorities.has(Authority.READ_SECRET) &&
+        authorities.has(Authority.READ_VARIABLE)
+      ) {
+        accessibleProjectIds.push(project.id);
+      }
+    }
+    return accessibleProjectIds;
+  }
 
   private async queryProjects(
-    workspaceId: string,
+    projectIds: string[],
     searchTerm: string,
     userId: string
   ): Promise<Project[]> {
     // Fetch projects where user has READ_PROJECT authority and match search term
-    const projects = await this.prisma.project.findMany({
+    return this.prisma.project.findMany({
       where: {
-        workspaceId,
+        id: { in: projectIds },
         OR: [
           { name: { contains: searchTerm } },
           { description: { contains: searchTerm } },
         ],
       },
+      select: { id: true, name: true, description: true },
     });
-
-    return projects;
   }
 
   private async queryEnvironments(
-    workspaceId: string,
+    projectIds: string[],
     searchTerm: string,
     userId: string
   ): Promise<Environment[]> {
-    // Fetch environments associated with projects user has READ_ENVIRONMENT authority on
-    const environments = await this.prisma.environment.findMany({
+    return this.prisma.environment.findMany({
       where: {
-        projectId: {
-          in: {
-            select: {
-              projectId: true,
-            },
-            from: {
-              id: workspaceId,
-              ...getCollectiveProjectAuthorities(userId, workspaceId, this.prisma),
-            },
-          },
-          OR: [
-            { name: { contains: searchTerm } },
-            { description: { contains: searchTerm } },
-          ],
+        project: {
+          id: { in: projectIds },
+          workspaceId:{ workspaceId},
         },
+        OR: [
+          { name: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
+        ],
       },
+      select: { id: true, name: true, description: true },
     });
 
-    return environments;
-  }
-
   private async querySecrets(
-    workspaceId: string,
+    projectId: string,
     searchTerm: string,
     userId: string
   ): Promise<Secret[]> {
     // Fetch secrets associated with projects user has READ_SECRET authority on
     const secrets = await this.prisma.secret.findMany({
       where: {
-        projectId: {
-          in: {
-            select: {
-              projectId: true,
-            },
-            from: {
-              id: workspaceId,
-              ...getCollectiveProjectAuthorities(userId, workspaceId, this.prisma),
-            },
-          },
-          OR: [
-            { name: { contains: searchTerm } },
-            { note: { contains: searchTerm } },
-          ],
+        project: {
+          id: { in: projectIds },
+          workspaceId: workspaceId,
         },
+        OR: [
+          { name: { contains: searchTerm } },
+          { note: { contains: searchTerm } },
+        ],
       },
+      select: { id: true, name: true, note: true },
     });
-
-    return secrets;
   }
 
-  private async queryVariables(
-    workspaceId: string,
-    searchTerm: string,
-    userId: string
-  ): Promise<Variable[]> {
-    // Fetch variables associated with projects user has READ_VARIABLE authority on
-    const variables = await this.prisma.variable.findMany({
+  private async queryVariables(projectIds: string[], searchTerm: string): Promise<Variable[]> {
+    return this.prisma.variable.findMany({
       where: {
-        projectId: {
-          in: {
-            select: {
-              projectId: true,
-            },
-            from: {
-              id: workspaceId,
-              ...getCollectiveProjectAuthorities(userId, workspaceId, this.prisma),
-            },
-          },
-          OR: [
-            { name: { contains: searchTerm } },
-            { note: { contains: searchTerm } },
-          ],
+        project: {
+          id: { in: projectIds },
+          workspaceId: workspaceId,
         },
+        OR: [
+          { name: { contains: searchTerm } },
+          { note: { contains: searchTerm } },
+        ],
       },
+      select: { id: true, name: true, note: true },
     });
-
-    return variables;
   }
+
 
   private async existsByName(
     name: string,
