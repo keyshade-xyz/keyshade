@@ -58,8 +58,6 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 
 - **Multiple Environments**: We allow you to create multiple environments for your application. This feature enables you to manage your secrets for different environments such as `development`, `staging`, and `production` separately, and reference them in your codebase.
 
-- **Object Values**: You can store your secrets as JSON like objects. This gives you the ability to group similar secrets together.
-
 - **Secret and variable versioning**: We maintain a history of all your secrets. This means that you can easily revert to an older version of your configuration if you need to.
 
 - **Secret Rotation**: We allow you to rotate your secrets regularly. This means that you can update your secrets without having to update your application.
