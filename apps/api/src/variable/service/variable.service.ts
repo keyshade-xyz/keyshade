@@ -603,6 +603,31 @@ export class VariableService {
 
     return Array.from(variablesWithEnvironmentalValues.values())
   }
+  
+  async getVariablesOfWorkspace(user: User, workspaceId: Workspace['id'], search: string) {
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    });
+  
+    return this.prisma.variable.findMany({
+      where: {
+        project: { workspaceId },
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { note: { contains: search, mode: 'insensitive' } }
+        ],
+        users: { some: { id: user.id } }
+      },
+      select: {
+        id: true,
+        name: true,
+        note: true
+      }
+    });
+  }
 
   private async variableExists(
     variableName: Variable['name'],

@@ -617,6 +617,31 @@ export class SecretService {
 
     return Array.from(secretsWithEnvironmentalValues.values())
   }
+  
+  async getSecretsOfWorkspace(user: User, workspaceId: Workspace['id'], search: string) {
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_SECRET,
+      prisma: this.prisma
+    });
+  
+    return this.prisma.secret.findMany({
+      where: {
+        project: { workspaceId },
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { note: { contains: search, mode: 'insensitive' } }
+        ],
+        users: { some: { id: user.id } }
+      },
+      select: {
+        id: true,
+        name: true,
+        note: true
+      }
+    });
+  }
 
   private async secretExists(
     secretName: Secret['name'],
