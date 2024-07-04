@@ -1,0 +1,26 @@
+import { z } from 'zod'
+import { apiClient } from '../api-client'
+import { zSecret, type Secret } from '@/types'
+
+async function getAllSecretbyProjectId(
+  projectId: string
+): Promise<Secret[] | undefined> {
+  try {
+    const secretData = await apiClient.get<Secret[]>(`/secret/all/${projectId}`)
+
+    const zSecretArray = z.array(zSecret)
+
+    const { success, data } = zSecretArray.safeParse(secretData)
+    if (!success) {
+      throw new Error('Invalid data')
+    }
+    return data
+  } catch (error) {
+    // eslint-disable-next-line no-console -- we need to log the error
+    console.error(error)
+  }
+}
+
+export const Secrets = {
+  getAllSecretbyProjectId
+}

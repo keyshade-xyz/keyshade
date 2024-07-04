@@ -12,20 +12,19 @@ export const zUser = z.object({
 })
 
 export const zWorkspace = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   isFreeTier: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   ownerId: z.string(),
-  approvalEnabled: z.boolean(),
   isDefault: z.boolean(),
   lastUpdatedById: z.string().datetime().nullable()
 })
 
 export const zProject = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   createdAt: z.string().datetime(),
@@ -35,9 +34,10 @@ export const zProject = z.object({
   storePrivateKey: z.boolean(),
   isDisabled: z.boolean(),
   accessLevel: z.enum(['GLOBAL', 'INTERNAL', 'PRIVATE']),
-  pendingCreation: z.boolean(),
   lastUpdatedById: z.string(),
-  workspaceId: z.string().uuid()
+  workspaceId: z.string().uuid(),
+  isForked: z.boolean(),
+  forkedFromId: z.string().uuid().nullable()
 })
 
 export const zEnvironment = z.object({
@@ -58,9 +58,42 @@ export const zProjectWithoutKeys = zProject.omit({
   privateKey: true
 })
 
+export const zVersion = z.object({
+  id: z.string().uuid(),
+  value: z.string(),
+  version: z.number()
+})
+
+export const zSecret = z.object({
+  secret: z.object({
+    id: z.string(),
+    name: z.string(),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+    rotateAt: z.string().datetime().nullable(),
+    note: z.string().nullable(),
+    lastUpdatedById: z.string(),
+    projectId: z.string(),
+    lastUpdatedBy: z.object({
+      id: z.string(),
+      name: z.string()
+    })
+  }),
+  values: z.array(
+    z.object({
+      environment: z.object({
+        id: z.string(),
+        name: z.string()
+      }),
+      value: z.string()
+    })
+  )
+})
+
 export type User = z.infer<typeof zUser>
 export type Workspace = z.infer<typeof zWorkspace>
 export type Project = z.infer<typeof zProject>
 export type ProjectWithoutKeys = z.infer<typeof zProjectWithoutKeys>
 export type Environment = z.infer<typeof zEnvironment>
 export type NewProject = z.infer<typeof zNewProject>
+export type Secret = z.infer<typeof zSecret>

@@ -9,6 +9,7 @@
         "lint": "next lint --fix"
     },
     "dependencies": {
+        "@radix-ui/react-accordion": "^1.2.0",
         "@radix-ui/react-avatar": "^1.0.4",
         "@radix-ui/react-checkbox": "^1.0.4",
         "@radix-ui/react-context-menu": "^2.1.5",
@@ -23,11 +24,13 @@
         "@radix-ui/react-separator": "^1.0.3",
         "@radix-ui/react-slot": "^1.0.2",
         "@radix-ui/react-switch": "^1.0.3",
+        "@radix-ui/react-tooltip": "^1.1.2",
         "@tanstack/react-table": "^8.16.0",
         "avvvatars-react": "^0.4.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.0",
         "cmdk": "^1.0.0",
+        "dayjs": "^1.11.11",
         "framer-motion": "^11.1.7",
         "geist": "^1.2.2",
         "input-otp": "^1.2.4",

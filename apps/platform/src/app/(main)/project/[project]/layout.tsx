@@ -1,5 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { AddSVG } from '@public/svg/shared'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,25 +13,45 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AddSVG } from '@public/svg/shared'
+import type { Project } from '@/types'
+import { Projects } from '@/lib/api-functions/projects'
 
 interface DetailedProjectPageProps {
   params: { project: string }
+  secret: React.ReactNode
+  variable: React.ReactNode
 }
 
 function DetailedProjectPage({
-  params
+  params,
+  secret,
+  variable
 }: DetailedProjectPageProps): JSX.Element {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
   const [key, setKey] = useState<string>('')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
   const [value, setValue] = useState<string>('')
 
-  // eslint-disable-next-line no-console -- //! TODO: remove
-  console.log(`Key: ${key} Value: ${value}`)
+  const [currentProject, setCurrentProject] = useState<Project>()
+
+  const searchParams = useSearchParams()
+  const tab = searchParams.get('tab') ?? 'rollup-details'
+
+  useEffect(() => {
+    Projects.getProjectbyID(params.project)
+      .then((project) => {
+        setCurrentProject(project)
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      })
+  }, [params.project])
 
   return (
-    <div>
-      <div className="flex justify-between">
-        <div className="text-3xl">{params.project}</div>
+    <main className="flex flex-col gap-4">
+      <div className="flex justify-between ">
+        <div className="text-3xl">{currentProject?.name}</div>
         <Dialog>
           <DialogTrigger>
             <Button>
@@ -81,7 +103,11 @@ function DetailedProjectPage({
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+      <div>
+        {tab === 'secret' && secret}
+        {tab === 'variable' && variable}
+      </div>
+    </main>
   )
 }
 
