@@ -206,21 +206,10 @@ export class VariableService {
           note: dto.note,
           lastUpdatedById: user.id
         },
-        include: {
-          project: {
-            select: {
-              workspaceId: true
-            }
-          },
-          versions: {
-            select: {
-              environmentId: true,
-              value: true
-            },
-            orderBy: {
-              version: 'desc'
-            }
-          }
+        select: {
+          id: true,
+          name: true,
+          note: true
         }
       })
     )
@@ -253,6 +242,12 @@ export class VariableService {
               createdById: user.id,
               environmentId: entry.environmentId,
               variableId: variable.id
+            },
+            select: {
+              id: true,
+              environmentId: true,
+              value: true,
+              version: true
             }
           })
         )
@@ -262,6 +257,11 @@ export class VariableService {
     // Make the transaction
     const tx = await this.prisma.$transaction(op)
     const updatedVariable = tx[0]
+    const updatedVersions = tx.slice(1)
+    const result = {
+      variable: updatedVariable,
+      updatedVersions: updatedVersions
+    }
 
     // Notify the new variable version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -304,7 +304,7 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} updated variable ${variable.id}`)
 
-    return updatedVariable
+    return result
   }
 
   async rollbackVariable(

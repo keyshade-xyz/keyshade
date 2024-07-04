@@ -331,8 +331,9 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().name).toEqual('Updated Secret 1')
-    expect(response.json().note).toEqual('Updated Secret 1 note')
+    expect(response.json().secret.name).toEqual('Updated Secret 1')
+    expect(response.json().secret.note).toEqual('Updated Secret 1 note')
+    expect(response.json().updatedVersions.length).toBe(0)
 
     const secretVersion = await prisma.secretVersion.findMany({
       where: {
@@ -361,6 +362,7 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+    expect(response.json().updatedVersions.length).toBe(1)
 
     const secretVersion = await prisma.secretVersion.findMany({
       where: {
@@ -579,7 +581,7 @@ describe('Secret Controller Tests', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project2.id}?decryptValue=true`,
+      url: `/secret/${project2.id}?decryptValue=true`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -594,7 +596,7 @@ describe('Secret Controller Tests', () => {
   it('should be able to fetch all secrets', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}`,
+      url: `/secret/${project1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -618,7 +620,7 @@ describe('Secret Controller Tests', () => {
   it('should be able to fetch all secrets decrypted', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}?decryptValue=true`,
+      url: `/secret/${project1.id}?decryptValue=true`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -642,7 +644,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project2.id}?decryptValue=true`,
+      url: `/secret/${project2.id}?decryptValue=true`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -667,7 +669,7 @@ describe('Secret Controller Tests', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}?decryptValue=true`,
+      url: `/secret/${project1.id}?decryptValue=true`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -691,7 +693,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets if the user has no access to the project', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}`,
+      url: `/secret/${project1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -706,7 +708,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets if the project does not exist', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/non-existing-project-id`,
+      url: `/secret/non-existing-project-id`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -721,7 +723,7 @@ describe('Secret Controller Tests', () => {
   it('should be able to fetch all secrets by project and environment', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}/${environment1.id}`,
+      url: `/secret/${project1.id}/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -739,7 +741,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets by project and environment if project does not exists', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/non-existing-project-id/${environment1.id}`,
+      url: `/secret/non-existing-project-id/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -754,7 +756,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets by project and environment if environment does not exists', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}/non-existing-environment-id`,
+      url: `/secret/${project1.id}/non-existing-environment-id`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -769,7 +771,7 @@ describe('Secret Controller Tests', () => {
   it('should not be able to fetch all secrets by project and environment if the user has no access to the project', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project1.id}/${environment1.id}`,
+      url: `/secret/${project1.id}/${environment1.id}`,
       headers: {
         'x-e2e-user-email': user2.email
       }
@@ -808,7 +810,7 @@ describe('Secret Controller Tests', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/all/${project2.id}/${environment.id}`,
+      url: `/secret/${project2.id}/${environment.id}`,
       headers: {
         'x-e2e-user-email': user1.email
       }

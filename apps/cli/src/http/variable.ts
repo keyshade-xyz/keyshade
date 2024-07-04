@@ -8,7 +8,7 @@ const VariableController = {
     environmentId: string
   ): Promise<Configuration[]> {
     const response = await fetch(
-      `${baseUrl}/api/variable/all/${projectId}/${environmentId}`,
+      `${baseUrl}/api/variable/${projectId}/${environmentId}`,
       {
         method: 'GET',
         headers: {

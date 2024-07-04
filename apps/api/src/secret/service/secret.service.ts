@@ -207,21 +207,10 @@ export class SecretService {
             : undefined,
           lastUpdatedById: user.id
         },
-        include: {
-          project: {
-            select: {
-              workspaceId: true
-            }
-          },
-          versions: {
-            select: {
-              environmentId: true,
-              value: true
-            },
-            orderBy: {
-              version: 'desc'
-            }
-          }
+        select: {
+          id: true,
+          name: true,
+          note: true
         }
       })
     )
@@ -254,6 +243,12 @@ export class SecretService {
               createdById: user.id,
               environmentId: entry.environmentId,
               secretId: secret.id
+            },
+            select: {
+              id: true,
+              environmentId: true,
+              value: true,
+              version: true
             }
           })
         )
@@ -263,6 +258,12 @@ export class SecretService {
     // Make the transaction
     const tx = await this.prisma.$transaction(op)
     const updatedSecret = tx[0]
+    const updatedVersions = tx.slice(1)
+
+    const result = {
+      secret: updatedSecret,
+      updatedVersions: updatedVersions
+    }
 
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -303,7 +304,7 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
-    return updatedSecret
+    return result
   }
 
   async rollbackSecret(
