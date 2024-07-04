@@ -193,31 +193,6 @@ export class EnvironmentService {
     })
   }
 
-  async getEnvironmentsOfWorkspace(user: User, workspaceId: Workspace['id'], search: string) {
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authority: Authority.READ_ENVIRONMENT,
-      prisma: this.prisma
-    });
-  
-    return this.prisma.environment.findMany({
-      where: {
-        project: { workspaceId },
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } }
-        ],
-        users: { some: { id: user.id } }
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true
-      }
-    });
-  }  
-
   async deleteEnvironment(user: User, environmentId: Environment['id']) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({

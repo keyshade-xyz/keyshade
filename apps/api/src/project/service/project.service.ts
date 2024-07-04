@@ -625,6 +625,10 @@ export class ProjectService {
   async getProjectsOfWorkspace(
     user: User,
     workspaceId: Workspace['id'],
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
     search: string
   ) {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -636,6 +640,11 @@ export class ProjectService {
 
     return (
       await this.prisma.project.findMany({
+        skip: page * limit,
+        take: limit,
+        orderBy: {
+          [sort]: order
+        },
         where: {
           workspaceId,
           OR: [
@@ -657,11 +666,6 @@ export class ProjectService {
               }
             }
           }
-        },
-        select: {
-          id: true,
-          name: true,
-          description: true
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
