@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { apiClient } from '../api-client'
 import { zProject, zProjectWithoutKeys } from '@/types'
 import type { NewProject, Project, ProjectWithoutKeys } from '@/types'
+import { apiClient } from '../api-client'
 
 /**
  * Retrieves projects by workspace ID.

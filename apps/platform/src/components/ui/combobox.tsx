@@ -42,14 +42,13 @@ async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
     const workspaceData: Workspace[] =
       await apiClient.get<Workspace[]>('/workspace')
-      
+
     const { success, data } = zWorkspace.array().safeParse(workspaceData)
-    
+
     if (!success) {
       throw new Error('Invalid data')
     }
-    
-    
+
     return data
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
