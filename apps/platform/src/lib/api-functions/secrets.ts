@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { zSecret, type Secret } from '@/types'
 import { apiClient } from '../api-client'
+import { zSecret, type Secret } from '@/types'
 
 async function getAllSecretbyProjectId(
   projectId: string
 ): Promise<Secret[] | undefined> {
   try {
-    const secretData = await apiClient.get<Secret[]>(`/secret/all/${projectId}`)
+    const secretData = await apiClient.get<Secret[]>(`/secret/${projectId}`)
 
     const zSecretArray = z.array(zSecret)
 
