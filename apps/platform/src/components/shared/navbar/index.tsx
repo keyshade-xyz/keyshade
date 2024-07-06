@@ -57,7 +57,8 @@ function Navbar(): React.JSX.Element {
 
   const pathname = usePathname()
 
-  const tabs = ['Workspace', 'Profile', 'Billing']
+  const settingsTabs = ['Workspace', 'Profile', 'Billing']
+  const projectTabs = ['Secret', 'Variable']
 
   useEffect(() => {
     const down = (e: KeyboardEvent): void => {
@@ -153,8 +154,16 @@ function Navbar(): React.JSX.Element {
           </DropdownMenu>
         </div>
         <div className="px-4">
-          {pathname === '/settings' && (
-            <LineTab customID="linetab" tabs={tabs} />
+          {(pathname === '/settings' ||
+            pathname.split('/')[1] === 'project') && (
+            <LineTab
+              customID="linetab"
+              tabs={
+                pathname.split('/')[1] === 'project'
+                  ? projectTabs
+                  : settingsTabs
+              }
+            />
           )}
         </div>
       </nav>

@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { z } from 'zod'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { AddSVG } from '@public/svg/shared'
@@ -19,9 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { apiClient } from '@/lib/api-client'
 import type { NewProject, ProjectWithoutKeys, Workspace } from '@/types'
-import { zProjectWithoutKeys } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -29,39 +26,7 @@ import {
   DialogHeader,
   DialogTrigger
 } from '@/components/ui/dialog'
-
-async function getProjects(
-  currentWorkspaceID: string
-): Promise<ProjectWithoutKeys[] | [] | undefined> {
-  try {
-    const projectData = await apiClient.get<ProjectWithoutKeys[] | []>(
-      `/project/all/${currentWorkspaceID}`
-    )
-    const zProjectWithoutKeysArray = z.array(zProjectWithoutKeys)
-    const { success, data } = zProjectWithoutKeysArray.safeParse(projectData)
-    if (!success) {
-      throw new Error('Invalid data')
-    }
-    return data
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
-
-async function createProject(
-  newProjectData: NewProject,
-  currentWorkspaceID: string
-): Promise<void> {
-  try {
-    await apiClient.post<NewProject>(`/project/${currentWorkspaceID}`, {
-      newProjectData
-    })
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
+import { Projects } from '@/lib/api-functions/projects'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -96,7 +61,7 @@ export default function Index(): JSX.Element {
   ) as Workspace
 
   useEffect(() => {
-    getProjects(currentWorkspace.id)
+    Projects.getProjectsbyWorkspaceID(currentWorkspace.id)
       .then((data: ProjectWithoutKeys[] | [] | undefined) => {
         if (data) {
           setProjects(data)
@@ -169,7 +134,7 @@ export default function Index(): JSX.Element {
             <div className="flex w-full justify-end">
               <Button
                 onClick={() => {
-                  createProject(newProjectData, currentWorkspace.id)
+                  Projects.createProject(newProjectData, currentWorkspace.id)
                     .then(() => {
                       toast.success('New project added successfully')
                       router.refresh()
@@ -195,7 +160,7 @@ export default function Index(): JSX.Element {
                 config={10}
                 description={project.description ?? ''}
                 environment={2}
-                idForImage={project.id}
+                id={project.id}
                 key={project.id}
                 secret={5}
                 setIsSheetOpen={setIsSheetOpen}
