@@ -75,7 +75,7 @@ export class AuthGuard implements CanActivate {
       if (authType === 'API_KEY') {
         const apiKeyValue = this.extractApiKeyFromHeader(request)
         if (!apiKeyValue) {
-          throw new ForbiddenException()
+          throw new ForbiddenException('No API key provided')
         }
 
         const apiKey = await this.prisma.apiKey.findUnique({
@@ -88,7 +88,7 @@ export class AuthGuard implements CanActivate {
         })
 
         if (!apiKey) {
-          throw new ForbiddenException()
+          throw new ForbiddenException('Invalid API key')
         }
 
         user = apiKey.user
@@ -164,7 +164,7 @@ export class AuthGuard implements CanActivate {
   private extractApiKeyFromHeader(request: any): string | undefined {
     const headers = this.getHeaders(request)
     if (Array.isArray(headers[X_KEYSHADE_TOKEN])) {
-      throw new Error('Bad auth')
+      throw new ForbiddenException('Bad auth')
     }
     return headers[X_KEYSHADE_TOKEN]
   }

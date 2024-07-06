@@ -7,7 +7,7 @@
 <p align="center">
     <a href="https://www.keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
     <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
-    <a href="https://discord.gg/acfN4k6dxU" target="_blank"><b>Join our Community</b></a> • 
+    <a href="https://discord.gg/dh8F3Dzt" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a>
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
 </p>
@@ -57,8 +57,6 @@ Our goal is to enable you to manage your secrets effortlessly. We don't want to 
 - **Live Updates**: Whenever you make any changes to your secrets, they're automatically updated in your runtime environment. This means that you don't have to restart your application to update your secrets.
 
 - **Multiple Environments**: We allow you to create multiple environments for your application. This feature enables you to manage your secrets for different environments such as `development`, `staging`, and `production` separately, and reference them in your codebase.
-
-- **Object Values**: You can store your secrets as JSON like objects. This gives you the ability to group similar secrets together.
 
 - **Secret and variable versioning**: We maintain a history of all your secrets. This means that you can easily revert to an older version of your configuration if you need to.
 

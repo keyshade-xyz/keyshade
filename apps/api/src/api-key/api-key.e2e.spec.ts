@@ -8,7 +8,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { AppModule } from '../app/app.module'
 import { Test } from '@nestjs/testing'
-import { ApiKey, User } from '@prisma/client'
+import { ApiKey, Authority, User } from '@prisma/client'
 import { ApiKeyService } from './service/api-key.service'
 
 describe('Api Key Role Controller Tests', () => {
@@ -70,7 +70,7 @@ describe('Api Key Role Controller Tests', () => {
       method: 'POST',
       url: '/api-key',
       payload: {
-        name: 'Test Key',
+        name: 'Test',
         expiresAfter: '24',
         authorities: ['READ_API_KEY']
       },
@@ -81,7 +81,7 @@ describe('Api Key Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(201)
     expect(response.json().id).toBeDefined()
-    expect(response.json().name).toBe('Test Key')
+    expect(response.json().name).toBe('Test')
     expect(response.json().value).toMatch(/^ks_*/)
     expect(response.json().authorities).toEqual(['READ_API_KEY'])
 
@@ -92,7 +92,24 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(apiKey).toBeDefined()
-    expect(apiKey!.name).toBe('Test Key')
+    expect(apiKey!.name).toBe('Test')
+  })
+
+  it('should not be able to create api key with same name', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api-key',
+      payload: {
+        name: 'Test Key',
+        expiresAfter: '24',
+        authorities: ['READ_API_KEY']
+      },
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
   })
 
   it('should not have any authorities if none are provided', async () => {
@@ -100,7 +117,7 @@ describe('Api Key Role Controller Tests', () => {
       method: 'POST',
       url: '/api-key',
       payload: {
-        name: 'Test Key 1',
+        name: 'Test',
         expiresAfter: '24'
       },
       headers: {
@@ -110,9 +127,25 @@ describe('Api Key Role Controller Tests', () => {
 
     expect(response.statusCode).toBe(201)
     expect(response.json().id).toBeDefined()
-    expect(response.json().name).toBe('Test Key 1')
+    expect(response.json().name).toBe('Test')
     expect(response.json().value).toMatch(/^ks_*/)
     expect(response.json().authorities).toEqual([])
+  })
+
+  it('should not be able to update an api key with the same name', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/api-key/${apiKey.id}`,
+      payload: {
+        name: 'Test Key',
+        expiresAfter: '168'
+      },
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
   })
 
   it('should be able to update the api key without without changing the authorities', async () => {
@@ -120,8 +153,7 @@ describe('Api Key Role Controller Tests', () => {
       method: 'PUT',
       url: `/api-key/${apiKey.id}`,
       payload: {
-        name: 'Updated Test Key',
-        expiresAfter: '168'
+        name: 'Updated Test Key'
       },
       headers: {
         'x-e2e-user-email': user.email
@@ -203,7 +235,7 @@ describe('Api Key Role Controller Tests', () => {
   it('should be able to get all the api keys of the user', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all',
+      url: '/api-key',
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -221,7 +253,7 @@ describe('Api Key Role Controller Tests', () => {
   it('should be able to get all api keys using the API key', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api-key/all',
+      url: '/api-key',
       headers: {
         'x-keyshade-token': apiKey.value
       }
@@ -252,6 +284,42 @@ describe('Api Key Role Controller Tests', () => {
     expect(response.statusCode).toBe(401)
   })
 
+  it('should be able to access live updates if API key has the required authorities', async () => {
+    // Create a new API key with the required authorities
+    const newApiKey = await apiKeyService.createApiKey(user, {
+      name: 'Test Key 2',
+      authorities: [
+        Authority.READ_SECRET,
+        Authority.READ_VARIABLE,
+        Authority.READ_ENVIRONMENT,
+        Authority.READ_PROJECT,
+        Authority.READ_WORKSPACE
+      ]
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api-key/access/live-updates',
+      headers: {
+        'x-keyshade-token': newApiKey.value
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should not be able to access live updates if API key does not have the required authorities', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api-key/access/live-updates',
+      headers: {
+        'x-keyshade-token': apiKey.value
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+  })
+
   it('should be able to delete the api key', async () => {
     const response = await app.inject({
       method: 'DELETE',
@@ -262,6 +330,18 @@ describe('Api Key Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(204)
+  })
+
+  it('should not be able to delete an api key that does not exist', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/api-key/ks_1234567890`,
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
   })
 
   afterAll(async () => {

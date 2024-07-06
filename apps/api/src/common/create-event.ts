@@ -42,7 +42,9 @@ export default async function createEvent(
   prisma: PrismaClient
 ) {
   if (data.triggerer !== EventTriggerer.SYSTEM && !data.triggeredBy) {
-    throw new Error('User must be provided for non-system events')
+    throw new InternalServerErrorException(
+      'User must be provided for non-system events'
+    )
   }
 
   const event = await prisma.event.create({

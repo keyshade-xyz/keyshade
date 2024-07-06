@@ -43,13 +43,7 @@ export class ApiKeyController {
     return this.apiKeyService.deleteApiKey(user, id)
   }
 
-  @Get(':id')
-  @RequiredApiKeyAuthorities(Authority.READ_API_KEY)
-  async getApiKey(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.apiKeyService.getApiKeyById(user, id)
-  }
-
-  @Get('all')
+  @Get('/')
   @RequiredApiKeyAuthorities(Authority.READ_API_KEY)
   async getApiKeysOfUser(
     @CurrentUser() user: User,
@@ -67,5 +61,25 @@ export class ApiKeyController {
       order,
       search
     )
+  }
+
+  @Get(':id')
+  @RequiredApiKeyAuthorities(Authority.READ_API_KEY)
+  async getApiKey(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.apiKeyService.getApiKeyById(user, id)
+  }
+
+  @Get('/access/live-updates')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_SECRET,
+    Authority.READ_VARIABLE,
+    Authority.READ_ENVIRONMENT,
+    Authority.READ_PROJECT,
+    Authority.READ_WORKSPACE
+  )
+  async canAccessLiveUpdates() {
+    return {
+      canAccessLiveUpdates: true
+    }
   }
 }

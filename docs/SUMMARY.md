@@ -10,6 +10,7 @@
   - [Organization of code](contributing-to-keyshade/design-of-our-code/organization-of-code.md)
   - [API](contributing-to-keyshade/design-of-our-code/api.md)
   - [Integrations](contributing-to-keyshade/design-of-our-code/integrations.md)
+  - [Web](contributing-to-keyshade/design-of-our-code/web.md)
 - [Prerequisites](contributing-to-keyshade/prerequisites.md)
 - [Environment Variables](contributing-to-keyshade/environment-variables.md)
 - [Setting things up](contributing-to-keyshade/setting-things-up.md)

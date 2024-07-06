@@ -27,6 +27,10 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '../../provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import {
+  ChangeNotification,
+  ChangeNotificationEvent
+} from 'src/socket/socket.types'
 
 @Injectable()
 export class SecretService {
@@ -203,18 +207,10 @@ export class SecretService {
             : undefined,
           lastUpdatedById: user.id
         },
-        include: {
-          project: {
-            select: {
-              workspaceId: true
-            }
-          },
-          versions: {
-            select: {
-              environmentId: true,
-              value: true
-            }
-          }
+        select: {
+          id: true,
+          name: true,
+          note: true
         }
       })
     )
@@ -239,7 +235,6 @@ export class SecretService {
         })
 
         // Create the new version
-        // Create the new version
         op.push(
           this.prisma.secretVersion.create({
             data: {
@@ -248,6 +243,12 @@ export class SecretService {
               createdById: user.id,
               environmentId: entry.environmentId,
               secretId: secret.id
+            },
+            select: {
+              id: true,
+              environmentId: true,
+              value: true,
+              version: true
             }
           })
         )
@@ -257,6 +258,12 @@ export class SecretService {
     // Make the transaction
     const tx = await this.prisma.$transaction(op)
     const updatedSecret = tx[0]
+    const updatedVersions = tx.slice(1)
+
+    const result = {
+      secret: updatedSecret,
+      updatedVersions: updatedVersions
+    }
 
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -268,8 +275,8 @@ export class SecretService {
               environmentId: entry.environmentId,
               name: updatedSecret.name,
               value: entry.value,
-              isSecret: true
-            })
+              isPlaintext: true
+            } as ChangeNotificationEvent)
           )
         } catch (error) {
           this.logger.error(`Error publishing secret update to Redis: ${error}`)
@@ -297,7 +304,7 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
-    return updatedSecret
+    return result
   }
 
   async rollbackSecret(
@@ -313,6 +320,8 @@ export class SecretService {
       authority: Authority.UPDATE_SECRET,
       prisma: this.prisma
     })
+
+    const project = secret.project
 
     // Filter the secret versions by the environment
     secret.versions = secret.versions.filter(
@@ -351,9 +360,11 @@ export class SecretService {
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: secret.versions[rollbackVersion - 1].value,
-          isSecret: true
-        })
+          value: project.storePrivateKey
+            ? await decrypt(project.privateKey, secret.versions[0].value)
+            : secret.versions[0].value,
+          isPlaintext: project.storePrivateKey
+        } as ChangeNotificationEvent)
       )
     } catch (error) {
       this.logger.error(`Error publishing secret update to Redis: ${error}`)
@@ -416,6 +427,71 @@ export class SecretService {
     this.logger.log(`User ${user.id} deleted secret ${secret.id}`)
   }
 
+  async getAllSecretsOfProjectAndEnvironment(
+    user: User,
+    projectId: Project['id'],
+    environmentId: Environment['id']
+  ) {
+    // Fetch the project
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_SECRET,
+        prisma: this.prisma
+      })
+
+    // Check access to the environment
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        versions: {
+          some: {
+            environmentId
+          }
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        versions: {
+          where: {
+            environmentId
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        }
+      }
+    })
+
+    const response: ChangeNotification[] = []
+
+    for (const secret of secrets) {
+      response.push({
+        name: secret.name,
+        value: project.storePrivateKey
+          ? await decrypt(project.privateKey, secret.versions[0].value)
+          : secret.versions[0].value,
+        isPlaintext: project.storePrivateKey
+      })
+    }
+
+    return response
+  }
+
   async getAllSecretsOfProject(
     user: User,
     projectId: Project['id'],
@@ -470,6 +546,7 @@ export class SecretService {
             id: Environment['id']
           }
           value: SecretVersion['value']
+          version: SecretVersion['version']
         }[]
       }
     >()
@@ -513,7 +590,8 @@ export class SecretService {
             },
             value: decryptValue
               ? await decrypt(project.privateKey, latestVersion.value)
-              : latestVersion.value
+              : latestVersion.value,
+            version: latestVersion.version
           })
         } else {
           secretsWithEnvironmentalValues.set(secret.id, {
@@ -526,7 +604,8 @@ export class SecretService {
                 },
                 value: decryptValue
                   ? await decrypt(project.privateKey, latestVersion.value)
-                  : latestVersion.value
+                  : latestVersion.value,
+                version: latestVersion.version
               }
             ]
           })

@@ -1,11 +1,16 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException
+} from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { addHoursToDate } from '../../common/add-hours-to-date'
 import { generateApiKey } from '../../common/api-key-generator'
 import { toSHA256 } from '../../common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
-import { User } from '@prisma/client'
+import { ApiKey, User } from '@prisma/client'
 
 @Injectable()
 export class ApiKeyService {
@@ -14,6 +19,8 @@ export class ApiKeyService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createApiKey(user: User, dto: CreateApiKey) {
+    await this.isApiKeyUnique(user, dto.name)
+
     const plainTextApiKey = generateApiKey()
     const hashedApiKey = toSHA256(plainTextApiKey)
     const apiKey = await this.prisma.apiKey.create({
@@ -43,6 +50,19 @@ export class ApiKeyService {
   }
 
   async updateApiKey(user: User, apiKeyId: string, dto: UpdateApiKey) {
+    await this.isApiKeyUnique(user, dto.name)
+
+    const apiKey = await this.prisma.apiKey.findUnique({
+      where: {
+        id: apiKeyId,
+        userId: user.id
+      }
+    })
+
+    if (!apiKey) {
+      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+    }
+
     const updatedApiKey = await this.prisma.apiKey.update({
       where: {
         id: apiKeyId,
@@ -50,11 +70,9 @@ export class ApiKeyService {
       },
       data: {
         name: dto.name,
-        authorities: dto.authorities
-          ? {
-              set: dto.authorities
-            }
-          : undefined,
+        authorities: {
+          set: dto.authorities ? dto.authorities : apiKey.authorities
+        },
         expiresAt: dto.expiresAfter
           ? addHoursToDate(dto.expiresAfter)
           : undefined
@@ -75,12 +93,16 @@ export class ApiKeyService {
   }
 
   async deleteApiKey(user: User, apiKeyId: string) {
-    await this.prisma.apiKey.delete({
-      where: {
-        id: apiKeyId,
-        userId: user.id
-      }
-    })
+    try {
+      await this.prisma.apiKey.delete({
+        where: {
+          id: apiKeyId,
+          userId: user.id
+        }
+      })
+    } catch (error) {
+      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+    }
 
     this.logger.log(`User ${user.id} deleted API key ${apiKeyId}`)
   }
@@ -137,5 +159,26 @@ export class ApiKeyService {
         updatedAt: true
       }
     })
+  }
+
+  private async isApiKeyUnique(user: User, apiKeyName: string) {
+    let apiKey: ApiKey | null = null
+
+    try {
+      apiKey = await this.prisma.apiKey.findUnique({
+        where: {
+          userId_name: {
+            userId: user.id,
+            name: apiKeyName
+          }
+        }
+      })
+    } catch (_error) {}
+
+    if (apiKey) {
+      throw new ConflictException(
+        `API key with name ${apiKeyName} already exists`
+      )
+    }
   }
 }
