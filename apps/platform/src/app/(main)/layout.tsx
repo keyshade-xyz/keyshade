@@ -8,9 +8,9 @@ export default function AppLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <main className="flex h-dvh md:h-[90vh] 2xl:h-[93vh]">
+    <main className="flex ">
       <Sidebar />
-      <div className="m-8 h-full overflow-clip rounded-[1.125rem] bg-[#161819] md:w-[90vw]">
+      <div className="m-8 h-dvh overflow-clip rounded-[1.125rem] bg-[#161819] md:h-[90vh] md:w-[90vw] 2xl:h-[93vh]">
         <Navbar />
         <div className="p-4">{children}</div>
       </div>
