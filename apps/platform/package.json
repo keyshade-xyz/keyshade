@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "next dev -p 3025",
+        "dev": "env-cmd -f ../../.env --silent next dev -p 3025",
         "build": "next build",
         "start": "next start",
         "lint": "next lint --fix"
@@ -31,6 +31,7 @@
         "clsx": "^2.1.0",
         "cmdk": "^1.0.0",
         "dayjs": "^1.11.11",
+        "env-cmd": "^10.1.0",
         "framer-motion": "^11.1.7",
         "geist": "^1.2.2",
         "input-otp": "^1.2.4",
