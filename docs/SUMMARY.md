@@ -1,7 +1,13 @@
 # Table of contents
 
 - [❔ What is keyshade?](README.md)
-- [🏗️ Architecture of keyshade](architecture-of-keyshade.md)
+
+## CLI
+
+- [Introduction](cli/introduction.md)
+- [Profile](cli/profile.md)
+- [Init](cli/init.md)
+- [Run](cli/run.md)
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
 
@@ -20,3 +26,8 @@
   - [Running the Web](contributing-to-keyshade/running-things-locally/running-the-web.md)
   - [Running the CLI](contributing-to-keyshade/running-things-locally/running-the-cli.md)
   - [API Testing](contributing-to-keyshade/running-things-locally/api-testing.md)
+
+## Internals
+
+- [Architecture of keyshade](internals/architecture-of-keyshade.md)
+- [How the CLI works](internals/how-the-cli-works.md)
