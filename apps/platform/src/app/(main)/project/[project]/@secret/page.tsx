@@ -28,7 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import SkeletonLoader from '@/components/ui/SkeletonLoader' // Import SkeletonLoader component
+import Loading from '@/components/ui/loading' // Import Loading component
 
 extend(relativeTime)
 
@@ -53,8 +53,8 @@ function SecretPage(): React.JSX.Element {
   return (
     <ScrollArea className="mb-4 h-[50rem]">
       {loading ? (
-        // Rendering SkeletonLoader when data is loading
-        <SkeletonLoader />
+        // Rendering Loading when data is loading
+        <Loading />
       ) : (
         <Accordion
           className="flex h-[50rem] flex-col gap-4"
