@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,Suspense } from 'react'
 // import { SecretLogoSVG } from '@public/svg/secret'
 import { usePathname } from 'next/navigation'
 import dayjs, { extend } from 'dayjs'
@@ -28,34 +28,29 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import Loading from '@/components/ui/loading' // Import Loading component
+import Loading from './loading'  
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
   const [allSecrets, setAllSecrets] = useState<Secret[]>()
   const pathname = usePathname()
-  const [loading, setLoading] = useState(true); // State to manage loading state
+ 
 
   useEffect(() => {
     Secrets.getAllSecretbyProjectId(pathname.split('/')[2])
       .then((data) => {
         setAllSecrets(data)
-        setLoading(false); //  loading becomes false once data is fetched
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
-        setLoading(false); // Handling loading state in case of error
       })
   }, [pathname])
 
   return (
     <ScrollArea className="mb-4 h-[50rem]">
-      {loading ? (
-        // Rendering Loading when data is loading
-        <Loading />
-      ) : (
+      <Suspense fallback={<Loading />}>
         <Accordion
           className="flex h-[50rem] flex-col gap-4"
           collapsible
@@ -123,7 +118,7 @@ function SecretPage(): React.JSX.Element {
             )
           })}
         </Accordion>
-      )}
+      </Suspense>
     </ScrollArea>
   )
 }
