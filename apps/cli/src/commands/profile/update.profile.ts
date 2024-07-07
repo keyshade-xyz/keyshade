@@ -10,6 +10,7 @@ import {
   writeProfileConfig
 } from '../../util/configuration'
 import { spinner } from '@clack/prompts'
+import { checkProfileExists, checkIsDefaultProfile } from '../../util/profile'
 
 export default class UpdateProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -55,12 +56,20 @@ export default class UpdateProfile extends BaseCommand {
     const s = spinner()
     s.start('Updating the profile')
 
-    if (!this.profiles[profile]) {
-      s.stop(`Profile ${profile} not found`)
-      return
-    }
+    checkProfileExists(this.profiles, profile, s)
+    this.updateProfileData(profile, name, apiKey, baseUrl)
+    await writeProfileConfig(this.profiles)
 
-    const isDefaultProfile = this.profiles.default === profile
+    s.stop(`Profile ${profile} updated`)
+  }
+
+  private updateProfileData(
+    profile: string,
+    name: string,
+    apiKey: string,
+    baseUrl: string
+  ): void {
+    const isDefaultProfile = checkIsDefaultProfile(this.profiles, profile)
 
     if (apiKey) {
       this.profiles[profile].apiKey = apiKey
@@ -77,9 +86,5 @@ export default class UpdateProfile extends BaseCommand {
         this.profiles.default = name
       }
     }
-
-    await writeProfileConfig(this.profiles)
-
-    s.stop(`Profile ${profile} updated`)
   }
 }

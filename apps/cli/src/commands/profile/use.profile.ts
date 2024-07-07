@@ -8,6 +8,7 @@ import {
   fetchProfileConfig,
   writeProfileConfig
 } from '../../util/configuration'
+import { checkProfileExists } from '../../util/profile'
 
 export default class UseProfile extends BaseCommand {
   getName(): string {
@@ -30,10 +31,7 @@ export default class UseProfile extends BaseCommand {
 
     const profiles = await fetchProfileConfig()
 
-    if (!profiles[profile]) {
-      s.stop(`Profile ${profile} not found`)
-      return
-    }
+    checkProfileExists(profiles, profile, s)
 
     // Set the active profile
     profiles.default = profile
