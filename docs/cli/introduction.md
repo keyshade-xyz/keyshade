@@ -10,9 +10,9 @@ Our CLI is one of the major component of keyshade. The CLI is the entrypoint for
 
 The CLI has the following commands:
 
-- [`profile`](./profile.md): This command is used to create, delete, list and switch between profiles.
-- [`init`](./init.md): This command is used to initialize your project to tap into the live updates from our platform.
-- [`run`](./run.md): This command is used to run your application.
+- [profile](./profile.md): This command is used to create, delete, list and switch between profiles.
+- [init](./init.md): This command is used to initialize your project to tap into the live updates from our platform.
+- [run](./run.md): This command is used to run your application.
 
 ## Global flags
 
