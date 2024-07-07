@@ -27,7 +27,7 @@ Here's the description of the environment variables used in the project. You can
 - **WEB_FRONTEND_URL, WORKSPACE_FRONTEND_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
 - **API_PORT**: The environmental variable that specifies the port number on which the API server should listen for incoming connections. If not explicitly set, it defaults to port 4200.
 
-- **MINIO_ENDPOINT**: This is the endpoint of the Minio server. Minio is an open-source object storage server. 
+- **MINIO_ENDPOINT**: This is the endpoint of the Minio server. Minio is an open-source object storage server.
 - **MINIO_PORT**: The port on which the Minio server is running.
 - **MINIO_ACCESS_KEY**: The access key to the Minio server.
 - **MINIO_SECRET_KEY**: The secret key to the Minio server.
@@ -37,3 +37,5 @@ Here's the description of the environment variables used in the project. You can
 - **REDIS_PASSWORD**: The optional parameter that is used by the API. This is specified only if the Redis instance is configured to use a password.
 
 - **FEEDBACK_FORWARD_EMAIL**: Feedbacks submitted by the user would be sent to this email address for the concerned authorities to view it. Ideally, in development environment, this would be your personal email address
+
+- **NEXT_PUBLIC_BACKEND_URL**: The URL of the backend server. This is used by the frontend to make API requests to the backend.

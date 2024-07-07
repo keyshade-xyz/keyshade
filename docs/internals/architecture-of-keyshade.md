@@ -8,22 +8,22 @@ The following few diagrams try to explain the architecture of keyshade.
 
 ### Control Flow
 
-![Control Flow](../blob/control-flow.png)
+![Control Flow](../../blob/control-flow.png)
 
 ### Hierarchical Structure
 
-![Hierarchical Structure](../blob/data-hierarchy.png)
+![Hierarchical Structure](../../blob/data-hierarchy.png)
 
 ### Behind the curtain
 
 #### Projects
 
-![Projects](../blob/projects.png)
+![Projects](../../blob/projects.png)
 
 #### Creating secrets
 
-![Creating secrets](../blob/secret-creation.png)
+![Creating secrets](../../blob/secret-creation.png)
 
 #### Retrieving secrets
 
-![Retrieving secrets](../blob/secret-retrieval.png)
+![Retrieving secrets](../../blob/secret-retrieval.png)
