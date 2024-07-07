@@ -50,10 +50,31 @@ export default class CreateProfile extends BaseCommand {
   }
 
   async action({ options }: CommandActionData): Promise<void> {
+    intro('Creating a new profile')
+
+    const { name, apiKey, baseUrl, setDefault } = await this.parseInput(options)
+
+    this.profiles = await fetchProfileConfig()
+    await this.checkOverwriteExistingProfile(name)
+
+    const s = spinner()
+    s.start('Saving changes...')
+
+    this.setProfileConfigData(name, apiKey, baseUrl, setDefault)
+    await writeProfileConfig(this.profiles)
+
+    s.stop()
+    outro(`Profile ${name} created successfully`)
+  }
+
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    name: string
+    apiKey: string
+    baseUrl: string
+    setDefault: boolean
+  }> {
     let { name, apiKey } = options
     const { baseUrl, setDefault } = options
-
-    intro('Creating a new profile')
 
     if (!name) {
       name = await text({
@@ -69,19 +90,7 @@ export default class CreateProfile extends BaseCommand {
       })
     }
 
-    this.profiles = await fetchProfileConfig()
-    await this.checkOverwriteExistingProfile(name)
-
-    const s = spinner()
-    s.start('Saving changes...')
-
-    this.setProfileData(name, apiKey, baseUrl, setDefault)
-
-    await writeProfileConfig(this.profiles)
-
-    s.stop()
-
-    outro(`Profile ${name} created successfully`)
+    return { name, apiKey, baseUrl, setDefault }
   }
 
   private async checkOverwriteExistingProfile(name: string): Promise<boolean> {
@@ -97,7 +106,7 @@ export default class CreateProfile extends BaseCommand {
     }
   }
 
-  private setProfileData(
+  private setProfileConfigData(
     name: string,
     apiKey: string,
     baseUrl: string,

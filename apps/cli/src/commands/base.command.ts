@@ -6,6 +6,7 @@ import {
 } from '../types/command/command.types'
 import { fetchProfileConfig } from '../util/configuration'
 import Logger from '../util/logger'
+import { getDefaultProfile } from '../util/profile'
 
 /**
  * The base class for all commands. All commands should extend this class.
@@ -143,7 +144,7 @@ export default abstract class BaseCommand {
         this.baseUrl = globalOptions.baseUrl
       }
     } else {
-      const defaultProfileName = profiles.default
+      const defaultProfileName = getDefaultProfile(profiles)
       const defaultProfile = profiles[defaultProfileName]
 
       if (defaultProfile) {
