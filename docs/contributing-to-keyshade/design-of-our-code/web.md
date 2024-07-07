@@ -1,3 +1,7 @@
+---
+description: Design of our Web package
+---
+
 # Web
 
 The web application is responsible for serving the homepage, providing users with access to its content and functionality, the stacks, and things you should know before you get started with it!
@@ -21,18 +25,21 @@ The web application is responsible for serving the homepage, providing users wit
     ├── public
     ├── src
     |      ├── app
-    |      ├── components        
+    |      ├── components
     |      └── utils
     └── config_files
 ```
 
 ### web
+
 The main directory that contains all parts of the web app.
 
 #### public
+
 Contains static files and assets.
 
 #### src
+
 Contains the source code of the app.
 
 - **app**: Holds the main pages and settings for the app.
@@ -40,4 +47,5 @@ Contains the source code of the app.
 - **utils**: Helper tools and functions that support the app.
 
 #### config_files
+
 Contains configuration files for the app.
