@@ -1,31 +1,129 @@
-import axios from 'axios';
+import { EnvironmentData } from 'src/types/command/environment.types'
 
-export class EnvironmentController {
-  async listEnvironments(projectId: string): Promise<any> {
-    // list environment api
-    let response
-    return response.data
+class EnvironmentController {
+  async createEnvironment(
+    baseUrl: string,
+    apiKey: string,
+    project_id: number,
+    environmentData: EnvironmentData
+  ): Promise<any> {
+    const response = await fetch(`${baseUrl}/api/environment/${project_id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-keyshade-token': apiKey
+      },
+      body: JSON.stringify(environmentData)
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Cannot Create new Environment with id-${project_id}` +
+          response.statusText
+      )
+    }
+
+    return (await response.json()) as any
   }
 
-  async getEnvironment(environmentId: string): Promise<any> {
-    // get environment api
-    let response
-    return response.data
+  async getEnvironmentById(
+    baseUrl: string,
+    apiKey: string,
+    environment_id: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${baseUrl}/api/environment/${environment_id}`,
+      {
+        method: 'GET',
+        headers: {
+          'x-keyshade-token': apiKey
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(
+        `Cannot get Environment with id-${environment_id}` + response.statusText
+      )
+    }
+
+    return (await response.json()) as any
   }
 
-  async createEnvironment(projectId: string): Promise<any> {
-    // create environment api
-    let response
-    return response.data
+  async getAllEnvironmentByProjectId(
+    baseUrl: string,
+    apiKey: string,
+    project_id: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${baseUrl}/api/environment/all/${project_id}`,
+      {
+        method: 'GET',
+        headers: {
+          'x-keyshade-token': apiKey
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(
+        `Cannot get all Environment of Project with id-${project_id}` +
+          response.statusText
+      )
+    }
+
+    return (await response.json()) as any
   }
 
-  async updateEnvironment(environmentId: string): Promise<any> {
-    // update environment api
-    let response
-    return response.data
+  async deleteEnvironment(
+    baseUrl: string,
+    apiKey: string,
+    environment_id: string
+  ): Promise<any> {
+    const response = await fetch(
+      `${baseUrl}/api/environment/${environment_id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'x-keyshade-token': apiKey
+        }
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(
+        `Cannot get Environment with id-${environment_id}` + response.statusText
+      )
+    }
+
+    return (await response.json()) as any
   }
 
-  async deleteEnvironment(environmentId: string): Promise<void> {
-    // delete environment api
+  async updateEnvironment(
+    baseUrl: string,
+    apiKey: string,
+    environment_id: string,
+    environmentData: EnvironmentData
+  ): Promise<any> {
+    const response = await fetch(
+      `${baseUrl}/api/environment/${environment_id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'x-keyshade-token': apiKey
+        },
+        body: JSON.stringify(environmentData)
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(
+        `Cannot get Environment with id-${environment_id}` + response.statusText
+      )
+    }
+
+    return (await response.json()) as any
   }
 }
+
+export default EnvironmentController
