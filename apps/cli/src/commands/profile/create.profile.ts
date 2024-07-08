@@ -64,7 +64,7 @@ export default class CreateProfile extends BaseCommand {
 
     if (!apiKey) {
       apiKey = await text({
-        message: 'Enter the private key for the profile',
+        message: 'Enter the API key for the profile',
         placeholder: 'ks_************'
       })
     }
