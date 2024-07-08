@@ -6,25 +6,25 @@ description: Get to know how you can develop the API!
 
 The API resides in the `apps/api` directory. It is a NestJS project. To run the API locally, do the following:
 
-* Get the database and cache up and running:
+- Get the database and cache up and running:
 
 ```bash
 docker compose up -d
 ```
 
-* Generate the prisma types:
+- Generate the prisma types:
 
 ```bash
 pnpm run db:generate-types
 ```
 
-* Deploy the migrations:
+- Deploy the migrations:
 
 ```bash
 pnpm run db:deploy-migrations
 ```
 
-* Start the server in development mode:
+- Start the server in development mode:
 
 ```bash
 pnpm run dev:api
@@ -47,6 +47,7 @@ pnpm run e2e:api
 ```
 
 You can also skip these first two commands and perform the unit and e2e tests at the same time with:
+
 ```bash
 pnpm run test:api
 ```
