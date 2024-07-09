@@ -3,7 +3,7 @@ import { CreateEnvironment } from './environment/create.env'
 import { DeleteEnvironment } from './environment/delete.env'
 import { GetEnvironment } from './environment/get.env'
 import { ListEnvironment } from './environment/list.env'
-import { UpdateEnvironment } from './environment/update.profile'
+import { UpdateEnvironment } from './environment/update.env'
 
 export class EnvironmentCommand extends BaseCommand {
   getName(): string {
