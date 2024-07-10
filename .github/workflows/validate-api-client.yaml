@@ -51,6 +51,13 @@ jobs:
           pnpm run lint:api-client
 
       - name: Test
+        env:
+          NODE_ENV: e2e
+          GITHUB_CLIENT_ID: dummy
+          GITHUB_CLIENT_SECRET: dummy
+          GITHUB_CALLBACK_URL: dummy
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: secret
         run: |
           pnpm run test:api-client
 
@@ -59,4 +66,4 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          flags: web
+          flags: api-client
