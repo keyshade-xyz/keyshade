@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { apiClient } from '../api-client'
 import { zSecret, type Secret } from '@/types'
+import { apiClient } from '../api-client'
 
 async function getAllSecretbyProjectId(
   projectId: string

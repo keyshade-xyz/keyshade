@@ -3,9 +3,19 @@ on:
     branches:
       - '!develop'
       - '!main'
-    paths: ['apps/web/**', '.github/workflows/web.yaml']
+    paths:
+      [
+        'apps/web/**',
+        '.github/workflows/validate-web.yaml',
+        '.github/workflows/deploy-web.yaml'
+      ]
   pull_request:
-    paths: ['apps/web/**', '.github/workflows/web.yaml']
+    paths:
+      [
+        'apps/web/**',
+        '.github/workflows/deploy-web.yaml',
+        '.github/workflows/validate-web.yaml'
+      ]
 
 jobs:
   validate:
