@@ -4,23 +4,15 @@ on:
       - '!develop'
       - '!main'
     paths:
-      [
-        'apps/web/**',
-        '.github/workflows/validate-web.yaml',
-        '.github/workflows/deploy-web.yaml'
-      ]
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yaml']
   pull_request:
     paths:
-      [
-        'apps/web/**',
-        '.github/workflows/deploy-web.yaml',
-        '.github/workflows/validate-web.yaml'
-      ]
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yaml']
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    name: Validate Web
+    name: Validate API Client
 
     steps:
       - name: Checkout
@@ -56,11 +48,11 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm run lint:web
+          pnpm run lint:api-client
 
       - name: Test
         run: |
-          pnpm run test:web
+          pnpm run test:api-client
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

@@ -18,7 +18,7 @@ async function getProjectsbyWorkspaceID(
 
     const zProjectWithoutKeysArray = z.array(zProjectWithoutKeys)
     const { success, data } = zProjectWithoutKeysArray.safeParse(projectData)
-    
+
     if (!success) {
       throw new Error('Invalid data')
     }
