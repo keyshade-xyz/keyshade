@@ -265,10 +265,8 @@ describe('Environment Controller Tests', () => {
       description: 'Environment 1 description updated',
       projectId: project1.id,
       lastUpdatedById: user1.id,
-      lastUpdatedBy: expect.any(Object),
       createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      project: expect.any(Object)
+      updatedAt: expect.any(String)
     })
 
     environment1 = response.json()
