@@ -36,7 +36,8 @@ export default class InitCommand extends BaseCommand {
       {
         short: '-o',
         long: '--overwrite',
-        description: 'Overwrite existing configuration'
+        description: 'Overwrite existing configuration',
+        defaultValue: false
       }
     ]
   }

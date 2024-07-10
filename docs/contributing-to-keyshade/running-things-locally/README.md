@@ -11,4 +11,6 @@ This document (and the sub-series) guides you on how you can run and test each o
 You can pick up any of these topics from the following and start with it.
 
 - [Running the API](running-the-api.md)
+- [Running the Web](running-the-web-app.md)
+- [Running the CLI](running-the-cli.md)
 - [API Testing](api-testing.md)

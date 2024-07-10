@@ -10,6 +10,8 @@ const Table = require('cli-table')
 const colors = require('colors/safe')
 
 export default class ListProfile extends BaseCommand {
+  private profiles: ProfileConfig
+
   getName(): string {
     return 'list'
   }
@@ -31,7 +33,6 @@ export default class ListProfile extends BaseCommand {
 
   async action({ options }: CommandActionData): Promise<void> {
     const { verbose } = options
-
     const profiles = await fetchProfileConfig()
     const defaultProfile = profiles.default
     delete profiles.default

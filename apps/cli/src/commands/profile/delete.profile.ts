@@ -9,6 +9,7 @@ import {
   writeProfileConfig
 } from '../../util/configuration'
 import { ProfileConfig } from 'src/types/index.types'
+import { checkIsDefaultProfile, checkProfileExists } from 'src/util/profile'
 
 export default class DeleteProfile extends BaseCommand {
   profiles: ProfileConfig
@@ -32,13 +33,20 @@ export default class DeleteProfile extends BaseCommand {
     s.start('Deleting the profile')
 
     this.profiles = await fetchProfileConfig()
+    checkProfileExists(this.profiles, profile, s)
+    await this.makeConfirmation(profile, s)
 
-    if (this.profileNotFound(profile)) {
-      s.stop(`Profile ${profile} not found`)
-      return
+    this.profiles[profile] = undefined
+    if (checkIsDefaultProfile(this.profiles, profile)) {
+      delete this.profiles.default
     }
+    await writeProfileConfig(this.profiles)
 
-    if (this.isDefaultProfile(profile)) {
+    s.stop(`Profile ${profile} deleted`)
+  }
+
+  private async makeConfirmation(profile: string, s: any) {
+    if (checkIsDefaultProfile(this.profiles, profile)) {
       const choice = await confirm({
         message: 'Are you sure you want to delete the default profile?'
       })
@@ -48,23 +56,5 @@ export default class DeleteProfile extends BaseCommand {
         return
       }
     }
-
-    this.profiles[profile] = undefined
-
-    if (this.isDefaultProfile(profile)) {
-      delete this.profiles.default
-    }
-
-    await writeProfileConfig(this.profiles)
-
-    s.stop(`Profile ${profile} deleted`)
-  }
-
-  private profileNotFound(profile: string): boolean {
-    return !this.profiles[profile]
-  }
-
-  private isDefaultProfile(profile: string): boolean {
-    return this.profiles.default === profile
   }
 }
