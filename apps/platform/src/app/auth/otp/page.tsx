@@ -7,6 +7,7 @@ import { z } from 'zod'
 import Cookies from 'js-cookie'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import { toast } from 'sonner'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,6 +62,9 @@ export default function AuthOTPPage(): React.JSX.Element {
         }
       )
       if (response.status === 401) {
+        toast.warning(
+          'The OTP you entered is not valid, Please enter the right OTP'
+        )
         setIsLoading(false)
       }
       const data: User = (await response.json()) as User
@@ -108,7 +112,7 @@ export default function AuthOTPPage(): React.JSX.Element {
               <InputOTP
                 maxLength={6}
                 onChange={(otpVal) => {
-                  setOtp(otpVal as string)
+                  setOtp(otpVal)
                 }}
                 pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
                 value={otp}
@@ -133,7 +137,8 @@ export default function AuthOTPPage(): React.JSX.Element {
             <Button
               className="w-full"
               disabled={isLoading}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault()
                 void handleVerifyOTP(email, otp)
               }}
             >
