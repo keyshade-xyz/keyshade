@@ -35,6 +35,8 @@ function startAPI(): Promise<void> {
       env: {
         PATH: process.env.PATH,
         DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
+        REDIS_URL: 'redis://localhost:6379',
+        JWT_SECRET: 'secret',
         NODE_ENV: 'e2e'
       }
     })

@@ -55,9 +55,6 @@ jobs:
 
       - name: E2E tests
         env:
-          GITHUB_CLIENT_ID: dummy
-          GITHUB_CLIENT_SECRET: dummy
-          GITHUB_CALLBACK_URL: dummy
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: secret
         run: pnpm run e2e:api
