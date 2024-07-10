@@ -4,7 +4,7 @@ class EnvironmentController {
   async createEnvironment(
     baseUrl: string,
     apiKey: string,
-    project_id: number,
+    project_id: string,
     environmentData: EnvironmentData
   ): Promise<any> {
     const response = await fetch(`${baseUrl}/api/environment/${project_id}`, {

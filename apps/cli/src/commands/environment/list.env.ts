@@ -46,7 +46,9 @@ export class ListEnvironment extends BaseCommand {
         )
       Logger.log(`Environments for project ${project}:`)
       environments.forEach((environment: any) => {
-        Logger.log(`- ${environment.name} (ID: ${environment.id})`)
+        Logger.log(
+          `- ${environment.name} (Description: ${environment.description})`
+        )
       })
     } catch (error) {
       Logger.error(error.message)

@@ -10,7 +10,7 @@ export class EnvironmentCommand extends BaseCommand {
     return 'environment'
   }
   getDescription(): string {
-    return 'Manage your CLI environments.'
+    return 'Manage your environments in keyshade.'
   }
 
   getSubCommands(): BaseCommand[] {
