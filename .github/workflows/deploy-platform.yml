@@ -8,7 +8,7 @@ jobs:
   deploy-alpha:
     runs-on: ubuntu-latest
     environment: alpha
-    name: Build and push Web docker image for release
+    name: Build and push Platform docker image for release
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -30,11 +30,11 @@ jobs:
         id: build
         env:
           ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ vars.ECR_WEB_REPOSITORY }}
+          ECR_REPOSITORY: ${{ vars.ECR_PLATFORM_REPOSITORY }}
         run: |
           # Build a docker container and push it to ECR 
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/platform/Dockerfile .
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
@@ -44,6 +44,6 @@ jobs:
         id: force-redeploy
         env:
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_WEB_SERVICE }}
+          ECS_SERVICE: ${{ vars.ECS_PLATFORM_SERVICE }}
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
