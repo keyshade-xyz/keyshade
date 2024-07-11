@@ -5,11 +5,10 @@ on:
       - main
 
 jobs:
-  deploy-alpha:
+  build:
     runs-on: ubuntu-latest
     environment: alpha
     name: Build and push Web docker image for release
-    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
@@ -39,6 +38,22 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: alpha
+    name: Deploy Web docker image for release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-region: ap-south-1
 
       - name: Force re-deploy task in service
         id: force-redeploy
