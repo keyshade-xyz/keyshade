@@ -40,6 +40,7 @@ jobs:
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment: alpha
     name: Deploy Platform docker image for release

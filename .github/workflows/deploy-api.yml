@@ -40,6 +40,7 @@ jobs:
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
   setup-database:
+    needs: build
     name: Setup Database
     runs-on: ubuntu-latest
     environment: alpha
@@ -65,6 +66,7 @@ jobs:
         run: pnpm db:deploy-migrations
 
   deploy:
+    needs: [build, setup-database]
     runs-on: ubuntu-latest
     environment: alpha
     name: Deploy API docker image for release
