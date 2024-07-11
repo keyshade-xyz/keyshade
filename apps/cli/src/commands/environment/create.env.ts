@@ -1,15 +1,13 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../http/project'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
 import { EnvironmentData } from 'src/types/command/environment.types'
-import {text} from '@clack/prompts'
+import { text } from '@clack/prompts'
+import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
 export class CreateEnvironment extends BaseCommand {
-  private environmentController = new EnvironmentController()
-
   getName(): string {
     return 'create'
   }
@@ -24,7 +22,7 @@ export class CreateEnvironment extends BaseCommand {
 
   async action({ options, args }: CommandActionData): Promise<void> {
     const [project_id] = args
-    const {name, description} = await this.parseInput(options)
+    const { name, description } = await this.parseInput(options)
 
     if (!project_id) {
       Logger.error('Project ID is required')
@@ -32,21 +30,24 @@ export class CreateEnvironment extends BaseCommand {
     }
 
     const baseUrl = this.baseUrl
-    const apiKey = this.apiKey  
+    const apiKey = this.apiKey
 
     const environmentData: EnvironmentData = {
       name: name,
-      description: description
+      description: description,
+      project_id: project_id
+    }
+
+    const headers = {
+      baseUrl,
+      apiKey
     }
 
     try {
-      const createdEnvironment =
-        await this.environmentController.createEnvironment(
-          baseUrl,
-          apiKey,
-          project_id,
-          environmentData
-        )
+      const createdEnvironment = await EnvironmentController.createEnvironment(
+        environmentData,
+        headers
+      )
       Logger.log(`Created environment:`)
       Logger.log(`- Name: ${createdEnvironment.name}`)
       Logger.log(`- ID: ${createdEnvironment.id}`)
@@ -59,7 +60,7 @@ export class CreateEnvironment extends BaseCommand {
 
   private async parseInput(options: CommandActionData['options']): Promise<{
     name: string
-    description?: string,
+    description?: string
   }> {
     let { name, description } = options
 
@@ -70,15 +71,6 @@ export class CreateEnvironment extends BaseCommand {
       })
     }
 
-    let apiKey = this.apiKey as string | symbol; 
-
-    if (!apiKey) {
-      apiKey = await text({
-        message: 'Enter the private key for the profile',
-        placeholder: 'ks_************'
-      })
-    }
-
-    return { name,description }
+    return { name, description }
   }
 }

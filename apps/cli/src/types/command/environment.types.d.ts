@@ -1,4 +1,6 @@
 export interface EnvironmentData {
   name: string
-  description?: strings
+  description?: string
+  project_id?: string
+  environment_id?: string
 }

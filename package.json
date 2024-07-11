@@ -162,7 +162,6 @@
     "@semantic-release/release-notes-generator": "^14.0.0",
     "@sentry/node": "^7.102.0",
     "@sentry/profiling-node": "^7.102.0",
-    "axios": "^1.7.2",
     "@types/node": "^20.14.10",
     "chalk": "^4.1.2",
     "clsx": "^2.1.0",

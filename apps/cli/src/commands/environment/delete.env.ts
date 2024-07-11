@@ -1,14 +1,12 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../http/project'
+import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
 
 export class DeleteEnvironment extends BaseCommand {
-  private environmentController = new EnvironmentController()
-
   getName(): string {
     return 'delete'
   }
@@ -29,15 +27,16 @@ export class DeleteEnvironment extends BaseCommand {
       return
     }
 
-    const baseUrl = process.env.BASE_URL
-    const apiKey = process.env.API_KEY
+    const baseUrl = this.baseUrl
+    const apiKey = this.apiKey
+
+    const headers = {
+      baseUrl,
+      apiKey
+    }
 
     try {
-      await this.environmentController.deleteEnvironment(
-        baseUrl,
-        apiKey,
-        environment_id
-      )
+      await EnvironmentController.deleteEnvironment({ environment_id }, headers)
       Logger.log(`Environment ${environment_id} has been deleted successfully.`)
     } catch (error) {
       Logger.error(error.message)

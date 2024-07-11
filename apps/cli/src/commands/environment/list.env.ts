@@ -1,14 +1,12 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../http/project'
+import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
 
 export class ListEnvironment extends BaseCommand {
-  private environmentController = new EnvironmentController()
-
   getName(): string {
     return 'list'
   }
@@ -22,15 +20,20 @@ export class ListEnvironment extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [project] = args
+    const [project_id] = args
 
-    if (!project) {
+    if (!project_id) {
       Logger.error('Project ID is required')
       return
     }
 
-    const baseUrl = process.env.BASE_URL
-    const apiKey = process.env.API_KEY
+    const baseUrl = this.baseUrl
+    const apiKey = this.apiKey
+
+    const headers = {
+      baseUrl,
+      apiKey
+    }
 
     if (!baseUrl || !apiKey) {
       Logger.error('Base URL and API Key must be set as environment variables')
@@ -39,12 +42,11 @@ export class ListEnvironment extends BaseCommand {
 
     try {
       const environments =
-        await this.environmentController.getAllEnvironmentByProjectId(
-          baseUrl,
-          apiKey,
-          project
+        await EnvironmentController.getAllEnvironmentsOfProject(
+          { project_id },
+          headers
         )
-      Logger.log(`Environments for project ${project}:`)
+      Logger.log(`Environments for project ${project_id}:`)
       environments.forEach((environment: any) => {
         Logger.log(
           `- ${environment.name} (Description: ${environment.description})`
