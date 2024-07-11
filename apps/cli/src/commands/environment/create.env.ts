@@ -6,7 +6,7 @@ import {
   CommandOption
 } from 'src/types/command/command.types'
 import { EnvironmentData } from 'src/types/command/environment.types'
-
+import {text} from '@clack/prompts'
 export class CreateEnvironment extends BaseCommand {
   private environmentController = new EnvironmentController()
 
@@ -22,20 +22,21 @@ export class CreateEnvironment extends BaseCommand {
     return []
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  async action({ options, args }: CommandActionData): Promise<void> {
     const [project_id] = args
+    const {name, description} = await this.parseInput(options)
 
     if (!project_id) {
       Logger.error('Project ID is required')
       return
     }
 
-    const baseUrl = process.env.BASE_URL
-    const apiKey = process.env.API_KEY
+    const baseUrl = this.baseUrl
+    const apiKey = this.apiKey  
 
     const environmentData: EnvironmentData = {
-      name: '',
-      description: ''
+      name: name,
+      description: description
     }
 
     try {
@@ -54,5 +55,30 @@ export class CreateEnvironment extends BaseCommand {
     } catch (error) {
       Logger.error(error.message)
     }
+  }
+
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    name: string
+    description?: string,
+  }> {
+    let { name, description } = options
+
+    if (!name) {
+      name = await text({
+        message: 'Enter the name of the Environment',
+        placeholder: 'env'
+      })
+    }
+
+    let apiKey = this.apiKey as string | symbol; 
+
+    if (!apiKey) {
+      apiKey = await text({
+        message: 'Enter the private key for the profile',
+        placeholder: 'ks_************'
+      })
+    }
+
+    return { name,description }
   }
 }

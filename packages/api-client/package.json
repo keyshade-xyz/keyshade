@@ -1,0 +1,16 @@
+{
+  "name": "api-client",
+  "version": "1.0.0",
+  "description": "This package holds all the API request logic",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "node dist/index.js",
+    "dev": "npx tsc && node dist/index.js",
+    "test": "BACKEND_URL=http://localhost:4200 jest",
+    "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "dependencies": {}
+}
