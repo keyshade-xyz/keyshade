@@ -40,6 +40,22 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.2.0
+          run_install: false
+
+      - name: Deploy migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm db:deploy-migrations
+
       - name: Force re-deploy task in service
         id: force-redeploy
         env:

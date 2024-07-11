@@ -132,7 +132,9 @@
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
     "docker:build:web": "docker build -t ks-web -f apps/web/Dockerfile .",
     "docker:run:api": "docker run --env-file .env --name ks-api --rm -p 4200:4200 ks-api",
-    "docker:build:api": "docker build -t ks-api -f apps/api/Dockerfile ."
+    "docker:build:api": "docker build -t ks-api -f apps/api/Dockerfile .",
+    "docker:run:platform": "docker run --env-file .env --name ks-platform --rm -p 3025:3025 ks-platform",
+    "docker:build:platform": "docker build -t ks-platform -f apps/platform/Dockerfile ."
   },
   "devDependencies": {
     "@sentry/cli": "^2.28.6",
