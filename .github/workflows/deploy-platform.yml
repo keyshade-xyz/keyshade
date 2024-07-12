@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: alpha
-    name: Build and push Web docker image for release
+    name: Build and push Platform docker image for release
 
     steps:
       - name: Checkout
@@ -29,7 +29,7 @@ jobs:
         id: build
         env:
           ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ vars.ECR_WEB_REPOSITORY }}
+          ECR_REPOSITORY: ${{ vars.ECR_PLATFORM_REPOSITORY }}
         run: |
           # Build a docker container and push it to ECR 
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
@@ -43,7 +43,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: alpha
-    name: Deploy Web docker image for release
+    name: Deploy Platform docker image for release
 
     steps:
       - name: Checkout
@@ -60,6 +60,6 @@ jobs:
         id: force-redeploy
         env:
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_WEB_SERVICE }}
+          ECS_SERVICE: ${{ vars.ECS_PLATFORM_SERVICE }}
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
