@@ -1,9 +1,11 @@
+name: Deploy API
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-    paths: ['apps/api/**', '.github/workflows/deploy-api.yaml', 'package.json']
+    paths: ['apps/api/**', '.github/workflows/deploy-api.yml', 'package.json']
 
 jobs:
   build:

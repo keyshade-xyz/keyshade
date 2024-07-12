@@ -1,9 +1,11 @@
+name: Deploy Web
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-    paths: ['apps/web/**', '.github/workflows/deploy-web.yaml', 'package.json']
+    paths: ['apps/web/**', '.github/workflows/deploy-web.yml', 'package.json']
 
 jobs:
   build:
