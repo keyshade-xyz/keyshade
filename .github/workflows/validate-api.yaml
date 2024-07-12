@@ -1,11 +1,13 @@
+name: Validate API
+
 on:
   push:
     branches:
       - '!develop'
       - '!main'
-    paths: ['apps/api/**']
+    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
   pull_request:
-    paths: ['apps/api/**']
+    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
 
 jobs:
   validate:
@@ -36,7 +38,7 @@ jobs:
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
