@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      [
+        'packages/platform/**',
+        '.github/workflows/deploy-platform.yaml',
+        'package.json'
+      ]
 
 jobs:
   build:
