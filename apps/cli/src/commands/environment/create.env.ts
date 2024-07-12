@@ -6,7 +6,7 @@ import {
 } from 'src/types/command/command.types'
 import { EnvironmentData } from 'src/types/command/environment.types'
 import { text } from '@clack/prompts'
-import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
+import EnvironmentController from 'api-client'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
