@@ -1,13 +1,15 @@
+name: Validate API Client
+
 on:
   push:
     branches:
       - '!develop'
       - '!main'
     paths:
-      ['packages/api-client/**', '.github/workflows/validate-api-client.yaml']
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
   pull_request:
     paths:
-      ['packages/api-client/**', '.github/workflows/validate-api-client.yaml']
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
 
 jobs:
   validate:
