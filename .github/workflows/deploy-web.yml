@@ -3,8 +3,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      ['packages/web/**', '.github/workflows/deploy-web.yaml', 'package.json']
+    paths: ['apps/web/**', '.github/workflows/deploy-web.yaml', 'package.json']
 
 jobs:
   build:

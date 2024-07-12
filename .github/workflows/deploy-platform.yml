@@ -5,7 +5,7 @@ on:
       - main
     paths:
       [
-        'packages/platform/**',
+        'apps/platform/**',
         '.github/workflows/deploy-platform.yaml',
         'package.json'
       ]
