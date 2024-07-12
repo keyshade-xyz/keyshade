@@ -1,11 +1,8 @@
 {
-  "name": "api-client",
+  "name": "@keyshade/api-client",
   "version": "1.0.0",
   "description": "This package holds all the API request logic",
   "private": true,
-  "exports":{
-    "./environment":"./src/controllers/environment/environment.ts"
-  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

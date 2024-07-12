@@ -1,4 +1,4 @@
-import client from '@package/client'
+import client from '../../client'
 import {
   CreateEnvironmentRequest,
   CreateEnvironmentResponse,
@@ -10,7 +10,7 @@ import {
   GetEnvironmentByIdResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
-} from '@package/types/environment.types'
+} from '../../types/environment.types'
 
 export default class EnvironmentController {
   private static apiClient = client
