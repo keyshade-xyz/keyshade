@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      ['packages/api/**', '.github/workflows/deploy-api.yaml', 'package.json']
 
 jobs:
   build:
