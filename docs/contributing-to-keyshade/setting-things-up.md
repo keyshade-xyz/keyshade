@@ -61,7 +61,7 @@ If you plan to work on the API, you would need the **NestJS CLI.** To do this, s
 npm install -g @nestjs/cli
 ```
 
-## Settng up the development environment
+## Setting up the development environment
 
 We cluster every dependency that keyshade will need into our `docker compose` file. So, in order to start developing, you will first need to fire up these dependencies using one single command:
 
