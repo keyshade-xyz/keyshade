@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import Cookies from 'js-cookie'
+import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import { toast } from 'sonner'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -63,7 +63,7 @@ export default function AuthOTPPage(): React.JSX.Element {
       )
       if (response.status === 401) {
         toast.warning(
-          'The OTP you entered is not valid, Please enter the right OTP'
+          'The OTP you entered is either incorrect or has expired. Please enter the correct OTP.'
         )
         setIsLoading(false)
       }
