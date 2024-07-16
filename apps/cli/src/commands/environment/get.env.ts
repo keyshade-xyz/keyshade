@@ -1,10 +1,11 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
+import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
+import { GetEnvironmentByIdResponse } from '../../../../../packages/api-client/src/types/environment.types'
 
 export class GetEnvironment extends BaseCommand {
   getName(): string {
@@ -20,9 +21,9 @@ export class GetEnvironment extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [environment_id] = args
+    const [environmentId] = args
 
-    if (!environment_id) {
+    if (!environmentId) {
       Logger.error('Environment ID is required')
       return
     }
@@ -36,11 +37,12 @@ export class GetEnvironment extends BaseCommand {
     }
 
     try {
-      const environment = await EnvironmentController.getEnvironmentById(
-        { environment_id },
-        headers
-      )
-      Logger.log(`Environment ${environment_id}:`)
+      const environment: GetEnvironmentByIdResponse =
+        await EnvironmentController.getEnvironmentById(
+          { id: environmentId },
+          headers
+        )
+      Logger.log(`Environment ${environmentId}:`)
       Logger.log(`- Name: ${environment.name}`)
       Logger.log(`- Description: ${environment.description}`)
     } catch (error) {

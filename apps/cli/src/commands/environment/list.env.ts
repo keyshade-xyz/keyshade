@@ -1,10 +1,11 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
+import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
+import { GetAllEnvironmentsOfProjectResponse } from '../../../../../packages/api-client/src/types/environment.types'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -20,9 +21,9 @@ export class ListEnvironment extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [project_id] = args
+    const [projectId] = args
 
-    if (!project_id) {
+    if (!projectId) {
       Logger.error('Project ID is required')
       return
     }
@@ -41,12 +42,12 @@ export class ListEnvironment extends BaseCommand {
     }
 
     try {
-      const environments =
+      const environments: GetAllEnvironmentsOfProjectResponse =
         await EnvironmentController.getAllEnvironmentsOfProject(
-          { project_id },
+          { projectId },
           headers
         )
-      Logger.log(`Environments for project ${project_id}:`)
+      Logger.log(`Environments for project ${projectId}:`)
       environments.forEach((environment: any) => {
         Logger.log(
           `- ${environment.name} (Description: ${environment.description})`

@@ -1,6 +1,6 @@
 import BaseCommand from '../base.command'
 import Logger from '../../util/logger'
-import EnvironmentController from '../../../../../packages/api-client/src/controllers/environment/environment'
+import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandActionData,
   CommandOption
@@ -20,9 +20,9 @@ export class DeleteEnvironment extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [environment_id] = args
+    const [environmentId] = args
 
-    if (!environment_id) {
+    if (!environmentId) {
       Logger.error('Environment ID is required')
       return
     }
@@ -36,8 +36,11 @@ export class DeleteEnvironment extends BaseCommand {
     }
 
     try {
-      await EnvironmentController.deleteEnvironment({ environment_id }, headers)
-      Logger.log(`Environment ${environment_id} has been deleted successfully.`)
+      await EnvironmentController.deleteEnvironment(
+        { id: environmentId },
+        headers
+      )
+      Logger.log(`Environment ${environmentId} has been deleted successfully.`)
     } catch (error) {
       Logger.error(error.message)
     }

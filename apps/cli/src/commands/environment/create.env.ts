@@ -4,9 +4,12 @@ import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
-import { EnvironmentData } from 'src/types/command/environment.types'
 import { text } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
+import {
+  CreateEnvironmentRequest,
+  CreateEnvironmentResponse
+} from '../../../../../packages/api-client/src/types/environment.types'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
@@ -21,10 +24,10 @@ export class CreateEnvironment extends BaseCommand {
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
-    const [project_id] = args
+    const [projectId] = args
     const { name, description } = await this.parseInput(options)
 
-    if (!project_id) {
+    if (!projectId) {
       Logger.error('Project ID is required')
       return
     }
@@ -32,10 +35,10 @@ export class CreateEnvironment extends BaseCommand {
     const baseUrl = this.baseUrl
     const apiKey = this.apiKey
 
-    const environmentData: EnvironmentData = {
+    const environmentData: CreateEnvironmentRequest = {
       name: name,
       description: description,
-      project_id: project_id
+      projectId: projectId
     }
 
     const headers = {
@@ -44,15 +47,11 @@ export class CreateEnvironment extends BaseCommand {
     }
 
     try {
-      const createdEnvironment = await EnvironmentController.createEnvironment(
-        environmentData,
-        headers
-      )
+      const createdEnvironment: CreateEnvironmentResponse =
+        await EnvironmentController.createEnvironment(environmentData, headers)
       Logger.log(`Created environment:`)
       Logger.log(`- Name: ${createdEnvironment.name}`)
       Logger.log(`- ID: ${createdEnvironment.id}`)
-      Logger.log(`- API Key: ${createdEnvironment.apiKey}`)
-      Logger.log(`- Base URL: ${createdEnvironment.baseUrl}`)
     } catch (error) {
       Logger.error(error.message)
     }

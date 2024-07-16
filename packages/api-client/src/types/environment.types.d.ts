@@ -21,6 +21,7 @@ export interface UpdateEnvironmentRequest {
 }
 
 export interface UpdateEnvironmentResponse {
+  forEach(arg0: (environment: any) => void): unknown
   id: string
   name: string
   description: string | null
