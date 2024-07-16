@@ -28,6 +28,7 @@ export class UserService {
 
   async onApplicationBootstrap() {
     await this.checkIfAdminExistsOrCreate()
+    await this.createDummyUser()
   }
 
   async getSelf(user: User) {
@@ -292,6 +293,24 @@ export class UserService {
     this.log.log(`Sent login email to ${user.email}`)
 
     return userWithWorkspace
+  }
+
+  private async createDummyUser() {
+    // @ts-expect-error - This is a test environment
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'e2e') {
+      this.log.log('Creating dummy user')
+
+      const user = await this.prisma.user.create({
+        data: {
+          email: 'johndoe@example.com',
+          name: 'John Doe',
+          isActive: true,
+          isOnboardingFinished: true
+        }
+      })
+
+      this.log.log('Created dummy user: ', user)
+    }
   }
 
   private async checkIfAdminExistsOrCreate() {

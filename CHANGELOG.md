@@ -1,3 +1,35 @@
+## [2.2.0](https://github.com/keyshade-xyz/keyshade/compare/v2.1.0...v2.2.0) (2024-07-11)
+
+### 🚀 Features
+
+* **api-client:** Added API Client package ([#346](https://github.com/keyshade-xyz/keyshade/issues/346)) ([6734e1e](https://github.com/keyshade-xyz/keyshade/commit/6734e1e2490915406a82c2e5a6bd88944b0fb664))
+* **api:** Updated API key ([fbac312](https://github.com/keyshade-xyz/keyshade/commit/fbac3120b4aa063119f3b09a2b61996fefb17143))
+* **platform:** View [secure]s ([#313](https://github.com/keyshade-xyz/keyshade/issues/313)) ([97c4541](https://github.com/keyshade-xyz/keyshade/commit/97c45414d4a3e456170369c07d4f936f06189c7a))
+* **web:** Add Pricing Page ([#243](https://github.com/keyshade-xyz/keyshade/issues/243)) ([2c7f1d6](https://github.com/keyshade-xyz/keyshade/commit/2c7f1d6171ac0563a13279676ddaf3d098855fee))
+
+### 📚 Documentation
+
+* **cli:** Added docs for the CLI package ([#329](https://github.com/keyshade-xyz/keyshade/issues/329)) ([edad166](https://github.com/keyshade-xyz/keyshade/commit/edad166c1a05507da481158f42571d1724179e36))
+* **cli:** Added usage docs ([#330](https://github.com/keyshade-xyz/keyshade/issues/330)) ([b6963d5](https://github.com/keyshade-xyz/keyshade/commit/b6963d5093f9031cd76821eb5faab840ea979d53))
+* Update Discord link ([871b6cd](https://github.com/keyshade-xyz/keyshade/commit/871b6cdef19fed55d7b34bc1e8b418b6974e9f38))
+* Update README.md ([e66fcd2](https://github.com/keyshade-xyz/keyshade/commit/e66fcd2caf75f75cd3a195139e92c5b27a7321ef))
+* **web:** Add documentation about our web package ([#268](https://github.com/keyshade-xyz/keyshade/issues/268)) ([3d848e7](https://github.com/keyshade-xyz/keyshade/commit/3d848e7e2e20623edcc6c8dec3741f2de506c2c5))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Updated response types in environment service ([b8a3ddd](https://github.com/keyshade-xyz/keyshade/commit/b8a3ddd5c2c1f8a9c24f7df6f193eff4fc2da691))
+* **ci:** Added release scripts for platform and api ([02dae60](https://github.com/keyshade-xyz/keyshade/commit/02dae60f1b5493e820b71e1640c6aec73d5d00f8))
+* **CI:** Updated action plugin versions ([88bb317](https://github.com/keyshade-xyz/keyshade/commit/88bb3171e44e068f7ea848dcff7f927b8e2df92b))
+* **CI:** Updated pnpm version in CI file ([2692e88](https://github.com/keyshade-xyz/keyshade/commit/2692e887144b3ed6108e8b2b7670f1bfc9f79fcf))
+* **platform:** Fixed env parsing in platform ([d6ffafa](https://github.com/keyshade-xyz/keyshade/commit/d6ffafa16eaea7131af0356a9fc2a4107e7cdddc))
+* **web:** Update Terms and Conditions and Privacy Policy ([#282](https://github.com/keyshade-xyz/keyshade/issues/282)) ([d621dcb](https://github.com/keyshade-xyz/keyshade/commit/d621dcb2675caf6cf12f07f9fdd48cc57d581a62))
+
+### 🔨 Code Refactoring
+
+* **api:** Update [secure] and variable fetching endpoints ([7d9acd0](https://github.com/keyshade-xyz/keyshade/commit/7d9acd03bed944fb99a630c2ee519e2f71354716))
+* **cli:** Refactored profile commands into readable blocks ([#331](https://github.com/keyshade-xyz/keyshade/issues/331)) ([4a8a089](https://github.com/keyshade-xyz/keyshade/commit/4a8a089dddd51cb04718f436d52735f48e55cceb))
+* **cli:** Updated configuration commands and mechanism ([#310](https://github.com/keyshade-xyz/keyshade/issues/310)) ([9079b6d](https://github.com/keyshade-xyz/keyshade/commit/9079b6d05667363312deae47754e2adc72a1ca73))
+
 ## [2.1.0](https://github.com/keyshade-xyz/keyshade/compare/v2.0.0...v2.1.0) (2024-06-27)
 
 ### 🚀 Features

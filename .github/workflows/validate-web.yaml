@@ -1,11 +1,23 @@
+name: Validate Web
+
 on:
   push:
     branches:
       - '!develop'
       - '!main'
-    paths: ['apps/web/**', '.github/workflows/web.yaml']
+    paths:
+      [
+        'apps/web/**',
+        '.github/workflows/validate-web.yml',
+        '.github/workflows/deploy-web.yml'
+      ]
   pull_request:
-    paths: ['apps/web/**', '.github/workflows/web.yaml']
+    paths:
+      [
+        'apps/web/**',
+        '.github/workflows/deploy-web.yml',
+        '.github/workflows/validate-web.yml'
+      ]
 
 jobs:
   validate:
