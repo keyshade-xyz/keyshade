@@ -6,7 +6,7 @@ import {
 } from 'src/types/command/command.types'
 import { EnvironmentData } from 'src/types/command/environment.types'
 import { text } from '@clack/prompts'
-import EnvironmentController from 'api-client'
+import { EnvironmentController } from '@keyshade/api-client'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
@@ -62,7 +62,8 @@ export class CreateEnvironment extends BaseCommand {
     name: string
     description?: string
   }> {
-    let { name, description } = options
+    let { name } = options
+    const { description } = options
 
     if (!name) {
       name = await text({
