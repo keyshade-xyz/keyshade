@@ -5,6 +5,7 @@ import type {
 } from '@/types/index.types'
 import { existsSync } from 'fs'
 import { readFile, readdir, writeFile } from 'fs/promises'
+import { ensureDirectoryExists } from './fileUtils.ts';
 
 export const getOsType = (): 'unix' | 'windows' => {
   return process.platform === 'win32' ? 'windows' : 'unix'
@@ -83,8 +84,4 @@ export const fetchUserRootConfigurationFiles = async (): Promise<string> => {
   const path = `${process.env[home]}/.keyshade`
   const files = await readdir(path)
   return `- ${files.join('\n- ')}`
-}
-
-async function ensureDirectoryExists(path: string): Promise<void> {
-  await mkdir(dirname(path), { recursive: true })
 }
