@@ -1,17 +1,17 @@
-name: Deploy Web
+name: Deploy API
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-    paths: ['apps/web/**', '.github/workflows/deploy-web.yml', 'package.json']
+    paths: ['apps/api/**', '.github/workflows/deploy-api.yml', 'package.json']
 
 jobs:
   build:
     runs-on: ubuntu-latest
     environment: alpha
-    name: Build and push Web docker image for release
+    name: Build and push API docker image for release
 
     steps:
       - name: Checkout
@@ -32,21 +32,47 @@ jobs:
         id: build
         env:
           ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ vars.ECR_WEB_REPOSITORY }}
+          ECR_REPOSITORY: ${{ vars.ECR_API_REPOSITORY }}
         run: |
           # Build a docker container and push it to ECR 
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/api/Dockerfile .
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
           echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
-  deploy:
+  setup-database:
     needs: build
+    name: Setup Database
     runs-on: ubuntu-latest
     environment: alpha
-    name: Deploy Web docker image for release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.2.0
+          run_install: false
+
+      - name: Deploy migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm db:deploy-migrations
+
+  deploy:
+    needs: [build, setup-database]
+    runs-on: ubuntu-latest
+    environment: alpha
+    name: Deploy API docker image for release
 
     steps:
       - name: Checkout
@@ -63,6 +89,6 @@ jobs:
         id: force-redeploy
         env:
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_WEB_SERVICE }}
+          ECS_SERVICE: ${{ vars.ECS_API_SERVICE }}
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment

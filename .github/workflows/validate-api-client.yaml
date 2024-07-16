@@ -1,18 +1,20 @@
-name: Validate API
+name: Validate API Client
 
 on:
   push:
     branches:
       - '!develop'
       - '!main'
-    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
+    paths:
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
   pull_request:
-    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
+    paths:
+      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    name: Validate API
+    name: Validate API Client
 
     steps:
       - name: Checkout
@@ -38,7 +40,7 @@ jobs:
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
@@ -48,23 +50,15 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm run lint:api
+          pnpm run lint:api-client
 
-      - name: Unit tests
+      - name: Test
         run: |
-          pnpm run db:generate-types
-          pnpm run unit:api
+          pnpm run test:api-client
 
-      - name: E2E tests
-        env:
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: secret
-        run: pnpm run e2e:api
-
-      - name: Upload e2e test coverage reports to Codecov
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          flags: api-e2e-tests
-          files: /coverage-e2e/api/coverage-final.json
+          flags: api-client

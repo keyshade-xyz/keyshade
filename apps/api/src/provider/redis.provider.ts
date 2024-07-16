@@ -14,13 +14,9 @@ export const RedisProvider: Provider = {
     }
 
     const subscriber = redis.createClient({
-      url: process.env.REDIS_URL,
-      password: process.env.REDIS_PASSWORD
+      url: process.env.REDIS_URL
     })
-    const publisher = redis.createClient({
-      url: process.env.REDIS_URL,
-      password: process.env.REDIS_PASSWORD
-    })
+    const publisher = subscriber.duplicate()
 
     publisher.on('error', (error) => {
       logger.error('Redis client error:', error)

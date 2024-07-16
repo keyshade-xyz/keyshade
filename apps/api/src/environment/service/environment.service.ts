@@ -59,9 +59,6 @@ export class EnvironmentService {
             id: user.id
           }
         }
-      },
-      include: {
-        project: true
       }
     })
 
@@ -115,12 +112,10 @@ export class EnvironmentService {
         name: dto.name,
         description: dto.description,
         lastUpdatedById: user.id
-      },
-      include: {
-        project: true,
-        lastUpdatedBy: true
       }
     })
+
+    const project = environment.project
 
     await createEvent(
       {
@@ -134,13 +129,13 @@ export class EnvironmentService {
           name: updatedEnvironment.name,
           projectId: updatedEnvironment.projectId
         },
-        workspaceId: updatedEnvironment.project.workspaceId
+        workspaceId: project.workspaceId
       },
       this.prisma
     )
 
     this.logger.log(
-      `Environment ${updatedEnvironment.name} updated in project ${updatedEnvironment.project.name} (${updatedEnvironment.project.id})`
+      `Environment ${updatedEnvironment.name} updated in project ${project.name} (${project.id})`
     )
 
     return updatedEnvironment
@@ -154,6 +149,8 @@ export class EnvironmentService {
         authority: Authority.READ_ENVIRONMENT,
         prisma: this.prisma
       })
+
+    delete environment.project
 
     return environment
   }
@@ -182,8 +179,20 @@ export class EnvironmentService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: true
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            email: true,
+            profilePictureUrl: true,
+            name: true
+          }
+        }
       },
       skip: page * limit,
       take: limit,

@@ -221,7 +221,7 @@ export default class ChangeNotifier
     }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async rehydrateCache() {
     this.logger.log('Rehydrating ChangeNotifier cache')
     const socketMaps = await this.prisma.changeNotificationSocketMap.findMany()
