@@ -1,9 +1,12 @@
-import {
+import BaseCommand from '@/commands/base.command'
+import { getDefaultProfile } from '@/util/profile'
+import type { ProfileConfig } from '@/types/index.types'
+import { fetchProfileConfig } from '@/util/configuration'
+import type {
   CommandActionData,
   CommandOption
-} from 'src/types/command/command.types'
-import BaseCommand from '../base.command'
-import { fetchProfileConfig } from '../../util/configuration'
+} from '@/types/command/command.types'
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Table = require('cli-table')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,9 +36,25 @@ export default class ListProfile extends BaseCommand {
 
   async action({ options }: CommandActionData): Promise<void> {
     const { verbose } = options
-    const profiles = await fetchProfileConfig()
-    const defaultProfile = profiles.default
-    delete profiles.default
+    this.profiles = await fetchProfileConfig()
+    const defaultProfile = getDefaultProfile(this.profiles)
+    delete this.profiles.default
+
+    this.printProfile(this.profiles, defaultProfile, verbose as boolean)
+  }
+
+  /**
+   * Prints the profile information in a formatted table.
+   *
+   * @param profiles - The profile configuration object.
+   * @param defaultProfile - The name of the default profile.
+   * @param verbose - A boolean indicating whether to display additional information.
+   */
+  private printProfile(
+    profiles: ProfileConfig,
+    defaultProfile: string,
+    verbose: boolean
+  ) {
     const table = new Table({
       chars: {
         top: '═',

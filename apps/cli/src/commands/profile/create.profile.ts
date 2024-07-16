@@ -1,15 +1,12 @@
-import BaseCommand from '../base.command'
-import {
+import BaseCommand from '@/commands/base.command'
+import type {
   CommandActionData,
   CommandOption
-} from '../../types/command/command.types'
-import { API_BASE_URL } from '../../util/constants'
+} from '@/types/command/command.types'
+import type { ProfileConfig } from '@/types/index.types'
+import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
+import { API_BASE_URL } from '@/util/constants'
 import { intro, outro, confirm, spinner, text } from '@clack/prompts'
-import {
-  fetchProfileConfig,
-  writeProfileConfig
-} from '../../util/configuration'
-import { ProfileConfig } from '../../types/index.types'
 
 export default class CreateProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -93,15 +90,14 @@ export default class CreateProfile extends BaseCommand {
     return { name, apiKey, baseUrl, setDefault }
   }
 
-  private async checkOverwriteExistingProfile(name: string): Promise<boolean> {
-    if (!!this.profiles[name]) {
+  private async checkOverwriteExistingProfile(name: string): Promise<void> {
+    if (this.profiles[name]) {
       const overwrite = await confirm({
         message: `Profile ${name} already exists. Do you want to overwrite it?`
       })
 
       if (!overwrite) {
         outro('Profile creation cancelled')
-        return
       }
     }
   }

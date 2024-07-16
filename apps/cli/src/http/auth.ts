@@ -1,4 +1,4 @@
-import Logger from '../util/logger'
+import { Logger } from '@/util/logger'
 
 const AuthController = {
   async checkApiKeyValidity(baseUrl: string, apiKey: string): Promise<void> {
