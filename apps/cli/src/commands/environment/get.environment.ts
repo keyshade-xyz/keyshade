@@ -19,7 +19,7 @@ export class GetEnvironment extends BaseCommand {
     return [
       {
         name: '<Environment ID>',
-        description: 'ID of the environment which you want to delete.'
+        description: 'ID of the environment which you want to fetch.'
       }
     ]
   }

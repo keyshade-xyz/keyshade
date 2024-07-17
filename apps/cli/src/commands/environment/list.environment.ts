@@ -19,7 +19,7 @@ export class ListEnvironment extends BaseCommand {
     return [
       {
         name: '<Project ID>',
-        description: 'ID of the project under which you want to add the en'
+        description: 'ID of the project whose environments you want.'
       }
     ]
   }

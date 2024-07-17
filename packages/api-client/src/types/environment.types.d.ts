@@ -21,7 +21,6 @@ export interface UpdateEnvironmentRequest {
 }
 
 export interface UpdateEnvironmentResponse {
-  forEach(arg0: (environment: any) => void): unknown
   id: string
   name: string
   description: string | null
@@ -55,7 +54,6 @@ export interface GetAllEnvironmentsOfProjectRequest {
 }
 
 export interface GetAllEnvironmentsOfProjectResponse {
-  forEach(arg0: (environment: any) => void): unknown
   items: {
     id: string
     name: string
