@@ -1,11 +1,10 @@
 import BaseCommand from '../base.command'
-import Logger from '../../util/logger'
 import { EnvironmentController } from '@keyshade/api-client'
+import { intro, spinner } from '@clack/prompts'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
-import { GetAllEnvironmentsOfProjectResponse } from '../../../../../packages/api-client/src/types/environment.types'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -24,37 +23,39 @@ export class ListEnvironment extends BaseCommand {
     const [projectId] = args
 
     if (!projectId) {
-      Logger.error('Project ID is required')
+      console.error('Project ID is required')
       return
     }
 
-    const baseUrl = this.baseUrl
     const apiKey = this.apiKey
 
     const headers = {
-      baseUrl,
-      apiKey
+      'x-keyshade-token': apiKey
     }
 
-    if (!baseUrl || !apiKey) {
-      Logger.error('Base URL and API Key must be set as environment variables')
+    if (!apiKey) {
+      console.error('Base URL and API Key must be set as environment variables')
       return
     }
 
+    intro(`Fetching environments for project ${projectId}...`)
+
+    const spin = spinner()
+
     try {
-      const environments: GetAllEnvironmentsOfProjectResponse =
+      const environments =
         await EnvironmentController.getAllEnvironmentsOfProject(
           { projectId },
           headers
         )
-      Logger.log(`Environments for project ${projectId}:`)
+      spin.start(`Environments for project ${projectId}:`)
       environments.forEach((environment: any) => {
-        Logger.log(
+        spin.message(
           `- ${environment.name} (Description: ${environment.description})`
         )
       })
     } catch (error) {
-      Logger.error(error.message)
+      console.error(error.message)
     }
   }
 }

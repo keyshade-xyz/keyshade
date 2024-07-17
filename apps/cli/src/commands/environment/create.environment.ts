@@ -1,15 +1,11 @@
 import BaseCommand from '../base.command'
-import Logger from '../../util/logger'
+import { spinner } from '@clack/prompts'
 import {
   CommandActionData,
   CommandOption
 } from 'src/types/command/command.types'
 import { text } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
-import {
-  CreateEnvironmentRequest,
-  CreateEnvironmentResponse
-} from '../../../../../packages/api-client/src/types/environment.types'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
@@ -28,32 +24,33 @@ export class CreateEnvironment extends BaseCommand {
     const { name, description } = await this.parseInput(options)
 
     if (!projectId) {
-      Logger.error('Project ID is required')
+      console.error('Project ID is required')
       return
     }
 
-    const baseUrl = this.baseUrl
     const apiKey = this.apiKey
 
-    const environmentData: CreateEnvironmentRequest = {
+    const environmentData = {
       name: name,
       description: description,
       projectId: projectId
     }
 
     const headers = {
-      baseUrl,
-      apiKey
+      'x-keyshade-token': apiKey
     }
 
+    const spin = spinner()
     try {
-      const createdEnvironment: CreateEnvironmentResponse =
-        await EnvironmentController.createEnvironment(environmentData, headers)
-      Logger.log(`Created environment:`)
-      Logger.log(`- Name: ${createdEnvironment.name}`)
-      Logger.log(`- ID: ${createdEnvironment.id}`)
+      const createdEnvironment = await EnvironmentController.createEnvironment(
+        environmentData,
+        headers
+      )
+      spin.start(`Created environment:`)
+      spin.message(`- Name: ${createdEnvironment.name}`)
+      spin.message(`- ID: ${createdEnvironment.id}`)
     } catch (error) {
-      Logger.error(error.message)
+      console.error(error.message)
     }
   }
 
