@@ -6,7 +6,7 @@ description: API testing using Postman
 
 We use Postman to test our APIs. All of our endpoints are tested using Postman and we maintain a detailed documentation of every endpoint in our Postman collection. You can find the workspace in [here](https://www.postman.com/blue-crescent-581920/workspace/keyshade)
 
-We maintain an API named [`keyshade API`](https://www.postman.com/blue-crescent-581920/workspace/keyshade/api/a31bdb66-69e3-469b-afb4-f2051385e634?branch=develop) in our Postman workspace. This API contains all the endpoints that we have in our application. This is where you can find all the collections which you can use to develop/test our APIs
+We maintain an API named [`keyshade API`](https://www.postman.com/keyshade/workspace/keyshade) in our Postman workspace. This API contains all the endpoints that we have in our application. This is where you can find all the collections which you can use to develop/test our APIs
 
 ## Getting started
 
