@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/indent */
 import BaseCommand from './base.command'
 import { io } from 'socket.io-client'
+import { spawn } from 'child_process'
+import type {
+  CommandActionData,
+  CommandArgument
+} from '@/types/command/command.types'
+import { AuthController, SecretController, VariableController } from '@/http'
+import type { ProjectRootConfig } from '@/types/index.types'
 import {
   fetchPrivateKeyConfig,
   fetchProjectRootConfig
-} from '../util/configuration'
-import { ProjectRootConfig } from '../types/index.types'
-import { spawn } from 'child_process'
-import {
-  Configuration,
-  ClientRegisteredResponse
-} from '../types/command/run.types'
-import Logger from '../util/logger'
-import { SecretController, VariableController, AuthController } from '../http'
-import {
-  CommandActionData,
-  CommandArgument
-} from '../types/command/command.types'
+} from '@/util/configuration'
+import { Logger } from '@/util/logger'
+import type {
+  ClientRegisteredResponse,
+  Configuration
+} from '@/types/command/run.types'
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -110,12 +111,10 @@ export default class RunCommand extends BaseCommand {
       ioClient.on(
         'client-registered',
         (registrationResponse: ClientRegisteredResponse) => {
-          Logger.info(`Successfully registered to API`)
+          Logger.info('Successfully registered to API')
 
           this.projectId = registrationResponse.projectId
           this.environmentId = registrationResponse.environmentId
-          this.baseUrl = this.baseUrl
-          this.apiKey = this.apiKey
         }
       )
     })
@@ -146,7 +145,7 @@ export default class RunCommand extends BaseCommand {
         })
 
         childProcess.on('exit', () => {
-          Logger.info(`Command exited.`)
+          Logger.info('Command exited.')
           childProcess = null
         })
       }
@@ -185,7 +184,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async sleep(ms: number) {
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
       setTimeout(resolve, ms)
     })
   }

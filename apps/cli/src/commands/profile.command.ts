@@ -1,9 +1,9 @@
-import BaseCommand from './base.command'
-import CreateProfile from './profile/create.profile'
-import DeleteProfile from './profile/delete.profile'
-import ListProfile from './profile/list.profile'
-import UpdateProfile from './profile/update.profile'
-import UseProfile from './profile/use.profile'
+import BaseCommand from '@/commands/base.command'
+import CreateProfile from '@/commands/profile/create.profile'
+import DeleteProfile from '@/commands/profile/delete.profile'
+import ListProfile from '@/commands/profile/list.profile'
+import UpdateProfile from '@/commands/profile/update.profile'
+import UseProfile from '@/commands/profile/use.profile'
 
 export default class ProfileCommand extends BaseCommand {
   getName(): string {
