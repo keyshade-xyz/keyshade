@@ -126,7 +126,7 @@
     "db:validate": "pnpm run --filter=api db:validate",
     "db:format": "pnpm run --filter=api db:format",
     "db:reset": "pnpm run --filter=api db:reset",
-    "format": "prettier apps/**/*.{ts,tsx} packages/**/*.{ts,tsx} --write",
+    "format": "prettier apps/**/*.{ts,tsx} packages/**/*.ts --write",
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api",
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
