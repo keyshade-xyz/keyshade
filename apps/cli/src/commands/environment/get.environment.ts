@@ -3,8 +3,7 @@ import { spinner } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandActionData,
-  CommandArgument,
-  CommandOption
+  CommandArgument
 } from 'src/types/command/command.types'
 
 export class GetEnvironment extends BaseCommand {
@@ -14,10 +13,6 @@ export class GetEnvironment extends BaseCommand {
 
   getDescription(): string {
     return 'Get an environment'
-  }
-
-  getOptions(): CommandOption[] {
-    return []
   }
 
   getArguments(): CommandArgument[] {

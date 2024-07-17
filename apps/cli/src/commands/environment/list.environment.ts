@@ -3,8 +3,7 @@ import { EnvironmentController } from '@keyshade/api-client'
 import { intro, spinner } from '@clack/prompts'
 import {
   CommandActionData,
-  CommandArgument,
-  CommandOption
+  CommandArgument
 } from 'src/types/command/command.types'
 
 export class ListEnvironment extends BaseCommand {
@@ -14,10 +13,6 @@ export class ListEnvironment extends BaseCommand {
 
   getDescription(): string {
     return 'List all environments under a project'
-  }
-
-  getOptions(): CommandOption[] {
-    return []
   }
 
   getArguments(): CommandArgument[] {

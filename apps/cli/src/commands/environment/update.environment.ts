@@ -16,7 +16,18 @@ export class UpdateEnvironment extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return []
+    return [
+      {
+        short: '-n',
+        long: '--name <string>',
+        description: 'Name of the Environment'
+      },
+      {
+        short: '-d',
+        long: '--desc <string>',
+        description: 'Description about the Environment'
+      }
+    ]
   }
 
   getArguments(): CommandArgument[] {
