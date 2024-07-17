@@ -1,16 +1,13 @@
-import {
+import BaseCommand from '@/commands/base.command'
+import { spinner } from '@clack/prompts'
+import type { ProfileConfig } from '@/types/index.types'
+import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
+import { checkIsDefaultProfile, checkProfileExists } from '@/util/profile'
+import type {
   CommandActionData,
   CommandArgument,
   CommandOption
-} from 'src/types/command/command.types'
-import BaseCommand from '../base.command'
-import { ProfileConfig } from '../../types/index.types'
-import {
-  fetchProfileConfig,
-  writeProfileConfig
-} from '../../util/configuration'
-import { spinner } from '@clack/prompts'
-import { checkProfileExists, checkIsDefaultProfile } from '../../util/profile'
+} from '@/types/command/command.types'
 
 export default class UpdateProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -57,7 +54,12 @@ export default class UpdateProfile extends BaseCommand {
     s.start('Updating the profile')
 
     checkProfileExists(this.profiles, profile, s)
-    this.updateProfileData(profile, name, apiKey, baseUrl)
+    this.updateProfileData(
+      profile,
+      name as string,
+      apiKey as string,
+      baseUrl as string
+    )
     await writeProfileConfig(this.profiles)
 
     s.stop(`Profile ${profile} updated`)
@@ -81,6 +83,7 @@ export default class UpdateProfile extends BaseCommand {
 
     if (name) {
       this.profiles[name] = this.profiles[profile]
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete this.profiles[profile]
       if (isDefaultProfile) {
         this.profiles.default = name
