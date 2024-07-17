@@ -3,6 +3,7 @@ import { EnvironmentController } from '@keyshade/api-client'
 import { intro, spinner } from '@clack/prompts'
 import {
   CommandActionData,
+  CommandArgument,
   CommandOption
 } from 'src/types/command/command.types'
 
@@ -17,6 +18,15 @@ export class ListEnvironment extends BaseCommand {
 
   getOptions(): CommandOption[] {
     return []
+  }
+
+  getArguments(): CommandArgument[] {
+    return [
+      {
+        name: '<Project ID>',
+        description: 'ID of the project under which you want to add the en'
+      }
+    ]
   }
 
   async action({ args }: CommandActionData): Promise<void> {

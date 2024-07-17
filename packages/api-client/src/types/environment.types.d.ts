@@ -55,6 +55,7 @@ export interface GetAllEnvironmentsOfProjectRequest {
 }
 
 export interface GetAllEnvironmentsOfProjectResponse {
+  forEach(arg0: (environment: any) => void): unknown
   items: {
     id: string
     name: string

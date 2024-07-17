@@ -2,6 +2,7 @@ import BaseCommand from '../base.command'
 import { spinner } from '@clack/prompts'
 import {
   CommandActionData,
+  CommandArgument,
   CommandOption
 } from 'src/types/command/command.types'
 import { text } from '@clack/prompts'
@@ -17,6 +18,14 @@ export class CreateEnvironment extends BaseCommand {
 
   getOptions(): CommandOption[] {
     return []
+  }
+  getArguments(): CommandArgument[] {
+    return [
+      {
+        name: '<Project ID>',
+        description: 'ID of the project under which you want to add the en'
+      }
+    ]
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {

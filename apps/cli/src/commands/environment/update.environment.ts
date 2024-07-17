@@ -3,6 +3,7 @@ import { spinner } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandActionData,
+  CommandArgument,
   CommandOption
 } from 'src/types/command/command.types'
 
@@ -16,6 +17,15 @@ export class UpdateEnvironment extends BaseCommand {
 
   getOptions(): CommandOption[] {
     return []
+  }
+
+  getArguments(): CommandArgument[] {
+    return [
+      {
+        name: '<Environment ID>',
+        description: 'ID of the environment which you want to delete.'
+      }
+    ]
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
