@@ -1,10 +1,10 @@
 import BaseCommand from '../base.command'
-import Logger from '../../util/logger'
+import { spinner } from '@clack/prompts'
 import {
   CommandActionData,
+  CommandArgument,
   CommandOption
 } from 'src/types/command/command.types'
-import { EnvironmentData } from 'src/types/command/environment.types'
 import { text } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 export class CreateEnvironment extends BaseCommand {
@@ -17,44 +17,61 @@ export class CreateEnvironment extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return []
+    return [
+      {
+        short: '-n',
+        long: '--name <string>',
+        description: 'Name of the Environment'
+      },
+      {
+        short: '-d',
+        long: '--desc <string>',
+        description: 'Description about the Environment'
+      }
+    ]
+  }
+  getArguments(): CommandArgument[] {
+    return [
+      {
+        name: '<Project ID>',
+        description:
+          'ID of the project under which you want to add the environment'
+      }
+    ]
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
-    const [project_id] = args
+    const [projectId] = args
     const { name, description } = await this.parseInput(options)
 
-    if (!project_id) {
-      Logger.error('Project ID is required')
+    if (!projectId) {
+      console.error('Project ID is required')
       return
     }
 
-    const baseUrl = this.baseUrl
     const apiKey = this.apiKey
 
-    const environmentData: EnvironmentData = {
+    const environmentData = {
       name: name,
       description: description,
-      project_id: project_id
+      projectId: projectId
     }
 
     const headers = {
-      baseUrl,
-      apiKey
+      'x-keyshade-token': apiKey
     }
 
+    const spin = spinner()
     try {
       const createdEnvironment = await EnvironmentController.createEnvironment(
         environmentData,
         headers
       )
-      Logger.log(`Created environment:`)
-      Logger.log(`- Name: ${createdEnvironment.name}`)
-      Logger.log(`- ID: ${createdEnvironment.id}`)
-      Logger.log(`- API Key: ${createdEnvironment.apiKey}`)
-      Logger.log(`- Base URL: ${createdEnvironment.baseUrl}`)
+      spin.start(`Created environment:`)
+      spin.message(`- Name: ${createdEnvironment.name}`)
+      spin.message(`- ID: ${createdEnvironment.id}`)
     } catch (error) {
-      Logger.error(error.message)
+      console.error(error.message)
     }
   }
 

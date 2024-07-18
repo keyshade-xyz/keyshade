@@ -1,9 +1,9 @@
 import BaseCommand from './base.command'
-import { CreateEnvironment } from './environment/create.env'
-import { DeleteEnvironment } from './environment/delete.env'
-import { GetEnvironment } from './environment/get.env'
-import { ListEnvironment } from './environment/list.env'
-import { UpdateEnvironment } from './environment/update.env'
+import { CreateEnvironment } from './environment/create.environment'
+import { DeleteEnvironment } from './environment/delete.environment'
+import { GetEnvironment } from './environment/get.environment'
+import { ListEnvironment } from './environment/list.environment'
+import { UpdateEnvironment } from './environment/update.environment'
 
 export class EnvironmentCommand extends BaseCommand {
   getName(): string {
