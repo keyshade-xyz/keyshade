@@ -1,14 +1,11 @@
-import {
+import BaseCommand from '@/commands/base.command'
+import type {
   CommandActionData,
   CommandArgument
-} from 'src/types/command/command.types'
-import BaseCommand from '../base.command'
+} from '@/types/command/command.types'
+import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
+import { checkProfileExists } from '@/util/profile'
 import { spinner } from '@clack/prompts'
-import {
-  fetchProfileConfig,
-  writeProfileConfig
-} from '../../util/configuration'
-import { checkProfileExists } from '../../util/profile'
 
 export default class UseProfile extends BaseCommand {
   getName(): string {

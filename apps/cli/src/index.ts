@@ -1,8 +1,8 @@
 import { Command } from 'commander'
-import BaseCommand from './commands/base.command'
-import ProfileCommand from './commands/profile.command'
-import InitCommand from './commands/init.command'
-import RunCommand from './commands/run.command'
+import type BaseCommand from '@/commands/base.command'
+import ProfileCommand from '@/commands/profile.command'
+import InitCommand from '@/commands/init.command'
+import RunCommand from '@/commands/run.command'
 
 const program = new Command()
 
@@ -16,6 +16,8 @@ const COMMANDS: BaseCommand[] = [
   new ProfileCommand()
 ]
 
-COMMANDS.forEach((command) => command.prepare(program))
+COMMANDS.forEach((command) => {
+  command.prepare(program)
+})
 
 program.parse(process.argv)

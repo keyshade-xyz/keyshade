@@ -1,12 +1,16 @@
-import {
+import BaseCommand from '@/commands/base.command'
+import { getDefaultProfile } from '@/util/profile'
+import type { ProfileConfig } from '@/types/index.types'
+import { fetchProfileConfig } from '@/util/configuration'
+import type {
   CommandActionData,
   CommandOption
-} from 'src/types/command/command.types'
-import BaseCommand from '../base.command'
-import { fetchProfileConfig } from '../../util/configuration'
-import Logger from '../../util/logger'
-import { ProfileConfig } from '../../types/index.types'
-import { getDefaultProfile } from '../../util/profile'
+} from '@/types/command/command.types'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Table = require('cli-table')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const colors = require('colors/safe')
 
 export default class ListProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -32,31 +36,72 @@ export default class ListProfile extends BaseCommand {
 
   async action({ options }: CommandActionData): Promise<void> {
     const { verbose } = options
-
     this.profiles = await fetchProfileConfig()
     const defaultProfile = getDefaultProfile(this.profiles)
     delete this.profiles.default
 
-    Logger.log('Profiles:')
-    Object.keys(this.profiles).forEach((profile) =>
-      this.printProfile(profile, defaultProfile, verbose)
-    )
+    this.printProfile(this.profiles, defaultProfile, verbose as boolean)
   }
 
+  /**
+   * Prints the profile information in a formatted table.
+   *
+   * @param profiles - The profile configuration object.
+   * @param defaultProfile - The name of the default profile.
+   * @param verbose - A boolean indicating whether to display additional information.
+   */
   private printProfile(
-    profile: string,
+    profiles: ProfileConfig,
     defaultProfile: string,
     verbose: boolean
-  ): void {
-    if (defaultProfile === profile) {
-      Logger.log(`- ${profile} (default)`)
-    } else {
-      Logger.log(`- ${profile}`)
-    }
+  ) {
+    const table = new Table({
+      chars: {
+        top: '═',
+        'top-mid': '╤',
+        'top-left': '╔',
+        'top-right': '╗',
+        bottom: '═',
+        'bottom-mid': '╧',
+        'bottom-left': '╚',
+        'bottom-right': '╝',
+        left: '║',
+        'left-mid': '╟',
+        mid: '─',
+        'mid-mid': '┼',
+        right: '║',
+        'right-mid': '╢',
+        middle: '│'
+      }
+    })
 
     if (verbose) {
-      Logger.log(`  - API Key: ${this.profiles[profile].apiKey}`)
-      Logger.log(`  - Base URL: ${this.profiles[profile].baseUrl}`)
+      const profileList = []
+      Object.keys(profiles).forEach((profile) => {
+        profileList.push([
+          `${defaultProfile === profile ? `${profile} ${colors.dim('(default)')}` : profile}`,
+          `${profiles[profile].apiKey}`,
+          `${profiles[profile].baseUrl}`
+        ])
+      })
+      table.push(
+        [
+          colors.cyan.bold('Profile'),
+          colors.cyan.bold('API Key'),
+          colors.cyan.bold('Base URL')
+        ],
+        ...profileList
+      )
+    } else {
+      const profileList = []
+      Object.keys(profiles).forEach((profile) => {
+        profileList.push([
+          `${defaultProfile === profile ? `${profile} ${colors.dim('(default)')}` : profile}`
+        ])
+      })
+      table.push([colors.cyan.bold('Profile')], ...profileList)
     }
+
+    console.log(table.toString())
   }
 }

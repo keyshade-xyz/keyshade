@@ -1,8 +1,8 @@
-import {
+import type {
   PrivateKeyConfig,
   ProfileConfig,
   ProjectRootConfig
-} from '../types/index.types'
+} from '@/types/index.types'
 import { existsSync } from 'fs'
 import { readFile, readdir, writeFile } from 'fs/promises'
 
