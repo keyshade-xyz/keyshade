@@ -4,7 +4,7 @@ import type {
   CommandOption
 } from '@/types/command/command.types'
 import { fetchProfileConfig } from '@/util/configuration'
-import Logger from '@/util/logger'
+import { Logger } from '@/util/logger'
 import { getDefaultProfile } from '@/util/profile'
 import type { Command } from 'commander'
 
