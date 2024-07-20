@@ -1,18 +1,9 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  Logger,
-  UnauthorizedException
-} from '@nestjs/common'
+import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
-import {
-  IMailService,
-  MAIL_SERVICE
-} from '../../mail/services/interface.service'
+import { IMailService, MAIL_SERVICE } from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
 import generateOtp from '../../common/generate-otp'
 import { EnvSchema } from '../../common/env/env.schema'
@@ -72,14 +63,12 @@ export class UserService {
     }
 
     this.log.log(`Updating user ${user.id} with data ${dto}`)
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: {
         id: user.id
       },
       data
     })
-
-    return updatedUser
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
@@ -116,7 +105,7 @@ export class UserService {
     }
 
     this.log.log(`Updating user ${userId} with data ${dto}`)
-    return await this.prisma.user.update({
+    return this.prisma.user.update({
       where: {
         id: userId
       },
@@ -202,7 +191,7 @@ export class UserService {
   }
 
   async getUserById(userId: string) {
-    return await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: {
         id: userId
       }
@@ -216,7 +205,7 @@ export class UserService {
     order: string,
     search: string
   ): Promise<User[]> {
-    return await this.prisma.user.findMany({
+    return this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limit,
       orderBy: {
@@ -240,11 +229,11 @@ export class UserService {
   }
 
   async deleteSelf(user: User) {
-    this.deleteUserById(user.id)
+    await this.deleteUserById(user.id)
   }
 
   async deleteUser(userId: User['id']) {
-    this.deleteUserById(userId)
+    await this.deleteUserById(userId)
   }
 
   private async deleteUserById(userId: User['id']) {
