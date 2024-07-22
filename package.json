@@ -93,6 +93,7 @@
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
     "dev:platform": "turbo run dev --filter=platform",
+    "dev:cli": "turbo run dev --filter=cli",
     "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=api",
     "add:web": "pnpm add --filter=web",
