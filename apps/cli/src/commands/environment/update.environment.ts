@@ -55,8 +55,8 @@ export class UpdateEnvironment extends BaseCommand {
     }
 
     const environmentData = {
-      name: name,
-      description: description,
+      name,
+      description,
       id: environmentId
     }
 
@@ -68,9 +68,9 @@ export class UpdateEnvironment extends BaseCommand {
         headers
       )
       spin.start(`Environments for project ${environmentId}:`)
-      environments.forEach((environment: any) => {
-        spin.message(`- ${environment.name} (ID: ${environment.id})`)
-      })
+      // environments.forEach((environment: any) => {
+      //   spin.message(`- ${environment.name} (ID: ${environment.id})`)
+      // })
     } catch (error) {
       console.error(error.message)
     }

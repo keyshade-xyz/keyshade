@@ -54,11 +54,11 @@ export class ListEnvironment extends BaseCommand {
           headers
         )
       spin.start(`Environments for project ${projectId}:`)
-      environments.forEach((environment: any) => {
-        spin.message(
-          `- ${environment.name} (Description: ${environment.description})`
-        )
-      })
+      // environments.forEach((environment: any) => {
+      //   spin.message(
+      //     `- ${environment.name} (Description: ${environment.description})`
+      //   )
+      // })
     } catch (error) {
       console.error(error.message)
     }

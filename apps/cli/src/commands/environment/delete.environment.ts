@@ -2,8 +2,8 @@ import BaseCommand from '../base.command'
 import { spinner } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
-  CommandActionData,
-  CommandArgument
+  type CommandActionData,
+  type CommandArgument
 } from 'src/types/command/command.types'
 
 export class DeleteEnvironment extends BaseCommand {

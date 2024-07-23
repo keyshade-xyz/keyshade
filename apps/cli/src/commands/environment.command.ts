@@ -5,10 +5,11 @@ import { GetEnvironment } from './environment/get.environment'
 import { ListEnvironment } from './environment/list.environment'
 import { UpdateEnvironment } from './environment/update.environment'
 
-export class EnvironmentCommand extends BaseCommand {
+export default class EnvironmentCommand extends BaseCommand {
   getName(): string {
     return 'environment'
   }
+
   getDescription(): string {
     return 'Manage your environments in keyshade.'
   }

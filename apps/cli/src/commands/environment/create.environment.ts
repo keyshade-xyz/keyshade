@@ -67,7 +67,7 @@ export class CreateEnvironment extends BaseCommand {
         environmentData,
         headers
       )
-      spin.start(`Created environment:`)
+      spin.start('Created environment:')
       spin.message(`- Name: ${createdEnvironment.name}`)
       spin.message(`- ID: ${createdEnvironment.id}`)
     } catch (error) {
