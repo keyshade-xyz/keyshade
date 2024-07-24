@@ -524,7 +524,7 @@ export class SecretService {
       skip: page * limit,
       take: limit,
       orderBy: {
-        [sort]: 'desc'
+        [sort]: sort
       }
     })
     return revisions
