@@ -13,7 +13,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
@@ -21,6 +20,6 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "tsup.config.ts"],
   "exclude": ["node_modules"]
 }

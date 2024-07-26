@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import * as chalk from 'chalk'
-import * as moment from 'moment'
+import chalk from 'chalk'
+import moment from 'moment'
 
 export namespace Logger {
   export function log(message: string) {
