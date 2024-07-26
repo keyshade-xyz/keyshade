@@ -289,6 +289,9 @@ importers:
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
+      cli-spinners:
+        specifier: ^3.1.0
+        version: 3.1.0
       cli-table:
         specifier: ^0.3.11
         version: 0.3.11
@@ -307,9 +310,21 @@ importers:
       fs:
         specifier: 0.0.1-security
         version: 0.0.1-security
+      glob:
+        specifier: ^11.0.0
+        version: 11.0.0
+      nanospinner:
+        specifier: ^1.1.0
+        version: 1.1.0
       nodemon:
         specifier: ^3.1.4
         version: 3.1.4
+      ora:
+        specifier: ^8.0.1
+        version: 8.0.1
+      secret-scan:
+        specifier: workspace:*
+        version: link:../../packages/secret-scan
       socket.io-client:
         specifier: ^4.7.5
         version: 4.7.5
