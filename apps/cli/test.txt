@@ -1,0 +1,10 @@
+this is a secret sk_live_ReTllpYQYfIZu2Jnf2lAPFjD
+
+this okay
+
+but this is not okey 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
+
+// keyshade-ignore -- just a test
+this is ignored AKIALALEMEL33243OLIB
+
+but this is not AKIALALEMEL33243OLIB
