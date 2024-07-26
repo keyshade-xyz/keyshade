@@ -5,9 +5,16 @@
   "main": "index.ts",
   "private": false,
   "scripts": {
+<<<<<<< HEAD
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",
     "dev": "pnpm build && node dist/index.js"
+=======
+    "build": "tsup",
+    "build:prod": "NODE_ENV=production tsup --minify",
+    "start": "node dist/index.js",
+    "dev": "NODE_ENV=development pnpm build && node dist/index.js"
+>>>>>>> c02e1d1 (feat(cli): add secret scan)
   },
   "keywords": [],
   "author": "",
@@ -16,14 +23,20 @@
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
     "chalk": "^4.1.2",
+    "cli-spinners": "^3.1.0",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",
     "fs": "0.0.1-security",
+    "glob": "^11.0.0",
+    "nanospinner": "^1.1.0",
     "nodemon": "^3.1.4",
-    "socket.io-client": "^4.7.5"
+    "ora": "^8.0.1",
+    "secret-scan": "workspace:*",
+    "socket.io-client": "^4.7.5",
+    "typescript": "^5.5.2"
   },
   "devDependencies": {
     "@swc/cli": "^0.4.0",
@@ -32,6 +45,7 @@
     "@types/figlet": "^1.5.8",
     "@types/eccrypto": "^1.1.6",
     "@types/node": "^20.14.10",
-    "eslint-config-standard-with-typescript": "^43.0.1"
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "tsup": "^8.1.2"
   }
 }
