@@ -1,0 +1,167 @@
+// keyshade-ignore-all
+import type { TestCase } from '@/types'
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export default function private_key(): RegExp[] {
+  return [
+    /BEGIN DSA PRIVATE KEY/,
+    /BEGIN EC PRIVATE KEY/,
+    /BEGIN OPENSSH PRIVATE KEY/,
+    /BEGIN PGP PRIVATE KEY BLOCK/,
+    /BEGIN PRIVATE KEY/,
+    /BEGIN RSA PRIVATE KEY/,
+    /BEGIN SSH2 ENCRYPTED PRIVATE KEY/,
+    /PuTTY-User-Key-File-2/
+  ]
+}
+
+const testcase: TestCase[] = [
+  {
+    input: `-----BEGIN DSA PRIVATE KEY-----
+MIIBvAIBAAKBgQDS+NcF5ALeAToPMbXgLV5x1t4+KHqkZyTq+z5iXbD/Ck+XG2Ld
+xW7Jl1t3LLZndy60BWyfuR8G5VbzT4J1ZwunwGz1DkREr9z5INMYa3UmQgCNXaIj
+qNBINtovv2Ig7Hv94+MZKszPe0UHeLg2H5xIuToD6H0fgQC2gb8VfDpXewIVAJGh
+4p/WNCBN/qGfC/lQ44eY/d8FAoGBAOkMCPLTxzxJlB5oCeFb+yzA5c+1xCht8/GN
+QJWo2b+/0V4A0Xth8Ed0L5yPnOeQw2B7y6a9Xk8Mn8nPLQ8Tv2vH5LSD8cLtBhI7
+DcfjIen7mI4sMOnEkZn3R9LJ5z6sWyro1hMtV1fz+stPiA9PQY2vS3DjTR5de8xD
+zLtGA2XXAoGAfR4RiqcCjTDdfG7RExWQiayNi27hPdlM8OSfEAXbiHZykvQ1/MBm
+X7B/mtnvQwMycEY9NZ8A2lhW/g6bhppZs34RaBOy9Jwr8bYykI9pZBaPxqWf74z1
+CgRB+FuzikOzKHg5jJrHcP4DNwi7E4Bp/xMdP/bGJvn7yyLShzUMMtsCFEoF28VA
+2JcmRGLQ5t9NBhGqZaj3
+-----END DSA PRIVATE KEY-----
+`,
+    expected: true
+  },
+  {
+    input: `-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEINXfnQygFjqzsh/7xUBzC/ihovm4t4gRhIGXQnG0OkQfoAoGCCqGSM49
+AwEHoUQDQgAEvHEfpE5iE+EshRaUyZQkPoD9UNpsV1kMr1UXs3tAp7u+4Ezj/AWW
+e3+YtXaP7ndw1/zicWJzD6t5XgAlUwUo3w==
+-----END EC PRIVATE KEY-----
+`,
+    expected: true
+  },
+  {
+    input: `-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtz
+c2gtZWQyNTUxOQAAACBaOmQ5szA+3I2igVgbcDZT0F2qkSmVzA0yS8/qzZL62wAA
+AKB1KNsuNSjbLgAAAAtzc2gtZWQyNTUxOQAAACBaOmQ5szA+3I2igVgbcDZT0F2q
+kSmVzA0yS8/qzZL62wAAAEB0pCyprVPUtsDB0YMCwhHdDR3VnBOabYliAifJ9i1a
+95YbmMNRb1DZmVAcHly7ddzPnd5XRE7AS/U8VmkBeMyfyMUNV9M9cq7J2gjSNNZh
+4VRKtHppRvgowN5wygYAAAADmFsZXhhbmRlci5hbGV4YW5kZXJAZXhhbXBsZS5j
+b20BAgMEBQYH
+-----END OPENSSH PRIVATE KEY-----
+`,
+    expected: true
+  },
+  {
+    input: `-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: GnuPG v1
+
+lQO+BFC0VloBCAC3cV/mIX8SxkDfJPMZo0+IZN8ZRJKUy/NKdDb0Q1B2svGJoZ2W
+fCQJ5CgV3++XUR1JeP4VZxAl1kc+5/PW3ht+nhpj9+E2SLG/1ZBJ5p9yTw0tD6AB
+Bikp+38Ko+5tP2KiIk2N8VZ7aY+Di1BaSLGzF1x2qYsbJ7c2RpF1TgrVABf3zCUe
+ZQIkXScNz3PPtfTDQ/fxKHHH9NhcYKwZkcbO7qXMz8pqUUbAxdNjHe75VV+9tPYK
+ZDrzR1Gfdmn6F8CAxdL8OB9OfabC+Ib1RdTPgciB1d1Ck9yifhXe8FVpB+9vGg3P
+FlKcBQd3Pf+TkOnCqlwx2bML+fS2qZC0zQkDABEBAAEAB/0SpHq3As9kUsU5IZAp
+irXaYPLR/OclS/f1kMT13Bu8T88v9OOpZJxdVC0BlXxQ82Qhig7KoP9qKOaXFRo4
+pTT7u8W7EEfUFWNULPjT/6gTz4AxRQhh4sHg03mnGpXPwSahBP5C7oyn+rM9U4t2
+yX9d5xZmqSCfD8zyDcuYADwSfYV0arQk0C9rkhET5XMIcehLzh8S3Xq7rD5/4CIm
+o+cdknBj8fgDoMyQSuKZoaxMGuqN40LUwO/oAOvD6gtJ5//p/L39wlBQaTnSUI/Q
+7GnT8k4/w+mRJjiV6vnNQ2XJh0eqx1ZsRiP0xE0m/Ofn57hxAsXa1/n92YeSiHNa
+AAADAP9F8GVY3pEK4aQowhM3y9hKfi2P5nB/h0rSks8K1vYhhGb0eTpB1kNzQyLf
+9xi7UueN5nhRU5MWj9Z5yzCwSEVi0L/UFWfQTSsm9PqNoa9b8mCEwLeWvDr8C/k2
+5f1OhrzOX3f8ibkVFbP9fNQusJ7RfMxeZek2ThG6+c9nd4TvqEtg+ozB7T9IHcY+
+gHdNHOdYH5H1QSpF4DUHssUtKnKiyxWq1IyeSm/l5DNk5LUmBYGCVm3rSABuR7Tn
+tQKAJZ58UeUbkPdM+3T9vblJ0R8I3P9HDwN4tDrMWtZ76XkHN0x7ZcCjvBJ3A2++
+KtA6Z9F73Rit8dIFAEQEAQEAAgD/dcfnH8oXbF3rTbO5PaQj10UlCeM9cyP3BJzL
+a5omG3nx2/YhGy1MIWcu50u1JmKsT7OY5IV4y0sI7HCGGo8QNyhRfKZs5GFc4oJ3
+Kb1UOtoEmGqurxVr2MjxrSV+mv4+WiAwrXlX0MSdAMvnpe8G+aDWc3mWbLyg7F1Z
+U3Y2YPfNoDW9ViyfHr0EAPSwSgDWlhvEVkaCX5PG9K0nZq95GkvAka5Gnt8TPhzX
+/ND61XHABfAo/P3Bfci/2C1Ny6wvdcmCtP6hm5SkhvGVZYZ9U6Gm9OSBbiUbODWm
+onBYnU0gyNPIksqFcwsBUXmQ24y4P5ZZeBFd+xN9lHiRImiLpk7TfiECAXy3zCJz
+MfGtz6+luB17smDuP99QkFZUz91EBkncDzzcdpA5SiDXms91PZghP72L47U7Elcq
+wV9d+KtwW8PdtAtuL/yrChLStKVDpVpOp5ir4eTVhngnA5j0eLf3ARmfA6thmOZL
+GbwMxsGiwc9U+JKkhCwNDK9sAKryUsM=
+=7mjv
+-----END PGP PRIVATE KEY BLOCK-----
+`,
+    expected: true
+  },
+  {
+    input: `-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEA1iBpOwGHf6XZn6VwDZtM8/G26wvUo0nYlP5Ez+k3rzOnI6ZB
+uTBk0KizJFtKKZkLBrLmzOeZG3RnPijRYR1yyHPeFnk8T6RUUXs9szrFwEFsXzBI
+bDqfrLZVh21DSNVE3cNnYPVP4EnF3Ybkl6bW8mIEb3/biSa5DEa95r3mUkx9FqKx
+HvdG/WgtpbIjZSoqTI6E6/HbL9R6DToZZMFZs08aYyWJRHnCazlSTIoJ1ESAXSja
+aUoCZP2RFP/hG9K1xyClbFGkM63L8HQvTFZ+4AyeV1yQJiwD12OwSpnUq+YIuHzP
+8G4yyt95XlQFgJLK2rU5FSG+8NltD2YXqJlTPQIDAQABAoIBAQC/8zpzXgn4QAAy
+Zlk9oG6L1Bbhk7X/G8nUGxBhTcd8X8BpUPj8UNLB8GpJ8LbcexvEm0f1JKYADh4N
+sZMJxU6zU5uMfR2iPqQFHg9RxDJlBTR5Ak4heykLmkS3U20qk5dbw/3fQ4M9s2as
+GvF8k5orOl0pCJ9GNCYkThR7L59bUB5kCw3BFf9/9vEF17FMcrjsOvSxW+qszPNo
+mXs+0uYbStI+0N2vGyV3cQIMjzVEv1dTBdSo/0aP0hL5odUsBbD45jvymmyGo1fI
+S8U6LdyqMWPC9Q+O7FNcKndYQMcWyQs4XtDJZnOJS6H+0/ENmUPTHgJYYDFn8xyW
+NZU/1BABAoGBAPdmy04u4wFkXJCU4TGX0X+E3pNjcPLSBXBwqG34LO/Mhlm4mQmD
+Od2RRBXUefDhDdiZHe7mFC5bV3fzXPG9/Px0/BbAe5XFrorNLpgXEkxckOkiHtyv
+VeMLq6lS5oyLgGV9NU6/QgPDiEIkqxzz5AzGJQFy7bU8b3mXEw9z3v+JAoGBAO/M
+I3X5tIz0sNxWvB8LGXc6p4R6n/R5AZJvD/vMu6b/hF6K8F3ch3+j4SuY4EGvG7tM
+u7eNscnfx3L/g7Uv6kU3s6dN1VjZjGvG9GuTyyltbp+dYOCMxG1OWHkSBdQjWprD
+dIDtJocZkDcfglfZdNYkB1IkXeWcaGPOxfHH0tiBAoGAZZikExax9jsuxQG0ySoi
+FF0uQZ6Us5iSHzHrCSi/SO7yfqB6aytsP0hzQn8T3c0+tPz5oURmP3mcpVTCf4qH
+auOoStTGQ4YrY+zL5t9pIs9sI8u5FESgg8Gy3x17UsSn6J+xIEc/vhFuJS+GlxH5
+nT5s0zVzMGFW5MGj09u6aHECgYEAuViX/U88Y8KtNpdW/qZP9aqjQOn8+2oohw3+
+mD2rwY6D1Gi5GP63bxK7R5eI8Jl3b52XMfb4bCvU5qT5TjQHi3OUFapvLOZax7Fn
+HKWtn4MQjI4A+2+NaVD1nXU/eYROe+HgBfoArApJODxFvh3+lJZAdUuYtS3O5EvY
+BMC3G/UCgYBGSi1KrV5qxvmtG1dwDA75+xUOC3eqKFx9OTFHlhwpEbyRrNufAUKN
+7GQsohF+orxgySY+xy1bWB/hKLUH8eNmCoLLV0Eu9xKIMRG+5nqS0Za8P8fhN9AA
+uOgl7g+rm8r7XZ5BlSb1Ms62qct9nvT9sz/NPrTtq6qvP5IcT+TnDg==
+-----END RSA PRIVATE KEY-----
+`,
+    expected: true
+  },
+  {
+    input: `-----BEGIN SSH2 ENCRYPTED PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,0123456789ABCDEF0123456789ABCDEF
+
+VmbKcI1R9qOCGeaSKjx97+aAj8mFqOs9ptz8YVAnxZsCywPGO1xgWh3pSFXF93Zo
+47UNkgdFOxz0j/UFeMw8bw==
+-----END SSH2 ENCRYPTED PRIVATE KEY-----
+`,
+    expected: true
+  },
+  {
+    input: `PuTTY-User-Key-File-2: ssh-rsa
+Encryption: none
+Comment: rsa-key-20210314
+Public-Lines: 4
+AAAAB3NzaC1yc2EAAAABJQAAAQEAt8WmS34yn1u2WmY1npEklWpxOgK3CpMWFDXW
+sDLsyJFN5+1tMC/1GkMaCjLs6b8NqmdE5x14PZZjZxqr5nn7zv/AiyEFH3L/xjQm
+O3xjQvZ8cROtGnh06DBgUnZQo+GzGf/qV9TG8h06Bujz6yVGv2Ow3hxU0XSCplX3
+SNpGwjgIyeo+1g==
+Private-Lines: 8
+AAAAgQDY7b/XBzUAY5B6RaAVUyxR8TrN5Q0sK+2PbRphNBkZWkpDOmXoFakE1mpd
+m/MV+Jh3G1Qh6KE5Z+b1hLk3X7Bvsf0aRJdnRHl89A3jTQGowwLJScwEr2AnAq3J
+WjUn0DoEJ6EuWczFdxecrP9G6jj8jVbPn8rZ0leqLxkT2iP5Zg==
+Private-MAC: aae19c8a3f81c2a25173db6d37bcfffd1c96d5f1
+`,
+    expected: true
+  },
+  {
+    input: `My name is sheela
+Sheela ki jawani
+I’m just sexy for you
+Main tere haath na aani`,
+    expected: false
+  },
+  {
+    input: '',
+    expected: false
+  },
+  {
+    input: 'idufh aiubd isudb',
+    expected: false
+  }
+]
+
+private_key.testcases = testcase
