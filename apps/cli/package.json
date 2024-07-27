@@ -16,7 +16,6 @@
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
     "chalk": "^4.1.2",
-    "cli-spinners": "^3.1.0",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
@@ -24,9 +23,7 @@
     "figlet": "^1.7.0",
     "fs": "0.0.1-security",
     "glob": "^11.0.0",
-    "nanospinner": "^1.1.0",
     "nodemon": "^3.1.4",
-    "ora": "^8.0.1",
     "secret-scan": "workspace:*",
     "socket.io-client": "^4.7.5",
     "typescript": "^5.5.2"
