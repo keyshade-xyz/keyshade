@@ -143,6 +143,4 @@ export interface GetAllProjectsRequest {
   search?: string
 }
 
-export interface GetAllProjectsResponse {
-    
-}
+export interface GetAllProjectsResponse {}
