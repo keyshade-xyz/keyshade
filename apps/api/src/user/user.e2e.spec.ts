@@ -9,7 +9,8 @@ import { AppModule } from '../app/app.module'
 import { AuthProvider, User } from '@prisma/client'
 import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
-import { UserService } from './service/user.service'
+import { UserService } from './serice/user.service'
+import { create } from 'domain'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -128,6 +129,27 @@ describe('User Controller Tests', () => {
     expect(workspace.name).toEqual('My Workspace')
     expect(workspace.isDefault).toEqual(true)
     expect(workspace.ownerId).toEqual(createUserResponse.id)
+  })
+
+  it('should skip workspace creation for admin users', async () => {
+    const createAdminUserResponse = await userService.createUser({
+      email: '',
+      password: '',
+      isAdmin: true,
+      isOnboardingFinished: true,
+      profilePictureUrl: null
+    })
+
+    expect(createAdminUserResponse.defaultWorkspace).toBeUndefined()
+
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        ownerId: createAdminUserResponse.id,
+        isDefault: true
+      }
+    })
+
+    expect(workspace).toBeNull()
   })
 
   test('regular user should not be able to access other routes if onboarding is not finished', async () => {

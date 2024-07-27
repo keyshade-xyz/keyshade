@@ -8,9 +8,10 @@ const createUser = async (
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider },
   prisma: PrismaService
 ): Promise<
-  User & {
-    defaultWorkspace: Workspace
-  }
+  | (User & {
+      defaultWorkspace: Workspace
+    })
+  | User
 > => {
   const logger = new Logger('createUser')
 
@@ -26,6 +27,11 @@ const createUser = async (
       authProvider: dto.authProvider
     }
   })
+
+  if (user.isAdmin) {
+    logger.log(`Created admin user ${user.id}`)
+    return user
+  }
 
   // Create the user's default workspace
   const workspace = await createWorkspace(
