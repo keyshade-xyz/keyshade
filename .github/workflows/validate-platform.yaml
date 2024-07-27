@@ -1,0 +1,61 @@
+name: Validate Platform
+
+on:
+  push:
+    branches:
+      - '!develop'
+      - '!main'
+    paths:
+      [
+        'apps/platform/**',
+        '.github/workflows/validate-platform.yml',
+        '.github/workflows/deploy-platform.yml'
+      ]
+  pull_request:
+    paths:
+      [
+        'apps/platform/**',
+        '.github/workflows/deploy-platform.yml',
+        '.github/workflows/validate-platform.yml'
+      ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Platform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.2.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install packages
+        run: |
+          pnpm i
+
+      - name: Lint
+        run: |
+          pnpm run lint:platform
