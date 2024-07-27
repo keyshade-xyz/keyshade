@@ -1441,7 +1441,7 @@ describe('Project Controller Tests', () => {
       // Sync the fork
       await app.inject({
         method: 'PUT',
-        url: `/project/${forkedProject.id}/sync-fork`,
+        url: `/project/${forkedProject.id}/fork`,
         headers: {
           'x-e2e-user-email': user2.email
         }
@@ -1631,7 +1631,7 @@ describe('Project Controller Tests', () => {
       // Sync the fork
       await app.inject({
         method: 'PUT',
-        url: `/project/${forkedProject.id}/sync-fork?hardSync=true`,
+        url: `/project/${forkedProject.id}/fork?hardSync=true`,
         headers: {
           'x-e2e-user-email': user2.email
         }
@@ -1666,7 +1666,7 @@ describe('Project Controller Tests', () => {
     it('should not be able to sync a project that is not forked', async () => {
       const response = await app.inject({
         method: 'PUT',
-        url: `/project/${project3.id}/sync-fork`,
+        url: `/project/${project3.id}/fork`,
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -1690,8 +1690,8 @@ describe('Project Controller Tests', () => {
       )
 
       const response = await app.inject({
-        method: 'PUT',
-        url: `/project/${forkedProject.id}/unlink-fork`,
+        method: 'DELETE',
+        url: `/project/${forkedProject.id}/fork`,
         headers: {
           'x-e2e-user-email': user2.email
         }

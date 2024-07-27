@@ -68,7 +68,7 @@ export class ProjectController {
     return await this.service.forkProject(user, projectId, forkMetadata)
   }
 
-  @Put(':projectId/sync-fork')
+  @Put(':projectId/fork')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.UPDATE_PROJECT)
   async syncFork(
     @CurrentUser() user: User,
@@ -78,7 +78,7 @@ export class ProjectController {
     return await this.service.syncFork(user, projectId, hardSync)
   }
 
-  @Put(':projectId/unlink-fork')
+  @Delete(':projectId/fork')
   @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
   async unlinkFork(
     @CurrentUser() user: User,
