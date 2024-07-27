@@ -67,6 +67,19 @@ export interface GetAllEnvironmentsOfProjectResponse {
       profilePictureUrl: string | null
     }
   }[]
+  metadata: {
+    page: number
+    perPage: number
+    pageCount: number
+    totalCount: number
+    links: {
+      self: string
+      first: string
+      previous: string | null
+      next: string | null
+      last: string
+    }
+  }
 }
 
 export interface DeleteEnvironmentRequest {

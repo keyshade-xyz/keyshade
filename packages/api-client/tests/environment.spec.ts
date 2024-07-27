@@ -87,8 +87,20 @@ describe('Get Environments Tests', () => {
           }
         )
 
-      expect(environments).toHaveLength(2)
-      expect(environments[0].name).toBe('Default')
+      expect(environments.items).toHaveLength(2)
+      expect(environments.items[0].name).toBe('Default')
+      expect(environments.metadata.totalCount).toEqual(2)
+      expect(environments.metadata.links.self).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(environments.metadata.links.first).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(environments.metadata.links.previous).toBeNull()
+      expect(environments.metadata.links.next).toBeNull()
+      expect(environments.metadata.links.last).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
     } catch (error) {
       console.error(error)
       process.exit(1)
@@ -211,7 +223,19 @@ describe('Get Environments Tests', () => {
           }
         )
 
-      expect(environments).toHaveLength(2)
+      expect(environments.items).toHaveLength(2)
+      expect(environments.metadata.totalCount).toEqual(2)
+      expect(environments.metadata.links.self).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(environments.metadata.links.first).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(environments.metadata.links.previous).toBeNull()
+      expect(environments.metadata.links.next).toBeNull()
+      expect(environments.metadata.links.last).toBe(
+        `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      )
     } catch (error) {
       console.error(error)
       process.exit(1)
