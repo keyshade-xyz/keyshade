@@ -725,7 +725,22 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining(roles))
+    expect(response.json().items).toEqual(expect.arrayContaining(roles))
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toBe(roles.length)
+    expect(metadata.links.self).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should be able to fetch all the roles of a workspace with READ_WORKSPACE_ROLE role', async () => {
@@ -766,7 +781,22 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining(roles))
+    expect(response.json().items).toEqual(expect.arrayContaining(roles))
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toBe(roles.length)
+    expect(metadata.links.self).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all the roles of a workspace without READ_WORKSPACE_ROLE role', async () => {
