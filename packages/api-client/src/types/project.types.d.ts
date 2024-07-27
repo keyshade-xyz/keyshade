@@ -98,7 +98,9 @@ export interface ForkProjectResponse {
   forkedFromId: string
 }
 
-export interface SyncProjectRequest {}
+export interface SyncProjectRequest {
+  projectId: string
+}
 
 export interface SyncProjectResponse {}
 
@@ -135,7 +137,7 @@ export interface GetForkResponse {
   forkedFromId: string
 }
 export interface GetAllProjectsRequest {
-  projectId: string
+  workspaceId: string
   page?: number
   limit?: number
   sort?: string

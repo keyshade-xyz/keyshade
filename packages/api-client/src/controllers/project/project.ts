@@ -12,6 +12,8 @@ import {
   GetForkResponse,
   GetProjectRequest,
   GetProjectResponse,
+  SyncProjectRequest,
+  SyncProjectResponse,
   UnlinkProjectRequest,
   UnlinkProjectResponse,
   UpdateProjectRequest,
@@ -71,7 +73,16 @@ export default class ProjectController {
     )
   }
 
-  static async syncFork() {}
+  static async syncFork(
+    request: SyncProjectRequest,
+    headers: Record<string, string>
+  ): Promise<SyncProjectResponse> {
+    return this.apiClient.put(
+      `/project/${request.projectId}/fork`,
+      request,
+      headers
+    )
+  }
 
   static async unlinkFork(
     request: UnlinkProjectRequest,
@@ -100,7 +111,7 @@ export default class ProjectController {
     request: GetAllProjectsRequest,
     headers: Record<string, string>
   ): Promise<[GetAllProjectsResponse]> {
-    let url = `/api/project/all/${request.projectId}`
+    let url = `/api/project/all/${request.workspaceId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
