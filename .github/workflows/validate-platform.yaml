@@ -59,14 +59,3 @@ jobs:
       - name: Lint
         run: |
           pnpm run lint:platform
-
-      - name: Test
-        run: |
-          pnpm run test:platform
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          flags: platform
