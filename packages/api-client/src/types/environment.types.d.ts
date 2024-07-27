@@ -1,3 +1,5 @@
+import { Page } from '../../../../apps/cli/src/types/index.types'
+
 export interface CreateEnvironmentRequest {
   name: string
   description?: string
@@ -53,8 +55,8 @@ export interface GetAllEnvironmentsOfProjectRequest {
   search?: string
 }
 
-export interface GetAllEnvironmentsOfProjectResponse {
-  items: {
+export interface GetAllEnvironmentsOfProjectResponse
+  extends Page<{
     id: string
     name: string
     description: string | null
@@ -66,21 +68,7 @@ export interface GetAllEnvironmentsOfProjectResponse {
       email: string
       profilePictureUrl: string | null
     }
-  }[]
-  metadata: {
-    page: number
-    perPage: number
-    pageCount: number
-    totalCount: number
-    links: {
-      self: string
-      first: string
-      previous: string | null
-      next: string | null
-      last: string
-    }
-  }
-}
+  }> {}
 
 export interface DeleteEnvironmentRequest {
   id: string
