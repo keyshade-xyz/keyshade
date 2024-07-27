@@ -88,7 +88,7 @@ export class VariableController {
 
   @Get('/:projectId/:environmentId')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
-  async getAllSecretsOfEnvironment(
+  async getAllVariablesOfEnvironment(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
     @Param('environmentId') environmentId: string
