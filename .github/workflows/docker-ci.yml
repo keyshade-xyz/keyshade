@@ -8,7 +8,7 @@ on:
     paths:
       - '**Dockerfile'
 jobs:
-  build-image-1:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
