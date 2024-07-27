@@ -498,8 +498,10 @@ export class SecretService {
     environmentId: Environment['id'],
     page: number,
     limit: number,
-    sort: string
+    order: string
   ) {
+    // assign order to variable dynamically
+    const sortOrder = order === 'asc' ? 'asc' : 'desc'
     //check access to secret
     await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
@@ -524,7 +526,7 @@ export class SecretService {
       skip: page * limit,
       take: limit,
       orderBy: {
-        [sort]: sort
+        version: sortOrder
       }
     })
     return revisions

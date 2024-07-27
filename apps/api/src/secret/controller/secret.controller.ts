@@ -110,7 +110,7 @@ export class SecretController {
     @Param('environmentId') environmentId: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
-    @Query('sort') sort: string = 'version'
+    @Query('order') order: string = 'desc'
   ) {
     return await this.secretService.getRevisionsOfSecret(
       user,
@@ -118,7 +118,7 @@ export class SecretController {
       environmentId,
       page,
       limit,
-      sort
+      order
     )
   }
 }
