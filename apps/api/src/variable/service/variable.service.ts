@@ -28,6 +28,7 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+import { paginate } from '../../common/paginate'
 
 @Injectable()
 export class VariableService {
@@ -520,7 +521,7 @@ export class VariableService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: Number(limit),
       orderBy: {
         [sort]: order
       }
@@ -601,7 +602,27 @@ export class VariableService {
       }
     }
 
-    return Array.from(variablesWithEnvironmentalValues.values())
+    const items = Array.from(variablesWithEnvironmentalValues.values())
+
+    //calculate metadata
+    const totalCount = await this.prisma.variable.count({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      }
+    })
+
+    const metadata = paginate(totalCount, `/variable/${projectId}`, {
+      page: Number(page),
+      limit: Number(limit),
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
   }
 
   private async variableExists(

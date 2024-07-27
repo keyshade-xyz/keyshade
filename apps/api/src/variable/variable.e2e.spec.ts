@@ -575,16 +575,16 @@ describe('Variable Controller Tests', () => {
   it('should be able to fetch all variables', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/${project1.id}`,
+      url: `/variable/${project1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { variable, values } = response.json()[0]
+    const { variable, values } = response.json().items[0]
     expect(variable).toBeDefined()
     expect(values).toBeDefined()
     expect(values.length).toBe(1)
@@ -592,6 +592,21 @@ describe('Variable Controller Tests', () => {
     expect(values[0].environment.id).toBe(environment1.id)
     expect(variable.id).toBe(variable1.id)
     expect(variable.name).toBe('Variable 1')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all variables if the user has no access to the project', async () => {
