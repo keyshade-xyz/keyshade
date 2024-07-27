@@ -1,13 +1,21 @@
 import client from '@package/client'
 import {
   CreateProjectRequest,
+  CreateProjectResponse,
   DeleteProjectRequest,
+  DeleteProjectResponse,
   ForkProjectRequest,
+  ForkProjectResponse,
   GetAllProjectsRequest,
+  GetAllProjectsResponse,
   GetForkRequest,
+  GetForkResponse,
   GetProjectRequest,
+  GetProjectResponse,
   UnlinkProjectRequest,
-  UpdateProjectRequest
+  UnlinkProjectResponse,
+  UpdateProjectRequest,
+  UpdateProjectResponse
 } from '@package/types/project.types'
 
 export default class ProjectController {
@@ -15,9 +23,9 @@ export default class ProjectController {
 
   static async createProject(
     request: CreateProjectRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.post(
+    headers: Record<string, string>
+  ): Promise<CreateProjectResponse> {
+    return this.apiClient.post<CreateProjectResponse>(
       `/api/project/${request.workspaceId}`,
       request,
       headers
@@ -26,9 +34,9 @@ export default class ProjectController {
 
   static async updateProject(
     request: UpdateProjectRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.put(
+    headers: Record<string, string>
+  ): Promise<UpdateProjectResponse> {
+    return this.apiClient.put<UpdateProjectResponse>(
       `/api/project/${request.projectId}`,
       request,
       headers
@@ -37,23 +45,26 @@ export default class ProjectController {
 
   static async deleteProject(
     request: DeleteProjectRequest,
-    headers: any
-  ): Promise<any> {
+    headers: Record<string, string>
+  ): Promise<DeleteProjectResponse> {
     return this.apiClient.delete(`/api/project/${request.projectId}`, headers)
   }
 
   static async getProject(
     request: GetProjectRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.get(`/api/project/${request.projectId}`, headers)
+    headers: Record<string, string>
+  ): Promise<GetProjectResponse> {
+    return this.apiClient.get<GetProjectResponse>(
+      `/api/project/${request.projectId}`,
+      headers
+    )
   }
 
   static async forkProject(
     request: ForkProjectRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.post(
+    headers: Record<string, string>
+  ): Promise<ForkProjectResponse> {
+    return this.apiClient.post<ForkProjectResponse>(
       `/api/project/${request.projectId}/fork`,
       request,
       headers
@@ -64,26 +75,37 @@ export default class ProjectController {
 
   static async unlinkFork(
     request: UnlinkProjectRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.put(
-      `/api/project/${request.projectId}/unlink-fork`,
-      request,
+    headers: Record<string, string>
+  ): Promise<UnlinkProjectResponse> {
+    return this.apiClient.delete(
+      `/api/project/${request.projectId}/fork`,
       headers
     )
   }
 
-  static async getForks(request: GetForkRequest, headers: any): Promise<any> {
-    return this.apiClient.get(
-      `/api/project/${request.projectId}/forks`,
-      headers
-    )
+  static async getForks(
+    request: GetForkRequest,
+    headers: Record<string, string>
+  ): Promise<[GetForkResponse]> {
+    let url = `/api/project/${request.projectId}/forks`
+    request.page && (url += `page=${request.page}&`)
+    request.limit && (url += `limit=${request.limit}&`)
+    request.sort && (url += `sort=${request.sort}&`)
+    request.order && (url += `order=${request.order}&`)
+    request.search && (url += `search=${request.search}&`)
+    return this.apiClient.get(url, headers)
   }
 
   static async getAllProjects(
     request: GetAllProjectsRequest,
-    headers: any
-  ): Promise<any> {
-    return this.apiClient.get(`/api/project/all/${request.projectId}`, headers)
+    headers: Record<string, string>
+  ): Promise<[GetAllProjectsResponse]> {
+    let url = `/api/project/all/${request.projectId}`
+    request.page && (url += `page=${request.page}&`)
+    request.limit && (url += `limit=${request.limit}&`)
+    request.sort && (url += `sort=${request.sort}&`)
+    request.order && (url += `order=${request.order}&`)
+    request.search && (url += `search=${request.search}&`)
+    return this.apiClient.get(url, headers)
   }
 }
