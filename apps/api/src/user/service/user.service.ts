@@ -1,9 +1,18 @@
-import { ConflictException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException
+} from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
-import { IMailService, MAIL_SERVICE } from '../../mail/services/interface.service'
+import {
+  IMailService,
+  MAIL_SERVICE
+} from '../../mail/services/interface.service'
 import createUser from '../../common/create-user'
 import generateOtp from '../../common/generate-otp'
 import { EnvSchema } from '../../common/env/env.schema'
