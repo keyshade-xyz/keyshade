@@ -5,6 +5,7 @@ describe('Get Project Tests', () => {
   const email = 'johndoe@example.com'
   let projectId: string | null
   let workspaceId: string | null
+  let forkedProjectId: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -33,7 +34,8 @@ describe('Get Project Tests', () => {
         name: 'Project',
         description: 'Project Description',
         storePrivateKey: true,
-        workspaceId
+        workspaceId,
+        accessLevel: 'GLOBAL'
       },
       {
         'x-e2e-user-email': email
@@ -41,7 +43,7 @@ describe('Get Project Tests', () => {
     )
     expect(project.id).toBeDefined()
     expect(project.name).toBe('Project')
-    expect(project.description).toBe('Project description')
+    expect(project.description).toBe('Project Description')
     expect(project.storePrivateKey).toBe(true)
     expect(project.workspaceId).toBe(workspaceId)
     expect(project.publicKey).toBeDefined()
@@ -65,23 +67,26 @@ describe('Get Project Tests', () => {
   })
 
   it('should fork the project', async () => {
-    const project = await ProjectController.forkProject(
+    const fork = await ProjectController.forkProject(
       {
-        name: 'Project',
-        projectId
+        projectId,
+        workspaceId,
+        name: 'Forked Stuff'
       },
       {
         'x-e2e-user-email': email
       }
     )
-    expect(project.isForked).toBe(true)
-    expect(project.forkedFromId).toBe(projectId)
+    forkedProjectId = fork.id
+    expect(fork.isForked).toBe(true)
+    expect(fork.forkedFromId).toBe(projectId)
   })
 
   it('should get all fork the project', async () => {
     const forks = await ProjectController.getForks(
       {
-        projectId
+        projectId,
+        workspaceId
       },
       {
         'x-e2e-user-email': email
@@ -93,7 +98,8 @@ describe('Get Project Tests', () => {
   it('should unlink fork the project', async () => {
     await ProjectController.unlinkFork(
       {
-        projectId
+        projectId: forkedProjectId,
+        workspaceId
       },
       {
         'x-e2e-user-email': email
@@ -101,7 +107,8 @@ describe('Get Project Tests', () => {
     )
     const forks = await ProjectController.getForks(
       {
-        projectId
+        projectId,
+        workspaceId
       },
       {
         'x-e2e-user-email': email
@@ -119,7 +126,7 @@ describe('Get Project Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(projects).toHaveLength(1)
+    expect(projects).toHaveLength(2)
   })
 
   it('should get delete a the project', async () => {

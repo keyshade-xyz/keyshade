@@ -4,6 +4,7 @@ export interface CreateProjectRequest {
   description?: string
   storePrivateKey?: boolean
   environments?: CreateEnvironment[]
+  accessLevel: string
 }
 
 export interface CreateProjectResponse {
@@ -77,7 +78,9 @@ export interface GetProjectResponse {
 
 export interface ForkProjectRequest {
   projectId: string
-  name: string
+  name?: string
+  workspaceId?: string
+  storePrivateKey?: boolean
 }
 
 export interface ForkProjectResponse {
@@ -106,12 +109,14 @@ export interface SyncProjectResponse {}
 
 export interface UnlinkProjectRequest {
   projectId: string
+  workspaceId: string
 }
 
 export interface UnlinkProjectResponse {}
 
 export interface GetForkRequest {
   projectId: string
+  workspaceId: string
   page?: number
   limit?: number
   sort?: string
