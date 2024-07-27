@@ -7,12 +7,7 @@ import { Logger } from '@nestjs/common'
 const createUser = async (
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider },
   prisma: PrismaService
-): Promise<
-  | (User & {
-      defaultWorkspace: Workspace
-    })
-  | User
-> => {
+): Promise<User & { defaultWorkspace?: Workspace }> => {
   const logger = new Logger('createUser')
 
   // Create the user

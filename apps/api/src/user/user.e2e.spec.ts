@@ -133,7 +133,6 @@ describe('User Controller Tests', () => {
   it('should skip workspace creation for admin users', async () => {
     const createAdminUserResponse = await userService.createUser({
       email: '',
-      password: '',
       isAdmin: true,
       isOnboardingFinished: true,
       profilePictureUrl: null
