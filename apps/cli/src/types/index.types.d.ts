@@ -2,6 +2,7 @@ export interface ProjectRootConfig {
   workspace: string
   project: string
   environment: string
+  quitOnDecryptionFailure: boolean
 }
 
 export interface ProfileConfig {

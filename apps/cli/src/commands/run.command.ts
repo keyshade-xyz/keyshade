@@ -18,6 +18,8 @@ import type {
   Configuration
 } from '@/types/command/run.types'
 
+import { decrypt } from '@/util/decrypt'
+
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
 
@@ -29,7 +31,7 @@ export default class RunCommand extends BaseCommand {
   getName(): string {
     return 'run'
   }
-
+  
   getDescription(): string {
     return 'Run a command'
   }
@@ -54,7 +56,7 @@ export default class RunCommand extends BaseCommand {
   private async fetchConfigurations(): Promise<
     ProjectRootConfig & { privateKey: string }
   > {
-    const { environment, project, workspace } = await fetchProjectRootConfig()
+    const { environment, project, workspace, quitOnDecryptionFailure } = await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
     const privateKey =
       privateKeyConfig[`${workspace}_${project}_${environment}`]
@@ -67,7 +69,8 @@ export default class RunCommand extends BaseCommand {
       environment,
       project,
       workspace,
-      privateKey
+      privateKey,
+      quitOnDecryptionFailure
     }
   }
 
@@ -102,8 +105,27 @@ export default class RunCommand extends BaseCommand {
 
       ioClient.on('configuration-updated', async (data: Configuration) => {
         Logger.info(
-          `Configuration change received from API (name: ${data.name}, value: ${data.value})`
+          `Configuration change received from API (name: ${data.name})`
         )
+
+        // To test the below condition of quitOnDecryptionFailure, uncomment the below line
+        // data.isPlaintext = false
+
+        if (!data.isPlaintext) {
+          const configurations = await this.fetchConfigurations()
+          try {
+            data.value = await decrypt(configurations.privateKey, data.value)
+          } catch (error) {
+            if (configurations.quitOnDecryptionFailure) {
+              Logger.error(`Decryption failed for ${data.name}. Stopping the process.`);
+              process.exit(1)
+            } else {
+              Logger.warn(`Decryption failed for ${data.name}. Skipping this configuration.`);
+              return;
+            }
+          }
+        }
+
         this.processEnvironmentalVariables[data.name] = data.value
         this.shouldRestart = true
       })
@@ -179,6 +201,7 @@ export default class RunCommand extends BaseCommand {
 
     // Set the configurations as environmental variables
     configurations.forEach((config) => {
+      console.log(config.name, config.value)
       this.processEnvironmentalVariables[config.name] = config.value
     })
   }
