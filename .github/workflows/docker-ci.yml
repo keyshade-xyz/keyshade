@@ -14,4 +14,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build Docker Image
-        run: docker build -f apps/** .
+        run: |
+          for dir in app/*/ ; do
+            if [ -f "$dir/Dockerfile" ]; then
+              docker build -f "$dir/Dockerfile" "$dir"
+            fi
+          done

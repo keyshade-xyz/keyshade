@@ -27,8 +27,6 @@ RUN pnpm install --no-cache --ignore-scripts
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-
-
 RUN pnpm turbo build --filter=web...
 
 FROM base AS runner
