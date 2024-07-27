@@ -9,6 +9,7 @@ import { GoogleOAuthStrategyFactory } from '../config/factory/google/google-stra
 import { GoogleStrategy } from '../config/oauth-strategy/google/google.strategy'
 import { GitlabOAuthStrategyFactory } from '../config/factory/gitlab/gitlab-strategy.factory'
 import { GitlabStrategy } from '../config/oauth-strategy/gitlab/gitlab.strategy'
+import { CacheModule } from '../cache/cache.module'
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { GitlabStrategy } from '../config/oauth-strategy/gitlab/gitlab.strategy'
         algorithm: 'HS256'
       }
     }),
-    UserModule
+    UserModule,
+    CacheModule
   ],
   providers: [
     AuthService,
