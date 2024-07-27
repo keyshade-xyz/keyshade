@@ -31,6 +31,7 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+import { paginate } from '../../common/paginate'
 
 @Injectable()
 export class SecretService {
@@ -530,7 +531,7 @@ export class SecretService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: Number(limit),
       orderBy: {
         [sort]: order
       }
@@ -615,7 +616,32 @@ export class SecretService {
       }
     }
 
-    return Array.from(secretsWithEnvironmentalValues.values())
+    const items = Array.from(secretsWithEnvironmentalValues.values())
+
+    //Calculate pagination metadata
+    const totalCount = await this.prisma.secret.count({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      }
+    })
+
+    const metadata = paginate(
+      totalCount,
+      `/secret/${projectId}`,
+      {
+        page: Number(page),
+        limit: Number(limit),
+        sort,
+        order,
+        search
+      },
+      { decryptValue }
+    )
+
+    return { items, metadata }
   }
 
   private async secretExists(
