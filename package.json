@@ -103,6 +103,7 @@
     "lint:api": "turbo run lint --filter=api",
     "lint:web": "turbo run lint --filter=web",
     "lint:platform": "turbo run lint --filter=platform",
+    "lint:cli": "turbo run lint --filter=cli",
     "lint:api-client": "pnpm run --filter=api-client lint",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
