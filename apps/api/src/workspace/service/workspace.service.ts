@@ -467,7 +467,7 @@ export class WorkspaceService {
 
     return this.prisma.workspaceMember.findMany({
       skip: page * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         workspace: {
           [sort]: order
@@ -730,7 +730,7 @@ export class WorkspaceService {
   ) {
     return this.prisma.workspace.findMany({
       skip: page * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         [sort]: order
       },

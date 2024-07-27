@@ -520,7 +520,7 @@ export class VariableService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         [sort]: order
       }

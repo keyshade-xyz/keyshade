@@ -43,7 +43,7 @@ export class EventService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         timestamp: 'desc'
       }

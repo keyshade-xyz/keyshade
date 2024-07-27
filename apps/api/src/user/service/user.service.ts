@@ -216,7 +216,7 @@ export class UserService {
   ): Promise<User[]> {
     return this.prisma.user.findMany({
       skip: (page - 1) * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         [sort]: order
       },

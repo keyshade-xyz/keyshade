@@ -641,7 +641,7 @@ export class ProjectService {
     return (
       await this.prisma.project.findMany({
         skip: page * limit,
-        take: limit,
+        take: Math.min(limit, 30),
         orderBy: {
           [sort]: order
         },
