@@ -16,9 +16,6 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
 
-
-
-
 # install the dependencies
 RUN npm install --ignore-scripts -g pnpm
 COPY .gitignore .gitignore
