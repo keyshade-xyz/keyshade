@@ -1,4 +1,4 @@
-import { ProfileConfig } from '../types/index.types'
+import type { ProfileConfig } from '@/types/index.types'
 
 export const checkProfileExists = (
   profiles: ProfileConfig,
@@ -8,7 +8,6 @@ export const checkProfileExists = (
   if (!profiles[profile]) {
     if (s) {
       s.stop(`Profile ${profile} not found`)
-      return
     } else throw new Error(`Profile ${profile} not found`)
   }
 }

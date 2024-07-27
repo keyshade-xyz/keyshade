@@ -1,15 +1,12 @@
-import {
+import BaseCommand from '@/commands/base.command'
+import { confirm, spinner } from '@clack/prompts'
+import { checkIsDefaultProfile, checkProfileExists } from '@/util/profile'
+import type {
   CommandActionData,
   CommandArgument
-} from 'src/types/command/command.types'
-import BaseCommand from '../base.command'
-import { confirm, spinner } from '@clack/prompts'
-import {
-  fetchProfileConfig,
-  writeProfileConfig
-} from '../../util/configuration'
-import { ProfileConfig } from 'src/types/index.types'
-import { checkIsDefaultProfile, checkProfileExists } from 'src/util/profile'
+} from '@/types/command/command.types'
+import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
+import type { ProfileConfig } from '@/types/index.types'
 
 export default class DeleteProfile extends BaseCommand {
   profiles: ProfileConfig
@@ -53,7 +50,6 @@ export default class DeleteProfile extends BaseCommand {
 
       if (!choice) {
         s.stop(`Profile ${profile} not deleted`)
-        return
       }
     }
   }

@@ -12,7 +12,4 @@ export interface ProfileConfig {
   }
 }
 
-export interface PrivateKeyConfig {
-  // workspace_project_environment => private key
-  [key: string]: string
-}
+export type PrivateKeyConfig = Record<string, string>

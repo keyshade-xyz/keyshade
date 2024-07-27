@@ -52,5 +52,3 @@ export interface GetForkResponse {}
 export interface GetAllProjectsRequest {
   projectId: string
 }
-
-export interface GetAllProjectsResponse {}
