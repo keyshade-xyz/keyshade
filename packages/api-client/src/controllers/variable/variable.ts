@@ -19,7 +19,7 @@ export default class VariableController {
 
   static async createVariable(
     request: CreateVariableRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<CreateVariableResponse> {
     return this.apiClient.post(
       `/api/variable/${request.projectId}`,
@@ -29,7 +29,7 @@ export default class VariableController {
   }
   static async updateVariable(
     request: UpdateVariableRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<UpdateVariableResponse> {
     return this.apiClient.put(
       `/api/variable/${request.variableId}`,
@@ -39,7 +39,7 @@ export default class VariableController {
   }
   static async rollbackVariable(
     request: RollBackVariableRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<RollBackVariableResponse> {
     return this.apiClient.put(
       `/api/variable/${request.variableId}/rollback/${request.version}?environmentId=${request.environmentId}`,
@@ -49,19 +49,19 @@ export default class VariableController {
   }
   static async deleteVariable(
     request: DeleteVariableRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<DeleteVariableResponse> {
     return this.apiClient.delete(`/api/variable/${request.variableId}`, headers)
   }
   static async getAllVariablesOfProject(
     request: getAllVariablesOfProjectRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<getAllVariablesOfProjectResponse> {
     return this.apiClient.get(`/api/variable/${request.projectId}`, headers)
   }
   static async getAllVariablesOfEnvironment(
     request: getAllVariablesOfEnvironmentRequest,
-    headers: any
+    headers: Record<string, string>
   ): Promise<getAllVariablesOfEnvironmentResponse> {
     return this.apiClient.get(
       `/api/variable/${request.projectId}/${request.environmentId}`,
