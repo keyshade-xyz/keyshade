@@ -291,7 +291,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -410,7 +410,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -911,7 +911,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)

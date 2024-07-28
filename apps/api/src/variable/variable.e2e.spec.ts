@@ -292,7 +292,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -430,7 +430,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -755,7 +755,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)

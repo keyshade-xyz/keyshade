@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { paginate } from '../../common/paginate'
 
 @Injectable()
 export class EventService {
@@ -43,7 +44,7 @@ export class EventService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: Number(limit),
       orderBy: {
         timestamp: 'desc'
       }
@@ -54,6 +55,24 @@ export class EventService {
     }
 
     // @ts-expect-error - Prisma does not have a type for severity
-    return await this.prisma.event.findMany(query)
+    const items = await this.prisma.event.findMany(query)
+
+    //calculate metadata for pagination
+    const totalCount = await this.prisma.event.count({
+      where: query.where
+    })
+
+    const metadata = paginate(
+      totalCount,
+      `/event/${workspaceId}`,
+      {
+        page: Number(page),
+        limit: Number(limit),
+        search
+      },
+      { source }
+    )
+
+    return { items, metadata }
   }
 }
