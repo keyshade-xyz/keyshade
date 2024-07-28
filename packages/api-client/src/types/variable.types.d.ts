@@ -39,7 +39,11 @@ export interface UpdateVariableRequest {
   ]
 }
 export interface UpdateVariableResponse {
-  variable: Variable
+  variable: {
+    id: string
+    name: string
+    note: string
+  }
   updatedVersions: [
     {
       value: string
@@ -48,11 +52,6 @@ export interface UpdateVariableResponse {
   ]
 }
 
-export interface Variable {
-  id: string
-  name: string
-  note: string
-}
 export interface RollBackVariableRequest {
   variableId: string
   version: number
@@ -79,7 +78,24 @@ export interface GetAllVariablesOfProjectRequest {
 }
 
 export interface GetAllVariablesOfProjectResponse {
-  []
+  items: {
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+    note: string | null
+    lastUpdatedById: string
+    projectId: string
+    project: {
+      workspaceId: string
+    }
+    versions: [
+      {
+        value: string
+        environmentId: string
+      }
+    ]
+  }[]
 }
 
 export interface GetAllVariablesOfEnvironmentRequest {
@@ -92,4 +108,23 @@ export interface GetAllVariablesOfEnvironmentRequest {
   search?: string
 }
 
-export interface GetAllVariablesOfEnvironmentResponse {}
+export interface GetAllVariablesOfEnvironmentResponse {
+  items: {
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+    note: string | null
+    lastUpdatedById: string
+    projectId: string
+    project: {
+      workspaceId: string
+    }
+    versions: [
+      {
+        value: string
+        environmentId: string
+      }
+    ]
+  }[]
+}

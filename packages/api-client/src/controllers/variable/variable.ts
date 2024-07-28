@@ -27,6 +27,7 @@ export default class VariableController {
       headers
     )
   }
+
   static async updateVariable(
     request: UpdateVariableRequest,
     headers: Record<string, string>
@@ -37,6 +38,7 @@ export default class VariableController {
       headers
     )
   }
+
   static async rollbackVariable(
     request: RollBackVariableRequest,
     headers: Record<string, string>
@@ -47,25 +49,37 @@ export default class VariableController {
       headers
     )
   }
+
   static async deleteVariable(
     request: DeleteVariableRequest,
     headers: Record<string, string>
   ): Promise<DeleteVariableResponse> {
     return this.apiClient.delete(`/api/variable/${request.variableId}`, headers)
   }
+
   static async getAllVariablesOfProject(
     request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
   ): Promise<GetAllVariablesOfProjectResponse> {
-    return this.apiClient.get(`/api/variable/${request.projectId}`, headers)
+    let url = `/api/variable/${request.projectId}`
+    request.page && (url += `page=${request.page}&`)
+    request.limit && (url += `limit=${request.limit}&`)
+    request.sort && (url += `sort=${request.sort}&`)
+    request.order && (url += `order=${request.order}&`)
+    request.search && (url += `search=${request.search}&`)
+    return this.apiClient.get(url, headers)
   }
+
   static async getAllVariablesOfEnvironment(
     request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
   ): Promise<GetAllVariablesOfEnvironmentResponse> {
-    return this.apiClient.get(
-      `/api/variable/${request.projectId}/${request.environmentId}`,
-      headers
-    )
+    let url = `/api/variable/${request.projectId}/${request.environmentId}`
+    request.page && (url += `page=${request.page}&`)
+    request.limit && (url += `limit=${request.limit}&`)
+    request.sort && (url += `sort=${request.sort}&`)
+    request.order && (url += `order=${request.order}&`)
+    request.search && (url += `search=${request.search}&`)
+    return this.apiClient.get(url, headers)
   }
 }
