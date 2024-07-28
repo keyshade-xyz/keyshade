@@ -36,6 +36,7 @@ import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -80,6 +81,8 @@ describe('Secret Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()

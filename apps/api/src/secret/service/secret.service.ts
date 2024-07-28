@@ -531,7 +531,7 @@ export class SecretService {
         }
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       }
@@ -632,8 +632,8 @@ export class SecretService {
       totalCount,
       `/secret/${projectId}`,
       {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         sort,
         order,
         search
