@@ -81,13 +81,24 @@ describe('paginate', () => {
     expect(result.links.last).toEqual('/items?page=0&limit=10')
   })
 
-  it('should not be able to paginate when limit is 0 or undefined', () => {
+  it('should return empty object when page is greater than maximum page limit', () => {
+    const totalCount = 4
+    const relativeUrl = '/items'
+    const query = { page: 3, limit: 2 }
+
+    const result = paginate(totalCount, relativeUrl, query)
+
+    expect(result).toBeDefined()
+    expect(result).toEqual({})
+  })
+
+  it('should return empty object when limit is 0 or undefined', () => {
     const totalCount = 10
     const relativeUrl = '/items'
     const query = { page: 0, limit: 0 }
+    const result = paginate(totalCount, relativeUrl, query)
 
-    expect(() => paginate(totalCount, relativeUrl, query)).toThrow(
-      'Limit is required'
-    )
+    expect(result).toBeDefined()
+    expect(result).toEqual({})
   })
 })
