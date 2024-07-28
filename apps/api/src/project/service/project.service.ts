@@ -53,7 +53,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.CREATE_PROJECT,
+        authorities: [Authority.CREATE_PROJECT],
         prisma: this.prisma
       })
 
@@ -208,7 +208,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority,
+        authorities: [authority],
         prisma: this.prisma
       })
 
@@ -367,7 +367,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.CREATE_PROJECT,
+        authorities: [Authority.CREATE_PROJECT],
         prisma: this.prisma
       })
     } else {
@@ -484,7 +484,7 @@ export class ProjectService {
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,
       entity: { id: projectId },
-      authority: Authority.UPDATE_PROJECT,
+      authorities: [Authority.UPDATE_PROJECT],
       prisma: this.prisma
     })
 
@@ -504,7 +504,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.UPDATE_PROJECT,
+        authorities: [Authority.UPDATE_PROJECT],
         prisma: this.prisma
       })
 
@@ -518,7 +518,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: project.forkedFromId },
-        authority: Authority.READ_PROJECT,
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
 
@@ -543,7 +543,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.DELETE_PROJECT,
+        authorities: [Authority.DELETE_PROJECT],
         prisma: this.prisma
       })
 
@@ -601,7 +601,7 @@ export class ProjectService {
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,
       entity: { id: projectId },
-      authority: Authority.READ_PROJECT,
+      authorities: [Authority.READ_PROJECT],
       prisma: this.prisma
     })
 
@@ -616,7 +616,7 @@ export class ProjectService {
         (await this.authorityCheckerService.checkAuthorityOverProject({
           userId: user.id,
           entity: { id: fork.id },
-          authority: Authority.READ_PROJECT,
+          authorities: [Authority.READ_PROJECT],
           prisma: this.prisma
         })) != null
 
@@ -642,7 +642,7 @@ export class ProjectService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.READ_PROJECT,
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
 
@@ -663,7 +663,7 @@ export class ProjectService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_PROJECT,
+      authorities: [Authority.READ_PROJECT],
       prisma: this.prisma
     })
 
