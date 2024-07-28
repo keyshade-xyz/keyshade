@@ -9,7 +9,7 @@ import {
   GetIntegrationResponse,
   UpdateIntegrationRequest,
   UpdateIntegrationResponse
-} from '@package/types/integrayion.types'
+} from '@package/types/integration.types'
 import client from '@package/client'
 
 export default class IntegrationController {
@@ -64,7 +64,7 @@ export default class IntegrationController {
   static async deleteIntegration(
     request: DeleteIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<DeleteIntegrationResponse> {
+  ): Promise<DeleteIntegrationResponse[]> {
     return this.apiClient.delete(
       `/api/integration/${request.integrationId}`,
       headers
