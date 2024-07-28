@@ -320,7 +320,7 @@ export class WorkspaceRoleService {
         }
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       }
@@ -340,8 +340,8 @@ export class WorkspaceRoleService {
       totalCount,
       `/workspace-role/${workspaceId}/all`,
       {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         sort,
         order,
         search

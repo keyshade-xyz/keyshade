@@ -26,6 +26,7 @@ import { EventModule } from '../event/event.module'
 import { WorkspaceRoleService } from './service/workspace-role.service'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -57,6 +58,8 @@ describe('Workspace Role Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
