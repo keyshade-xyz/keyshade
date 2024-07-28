@@ -521,7 +521,7 @@ export class VariableService {
         }
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       }
@@ -615,8 +615,8 @@ export class VariableService {
     })
 
     const metadata = paginate(totalCount, `/variable/${projectId}`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       sort,
       order,
       search
