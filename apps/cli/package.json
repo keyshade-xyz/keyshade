@@ -7,7 +7,10 @@
   "scripts": {
     "build": "swc src --out-dir dist",
     "start": "node dist/src/index.js",
-    "dev": "pnpm build && node dist/src/index.js"
+    "dev": "pnpm build && node dist/src/index.js",
+    "bun:build": "bun build src --outdir dist",
+    "bun:start": "bun dist/src/index.js",
+    "bun:dev": "bun bun:build && bun dist/src/index.js"
   },
   "keywords": [],
   "author": "",
