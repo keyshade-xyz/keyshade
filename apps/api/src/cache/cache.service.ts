@@ -1,22 +1,30 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common'
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common'
 import { createClient, RedisClientType } from 'redis'
 import { User } from '@prisma/client'
 
 @Injectable()
 export class CacheService implements OnModuleDestroy {
   private readonly redisClient: RedisClientType
-  private readonly userPrefix = 'user-'
+  private static readonly USER_PREFIX = 'user-'
+  private readonly logger = new Logger(CacheService.name)
 
   constructor() {
-    this.redisClient = createClient({
-      url: 'redis://localhost:6379' // Replace with your Redis URL
-      // Add other Redis configuration options as needed
-    })
-    this.redisClient.connect()
+    if (process.env.REDIS_URL) {
+      this.redisClient = createClient({
+        url: process.env.REDIS_URL
+      })
+      this.redisClient.connect().catch((error) => {
+        this.logger.error('Failed to connect to Redis', error)
+      })
+    } else {
+      this.logger.warn(
+        'REDIS_URL is not set. CacheService will not be functional.'
+      )
+    }
   }
 
   private getUserKey(userId: string): string {
-    return `${this.userPrefix}${userId}`
+    return `${CacheService.USER_PREFIX}${userId}`
   }
 
   async setUser(user: User, expirationInSeconds?: number): Promise<void> {
@@ -44,7 +52,7 @@ export class CacheService implements OnModuleDestroy {
   }
 
   async clearAllUserCache(): Promise<void> {
-    const keys = await this.redisClient.keys(`${this.userPrefix}*`)
+    const keys = await this.redisClient.keys(`${CacheService.USER_PREFIX}*`)
     if (keys.length > 0) {
       await this.redisClient.del(keys)
     }

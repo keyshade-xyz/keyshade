@@ -144,7 +144,6 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Onboarding not finished')
     }
 
-    if (user) this.cache.setUser(user)
     // We attach the user to the request object.
     request['user'] = user
     return true

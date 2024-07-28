@@ -5,6 +5,7 @@ import { MAIL_SERVICE } from '../../mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '../../prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { CacheService } from '../../cache/cache.service'
 
 describe('AuthService', () => {
   let service: AuthService
@@ -15,7 +16,8 @@ describe('AuthService', () => {
         AuthService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
-        PrismaService
+        PrismaService,
+        CacheService
       ]
     })
       .overrideProvider(PrismaService)
