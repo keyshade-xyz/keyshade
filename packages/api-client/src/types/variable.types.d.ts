@@ -31,11 +31,21 @@ export interface CreateVariableResponse {
 export interface UpdateVariableRequest {
   variableId: string
   name?: string
-  entries?: Entries[]
+  entries?: [
+    {
+      value: string
+      environmentId: string
+    }
+  ]
 }
 export interface UpdateVariableResponse {
   variable: Variable
-  updatedVersions: Entries[]
+  updatedVersions: [
+    {
+      value: string
+      environmentId: string
+    }
+  ]
 }
 
 export interface Variable {
