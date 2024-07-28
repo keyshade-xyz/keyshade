@@ -196,7 +196,7 @@ export class EnvironmentService {
         }
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       }
@@ -211,8 +211,8 @@ export class EnvironmentService {
       }
     })
     const metadata = paginate(totalCount, `/environment/all/${projectId}`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       sort,
       order,
       search

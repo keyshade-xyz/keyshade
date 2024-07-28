@@ -79,15 +79,18 @@ describe('Get Environments Tests', () => {
     const environments =
       await EnvironmentController.getAllEnvironmentsOfProject(
         {
-          projectId
+          projectId,
+          page: 0,
+          limit: 10
         },
         {
           'x-e2e-user-email': email
         }
       )
-
     expect(environments.items).toHaveLength(2)
     expect(environments.items[0].name).toBe('Default')
+
+    //check metadata
     expect(environments.metadata.totalCount).toEqual(2)
     expect(environments.metadata.links.self).toBe(
       `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
