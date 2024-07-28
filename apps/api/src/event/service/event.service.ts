@@ -33,7 +33,7 @@ export class EventService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_EVENT,
+      authorities: [Authority.READ_EVENT],
       prisma: this.prisma
     })
 
