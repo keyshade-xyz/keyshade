@@ -20,7 +20,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<CreateIntegrationResponse> {
     return this.apiClient.post(
-      `api/integration/${request.workspaceId}`,
+      `/api/integration/${request.workspaceId}`,
       request,
       headers
     )
@@ -31,7 +31,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<UpdateIntegrationResponse> {
     return this.apiClient.put(
-      `/api/integration/${request.workspaceId}`,
+      `/api/integration/${request.integrationId}`,
       request,
       headers
     )

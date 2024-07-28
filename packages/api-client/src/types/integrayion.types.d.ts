@@ -1,14 +1,43 @@
 export interface CreateIntegrationRequest {
   workspaceId: string
+  projectId: string
+  name: string
+  type: string
+  notifyOn: [string]
+  metadata: any
+  environmentId: string
 }
 
-export interface CreateIntegrationResponse {}
+export interface CreateIntegrationResponse {
+  id: string
+  name: string
+  metadata: any
+  createdAt: string
+  updatedAt: string
+  type: string
+  notifyOn: [string]
+  workspaceId: string
+  projectId: string
+  environmentId: string
+}
 
 export interface UpdateIntegrationRequest {
-  workspaceId: string
+  integrationId: string
+  name: string
 }
 
-export interface UpdateIntegrationResponse {}
+export interface UpdateIntegrationResponse {
+  id: string
+  name: string
+  metadata: any
+  createdAt: string
+  updatedAt: string
+  type: string
+  notifyOn: [string]
+  workspaceId: string
+  projectId: string
+  environmentId: string
+}
 
 export interface DeleteIntegrationResponse {}
 
@@ -20,7 +49,18 @@ export interface GetIntegrationRequest {
   integrationId: string
 }
 
-export interface GetIntegrationResponse {}
+export interface GetIntegrationResponse {
+  id: string
+  name: string
+  metadata: any
+  createdAt: string
+  updatedAt: string
+  type: string
+  notifyOn: [string]
+  workspaceId: string
+  projectId: string
+  environmentId: string
+}
 
 export interface GetAllIntegrationRequest {
   page?: number
@@ -31,4 +71,17 @@ export interface GetAllIntegrationRequest {
   workspaceId: string
 }
 
-export interface GetAllIntegrationResponse {}
+export interface GetAllIntegrationResponse {
+  items: {
+    id: string
+    name: string
+    metadata: any
+    createdAt: string
+    updatedAt: string
+    type: string
+    notifyOn: [string]
+    workspaceId: string
+    projectId: string
+    environmentId: string
+  }[]
+}
