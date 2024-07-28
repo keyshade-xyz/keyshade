@@ -57,7 +57,7 @@ export default class VariableController {
     request: getAllVariablesOfProjectRequest,
     headers: any
   ): Promise<getAllVariablesOfProjectResponse> {
-    return this.apiClient.get(`}/api/variable/${request.projectId}`, headers)
+    return this.apiClient.get(`/api/variable/${request.projectId}`, headers)
   }
   static async getAllVariablesOfEnvironment(
     request: getAllVariablesOfEnvironmentRequest,

@@ -23,12 +23,12 @@ export interface Project {
   workspaceId: string
 }
 export interface UpdateVariableRequest {
-  variableId: string
+  variableId?: string
   name?: string
   entries?: Entries[]
 }
 export interface UpdateVariableResponse {
-  variables: Variable
+  variable: Variable
   updatedVersions: Entries[]
 }
 
@@ -39,7 +39,7 @@ export interface Variable {
 }
 export interface RollBackVariableRequest {
   variableId: string
-  version: string
+  version: number
   environmentId: string
 }
 export interface RollBackVariableResponse {}
