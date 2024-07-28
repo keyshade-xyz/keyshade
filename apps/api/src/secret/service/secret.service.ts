@@ -56,7 +56,7 @@ export class SecretService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.CREATE_SECRET,
+        authorities: [Authority.CREATE_SECRET],
         prisma: this.prisma
       })
 
@@ -74,7 +74,7 @@ export class SecretService {
             await this.authorityCheckerService.checkAuthorityOverEnvironment({
               userId: user.id,
               entity: { id: environmentId },
-              authority: Authority.READ_ENVIRONMENT,
+              authorities: [Authority.READ_ENVIRONMENT],
               prisma: this.prisma
             })
 
@@ -159,7 +159,7 @@ export class SecretService {
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
       entity: { id: secretId },
-      authority: Authority.UPDATE_SECRET,
+      authorities: [Authority.UPDATE_SECRET],
       prisma: this.prisma
     })
 
@@ -177,7 +177,7 @@ export class SecretService {
             await this.authorityCheckerService.checkAuthorityOverEnvironment({
               userId: user.id,
               entity: { id: environmentId },
-              authority: Authority.READ_ENVIRONMENT,
+              authorities: [Authority.READ_ENVIRONMENT],
               prisma: this.prisma
             })
 
@@ -319,7 +319,7 @@ export class SecretService {
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
       entity: { id: secretId },
-      authority: Authority.UPDATE_SECRET,
+      authorities: [Authority.UPDATE_SECRET],
       prisma: this.prisma
     })
 
@@ -400,7 +400,7 @@ export class SecretService {
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
       entity: { id: secretId },
-      authority: Authority.DELETE_SECRET,
+      authorities: [Authority.DELETE_SECRET],
       prisma: this.prisma
     })
 
@@ -439,7 +439,7 @@ export class SecretService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.READ_SECRET,
+        authorities: [Authority.READ_SECRET],
         prisma: this.prisma
       })
 
@@ -447,7 +447,7 @@ export class SecretService {
     await this.authorityCheckerService.checkAuthorityOverEnvironment({
       userId: user.id,
       entity: { id: environmentId },
-      authority: Authority.READ_ENVIRONMENT,
+      authorities: [Authority.READ_ENVIRONMENT],
       prisma: this.prisma
     })
 
@@ -548,7 +548,7 @@ export class SecretService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.READ_SECRET,
+        authorities: [Authority.READ_SECRET],
         prisma: this.prisma
       })
 
