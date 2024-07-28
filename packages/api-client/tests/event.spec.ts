@@ -76,7 +76,7 @@ describe('Get Event Controller', () => {
   })
 
   it('should fetch a Secret Event', async () => {
-    const secret = (await client.post(
+    secret = (await client.post(
       `/api/secret/${projectId}`,
       {
         name: 'My secret',
@@ -104,7 +104,7 @@ describe('Get Event Controller', () => {
   })
 
   it('should fetch a Variable Event', async () => {
-    const variable = (await client.post(
+    variable = (await client.post(
       `/api/variable/${projectId}`,
       {
         name: 'My variable',
@@ -124,7 +124,6 @@ describe('Get Event Controller', () => {
       { workspaceId, source: 'VARIABLE' },
       { 'x-e2e-user-email': email }
     )
-
     expect(events[0].source).toBe('VARIABLE')
     expect(events[0].metadata.variableId).toBe(variable.id)
     expect(events[0].metadata.name).toBe('My variable')
