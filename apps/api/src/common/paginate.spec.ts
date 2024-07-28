@@ -81,7 +81,7 @@ describe('paginate', () => {
     expect(result.links.last).toEqual('/items?page=0&limit=10')
   })
 
-  it('should return empty object when page is greater than maximum page limit', () => {
+  it('should receive empty object when page is greater than maximum page limit', () => {
     const totalCount = 4
     const relativeUrl = '/items'
     const query = { page: 3, limit: 2 }
@@ -92,7 +92,7 @@ describe('paginate', () => {
     expect(result).toEqual({})
   })
 
-  it('should return empty object when limit is 0 or undefined', () => {
+  it('should receive empty object when limit is 0 or undefined', () => {
     const totalCount = 10
     const relativeUrl = '/items'
     const query = { page: 0, limit: 0 }
