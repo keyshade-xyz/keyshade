@@ -599,6 +599,33 @@ describe('Integration Controller Tests', () => {
     expect(result.json().id).toEqual(integration1.id)
   })
 
+  it('should be able to fetch all integrations on first page', async () => {
+    const result = await app.inject({
+      method: 'GET',
+      url: `/integration/all/${workspace1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(result.statusCode).toEqual(200)
+    expect(result.json().items).toHaveLength(1)
+
+    //check metadata
+    const metadata = result.json().metadata
+    expect(metadata.links.self).toEqual(
+      `/integration/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/integration/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/integration/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+  })
+
   it('should not be able to fetch an integration that does not exist', async () => {
     const result = await app.inject({
       method: 'GET',
