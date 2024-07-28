@@ -35,6 +35,7 @@ import { EnvironmentModule } from '../environment/environment.module'
 import createEvent from '../common/create-event'
 import { VariableService } from '../variable/service/variable.service'
 import { VariableModule } from '../variable/variable.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -79,6 +80,8 @@ describe('Event Controller Tests', () => {
     projectService = moduleRef.get(ProjectService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()

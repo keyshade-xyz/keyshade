@@ -44,7 +44,7 @@ export class EventService {
         }
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         timestamp: 'desc'
       }
@@ -66,8 +66,8 @@ export class EventService {
       totalCount,
       `/event/${workspaceId}`,
       {
-        page: Number(page),
-        limit: Number(limit),
+        page,
+        limit,
         search
       },
       { source }
