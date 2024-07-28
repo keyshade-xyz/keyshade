@@ -17,78 +17,78 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+  #         aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+  #         aws-region: ap-south-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image
-        id: build
-        env:
-          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ vars.ECR_API_REPOSITORY }}
-        run: |
-          # Build a docker container and push it to ECR 
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/api/Dockerfile .
-          echo "Pushing image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
-          echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+  #     - name: Build Docker image
+  #       id: build
+  #       env:
+  #         ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+  #         ECR_REPOSITORY: ${{ vars.ECR_API_REPOSITORY }}
+  #       run: |
+  #         # Build a docker container and push it to ECR
+  #         aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+  #         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/api/Dockerfile .
+  #         echo "Pushing image to ECR..."
+  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+  #         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
+  #         echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
-  setup-database:
-    needs: build
-    name: Setup Database
-    runs-on: ubuntu-latest
-    environment: alpha
+  # setup-database:
+  #   needs: build
+  #   name: Setup Database
+  #   runs-on: ubuntu-latest
+  #   environment: alpha
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.2.0
-          run_install: false
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v4
+  #       with:
+  #         version: 9.2.0
+  #         run_install: false
 
-      - name: Deploy migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: pnpm db:deploy-migrations
+  #     - name: Deploy migrations
+  #       env:
+  #         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  #       run: pnpm db:deploy-migrations
 
-  deploy:
-    needs: [build, setup-database]
-    runs-on: ubuntu-latest
-    environment: alpha
-    name: Deploy API docker image for release
+  # deploy:
+  #   needs: [build, setup-database]
+  #   runs-on: ubuntu-latest
+  #   environment: alpha
+  #   name: Deploy API docker image for release
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+  #         aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+  #         aws-region: ap-south-1
 
-      - name: Force re-deploy task in service
-        id: force-redeploy
-        env:
-          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_API_SERVICE }}
-        run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+  #     - name: Force re-deploy task in service
+  #       id: force-redeploy
+  #       env:
+  #         ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  #         ECS_SERVICE: ${{ vars.ECS_API_SERVICE }}
+  #       run: |
+  #         aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment

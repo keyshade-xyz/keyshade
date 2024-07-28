@@ -51,6 +51,7 @@
     "@next/eslint-plugin-next": "^13.5.6",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/forms": "^0.5.7",
+    "@types/dayjs-precise-range": "^1.0.5",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
@@ -58,7 +59,6 @@
     "eslint-config-custom": "workspace:*",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
-    "tsconfig": "workspace:*",
-    "typescript": "^4.5.3"
+    "tsconfig": "workspace:*"
   }
 }

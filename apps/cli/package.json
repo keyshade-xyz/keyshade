@@ -22,8 +22,7 @@
     "figlet": "^1.7.0",
     "fs": "0.0.1-security",
     "nodemon": "^3.1.4",
-    "socket.io-client": "^4.7.5",
-    "typescript": "^5.5.2"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@swc/cli": "^0.4.0",
