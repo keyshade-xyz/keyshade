@@ -85,6 +85,9 @@ export default class RunCommand extends BaseCommand {
     Logger.info('Connecting to socket...')
     const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
+    const privateKey = (data as any).privateKey;
+    const quitOnDecryptionFailure = data.quitOnDecryptionFailure
+    
 
     const ioClient = io(websocketUrl, {
       autoConnect: false,
@@ -108,15 +111,11 @@ export default class RunCommand extends BaseCommand {
           `Configuration change received from API (name: ${data.name})`
         )
 
-        // To test the below condition of quitOnDecryptionFailure, uncomment the below line
-        // data.isPlaintext = false
-
         if (!data.isPlaintext) {
-          const configurations = await this.fetchConfigurations()
           try {
-            data.value = await decrypt(configurations.privateKey, data.value)
+            data.value = await decrypt(privateKey, data.value)
           } catch (error) {
-            if (configurations.quitOnDecryptionFailure) {
+            if (quitOnDecryptionFailure) {
               Logger.error(`Decryption failed for ${data.name}. Stopping the process.`);
               process.exit(1)
             } else {
@@ -201,7 +200,6 @@ export default class RunCommand extends BaseCommand {
 
     // Set the configurations as environmental variables
     configurations.forEach((config) => {
-      console.log(config.name, config.value)
       this.processEnvironmentalVariables[config.name] = config.value
     })
   }

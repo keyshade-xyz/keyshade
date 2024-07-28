@@ -59,7 +59,6 @@ export default class InitCommand extends BaseCommand {
   async action({ options }: CommandActionData): Promise<void> {
     let { workspace, project, environment, privateKey } = options
     const { overwrite, quitOnDecryptionFailure } = options
-    console.log(workspace)
 
     intro('Configure the project for live-updates')
 
@@ -89,8 +88,6 @@ export default class InitCommand extends BaseCommand {
 
     if (!overwrite) await this.checkOverwriteExistingProjectConfig()
 
-    if (!quitOnDecryptionFailure) await this.checkQuitOnDecryptionFailureProjectConfig()
-     
     await writeProjectRootConfig({
       workspace,
       project,
@@ -112,18 +109,6 @@ export default class InitCommand extends BaseCommand {
       })
 
       if (!overwrite) {
-        outro('Configuration cancelled')
-      }
-    }
-  }
-
-  private async checkQuitOnDecryptionFailureProjectConfig(): Promise<void> {
-    if (existsSync('./keyshade.json')) {
-      const quitOnDecryptionFailure = await confirm({
-        message: 'Quit on decryption failure?'
-      })
-
-      if (!quitOnDecryptionFailure) {
         outro('Configuration cancelled')
       }
     }
