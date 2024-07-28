@@ -40,7 +40,7 @@ export class IntegrationService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.CREATE_INTEGRATION,
+      authorities: [Authority.CREATE_INTEGRATION],
       prisma: this.prisma
     })
 
@@ -48,7 +48,7 @@ export class IntegrationService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_WORKSPACE,
+      authorities: [Authority.READ_WORKSPACE],
       prisma: this.prisma
     })
 
@@ -57,7 +57,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: dto.projectId },
-        authority: Authority.READ_PROJECT,
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
     }
@@ -74,7 +74,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
         entity: { id: dto.environmentId },
-        authority: Authority.READ_ENVIRONMENT,
+        authorities: [Authority.READ_ENVIRONMENT],
         prisma: this.prisma
       })
     }
@@ -132,7 +132,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverIntegration({
         userId: user.id,
         entity: { id: integrationId },
-        authority: Authority.UPDATE_INTEGRATION,
+        authorities: [Authority.UPDATE_INTEGRATION],
         prisma: this.prisma
       })
 
@@ -146,7 +146,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: dto.projectId },
-        authority: Authority.READ_PROJECT,
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
     }
@@ -163,7 +163,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
         entity: { id: dto.environmentId },
-        authority: Authority.READ_ENVIRONMENT,
+        authorities: [Authority.READ_ENVIRONMENT],
         prisma: this.prisma
       })
     }
@@ -217,7 +217,7 @@ export class IntegrationService {
     return this.authorityCheckerService.checkAuthorityOverIntegration({
       userId: user.id,
       entity: { id: integrationId },
-      authority: Authority.READ_INTEGRATION,
+      authorities: [Authority.READ_INTEGRATION],
       prisma: this.prisma
     })
   }
@@ -237,7 +237,7 @@ export class IntegrationService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_INTEGRATION,
+      authorities: [Authority.READ_INTEGRATION],
       prisma: this.prisma
     })
 
@@ -310,7 +310,7 @@ export class IntegrationService {
       await this.authorityCheckerService.checkAuthorityOverIntegration({
         userId: user.id,
         entity: { id: integrationId },
-        authority: Authority.DELETE_INTEGRATION,
+        authorities: [Authority.DELETE_INTEGRATION],
         prisma: this.prisma
       })
 

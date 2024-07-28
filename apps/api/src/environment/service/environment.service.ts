@@ -37,7 +37,7 @@ export class EnvironmentService {
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
         entity: { id: projectId },
-        authority: Authority.CREATE_ENVIRONMENT,
+        authorities: [Authority.CREATE_ENVIRONMENT],
         prisma: this.prisma
       })
 
@@ -96,7 +96,7 @@ export class EnvironmentService {
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
         entity: { id: environmentId },
-        authority: Authority.UPDATE_ENVIRONMENT,
+        authorities: [Authority.UPDATE_ENVIRONMENT],
         prisma: this.prisma
       })
 
@@ -146,7 +146,7 @@ export class EnvironmentService {
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
         entity: { id: environmentId },
-        authority: Authority.READ_ENVIRONMENT,
+        authorities: [Authority.READ_ENVIRONMENT],
         prisma: this.prisma
       })
 
@@ -167,7 +167,7 @@ export class EnvironmentService {
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,
       entity: { id: projectId },
-      authority: Authority.READ_ENVIRONMENT,
+      authorities: [Authority.READ_ENVIRONMENT],
       prisma: this.prisma
     })
 
@@ -207,7 +207,7 @@ export class EnvironmentService {
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
         entity: { id: environmentId },
-        authority: Authority.DELETE_ENVIRONMENT,
+        authorities: [Authority.DELETE_ENVIRONMENT],
         prisma: this.prisma
       })
 
