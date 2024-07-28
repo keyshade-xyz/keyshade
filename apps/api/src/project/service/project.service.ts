@@ -2,7 +2,9 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
 import {
   Authority,
@@ -336,13 +338,27 @@ export class ProjectService {
     projectId: Project['id'],
     forkMetadata: ForkProject
   ) {
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { id: projectId },
-        authority: Authority.READ_PROJECT,
-        prisma: this.prisma
-      })
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        storePrivateKey: true,
+        accessLevel: true,
+        privateKey: true
+      }
+    })
+
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
+
+    if (project.accessLevel !== 'GLOBAL') {
+      throw new UnauthorizedException(
+        `User with id ${user.id} does not have the authority in the project with id ${project.id}`
+      )
+    }
 
     let workspaceId = forkMetadata.workspaceId
 
