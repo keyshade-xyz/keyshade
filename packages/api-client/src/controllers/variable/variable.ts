@@ -60,7 +60,7 @@ export default class VariableController {
   static async getAllVariablesOfProject(
     request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
-  ): Promise<GetAllVariablesOfProjectResponse> {
+  ): Promise<GetAllVariablesOfProjectResponse[]> {
     let url = `/api/variable/${request.projectId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
@@ -73,7 +73,7 @@ export default class VariableController {
   static async getAllVariablesOfEnvironment(
     request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
-  ): Promise<GetAllVariablesOfEnvironmentResponse> {
+  ): Promise<GetAllVariablesOfEnvironmentResponse[]> {
     let url = `/api/variable/${request.projectId}/${request.environmentId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)

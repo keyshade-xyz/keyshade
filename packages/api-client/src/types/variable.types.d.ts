@@ -78,7 +78,7 @@ export interface GetAllVariablesOfProjectRequest {
 }
 
 export interface GetAllVariablesOfProjectResponse {
-  items: {
+  variable: {
     id: string
     name: string
     createdAt: string
@@ -86,16 +86,19 @@ export interface GetAllVariablesOfProjectResponse {
     note: string | null
     lastUpdatedById: string
     projectId: string
-    project: {
-      workspaceId: string
+    lastUpdatedBy: {
+      id: string
+      name: string
     }
-    versions: [
-      {
-        value: string
-        environmentId: string
-      }
-    ]
-  }[]
+  }
+  values: {
+    environment: {
+      id: string
+      name: string
+    }
+    value: string
+    version: number
+  }
 }
 
 export interface GetAllVariablesOfEnvironmentRequest {
@@ -109,22 +112,7 @@ export interface GetAllVariablesOfEnvironmentRequest {
 }
 
 export interface GetAllVariablesOfEnvironmentResponse {
-  items: {
-    id: string
-    name: string
-    createdAt: string
-    updatedAt: string
-    note: string | null
-    lastUpdatedById: string
-    projectId: string
-    project: {
-      workspaceId: string
-    }
-    versions: [
-      {
-        value: string
-        environmentId: string
-      }
-    ]
-  }[]
+  name: string
+  value: string
+  isPlaintext: boolean
 }

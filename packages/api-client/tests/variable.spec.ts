@@ -122,11 +122,56 @@ describe('Get Variable Tests', () => {
 
   // Get all the variables of project
   it('should get all variables of project', async () => {
-    const variables: any = await VariableController.getAllVariablesOfProject(
+    const response: any = await VariableController.getAllVariablesOfProject(
       { projectId },
       { 'x-e2e-user-email': email }
     )
-    expect(variables.length).toBe(1)
+    expect(response.length).toBe(1)
+    const variable1 = response[0]
+    const variable = variable1.variable
+    const values = variable1.values
+    expect(variable).toHaveProperty('id')
+    expect(typeof variable.id).toBe('string')
+
+    expect(variable).toHaveProperty('name')
+    expect(typeof variable.name).toBe('string')
+
+    expect(variable).toHaveProperty('createdAt')
+    expect(typeof variable.createdAt).toBe('string')
+
+    expect(variable).toHaveProperty('updatedAt')
+    expect(typeof variable.updatedAt).toBe('string')
+
+    expect(variable).toHaveProperty('note')
+    expect(typeof variable.note === 'string' || variable.note === null).toBe(
+      true
+    )
+
+    expect(variable).toHaveProperty('lastUpdatedById')
+    expect(typeof variable.lastUpdatedById).toBe('string')
+
+    expect(variable).toHaveProperty('projectId')
+    expect(typeof variable.projectId).toBe('string')
+
+    expect(variable).toHaveProperty('lastUpdatedBy')
+    expect(variable.lastUpdatedBy).toHaveProperty('id')
+    expect(typeof variable.lastUpdatedBy.id).toBe('string')
+    expect(variable.lastUpdatedBy).toHaveProperty('name')
+    expect(typeof variable.lastUpdatedBy.name).toBe('string')
+
+    values.forEach((value) => {
+      expect(value).toHaveProperty('environment')
+      expect(value.environment).toHaveProperty('id')
+      expect(typeof value.environment.id).toBe('string')
+      expect(value.environment).toHaveProperty('name')
+      expect(typeof value.environment.name).toBe('string')
+
+      expect(value).toHaveProperty('value')
+      expect(typeof value.value).toBe('string')
+
+      expect(value).toHaveProperty('version')
+      expect(typeof value.version).toBe('number')
+    })
   })
 
   // Get all variables for an environment
@@ -139,7 +184,22 @@ describe('Get Variable Tests', () => {
         },
         { 'x-e2e-user-email': email }
       )
+
     expect(variables.length).toBe(1)
+    variables.forEach((variable) => {
+      expect(variable).toHaveProperty('name')
+      expect(typeof variable.name).toBe('string')
+
+      expect(variable).toHaveProperty('value')
+      expect(typeof variable.value).toBe('string')
+
+      expect(variable).toHaveProperty('isPlaintext')
+      expect(typeof variable.isPlaintext).toBe('boolean')
+    })
+    const variable1 = variables[0]
+    expect(variable1.name).toBe('UpdatedVariable 1')
+    expect(variable1.value).toBe('Variable 1 value')
+    expect(variable1.isPlaintext).toBe(true)
   })
 
   // Delete a variable
