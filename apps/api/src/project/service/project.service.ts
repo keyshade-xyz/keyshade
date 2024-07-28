@@ -612,8 +612,8 @@ export class ProjectService {
       forksAllowed.length,
       `/project/${projectId}/forks`,
       {
-        page: Number(page),
-        limit: Number(limit)
+        page,
+        limit
       }
     )
 
@@ -654,7 +654,7 @@ export class ProjectService {
     const items = (
       await this.prisma.project.findMany({
         skip: page * limit,
-        take: Number(limit),
+        take: limit,
         orderBy: {
           [sort]: order
         },
@@ -710,8 +710,8 @@ export class ProjectService {
     })
 
     const metadata = paginate(totalCount, `/project/all/${workspaceId}`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       sort,
       order,
       search

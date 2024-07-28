@@ -38,6 +38,7 @@ import { VariableService } from '../variable/service/variable.service'
 import { VariableModule } from '../variable/variable.module'
 import { SecretModule } from '../secret/secret.module'
 import { EnvironmentModule } from '../environment/environment.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -85,6 +86,8 @@ describe('Project Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
