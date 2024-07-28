@@ -468,7 +468,7 @@ export class WorkspaceService {
     //get all members of workspace for page with limit
     const items = await this.prisma.workspaceMember.findMany({
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         workspace: {
           [sort]: order
@@ -538,8 +538,8 @@ export class WorkspaceService {
     })
 
     const metadata = paginate(totalCount, `/workspace/${workspaceId}/members`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       sort,
       order,
       search

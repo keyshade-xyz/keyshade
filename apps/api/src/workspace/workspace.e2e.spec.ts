@@ -24,6 +24,7 @@ import { EventModule } from '../event/event.module'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/service/user.service'
 import { WorkspaceService } from './service/workspace.service'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 const createMembership = async (
   adminRoleId: string,
@@ -74,6 +75,8 @@ describe('Workspace Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
     workspaceService = moduleRef.get(WorkspaceService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
