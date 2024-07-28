@@ -297,7 +297,7 @@ export class IntegrationService {
         ]
       },
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       }
@@ -323,8 +323,8 @@ export class IntegrationService {
       }
     })
     const metadata = paginate(totalCount, `/integration/all/${workspaceId}`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       sort,
       order,
       search

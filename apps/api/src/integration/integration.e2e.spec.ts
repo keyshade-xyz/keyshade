@@ -26,6 +26,7 @@ import { MAIL_SERVICE } from '../mail/services/interface.service'
 import { MockMailService } from '../mail/services/mock.service'
 import { EnvironmentModule } from '../environment/environment.module'
 import { EnvironmentService } from '../environment/service/environment.service'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -65,6 +66,8 @@ describe('Integration Controller Tests', () => {
     workspaceService = moduleRef.get(WorkspaceService)
     projectService = moduleRef.get(ProjectService)
     environmentService = moduleRef.get(EnvironmentService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -602,7 +605,7 @@ describe('Integration Controller Tests', () => {
   it('should be able to fetch all integrations on first page', async () => {
     const result = await app.inject({
       method: 'GET',
-      url: `/integration/all/${workspace1.id}`,
+      url: `/integration/all/${workspace1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -613,6 +616,7 @@ describe('Integration Controller Tests', () => {
 
     //check metadata
     const metadata = result.json().metadata
+    expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
       `/integration/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
     )
