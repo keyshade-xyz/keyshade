@@ -1,6 +1,43 @@
 import client from '@package/client'
 import IntegrationController from '@package/controllers/integration/integration'
 
+export enum IntegrationType {
+  DISCORD = 'DISCORD',
+  SLACK = 'SLACK',
+  GITHUB = 'GITHUB',
+  GITLAB = 'GITLAB'
+}
+
+export enum EventType {
+  INVITED_TO_WORKSPACE = 'INVITED_TO_WORKSPACE',
+  REMOVED_FROM_WORKSPACE = 'REMOVED_FROM_WORKSPACE',
+  ACCEPTED_INVITATION = 'ACCEPTED_INVITATION',
+  DECLINED_INVITATION = 'DECLINED_INVITATION',
+  CANCELLED_INVITATION = 'CANCELLED_INVITATION',
+  LEFT_WORKSPACE = 'LEFT_WORKSPACE',
+  WORKSPACE_MEMBERSHIP_UPDATED = 'WORKSPACE_MEMBERSHIP_UPDATED',
+  WORKSPACE_UPDATED = 'WORKSPACE_UPDATED',
+  WORKSPACE_CREATED = 'WORKSPACE_CREATED',
+  WORKSPACE_ROLE_CREATED = 'WORKSPACE_ROLE_CREATED',
+  WORKSPACE_ROLE_UPDATED = 'WORKSPACE_ROLE_UPDATED',
+  WORKSPACE_ROLE_DELETED = 'WORKSPACE_ROLE_DELETED',
+  PROJECT_CREATED = 'PROJECT_CREATED',
+  PROJECT_UPDATED = 'PROJECT_UPDATED',
+  PROJECT_DELETED = 'PROJECT_DELETED',
+  SECRET_UPDATED = 'SECRET_UPDATED',
+  SECRET_DELETED = 'SECRET_DELETED',
+  SECRET_ADDED = 'SECRET_ADDED',
+  VARIABLE_UPDATED = 'VARIABLE_UPDATED',
+  VARIABLE_DELETED = 'VARIABLE_DELETED',
+  VARIABLE_ADDED = 'VARIABLE_ADDED',
+  ENVIRONMENT_UPDATED = 'ENVIRONMENT_UPDATED',
+  ENVIRONMENT_DELETED = 'ENVIRONMENT_DELETED',
+  ENVIRONMENT_ADDED = 'ENVIRONMENT_ADDED',
+  INTEGRATION_ADDED = 'INTEGRATION_ADDED',
+  INTEGRATION_UPDATED = 'INTEGRATION_UPDATED',
+  INTEGRATION_DELETED = 'INTEGRATION_DELETED'
+}
+
 describe('Get Environments Tests', () => {
   const email = 'johndoe@example.com'
   let projectId: string | null
@@ -62,8 +99,8 @@ describe('Get Environments Tests', () => {
         workspaceId,
         projectId,
         name: 'Discord second',
-        type: 'DISCORD',
-        notifyOn: ['WORKSPACE_UPDATED'],
+        type: IntegrationType.DISCORD,
+        notifyOn: [EventType.PROJECT_CREATED],
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
@@ -105,8 +142,8 @@ describe('Get Environments Tests', () => {
         workspaceId,
         projectId,
         name: 'Discord third',
-        type: 'DISCORD',
-        notifyOn: ['WORKSPACE_UPDATED'],
+        type: IntegrationType.DISCORD,
+        notifyOn: [EventType.PROJECT_CREATED],
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
