@@ -4,10 +4,10 @@ import {
   CreateVariableResponse,
   DeleteVariableRequest,
   DeleteVariableResponse,
-  getAllVariablesOfEnvironmentRequest,
-  getAllVariablesOfEnvironmentResponse,
-  getAllVariablesOfProjectRequest,
-  getAllVariablesOfProjectResponse,
+  GetAllVariablesOfEnvironmentRequest,
+  GetAllVariablesOfEnvironmentResponse,
+  GetAllVariablesOfProjectRequest,
+  GetAllVariablesOfProjectResponse,
   RollBackVariableRequest,
   RollBackVariableResponse,
   UpdateVariableRequest,
@@ -54,15 +54,15 @@ export default class VariableController {
     return this.apiClient.delete(`/api/variable/${request.variableId}`, headers)
   }
   static async getAllVariablesOfProject(
-    request: getAllVariablesOfProjectRequest,
+    request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
-  ): Promise<getAllVariablesOfProjectResponse> {
+  ): Promise<GetAllVariablesOfProjectResponse> {
     return this.apiClient.get(`/api/variable/${request.projectId}`, headers)
   }
   static async getAllVariablesOfEnvironment(
-    request: getAllVariablesOfEnvironmentRequest,
+    request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
-  ): Promise<getAllVariablesOfEnvironmentResponse> {
+  ): Promise<GetAllVariablesOfEnvironmentResponse> {
     return this.apiClient.get(
       `/api/variable/${request.projectId}/${request.environmentId}`,
       headers

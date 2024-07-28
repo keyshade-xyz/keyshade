@@ -1,12 +1,15 @@
 export interface CreateVariableRequest {
   projectId: string
   name: string
-  entries: Entries[]
+  note?: string
+  entries?: [
+    {
+      value: string
+      environmentId: string
+    }
+  ]
 }
-export interface Entries {
-  value: string
-  environmentId: string
-}
+
 export interface CreateVariableResponse {
   id: string
   name: string
@@ -15,15 +18,18 @@ export interface CreateVariableResponse {
   note: string | null
   lastUpdatedById: string
   projectId: string
-  project: Project
-  versions: Entries[]
-}
-
-export interface Project {
-  workspaceId: string
+  project: {
+    workspaceId: string
+  }
+  versions: [
+    {
+      value: string
+      environmentId: string
+    }
+  ]
 }
 export interface UpdateVariableRequest {
-  variableId?: string
+  variableId: string
   name?: string
   entries?: Entries[]
 }
@@ -42,17 +48,38 @@ export interface RollBackVariableRequest {
   version: number
   environmentId: string
 }
-export interface RollBackVariableResponse {}
+
+export interface RollBackVariableResponse {
+  count: string
+}
+
 export interface DeleteVariableRequest {
   variableId: string
 }
+
 export interface DeleteVariableResponse {}
-export interface getAllVariablesOfProjectRequest {
+
+export interface GetAllVariablesOfProjectRequest {
   projectId: string
+  page?: number
+  limit?: number
+  sort?: string
+  order?: string
+  search?: string
 }
-export interface getAllVariablesOfProjectResponse {}
-export interface getAllVariablesOfEnvironmentRequest {
+
+export interface GetAllVariablesOfProjectResponse {
+  []
+}
+
+export interface GetAllVariablesOfEnvironmentRequest {
   projectId: string
   environmentId: string
+  page?: number
+  limit?: number
+  sort?: string
+  order?: string
+  search?: string
 }
-export interface getAllVariablesOfEnvironmentResponse {}
+
+export interface GetAllVariablesOfEnvironmentResponse {}

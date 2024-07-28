@@ -51,6 +51,8 @@ describe('Get Variable Tests', () => {
       'x-e2e-user-email': email
     })
   })
+
+  // Create a variable
   it('should create a variable', async () => {
     const variable = await VariableController.createVariable(
       {
@@ -71,6 +73,7 @@ describe('Get Variable Tests', () => {
     variableId = variable.id
   })
 
+  // Update Name of the Variable
   it('should update the name a variable', async () => {
     const updatedVariable = await VariableController.updateVariable(
       {
@@ -85,6 +88,7 @@ describe('Get Variable Tests', () => {
     expect(updatedVariable.variable.id).toBe(variableId)
   })
 
+  // Create a new version of Variable
   it('should add version to a variable', async () => {
     const updateVariable = await VariableController.updateVariable(
       {
@@ -103,6 +107,7 @@ describe('Get Variable Tests', () => {
     expect(updateVariable.updatedVersions[0].environmentId).toBe(environment.id)
   })
 
+  // Roll back a variable
   it('should rollback a variable', async () => {
     const rolledBackVariable: any = await VariableController.rollbackVariable(
       {
@@ -115,6 +120,7 @@ describe('Get Variable Tests', () => {
     expect(rolledBackVariable.count).toBe(1)
   })
 
+  // Get all the variables of project
   it('should get all variables of project', async () => {
     const variables: any = await VariableController.getAllVariablesOfProject(
       { projectId },
@@ -123,6 +129,7 @@ describe('Get Variable Tests', () => {
     expect(variables.length).toBe(1)
   })
 
+  // Get all variables for an environment
   it('should get all variables for an environment', async () => {
     const variables: any =
       await VariableController.getAllVariablesOfEnvironment(
@@ -133,5 +140,18 @@ describe('Get Variable Tests', () => {
         { 'x-e2e-user-email': email }
       )
     expect(variables.length).toBe(1)
+  })
+
+  // Delete a variable
+  it('should delete variable', async () => {
+    await VariableController.deleteVariable(
+      { variableId },
+      { 'x-e2e-user-email': email }
+    )
+    const variables: any = await VariableController.getAllVariablesOfProject(
+      { projectId },
+      { 'x-e2e-user-email': email }
+    )
+    expect(variables.length).toBe(0)
   })
 })
