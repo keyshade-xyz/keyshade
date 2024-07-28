@@ -2,7 +2,7 @@ export interface CreateSecretRequest {
   projectId: string
   name: string
   note?: string
-  rotateAfter?: string
+  rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
   entries?: [
     {
       value: string
@@ -35,7 +35,7 @@ export interface UpdateSecretRequest {
   secretId: string
   name?: string
   note?: string
-  rotateAfter?: string
+  rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
   entries?: [
     {
       value: string
@@ -45,8 +45,18 @@ export interface UpdateSecretRequest {
 }
 
 export interface UpdateSecretResponse {
-  secret: any
-  updatedVersions: any
+  secret: {
+    id: string
+    name: string
+    note: string
+  }
+  updatedVersions: [
+    {
+      id?: string
+      environmentId: string
+      value: string
+    }
+  ]
 }
 
 export interface DeleteSecretRequest {
@@ -73,25 +83,28 @@ export interface GetAllSecretsOfProjectRequest {
   search?: string
 }
 export interface GetAllSecretsOfProjectResponse {
-  items: {
+  secret: {
     id: string
     name: string
     createdAt: string
     updatedAt: string
-    rotateAt: string | null
+    rotateAt: string
     note: string | null
     lastUpdatedById: string
     projectId: string
-    project: {
-      workspaceId: string
+    lastUpdatedBy: {
+      id: string
+      name: string
     }
-    versions: [
-      {
-        value: string
-        environmentId: string
-      }
-    ]
-  }[]
+  }
+  values: {
+    environment: {
+      id: string
+      name: string
+    }
+    value: string
+    version: number
+  }
 }
 
 export interface GetAllSecretsOfEnvironmentRequest {
@@ -104,23 +117,7 @@ export interface GetAllSecretsOfEnvironmentRequest {
   search?: string
 }
 export interface GetAllSecretsOfEnvironmentResponse {
-  items: {
-    id: string
-    name: string
-    createdAt: string
-    updatedAt: string
-    rotateAt: string | null
-    note: string | null
-    lastUpdatedById: string
-    projectId: string
-    project: {
-      workspaceId: string
-    }
-    versions: [
-      {
-        value: string
-        environmentId: string
-      }
-    ]
-  }[]
+  name: string
+  value: string
+  isPlaintext: boolean
 }

@@ -59,26 +59,29 @@ export default class SecretController {
   static async getAllSecretsOfProject(
     request: GetAllSecretsOfProjectRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllSecretsOfProjectResponse> {
+  ): Promise<GetAllSecretsOfProjectResponse[]> {
     let url = `/api/secret/${request.projectId}?decryptValue=true`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    return this.apiClient.get<GetAllSecretsOfProjectResponse[]>(url, headers)
   }
 
   static async getAllSecretsOfEnvironment(
     request: GetAllSecretsOfEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllSecretsOfEnvironmentResponse> {
+  ): Promise<GetAllSecretsOfEnvironmentResponse[]> {
     let url = `/api/secret/${request.projectId}/${request.environmentId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    return this.apiClient.get<GetAllSecretsOfEnvironmentResponse[]>(
+      url,
+      headers
+    )
   }
 }

@@ -117,15 +117,11 @@ describe('Get Variable tests', () => {
 
   // RollBack a Particular Version of a Secret
   it('should roll back a version of a secret', async () => {
-    try {
-      const rollbackSecret = await SecretController.rollbackSecret(
-        { secretId, environmentId: environment.id, version: 1 },
-        { 'x-e2e-user-email': email }
-      )
-      expect(rollbackSecret.count).toBe(1)
-    } catch (error) {
-      console.log(error)
-    }
+    const rollbackSecret = await SecretController.rollbackSecret(
+      { secretId, environmentId: environment.id, version: 1 },
+      { 'x-e2e-user-email': email }
+    )
+    expect(rollbackSecret.count).toBe(1)
   })
 
   // Get all secrets of a Project
@@ -147,6 +143,16 @@ describe('Get Variable tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(secrets.length).toBe(1)
+    secrets.forEach((secret) => {
+      expect(secret).toHaveProperty('name')
+      expect(typeof secret.name).toBe('string')
+
+      expect(secret).toHaveProperty('value')
+      expect(typeof secret.value).toBe('string')
+
+      expect(secret).toHaveProperty('isPlaintext')
+      expect(typeof secret.isPlaintext).toBe('boolean')
+    })
   })
 
   // Delete a Secert from a Project
