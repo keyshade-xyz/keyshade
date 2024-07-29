@@ -1,27 +1,15 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common'
-import { createClient, RedisClientType } from 'redis'
+import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common'
+import { RedisClientType } from 'redis'
 import { User } from '@prisma/client'
+import { REDIS_CLIENT } from '../provider/redis.provider'
 
 @Injectable()
 export class CacheService implements OnModuleDestroy {
-  private readonly redisClient: RedisClientType
   private static readonly USER_PREFIX = 'user-'
-  private readonly logger = new Logger(CacheService.name)
 
-  constructor() {
-    if (process.env.REDIS_URL) {
-      this.redisClient = createClient({
-        url: process.env.REDIS_URL
-      })
-      this.redisClient.connect().catch((error) => {
-        this.logger.error('Failed to connect to Redis', error)
-      })
-    } else {
-      this.logger.warn(
-        'REDIS_URL is not set. CacheService will not be functional.'
-      )
-    }
-  }
+  constructor(
+    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
+  ) {}
 
   private getUserKey(userId: string): string {
     return `${CacheService.USER_PREFIX}${userId}`
@@ -31,15 +19,15 @@ export class CacheService implements OnModuleDestroy {
     const key = this.getUserKey(user.id)
     const userJson = JSON.stringify(user)
     if (expirationInSeconds) {
-      await this.redisClient.setEx(key, expirationInSeconds, userJson)
+      await this.redisClient.publisher.setEx(key, expirationInSeconds, userJson)
     } else {
-      await this.redisClient.set(key, userJson)
+      await this.redisClient.publisher.set(key, userJson)
     }
   }
 
   async getUser(userId: string): Promise<User | null> {
     const key = this.getUserKey(userId)
-    const userData = await this.redisClient.get(key)
+    const userData = await this.redisClient.publisher.get(key)
     if (userData) {
       return JSON.parse(userData) as User
     }
@@ -48,17 +36,19 @@ export class CacheService implements OnModuleDestroy {
 
   async deleteUser(userId: string): Promise<number> {
     const key = this.getUserKey(userId)
-    return await this.redisClient.del(key)
+    return await this.redisClient.publisher.del(key)
   }
 
   async clearAllUserCache(): Promise<void> {
-    const keys = await this.redisClient.keys(`${CacheService.USER_PREFIX}*`)
+    const keys = await this.redisClient.publisher.keys(
+      `${CacheService.USER_PREFIX}*`
+    )
     if (keys.length > 0) {
-      await this.redisClient.del(keys)
+      await this.redisClient.publisher.del(keys)
     }
   }
 
   async onModuleDestroy() {
-    await this.redisClient.quit()
+    await this.redisClient.publisher.quit()
   }
 }
