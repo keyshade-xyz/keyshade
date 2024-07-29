@@ -70,6 +70,7 @@ export class WorkspaceController {
       members
     )
   }
+  
 
   @Delete(':workspaceId/remove-users')
   @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
@@ -210,5 +211,16 @@ export class WorkspaceController {
       order,
       search
     )
+  }
+  
+  @Get(':workspaceId/global-search/:searchTerm')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE,Authority.READ_ENVIRONMENT, Authority.READ_SECRET, Authority.READ_VARIABLE, Authority.READ_PROJECT)
+  async globalSearch(
+    @CurrentUser() user: User,
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('searchTerm') searchTerm: string
+  ) {
+    // Call service method to perform global search
+    return this.workspaceService.globalSearch(user, workspaceId, searchTerm);
   }
 }

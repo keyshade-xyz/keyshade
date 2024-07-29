@@ -31,6 +31,7 @@ import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import getCollectiveProjectAuthorities from '../../common/get-collective-project-authorities'
 
 @Injectable()
 export class WorkspaceService {
@@ -838,6 +839,129 @@ export class WorkspaceService {
 
     return data
   }
+  
+  async globalSearch(
+    user: User,
+    workspaceId: string,
+    searchTerm: string
+  ): Promise<{
+    projects: Project[];
+    environments: Environment[];
+    secrets: Secret[];
+    variables: Variable[];
+  }> {
+    // Check authority over workspace
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_WORKSPACE,
+      prisma: this.prisma,
+    });
+    const accessibleProjectIds = await this.getAccessibleProjectIds(user.id, workspaceId);
+
+    // Query all entities based on the search term and permissions
+    const projects = await this.queryProjects(accessibleProjectIds, searchTerm, user.id);
+    const environments = await this.queryEnvironments(accessibleProjectIds, searchTerm, user.id);
+    const secrets = await this.querySecrets(accessibleProjectIds, searchTerm, user.id);
+    const variables = await this.queryVariables(accessibleProjectIds, searchTerm, user.id);
+
+    return { projects, environments, secrets, variables };
+  }
+  private async getAccessibleProjectIds(userId: string, workspaceId: string): Promise<string[]> {
+    const projects = await this.prisma.project.findMany({
+      where: { workspaceId },
+    });
+
+    const accessibleProjectIds : string[]=[];
+    for (const project of projects) {
+      const authorities = await getCollectiveProjectAuthorities(userId, project, this.prisma);
+      if (
+        authorities.has(Authority.READ_WORKSPACE) &&
+        authorities.has(Authority.READ_PROJECT) &&
+        authorities.has(Authority.READ_ENVIRONMENT) &&
+        authorities.has(Authority.READ_SECRET) &&
+        authorities.has(Authority.READ_VARIABLE)
+      ) {
+        accessibleProjectIds.push(project.id);
+      }
+    }
+    return accessibleProjectIds;
+  }
+
+  private async queryProjects(
+    projectIds: string[],
+    searchTerm: string,
+    userId: string
+  ): Promise<Project[]> {
+    // Fetch projects where user has READ_PROJECT authority and match search term
+    return this.prisma.project.findMany({
+      where: {
+        id: { in: projectIds },
+        OR: [
+          { name: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
+        ],
+      },
+      select: { id: true, name: true, description: true },
+    });
+  }
+
+  private async queryEnvironments(
+    projectIds: string[],
+    searchTerm: string,
+    userId: string
+  ): Promise<Environment[]> {
+    return this.prisma.environment.findMany({
+      where: {
+        project: {
+          id: { in: projectIds },
+          workspaceId:{ workspaceId},
+        },
+        OR: [
+          { name: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
+        ],
+      },
+      select: { id: true, name: true, description: true },
+    });
+
+  private async querySecrets(
+    projectId: string,
+    searchTerm: string,
+    userId: string
+  ): Promise<Secret[]> {
+    // Fetch secrets associated with projects user has READ_SECRET authority on
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        project: {
+          id: { in: projectIds },
+          workspaceId: workspaceId,
+        },
+        OR: [
+          { name: { contains: searchTerm } },
+          { note: { contains: searchTerm } },
+        ],
+      },
+      select: { id: true, name: true, note: true },
+    });
+  }
+
+  private async queryVariables(projectIds: string[], searchTerm: string): Promise<Variable[]> {
+    return this.prisma.variable.findMany({
+      where: {
+        project: {
+          id: { in: projectIds },
+          workspaceId: workspaceId,
+        },
+        OR: [
+          { name: { contains: searchTerm } },
+          { note: { contains: searchTerm } },
+        ],
+      },
+      select: { id: true, name: true, note: true },
+    });
+  }
+
 
   private async existsByName(
     name: string,
