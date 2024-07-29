@@ -58,13 +58,13 @@ export default class IntegrationController {
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
 
-    return this.apiClient.get(url, headers)
+    return this.apiClient.get<GetAllIntegrationResponse>(url, headers)
   }
 
   static async deleteIntegration(
     request: DeleteIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<DeleteIntegrationResponse[]> {
+  ): Promise<DeleteIntegrationResponse> {
     return this.apiClient.delete(
       `/api/integration/${request.integrationId}`,
       headers
