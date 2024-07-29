@@ -225,7 +225,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -343,7 +343,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -488,7 +488,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -566,7 +566,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -644,7 +644,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -722,7 +722,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -834,7 +834,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -898,7 +898,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
@@ -967,7 +967,7 @@ describe('Workspace Controller Tests', () => {
       EventSource.WORKSPACE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event).toBeDefined()
     expect(event.source).toBe(EventSource.WORKSPACE)
