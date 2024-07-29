@@ -354,7 +354,7 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${projectId} not found`)
     }
 
-    if (project.accessLevel !== 'GLOBAL') {
+    if (project.accessLevel !== ProjectAccessLevel.GLOBAL) {
       throw new UnauthorizedException(
         `User with id ${user.id} does not have the authority in the project with id ${project.id}`
       )
