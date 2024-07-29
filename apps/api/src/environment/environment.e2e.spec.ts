@@ -238,7 +238,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -347,7 +347,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -476,7 +476,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
