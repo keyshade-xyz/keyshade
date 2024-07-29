@@ -253,7 +253,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -407,7 +407,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -628,7 +628,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)

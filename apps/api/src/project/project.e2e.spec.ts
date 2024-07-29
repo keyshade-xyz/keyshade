@@ -225,7 +225,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -401,7 +401,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -650,7 +650,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
