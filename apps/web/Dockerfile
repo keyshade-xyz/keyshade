@@ -28,6 +28,7 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
 
+
 RUN pnpm turbo build --filter=web...
 
 FROM base AS runner
