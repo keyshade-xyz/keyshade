@@ -93,6 +93,7 @@
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
     "dev:platform": "turbo run dev --filter=platform",
+    "dev:cli": "turbo run dev --filter=cli",
     "add:global": "pnpm add -w",
     "add:api": "pnpm add --filter=api",
     "add:web": "pnpm add --filter=web",
@@ -102,6 +103,7 @@
     "lint:api": "turbo run lint --filter=api",
     "lint:web": "turbo run lint --filter=web",
     "lint:platform": "turbo run lint --filter=platform",
+    "lint:cli": "turbo run lint --filter=cli",
     "lint:api-client": "pnpm run --filter=api-client lint",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
@@ -126,7 +128,7 @@
     "db:validate": "pnpm run --filter=api db:validate",
     "db:format": "pnpm run --filter=api db:format",
     "db:reset": "pnpm run --filter=api db:reset",
-    "format": "prettier apps/**/*.{ts,tsx} packages/**/*.{ts,tsx} --write",
+    "format": "prettier apps/**/*.{ts,tsx} packages/**/*.ts --write",
     "prepare": "husky",
     "sourcemaps:api": "turbo run sourcemaps --filter=api",
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
@@ -175,6 +177,7 @@
     "sharp": "^0.33.3",
     "tailwind-merge": "^2.3.0",
     "ts-node": "^10.9.2",
-    "zod": "^3.23.6"
+    "zod": "^3.23.6",
+    "typescript": "^5.5.2"
   }
 }

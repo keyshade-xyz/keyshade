@@ -1,4 +1,4 @@
-import { Configuration } from '../types/command/run.types'
+import type { Configuration } from '@/types/command/run.types'
 
 const SecretController = {
   async fetchSecrets(

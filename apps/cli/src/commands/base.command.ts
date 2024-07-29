@@ -1,12 +1,12 @@
-import { Command } from 'commander'
-import {
+import type {
   CommandActionData,
   CommandArgument,
   CommandOption
-} from '../types/command/command.types'
-import { fetchProfileConfig } from '../util/configuration'
-import Logger from '../util/logger'
-import { getDefaultProfile } from '../util/profile'
+} from '@/types/command/command.types'
+import { fetchProfileConfig } from '@/util/configuration'
+import { Logger } from '@/util/logger'
+import { getDefaultProfile } from '@/util/profile'
+import type { Command } from 'commander'
 
 /**
  * The base class for all commands. All commands should extend this class.
@@ -38,7 +38,7 @@ export default abstract class BaseCommand {
           const args: string[] = data.slice(0, argsCount)
           await this.action({ args, options: commandOptions })
         } catch (error) {
-          Logger.error(error.message)
+          Logger.error(error.message as string)
           process.exit(1)
         }
       })
@@ -54,7 +54,9 @@ export default abstract class BaseCommand {
       command.argument(argument.name, argument.description)
     )
 
-    this.getSubCommands().forEach((subCommand) => subCommand.prepare(command))
+    this.getSubCommands().forEach((subCommand) => {
+      subCommand.prepare(command)
+    })
   }
 
   /**

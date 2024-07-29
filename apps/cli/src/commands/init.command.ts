@@ -1,14 +1,14 @@
-import {
-  writePrivateKeyConfig,
-  writeProjectRootConfig
-} from '../util/configuration'
-import {
+import type {
   CommandActionData,
   CommandOption
-} from '../types/command/command.types'
+} from '@/types/command/command.types'
 import BaseCommand from './base.command'
 import { intro, text, confirm, outro } from '@clack/prompts'
 import { existsSync } from 'fs'
+import {
+  writePrivateKeyConfig,
+  writeProjectRootConfig
+} from '@/util/configuration'
 
 export default class InitCommand extends BaseCommand {
   getOptions(): CommandOption[] {
@@ -98,12 +98,11 @@ export default class InitCommand extends BaseCommand {
   private async checkOverwriteExistingProjectConfig(): Promise<void> {
     if (existsSync('./keyshade.json')) {
       const overwrite = await confirm({
-        message: `Configuration already exists. Do you want to overwrite it?`
+        message: 'Configuration already exists. Do you want to overwrite it?'
       })
 
       if (!overwrite) {
         outro('Configuration cancelled')
-        return
       }
     }
   }
