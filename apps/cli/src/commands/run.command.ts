@@ -55,7 +55,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async fetchConfigurations(): Promise<
-    ProjectRootConfig & RunData
+    RunData
   > {
     const { environment, project, workspace, quitOnDecryptionFailure } = await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
@@ -82,7 +82,7 @@ export default class RunCommand extends BaseCommand {
     return 'ws'
   }
 
-  private async connectToSocket(data: ProjectRootConfig & RunData) {
+  private async connectToSocket(data: RunData) {
     Logger.info('Connecting to socket...')
     const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
