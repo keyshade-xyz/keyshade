@@ -1,43 +1,7 @@
-export enum IntegrationType {
-  DISCORD = 'DISCORD',
-  SLACK = 'SLACK',
-  GITHUB = 'GITHUB',
-  GITLAB = 'GITLAB'
-}
-
-export enum EventType {
-  INVITED_TO_WORKSPACE = 'INVITED_TO_WORKSPACE',
-  REMOVED_FROM_WORKSPACE = 'REMOVED_FROM_WORKSPACE',
-  ACCEPTED_INVITATION = 'ACCEPTED_INVITATION',
-  DECLINED_INVITATION = 'DECLINED_INVITATION',
-  CANCELLED_INVITATION = 'CANCELLED_INVITATION',
-  LEFT_WORKSPACE = 'LEFT_WORKSPACE',
-  WORKSPACE_MEMBERSHIP_UPDATED = 'WORKSPACE_MEMBERSHIP_UPDATED',
-  WORKSPACE_UPDATED = 'WORKSPACE_UPDATED',
-  WORKSPACE_CREATED = 'WORKSPACE_CREATED',
-  WORKSPACE_ROLE_CREATED = 'WORKSPACE_ROLE_CREATED',
-  WORKSPACE_ROLE_UPDATED = 'WORKSPACE_ROLE_UPDATED',
-  WORKSPACE_ROLE_DELETED = 'WORKSPACE_ROLE_DELETED',
-  PROJECT_CREATED = 'PROJECT_CREATED',
-  PROJECT_UPDATED = 'PROJECT_UPDATED',
-  PROJECT_DELETED = 'PROJECT_DELETED',
-  SECRET_UPDATED = 'SECRET_UPDATED',
-  SECRET_DELETED = 'SECRET_DELETED',
-  SECRET_ADDED = 'SECRET_ADDED',
-  VARIABLE_UPDATED = 'VARIABLE_UPDATED',
-  VARIABLE_DELETED = 'VARIABLE_DELETED',
-  VARIABLE_ADDED = 'VARIABLE_ADDED',
-  ENVIRONMENT_UPDATED = 'ENVIRONMENT_UPDATED',
-  ENVIRONMENT_DELETED = 'ENVIRONMENT_DELETED',
-  ENVIRONMENT_ADDED = 'ENVIRONMENT_ADDED',
-  INTEGRATION_ADDED = 'INTEGRATION_ADDED',
-  INTEGRATION_UPDATED = 'INTEGRATION_UPDATED',
-  INTEGRATION_DELETED = 'INTEGRATION_DELETED'
-}
-
+import { IntegrationType, EventType } from 'tests/integration.spec'
 export interface CreateIntegrationRequest {
-  workspaceId: string
-  projectId: string
+  workspaceId?: string
+  projectId?: string
   name: string
   type: IntegrationType
   notifyOn: EventType[]
@@ -115,14 +79,16 @@ export interface GetAllIntegrationRequest {
 }
 
 export interface GetAllIntegrationResponse {
-  id: string
-  name: string
-  metadata: Record<string, string>
-  createdAt: string
-  updatedAt: string
-  type: IntegrationType
-  notifyOn: EventType[]
-  workspaceId: string
-  projectId: string
-  environmentId: string
+  items: {
+    id: string
+    name: string
+    metadata: Record<string, string>
+    createdAt: string
+    updatedAt: string
+    type: IntegrationType
+    notifyOn: EventType[]
+    workspaceId: string
+    projectId: string
+    environmentId: string
+  }[]
 }
