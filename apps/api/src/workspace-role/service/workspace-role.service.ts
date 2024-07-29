@@ -50,7 +50,7 @@ export class WorkspaceRoleService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.CREATE_WORKSPACE_ROLE,
+        authorities: [Authority.CREATE_WORKSPACE_ROLE],
         prisma: this.prisma
       })
 
@@ -270,7 +270,7 @@ export class WorkspaceRoleService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_WORKSPACE_ROLE,
+      authorities: [Authority.READ_WORKSPACE_ROLE],
       prisma: this.prisma
     })
 
@@ -307,7 +307,7 @@ export class WorkspaceRoleService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_WORKSPACE_ROLE,
+      authorities: [Authority.READ_WORKSPACE_ROLE],
       prisma: this.prisma
     })
 
@@ -330,7 +330,7 @@ export class WorkspaceRoleService {
   private async getWorkspaceRoleWithAuthority(
     userId: User['id'],
     workspaceRoleId: Workspace['id'],
-    authority: Authority
+    authorities: Authority
   ) {
     const workspaceRole = (await this.prisma.workspaceRole.findUnique({
       where: {
@@ -354,7 +354,7 @@ export class WorkspaceRoleService {
     )
 
     if (
-      !permittedAuthorities.has(authority) &&
+      !permittedAuthorities.has(authorities) &&
       !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
     ) {
       throw new UnauthorizedException(

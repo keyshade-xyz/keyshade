@@ -108,7 +108,7 @@ export default class ChangeNotifier
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspace.id },
-      authority: Authority.READ_WORKSPACE,
+      authorities: [Authority.READ_WORKSPACE],
       prisma: this.prisma
     })
 
@@ -121,7 +121,7 @@ export default class ChangeNotifier
     await this.authorityCheckerService.checkAuthorityOverProject({
       userId: user.id,
       entity: { id: project.id },
-      authority: Authority.READ_PROJECT,
+      authorities: [Authority.READ_PROJECT],
       prisma: this.prisma
     })
 
@@ -134,7 +134,7 @@ export default class ChangeNotifier
     await this.authorityCheckerService.checkAuthorityOverEnvironment({
       userId: user.id,
       entity: { id: environment.id },
-      authority: Authority.READ_ENVIRONMENT,
+      authorities: [Authority.READ_ENVIRONMENT],
       prisma: this.prisma
     })
 

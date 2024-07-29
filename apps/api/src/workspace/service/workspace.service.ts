@@ -61,7 +61,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.UPDATE_WORKSPACE,
+        authorities: [Authority.UPDATE_WORKSPACE],
 
         prisma: this.prisma
       })
@@ -118,7 +118,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.WORKSPACE_ADMIN,
+        authorities: [Authority.WORKSPACE_ADMIN],
 
         prisma: this.prisma
       })
@@ -240,7 +240,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.DELETE_WORKSPACE,
+        authorities: [Authority.DELETE_WORKSPACE],
         prisma: this.prisma
       })
 
@@ -270,7 +270,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.ADD_USER,
+        authorities: [Authority.ADD_USER],
         prisma: this.prisma
       })
 
@@ -316,7 +316,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.REMOVE_USER,
+        authorities: [Authority.REMOVE_USER],
         prisma: this.prisma
       })
 
@@ -371,7 +371,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.UPDATE_USER_ROLE,
+        authorities: [Authority.UPDATE_USER_ROLE],
         prisma: this.prisma
       })
 
@@ -461,7 +461,7 @@ export class WorkspaceService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_USERS,
+      authorities: [Authority.READ_USERS],
       prisma: this.prisma
     })
 
@@ -571,7 +571,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.REMOVE_USER,
+        authorities: [Authority.REMOVE_USER],
         prisma: this.prisma
       })
 
@@ -649,7 +649,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.READ_WORKSPACE,
+        authorities: [Authority.READ_WORKSPACE],
         prisma: this.prisma
       })
 
@@ -701,7 +701,7 @@ export class WorkspaceService {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_USERS,
+      authorities: [Authority.READ_USERS],
       prisma: this.prisma
     })
 
@@ -715,7 +715,7 @@ export class WorkspaceService {
     return await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
-      authority: Authority.READ_USERS,
+      authorities: [Authority.READ_USERS],
       prisma: this.prisma
     })
   }
@@ -761,7 +761,7 @@ export class WorkspaceService {
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
         entity: { id: workspaceId },
-        authority: Authority.WORKSPACE_ADMIN,
+        authorities: [Authority.WORKSPACE_ADMIN],
         prisma: this.prisma
       })
 
