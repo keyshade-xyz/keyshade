@@ -24,6 +24,7 @@ import { EventModule } from '../event/event.module'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/service/user.service'
 import { WorkspaceService } from './service/workspace.service'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 const createMembership = async (
   adminRoleId: string,
@@ -74,6 +75,8 @@ describe('Workspace Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
     workspaceService = moduleRef.get(WorkspaceService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -1033,8 +1036,23 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toBeInstanceOf(Array)
-    expect(response.json()).toHaveLength(1)
+    expect(response.json().items).toBeInstanceOf(Array)
+    expect(response.json().items).toHaveLength(1)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/workspace/${workspace1.id}/members?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace/${workspace1.id}/members?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace/${workspace1.id}/members?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to get all the members of the workspace if user is not a member', async () => {
@@ -1150,7 +1168,53 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toEqual(2)
+    expect(response.json().items.length).toEqual(2)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toBe(2)
+    expect(metadata.links.self).toEqual(
+      `/workspace?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace?page=0&limit=10&sort=name&order=asc&search=`
+    )
+  })
+
+  it('should be able to fetch the 2nd page of the workspaces the user is a member of', async () => {
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+    const response = await app.inject({
+      method: 'GET',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: '/workspace?page=1&limit=1'
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().items).toHaveLength(1)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(2)
+    expect(metadata.links.self).toEqual(
+      `/workspace?page=1&limit=1&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace?page=0&limit=1&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toEqual(
+      `/workspace?page=0&limit=1&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace?page=1&limit=1&sort=name&order=asc&search=`
+    )
   })
 
   it('should be able to transfer the ownership of the workspace', async () => {
