@@ -57,7 +57,7 @@ export class EnvironmentController {
   async getEnvironmentsOfProject(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
