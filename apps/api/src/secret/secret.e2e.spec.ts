@@ -36,6 +36,7 @@ import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -80,6 +81,8 @@ describe('Secret Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -596,16 +599,16 @@ describe('Secret Controller Tests', () => {
   it('should be able to fetch all secrets', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/${project1.id}`,
+      url: `/secret/${project1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { secret, values } = response.json()[0]
+    const { secret, values } = response.json().items[0]
     expect(secret.id).toBeDefined()
     expect(secret.name).toBeDefined()
     expect(secret.note).toBeDefined()
@@ -615,21 +618,36 @@ describe('Secret Controller Tests', () => {
     const value = values[0]
     expect(value.environment).toBeDefined()
     expect(value.value).not.toEqual('Secret 1 value')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should be able to fetch all secrets decrypted', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/${project1.id}?decryptValue=true`,
+      url: `/secret/${project1.id}?decryptValue=true&page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { secret, values } = response.json()[0]
+    const { secret, values } = response.json().items[0]
     expect(secret.id).toBeDefined()
     expect(secret.name).toBeDefined()
     expect(secret.note).toBeDefined()
@@ -639,6 +657,21 @@ describe('Secret Controller Tests', () => {
     const value = values[0]
     expect(value.environment).toBeDefined()
     expect(value.value).toEqual('Secret 1 value')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
