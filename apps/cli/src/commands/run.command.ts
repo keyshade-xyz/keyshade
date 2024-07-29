@@ -15,7 +15,8 @@ import {
 import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
-  Configuration
+  Configuration,
+  RunData
 } from '@/types/command/run.types'
 
 import { decrypt } from '@/util/decrypt'
@@ -54,7 +55,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   private async fetchConfigurations(): Promise<
-    ProjectRootConfig & { privateKey: string }
+    ProjectRootConfig & RunData
   > {
     const { environment, project, workspace, quitOnDecryptionFailure } = await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
@@ -81,14 +82,13 @@ export default class RunCommand extends BaseCommand {
     return 'ws'
   }
 
-  private async connectToSocket(data: ProjectRootConfig) {
+  private async connectToSocket(data: ProjectRootConfig & RunData) {
     Logger.info('Connecting to socket...')
     const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
-    const privateKey = (data as any).privateKey;
+    const privateKey = data.privateKey
     const quitOnDecryptionFailure = data.quitOnDecryptionFailure
     
-
     const ioClient = io(websocketUrl, {
       autoConnect: false,
       extraHeaders: {
