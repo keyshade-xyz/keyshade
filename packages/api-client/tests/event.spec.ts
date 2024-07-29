@@ -1,5 +1,6 @@
 import client from '@package/client'
 import EventController from '@package/controllers/event/event'
+import { EventSource } from '@package/types/event.types'
 
 describe('Get Event Controller', () => {
   const email = 'johndoe@example.com'
@@ -45,10 +46,10 @@ describe('Get Event Controller', () => {
     projectId = project.id
 
     const events = await EventController.getEvents(
-      { workspaceId, source: 'PROJECT' },
+      { workspaceId, source: EventSource.PROJECT },
       { 'x-e2e-user-email': email }
     )
-
+    console.log(events)
     expect(events[0].source).toBe('PROJECT')
     expect(events[0].metadata.projectId).toBe(project.id)
     expect(events[0].metadata.name).toBe('Project')
@@ -65,10 +66,10 @@ describe('Get Event Controller', () => {
       }
     )) as any
     const events = await EventController.getEvents(
-      { workspaceId, source: 'ENVIRONMENT' },
+      { workspaceId, source: EventSource.ENVIRONMENT },
       { 'x-e2e-user-email': email }
     )
-
+    console.log(events)
     expect(events[0].source).toBe('ENVIRONMENT')
     expect(events[0].metadata.environmentId).toBe(environmentResponse.id)
     expect(events[0].metadata.name).toBe('Dev')
@@ -94,10 +95,10 @@ describe('Get Event Controller', () => {
       }
     )) as any
     const events = await EventController.getEvents(
-      { workspaceId, source: 'SECRET' },
+      { workspaceId, source: EventSource.SECRET },
       { 'x-e2e-user-email': email }
     )
-
+    console.log(events)
     expect(events[0].source).toBe('SECRET')
     expect(events[0].metadata.secretId).toBe(secret.id)
     expect(events[0].metadata.name).toBe('My secret')
@@ -121,9 +122,10 @@ describe('Get Event Controller', () => {
       }
     )) as any
     const events = await EventController.getEvents(
-      { workspaceId, source: 'VARIABLE' },
+      { workspaceId, source: EventSource.VARIABLE },
       { 'x-e2e-user-email': email }
     )
+    console.log(events)
     expect(events[0].source).toBe('VARIABLE')
     expect(events[0].metadata.variableId).toBe(variable.id)
     expect(events[0].metadata.name).toBe('My variable')

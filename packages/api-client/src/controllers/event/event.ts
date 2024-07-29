@@ -8,12 +8,9 @@ export default class EventController {
     request: GetEventsRequest,
     headers?: Record<string, string>
   ): Promise<GetEventsResponse> {
-    let url = `/api/event/${request.workspaceId}?source=${request.source}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    return this.apiClient.get(
+      `/api/event/${request.workspaceId}?source=${request.source}`,
+      headers
+    )
   }
 }
