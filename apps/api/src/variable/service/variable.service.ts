@@ -625,6 +625,43 @@ export class VariableService {
     return { items, metadata }
   }
 
+  async getRevisionsOfVariable(
+    user: User,
+    variableId: Variable['id'],
+    environmentId: Environment['id'],
+    page: number,
+    limit: number,
+    order: 'asc' | 'desc'
+  ) {
+    await this.authorityCheckerService.checkAuthorityOverVariable({
+      userId: user.id,
+      entity: { id: variableId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
+
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    const revisions = await this.prisma.variableVersion.findMany({
+      where: {
+        variableId: variableId,
+        environmentId: environmentId
+      },
+      skip: page * limit,
+      take: limit,
+      orderBy: {
+        version: order
+      }
+    })
+
+    return revisions
+  }
+
   private async variableExists(
     variableName: Variable['name'],
     projectId: Project['id']
