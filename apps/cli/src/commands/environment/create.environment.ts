@@ -1,11 +1,10 @@
 import BaseCommand from '../base.command'
-import { spinner } from '@clack/prompts'
+import { spinner, text } from '@clack/prompts'
 import {
-  CommandActionData,
-  CommandArgument,
-  CommandOption
+  type CommandActionData,
+  type CommandArgument,
+  type CommandOption
 } from 'src/types/command/command.types'
-import { text } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -30,6 +29,7 @@ export class CreateEnvironment extends BaseCommand {
       }
     ]
   }
+
   getArguments(): CommandArgument[] {
     return [
       {
@@ -52,9 +52,9 @@ export class CreateEnvironment extends BaseCommand {
     const apiKey = this.apiKey
 
     const environmentData = {
-      name: name,
-      description: description,
-      projectId: projectId
+      name,
+      description,
+      projectId
     }
 
     const headers = {

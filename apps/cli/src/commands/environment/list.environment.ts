@@ -2,8 +2,8 @@ import BaseCommand from '../base.command'
 import { EnvironmentController } from '@keyshade/api-client'
 import { intro, spinner } from '@clack/prompts'
 import {
-  CommandActionData,
-  CommandArgument
+  type CommandActionData,
+  type CommandArgument
 } from 'src/types/command/command.types'
 
 export class ListEnvironment extends BaseCommand {

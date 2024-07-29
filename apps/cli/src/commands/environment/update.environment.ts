@@ -2,15 +2,16 @@ import BaseCommand from '../base.command'
 import { spinner } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
-  CommandActionData,
-  CommandArgument,
-  CommandOption
+  type CommandActionData,
+  type CommandArgument,
+  type CommandOption
 } from 'src/types/command/command.types'
 
 export class UpdateEnvironment extends BaseCommand {
   getName(): string {
     return 'update'
   }
+
   getDescription(): string {
     return 'Update a environment'
   }
