@@ -33,8 +33,7 @@ export const paginate = (
   query: QueryOptions,
   defaultQuery?: Record<string, any>
 ) => {
-  //query.limit cannot be 0 or undefined
-  if (!query.limit) throw new Error('Limit is required')
+  if (!query.limit) return {} as PaginatedMetadata
   let defaultQueryStr = ''
   if (defaultQuery) {
     //sorting entries to make sure the order is consistent and predictable during tests
@@ -55,6 +54,8 @@ export const paginate = (
   metadata.perPage = query.limit
   metadata.pageCount = Math.ceil(totalCount / query.limit)
   metadata.totalCount = totalCount
+
+  if (query.page >= metadata.pageCount) return {} as PaginatedMetadata
 
   //create links from relativeUrl , defalutQueryStr and query of type QueryOptions
   metadata.links = {
