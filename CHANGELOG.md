@@ -1,3 +1,64 @@
+## [2.3.0](https://github.com/keyshade-xyz/keyshade/compare/v2.2.0...v2.3.0) (2024-07-29)
+
+### 🚀 Features
+
+* **api:** Add pagination metadata to Environment module ([#382](https://github.com/keyshade-xyz/keyshade/issues/382)) ([9baa344](https://github.com/keyshade-xyz/keyshade/commit/9baa344e662e8034ab184f9db2218b8d8b279c61))
+* **api:** Add pagination metadata to Event module ([#394](https://github.com/keyshade-xyz/keyshade/issues/394)) ([60010b4](https://github.com/keyshade-xyz/keyshade/commit/60010b434a15082b90b9b858e0dd9c09748661fb))
+* **api:** Add pagination metadata to Integration module ([#391](https://github.com/keyshade-xyz/keyshade/issues/391)) ([0372e36](https://github.com/keyshade-xyz/keyshade/commit/0372e3629d4d96df7d7263215f866ad8a3e70bc0))
+* **api:** Add pagination metadata to Project module ([#393](https://github.com/keyshade-xyz/keyshade/issues/393)) ([bc274fd](https://github.com/keyshade-xyz/keyshade/commit/bc274fdc241395c022fd6f209c0e951ab4c7694f))
+* **api:** Add pagination metadata to Secret module ([#389](https://github.com/keyshade-xyz/keyshade/issues/389)) ([c4cc667](https://github.com/keyshade-xyz/keyshade/commit/c4cc6676f566c6216ba2e196834aea164c682e51))
+* **api:** Add pagination metadata to Variable module ([#390](https://github.com/keyshade-xyz/keyshade/issues/390)) ([be6aabf](https://github.com/keyshade-xyz/keyshade/commit/be6aabfe218b039d65b62aa01518240487bb5836))
+* **api:** Add pagination metadata to Workspace module  ([#387](https://github.com/keyshade-xyz/keyshade/issues/387)) ([a08c924](https://github.com/keyshade-xyz/keyshade/commit/a08c924dbc52ea45e793d639170333f8824eae2c))
+* **api:** Add pagination metadata to Workspace Role module ([#388](https://github.com/keyshade-xyz/keyshade/issues/388)) ([d8e8f49](https://github.com/keyshade-xyz/keyshade/commit/d8e8f491d966cb794057536922c7469ed4f8f448))
+* **api:** Create a paginate method ([#379](https://github.com/keyshade-xyz/keyshade/issues/379)) ([09576f1](https://github.com/keyshade-xyz/keyshade/commit/09576f130900ea8d89454332bef9353bfe09a0b2))
+* **api:** Create endpoint for fetching all revisions of a [secure] ([#303](https://github.com/keyshade-xyz/keyshade/issues/303)) ([de2b602](https://github.com/keyshade-xyz/keyshade/commit/de2b602dcd5bdab104d910b12761a6ec778103b8))
+* **api:** Create endpoint for fetching all revisions of a variable ([#304](https://github.com/keyshade-xyz/keyshade/issues/304)) ([9abddc1](https://github.com/keyshade-xyz/keyshade/commit/9abddc11691146045e727078b3b963f8b9c2e990))
+* **cli:** Improved the DX for list profile ([#334](https://github.com/keyshade-xyz/keyshade/issues/334)) ([6bff496](https://github.com/keyshade-xyz/keyshade/commit/6bff4964493f9919b221a5dc6fcc578bc47b2832))
+* **platform:** Add warning sonner toast for invalid otp ([#335](https://github.com/keyshade-xyz/keyshade/issues/335)) ([21513f5](https://github.com/keyshade-xyz/keyshade/commit/21513f5be6d36b308cd5926e7ad1b475f96cb668))
+
+### 🐛 Bug Fixes
+
+* **cli:** Added parent directory check ([#359](https://github.com/keyshade-xyz/keyshade/issues/359)) ([538ea7f](https://github.com/keyshade-xyz/keyshade/commit/538ea7f2654e4f3ea06fde9fe653342ca769ce44))
+* **platform:** Platform types fixes ([#374](https://github.com/keyshade-xyz/keyshade/issues/374)) ([8e9d9ff](https://github.com/keyshade-xyz/keyshade/commit/8e9d9ffac0af1f93bb5513bf94aa3a75fb3c31c6))
+
+### 📚 Documentation
+
+* Added docker details in setting-things-up.md ([#358](https://github.com/keyshade-xyz/keyshade/issues/358)) ([ed5093a](https://github.com/keyshade-xyz/keyshade/commit/ed5093ac5df17f8dbf4c7e286af739121b51a692))
+* Update postman workspace link ([d6aba27](https://github.com/keyshade-xyz/keyshade/commit/d6aba270a97f03f16e35b5cde75ff472641fe1a7))
+* Updated env and cli docs ([1213d2a](https://github.com/keyshade-xyz/keyshade/commit/1213d2a9b5689d44a260eff9c2e0eb8e6968c7da))
+
+### 🔧 Miscellaneous Chores
+
+* Added next backend url in .env.example ([5695254](https://github.com/keyshade-xyz/keyshade/commit/5695254b64d3c504f7ca7cd17681f42947fef232))
+* **api-client:** Added pagination structure ([a70e957](https://github.com/keyshade-xyz/keyshade/commit/a70e957afc828be1e72d0ea958de8ba860a04b9c))
+* **api-client:** Fixed test script ([ad70819](https://github.com/keyshade-xyz/keyshade/commit/ad708190771f40596646b54fdda49a01c4742644))
+* **api-client:** Removed try-catch from tests in environment ([a64e48c](https://github.com/keyshade-xyz/keyshade/commit/a64e48cb171b3996bddb74f2cf256d4760e3ccb3))
+* **api:** Add user cache for optimization ([#386](https://github.com/keyshade-xyz/keyshade/issues/386)) ([8d730b5](https://github.com/keyshade-xyz/keyshade/commit/8d730b58830a8a0e6be6bf0fe86b3021a2d473eb))
+* **api:** Alter cache rehydration interval ([f5f9eec](https://github.com/keyshade-xyz/keyshade/commit/f5f9eec5c81b29d7f8eb1e233c4e80e4d36eb0cf))
+* **api:** Fixed naming error in variable controller ([0c5a380](https://github.com/keyshade-xyz/keyshade/commit/0c5a380fba843a2eb8a84753cfbe8b3ef86b6e31))
+* **api:** Improve handling of edge cases for paginate module ([#402](https://github.com/keyshade-xyz/keyshade/issues/402)) ([8591487](https://github.com/keyshade-xyz/keyshade/commit/8591487623c5e817ff31aedd6e8cd15074bcfc1c))
+* **api:** Minor updates to user service ([249d778](https://github.com/keyshade-xyz/keyshade/commit/249d778b94a5587b6c7da6d7afe04b9bfee5c0d6))
+* **api:** Skip workspace creation when user is admin ([#376](https://github.com/keyshade-xyz/keyshade/issues/376)) ([13f6c59](https://github.com/keyshade-xyz/keyshade/commit/13f6c59fda07e4a8b6f991e670ab055964fb2fb1))
+* **ci:** Add docker check   ([#383](https://github.com/keyshade-xyz/keyshade/issues/383)) ([3119001](https://github.com/keyshade-xyz/keyshade/commit/311900177b85035d777acb6d86549cfffc71dbef))
+* **ci:** Add names to CI files ([1a7e5f6](https://github.com/keyshade-xyz/keyshade/commit/1a7e5f6c2b4e4a5aced5955a2a394f0540776cb1))
+* **ci:** Add validate CLI pipeline ([#373](https://github.com/keyshade-xyz/keyshade/issues/373)) ([a91df6c](https://github.com/keyshade-xyz/keyshade/commit/a91df6c6eedbb3e79dd77cbe42ca4836a714e8a3))
+* **ci:** Adding validate pipeline ([#372](https://github.com/keyshade-xyz/keyshade/issues/372)) ([23cf3b3](https://github.com/keyshade-xyz/keyshade/commit/23cf3b3b12719297ac00c07a20d0b57462440fef))
+* **ci:** Disabled platform and api deployments ([74d601a](https://github.com/keyshade-xyz/keyshade/commit/74d601a576986f6436314dd6631f86ee49185109))
+* **ci:** Fixed deployment scripts ([12e35db](https://github.com/keyshade-xyz/keyshade/commit/12e35db8a5d454db59c8eadaa6bd0fa0525b90b5))
+* **ci:** Fixed platform script ([d783f2a](https://github.com/keyshade-xyz/keyshade/commit/d783f2ab16c63c711a8022b145e0af085cc011de))
+* **CI:** Include migration deployment in API deploy pipeline ([dbd5222](https://github.com/keyshade-xyz/keyshade/commit/dbd5222a5081d769e47cd32231cc515bb311666b))
+* **CI:** Separated deployment and docker build jobs ([090e193](https://github.com/keyshade-xyz/keyshade/commit/090e193cb4af3771e523dd371364f2d21dd3cd03))
+* **CI:** Setup inter-job dependency ([1756727](https://github.com/keyshade-xyz/keyshade/commit/1756727849a2bfabf9d58a81e95d7b6f6c159f4a))
+* **ci:** Update auto-assign.yaml ([#375](https://github.com/keyshade-xyz/keyshade/issues/375)) ([91e0ec1](https://github.com/keyshade-xyz/keyshade/commit/91e0ec12da8c22b8b2ecec8a35aef48fc5fecc9d))
+* **cli:** Changed objects to classes ([#306](https://github.com/keyshade-xyz/keyshade/issues/306)) ([c83f2db](https://github.com/keyshade-xyz/keyshade/commit/c83f2db56ddc3256ed4df35169325cc5427b4978))
+* Removed Minio config ([8feb83a](https://github.com/keyshade-xyz/keyshade/commit/8feb83aae23b5817d5038235a3d0e59c5d12a0ff))
+* Updated deployment scripts and added health check in platform ([fcc1c3f](https://github.com/keyshade-xyz/keyshade/commit/fcc1c3fb50679073c7d3791fedafe25b1287ad0a))
+
+### 🔨 Code Refactoring
+
+* **api:** Updated path of some endpoints in project controller ([9502678](https://github.com/keyshade-xyz/keyshade/commit/95026787df5156147a209c7f6e6b8970b33df5aa))
+* **api:** Updated Redis provider ([33491a1](https://github.com/keyshade-xyz/keyshade/commit/33491a199c5ae7f822e44936eebab964f7f93ac5))
+
 ## [2.2.0](https://github.com/keyshade-xyz/keyshade/compare/v2.1.0...v2.2.0) (2024-07-11)
 
 ### 🚀 Features
