@@ -763,7 +763,7 @@ export class WorkspaceService {
     //get all workspaces of user for page with limit
     const items = await this.prisma.workspace.findMany({
       skip: page * limit,
-      take: Number(limit),
+      take: limit,
       orderBy: {
         [sort]: order
       },
