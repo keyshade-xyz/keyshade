@@ -19,6 +19,7 @@ import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import createEvent from '../../common/create-event'
 import IntegrationFactory from '../plugins/factory/integration.factory'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class IntegrationService {
@@ -297,7 +298,8 @@ export class IntegrationService {
         ]
       },
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -323,8 +325,8 @@ export class IntegrationService {
       }
     })
     const metadata = paginate(totalCount, `/integration/all/${workspaceId}`, {
-      page,
-      limit,
+      page: Number(page),
+      limit: Number(limit),
       sort,
       order,
       search

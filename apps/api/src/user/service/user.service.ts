@@ -16,6 +16,7 @@ import {
 import createUser from '../../common/create-user'
 import generateOtp from '../../common/generate-otp'
 import { EnvSchema } from '../../common/env/env.schema'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class UserService {
@@ -216,7 +217,8 @@ export class UserService {
   ): Promise<User[]> {
     return this.prisma.user.findMany({
       skip: (page - 1) * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       },

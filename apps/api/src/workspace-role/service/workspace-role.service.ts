@@ -23,6 +23,7 @@ import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { paginate, PaginatedMetadata } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -320,7 +321,8 @@ export class WorkspaceRoleService {
         }
       },
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -340,8 +342,8 @@ export class WorkspaceRoleService {
       totalCount,
       `/workspace-role/${workspaceId}/all`,
       {
-        page,
-        limit,
+        page: Number(page),
+        limit: Number(limit),
         sort,
         order,
         search

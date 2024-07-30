@@ -32,6 +32,7 @@ import {
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class SecretService {
@@ -524,7 +525,8 @@ export class SecretService {
         environmentId: environmentId
       },
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         version: sortOrder
       }
@@ -570,7 +572,8 @@ export class SecretService {
         }
       },
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -671,8 +674,8 @@ export class SecretService {
       totalCount,
       `/secret/${projectId}`,
       {
-        page,
-        limit,
+        page: Number(page),
+        limit: Number(limit),
         sort,
         order,
         search

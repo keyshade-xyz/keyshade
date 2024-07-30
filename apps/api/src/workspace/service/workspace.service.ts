@@ -32,6 +32,7 @@ import createEvent from '../../common/create-event'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceService {
@@ -468,7 +469,7 @@ export class WorkspaceService {
     //get all members of workspace for page with limit
     const items = await this.prisma.workspaceMember.findMany({
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
       orderBy: {
         workspace: {
           [sort]: order
@@ -538,8 +539,8 @@ export class WorkspaceService {
     })
 
     const metadata = paginate(totalCount, `/workspace/${workspaceId}/members`, {
-      page,
-      limit,
+      page: Number(page),
+      limit: Number(limit),
       sort,
       order,
       search
@@ -763,7 +764,7 @@ export class WorkspaceService {
     //get all workspaces of user for page with limit
     const items = await this.prisma.workspace.findMany({
       skip: page * limit,
-      take: limit,
+      take: Number(limit),
       orderBy: {
         [sort]: order
       },

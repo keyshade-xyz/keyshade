@@ -3,6 +3,7 @@ import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class EventService {
@@ -44,7 +45,8 @@ export class EventService {
         }
       },
       skip: page * limit,
-      take: Math.min(limit, 30),
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         timestamp: 'desc'
       }
@@ -66,8 +68,8 @@ export class EventService {
       totalCount,
       `/event/${workspaceId}`,
       {
-        page,
-        limit,
+        page: Number(page),
+        limit: Number(limit),
         search
       },
       { source }
