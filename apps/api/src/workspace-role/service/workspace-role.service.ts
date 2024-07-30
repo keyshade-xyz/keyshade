@@ -343,7 +343,7 @@ export class WorkspaceRoleService {
       `/workspace-role/${workspaceId}/all`,
       {
         page: Number(page),
-        limit: Number(limit),
+        limit: limitMaxItemsPerPage(limit),
         sort,
         order,
         search

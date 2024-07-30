@@ -540,7 +540,7 @@ export class WorkspaceService {
 
     const metadata = paginate(totalCount, `/workspace/${workspaceId}/members`, {
       page: Number(page),
-      limit: Number(limit),
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search

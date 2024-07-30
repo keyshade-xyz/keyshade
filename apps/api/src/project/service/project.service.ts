@@ -630,7 +630,7 @@ export class ProjectService {
       `/project/${projectId}/forks`,
       {
         page: Number(page),
-        limit: Number(limit)
+        limit: limitMaxItemsPerPage(limit)
       }
     )
 

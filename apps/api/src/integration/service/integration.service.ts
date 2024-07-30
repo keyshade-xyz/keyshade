@@ -326,7 +326,7 @@ export class IntegrationService {
     })
     const metadata = paginate(totalCount, `/integration/all/${workspaceId}`, {
       page: Number(page),
-      limit: Number(limit),
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search

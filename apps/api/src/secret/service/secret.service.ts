@@ -675,7 +675,7 @@ export class SecretService {
       `/secret/${projectId}`,
       {
         page: Number(page),
-        limit: Number(limit),
+        limit: limitMaxItemsPerPage(limit),
         sort,
         order,
         search

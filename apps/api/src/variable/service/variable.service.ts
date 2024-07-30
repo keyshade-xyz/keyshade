@@ -618,7 +618,7 @@ export class VariableService {
 
     const metadata = paginate(totalCount, `/variable/${projectId}`, {
       page: Number(page),
-      limit: Number(limit),
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search

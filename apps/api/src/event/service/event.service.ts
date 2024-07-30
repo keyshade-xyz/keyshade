@@ -69,7 +69,7 @@ export class EventService {
       `/event/${workspaceId}`,
       {
         page: Number(page),
-        limit: Number(limit),
+        limit: limitMaxItemsPerPage(limit),
         search
       },
       { source }
