@@ -218,7 +218,6 @@ export class UserService {
     return this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       },
