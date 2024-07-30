@@ -2,7 +2,9 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  NotFoundException,
+  UnauthorizedException
 } from '@nestjs/common'
 import {
   Authority,
@@ -29,6 +31,7 @@ import createEvent from '../../common/create-event'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
+import { paginate } from '../../common/paginate'
 
 @Injectable()
 export class ProjectService {
@@ -335,13 +338,27 @@ export class ProjectService {
     projectId: Project['id'],
     forkMetadata: ForkProject
   ) {
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { id: projectId },
-        authority: Authority.READ_PROJECT,
-        prisma: this.prisma
-      })
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        storePrivateKey: true,
+        accessLevel: true,
+        privateKey: true
+      }
+    })
+
+    if (!project) {
+      throw new NotFoundException(`Project with id ${projectId} not found`)
+    }
+
+    if (project.accessLevel !== ProjectAccessLevel.GLOBAL) {
+      throw new UnauthorizedException(
+        `User with id ${user.id} does not have the authority in the project with id ${project.id}`
+      )
+    }
 
     let workspaceId = forkMetadata.workspaceId
 
@@ -593,19 +610,30 @@ export class ProjectService {
       }
     })
 
-    return forks
-      .slice(page * limit, (page + 1) * limit)
-      .filter(async (fork) => {
-        const allowed =
-          (await this.authorityCheckerService.checkAuthorityOverProject({
-            userId: user.id,
-            entity: { id: fork.id },
-            authority: Authority.READ_PROJECT,
-            prisma: this.prisma
-          })) != null
+    const forksAllowed = forks.filter(async (fork) => {
+      const allowed =
+        (await this.authorityCheckerService.checkAuthorityOverProject({
+          userId: user.id,
+          entity: { id: fork.id },
+          authority: Authority.READ_PROJECT,
+          prisma: this.prisma
+        })) != null
 
-        return allowed
-      })
+      return allowed
+    })
+
+    const items = forksAllowed.slice(page * limit, (page + 1) * limit)
+    //calculate metadata
+    const metadata = paginate(
+      forksAllowed.length,
+      `/project/${projectId}/forks`,
+      {
+        page,
+        limit
+      }
+    )
+
+    return { items, metadata }
   }
 
   async getProjectById(user: User, projectId: Project['id']) {
@@ -638,7 +666,8 @@ export class ProjectService {
       prisma: this.prisma
     })
 
-    return (
+    //fetch projects with required properties
+    const items = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: Math.min(limit, 30),
@@ -669,6 +698,42 @@ export class ProjectService {
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+
+    //calculate metadata
+    const totalCount = await this.prisma.project.count({
+      where: {
+        workspaceId,
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          },
+          {
+            description: {
+              contains: search
+            }
+          }
+        ],
+        workspace: {
+          members: {
+            some: {
+              userId: user.id
+            }
+          }
+        }
+      }
+    })
+
+    const metadata = paginate(totalCount, `/project/all/${workspaceId}`, {
+      page,
+      limit,
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
   }
 
   private async projectExists(

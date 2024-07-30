@@ -17,6 +17,7 @@ import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '../../prisma/prisma.service'
 import createEvent from '../../common/create-event'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { paginate } from '../../common/paginate'
 
 @Injectable()
 export class EnvironmentService {
@@ -171,8 +172,8 @@ export class EnvironmentService {
       prisma: this.prisma
     })
 
-    // Get the environments
-    return await this.prisma.environment.findMany({
+    // Get the environments for the required page
+    const items = await this.prisma.environment.findMany({
       where: {
         projectId,
         name: {
@@ -200,6 +201,24 @@ export class EnvironmentService {
         [sort]: order
       }
     })
+    // Calculate metadata for pagination
+    const totalCount = await this.prisma.environment.count({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      }
+    })
+    const metadata = paginate(totalCount, `/environment/all/${projectId}`, {
+      page,
+      limit,
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
   }
 
   async deleteEnvironment(user: User, environmentId: Environment['id']) {
