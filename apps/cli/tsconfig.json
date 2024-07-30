@@ -12,7 +12,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@keyshade/api-client": ["../../packages/api-client/src"]
     },
     "incremental": true,
     "skipLibCheck": true,

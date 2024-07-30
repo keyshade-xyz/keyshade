@@ -1,5 +1,6 @@
+import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { spinner } from '@clack/prompts'
+import { spinner, intro, outro } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   type CommandActionData,
@@ -40,6 +41,7 @@ export class GetEnvironment extends BaseCommand {
 
     const spin = spinner()
     try {
+      intro('Getting Environment...')
       const environment = await EnvironmentController.getEnvironmentById(
         { id: environmentId },
         headers
@@ -47,8 +49,10 @@ export class GetEnvironment extends BaseCommand {
       spin.start(`Environment ${environmentId}:`)
       spin.message(`- Name: ${environment.name}`)
       spin.message(`- Description: ${environment.description}`)
+      outro('Successfully Fetched the Environment.')
+      spin.stop()
     } catch (error) {
-      console.error(error.message)
+      Logger.error(error.message as string)
     }
   }
 }

@@ -1,11 +1,12 @@
 import BaseCommand from '../base.command'
-import { spinner, text } from '@clack/prompts'
+import { spinner, text, intro, outro } from '@clack/prompts'
 import {
   type CommandActionData,
   type CommandArgument,
   type CommandOption
 } from 'src/types/command/command.types'
 import { EnvironmentController } from '@keyshade/api-client'
+import { Logger } from '@/util/logger'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
@@ -63,15 +64,17 @@ export class CreateEnvironment extends BaseCommand {
 
     const spin = spinner()
     try {
+      intro('Creating Environment')
       const createdEnvironment = await EnvironmentController.createEnvironment(
         environmentData,
         headers
       )
-      spin.start('Created environment:')
       spin.message(`- Name: ${createdEnvironment.name}`)
       spin.message(`- ID: ${createdEnvironment.id}`)
+      outro('Environment Created Successfully.')
+      spin.stop()
     } catch (error) {
-      console.error(error.message)
+      Logger.error(error.message as string)
     }
   }
 

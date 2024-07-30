@@ -1,10 +1,11 @@
 import BaseCommand from '../base.command'
-import { spinner } from '@clack/prompts'
+import { intro, outro } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   type CommandActionData,
   type CommandArgument
 } from 'src/types/command/command.types'
+import { Logger } from '@/util/logger'
 
 export class DeleteEnvironment extends BaseCommand {
   getName(): string {
@@ -38,16 +39,15 @@ export class DeleteEnvironment extends BaseCommand {
       'x-keyshade-token': apiKey
     }
 
-    const spin = spinner()
-
     try {
+      intro('Deleting Environment..')
       await EnvironmentController.deleteEnvironment(
         { id: environmentId },
         headers
       )
-      spin.stop(`Environment ${environmentId} has been deleted successfully.`)
+      outro(`Environment ${environmentId} has been deleted successfully.`)
     } catch (error) {
-      console.error(error.message)
+      Logger.info(error.message as string)
     }
   }
 }
