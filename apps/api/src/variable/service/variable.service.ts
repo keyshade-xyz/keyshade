@@ -653,7 +653,7 @@ export class VariableService {
         environmentId: environmentId
       },
       skip: page * limit,
-      take: limit,
+      take: Math.min(limit, 30),
       orderBy: {
         version: order
       }
