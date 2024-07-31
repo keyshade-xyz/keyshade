@@ -46,7 +46,7 @@ export class UpdateEnvironment extends BaseCommand {
     const { name, description } = options
 
     if (!environmentId) {
-      console.error('Environment ID is required')
+      Logger.error('Environment ID is required')
       return
     }
 
@@ -62,14 +62,13 @@ export class UpdateEnvironment extends BaseCommand {
       id: environmentId
     }
 
-    const spin = spinner()
-
     try {
       intro('Updating Environment...')
       const environments = await EnvironmentController.updateEnvironment(
         environmentData,
         headers
       )
+      const spin = spinner()
       spin.start(`Environments for project ${environmentId}:`)
       spin.message(JSON.stringify(environments))
       outro('Successfully Updated The Environment')

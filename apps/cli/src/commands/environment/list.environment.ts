@@ -29,7 +29,7 @@ export class ListEnvironment extends BaseCommand {
     const [projectId] = args
 
     if (!projectId) {
-      console.error('Project ID is required')
+      Logger.error('Project ID is required')
       return
     }
 
@@ -40,13 +40,11 @@ export class ListEnvironment extends BaseCommand {
     }
 
     if (!apiKey) {
-      console.error('Base URL and API Key must be set as environment variables')
+      Logger.error('Base URL and API Key must be set as environment variables')
       return
     }
 
     intro(`Fetching environments for project ${projectId}...`)
-
-    const spin = spinner()
 
     try {
       intro(`Getting all Environment for Project ${projectId}`)
@@ -55,6 +53,7 @@ export class ListEnvironment extends BaseCommand {
           { projectId },
           headers
         )
+      const spin = spinner()
       spin.start(`Environments for project ${projectId}:`)
       spin.message(JSON.stringify(environments))
       outro('Fetched all Environments.')

@@ -46,7 +46,7 @@ export class CreateEnvironment extends BaseCommand {
     const { name, description } = await this.parseInput(options)
 
     if (!projectId) {
-      console.error('Project ID is required')
+      Logger.error('Project ID is required')
       return
     }
 
@@ -62,13 +62,13 @@ export class CreateEnvironment extends BaseCommand {
       'x-keyshade-token': apiKey
     }
 
-    const spin = spinner()
     try {
       intro('Creating Environment')
       const createdEnvironment = await EnvironmentController.createEnvironment(
         environmentData,
         headers
       )
+      const spin = spinner()
       spin.message(`- Name: ${createdEnvironment.name}`)
       spin.message(`- ID: ${createdEnvironment.id}`)
       outro('Environment Created Successfully.')

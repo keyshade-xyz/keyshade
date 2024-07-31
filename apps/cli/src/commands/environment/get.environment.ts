@@ -29,7 +29,7 @@ export class GetEnvironment extends BaseCommand {
     const [environmentId] = args
 
     if (!environmentId) {
-      console.error('Environment ID is required')
+      Logger.error('Environment ID is required')
       return
     }
 

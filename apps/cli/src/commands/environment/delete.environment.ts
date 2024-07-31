@@ -29,7 +29,7 @@ export class DeleteEnvironment extends BaseCommand {
     const [environmentId] = args
 
     if (!environmentId) {
-      console.error('Environment ID is required')
+      Logger.error('Environment ID is required')
       return
     }
 
@@ -40,7 +40,7 @@ export class DeleteEnvironment extends BaseCommand {
     }
 
     try {
-      intro('Deleting Environment..')
+      intro('Deleting Environment...')
       await EnvironmentController.deleteEnvironment(
         { id: environmentId },
         headers
