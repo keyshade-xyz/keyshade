@@ -88,7 +88,7 @@ export class VariableController {
 
   @Get('/:projectId/:environmentId')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
-  async getAllSecretsOfEnvironment(
+  async getAllVariablesOfEnvironment(
     @CurrentUser() user: User,
     @Param('projectId') projectId: string,
     @Param('environmentId') environmentId: string
@@ -97,6 +97,26 @@ export class VariableController {
       user,
       projectId,
       environmentId
+    )
+  }
+
+  @Get('/:variableId/revisions/:environmentId')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getRevisionsOfVariable(
+    @CurrentUser() user: User,
+    @Param('variableId') variableId: string,
+    @Param('environmentId') environmentId: string,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+    @Query('order') order: 'asc' | 'desc' = 'desc'
+  ) {
+    return await this.variableService.getRevisionsOfVariable(
+      user,
+      variableId,
+      environmentId,
+      page,
+      limit,
+      order
     )
   }
 }

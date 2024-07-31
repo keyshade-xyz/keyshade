@@ -22,6 +22,7 @@ import createEvent from '../../common/create-event'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { paginate, PaginatedMetadata } from '../../common/paginate'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -303,28 +304,51 @@ export class WorkspaceRoleService {
     sort: string,
     order: string,
     search: string
-  ): Promise<WorkspaceRole[]> {
+  ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { id: workspaceId },
       authority: Authority.READ_WORKSPACE_ROLE,
       prisma: this.prisma
     })
-
-    return await this.prisma.workspaceRole.findMany({
+    //get workspace roles of a workspace for given page and limit
+    const items = await this.prisma.workspaceRole.findMany({
       where: {
         workspaceId,
         name: {
           contains: search
         }
       },
-
       skip: page * limit,
       take: limit,
       orderBy: {
         [sort]: order
       }
     })
+
+    //calculate metadata
+    const totalCount = await this.prisma.workspaceRole.count({
+      where: {
+        workspaceId,
+        name: {
+          contains: search
+        }
+      }
+    })
+
+    const metadata = paginate(
+      totalCount,
+      `/workspace-role/${workspaceId}/all`,
+      {
+        page,
+        limit,
+        sort,
+        order,
+        search
+      }
+    )
+
+    return { items, metadata }
   }
 
   private async getWorkspaceRoleWithAuthority(

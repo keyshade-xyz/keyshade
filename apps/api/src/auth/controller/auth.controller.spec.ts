@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config'
 import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
 import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
+import { CacheService } from '../../cache/cache.service'
+import { REDIS_CLIENT } from '../../provider/redis.provider'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -25,7 +27,20 @@ describe('AuthController', () => {
         ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
-        PrismaService
+        PrismaService,
+        CacheService,
+        {
+          provide: REDIS_CLIENT,
+          useValue: {
+            publisher: {
+              setEx: jest.fn(),
+              set: jest.fn(),
+              get: jest.fn(),
+              del: jest.fn(),
+              keys: jest.fn()
+            }
+          }
+        }
       ]
     })
       .overrideProvider(PrismaService)
