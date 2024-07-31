@@ -1,7 +1,12 @@
-import client from '@/client'
-import EnvironmentController from '@/controllers/environment/environment'
+import { APIClient } from '../src/core/client'
+import EnvironmentController from '../src/controllers/environment/environment'
 
 describe('Get Environments Tests', () => {
+  const backendUrl = process.env.BACKEND_URL
+
+  const client = new APIClient(backendUrl)
+  const environmentController = new EnvironmentController(backendUrl)
+
   const email = 'johndoe@example.com'
   let projectId: string | null
   let workspaceId: string | null
@@ -9,29 +14,33 @@ describe('Get Environments Tests', () => {
 
   beforeAll(async () => {
     //Create the user's workspace
-    const workspaceResponse = (await client.post(
-      '/api/workspace',
-      {
-        name: 'My Workspace'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const workspaceResponse = (await (
+      await client.post(
+        '/api/workspace',
+        {
+          name: 'My Workspace'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     workspaceId = workspaceResponse.id
 
     // Create a project
-    const projectResponse = (await client.post(
-      `/api/project/${workspaceId}`,
-      {
-        name: 'Project',
-        storePrivateKey: true
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const projectResponse = (await (
+      await client.post(
+        `/api/project/${workspaceId}`,
+        {
+          name: 'Project',
+          storePrivateKey: true
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     projectId = projectResponse.id
   })
@@ -45,15 +54,17 @@ describe('Get Environments Tests', () => {
 
   beforeEach(async () => {
     // Create an environment
-    const createEnvironmentResponse = await client.post(
-      `/api/environment/${projectId}`,
-      {
-        name: 'Dev'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )
+    const createEnvironmentResponse = (await (
+      await client.post(
+        `/api/environment/${projectId}`,
+        {
+          name: 'Dev'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     environment = createEnvironmentResponse
   })
@@ -66,8 +77,8 @@ describe('Get Environments Tests', () => {
   })
 
   it('should return a list of environments', async () => {
-    const environments =
-      await EnvironmentController.getAllEnvironmentsOfProject(
+    const environments = (
+      await environmentController.getAllEnvironmentsOfProject(
         {
           projectId,
           page: 0,
@@ -77,6 +88,8 @@ describe('Get Environments Tests', () => {
           'x-e2e-user-email': email
         }
       )
+    ).data
+
     expect(environments.items).toHaveLength(2)
     expect(environments.items[0].name).toBe('Default')
 
@@ -96,22 +109,24 @@ describe('Get Environments Tests', () => {
   })
 
   it('should be able to fetch environment by ID', async () => {
-    const environmentResponse = await EnvironmentController.getEnvironmentById(
-      {
-        id: environment.id
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )
+    const environmentResponse = (
+      await environmentController.getEnvironmentById(
+        {
+          id: environment.id
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).data
 
     expect(environmentResponse.id).toBe(environment.id)
     expect(environmentResponse.name).toBe('Dev')
   })
 
   it('should be able to create an environment', async () => {
-    const createEnvironmentResponse =
-      await EnvironmentController.createEnvironment(
+    const createEnvironmentResponse = (
+      await environmentController.createEnvironment(
         {
           projectId,
           name: 'Prod'
@@ -120,15 +135,15 @@ describe('Get Environments Tests', () => {
           'x-e2e-user-email': email
         }
       )
+    ).data
 
     expect(createEnvironmentResponse.name).toBe('Prod')
 
-    const fetchEnvironmentResponse = (await client.get(
-      `/api/environment/${createEnvironmentResponse.id}`,
-      {
+    const fetchEnvironmentResponse = (await (
+      await client.get(`/api/environment/${createEnvironmentResponse.id}`, {
         'x-e2e-user-email': email
-      }
-    )) as any
+      })
+    ).json()) as any
 
     expect(fetchEnvironmentResponse.name).toBe('Prod')
 
@@ -139,8 +154,8 @@ describe('Get Environments Tests', () => {
   })
 
   it('should be able to update an environment', async () => {
-    const updateEnvironmentResponse =
-      await EnvironmentController.updateEnvironment(
+    const updateEnvironmentResponse = (
+      await environmentController.updateEnvironment(
         {
           id: environment.id,
           name: 'Prod'
@@ -149,32 +164,34 @@ describe('Get Environments Tests', () => {
           'x-e2e-user-email': email
         }
       )
+    ).data
 
     expect(updateEnvironmentResponse.name).toBe('Prod')
 
-    const fetchEnvironmentResponse = (await client.get(
-      `/api/environment/${environment.id}`,
-      {
+    const fetchEnvironmentResponse = (await (
+      await client.get(`/api/environment/${environment.id}`, {
         'x-e2e-user-email': email
-      }
-    )) as any
+      })
+    ).json()) as any
 
     expect(fetchEnvironmentResponse.name).toBe('Prod')
   })
 
   it('should be able to delete an environment', async () => {
     // Create an environment
-    const createEnvironmentResponse = (await client.post(
-      `/api/environment/${projectId}`,
-      {
-        name: 'Prod'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const createEnvironmentResponse = (await (
+      await client.post(
+        `/api/environment/${projectId}`,
+        {
+          name: 'Prod'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
-    await EnvironmentController.deleteEnvironment(
+    await environmentController.deleteEnvironment(
       {
         id: createEnvironmentResponse.id
       },
@@ -184,8 +201,8 @@ describe('Get Environments Tests', () => {
     )
 
     // Check if the environment is deleted
-    const environments =
-      await EnvironmentController.getAllEnvironmentsOfProject(
+    const environments = (
+      await environmentController.getAllEnvironmentsOfProject(
         {
           projectId
         },
@@ -193,6 +210,7 @@ describe('Get Environments Tests', () => {
           'x-e2e-user-email': email
         }
       )
+    ).data
 
     expect(environments.items).toHaveLength(2)
     expect(environments.metadata.totalCount).toEqual(2)

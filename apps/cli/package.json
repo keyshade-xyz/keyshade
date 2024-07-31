@@ -6,7 +6,7 @@
   "private": false,
   "type": "commonjs",
   "scripts": {
-    "build": "tsc",
+    "build": "swc src --out-dir dist",
     "start": "node dist/src/index.js",
     "dev": "pnpm build && node dist/src/index.js"
   },

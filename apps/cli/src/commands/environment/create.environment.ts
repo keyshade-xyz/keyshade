@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { spinner, text, outro } from '@clack/prompts'
+import { text } from '@clack/prompts'
 import {
   type CommandActionData,
   type CommandArgument,
@@ -25,7 +25,7 @@ export class CreateEnvironment extends BaseCommand {
       },
       {
         short: '-d',
-        long: '--desc <string>',
+        long: '--description <string>',
         description: 'Description about the Environment'
       }
     ]
@@ -62,19 +62,19 @@ export class CreateEnvironment extends BaseCommand {
       'x-keyshade-token': apiKey
     }
 
-    try {
-      const spin = spinner()
-      spin.start('Creating Environment')
-      const createdEnvironment = await EnvironmentController.createEnvironment(
-        environmentData,
-        headers
-      )
-      spin.message(`- Name: ${createdEnvironment.name}`)
-      spin.message(`- ID: ${createdEnvironment.id}`)
-      outro('Environment Created Successfully.')
-      spin.stop()
-    } catch (error) {
-      Logger.error(error.message as string)
+    const environmentController = new EnvironmentController(this.baseUrl)
+    Logger.info('Creating Environment...')
+
+    const {
+      data: environment,
+      error,
+      success
+    } = await environmentController.createEnvironment(environmentData, headers)
+
+    if (success) {
+      Logger.info(`Environment created:${environment.name} (${environment.id})`)
+    } else {
+      Logger.error(`Failed to create environment: ${error.message}`)
     }
   }
 

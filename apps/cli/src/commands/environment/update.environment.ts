@@ -1,6 +1,5 @@
 import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { spinner, outro } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   type CommandActionData,
@@ -26,7 +25,7 @@ export class UpdateEnvironment extends BaseCommand {
       },
       {
         short: '-d',
-        long: '--desc <string>',
+        long: '--description <string>',
         description: 'Description about the Environment'
       }
     ]
@@ -62,19 +61,22 @@ export class UpdateEnvironment extends BaseCommand {
       id: environmentId
     }
 
-    try {
-      const spin = spinner()
-      spin.start('Updating Environment...')
-      const environments = await EnvironmentController.updateEnvironment(
-        environmentData,
-        headers
+    const environmentController = new EnvironmentController(this.baseUrl)
+    Logger.info('Updating Environment...')
+
+    const {
+      success,
+      error,
+      data: environment
+    } = await environmentController.updateEnvironment(environmentData, headers)
+
+    if (success) {
+      Logger.info('Environment updated successfully')
+      Logger.info(
+        `Environment ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
       )
-      spin.message(`Environments for project ${environmentId}:`)
-      spin.message(JSON.stringify(environments))
-      outro('Successfully Updated The Environment')
-      spin.stop()
-    } catch (error) {
-      Logger.error(error.message as string)
+    } else {
+      Logger.error(error.message)
     }
   }
 }
