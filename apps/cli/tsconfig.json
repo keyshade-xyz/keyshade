@@ -12,6 +12,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@keyshade/api-client": ["../../packages/api-client/src/index.ts"]
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -19,7 +20,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]

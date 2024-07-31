@@ -1,5 +1,5 @@
-import client from '@package/client'
-import EnvironmentController from '@package/controllers/environment/environment'
+import client from '@/client'
+import EnvironmentController from '@/controllers/environment/environment'
 
 describe('Get Environments Tests', () => {
   const email = 'johndoe@example.com'
