@@ -342,7 +342,7 @@ export class WorkspaceRoleService {
       totalCount,
       `/workspace-role/${workspaceId}/all`,
       {
-        page: Number(page),
+        page: page,
         limit: limitMaxItemsPerPage(limit),
         sort,
         order,

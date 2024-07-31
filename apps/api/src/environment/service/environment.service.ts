@@ -212,7 +212,7 @@ export class EnvironmentService {
       }
     })
     const metadata = paginate(totalCount, `/environment/all/${projectId}`, {
-      page: Number(page),
+      page: page,
       limit: limitMaxItemsPerPage(limit),
       sort,
       order,

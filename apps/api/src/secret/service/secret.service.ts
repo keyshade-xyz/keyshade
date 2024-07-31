@@ -526,7 +526,6 @@ export class SecretService {
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         version: sortOrder
       }
@@ -674,7 +673,7 @@ export class SecretService {
       totalCount,
       `/secret/${projectId}`,
       {
-        page: Number(page),
+        page: page,
         limit: limitMaxItemsPerPage(limit),
         sort,
         order,
