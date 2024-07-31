@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as eccrypto from 'eccrypto'
 
 export const decrypt = async (

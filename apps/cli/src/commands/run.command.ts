@@ -32,7 +32,7 @@ export default class RunCommand extends BaseCommand {
   getName(): string {
     return 'run'
   }
-  
+
   getDescription(): string {
     return 'Run a command'
   }
@@ -54,10 +54,9 @@ export default class RunCommand extends BaseCommand {
     await this.executeCommand(args[0])
   }
 
-  private async fetchConfigurations(): Promise<
-    RunData
-  > {
-    const { environment, project, workspace, quitOnDecryptionFailure } = await fetchProjectRootConfig()
+  private async fetchConfigurations(): Promise<RunData> {
+    const { environment, project, workspace, quitOnDecryptionFailure } =
+      await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
     const privateKey =
       privateKeyConfig[`${workspace}_${project}_${environment}`]
@@ -88,7 +87,7 @@ export default class RunCommand extends BaseCommand {
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
     const privateKey = data.privateKey
     const quitOnDecryptionFailure = data.quitOnDecryptionFailure
-    
+
     const ioClient = io(websocketUrl, {
       autoConnect: false,
       extraHeaders: {
@@ -116,11 +115,15 @@ export default class RunCommand extends BaseCommand {
             data.value = await decrypt(privateKey, data.value)
           } catch (error) {
             if (quitOnDecryptionFailure) {
-              Logger.error(`Decryption failed for ${data.name}. Stopping the process.`);
+              Logger.error(
+                `Decryption failed for ${data.name}. Stopping the process.`
+              )
               process.exit(1)
             } else {
-              Logger.warn(`Decryption failed for ${data.name}. Skipping this configuration.`);
-              return;
+              Logger.warn(
+                `Decryption failed for ${data.name}. Skipping this configuration.`
+              )
+              return
             }
           }
         }
