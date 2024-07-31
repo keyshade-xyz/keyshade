@@ -1,6 +1,6 @@
 import BaseCommand from '../base.command'
 import { EnvironmentController } from '@keyshade/api-client'
-import { intro, spinner, outro } from '@clack/prompts'
+import { spinner, outro } from '@clack/prompts'
 import {
   type CommandActionData,
   type CommandArgument
@@ -44,17 +44,15 @@ export class ListEnvironment extends BaseCommand {
       return
     }
 
-    intro(`Fetching environments for project ${projectId}...`)
-
     try {
-      intro(`Getting all Environment for Project ${projectId}`)
+      const spin = spinner()
+      spin.start(`Getting all Environment for Project ${projectId}`)
       const environments =
         await EnvironmentController.getAllEnvironmentsOfProject(
           { projectId },
           headers
         )
-      const spin = spinner()
-      spin.start(`Environments for project ${projectId}:`)
+      spin.message(`Environments for project ${projectId}:`)
       spin.message(JSON.stringify(environments))
       outro('Fetched all Environments.')
       spin.stop()

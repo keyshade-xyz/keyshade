@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { spinner, text, intro, outro } from '@clack/prompts'
+import { spinner, text, outro } from '@clack/prompts'
 import {
   type CommandActionData,
   type CommandArgument,
@@ -63,12 +63,12 @@ export class CreateEnvironment extends BaseCommand {
     }
 
     try {
-      intro('Creating Environment')
+      const spin = spinner()
+      spin.start('Creating Environment')
       const createdEnvironment = await EnvironmentController.createEnvironment(
         environmentData,
         headers
       )
-      const spin = spinner()
       spin.message(`- Name: ${createdEnvironment.name}`)
       spin.message(`- ID: ${createdEnvironment.id}`)
       outro('Environment Created Successfully.')

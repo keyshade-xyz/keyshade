@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { intro, outro } from '@clack/prompts'
+import { outro, spinner } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   type CommandActionData,
@@ -40,7 +40,8 @@ export class DeleteEnvironment extends BaseCommand {
     }
 
     try {
-      intro('Deleting Environment...')
+      const spin = spinner()
+      spin.start('Deleting Environment...')
       await EnvironmentController.deleteEnvironment(
         { id: environmentId },
         headers

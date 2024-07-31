@@ -1,6 +1,6 @@
 import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { spinner, intro, outro } from '@clack/prompts'
+import { spinner, outro } from '@clack/prompts'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
   type CommandActionData,
@@ -63,13 +63,13 @@ export class UpdateEnvironment extends BaseCommand {
     }
 
     try {
-      intro('Updating Environment...')
+      const spin = spinner()
+      spin.start('Updating Environment...')
       const environments = await EnvironmentController.updateEnvironment(
         environmentData,
         headers
       )
-      const spin = spinner()
-      spin.start(`Environments for project ${environmentId}:`)
+      spin.message(`Environments for project ${environmentId}:`)
       spin.message(JSON.stringify(environments))
       outro('Successfully Updated The Environment')
       spin.stop()
