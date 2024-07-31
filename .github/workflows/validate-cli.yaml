@@ -1,4 +1,4 @@
-name: Validate Cli
+name: Validate CLI
 
 on:
   push:
