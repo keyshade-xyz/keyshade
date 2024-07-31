@@ -59,3 +59,7 @@ jobs:
       - name: Lint
         run: |
           pnpm run lint:cli
+
+      - name: Build
+        run: |
+          pnpm run build:cli
