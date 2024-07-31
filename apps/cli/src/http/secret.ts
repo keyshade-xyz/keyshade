@@ -25,5 +25,4 @@ class SecretController {
   }
 }
 
-
 export default SecretController
