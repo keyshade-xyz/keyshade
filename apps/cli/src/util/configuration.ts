@@ -61,6 +61,7 @@ export const writeProfileConfig = async (
 ): Promise<void> => {
   const path = getProfileConfigurationFilePath()
   await ensureDirectoryExists(path)
+  await ensureDirectoryExists(path)
   await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
 }
 
@@ -68,6 +69,7 @@ export const writePrivateKeyConfig = async (
   config: PrivateKeyConfig
 ): Promise<void> => {
   const path = getPrivateKeyConfigurationFilePath()
+  await ensureDirectoryExists(path)
   await ensureDirectoryExists(path)
   await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
 }
