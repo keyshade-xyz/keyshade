@@ -1,4 +1,6 @@
-import client from '@package/client'
+import { ClientResponse } from '../../types/index.types'
+import { APIClient } from '../../core/client'
+import { parseResponse } from '../../core/response-parser'
 import {
   CreateEnvironmentRequest,
   CreateEnvironmentResponse,
@@ -10,48 +12,57 @@ import {
   GetEnvironmentByIdResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
-} from '@package/types/environment.types'
+} from '../../types/environment.types'
 
 export default class EnvironmentController {
-  private static apiClient = client
+  private apiClient: APIClient
 
-  static async createEnvironment(
+  constructor(private readonly backendUrl: string) {
+    this.apiClient = new APIClient(this.backendUrl)
+  }
+
+  async createEnvironment(
     request: CreateEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<CreateEnvironmentResponse> {
-    return this.apiClient.post<CreateEnvironmentResponse>(
+  ): Promise<ClientResponse<CreateEnvironmentResponse>> {
+    const response = await this.apiClient.post(
       `/api/environment/${request.projectId}`,
       request,
       headers
     )
+
+    return await parseResponse<CreateEnvironmentResponse>(response)
   }
 
-  static async updateEnvironment(
+  async updateEnvironment(
     request: UpdateEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<UpdateEnvironmentResponse> {
-    return this.apiClient.put<UpdateEnvironmentResponse>(
+  ): Promise<ClientResponse<UpdateEnvironmentResponse>> {
+    const response = await this.apiClient.put(
       `/api/environment/${request.id}`,
       request,
       headers
     )
+
+    return await parseResponse<UpdateEnvironmentResponse>(response)
   }
 
-  static async getEnvironmentById(
+  async getEnvironmentById(
     request: GetEnvironmentByIdRequest,
-
     headers?: Record<string, string>
-  ): Promise<GetEnvironmentByIdResponse> {
-    return this.apiClient.get<GetEnvironmentByIdResponse>(
+  ): Promise<ClientResponse<GetEnvironmentByIdResponse>> {
+    const response = await this.apiClient.get(
       `/api/environment/${request.id}`,
       headers
     )
+
+    return await parseResponse<GetEnvironmentByIdResponse>(response)
   }
 
-  static async getAllEnvironmentsOfProject(
+  async getAllEnvironmentsOfProject(
     request: GetAllEnvironmentsOfProjectRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllEnvironmentsOfProjectResponse> {
+  ): Promise<ClientResponse<GetAllEnvironmentsOfProjectResponse>> {
     let url = `/api/environment/all/${request.projectId}?`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
@@ -59,16 +70,20 @@ export default class EnvironmentController {
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
 
-    return this.apiClient.get<GetAllEnvironmentsOfProjectResponse>(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllEnvironmentsOfProjectResponse>(response)
   }
 
-  static async deleteEnvironment(
+  async deleteEnvironment(
     request: DeleteEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<DeleteEnvironmentResponse> {
-    return this.apiClient.delete<DeleteEnvironmentResponse>(
+  ): Promise<ClientResponse<DeleteEnvironmentResponse>> {
+    const response = await this.apiClient.delete(
       `/api/environment/${request.id}`,
       headers
     )
+
+    return await parseResponse<DeleteEnvironmentResponse>(response)
   }
 }
