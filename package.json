@@ -110,6 +110,7 @@
     "build:web": "turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
     "build:cli": "turbo run build --filter=cli",
+    "build:api-client": "pnpm run --filter=api-client build",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
     "start:web": "turbo run start --filter=web",
