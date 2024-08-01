@@ -32,6 +32,7 @@ import createEvent from '../../common/create-event'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceService {
@@ -539,7 +540,7 @@ export class WorkspaceService {
 
     const metadata = paginate(totalCount, `/workspace/${workspaceId}/members`, {
       page,
-      limit,
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search
@@ -813,8 +814,8 @@ export class WorkspaceService {
 
     //calculate metadata for pagination
     const metadata = paginate(totalCount, `/workspace`, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search
