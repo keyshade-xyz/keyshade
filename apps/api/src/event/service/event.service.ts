@@ -68,7 +68,7 @@ export class EventService {
       totalCount,
       `/event/${workspaceId}`,
       {
-        page: page,
+        page,
         limit: limitMaxItemsPerPage(limit),
         search
       },

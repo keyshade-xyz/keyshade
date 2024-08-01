@@ -673,7 +673,7 @@ export class SecretService {
       totalCount,
       `/secret/${projectId}`,
       {
-        page: page,
+        page,
         limit: limitMaxItemsPerPage(limit),
         sort,
         order,
