@@ -1,6 +1,6 @@
 import type { Configuration } from '@/types/command/run.types'
 
-class VariableController{
+class VariableController {
   static async fetchVariables(
     baseUrl: string,
     apiKey: string,

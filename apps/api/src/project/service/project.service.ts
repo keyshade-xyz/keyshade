@@ -32,6 +32,7 @@ import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class ProjectService {
@@ -629,7 +630,7 @@ export class ProjectService {
       `/project/${projectId}/forks`,
       {
         page,
-        limit
+        limit: limitMaxItemsPerPage(limit)
       }
     )
 
@@ -670,7 +671,8 @@ export class ProjectService {
     const items = (
       await this.prisma.project.findMany({
         skip: page * limit,
-        take: limit,
+        take: limitMaxItemsPerPage(limit),
+
         orderBy: {
           [sort]: order
         },

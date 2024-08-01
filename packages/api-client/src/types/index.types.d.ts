@@ -1,4 +1,4 @@
-interface Page<T> {
+export interface Page<T> {
   items: T[]
   metadata: {
     page: number
@@ -13,4 +13,16 @@ interface Page<T> {
       last: string
     }
   }
+}
+
+export interface ResponseError {
+  message: string
+  error: string
+  statusCode: number
+}
+
+export interface ClientResponse<T> {
+  success: boolean
+  error: ResponseError | null
+  data: T | null
 }

@@ -29,6 +29,7 @@ import {
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class VariableService {
@@ -521,7 +522,8 @@ export class VariableService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -616,7 +618,7 @@ export class VariableService {
 
     const metadata = paginate(totalCount, `/variable/${projectId}`, {
       page,
-      limit,
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search
@@ -653,7 +655,8 @@ export class VariableService {
         environmentId: environmentId
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         version: order
       }

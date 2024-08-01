@@ -18,6 +18,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import createEvent from '../../common/create-event'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class EnvironmentService {
@@ -196,7 +197,7 @@ export class EnvironmentService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
       orderBy: {
         [sort]: order
       }
@@ -212,7 +213,7 @@ export class EnvironmentService {
     })
     const metadata = paginate(totalCount, `/environment/all/${projectId}`, {
       page,
-      limit,
+      limit: limitMaxItemsPerPage(limit),
       sort,
       order,
       search
