@@ -1,7 +1,7 @@
 import type { Configuration } from '@/types/command/run.types'
 
-const SecretController = {
-  async fetchSecrets(
+class SecretController {
+  static async fetchSecrets(
     baseUrl: string,
     apiKey: string,
     projectId: string,

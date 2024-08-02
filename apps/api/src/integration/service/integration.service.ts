@@ -18,6 +18,8 @@ import { UpdateIntegration } from '../dto/update.integration/update.integration'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
 import createEvent from '../../common/create-event'
 import IntegrationFactory from '../plugins/factory/integration.factory'
+import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class IntegrationService {
@@ -296,13 +298,41 @@ export class IntegrationService {
         ]
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
     })
 
-    return integrations
+    //calculate metadata for pagination
+    const totalCount = await this.prisma.integration.count({
+      where: {
+        name: {
+          contains: search
+        },
+        workspaceId,
+        OR: [
+          {
+            projectId: null
+          },
+          {
+            projectId: {
+              in: projectIds
+            }
+          }
+        ]
+      }
+    })
+    const metadata = paginate(totalCount, `/integration/all/${workspaceId}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+
+    return { items: integrations, metadata }
   }
 
   async deleteIntegration(user: User, integrationId: Integration['id']) {
