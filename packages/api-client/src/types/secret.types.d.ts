@@ -1,3 +1,5 @@
+import { Page } from '../../../../apps/cli/src/types/index.types'
+
 export interface CreateSecretRequest {
   projectId: string
   name: string
@@ -82,30 +84,31 @@ export interface GetAllSecretsOfProjectRequest {
   order?: string
   search?: string
 }
-export interface GetAllSecretsOfProjectResponse {
-  secret: {
-    id: string
-    name: string
-    createdAt: string
-    updatedAt: string
-    rotateAt: string
-    note: string | null
-    lastUpdatedById: string
-    projectId: string
-    lastUpdatedBy: {
+export interface GetAllSecretsOfProjectResponse
+  extends Page<{
+    secret: {
       id: string
       name: string
+      createdAt: string
+      updatedAt: string
+      rotateAt: string
+      note: string | null
+      lastUpdatedById: string
+      projectId: string
+      lastUpdatedBy: {
+        id: string
+        name: string
+      }
     }
-  }
-  values: {
-    environment: {
-      id: string
-      name: string
+    values: {
+      environment: {
+        id: string
+        name: string
+      }
+      value: string
+      version: number
     }
-    value: string
-    version: number
-  }
-}
+  }> {}
 
 export interface GetAllSecretsOfEnvironmentRequest {
   projectId: string
@@ -116,8 +119,9 @@ export interface GetAllSecretsOfEnvironmentRequest {
   order?: string
   search?: string
 }
-export interface GetAllSecretsOfEnvironmentResponse {
-  name: string
-  value: string
-  isPlaintext: boolean
-}
+export interface GetAllSecretsOfEnvironmentResponse
+  extends Page<{
+    name: string
+    value: string
+    isPlaintext: boolean
+  }> {}

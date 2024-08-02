@@ -1,4 +1,6 @@
-import client from '@package/client'
+import { APIClient } from '../../core/client'
+import { ClientResponse } from 'src/types/index.types'
+import { parseResponse } from '../../core/response-parser'
 import {
   CreateSecretRequest,
   CreateSecretResponse,
@@ -12,76 +14,89 @@ import {
   RollBackSecretResponse,
   UpdateSecretRequest,
   UpdateSecretResponse
-} from '@package/types/secret.types'
+} from '../../types/secret.types'
 
 export default class SecretController {
-  private static apiClient = client
+  private apiClient: APIClient
 
-  static async createSecret(
+  constructor(private readonly backendUrl: string) {
+    this.apiClient = new APIClient(this.backendUrl)
+  }
+
+  async createSecret(
     request: CreateSecretRequest,
     headers?: Record<string, string>
-  ): Promise<CreateSecretResponse> {
-    return this.apiClient.post(
+  ): Promise<ClientResponse<CreateSecretResponse>> {
+    const response = await this.apiClient.post(
       `/api/secret/${request.projectId}`,
       request,
       headers
     )
+    return await parseResponse<CreateSecretResponse>(response)
   }
-  static async updateSecret(
+  async updateSecret(
     request: UpdateSecretRequest,
     headers?: Record<string, string>
-  ): Promise<UpdateSecretResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<UpdateSecretResponse>> {
+    const response = await this.apiClient.put(
       `/api/secret/${request.secretId}`,
       request,
       headers
     )
+
+    return await parseResponse<UpdateSecretResponse>(response)
   }
 
-  static async rollbackSecret(
+  async rollbackSecret(
     request: RollBackSecretRequest,
     headers?: Record<string, string>
-  ): Promise<RollBackSecretResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<RollBackSecretResponse>> {
+    const response = await this.apiClient.put(
       `/api/secret/${request.secretId}/rollback/${request.version}?environmentId=${request.environmentId}`,
       request,
       headers
     )
+    return await parseResponse<RollBackSecretResponse>(response)
   }
 
-  static async deleteSecret(
+  async deleteSecret(
     request: DeleteSecretRequest,
     headers?: Record<string, string>
-  ): Promise<DeleteSecretResponse> {
-    return this.apiClient.delete(`/api/secret/${request.secretId}`, headers)
+  ): Promise<ClientResponse<DeleteSecretResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/secret/${request.secretId}`,
+      headers
+    )
+    return await parseResponse<DeleteSecretResponse>(response)
   }
 
-  static async getAllSecretsOfProject(
+  async getAllSecretsOfProject(
     request: GetAllSecretsOfProjectRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllSecretsOfProjectResponse[]> {
+  ): Promise<ClientResponse<GetAllSecretsOfProjectResponse>> {
     let url = `/api/secret/${request.projectId}?decryptValue=true`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get<GetAllSecretsOfProjectResponse[]>(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllSecretsOfProjectResponse>(response)
   }
 
-  static async getAllSecretsOfEnvironment(
+  async getAllSecretsOfEnvironment(
     request: GetAllSecretsOfEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllSecretsOfEnvironmentResponse[]> {
+  ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
     let url = `/api/secret/${request.projectId}/${request.environmentId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get<GetAllSecretsOfEnvironmentResponse[]>(
-      url,
-      headers
-    )
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)
   }
 }
