@@ -1,0 +1,22 @@
+name: Docker Check
+
+on:
+  push:
+    paths:
+      - '**Dockerfile'
+  pull_request:
+    paths:
+      - '**Dockerfile'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        run: |
+          for dir in app/*/ ; do
+            if [ -f "$dir/Dockerfile" ]; then
+              docker build -f "$dir/Dockerfile" "$dir"
+            fi
+          done

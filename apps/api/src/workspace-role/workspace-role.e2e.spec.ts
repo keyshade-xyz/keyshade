@@ -26,6 +26,7 @@ import { EventModule } from '../event/event.module'
 import { WorkspaceRoleService } from './service/workspace-role.service'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -57,6 +58,8 @@ describe('Workspace Role Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -250,7 +253,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -404,7 +407,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -625,7 +628,7 @@ describe('Workspace Role Controller Tests', () => {
       EventSource.WORKSPACE_ROLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.WORKSPACE_ROLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -725,7 +728,22 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining(roles))
+    expect(response.json().items).toEqual(expect.arrayContaining(roles))
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toBe(roles.length)
+    expect(metadata.links.self).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should be able to fetch all the roles of a workspace with READ_WORKSPACE_ROLE role', async () => {
@@ -766,7 +784,22 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual(expect.arrayContaining(roles))
+    expect(response.json().items).toEqual(expect.arrayContaining(roles))
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toBe(roles.length)
+    expect(metadata.links.self).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/workspace-role/${workspaceAlice.id}/all?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all the roles of a workspace without READ_WORKSPACE_ROLE role', async () => {

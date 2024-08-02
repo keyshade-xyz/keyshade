@@ -27,6 +27,7 @@ import { EventService } from '../event/service/event.service'
 import { EnvironmentService } from './service/environment.service'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/service/user.service'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -63,6 +64,8 @@ describe('Environment Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -235,7 +238,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -344,7 +347,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -399,13 +402,27 @@ describe('Environment Controller Tests', () => {
   it('should be able to fetch all environments of a project', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/environment/all/${project1.id}`,
+      url: `/environment/all/${project1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(2)
+    expect(metadata.links.self).toBe(
+      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toBe(
+      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toBe(
+      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all environments of a project that does not exist', async () => {
@@ -459,7 +476,7 @@ describe('Environment Controller Tests', () => {
       EventSource.ENVIRONMENT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.ENVIRONMENT)
     expect(event.triggerer).toBe(EventTriggerer.USER)

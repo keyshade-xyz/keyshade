@@ -11,7 +11,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@keyshade/api-client": ["../../packages/api-client/src/index.ts"]
     },
     "incremental": true,
     "skipLibCheck": true,
@@ -20,6 +21,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

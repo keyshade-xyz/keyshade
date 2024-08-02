@@ -36,6 +36,7 @@ import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -82,6 +83,8 @@ describe('Variable Controller Tests', () => {
     variableService = moduleRef.get(VariableService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -289,7 +292,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -427,7 +430,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -553,7 +556,7 @@ describe('Variable Controller Tests', () => {
     )
   })
 
-  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+  it('should not create a variable version entity if value-environmentId is not provided during creation', async () => {
     const variable = await variableService.createVariable(
       user1,
       {
@@ -575,16 +578,16 @@ describe('Variable Controller Tests', () => {
   it('should be able to fetch all variables', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/${project1.id}`,
+      url: `/variable/${project1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { variable, values } = response.json()[0]
+    const { variable, values } = response.json().items[0]
     expect(variable).toBeDefined()
     expect(values).toBeDefined()
     expect(values.length).toBe(1)
@@ -592,6 +595,21 @@ describe('Variable Controller Tests', () => {
     expect(values[0].environment.id).toBe(environment1.id)
     expect(variable.id).toBe(variable1.id)
     expect(variable.name).toBe('Variable 1')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/variable/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all variables if the user has no access to the project', async () => {
@@ -737,7 +755,7 @@ describe('Variable Controller Tests', () => {
       EventSource.VARIABLE
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.VARIABLE)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -745,5 +763,109 @@ describe('Variable Controller Tests', () => {
     expect(event.type).toBe(EventType.VARIABLE_DELETED)
     expect(event.workspaceId).toBe(workspace1.id)
     expect(event.itemId).toBeDefined()
+  })
+
+  //revisions test
+  it('should be able to fetch all revisions of variables', async () => {
+    // create two more entries,totalling three versions
+    // checks if its able to fetch multiple revisions
+    await variableService.updateVariable(user1, variable1.id, {
+      entries: [
+        {
+          value: 'Updated Variable 1 value',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    await variableService.updateVariable(user1, variable1.id, {
+      entries: [
+        {
+          value: 'Updated variable 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variable1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(3)
+  })
+
+  it('should return [] if the variable has no revision', async () => {
+    //returns [] if variable has no revision
+    await prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variable1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(0)
+  })
+
+  it('should return error if variable doesnt exist', async () => {
+    //return error if variable doesnt exist
+    const variableid = 'nonexistentvariable'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variableid}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Variable with id ${variableid} not found`
+    )
+  })
+
+  it('should return error if environment doesnt exist', async () => {
+    //return error if environment doesnt exist
+    const environmentid = 'nonexistentenvironment'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variable1.id}/revisions/${environmentid}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Environment with id ${environmentid} not found`
+    )
+  })
+
+  it('returns error if variable isnt accessible', async () => {
+    //return error if user has no access to variable
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variable1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
   })
 })

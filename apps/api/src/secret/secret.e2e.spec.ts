@@ -36,6 +36,7 @@ import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
 import { UserService } from '../user/service/user.service'
 import { UserModule } from '../user/user.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -80,6 +81,8 @@ describe('Secret Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -288,7 +291,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -407,7 +410,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -596,16 +599,16 @@ describe('Secret Controller Tests', () => {
   it('should be able to fetch all secrets', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/${project1.id}`,
+      url: `/secret/${project1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { secret, values } = response.json()[0]
+    const { secret, values } = response.json().items[0]
     expect(secret.id).toBeDefined()
     expect(secret.name).toBeDefined()
     expect(secret.note).toBeDefined()
@@ -615,21 +618,36 @@ describe('Secret Controller Tests', () => {
     const value = values[0]
     expect(value.environment).toBeDefined()
     expect(value.value).not.toEqual('Secret 1 value')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/secret/${project1.id}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should be able to fetch all secrets decrypted', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/secret/${project1.id}?decryptValue=true`,
+      url: `/secret/${project1.id}?decryptValue=true&page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toBe(1)
+    expect(response.json().items.length).toBe(1)
 
-    const { secret, values } = response.json()[0]
+    const { secret, values } = response.json().items[0]
     expect(secret.id).toBeDefined()
     expect(secret.name).toBeDefined()
     expect(secret.note).toBeDefined()
@@ -639,6 +657,21 @@ describe('Secret Controller Tests', () => {
     const value = values[0]
     expect(value.environment).toBeDefined()
     expect(value.value).toEqual('Secret 1 value')
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/secret/${project1.id}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
@@ -878,7 +911,7 @@ describe('Secret Controller Tests', () => {
       EventSource.SECRET
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.SECRET)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -886,5 +919,109 @@ describe('Secret Controller Tests', () => {
     expect(event.type).toBe(EventType.SECRET_DELETED)
     expect(event.workspaceId).toBe(workspace1.id)
     expect(event.itemId).toBe(secret1.id)
+  })
+
+  //revisions test
+  it('should be able to fetch all revisions of secrets', async () => {
+    // create two more entries,totalling three versions
+    // checks if its able to fetch multiple revisions
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(3)
+  })
+
+  it('should return [] if the secret has no revision', async () => {
+    //returns [] if secret has no revision
+    await prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(0)
+  })
+
+  it('should return error if secret doesnt exist', async () => {
+    //return error if secret doesnt exist
+    const secretid = 'nonexistentsecret'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secretid}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Secret with id ${secretid} not found`
+    )
+  })
+
+  it('should return error if environment doesnt exist', async () => {
+    //return error if environment doesnt exist
+    const environmentid = 'nonexistentenv'
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environmentid}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Environment with id ${environmentid} not found`
+    )
+  })
+
+  it('returns error if secret isnt accessible', async () => {
+    //return error if user has no access to secret
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${secret1.id}/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
   })
 })

@@ -15,7 +15,40 @@ jobs:
             const comment = context.payload.comment;
             const issue = context.issue;
             const owner = "keyshade-xyz";
-            const repo = "keyshade"
+            const repo = "keyshade";
+
+            async function updateProjectStatus(issueNumber) {
+              const projectsResponse = await github.rest.projects.listForRepo({
+                owner,
+                repo,
+                per_page: 100,
+              });
+
+              for (const project of projectsResponse.data) {
+                const columnsResponse = await github.rest.projects.listColumns({
+                  project_id: project.id,
+                  per_page: 100,
+                });
+
+                const inProgressColumn = columnsResponse.data.find(column => column.name === "In Progress");
+                if (!inProgressColumn) continue;
+
+                const cardsResponse = await github.rest.projects.listCards({
+                  column_id: inProgressColumn.id,
+                  per_page: 100,
+                });
+
+                const issueCardExists = cardsResponse.data.some(card => card.content_id === issueNumber && card.content_type === "Issue");
+
+                if (!issueCardExists) {
+                  await github.rest.projects.createCard({
+                    column_id: inProgressColumn.id,
+                    content_id: issueNumber,
+                    content_type: "Issue",
+                  });
+                }
+              }
+            }
 
             if (comment.body.startsWith('/attempt')) {
               if (!issue.assignee) {
@@ -23,20 +56,23 @@ jobs:
                   owner,
                   repo,
                   issue_number: issue.number,
-                  assignees: [comment.user.login]
+                  assignees: [comment.user.login],
                 });
+
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: issue.number,
-                  body: `Assigned the issue to @${comment.user.login}!`
+                  body: `Assigned the issue to @${comment.user.login}!`,
                 });
+
+                await updateProjectStatus(issue.number);
               } else {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: issue.number,
-                  body: 'This issue is already assigned. Tag a maintainer if you need to take over.'
+                  body: 'This issue is already assigned. Tag a maintainer if you need to take over.',
                 });
               }
             }

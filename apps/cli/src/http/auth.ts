@@ -1,7 +1,10 @@
 import { Logger } from '@/util/logger'
 
-const AuthController = {
-  async checkApiKeyValidity(baseUrl: string, apiKey: string): Promise<void> {
+class AuthController {
+  static async checkApiKeyValidity(
+    baseUrl: string,
+    apiKey: string
+  ): Promise<void> {
     Logger.info('Checking API key validity...')
     const response = await fetch(`${baseUrl}/api/api-key/access/live-updates`, {
       headers: {

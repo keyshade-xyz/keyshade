@@ -15,8 +15,11 @@ import {
 import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
-  Configuration
+  Configuration,
+  RunData
 } from '@/types/command/run.types'
+
+import { decrypt } from '@/util/decrypt'
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -51,10 +54,9 @@ export default class RunCommand extends BaseCommand {
     await this.executeCommand(args[0])
   }
 
-  private async fetchConfigurations(): Promise<
-    ProjectRootConfig & { privateKey: string }
-  > {
-    const { environment, project, workspace } = await fetchProjectRootConfig()
+  private async fetchConfigurations(): Promise<RunData> {
+    const { environment, project, workspace, quitOnDecryptionFailure } =
+      await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
     const privateKey =
       privateKeyConfig[`${workspace}_${project}_${environment}`]
@@ -67,7 +69,8 @@ export default class RunCommand extends BaseCommand {
       environment,
       project,
       workspace,
-      privateKey
+      privateKey,
+      quitOnDecryptionFailure
     }
   }
 
@@ -78,10 +81,12 @@ export default class RunCommand extends BaseCommand {
     return 'ws'
   }
 
-  private async connectToSocket(data: ProjectRootConfig) {
+  private async connectToSocket(data: RunData) {
     Logger.info('Connecting to socket...')
     const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
     const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
+    const privateKey = data.privateKey
+    const quitOnDecryptionFailure = data.quitOnDecryptionFailure
 
     const ioClient = io(websocketUrl, {
       autoConnect: false,
@@ -102,8 +107,27 @@ export default class RunCommand extends BaseCommand {
 
       ioClient.on('configuration-updated', async (data: Configuration) => {
         Logger.info(
-          `Configuration change received from API (name: ${data.name}, value: ${data.value})`
+          `Configuration change received from API (name: ${data.name})`
         )
+
+        if (!data.isPlaintext) {
+          try {
+            data.value = await decrypt(privateKey, data.value)
+          } catch (error) {
+            if (quitOnDecryptionFailure) {
+              Logger.error(
+                `Decryption failed for ${data.name}. Stopping the process.`
+              )
+              process.exit(1)
+            } else {
+              Logger.warn(
+                `Decryption failed for ${data.name}. Skipping this configuration.`
+              )
+              return
+            }
+          }
+        }
+
         this.processEnvironmentalVariables[data.name] = data.value
         this.shouldRestart = true
       })

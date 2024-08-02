@@ -28,6 +28,8 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class VariableService {
@@ -520,7 +522,8 @@ export class VariableService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -601,7 +604,65 @@ export class VariableService {
       }
     }
 
-    return Array.from(variablesWithEnvironmentalValues.values())
+    const items = Array.from(variablesWithEnvironmentalValues.values())
+
+    //calculate metadata
+    const totalCount = await this.prisma.variable.count({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      }
+    })
+
+    const metadata = paginate(totalCount, `/variable/${projectId}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
+  }
+
+  async getRevisionsOfVariable(
+    user: User,
+    variableId: Variable['id'],
+    environmentId: Environment['id'],
+    page: number,
+    limit: number,
+    order: 'asc' | 'desc'
+  ) {
+    await this.authorityCheckerService.checkAuthorityOverVariable({
+      userId: user.id,
+      entity: { id: variableId },
+      authority: Authority.READ_VARIABLE,
+      prisma: this.prisma
+    })
+
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    const revisions = await this.prisma.variableVersion.findMany({
+      where: {
+        variableId: variableId,
+        environmentId: environmentId
+      },
+      skip: page * limit,
+      take: limitMaxItemsPerPage(limit),
+
+      orderBy: {
+        version: order
+      }
+    })
+
+    return revisions
   }
 
   private async variableExists(

@@ -38,6 +38,7 @@ import { VariableService } from '../variable/service/variable.service'
 import { VariableModule } from '../variable/variable.module'
 import { SecretModule } from '../secret/secret.module'
 import { EnvironmentModule } from '../environment/environment.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -85,6 +86,8 @@ describe('Project Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+
+    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -222,7 +225,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -398,7 +401,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -463,14 +466,29 @@ describe('Project Controller Tests', () => {
   it('should be able to fetch all projects of a workspace', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: `/project/all/${workspace1.id}?page=0`,
+      url: `/project/all/${workspace1.id}?page=0&limit=10`,
       headers: {
         'x-e2e-user-email': user1.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().length).toEqual(2)
+    expect(response.json().items.length).toEqual(2)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(2)
+    expect(metadata.links.self).toBe(
+      `/project/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toBe(
+      `/project/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toEqual(null)
+    expect(metadata.links.next).toEqual(null)
+    expect(metadata.links.last).toBe(
+      `/project/all/${workspace1.id}?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   it('should not be able to fetch all projects of a non existing workspace', async () => {
@@ -632,7 +650,7 @@ describe('Project Controller Tests', () => {
       EventSource.PROJECT
     )
 
-    const event = response[0]
+    const event = response.items[0]
 
     expect(event.source).toBe(EventSource.PROJECT)
     expect(event.triggerer).toBe(EventTriggerer.USER)
@@ -1722,9 +1740,22 @@ describe('Project Controller Tests', () => {
           'x-e2e-user-email': user2.email
         }
       })
-
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toHaveLength(1)
+      expect(response.json().items).toHaveLength(1)
+
+      //check metadata
+      const metadata = response.json().metadata
+      expect(metadata.links.self).toBe(
+        `/project/${project3.id}/forks?page=0&limit=10`
+      )
+      expect(metadata.links.first).toBe(
+        `/project/${project3.id}/forks?page=0&limit=10`
+      )
+      expect(metadata.links.previous).toEqual(null)
+      expect(metadata.links.next).toEqual(null)
+      expect(metadata.links.last).toBe(
+        `/project/${project3.id}/forks?page=0&limit=10`
+      )
     })
 
     it('should not contain a forked project that has access level other than GLOBAL', async () => {
@@ -1754,7 +1785,7 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toHaveLength(1)
+      expect(response.json().items).toHaveLength(1)
     })
   })
 })

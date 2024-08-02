@@ -35,6 +35,7 @@ import { EnvironmentModule } from '../environment/environment.module'
 import createEvent from '../common/create-event'
 import { VariableService } from '../variable/service/variable.service'
 import { VariableModule } from '../variable/variable.module'
+import { QueryTransformPipe } from '../common/query.transform.pipe'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -80,6 +81,8 @@ describe('Event Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
 
+    app.useGlobalPipes(new QueryTransformPipe())
+
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
 
@@ -115,9 +118,8 @@ describe('Event Controller Tests', () => {
         'x-e2e-user-email': user.email
       }
     })
-
     expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -129,6 +131,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newWorkspace.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(newWorkspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch a project event', async () => {
@@ -152,7 +169,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -164,6 +181,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newProject.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch an environment event', async () => {
@@ -188,7 +220,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -200,6 +232,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newEnvironment.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch a secret event', async () => {
@@ -230,7 +277,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -242,6 +289,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newSecret.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch a variable event', async () => {
@@ -272,7 +334,7 @@ describe('Event Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     // expect(response.json()).toBe({})
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -284,6 +346,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newVariable.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch a workspace role event', async () => {
@@ -310,7 +387,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json()[0]
+    const event = response.json().items[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -322,6 +399,21 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(newWorkspaceRole.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+    )
   })
 
   it('should be able to fetch all events', async () => {
@@ -334,7 +426,52 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toHaveLength(6)
+    expect(response.json().items).toHaveLength(6)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(6)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?page=0&limit=10&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?page=0&limit=10&search=`
+    )
+    expect(metadata.links.previous).toBeNull()
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?page=0&limit=10&search=`
+    )
+  })
+
+  it('should be able to fetch 2nd page of all events', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/event/${workspace.id}?page=1&limit=3&`,
+      headers: {
+        'x-e2e-user-email': user.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().items).toHaveLength(3)
+
+    //check metadata
+    const metadata = response.json().metadata
+    expect(metadata.totalCount).toEqual(6)
+    expect(metadata.links.self).toEqual(
+      `/event/${workspace.id}?page=1&limit=3&search=`
+    )
+    expect(metadata.links.first).toEqual(
+      `/event/${workspace.id}?page=0&limit=3&search=`
+    )
+    expect(metadata.links.previous).toEqual(
+      `/event/${workspace.id}?page=0&limit=3&search=`
+    )
+    expect(metadata.links.next).toBeNull()
+    expect(metadata.links.last).toEqual(
+      `/event/${workspace.id}?page=1&limit=3&search=`
+    )
   })
 
   it('should throw an error with wrong severity value', async () => {

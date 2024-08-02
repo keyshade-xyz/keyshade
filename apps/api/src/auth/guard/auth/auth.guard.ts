@@ -13,6 +13,7 @@ import { ONBOARDING_BYPASSED } from '../../../decorators/bypass-onboarding.decor
 import { AuthenticatedUserContext } from '../../auth.types'
 import { toSHA256 } from '../../../common/to-sha256'
 import { EnvSchema } from '../../../common/env/env.schema'
+import { CacheService } from '../../../cache/cache.service'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -24,7 +25,8 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    private reflector: Reflector
+    private reflector: Reflector,
+    private cache: CacheService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -104,11 +106,15 @@ export class AuthGuard implements CanActivate {
             secret: process.env.JWT_SECRET
           })
 
-          user = await this.prisma.user.findUnique({
-            where: {
-              id: payload['id']
-            }
-          })
+          const cachedUser = await this.cache.getUser(payload['id'])
+          if (cachedUser) user = cachedUser
+          else {
+            user = await this.prisma.user.findUnique({
+              where: {
+                id: payload['id']
+              }
+            })
+          }
         } catch {
           throw new ForbiddenException()
         }
