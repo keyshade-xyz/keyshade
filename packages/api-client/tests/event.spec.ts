@@ -1,6 +1,6 @@
-import client from '@package/client'
-import EventController from '@package/controllers/event/event'
-import { EventSource } from '@package/types/event.types'
+import client from '../src/core/client'
+import EventController from '../src/controllers/event/event'
+import { EventSource } from '../src/types/event.types'
 
 describe('Get Event Controller', () => {
   const email = 'johndoe@example.com'
