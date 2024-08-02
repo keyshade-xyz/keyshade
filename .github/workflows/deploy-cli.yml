@@ -1,0 +1,39 @@
+name: Deploy CLI
+
+on:
+    push:
+      branches:
+        - 'main'
+      paths: ['apps/cli/**','.github/workflows/deploy-cli.yaml']
+    pull_request:
+      paths: ['apps/cli/**','.github/workflows/deploy-cli.yaml']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: alpha
+    name: Build and push Web docker image for release
+    if: github.ref == 'refs/heads/main'
+  
+  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+  
+      - name: Install dependencies
+        run: pnpm install
+  
+      - name: Bump version and generate changelog
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Publish to NPM
+        run: npm publish
+        env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
