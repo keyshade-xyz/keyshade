@@ -1,5 +1,5 @@
 import { APIClient } from '../src/core/client'
-import EventController from '../src/controllers/event/event'
+import EventController from '../src/controllers/event'
 export enum EventSource {
   SECRET = 'SECRET',
   VARIABLE = 'VARIABLE',
@@ -10,7 +10,7 @@ export enum EventSource {
   INTEGRATION = 'INTEGRATION'
 }
 
-describe('Get Event Controller', () => {
+describe('Event Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
 
   const client = new APIClient(backendUrl)
@@ -18,8 +18,6 @@ describe('Get Event Controller', () => {
   const email = 'johndoe@example.com'
   let projectId: string | null
   let workspaceId: string | null
-  let secret: any
-  let variable: any
   let environment: any
 
   beforeAll(async () => {
@@ -35,7 +33,6 @@ describe('Get Event Controller', () => {
         }
       )
     ).json()) as any
-    console.log(workspaceResponse)
     workspaceId = workspaceResponse.id
   })
 
@@ -65,7 +62,6 @@ describe('Get Event Controller', () => {
       { workspaceId, source: 'PROJECT' },
       { 'x-e2e-user-email': email }
     )
-    console.log(events.data.items)
     expect(events.data.items[0].source).toBe(EventSource.PROJECT)
     expect(events.data.items[0].metadata.projectId).toBe(projectId)
     expect(events.data.items[0].metadata.name).toBe('Project')
@@ -122,7 +118,6 @@ describe('Get Event Controller', () => {
     expect(events.data.items[0].source).toBe('SECRET')
     expect(events.data.items[0].metadata.secretId).toBe(secretRepsonse.id)
     expect(events.data.items[0].metadata.name).toBe('My secret')
-    secret = secretRepsonse
   })
 
   it('should fetch a Variable Event', async () => {
@@ -151,6 +146,5 @@ describe('Get Event Controller', () => {
     expect(events.data.items[0].source).toBe('VARIABLE')
     expect(events.data.items[0].metadata.variableId).toBe(variableResponse.id)
     expect(events.data.items[0].metadata.name).toBe('My variable')
-    variable = variableResponse
   })
 })
