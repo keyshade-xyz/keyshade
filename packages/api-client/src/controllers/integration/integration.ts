@@ -9,48 +9,57 @@ import {
   GetIntegrationResponse,
   UpdateIntegrationRequest,
   UpdateIntegrationResponse
-} from '@package/types/integration.types'
-import client from '@package/client'
+} from '../../types/integration.types'
+import { APIClient } from '../../core/client'
+import { ClientResponse } from '../../types/index.types'
+import { parseResponse } from '../../core/response-parser'
 
 export default class IntegrationController {
-  private static apiClient = client
+  private apiClient: APIClient
 
-  static async createIntegration(
+  constructor(private readonly backendUrl: string) {
+    this.apiClient = new APIClient(this.backendUrl)
+  }
+
+  async createIntegration(
     request: CreateIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<CreateIntegrationResponse> {
-    return this.apiClient.post(
+  ): Promise<ClientResponse<CreateIntegrationResponse>> {
+    const response = await this.apiClient.post(
       `/api/integration/${request.workspaceId}`,
       request,
       headers
     )
+    return await parseResponse<CreateIntegrationResponse>(response)
   }
 
-  static async updateIntegration(
+  async updateIntegration(
     request: UpdateIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<UpdateIntegrationResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<UpdateIntegrationResponse>> {
+    const response = await this.apiClient.put(
       `/api/integration/${request.integrationId}`,
       request,
       headers
     )
+    return await parseResponse<UpdateIntegrationResponse>(response)
   }
 
-  static async getIntegration(
+  async getIntegration(
     request: GetIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<GetIntegrationResponse> {
-    return this.apiClient.get(
+  ): Promise<ClientResponse<GetIntegrationResponse>> {
+    const response = await this.apiClient.get(
       `/api/integration/${request.integrationId}`,
       headers
     )
+    return await parseResponse<GetIntegrationResponse>(response)
   }
 
-  static async getAllIntegrations(
+  async getAllIntegrations(
     request: GetAllIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<GetAllIntegrationResponse> {
+  ): Promise<ClientResponse<GetAllIntegrationResponse>> {
     let url = `/api/integration/all/${request.workspaceId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
@@ -58,16 +67,18 @@ export default class IntegrationController {
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
 
-    return this.apiClient.get<GetAllIntegrationResponse>(url, headers)
+    const response = await this.apiClient.get(url, headers)
+    return await parseResponse<GetAllIntegrationResponse>(response)
   }
 
-  static async deleteIntegration(
+  async deleteIntegration(
     request: DeleteIntegrationRequest,
     headers?: Record<string, string>
-  ): Promise<DeleteIntegrationResponse> {
-    return this.apiClient.delete(
+  ): Promise<ClientResponse<DeleteIntegrationResponse>> {
+    const response = await this.apiClient.delete(
       `/api/integration/${request.integrationId}`,
       headers
     )
+    return await parseResponse<DeleteIntegrationResponse>(response)
   }
 }

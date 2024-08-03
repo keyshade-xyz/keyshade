@@ -1,5 +1,5 @@
-import client from '@package/client'
-import IntegrationController from '@package/controllers/integration/integration'
+import { APIClient } from '../src/core/client'
+import IntegrationController from '../src/controllers/integration/integration'
 
 export enum IntegrationType {
   DISCORD = 'DISCORD',
@@ -39,49 +39,59 @@ export enum EventType {
 }
 
 describe('Get Environments Tests', () => {
+  const backendUrl = process.env.BACKEND_URL as string
+
+  const client = new APIClient(backendUrl)
+  const integrationController = new IntegrationController(backendUrl)
   const email = 'johndoe@example.com'
-  let projectId: string | null
-  let workspaceId: string | null
+  let projectId: string | undefined
+  let workspaceId: string
   let environment: any
-  let integrationId: string | null
+  let integrationId: string
 
   beforeAll(async () => {
     //Create the user's workspace
-    const workspaceResponse = (await client.post(
-      '/api/workspace',
-      {
-        name: 'My Workspace'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const workspaceResponse = (await (
+      await client.post(
+        '/api/workspace',
+        {
+          name: 'Integration Workspace'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     workspaceId = workspaceResponse.id
 
     // Create a project
-    const projectResponse = (await client.post(
-      `/api/project/${workspaceId}`,
-      {
-        name: 'Project',
-        storePrivateKey: true
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const projectResponse = (await (
+      await client.post(
+        `/api/project/${workspaceId}`,
+        {
+          name: 'Project',
+          storePrivateKey: true
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     projectId = projectResponse.id
 
-    const createEnvironmentResponse = await client.post(
-      `/api/environment/${projectId}`,
-      {
-        name: 'Dev'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )
+    const createEnvironmentResponse = (await (
+      await client.post(
+        `/api/environment/${projectId}`,
+        {
+          name: 'Dev'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     environment = createEnvironmentResponse
   })
@@ -94,7 +104,7 @@ describe('Get Environments Tests', () => {
   })
 
   it('should create a integration', async () => {
-    const integration = await IntegrationController.createIntegration(
+    const integration = await integrationController.createIntegration(
       {
         workspaceId,
         projectId,
@@ -110,25 +120,25 @@ describe('Get Environments Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(integration.name).toBe('Discord second')
-    expect(integration.projectId).toBe(projectId)
-    expect(integration.environmentId).toBe(environment.id)
-    expect(integration.workspaceId).toBe(workspaceId)
-    expect(integration.type).toBe('DISCORD')
-    integrationId = integration.id
+    expect(integration.data?.name).toBe('Discord second')
+    expect(integration.data?.projectId).toBe(projectId)
+    expect(integration.data?.environmentId).toBe(environment.id)
+    expect(integration.data?.workspaceId).toBe(workspaceId)
+    expect(integration.data?.type).toBe('DISCORD')
+    integrationId = integration.data?.id as string
   })
 
   it('should update the integration', async () => {
     const updatedIntegration: any =
-      await IntegrationController.updateIntegration(
+      await integrationController.updateIntegration(
         { integrationId, name: 'Github second' },
         { 'x-e2e-user-email': email }
       )
-    expect(updatedIntegration.name).toBe('Github second')
+    expect(updatedIntegration.data.name).toBe('Github second')
   })
 
   it('should get a integration', async () => {
-    const integration: any = await IntegrationController.getIntegration(
+    const integration: any = await integrationController.getIntegration(
       { integrationId },
       { 'x-e2e-user-email': email }
     )
@@ -137,7 +147,7 @@ describe('Get Environments Tests', () => {
 
   it('should get all the integration in workspace', async () => {
     // adding more integrations
-    await IntegrationController.createIntegration(
+    await integrationController.createIntegration(
       {
         workspaceId,
         projectId,
@@ -153,22 +163,22 @@ describe('Get Environments Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    const integrations: any = await IntegrationController.getAllIntegrations(
+    const integrations: any = await integrationController.getAllIntegrations(
       { workspaceId },
       { 'x-e2e-user-email': email }
     )
-    expect(integrations.length).toBe(2)
+    expect(integrations.data.items.length).toBe(2)
   })
 
   it('should delete a integration', async () => {
-    await IntegrationController.deleteIntegration(
+    await integrationController.deleteIntegration(
       { integrationId },
       { 'x-e2e-user-email': email }
     )
-    const integrations: any = await IntegrationController.getAllIntegrations(
+    const integrations: any = await integrationController.getAllIntegrations(
       { workspaceId },
       { 'x-e2e-user-email': email }
     )
-    expect(integrations.length).toBe(1)
+    expect(integrations.data.items.length).toBe(1)
   })
 })

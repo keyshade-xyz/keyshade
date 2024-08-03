@@ -1,4 +1,5 @@
-import { IntegrationType, EventType } from 'tests/integration.spec'
+import { Page } from '../../../../apps/cli/src/types/index.types'
+import { IntegrationType, EventType } from '../../tests/integration.spec'
 export interface CreateIntegrationRequest {
   workspaceId?: string
   projectId?: string
@@ -78,8 +79,8 @@ export interface GetAllIntegrationRequest {
   workspaceId: string
 }
 
-export interface GetAllIntegrationResponse {
-  items: {
+export interface GetAllIntegrationResponse
+  extends Page<{
     id: string
     name: string
     metadata: Record<string, string>
@@ -90,5 +91,4 @@ export interface GetAllIntegrationResponse {
     workspaceId: string
     projectId: string
     environmentId: string
-  }[]
-}
+  }> {}
