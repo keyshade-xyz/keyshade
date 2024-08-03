@@ -66,13 +66,12 @@ export class IntegrationController {
   }
 
   /* istanbul ignore next */
-  // The e2e tests are not working, but the API calls work as expected
   @Get('all/:workspaceId')
   @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
   async getAllIntegrations(
     @CurrentUser() user: User,
     @Param('workspaceId') workspaceId: string,
-    @Query('page') page: number = 1,
+    @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',

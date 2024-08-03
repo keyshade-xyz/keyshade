@@ -38,6 +38,12 @@ export default class InitCommand extends BaseCommand {
         long: '--overwrite',
         description: 'Overwrite existing configuration',
         defaultValue: false
+      },
+      {
+        short: '-q',
+        long: '--quit-on-decryption-failure',
+        description: 'Quit on decryption failure',
+        defaultValue: false
       }
     ]
   }
@@ -52,7 +58,7 @@ export default class InitCommand extends BaseCommand {
 
   async action({ options }: CommandActionData): Promise<void> {
     let { workspace, project, environment, privateKey } = options
-    const { overwrite } = options
+    const { overwrite, quitOnDecryptionFailure } = options
 
     intro('Configure the project for live-updates')
 
@@ -85,7 +91,8 @@ export default class InitCommand extends BaseCommand {
     await writeProjectRootConfig({
       workspace,
       project,
-      environment
+      environment,
+      quitOnDecryptionFailure
     })
 
     await writePrivateKeyConfig({
