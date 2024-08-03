@@ -1,7 +1,7 @@
 import { APIClient } from '../src/core/client'
-import EnvironmentController from '../src/controllers/environment/environment'
+import EnvironmentController from '../src/controllers/environment'
 
-describe('Get Environments Tests', () => {
+describe('Environments Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
 
   const client = new APIClient(backendUrl)
@@ -10,7 +10,7 @@ describe('Get Environments Tests', () => {
   const email = 'johndoe@example.com'
   let projectId: string | null
   let workspaceId: string | null
-  let environment: any
+  let environmentId: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -66,12 +66,12 @@ describe('Get Environments Tests', () => {
       )
     ).json()) as any
 
-    environment = createEnvironmentResponse
+    environmentId = createEnvironmentResponse.id
   })
 
   afterEach(async () => {
     // Delete the environment
-    await client.delete(`/api/environment/${environment.id}`, {
+    await client.delete(`/api/environment/${environmentId}`, {
       'x-e2e-user-email': email
     })
   })
@@ -112,7 +112,7 @@ describe('Get Environments Tests', () => {
     const environmentResponse = (
       await environmentController.getEnvironmentById(
         {
-          id: environment.id
+          id: environmentId
         },
         {
           'x-e2e-user-email': email
@@ -120,7 +120,7 @@ describe('Get Environments Tests', () => {
       )
     ).data
 
-    expect(environmentResponse.id).toBe(environment.id)
+    expect(environmentResponse.id).toBe(environmentId)
     expect(environmentResponse.name).toBe('Dev')
   })
 
@@ -157,7 +157,7 @@ describe('Get Environments Tests', () => {
     const updateEnvironmentResponse = (
       await environmentController.updateEnvironment(
         {
-          id: environment.id,
+          id: environmentId,
           name: 'Prod'
         },
         {
@@ -169,7 +169,7 @@ describe('Get Environments Tests', () => {
     expect(updateEnvironmentResponse.name).toBe('Prod')
 
     const fetchEnvironmentResponse = (await (
-      await client.get(`/api/environment/${environment.id}`, {
+      await client.get(`/api/environment/${environmentId}`, {
         'x-e2e-user-email': email
       })
     ).json()) as any

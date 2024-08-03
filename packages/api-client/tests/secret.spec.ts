@@ -1,7 +1,7 @@
 import { APIClient } from '../src/core/client'
-import SecretController from '../src/controllers/secret/secret'
+import SecretController from '../src/controllers/secret'
 
-describe('Get Variable tests', () => {
+describe('Secret Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
 
   const client = new APIClient(backendUrl)
@@ -10,11 +10,12 @@ describe('Get Variable tests', () => {
   const email = 'johndoe@example.com'
   let projectId: string | null
   let workspaceId: string | null
-  let environment: any
-  let secretId: string
+  let environmentId: string | null
+  let secretId: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
+
     const workspaceResponse = (await (
       await client.post(
         '/api/workspace',
@@ -26,6 +27,7 @@ describe('Get Variable tests', () => {
         }
       )
     ).json()) as any
+
     workspaceId = workspaceResponse.id
 
     // Create a project
@@ -41,6 +43,7 @@ describe('Get Variable tests', () => {
         }
       )
     ).json()) as any
+
     projectId = projectResponse.id
 
     const createEnvironmentResponse = (await (
@@ -55,30 +58,53 @@ describe('Get Variable tests', () => {
       )
     ).json()) as any
 
-    environment = createEnvironmentResponse
+    environmentId = createEnvironmentResponse.id
   })
 
   afterAll(async () => {
-    // Delete the environment
-    await client.delete(`/api/environment/${environment.id}`, {
-      'x-e2e-user-email': email
-    })
-
     // Delete the workspace
     await client.delete(`/api/workspace/${workspaceId}`, {
       'x-e2e-user-email': email
     })
   })
 
-  // Create a Secret
-  it('should create a secret', async () => {
-    const secret = await secretController.createSecret(
+  beforeEach(async () => {
+    // Create a secret
+    const createSecretResponse = await secretController.createSecret(
       {
         name: 'Secret 1',
         note: 'Secret 1 note',
         entries: [
           {
-            environmentId: environment.id,
+            environmentId,
+            value: 'Secret 1 value'
+          }
+        ],
+        projectId
+      },
+      { 'x-e2e-user-email': email }
+    )
+
+    secretId = createSecretResponse.data.id
+  })
+
+  afterEach(async () => {
+    // Delete the secret
+    await secretController.deleteSecret(
+      { secretId },
+      { 'x-e2e-user-email': email }
+    )
+  })
+
+  // Create a Secret
+  it('should create a secret', async () => {
+    const secret = await secretController.createSecret(
+      {
+        name: 'Secret 2',
+        note: 'Secret 2 note',
+        entries: [
+          {
+            environmentId,
             value: 'Secret 1 value'
           }
         ],
@@ -89,10 +115,15 @@ describe('Get Variable tests', () => {
 
     expect(secret.data.projectId).toBe(projectId)
     expect(secret.data.project.workspaceId).toBe(workspaceId)
-    expect(secret.data.name).toBe('Secret 1')
+    expect(secret.data.name).toBe('Secret 2')
     expect(secret.data.versions.length).toBe(1)
     expect(secret.error).toBe(null)
-    secretId = secret.data.id
+
+    // Delete the secret
+    await secretController.deleteSecret(
+      { secretId: secret.data.id },
+      { 'x-e2e-user-email': email }
+    )
   })
 
   // Update Name of a Secret
@@ -114,7 +145,7 @@ describe('Get Variable tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentId: environment.id
+            environmentId
           }
         ],
         secretId
@@ -126,11 +157,39 @@ describe('Get Variable tests', () => {
 
   // // RollBack a Particular Version of a Secret
   it('should roll back a version of a secret', async () => {
-    const rollbackSecret = await secretController.rollbackSecret(
-      { secretId, environmentId: environment.id, version: 1 },
+    // Create 2 versions of the secret
+    await secretController.updateSecret(
+      {
+        entries: [
+          {
+            value: 'Secret 1 value',
+            environmentId
+          }
+        ],
+        secretId
+      },
       { 'x-e2e-user-email': email }
     )
-    expect(rollbackSecret.data.count).toBe(1)
+
+    await secretController.updateSecret(
+      {
+        entries: [
+          {
+            value: 'Updated Secret 1 value',
+            environmentId
+          }
+        ],
+        secretId
+      },
+      { 'x-e2e-user-email': email }
+    )
+
+    const rollbackSecret = await secretController.rollbackSecret(
+      { secretId, environmentId, version: 1 },
+      { 'x-e2e-user-email': email }
+    )
+
+    expect(rollbackSecret.data.count).toBe(2)
   })
 
   // // Get all secrets of a Project
@@ -146,7 +205,7 @@ describe('Get Variable tests', () => {
   it('should get all secrets of an environment', async () => {
     const secrets: any = await secretController.getAllSecretsOfEnvironment(
       {
-        environmentId: environment.id,
+        environmentId,
         projectId: projectId
       },
       { 'x-e2e-user-email': email }
