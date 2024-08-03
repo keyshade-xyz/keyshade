@@ -18,6 +18,7 @@ import { PrismaService } from '../../prisma/prisma.service'
 import createUser from '../../common/create-user'
 import { AuthProvider } from '@prisma/client'
 import generateOtp from '../../common/generate-otp'
+import { CacheService } from '../../cache/cache.service'
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,8 @@ export class AuthService {
   constructor(
     @Inject(MAIL_SERVICE) private mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService
+    private jwt: JwtService,
+    private cache: CacheService
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -82,7 +84,7 @@ export class AuthService {
         }
       }
     })
-
+    this.cache.setUser(user) // Save user to cache
     this.logger.log(`User logged in: ${email}`)
 
     const token = await this.generateToken(user.id)

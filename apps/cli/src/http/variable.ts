@@ -1,7 +1,7 @@
 import type { Configuration } from '@/types/command/run.types'
 
-const VariableController = {
-  async fetchVariables(
+class VariableController {
+  static async fetchVariables(
     baseUrl: string,
     apiKey: string,
     projectId: string,
