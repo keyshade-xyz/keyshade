@@ -1,6 +1,6 @@
-import { APIClient } from '../../core/client'
-import { ClientResponse } from 'src/types/index.types'
-import { parseResponse } from '../../core/response-parser'
+import { APIClient } from '../core/client'
+import { ClientResponse } from '../types/index.types'
+import { parseResponse } from '../core/response-parser'
 import {
   CreateSecretRequest,
   CreateSecretResponse,
@@ -14,7 +14,7 @@ import {
   RollBackSecretResponse,
   UpdateSecretRequest,
   UpdateSecretResponse
-} from '../../types/secret.types'
+} from '../types/secret.types'
 
 export default class SecretController {
   private apiClient: APIClient
@@ -32,8 +32,10 @@ export default class SecretController {
       request,
       headers
     )
+
     return await parseResponse<CreateSecretResponse>(response)
   }
+
   async updateSecret(
     request: UpdateSecretRequest,
     headers?: Record<string, string>
@@ -56,6 +58,7 @@ export default class SecretController {
       request,
       headers
     )
+
     return await parseResponse<RollBackSecretResponse>(response)
   }
 
@@ -67,6 +70,7 @@ export default class SecretController {
       `/api/secret/${request.secretId}`,
       headers
     )
+
     return await parseResponse<DeleteSecretResponse>(response)
   }
 
