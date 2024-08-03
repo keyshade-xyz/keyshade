@@ -1,3 +1,5 @@
+import { Page } from '../../../../apps/cli/src/types/index.types'
+
 export enum EventSource {
   SECRET,
   VARIABLE,
@@ -51,11 +53,11 @@ export enum EventType {
 
 export interface GetEventsRequest {
   workspaceId: string
-  source: EventSource
+  source: string
 }
 
-export interface GetEventsResponse {
-  items: {
+export interface GetEventsResponse
+  extends Page<{
     id: string
     source: EventSource
     triggerer: EventTriggerer
@@ -77,5 +79,4 @@ export interface GetEventsResponse {
     itemId: string
     userId: string
     workspaceId: string
-  }[]
-}
+  }> {}
