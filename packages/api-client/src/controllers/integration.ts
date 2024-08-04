@@ -9,10 +9,10 @@ import {
   GetIntegrationResponse,
   UpdateIntegrationRequest,
   UpdateIntegrationResponse
-} from '../../types/integration.types'
-import { APIClient } from '../../core/client'
-import { ClientResponse } from '../../types/index.types'
-import { parseResponse } from '../../core/response-parser'
+} from '../types/integration.types'
+import { APIClient } from '../core/client'
+import { ClientResponse } from '../types/index.types'
+import { parseResponse } from '../core/response-parser'
 
 export default class IntegrationController {
   private apiClient: APIClient

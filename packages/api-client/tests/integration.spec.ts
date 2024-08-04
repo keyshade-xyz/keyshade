@@ -1,5 +1,5 @@
 import { APIClient } from '../src/core/client'
-import IntegrationController from '../src/controllers/integration/integration'
+import IntegrationController from '../src/controllers/integration'
 
 export enum IntegrationType {
   DISCORD = 'DISCORD',
