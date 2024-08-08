@@ -1,11 +1,46 @@
 import { Page } from '../../../../apps/cli/src/types/index.types'
-import { IntegrationType, EventType } from '../../tests/integration.spec'
+export enum IntegrationType {
+  DISCORD,
+  SLACK,
+  GITHUB,
+  GITLAB
+}
+
+export enum EventType {
+  INVITED_TO_WORKSPACE,
+  REMOVED_FROM_WORKSPACE,
+  ACCEPTED_INVITATION,
+  DECLINED_INVITATION,
+  CANCELLED_INVITATION,
+  LEFT_WORKSPACE,
+  WORKSPACE_MEMBERSHIP_UPDATED,
+  WORKSPACE_UPDATED,
+  WORKSPACE_CREATED,
+  WORKSPACE_ROLE_CREATED,
+  WORKSPACE_ROLE_UPDATED,
+  WORKSPACE_ROLE_DELETED,
+  PROJECT_CREATED,
+  PROJECT_UPDATED,
+  PROJECT_DELETED,
+  SECRET_UPDATED,
+  SECRET_DELETED,
+  SECRET_ADDED,
+  VARIABLE_UPDATED,
+  VARIABLE_DELETED,
+  VARIABLE_ADDED,
+  ENVIRONMENT_UPDATED,
+  ENVIRONMENT_DELETED,
+  ENVIRONMENT_ADDED,
+  INTEGRATION_ADDED,
+  INTEGRATION_UPDATED,
+  INTEGRATION_DELETED
+}
 export interface CreateIntegrationRequest {
   workspaceId?: string
   projectId?: string
   name: string
-  type: IntegrationType
-  notifyOn: EventType[]
+  type: string
+  notifyOn: [string]
   metadata: Record<string, string>
   environmentId: string
 }

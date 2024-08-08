@@ -1,11 +1,11 @@
 import EnvironmentController from './controllers/environment'
-import IntegrationController from './controllers/integration'
-import EventController from './controllers/event'
 import SecretController from './controllers/secret'
+import EventController from './controllers/event'
+import IntegrationController from './controllers/integration'
 
 export {
   EnvironmentController,
-  IntegrationController,
   SecretController,
-  EventController
+  EventController,
+  IntegrationController
 }
