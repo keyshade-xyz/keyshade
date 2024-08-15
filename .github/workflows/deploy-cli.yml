@@ -4,7 +4,7 @@ on:
     push:
       branches:
         - 'main'
-      paths: ['apps/cli/**','.github/workflows/deploy-cli.yaml']
+      paths: ['apps/cli/**','.github/workflows/deploy-cli.yml']
 
 jobs:
   deploy:
