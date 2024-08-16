@@ -140,7 +140,7 @@ describe('Get Variable Tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(response.data.items.length).toBe(1)
-    const variable1 = response.data.items [0]
+    const variable1 = response.data.items[0]
     const variable = variable1.variable
     const values = variable1.values
     expect(variable).toHaveProperty('id')
