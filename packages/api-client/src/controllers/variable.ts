@@ -1,4 +1,4 @@
-import { APIClient } from 'src/core/client'
+import { APIClient } from '../core/client'
 import { parseResponse } from '../core/response-parser'
 import { ClientResponse } from '../types/index.types'
 import {

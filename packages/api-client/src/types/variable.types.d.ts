@@ -79,29 +79,30 @@ export interface GetAllVariablesOfProjectRequest {
   search?: string
 }
 
-export interface GetAllVariablesOfProjectResponse {
-  variable: {
-    id: string
-    name: string
-    createdAt: string
-    updatedAt: string
-    note: string | null
-    lastUpdatedById: string
-    projectId: string
-    lastUpdatedBy: {
+export interface GetAllVariablesOfProjectResponse
+  extends Page<{
+    variable: {
       id: string
       name: string
+      createdAt: string
+      updatedAt: string
+      note: string | null
+      lastUpdatedById: string
+      projectId: string
+      lastUpdatedBy: {
+        id: string
+        name: string
+      }
     }
-  }
-  values: {
-    environment: {
-      id: string
-      name: string
+    values: {
+      environment: {
+        id: string
+        name: string
+      }
+      value: string
+      version: number
     }
-    value: string
-    version: number
-  }
-}
+  }> {}
 
 export interface GetAllVariablesOfEnvironmentRequest {
   projectId: string
@@ -113,8 +114,9 @@ export interface GetAllVariablesOfEnvironmentRequest {
   search?: string
 }
 
-export interface GetAllVariablesOfEnvironmentResponse {
-  name: string
-  value: string
-  isPlaintext: boolean
-}
+export interface GetAllVariablesOfEnvironmentResponse
+  extends Page<{
+    name: string
+    value: string
+    isPlaintext: boolean
+  }> {}

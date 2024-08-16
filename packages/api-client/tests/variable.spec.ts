@@ -1,7 +1,11 @@
-import client from '@package/client'
-import VariableController from '@package/controllers/variable/variable'
+import VariableController from '../src/controllers/variable'
+import { APIClient } from '../src/core/client'
 
 describe('Get Variable Tests', () => {
+  const backendUrl = process.env.BACKEND_URL
+
+  const client = new APIClient(backendUrl)
+  const variableController = new VariableController(backendUrl)
   const email = 'johndoe@example.com'
   let workspaceId: string | null
   let projectId: string | null
@@ -9,40 +13,47 @@ describe('Get Variable Tests', () => {
   let variableId: string | null
 
   beforeAll(async () => {
-    const workspaceResponse = (await client.post(
-      '/api/workspace',
-      {
-        name: 'My Workspace'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    const workspaceResponse = (await (
+      await client.post(
+        '/api/workspace',
+        {
+          name: 'My Workspace'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     workspaceId = workspaceResponse.id
 
-    const projectResponse = (await client.post(
-      `/api/project/${workspaceId}`,
-      {
-        name: 'Project',
-        storePrivateKey: true
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )) as any
+    // Create a project
+    const projectResponse = (await (
+      await client.post(
+        `/api/project/${workspaceId}`,
+        {
+          name: 'Project',
+          storePrivateKey: true
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     projectId = projectResponse.id
 
-    const createEnvironmentResponse = await client.post(
-      `/api/environment/${projectId}`,
-      {
-        name: 'Dev'
-      },
-      {
-        'x-e2e-user-email': email
-      }
-    )
+    const createEnvironmentResponse = (await (
+      await client.post(
+        `/api/environment/${projectId}`,
+        {
+          name: 'Dev'
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
 
     environment = createEnvironmentResponse
   })
@@ -54,7 +65,7 @@ describe('Get Variable Tests', () => {
 
   // Create a variable
   it('should create a variable', async () => {
-    const variable = await VariableController.createVariable(
+    const variable = await variableController.createVariable(
       {
         projectId,
         name: 'Variable 1',
@@ -64,18 +75,18 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(variable.name).toBe('Variable 1')
-    expect(variable.projectId).toBe(projectId)
-    expect(variable.project.workspaceId).toBe(workspaceId)
-    expect(variable.versions.length).toBe(1)
-    expect(variable.versions[0].value).toBe('Variable 1 value')
-    expect(variable.versions[0].environmentId).toBe(environment.id)
-    variableId = variable.id
+    expect(variable.data.name).toBe('Variable 1')
+    expect(variable.data.projectId).toBe(projectId)
+    expect(variable.data.project.workspaceId).toBe(workspaceId)
+    expect(variable.data.versions.length).toBe(1)
+    expect(variable.data.versions[0].value).toBe('Variable 1 value')
+    expect(variable.data.versions[0].environmentId).toBe(environment.id)
+    variableId = variable.data.id
   })
 
   // Update Name of the Variable
   it('should update the name a variable', async () => {
-    const updatedVariable = await VariableController.updateVariable(
+    const updatedVariable = await variableController.updateVariable(
       {
         name: 'UpdatedVariable 1',
         variableId
@@ -84,13 +95,13 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(updatedVariable.variable.name).toBe('UpdatedVariable 1')
-    expect(updatedVariable.variable.id).toBe(variableId)
+    expect(updatedVariable.data.variable.name).toBe('UpdatedVariable 1')
+    expect(updatedVariable.data.variable.id).toBe(variableId)
   })
 
   // Create a new version of Variable
   it('should add version to a variable', async () => {
-    const updateVariable = await VariableController.updateVariable(
+    const updateVariable = await variableController.updateVariable(
       {
         entries: [
           {
@@ -102,14 +113,16 @@ describe('Get Variable Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    expect(updateVariable.updatedVersions.length).toBe(1)
-    expect(updateVariable.updatedVersions[0].value).toBe('1234')
-    expect(updateVariable.updatedVersions[0].environmentId).toBe(environment.id)
+    expect(updateVariable.data.updatedVersions.length).toBe(1)
+    expect(updateVariable.data.updatedVersions[0].value).toBe('1234')
+    expect(updateVariable.data.updatedVersions[0].environmentId).toBe(
+      environment.id
+    )
   })
 
   // Roll back a variable
   it('should rollback a variable', async () => {
-    const rolledBackVariable: any = await VariableController.rollbackVariable(
+    const rolledBackVariable: any = await variableController.rollbackVariable(
       {
         variableId,
         version: 1,
@@ -117,17 +130,17 @@ describe('Get Variable Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    expect(rolledBackVariable.count).toBe(1)
+    expect(rolledBackVariable.data.count).toBe(1)
   })
 
   // Get all the variables of project
   it('should get all variables of project', async () => {
-    const response: any = await VariableController.getAllVariablesOfProject(
+    const response: any = await variableController.getAllVariablesOfProject(
       { projectId },
       { 'x-e2e-user-email': email }
     )
-    expect(response.length).toBe(1)
-    const variable1 = response[0]
+    expect(response.data.items.length).toBe(1)
+    const variable1 = response.data.items [0]
     const variable = variable1.variable
     const values = variable1.values
     expect(variable).toHaveProperty('id')
@@ -177,7 +190,7 @@ describe('Get Variable Tests', () => {
   // Get all variables for an environment
   it('should get all variables for an environment', async () => {
     const variables: any =
-      await VariableController.getAllVariablesOfEnvironment(
+      await variableController.getAllVariablesOfEnvironment(
         {
           environmentId: environment.id,
           projectId
@@ -185,8 +198,8 @@ describe('Get Variable Tests', () => {
         { 'x-e2e-user-email': email }
       )
 
-    expect(variables.length).toBe(1)
-    variables.forEach((variable) => {
+    expect(variables.data.length).toBe(1)
+    variables.data.forEach((variable) => {
       expect(variable).toHaveProperty('name')
       expect(typeof variable.name).toBe('string')
 
@@ -196,7 +209,7 @@ describe('Get Variable Tests', () => {
       expect(variable).toHaveProperty('isPlaintext')
       expect(typeof variable.isPlaintext).toBe('boolean')
     })
-    const variable1 = variables[0]
+    const variable1 = variables.data[0]
     expect(variable1.name).toBe('UpdatedVariable 1')
     expect(variable1.value).toBe('Variable 1 value')
     expect(variable1.isPlaintext).toBe(true)
@@ -204,14 +217,14 @@ describe('Get Variable Tests', () => {
 
   // Delete a variable
   it('should delete variable', async () => {
-    await VariableController.deleteVariable(
+    await variableController.deleteVariable(
       { variableId },
       { 'x-e2e-user-email': email }
     )
-    const variables: any = await VariableController.getAllVariablesOfProject(
+    const variables: any = await variableController.getAllVariablesOfProject(
       { projectId },
       { 'x-e2e-user-email': email }
     )
-    expect(variables.length).toBe(0)
+    expect(variables.data.items.length).toBe(0)
   })
 })
