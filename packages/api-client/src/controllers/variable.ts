@@ -1,4 +1,6 @@
-import client from '@package/client'
+import { APIClient } from 'src/core/client'
+import { parseResponse } from '../core/response-parser'
+import { ClientResponse } from '../types/index.types'
 import {
   CreateVariableRequest,
   CreateVariableResponse,
@@ -12,74 +14,92 @@ import {
   RollBackVariableResponse,
   UpdateVariableRequest,
   UpdateVariableResponse
-} from '@package/types/variable.types'
+} from '../types/variable.types'
 
 export default class VariableController {
-  private static apiClient = client
+  private apiClient: APIClient
 
-  static async createVariable(
+  constructor(private readonly backendUrl: string) {
+    this.apiClient = new APIClient(this.backendUrl)
+  }
+
+  async createVariable(
     request: CreateVariableRequest,
     headers: Record<string, string>
-  ): Promise<CreateVariableResponse> {
-    return this.apiClient.post(
+  ): Promise<ClientResponse<CreateVariableResponse>> {
+    const response = await this.apiClient.post(
       `/api/variable/${request.projectId}`,
       request,
       headers
     )
+    return await parseResponse<CreateVariableResponse>(response)
   }
 
-  static async updateVariable(
+  async updateVariable(
     request: UpdateVariableRequest,
     headers: Record<string, string>
-  ): Promise<UpdateVariableResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<UpdateVariableResponse>> {
+    const response = await this.apiClient.put(
       `/api/variable/${request.variableId}`,
       request,
       headers
     )
+
+    return await parseResponse<UpdateVariableResponse>(response)
   }
 
-  static async rollbackVariable(
+  async rollbackVariable(
     request: RollBackVariableRequest,
     headers: Record<string, string>
-  ): Promise<RollBackVariableResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<RollBackVariableResponse>> {
+    const response = await this.apiClient.put(
       `/api/variable/${request.variableId}/rollback/${request.version}?environmentId=${request.environmentId}`,
       request,
       headers
     )
+
+    return await parseResponse<RollBackVariableResponse>(response)
   }
 
-  static async deleteVariable(
+  async deleteVariable(
     request: DeleteVariableRequest,
     headers: Record<string, string>
-  ): Promise<DeleteVariableResponse> {
-    return this.apiClient.delete(`/api/variable/${request.variableId}`, headers)
+  ): Promise<ClientResponse<DeleteVariableResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/variable/${request.variableId}`,
+      headers
+    )
+
+    return await parseResponse<DeleteVariableResponse>(response)
   }
 
-  static async getAllVariablesOfProject(
+  async getAllVariablesOfProject(
     request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
-  ): Promise<GetAllVariablesOfProjectResponse[]> {
+  ): Promise<ClientResponse<GetAllVariablesOfProjectResponse>> {
     let url = `/api/variable/${request.projectId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllVariablesOfProjectResponse>(response)
   }
 
-  static async getAllVariablesOfEnvironment(
+  async getAllVariablesOfEnvironment(
     request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
-  ): Promise<GetAllVariablesOfEnvironmentResponse[]> {
+  ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
     let url = `/api/variable/${request.projectId}/${request.environmentId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)
   }
 }
