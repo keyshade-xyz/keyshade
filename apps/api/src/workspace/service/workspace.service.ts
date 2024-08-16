@@ -414,6 +414,26 @@ export class WorkspaceService {
         }
       })
 
+    //Check if the roleIds are valid
+    const roles = await this.prisma.workspaceRole.findMany({
+      where: {
+        id: {
+          in: roleIds
+        },
+        workspaceId: workspace.id
+      }
+    })
+
+    const invalidRoles = roleIds.filter(
+      (id) => !roles.map((role) => role.id).includes(id)
+    )
+
+    if (invalidRoles.length > 0) {
+      throw new NotFoundException(
+        `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
+      )
+    }
+
     // Create new associations
     const createNewAssociations =
       this.prisma.workspaceMemberRoleAssociation.createMany({
@@ -977,6 +997,26 @@ export class WorkspaceService {
         )
         throw new ConflictException(
           `User ${memberUser.name} (${userId}) is already a member of workspace ${workspace.name} (${workspace.id})`
+        )
+      }
+
+      //Check if the member has valid roles
+      const roles = await this.prisma.workspaceRole.findMany({
+        where: {
+          id: {
+            in: member.roleIds
+          },
+          workspaceId: workspace.id
+        }
+      })
+
+      const invalidRoles = member.roleIds.filter(
+        (id) => !roles.map((role) => role.id).includes(id)
+      )
+
+      if (invalidRoles.length > 0) {
+        throw new NotFoundException(
+          `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
         )
       }
 
