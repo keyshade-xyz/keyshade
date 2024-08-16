@@ -31,6 +31,8 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class SecretService {
@@ -491,6 +493,45 @@ export class SecretService {
 
     return response
   }
+  async getRevisionsOfSecret(
+    user: User,
+    secretId: Secret['id'],
+    environmentId: Environment['id'],
+    page: number,
+    limit: number,
+    order: string
+  ) {
+    // assign order to variable dynamically
+    const sortOrder = order === 'asc' ? 'asc' : 'desc'
+    //check access to secret
+    await this.authorityCheckerService.checkAuthorityOverSecret({
+      userId: user.id,
+      entity: { id: secretId },
+      authority: Authority.READ_SECRET,
+      prisma: this.prisma
+    })
+
+    await this.authorityCheckerService.checkAuthorityOverEnvironment({
+      userId: user.id,
+      entity: { id: environmentId },
+      authority: Authority.READ_ENVIRONMENT,
+      prisma: this.prisma
+    })
+
+    // get the revisions
+    const revisions = await this.prisma.secretVersion.findMany({
+      where: {
+        secretId: secretId,
+        environmentId: environmentId
+      },
+      skip: page * limit,
+      take: limitMaxItemsPerPage(limit),
+      orderBy: {
+        version: sortOrder
+      }
+    })
+    return revisions
+  }
 
   async getAllSecretsOfProject(
     user: User,
@@ -530,7 +571,8 @@ export class SecretService {
         }
       },
       skip: page * limit,
-      take: limit,
+      take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         [sort]: order
       }
@@ -615,7 +657,32 @@ export class SecretService {
       }
     }
 
-    return Array.from(secretsWithEnvironmentalValues.values())
+    const items = Array.from(secretsWithEnvironmentalValues.values())
+
+    //Calculate pagination metadata
+    const totalCount = await this.prisma.secret.count({
+      where: {
+        projectId,
+        name: {
+          contains: search
+        }
+      }
+    })
+
+    const metadata = paginate(
+      totalCount,
+      `/secret/${projectId}`,
+      {
+        page,
+        limit: limitMaxItemsPerPage(limit),
+        sort,
+        order,
+        search
+      },
+      { decryptValue }
+    )
+
+    return { items, metadata }
   }
 
   private async secretExists(
