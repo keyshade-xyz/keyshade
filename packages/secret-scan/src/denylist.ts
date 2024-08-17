@@ -1,9 +1,17 @@
 import { SecretConfig } from './index'
 import {
+  adafruit,
+  adobe,
+  age,
+  airtable,
   algolia,
   alibaba,
   artifactory,
   aws,
+  asana,
+  atlassian,
+  authress,
+  beamer,
   discord,
   github,
   ip_public,
@@ -17,7 +25,7 @@ import {
   square_OAuth,
   stripe,
   telegram_token,
-  twilo
+  twilio
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -35,7 +43,7 @@ const denylist: SecretConfig = {
 
   telegram_token: telegram_token(),
 
-  twilo: twilo(),
+  twilio: twilio(),
 
   npm: npm(),
 
@@ -56,7 +64,23 @@ const denylist: SecretConfig = {
 
   algolia: algolia(),
 
-  alibaba: alibaba()
+  alibaba: alibaba(),
+
+  adafruit: adafruit(),
+
+  adobe: adobe(),
+
+  age: age(),
+
+  airtable: airtable(),
+
+  asana: asana(),
+
+  atlassian: atlassian(),
+
+  authress: authress(),
+
+  beamer: beamer()
 }
 
 export default denylist

@@ -1,7 +1,7 @@
 // keyshade-ignore-all
 import type { TestCase } from '@/types'
 
-export default function twilo(): RegExp[] {
+export default function twilio(): RegExp[] {
   return [
     // Account SID (ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
     /AC[a-z0-9]{32}/,
@@ -33,4 +33,4 @@ const testcase: TestCase[] = [
   }
 ]
 
-twilo.testcases = testcase
+twilio.testcases = testcase
