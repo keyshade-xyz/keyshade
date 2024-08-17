@@ -24,6 +24,8 @@ import asana from "@/rules/asana";
 import atlassian from "@/rules/atlassian";
 import authress from "@/rules/authress";
 import beamer from "@/rules/beamer";
+import bitbucket from "@/rules/bitbucket";
+import bittrex from "@/rules/bittrex";
 
 export {
   private_key,
@@ -51,5 +53,7 @@ export {
   asana,
   atlassian,
   authress,
-  beamer
+  beamer,
+  bitbucket,
+  bittrex
 }
