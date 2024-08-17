@@ -414,18 +414,9 @@ export class WorkspaceService {
         }
       })
 
-    //Check if the roleIds are valid
-    const roles = await this.prisma.workspaceRole.findMany({
-      where: {
-        id: {
-          in: roleIds
-        },
-        workspaceId: workspace.id
-      }
-    })
-
-    const invalidRoles = roleIds.filter(
-      (id) => !roles.map((role) => role.id).includes(id)
+    const invalidRoles = await this.findInvalidWorkspaceRoles(
+      workspace.id,
+      roleIds
     )
 
     if (invalidRoles.length > 0) {
@@ -1000,18 +991,9 @@ export class WorkspaceService {
         )
       }
 
-      //Check if the member has valid roles
-      const roles = await this.prisma.workspaceRole.findMany({
-        where: {
-          id: {
-            in: member.roleIds
-          },
-          workspaceId: workspace.id
-        }
-      })
-
-      const invalidRoles = member.roleIds.filter(
-        (id) => !roles.map((role) => role.id).includes(id)
+      const invalidRoles = await this.findInvalidWorkspaceRoles(
+        workspace.id,
+        member.roleIds
       )
 
       if (invalidRoles.length > 0) {
@@ -1083,6 +1065,26 @@ export class WorkspaceService {
 
       this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
     }
+  }
+
+  private async findInvalidWorkspaceRoles(
+    workspaceId: string,
+    roleIds: string[]
+  ) {
+    const roles = await this.prisma.workspaceRole.findMany({
+      where: {
+        id: {
+          in: roleIds
+        },
+        workspaceId: workspaceId
+      }
+    })
+
+    const roleIdSet = new Set(roles.map((role) => role.id))
+
+    const invalidRoles = roleIds.filter((id) => !roleIdSet.has(id))
+
+    return invalidRoles
   }
 
   private async memberExistsInWorkspace(
