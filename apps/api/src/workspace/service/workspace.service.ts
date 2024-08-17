@@ -414,6 +414,17 @@ export class WorkspaceService {
         }
       })
 
+    const invalidRoles = await this.findInvalidWorkspaceRoles(
+      workspace.id,
+      roleIds
+    )
+
+    if (invalidRoles.length > 0) {
+      throw new NotFoundException(
+        `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
+      )
+    }
+
     // Create new associations
     const createNewAssociations =
       this.prisma.workspaceMemberRoleAssociation.createMany({
@@ -980,6 +991,17 @@ export class WorkspaceService {
         )
       }
 
+      const invalidRoles = await this.findInvalidWorkspaceRoles(
+        workspace.id,
+        member.roleIds
+      )
+
+      if (invalidRoles.length > 0) {
+        throw new NotFoundException(
+          `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
+        )
+      }
+
       // Create the workspace membership
       const createMembership = this.prisma.workspaceMember.create({
         data: {
@@ -1043,6 +1065,26 @@ export class WorkspaceService {
 
       this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
     }
+  }
+
+  private async findInvalidWorkspaceRoles(
+    workspaceId: string,
+    roleIds: string[]
+  ) {
+    const roles = await this.prisma.workspaceRole.findMany({
+      where: {
+        id: {
+          in: roleIds
+        },
+        workspaceId: workspaceId
+      }
+    })
+
+    const roleIdSet = new Set(roles.map((role) => role.id))
+
+    const invalidRoles = roleIds.filter((id) => !roleIdSet.has(id))
+
+    return invalidRoles
   }
 
   private async memberExistsInWorkspace(
