@@ -26,7 +26,9 @@ import {
   asana,
   atlassian,
   authress,
-  beamer
+  beamer,
+  bitbucket,
+  bittrex
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -136,5 +138,11 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Beamer Key'), () => {
     testSecret(beamer.testcases)
+  });
+  it(testcaseTitleTemplate('Bitbucket Key'), () => {
+    testSecret(bitbucket.testcases)
+  });
+  it(testcaseTitleTemplate('Bittrex Key'), () => {
+    testSecret(bittrex.testcases)
   });
 })
