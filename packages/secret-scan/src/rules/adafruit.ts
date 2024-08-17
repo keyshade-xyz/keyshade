@@ -2,7 +2,7 @@
 import type { TestCase } from '@/types'
 
 export default function adafruit(): RegExp[] {
-  return [/adafruit[a-zA-Z0-9]{32}/] // Adafruit secret keys are 32 characters long
+  return [/adafruit[a-zA-Z0-9]{32}/i] // Adafruit secret keys are 32 characters long
 }
 
 const testcase: TestCase[] = [
