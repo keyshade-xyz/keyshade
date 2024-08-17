@@ -12,6 +12,7 @@ import {
   atlassian,
   authress,
   beamer,
+  bitbucket,
   discord,
   github,
   ip_public,
@@ -80,7 +81,9 @@ const denylist: SecretConfig = {
 
   authress: authress(),
 
-  beamer: beamer()
+  beamer: beamer(),
+
+  bitbucket: bitbucket()
 }
 
 export default denylist
