@@ -18,7 +18,15 @@ import {
   square_OAuth,
   stripe,
   telegram_token,
-  twilo
+  twilio,
+  adafruit,
+  adobe,
+  age,
+  airtable,
+  asana,
+  atlassian,
+  authress,
+  beamer
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -65,8 +73,8 @@ describe('Detect Secrets from string', () => {
     testSecret(telegram_token.testcases)
   })
 
-  it(testcaseTitleTemplate('Twilo keys'), () => {
-    testSecret(twilo.testcases)
+  it(testcaseTitleTemplate('Twilio keys'), () => {
+    testSecret(twilio.testcases)
   })
 
   it(testcaseTitleTemplate('NPM keys'), () => {
@@ -105,4 +113,28 @@ describe('Detect Secrets from string', () => {
   it(testcaseTitleTemplate('Alibaba Key'), () => {
     testSecret(alibaba.testcases)
   })
+  it(testcaseTitleTemplate('Adafruit Key'), () => {
+    testSecret(adafruit.testcases)
+  })
+  it(testcaseTitleTemplate('Adobe Key'), () => {
+    testSecret(adobe.testcases)
+  });
+  it(testcaseTitleTemplate('Age Key'), () => {
+    testSecret(age.testcases)
+  });
+  it(testcaseTitleTemplate('Airtable Key'), () => {
+    testSecret(airtable.testcases)
+  });
+  it(testcaseTitleTemplate('Asana Key'), () => {
+    testSecret(asana.testcases)
+  });
+  it(testcaseTitleTemplate('Atlassian Key'), () => {
+    testSecret(atlassian.testcases)
+  });
+  it(testcaseTitleTemplate('Authress Key'), () => {
+    testSecret(authress.testcases)
+  });
+  it(testcaseTitleTemplate('Beamer Key'), () => {
+    testSecret(beamer.testcases)
+  });
 })

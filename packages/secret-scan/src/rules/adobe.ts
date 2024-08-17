@@ -2,7 +2,7 @@
 import type { TestCase } from '@/types'
 
 export default function adobe(): RegExp[] {
-  return [/adobe[a-fA-F0-9]{32}|p8e-[a-zA-Z0-9]{32}/]
+  return [/adobe[a-fA-F0-9]{32}|p8e-[a-zA-Z0-9]{32}/i]
 }
 
 const testcase: TestCase[] = [
