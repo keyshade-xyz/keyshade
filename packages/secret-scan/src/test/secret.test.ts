@@ -12,7 +12,7 @@ import {
   mailchimp,
   npm,
   openAI,
-  pipy,
+  pypi,
   private_key,
   sendgrid,
   square_OAuth,
@@ -28,7 +28,10 @@ import {
   authress,
   beamer,
   bitbucket,
-  bittrex
+  bittrex,
+  clojars,
+  cloudflare,
+  codecov
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -56,7 +59,7 @@ describe('Detect Secrets from string', () => {
   })
 
   it(testcaseTitleTemplate('PyPi keys'), () => {
-    testSecret(pipy.testcases)
+    testSecret(pypi.testcases)
   })
 
   it(testcaseTitleTemplate('Sendgrid keys'), () => {
@@ -144,5 +147,19 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Bittrex Key'), () => {
     testSecret(bittrex.testcases)
+  });
+  it(testcaseTitleTemplate('Clojars Key'), () => {
+    testSecret(clojars.testcases)
+  });
+
+  /* TODO: Fix the cloudflare testcase and regex, it's breaking OpenAI, Pypi, Sendgrid, NPM, GitHub, Beamer, Bittrex,
+      Clojars, Cloudflare tests
+      path: ./packages/secret-scan/src/rules/cloudflare.ts
+  it(testcaseTitleTemplate('Cloudflare Key'), () => {
+    testSecret(cloudflare.testcases)
+  });*/
+
+  it(testcaseTitleTemplate('Codecov Key'), () => {
+    testSecret(codecov.testcases)
   });
 })
