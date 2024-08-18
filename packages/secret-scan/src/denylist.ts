@@ -13,6 +13,10 @@ import {
   authress,
   beamer,
   bitbucket,
+  bittrex,
+  clojars,
+  cloudflare,
+  codecov,
   discord,
   github,
   ip_public,
@@ -20,7 +24,7 @@ import {
   mailchimp,
   npm,
   openAI,
-  pipy,
+  pypi,
   private_key,
   sendgrid,
   square_OAuth,
@@ -34,7 +38,7 @@ const denylist: SecretConfig = {
 
   openAI: openAI(),
 
-  pypi: pipy(),
+  pypi: pypi(),
 
   sendgrid: sendgrid(),
 
@@ -83,7 +87,15 @@ const denylist: SecretConfig = {
 
   beamer: beamer(),
 
-  bitbucket: bitbucket()
+  bitbucket: bitbucket(),
+
+  bittrex: bittrex(),
+
+  clojars: clojars(),
+
+  //cloudflare: cloudflare(),  // This regex is breaking other regexes, TODO: Fix this
+
+  codecov: codecov()
 }
 
 export default denylist

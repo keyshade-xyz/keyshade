@@ -1,6 +1,6 @@
 import private_key from './private_key'
 import openAI from './openAI'
-import pipy from './pypi'
+import pypi from './pypi'
 import sendgrid from './sendgrid'
 import square_OAuth from './square_OAuthts'
 import stripe from './stripe'
@@ -17,20 +17,23 @@ import aws from './aws'
 import algolia from './algolia'
 import alibaba from './alibaba'
 import adafruit from "./adafruit"
-import adobe from "./adobe";
-import age from "./age";
-import airtable from "./airtable";
-import asana from "@/rules/asana";
-import atlassian from "@/rules/atlassian";
-import authress from "@/rules/authress";
-import beamer from "@/rules/beamer";
-import bitbucket from "@/rules/bitbucket";
-import bittrex from "@/rules/bittrex";
+import adobe from "./adobe"
+import age from "./age"
+import airtable from "./airtable"
+import asana from "./asana"
+import atlassian from "./atlassian"
+import authress from "./authress"
+import beamer from "./beamer"
+import bitbucket from "./bitbucket"
+import bittrex from "./bittrex"
+import clojars from './clojars'
+import cloudflare from "./cloudflare"
+import codecov from "./codecov"
 
 export {
   private_key,
   openAI,
-  pipy,
+  pypi,
   sendgrid,
   square_OAuth,
   stripe,
@@ -55,5 +58,8 @@ export {
   authress,
   beamer,
   bitbucket,
-  bittrex
+  bittrex,
+  clojars,
+  cloudflare,
+  codecov
 }
