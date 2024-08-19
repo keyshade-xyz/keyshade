@@ -29,6 +29,10 @@ import bittrex from "./bittrex"
 import clojars from './clojars'
 import cloudflare from "./cloudflare"
 import codecov from "./codecov"
+import coinbase from "./coinbase"
+import confluent from "./confluent"
+import contentful from "./contentful"
+import databricks from "./databricks";
 
 export {
   private_key,
@@ -61,5 +65,9 @@ export {
   bittrex,
   clojars,
   cloudflare,
-  codecov
+  codecov,
+  coinbase,
+  confluent,
+  contentful,
+  databricks
 }
