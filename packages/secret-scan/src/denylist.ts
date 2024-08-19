@@ -17,6 +17,10 @@ import {
   clojars,
   cloudflare,
   codecov,
+  coinbase,
+  confluent,
+  contentful,
+  databricks,
   discord,
   github,
   ip_public,
@@ -95,7 +99,15 @@ const denylist: SecretConfig = {
 
   //cloudflare: cloudflare(),  // This regex is breaking other regexes, TODO: Fix this
 
-  codecov: codecov()
+  codecov: codecov(),
+
+  coinbase: coinbase(),
+
+  confluent: confluent(),
+
+  contentful: contentful(),
+
+  databricks: databricks()
 }
 
 export default denylist

@@ -31,7 +31,11 @@ import {
   bittrex,
   clojars,
   cloudflare,
-  codecov
+  codecov,
+  coinbase,
+  confluent,
+  contentful,
+  databricks
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -161,5 +165,17 @@ describe('Detect Secrets from string', () => {
 
   it(testcaseTitleTemplate('Codecov Key'), () => {
     testSecret(codecov.testcases)
+  });
+  it(testcaseTitleTemplate('Coinbase Key'), () => {
+    testSecret(coinbase.testcases)
+  });
+  it(testcaseTitleTemplate('Confluent Key'), () => {
+    testSecret(confluent.testcases)
+  });
+  it(testcaseTitleTemplate('Contentful Key'), () => {
+    testSecret(contentful.testcases)
+  });
+  it(testcaseTitleTemplate('Databricks Key'), () => {
+    testSecret(databricks.testcases)
   });
 })
