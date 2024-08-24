@@ -31,6 +31,8 @@ import { v4 } from 'uuid'
 import createEvent from '../../common/create-event'
 import createWorkspace from '../../common/create-workspace'
 import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { paginate } from '../../common/paginate'
+import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceService {
@@ -412,6 +414,17 @@ export class WorkspaceService {
         }
       })
 
+    const invalidRoles = await this.findInvalidWorkspaceRoles(
+      workspace.id,
+      roleIds
+    )
+
+    if (invalidRoles.length > 0) {
+      throw new NotFoundException(
+        `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
+      )
+    }
+
     // Create new associations
     const createNewAssociations =
       this.prisma.workspaceMemberRoleAssociation.createMany({
@@ -464,8 +477,8 @@ export class WorkspaceService {
       authority: Authority.READ_USERS,
       prisma: this.prisma
     })
-
-    return this.prisma.workspaceMember.findMany({
+    //get all members of workspace for page with limit
+    const items = await this.prisma.workspaceMember.findMany({
       skip: page * limit,
       take: limit,
       orderBy: {
@@ -514,6 +527,37 @@ export class WorkspaceService {
         }
       }
     })
+
+    //calculate metadata for pagination
+    const totalCount = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId,
+        user: {
+          OR: [
+            {
+              name: {
+                contains: search
+              }
+            },
+            {
+              email: {
+                contains: search
+              }
+            }
+          ]
+        }
+      }
+    })
+
+    const metadata = paginate(totalCount, `/workspace/${workspaceId}/members`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
   }
 
   async acceptInvitation(
@@ -728,9 +772,10 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    return this.prisma.workspace.findMany({
+    //get all workspaces of user for page with limit
+    const items = await this.prisma.workspace.findMany({
       skip: page * limit,
-      take: limit,
+      take: Number(limit),
       orderBy: {
         [sort]: order
       },
@@ -754,6 +799,40 @@ export class WorkspaceService {
         ]
       }
     })
+
+    // get total count of workspaces of the user
+    const totalCount = await this.prisma.workspace.count({
+      where: {
+        members: {
+          some: {
+            userId: user.id
+          }
+        },
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          },
+          {
+            description: {
+              contains: search
+            }
+          }
+        ]
+      }
+    })
+
+    //calculate metadata for pagination
+    const metadata = paginate(totalCount, `/workspace`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+
+    return { items, metadata }
   }
 
   async exportData(user: User, workspaceId: Workspace['id']) {
@@ -912,6 +991,17 @@ export class WorkspaceService {
         )
       }
 
+      const invalidRoles = await this.findInvalidWorkspaceRoles(
+        workspace.id,
+        member.roleIds
+      )
+
+      if (invalidRoles.length > 0) {
+        throw new NotFoundException(
+          `Workspace ${workspace.name} (${workspace.id}) does not have roles ${invalidRoles.join(', ')}`
+        )
+      }
+
       // Create the workspace membership
       const createMembership = this.prisma.workspaceMember.create({
         data: {
@@ -975,6 +1065,26 @@ export class WorkspaceService {
 
       this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
     }
+  }
+
+  private async findInvalidWorkspaceRoles(
+    workspaceId: string,
+    roleIds: string[]
+  ) {
+    const roles = await this.prisma.workspaceRole.findMany({
+      where: {
+        id: {
+          in: roleIds
+        },
+        workspaceId: workspaceId
+      }
+    })
+
+    const roleIdSet = new Set(roles.map((role) => role.id))
+
+    const invalidRoles = roleIds.filter((id) => !roleIdSet.has(id))
+
+    return invalidRoles
   }
 
   private async memberExistsInWorkspace(
