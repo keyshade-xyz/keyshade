@@ -1,6 +1,6 @@
-import { APIClient } from '../core/client'
-import { ClientResponse } from '../types/index.types'
-import { parseResponse } from '../core/response-parser'
+import { APIClient } from '@api-client/core/client'
+import { ClientResponse } from '@api-client/types/index.types'
+import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateSecretRequest,
   CreateSecretResponse,
@@ -14,7 +14,7 @@ import {
   RollBackSecretResponse,
   UpdateSecretRequest,
   UpdateSecretResponse
-} from '../types/secret.types'
+} from '@api-client/types/secret.types'
 
 export default class SecretController {
   private apiClient: APIClient

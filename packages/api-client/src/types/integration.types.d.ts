@@ -1,4 +1,5 @@
-import { Page } from '../../../../apps/cli/src/types/index.types'
+import { Page } from './index.types'
+
 export enum IntegrationType {
   DISCORD,
   SLACK,

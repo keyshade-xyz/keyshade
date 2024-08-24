@@ -1,6 +1,6 @@
-import { APIClient } from '../core/client'
-import { parseResponse } from '../core/response-parser'
-import { ClientResponse } from '../types/index.types'
+import { APIClient } from '@api-client/core/client'
+import { parseResponse } from '@api-client/core/response-parser'
+import { ClientResponse } from '@api-client/types/index.types'
 import {
   CreateVariableRequest,
   CreateVariableResponse,
@@ -14,7 +14,7 @@ import {
   RollBackVariableResponse,
   UpdateVariableRequest,
   UpdateVariableResponse
-} from '../types/variable.types'
+} from '@api-client/types/variable.types'
 
 export default class VariableController {
   private apiClient: APIClient

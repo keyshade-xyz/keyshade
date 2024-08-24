@@ -1,4 +1,5 @@
-import client from '@package/client'
+import { ClientResponse } from '@api-client/types/index.types'
+import { APIClient } from '@api-client/core/client'
 import {
   CreateProjectRequest,
   CreateProjectResponse,
@@ -18,105 +19,131 @@ import {
   UnlinkProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse
-} from '@package/types/project.types'
+} from '@api-client/types/project.types'
+import { parseResponse } from '@api-client/core/response-parser'
 
 export default class ProjectController {
-  private static apiClient = client
+  private apiClient: APIClient
 
-  static async createProject(
+  constructor(private readonly backendUrl: string) {
+    this.apiClient = new APIClient(this.backendUrl)
+  }
+
+  async createProject(
     request: CreateProjectRequest,
     headers: Record<string, string>
-  ): Promise<CreateProjectResponse> {
-    return this.apiClient.post<CreateProjectResponse>(
+  ): Promise<ClientResponse<CreateProjectResponse>> {
+    const response = await this.apiClient.post(
       `/api/project/${request.workspaceId}`,
       request,
       headers
     )
+
+    return await parseResponse<CreateProjectResponse>(response)
   }
 
-  static async updateProject(
+  async updateProject(
     request: UpdateProjectRequest,
     headers: Record<string, string>
-  ): Promise<UpdateProjectResponse> {
-    return this.apiClient.put<UpdateProjectResponse>(
+  ): Promise<ClientResponse<UpdateProjectResponse>> {
+    const response = await this.apiClient.put(
       `/api/project/${request.projectId}`,
       request,
       headers
     )
+
+    return await parseResponse<UpdateProjectResponse>(response)
   }
 
-  static async deleteProject(
+  async deleteProject(
     request: DeleteProjectRequest,
     headers: Record<string, string>
-  ): Promise<DeleteProjectResponse> {
-    return this.apiClient.delete(`/api/project/${request.projectId}`, headers)
-  }
-
-  static async getProject(
-    request: GetProjectRequest,
-    headers: Record<string, string>
-  ): Promise<GetProjectResponse> {
-    return this.apiClient.get<GetProjectResponse>(
+  ): Promise<ClientResponse<DeleteProjectResponse>> {
+    const response = await this.apiClient.delete(
       `/api/project/${request.projectId}`,
       headers
     )
+
+    return await parseResponse<DeleteProjectResponse>(response)
   }
 
-  static async forkProject(
+  async getProject(
+    request: GetProjectRequest,
+    headers: Record<string, string>
+  ): Promise<ClientResponse<GetProjectResponse>> {
+    const response = await this.apiClient.get(
+      `/api/project/${request.projectId}`,
+      headers
+    )
+
+    return await parseResponse<GetProjectResponse>(response)
+  }
+
+  async forkProject(
     request: ForkProjectRequest,
     headers: Record<string, string>
-  ): Promise<ForkProjectResponse> {
-    return this.apiClient.post<ForkProjectResponse>(
+  ): Promise<ClientResponse<ForkProjectResponse>> {
+    const response = await this.apiClient.post(
       `/api/project/${request.projectId}/fork`,
       request,
       headers
     )
+
+    return await parseResponse<ForkProjectResponse>(response)
   }
 
-  static async syncFork(
+  async syncFork(
     request: SyncProjectRequest,
     headers: Record<string, string>
-  ): Promise<SyncProjectResponse> {
-    return this.apiClient.put(
+  ): Promise<ClientResponse<SyncProjectResponse>> {
+    const response = await this.apiClient.put(
       `/project/${request.projectId}/fork`,
       request,
       headers
     )
+
+    return await parseResponse<SyncProjectResponse>(response)
   }
 
-  static async unlinkFork(
+  async unlinkFork(
     request: UnlinkProjectRequest,
     headers: Record<string, string>
-  ): Promise<UnlinkProjectResponse> {
-    return this.apiClient.delete(
+  ): Promise<ClientResponse<UnlinkProjectResponse>> {
+    const response = await this.apiClient.delete(
       `/api/project/${request.projectId}/fork`,
       headers
     )
+
+    return await parseResponse<UnlinkProjectResponse>(response)
   }
 
-  static async getForks(
+  async getForks(
     request: GetForkRequest,
     headers: Record<string, string>
-  ): Promise<[GetForkResponse]> {
+  ): Promise<ClientResponse<GetForkResponse>> {
     let url = `/api/project/${request.projectId}/forks`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetForkResponse>(response)
   }
 
-  static async getAllProjects(
+  async getAllProjects(
     request: GetAllProjectsRequest,
     headers: Record<string, string>
-  ): Promise<[GetAllProjectsResponse]> {
+  ): Promise<ClientResponse<GetAllProjectsResponse>> {
     let url = `/api/project/all/${request.workspaceId}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
     request.order && (url += `order=${request.order}&`)
     request.search && (url += `search=${request.search}&`)
-    return this.apiClient.get(url, headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllProjectsResponse>(response)
   }
 }

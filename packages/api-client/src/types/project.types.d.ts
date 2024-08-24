@@ -1,3 +1,5 @@
+import { Page } from './index.types'
+
 export interface CreateProjectRequest {
   name: string
   workspaceId: string
@@ -124,23 +126,25 @@ export interface GetForkRequest {
   search?: string
 }
 
-export interface GetForkResponse {
-  id: string
-  name: string
-  description: string
-  createdAt: string
-  updatedAt: string
-  publicKey: string
-  privateKey: string
-  storePrivateKey: boolean
-  isDisabled: boolean
-  accessLevel: string
-  pendingCreation: boolean
-  isForked: boolean
-  lastUpdatedById: string
-  workspaceId: string
-  forkedFromId: string
-}
+export interface GetForkResponse
+  extends Page<{
+    id: string
+    name: string
+    description: string
+    createdAt: string
+    updatedAt: string
+    publicKey: string
+    privateKey: string
+    storePrivateKey: boolean
+    isDisabled: boolean
+    accessLevel: string
+    pendingCreation: boolean
+    isForked: boolean
+    lastUpdatedById: string
+    workspaceId: string
+    forkedFromId: string
+  }> {}
+
 export interface GetAllProjectsRequest {
   workspaceId: string
   page?: number
@@ -150,4 +154,8 @@ export interface GetAllProjectsRequest {
   search?: string
 }
 
-export interface GetAllProjectsResponse {}
+export interface GetAllProjectsResponse
+  extends Page<{
+    id: string
+    name: string
+  }> {}

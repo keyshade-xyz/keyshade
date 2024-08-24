@@ -1,5 +1,5 @@
-import { APIClient } from '../src/core/client'
-import EnvironmentController from '../src/controllers/environment'
+import { APIClient } from '@api-client/core/client'
+import EnvironmentController from '@api-client/controllers/environment'
 
 describe('Environments Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
