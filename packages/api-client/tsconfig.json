@@ -1,22 +1,11 @@
 {
+  "extends": "../tsconfig/base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
-    "inlineSourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true
+    "paths": {
+      "@api-client/*": ["src/*"]
+    }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]

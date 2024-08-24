@@ -1,7 +1,10 @@
-import { GetEventsRequest, GetEventsResponse } from '../types/event.types'
+import {
+  GetEventsRequest,
+  GetEventsResponse
+} from '@api-client/types/event.types'
 import { APIClient } from '../core/client'
-import { ClientResponse } from '../types/index.types'
-import { parseResponse } from '../core/response-parser'
+import { ClientResponse } from '@api-client/types/index.types'
+import { parseResponse } from '@api-client/core/response-parser'
 
 export default class EventController {
   private apiClient: APIClient

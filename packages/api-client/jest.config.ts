@@ -13,7 +13,7 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^@package/(.*)$': '<rootDir>/src/$1'
+    '^@api-client/(.*)$': '<rootDir>/src/$1'
   }
 }
 

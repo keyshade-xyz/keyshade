@@ -1,4 +1,4 @@
-import { ClientResponse, ResponseError } from '../types/index.types'
+import { ClientResponse, ResponseError } from '@api-client/types/index.types'
 
 export async function parseResponse<T>(
   response: Response
