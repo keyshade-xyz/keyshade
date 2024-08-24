@@ -1,4 +1,4 @@
-import { Page } from '../../../../apps/cli/src/types/index.types'
+import { Page } from './index.types'
 
 export interface CreateSecretRequest {
   projectId: string
@@ -119,9 +119,8 @@ export interface GetAllSecretsOfEnvironmentRequest {
   order?: string
   search?: string
 }
-export interface GetAllSecretsOfEnvironmentResponse
-  extends Page<{
-    name: string
-    value: string
-    isPlaintext: boolean
-  }> {}
+export interface GetAllSecretsOfEnvironmentResponse {
+  name: string
+  value: string
+  isPlaintext: boolean
+}

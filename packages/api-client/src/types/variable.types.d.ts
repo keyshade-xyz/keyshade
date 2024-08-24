@@ -1,4 +1,4 @@
-import { Page } from '../../../../apps/cli/src/types/index.types'
+import { Page } from './index.types'
 
 export interface CreateVariableRequest {
   projectId: string

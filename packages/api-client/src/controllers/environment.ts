@@ -1,6 +1,5 @@
-import { ClientResponse } from '../types/index.types'
-import { APIClient } from '../core/client'
-import { parseResponse } from '../core/response-parser'
+import { APIClient } from '@api-client/core/client'
+import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateEnvironmentRequest,
   CreateEnvironmentResponse,
@@ -12,7 +11,8 @@ import {
   GetEnvironmentByIdResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
-} from '../types/environment.types'
+} from '@api-client/types/environment.types'
+import { ClientResponse } from '@api-client/types/index.types'
 
 export default class EnvironmentController {
   private apiClient: APIClient
