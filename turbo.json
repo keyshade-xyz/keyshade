@@ -25,6 +25,10 @@
     "start": {
       "dependsOn": ["build"],
       "inputs": ["dist/**"]
+    },
+    "publish":{
+      "dependsOn":["build"],
+      "inputs":["dist/**"]
     }
   }
 }
