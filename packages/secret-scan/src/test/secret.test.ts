@@ -35,7 +35,10 @@ import {
   coinbase,
   confluent,
   contentful,
-  databricks
+  databricks,
+  datadog,
+  definednetworking,
+  digitalocean
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -177,5 +180,14 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Databricks Key'), () => {
     testSecret(databricks.testcases)
+  });
+  it(testcaseTitleTemplate('Datadog Key'), () => {
+    testSecret(datadog.testcases)
+  });
+  it(testcaseTitleTemplate('Defined Networking Key'), () => {
+    testSecret(definednetworking.testcases)
+  });
+  it(testcaseTitleTemplate('Digital Ocean Key'), () => {
+    testSecret(digitalocean.testcases)
   });
 })

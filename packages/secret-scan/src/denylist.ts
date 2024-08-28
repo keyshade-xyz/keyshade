@@ -22,6 +22,9 @@ import {
   contentful,
   databricks,
   discord,
+  datadog,
+  definednetworking,
+  digitalocean,
   github,
   ip_public,
   jwt,
@@ -107,7 +110,13 @@ const denylist: SecretConfig = {
 
   contentful: contentful(),
 
-  databricks: databricks()
+  databricks: databricks(),
+
+  datadog: datadog(),
+
+  definednetworking: definednetworking(),
+
+  digitalocean: digitalocean()
 }
 
 export default denylist
