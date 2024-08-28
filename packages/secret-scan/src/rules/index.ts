@@ -32,7 +32,10 @@ import codecov from "./codecov"
 import coinbase from "./coinbase"
 import confluent from "./confluent"
 import contentful from "./contentful"
-import databricks from "./databricks";
+import databricks from "./databricks"
+import datadog from "./datadog"
+import definednetworking from "./definednetworking"
+import digitalocean from "./digitalocean"
 
 export {
   private_key,
@@ -69,5 +72,8 @@ export {
   coinbase,
   confluent,
   contentful,
-  databricks
+  databricks,
+  datadog,
+  definednetworking,
+  digitalocean
 }
