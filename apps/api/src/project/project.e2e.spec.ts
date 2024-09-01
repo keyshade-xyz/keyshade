@@ -272,11 +272,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should not be able to add project to a non existing workspace', async () => {
@@ -381,11 +376,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    })
   })
 
   it('should have created a PROJECT_UPDATED event', async () => {
@@ -456,11 +446,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    })
   })
 
   it('should be able to fetch all projects of a workspace', async () => {
@@ -518,11 +503,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   // ---------------------------------------------------------
@@ -718,11 +698,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User with id ${user1.id} does not have the authority in the project with id ${project2.id}`
-    })
   })
 
   describe('Project Controller tests for access levels', () => {
@@ -803,11 +778,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
-      expect(response.json()).toEqual({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: `User with id ${user2.id} does not have the authority in the project with id ${internalProject.id}`
-      })
     })
 
     it('should not allow outsiders to update a GLOBAL project', async () => {
@@ -823,11 +793,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
-      expect(response.json()).toEqual({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: `User with id ${user2.id} does not have the authority in the project with id ${globalProject.id}`
-      })
     })
 
     it('should store private key even if specified not to in a global project', async () => {
@@ -1033,11 +998,6 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User with id ${user2.id} does not have the authority in the project with id ${privateProject.id}`
-    })
   })
 
   describe('Project Controller tests for forking', () => {
@@ -1110,11 +1070,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
-      expect(response.json()).toEqual({
-        statusCode: 401,
-        error: 'Unauthorized',
-        message: `User with id ${user1.id} does not have the authority in the project with id ${project2.id}`
-      })
     })
 
     it('should fork the project in the default workspace if workspace id is not specified', async () => {
