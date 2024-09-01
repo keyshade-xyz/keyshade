@@ -4,7 +4,6 @@
   "main": "dist/src/index.js",
   "description": "This package holds all the API request logic",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "watch": "tsc -w",
