@@ -56,7 +56,7 @@ export class GetEnvironment extends BaseCommand {
         `Environment ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      Logger.error(error.message)
+      Logger.error(`Error fetching environment: ${error.message}`)
     }
   }
 }

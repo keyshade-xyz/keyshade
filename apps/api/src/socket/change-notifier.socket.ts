@@ -74,8 +74,8 @@ export default class ChangeNotifier
     )
   }
 
-  async handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log(`Client connected: ${client.id}. Data: ${args}`)
+  async handleConnection(client: Socket) {
+    this.logger.log(`Client connected: ${client.id}.`)
   }
 
   async handleDisconnect(client: Socket) {
@@ -102,7 +102,12 @@ export default class ChangeNotifier
     // Check if the user has access to the workspace
     const workspace = await this.prisma.workspace.findFirst({
       where: {
-        name: data.workspaceName
+        name: data.workspaceName,
+        members: {
+          some: {
+            userId: user.id
+          }
+        }
       }
     })
     await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -115,7 +120,8 @@ export default class ChangeNotifier
     // Check if the user has access to the project
     const project = await this.prisma.project.findFirst({
       where: {
-        name: data.projectName
+        name: data.projectName,
+        workspaceId: workspace.id
       }
     })
     await this.authorityCheckerService.checkAuthorityOverProject({
@@ -128,7 +134,8 @@ export default class ChangeNotifier
     // Check if the user has access to the environment
     const environment = await this.prisma.environment.findFirst({
       where: {
-        name: data.environmentName
+        name: data.environmentName,
+        projectId: project.id
       }
     })
     await this.authorityCheckerService.checkAuthorityOverEnvironment({
@@ -151,7 +158,9 @@ export default class ChangeNotifier
     client.emit('client-registered', clientRegisteredResponse)
 
     this.logger.log(
-      `Client registered: ${client.id} for configuration: ${clientRegisteredResponse}`
+      `Client registered: ${client.id} for configuration: ${JSON.stringify(
+        clientRegisteredResponse
+      )}`
     )
   }
 

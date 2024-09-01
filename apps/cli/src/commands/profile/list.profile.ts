@@ -6,11 +6,8 @@ import type {
   CommandActionData,
   CommandOption
 } from '@/types/command/command.types'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Table = require('cli-table')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const colors = require('colors/safe')
+import Table from 'cli-table'
+// import * as colors from 'colors'
 
 export default class ListProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -79,27 +76,25 @@ export default class ListProfile extends BaseCommand {
       const profileList = []
       Object.keys(profiles).forEach((profile) => {
         profileList.push([
-          `${defaultProfile === profile ? `${profile} ${colors.dim('(default)')}` : profile}`,
+          `${defaultProfile === profile ? `${profile} (default)` : profile}`,
           `${profiles[profile].apiKey}`,
           `${profiles[profile].baseUrl}`
         ])
       })
       table.push(
-        [
-          colors.cyan.bold('Profile'),
-          colors.cyan.bold('API Key'),
-          colors.cyan.bold('Base URL')
-        ],
+        ['Profile', 'API Key', 'Base URL'],
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         ...profileList
       )
     } else {
       const profileList = []
       Object.keys(profiles).forEach((profile) => {
         profileList.push([
-          `${defaultProfile === profile ? `${profile} ${colors.dim('(default)')}` : profile}`
+          `${defaultProfile === profile ? `${profile} (default)` : profile}`
         ])
       })
-      table.push([colors.cyan.bold('Profile')], ...profileList)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      table.push(['Profile'], ...profileList)
     }
 
     console.log(table.toString())

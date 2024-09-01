@@ -6,8 +6,6 @@ import type {
   CommandActionData,
   CommandArgument
 } from '@/types/command/command.types'
-import { AuthController, SecretController, VariableController } from '@/http'
-import type { ProjectRootConfig } from '@/types/index.types'
 import {
   fetchPrivateKeyConfig,
   fetchProjectRootConfig
@@ -20,6 +18,8 @@ import type {
 } from '@/types/command/run.types'
 
 import { decrypt } from '@/util/decrypt'
+
+import { SecretController, VariableController } from '@keyshade/api-client'
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -47,7 +47,7 @@ export default class RunCommand extends BaseCommand {
 
   async action({ args }: CommandActionData): Promise<void> {
     const configurations = await this.fetchConfigurations()
-    await AuthController.checkApiKeyValidity(this.baseUrl, this.apiKey)
+    await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations()
@@ -179,26 +179,42 @@ export default class RunCommand extends BaseCommand {
 
   private async prefetchConfigurations() {
     Logger.info('Prefetching configurations...')
-    // Fetch all secrets
-    const secrets = await SecretController.fetchSecrets(
-      this.baseUrl,
-      this.apiKey,
-      this.projectId,
-      this.environmentId
+    const secretController = new SecretController(this.baseUrl)
+    const variableController = new VariableController(this.baseUrl)
+
+    const secretsResponse = await secretController.getAllSecretsOfEnvironment(
+      {
+        environmentId: this.environmentId,
+        projectId: this.projectId
+      },
+      {
+        'x-keyshade-token': this.apiKey
+      }
     )
 
-    // Fetch all variables
-    const variables = await VariableController.fetchVariables(
-      this.baseUrl,
-      this.apiKey,
-      this.projectId,
-      this.environmentId
-    )
+    if (!secretsResponse.success) {
+      throw new Error(secretsResponse.error.message as string)
+    }
+
+    const variablesResponse =
+      await variableController.getAllVariablesOfEnvironment(
+        {
+          environmentId: this.environmentId,
+          projectId: this.projectId
+        },
+        {
+          'x-keyshade-token': this.apiKey
+        }
+      )
+
+    if (!variablesResponse.success) {
+      throw new Error(variablesResponse.error.message as string)
+    }
 
     // Merge secrets and variables
-    const configurations = [...secrets, ...variables]
+    const configurations = [...secretsResponse.data, ...variablesResponse.data]
     Logger.info(
-      `Fetched ${configurations.length} configurations (${secrets.length} secrets, ${variables.length} variables)`
+      `Fetched ${configurations.length} configurations (${secretsResponse.data.length} secrets, ${variablesResponse.data.length} variables)`
     )
 
     // Set the configurations as environmental variables
@@ -211,5 +227,25 @@ export default class RunCommand extends BaseCommand {
     return await new Promise((resolve) => {
       setTimeout(resolve, ms)
     })
+  }
+
+  private async checkApiKeyValidity(
+    baseUrl: string,
+    apiKey: string
+  ): Promise<void> {
+    Logger.info('Checking API key validity...')
+    const response = await fetch(`${baseUrl}/api/api-key/access/live-updates`, {
+      headers: {
+        'x-keyshade-token': apiKey
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        'API key is not valid. Please check the key and try again.'
+      )
+    }
+
+    Logger.info('API key is valid!')
   }
 }

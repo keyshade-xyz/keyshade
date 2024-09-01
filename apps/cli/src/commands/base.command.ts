@@ -38,7 +38,7 @@ export default abstract class BaseCommand {
           const args: string[] = data.slice(0, argsCount)
           await this.action({ args, options: commandOptions })
         } catch (error) {
-          Logger.error(error.message as string)
+          Logger.error(`${error as string}`)
           process.exit(1)
         }
       })
