@@ -76,7 +76,7 @@ export class UpdateEnvironment extends BaseCommand {
         `Environment ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      Logger.error(error.message)
+      Logger.error(`Error updating Environment: ${error}`)
     }
   }
 }

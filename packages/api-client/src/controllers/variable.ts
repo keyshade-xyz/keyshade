@@ -92,12 +92,7 @@ export default class VariableController {
     request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
-    let url = `/api/variable/${request.projectId}/${request.environmentId}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = `/api/variable/${request.projectId}/${request.environmentId}`
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)

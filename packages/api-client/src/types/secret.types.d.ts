@@ -113,14 +113,9 @@ export interface GetAllSecretsOfProjectResponse
 export interface GetAllSecretsOfEnvironmentRequest {
   projectId: string
   environmentId: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
-export interface GetAllSecretsOfEnvironmentResponse {
+export type GetAllSecretsOfEnvironmentResponse = {
   name: string
   value: string
   isPlaintext: boolean
-}
+}[]

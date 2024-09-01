@@ -3,6 +3,7 @@
   "version": "2.3.0",
   "license": "MPL-2.0",
   "private": true,
+  "type": "module",
   "engineStrict": false,
   "packageManager": "pnpm@9.2.0",
   "release": {
@@ -178,7 +179,10 @@
     "sharp": "^0.33.3",
     "tailwind-merge": "^2.3.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.5.2",
+    "typescript-transform-paths": "^3.5.0",
     "zod": "^3.23.6",
-    "typescript": "^5.5.2"
+    "@keyshade/api-client": "workspace:*"
   }
 }
