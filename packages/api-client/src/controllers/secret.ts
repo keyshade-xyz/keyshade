@@ -93,12 +93,7 @@ export default class SecretController {
     request: GetAllSecretsOfEnvironmentRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
-    let url = `/api/secret/${request.projectId}/${request.environmentId}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = `/api/secret/${request.projectId}/${request.environmentId}`
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)

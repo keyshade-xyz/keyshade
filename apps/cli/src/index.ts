@@ -1,9 +1,9 @@
 import { Command } from 'commander'
-import type BaseCommand from '@/commands/base.command'
-import ProfileCommand from '@/commands/profile.command'
-import InitCommand from '@/commands/init.command'
-import RunCommand from '@/commands/run.command'
-import EnvironmentCommand from '@/commands/environment.command'
+import type BaseCommand from './commands/base.command'
+import InitCommand from './commands/init.command'
+import RunCommand from './commands/run.command'
+import ProfileCommand from './commands/profile.command'
+import EnvironmentCommand from './commands/environment.command'
 
 const program = new Command()
 

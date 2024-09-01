@@ -114,9 +114,8 @@ export interface GetAllVariablesOfEnvironmentRequest {
   search?: string
 }
 
-export interface GetAllVariablesOfEnvironmentResponse
-  extends Page<{
-    name: string
-    value: string
-    isPlaintext: boolean
-  }> {}
+export type GetAllVariablesOfEnvironmentResponse = {
+  name: string
+  value: string
+  isPlaintext: boolean
+}[]
