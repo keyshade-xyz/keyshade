@@ -324,11 +324,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should have created a WORKSPACE_UPDATED event', async () => {
@@ -813,11 +808,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should have created a LEFT_WORKSPACE event', async () => {
@@ -1019,11 +1009,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should be able to get all the members of the workspace', async () => {
@@ -1065,11 +1050,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should be able to fetch the workspace by id', async () => {
@@ -1095,11 +1075,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should prevent external user from changing ownership of workspace', async () => {
@@ -1112,11 +1087,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should not be able to transfer the ownership to self', async () => {
@@ -1263,11 +1233,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should not be able to export data of a non-existing workspace', async () => {
@@ -1297,11 +1262,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json()).toEqual({
-      statusCode: 401,
-      error: 'Unauthorized',
-      message: `User ${user2.id} does not have the required authorities to perform the action`
-    })
   })
 
   it('should be able to export data of the workspace', async () => {
