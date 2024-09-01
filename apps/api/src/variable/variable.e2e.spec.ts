@@ -260,9 +260,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to create a duplicate variable in the same project', async () => {
@@ -465,9 +462,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should not be able to roll back to a non-existing version', async () => {
@@ -622,9 +616,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to fetch all variables if the project does not exist', async () => {
@@ -670,9 +661,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to fetch all variables by project and environment if the project does not exist', async () => {
@@ -727,9 +715,6 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should be able to delete a variable', async () => {

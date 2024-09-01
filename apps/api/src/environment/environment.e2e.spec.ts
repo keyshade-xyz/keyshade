@@ -197,9 +197,6 @@ describe('Environment Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toBe(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to create a duplicate environment', async () => {
@@ -306,9 +303,6 @@ describe('Environment Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toBe(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should not be able to update an environment to a duplicate name', async () => {
@@ -394,9 +388,6 @@ describe('Environment Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toBe(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should be able to fetch all environments of a project', async () => {
@@ -448,9 +439,6 @@ describe('Environment Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toBe(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should be able to delete an environment', async () => {
@@ -509,9 +497,6 @@ describe('Environment Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toBe(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should not be able to delete the only environment in a project', async () => {

@@ -30,6 +30,15 @@ export interface AuthorityInput {
 export class AuthorityCheckerService {
   constructor(private customLoggerService: CustomLoggerService) {}
 
+  /**
+   * Checks if the user has the required authorities to access the given workspace.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The workspace if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the workspace is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverWorkspace(
     input: AuthorityInput
   ): Promise<Workspace> {
@@ -67,21 +76,20 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    const hasRequiredAuthority = authorities.some(
-      (auth) =>
-        permittedAuthorities.has(auth) ||
-        permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-
-    if (!hasRequiredAuthority) {
-      throw new UnauthorizedException(
-        `User ${userId} does not have any of the required authorities to perform the action`
-      )
-    }
+    this.checkHasPermission(permittedAuthorities, authorities, userId)
 
     return workspace
   }
 
+  /**
+   * Checks if the user has the required authorities to access the given project.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The project if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the project is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverProject(
     input: AuthorityInput
   ): Promise<ProjectWithSecrets> {
@@ -133,47 +141,41 @@ export class AuthorityCheckerService {
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
         if (!authorities.includes(Authority.READ_PROJECT)) {
-          const hasRequiredAuthority = authorities.some(
-            (auth) =>
-              permittedAuthoritiesForWorkspace.has(auth) ||
-              permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
+          this.checkHasPermission(
+            permittedAuthoritiesForWorkspace,
+            authorities,
+            userId
           )
-          if (!hasRequiredAuthority) {
-            throw new UnauthorizedException(
-              `User with id ${userId} does not have any of the required authorities in the project with id ${entity.id}`
-            )
-          }
         }
         break
       case ProjectAccessLevel.INTERNAL:
-        const hasRequiredAuthorityInternal = authorities.some(
-          (auth) =>
-            permittedAuthoritiesForWorkspace.has(auth) ||
-            permittedAuthoritiesForWorkspace.has(Authority.WORKSPACE_ADMIN)
+        this.checkHasPermission(
+          permittedAuthoritiesForWorkspace,
+          authorities,
+          userId
         )
-        if (!hasRequiredAuthorityInternal) {
-          throw new UnauthorizedException(
-            `User with id ${userId} does not have any of the required authorities in the project with id ${entity.id}`
-          )
-        }
         break
       case ProjectAccessLevel.PRIVATE:
-        const hasRequiredAuthorityPrivate = authorities.some(
-          (auth) =>
-            permittedAuthoritiesForProject.has(auth) ||
-            permittedAuthoritiesForProject.has(Authority.WORKSPACE_ADMIN)
+        this.checkHasPermission(
+          permittedAuthoritiesForProject,
+          authorities,
+          userId
         )
-        if (!hasRequiredAuthorityPrivate) {
-          throw new UnauthorizedException(
-            `User with id ${userId} does not have any of the required authorities in the project with id ${entity.id}`
-          )
-        }
         break
     }
 
     return project
   }
 
+  /**
+   * Checks if the user has the required authorities to access the given environment.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The environment if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the environment is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverEnvironment(
     input: AuthorityInput
   ): Promise<EnvironmentWithProject> {
@@ -217,21 +219,20 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    const hasRequiredAuthority = authorities.some(
-      (auth) =>
-        permittedAuthorities.has(auth) ||
-        permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-
-    if (!hasRequiredAuthority) {
-      throw new UnauthorizedException(
-        `User ${userId} does not have any of the required authorities`
-      )
-    }
+    this.checkHasPermission(permittedAuthorities, authorities, userId)
 
     return environment
   }
 
+  /**
+   * Checks if the user has the required authorities to access the given variable.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The variable if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the variable is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverVariable(
     input: AuthorityInput
   ): Promise<VariableWithProjectAndVersion> {
@@ -277,21 +278,20 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    const hasRequiredAuthority = authorities.some(
-      (auth) =>
-        permittedAuthorities.has(auth) ||
-        permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-
-    if (!hasRequiredAuthority) {
-      throw new UnauthorizedException(
-        `User ${userId} does not have any of the required authorities`
-      )
-    }
+    this.checkHasPermission(permittedAuthorities, authorities, userId)
 
     return variable
   }
 
+  /**
+   * Checks if the user has the required authorities to access the given secret.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The secret if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the secret is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverSecret(
     input: AuthorityInput
   ): Promise<SecretWithProjectAndVersion> {
@@ -337,21 +337,20 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    const hasRequiredAuthority = authorities.some(
-      (auth) =>
-        permittedAuthorities.has(auth) ||
-        permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-
-    if (!hasRequiredAuthority) {
-      throw new UnauthorizedException(
-        `User ${userId} does not have any of the required authorities`
-      )
-    }
+    this.checkHasPermission(permittedAuthorities, authorities, userId)
 
     return secret
   }
 
+  /**
+   * Checks if the user has the required authorities to access the given integration.
+   *
+   * @param input The input object containing the userId, entity, authorities, and prisma client
+   * @returns The integration if the user has the required authorities
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the integration is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   */
   public async checkAuthorityOverIntegration(
     input: AuthorityInput
   ): Promise<Integration> {
@@ -389,17 +388,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    const hasRequiredAuthority = authorities.some(
-      (auth) =>
-        permittedAuthorities.has(auth) ||
-        permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-
-    if (!hasRequiredAuthority) {
-      throw new UnauthorizedException(
-        `User ${userId} does not have any of the required authorities`
-      )
-    }
+    this.checkHasPermission(permittedAuthorities, authorities, userId)
 
     if (integration.projectId) {
       const project = await prisma.project.findUnique({
@@ -420,19 +409,39 @@ export class AuthorityCheckerService {
         prisma
       )
 
-      const hasRequiredProjectAuthority = authorities.some(
-        (auth) =>
-          projectAuthorities.has(auth) ||
-          projectAuthorities.has(Authority.WORKSPACE_ADMIN)
-      )
-
-      if (!hasRequiredProjectAuthority) {
-        throw new UnauthorizedException(
-          `User ${userId} does not have any of the required authorities for the associated project`
-        )
-      }
+      this.checkHasPermission(projectAuthorities, authorities, userId)
     }
 
     return integration
+  }
+
+  /**
+   * Checks if the user has all the required authorities to perform an action.
+   * Throws UnauthorizedException if the user does not have all the required authorities.
+   *
+   * @param permittedAuthorities The set of authorities that the user has
+   * @param authorities The set of authorities required to perform the action
+   * @param userId The id of the user
+   * @returns void
+   * @throws UnauthorizedException if the user does not have all the required authorities
+   */
+  private checkHasPermission(
+    permittedAuthorities: Set<Authority>,
+    authorities: Authority[],
+    userId: string
+  ): void {
+    // We commence the check if WORKSPACE_ADMIN isn't in the list of permitted authorities
+    if (!permittedAuthorities.has(Authority.WORKSPACE_ADMIN)) {
+      // Check if the authority object passed is completely contained within the permitted authorities
+      const hasRequiredAuthority = authorities.every((auth) =>
+        permittedAuthorities.has(auth)
+      )
+
+      if (!hasRequiredAuthority) {
+        throw new UnauthorizedException(
+          `User ${userId} does not have any of the required authorities to perform the action`
+        )
+      }
+    }
   }
 }

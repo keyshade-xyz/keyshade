@@ -259,9 +259,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to create a duplicate secret in the same project', async () => {
@@ -445,9 +442,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should not be able to roll back to a non-existing version', async () => {
@@ -733,9 +727,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be able to fetch all secrets if the project does not exist', async () => {
@@ -811,9 +802,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
-    )
   })
 
   it('should not be sending the plaintext secret if project does not store the private key', async () => {
@@ -883,9 +871,6 @@ describe('Secret Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 
   it('should be able to delete a secret', async () => {
