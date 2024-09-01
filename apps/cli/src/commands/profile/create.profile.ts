@@ -7,7 +7,7 @@ import type { ProfileConfig } from '@/types/index.types'
 import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
 import { API_BASE_URL } from '@/util/constants'
 import { intro, outro, confirm, spinner, text } from '@clack/prompts'
-import { z } from 'zod';
+import { z } from 'zod'
 
 export default class CreateProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -65,51 +65,50 @@ export default class CreateProfile extends BaseCommand {
     outro(`Profile ${name} created successfully`)
   }
 
-  // Define the validation schemas
-const nameSchema = z.string().regex(/^[a-zA-Z0-9]+$/, 'Name must contain only letters and numbers without spaces.');
-const baseUrlSchema = z.string().url().or(z.string().length(0)).optional();
-const apiKeySchema = z.string().regex(/^ks_[a-zA-Z0-9]+$/, 'API key must start with "ks_" and contain only letters and numbers.');
-const setDefaultSchema = z.boolean().optional();
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    name?: string
+    apiKey?: string
+    baseUrl?: string
+    setDefault?: boolean
+  }> {
+    let { name, apiKey, baseUrl, setDefault } = options
 
-const inputSchema = z.object({
-  name: nameSchema,
-  apiKey: apiKeySchema,
-  baseUrl: baseUrlSchema,
-  setDefault: setDefaultSchema,
-});
+    if (!name) {
+      name = await text({
+        message: 'Enter the name of the profile',
+        placeholder: 'work'
+      })
+    }
 
-async function text(options: { message: string, placeholder: string }): Promise<string> {
-  // Implement your actual input collection logic here
-  return ''; // Dummy return, replace with actual user input
-}
+    if (!apiKey) {
+      apiKey = await text({
+        message: 'Enter the API key for the profile',
+        placeholder: 'ks_************'
+      })
+    }
 
-private async parseInput(options: CommandActionData['options']): Promise<{ 
-  name: string, 
-  apiKey: string, 
-  baseUrl: string, 
-  setDefault: boolean 
-}> { 
-  let { name, apiKey, baseUrl, setDefault } = options;
-  
-  if (!name) { 
-    name = await text({ 
-      message: 'Enter the name of the profile', 
-      placeholder: 'work' 
-    }); 
-  } 
-  
-  if (!apiKey) { 
-    apiKey = await text({ 
-      message: 'Enter the API key for the profile', 
-      placeholder: 'ks_************' 
-    }); 
+    const inputSchema = z.object({
+      name: z
+        .string()
+        .regex(
+          /^[a-zA-Z0-9]+$/,
+          'Name must contain only letters and numbers without spaces.'
+        ),
+      apiKey: z
+        .string()
+        .regex(
+          /^ks_[a-zA-Z0-9]+$/,
+          'API key must start with "ks_" and contain only letters and numbers.'
+        ),
+      baseUrl: z.string().url().or(z.string().length(0)).optional(),
+      setDefault: z.boolean().optional()
+    })
+
+    // Validate the collected data
+    const parsedData = inputSchema.parse({ name, apiKey, baseUrl, setDefault })
+
+    return parsedData
   }
-
-  // Validate the collected data
-  const parsedData = inputSchema.parse({ name, apiKey, baseUrl, setDefault });
-  
-  return parsedData; 
-}
 
   private async checkOverwriteExistingProfile(name: string): Promise<void> {
     if (this.profiles[name]) {

@@ -3,7 +3,6 @@
   "version": "2.3.0",
   "license": "MPL-2.0",
   "private": true,
-  "type": "module",
   "engineStrict": false,
   "packageManager": "pnpm@9.2.0",
   "release": {
