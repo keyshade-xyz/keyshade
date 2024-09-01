@@ -507,14 +507,14 @@ export class SecretService {
     await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
       entity: { id: secretId },
-      authority: Authority.READ_SECRET,
+      authorities: [Authority.READ_SECRET],
       prisma: this.prisma
     })
 
     await this.authorityCheckerService.checkAuthorityOverEnvironment({
       userId: user.id,
       entity: { id: environmentId },
-      authority: Authority.READ_ENVIRONMENT,
+      authorities: [Authority.READ_ENVIRONMENT],
       prisma: this.prisma
     })
 

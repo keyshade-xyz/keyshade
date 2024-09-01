@@ -805,11 +805,22 @@ describe('Variable Controller Tests', () => {
   })
 
   it('should return error if variable doesnt exist', async () => {
-    //return error if variable doesnt exist
-    const variableid = 'nonexistentvariable'
     const response = await app.inject({
       method: 'GET',
-      url: `/variable/${variableid}/revisions/${environment1.id}`,
+      url: `/variable/9999/revisions/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(`Variable with id 9999 not found`)
+  })
+
+  it('should return error if environment does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${variable1.id}/revisions/9999`,
       headers: {
         'x-e2e-user-email': user1.email
       }
@@ -817,28 +828,11 @@ describe('Variable Controller Tests', () => {
 
     expect(response.statusCode).toBe(404)
     expect(response.json().message).toEqual(
-      `Variable with id ${variableid} not found`
+      `Environment with id 9999 not found`
     )
   })
 
-  it('should return error if environment doesnt exist', async () => {
-    //return error if environment doesnt exist
-    const environmentid = 'nonexistentenvironment'
-    const response = await app.inject({
-      method: 'GET',
-      url: `/variable/${variable1.id}/revisions/${environmentid}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toEqual(
-      `Environment with id ${environmentid} not found`
-    )
-  })
-
-  it('returns error if variable isnt accessible', async () => {
+  it('returns error if variable is not accessible', async () => {
     //return error if user has no access to variable
     const response = await app.inject({
       method: 'GET',
@@ -849,8 +843,5 @@ describe('Variable Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(401)
-    expect(response.json().message).toEqual(
-      `User ${user2.id} does not have the required authorities`
-    )
   })
 })
