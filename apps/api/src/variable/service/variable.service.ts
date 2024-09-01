@@ -638,14 +638,14 @@ export class VariableService {
     await this.authorityCheckerService.checkAuthorityOverVariable({
       userId: user.id,
       entity: { id: variableId },
-      authority: Authority.READ_VARIABLE,
+      authorities: [Authority.READ_VARIABLE],
       prisma: this.prisma
     })
 
     await this.authorityCheckerService.checkAuthorityOverEnvironment({
       userId: user.id,
       entity: { id: environmentId },
-      authority: Authority.READ_ENVIRONMENT,
+      authorities: [Authority.READ_ENVIRONMENT],
       prisma: this.prisma
     })
 

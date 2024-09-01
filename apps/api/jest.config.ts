@@ -1,7 +1,6 @@
 /* eslint-disable */
 export default {
   displayName: 'api',
-  preset: '../../jest.preset.js',
   testEnvironment: 'node',
   testMatch: ['**/*.spec.ts'],
   testPathIgnorePatterns: ['.*.e2e.spec.ts'],
