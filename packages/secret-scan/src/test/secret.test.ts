@@ -38,7 +38,10 @@ import {
   databricks,
   datadog,
   definednetworking,
-  digitalocean
+  digitalocean,
+  doppler,
+  dropbox,
+  duffel
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -160,7 +163,7 @@ describe('Detect Secrets from string', () => {
   });
 
   /* TODO: Fix the cloudflare testcase and regex, it's breaking OpenAI, Pypi, Sendgrid, NPM, GitHub, Beamer, Bittrex,
-      Clojars, Cloudflare tests
+      Clojars, Cloudflare etc. tests
       path: ./packages/secret-scan/src/rules/cloudflare.ts
   it(testcaseTitleTemplate('Cloudflare Key'), () => {
     testSecret(cloudflare.testcases)
@@ -189,5 +192,14 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Digital Ocean Key'), () => {
     testSecret(digitalocean.testcases)
+  });
+  it(testcaseTitleTemplate('Doppler Key'), () => {
+    testSecret(doppler.testcases)
+  });
+  it(testcaseTitleTemplate('Dropbox Key'), () => {
+    testSecret(dropbox.testcases)
+  });
+  it(testcaseTitleTemplate('Duffel Key'), () => {
+    testSecret(duffel.testcases)
   });
 })

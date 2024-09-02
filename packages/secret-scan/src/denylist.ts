@@ -25,6 +25,7 @@ import {
   datadog,
   definednetworking,
   digitalocean,
+  doppler,
   github,
   ip_public,
   jwt,
@@ -37,7 +38,7 @@ import {
   square_OAuth,
   stripe,
   telegram_token,
-  twilio
+  twilio, dropbox, duffel
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -116,7 +117,13 @@ const denylist: SecretConfig = {
 
   definednetworking: definednetworking(),
 
-  digitalocean: digitalocean()
+  digitalocean: digitalocean(),
+
+  doppler: doppler(),
+
+  dropbox: dropbox(),
+
+  duffel: duffel()
 }
 
 export default denylist
