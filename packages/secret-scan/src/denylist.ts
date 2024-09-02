@@ -40,7 +40,9 @@ import {
   telegram_token,
   twilio, dropbox, duffel, dynatrace,
   easypost,
-  facebook
+  facebook,
+  flutterwave,
+  frameio
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -131,7 +133,11 @@ const denylist: SecretConfig = {
 
   easypost: easypost(),
 
-  facebook: facebook()
+  facebook: facebook(),
+
+  flutterwave: flutterwave(),
+
+  frameio: frameio()
 }
 
 export default denylist
