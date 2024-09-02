@@ -34,7 +34,7 @@ const testcase: TestCase[] = [
 		expected: true
 	},
 	{
-		input: 'const = EASYPOST_API_TOKEN',
+		input: 'const = FACEBOOK_API_TOKEN',
 		expected: false
 	},
 	{

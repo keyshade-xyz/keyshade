@@ -42,6 +42,8 @@ import duffel from './duffel'
 import dynatrace from './dynatrace'
 import easypost from './easypost'
 import facebook from "./facebook";
+import flutterwave from './flutterwave'
+import frameio from "@/rules/frameio";
 
 export {
   private_key,
@@ -87,5 +89,7 @@ export {
   duffel,
   dynatrace,
   easypost,
-  facebook
+  facebook,
+  flutterwave,
+  frameio
 }
