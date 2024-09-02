@@ -44,7 +44,9 @@ import {
   duffel,
   dynatrace,
   easypost,
-  facebook
+  facebook,
+  flutterwave,
+
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -213,5 +215,8 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Facebook Key'), () => {
     testSecret(facebook.testcases)
+  });
+  it(testcaseTitleTemplate('Flutterwave Key'), () => {
+    testSecret(flutterwave.testcases)
   });
 })
