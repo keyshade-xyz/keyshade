@@ -36,6 +36,9 @@ import databricks from "./databricks"
 import datadog from "./datadog"
 import definednetworking from "./definednetworking"
 import digitalocean from "./digitalocean"
+import doppler from './doppler'
+import dropbox from './dropbox'
+import duffel from './duffel'
 
 export {
   private_key,
@@ -75,5 +78,8 @@ export {
   databricks,
   datadog,
   definednetworking,
-  digitalocean
+  digitalocean,
+  doppler,
+  dropbox,
+  duffel
 }
