@@ -38,7 +38,9 @@ import {
   square_OAuth,
   stripe,
   telegram_token,
-  twilio, dropbox, duffel
+  twilio, dropbox, duffel, dynatrace,
+  easypost,
+  facebook
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -123,7 +125,13 @@ const denylist: SecretConfig = {
 
   dropbox: dropbox(),
 
-  duffel: duffel()
+  duffel: duffel(),
+
+  dynatrace: dynatrace(),
+
+  easypost: easypost(),
+
+  facebook: facebook()
 }
 
 export default denylist

@@ -39,6 +39,9 @@ import digitalocean from "./digitalocean"
 import doppler from './doppler'
 import dropbox from './dropbox'
 import duffel from './duffel'
+import dynatrace from './dynatrace'
+import easypost from './easypost'
+import facebook from "./facebook";
 
 export {
   private_key,
@@ -81,5 +84,8 @@ export {
   digitalocean,
   doppler,
   dropbox,
-  duffel
+  duffel,
+  dynatrace,
+  easypost,
+  facebook
 }

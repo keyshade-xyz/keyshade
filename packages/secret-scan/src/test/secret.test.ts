@@ -41,7 +41,10 @@ import {
   digitalocean,
   doppler,
   dropbox,
-  duffel
+  duffel,
+  dynatrace,
+  easypost,
+  facebook
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -201,5 +204,14 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Duffel Key'), () => {
     testSecret(duffel.testcases)
+  });
+  it(testcaseTitleTemplate('Dynatrace Key'), () => {
+    testSecret(dynatrace.testcases)
+  });
+  it(testcaseTitleTemplate('Easypost Key'), () => {
+    testSecret(easypost.testcases)
+  });
+  it(testcaseTitleTemplate('Facebook Key'), () => {
+    testSecret(facebook.testcases)
   });
 })
