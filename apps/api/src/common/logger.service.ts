@@ -1,6 +1,6 @@
 import { Injectable, LoggerService } from '@nestjs/common'
-import * as chalk from 'chalk'
-import * as moment from 'moment'
+import chalk from 'chalk'
+import moment from 'moment'
 
 @Injectable()
 export class CustomLoggerService implements LoggerService {

@@ -3,7 +3,6 @@
   "version": "2.3.0",
   "license": "MPL-2.0",
   "private": true,
-  "type": "module",
   "engineStrict": false,
   "packageManager": "pnpm@9.2.0",
   "release": {
@@ -110,8 +109,8 @@
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
     "build:web": "turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
-    "build:cli": "turbo run build --filter=cli",
-    "build:api-client": "pnpm run --filter=api-client build",
+    "build:cli": "pnpm build:api-client && turbo run build --filter=cli",
+    "build:api-client": "turbo run --filter=api-client build",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
     "start:web": "turbo run start --filter=web",

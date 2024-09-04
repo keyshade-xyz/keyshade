@@ -4,7 +4,6 @@
   "description": "CLI for keyshade",
   "main": "index.ts",
   "private": false,
-  "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",

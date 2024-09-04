@@ -53,6 +53,6 @@ function startAPI(): Promise<void> {
     setTimeout(() => {
       console.log('API launched')
       resolve()
-    }, 10000)
+    }, 15000)
   })
 }
