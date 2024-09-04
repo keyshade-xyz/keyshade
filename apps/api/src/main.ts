@@ -12,7 +12,7 @@ import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
-import * as cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 
 export const sentryEnv = process.env.SENTRY_ENV || 'production'
 

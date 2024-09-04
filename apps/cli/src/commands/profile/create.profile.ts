@@ -7,6 +7,7 @@ import type { ProfileConfig } from '@/types/index.types'
 import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
 import { API_BASE_URL } from '@/util/constants'
 import { intro, outro, confirm, spinner, text } from '@clack/prompts'
+import { z } from 'zod'
 
 export default class CreateProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -65,13 +66,12 @@ export default class CreateProfile extends BaseCommand {
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    name: string
-    apiKey: string
-    baseUrl: string
-    setDefault: boolean
+    name?: string
+    apiKey?: string
+    baseUrl?: string
+    setDefault?: boolean
   }> {
-    let { name, apiKey } = options
-    const { baseUrl, setDefault } = options
+    let { name, apiKey, baseUrl, setDefault } = options
 
     if (!name) {
       name = await text({
@@ -87,7 +87,27 @@ export default class CreateProfile extends BaseCommand {
       })
     }
 
-    return { name, apiKey, baseUrl, setDefault }
+    const inputSchema = z.object({
+      name: z
+        .string()
+        .regex(
+          /^[a-zA-Z0-9]+$/,
+          'Name must contain only letters and numbers without spaces.'
+        ),
+      apiKey: z
+        .string()
+        .regex(
+          /^ks_[a-zA-Z0-9]+$/,
+          'API key must start with "ks_" and contain only letters and numbers.'
+        ),
+      baseUrl: z.string().url().or(z.string().length(0)).optional(),
+      setDefault: z.boolean().optional()
+    })
+
+    // Validate the collected data
+    const parsedData = inputSchema.parse({ name, apiKey, baseUrl, setDefault })
+
+    return parsedData
   }
 
   private async checkOverwriteExistingProfile(name: string): Promise<void> {

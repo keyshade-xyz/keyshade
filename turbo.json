@@ -6,6 +6,12 @@
       "outputs": ["dist/**"],
       "env": ["NEXT_PUBLIC_BACKEND_URL"]
     },
+    "build#cli": {
+      "dependsOn": ["build#api-client"]
+    },
+    "build#api-client": {
+      "dependsOn": ["^build"]
+    },
     "deploy": {
       "dependsOn": ["build", "test", "lint"]
     },
