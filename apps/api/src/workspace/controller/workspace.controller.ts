@@ -211,4 +211,20 @@ export class WorkspaceController {
       search
     )
   }
+
+  @Get(':workspaceId/global-search/:searchTerm')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_WORKSPACE,
+    Authority.READ_ENVIRONMENT,
+    Authority.READ_SECRET,
+    Authority.READ_VARIABLE,
+    Authority.READ_PROJECT
+  )
+  async globalSearch(
+    @CurrentUser() user: User,
+    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('searchTerm') searchTerm: string
+  ) {
+    return this.workspaceService.globalSearch(user, workspaceId, searchTerm)
+  }
 }
