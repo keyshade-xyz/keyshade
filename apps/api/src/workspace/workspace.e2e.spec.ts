@@ -14,6 +14,7 @@ import {
   EventSource,
   EventTriggerer,
   EventType,
+  ProjectAccessLevel,
   User,
   Workspace,
   WorkspaceRole
@@ -25,9 +26,19 @@ import { UserModule } from '../user/user.module'
 import { UserService } from '../user/service/user.service'
 import { WorkspaceService } from './service/workspace.service'
 import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { ProjectModule } from '../project/project.module'
+import { EnvironmentModule } from '../environment/environment.module'
+import { SecretModule } from '../secret/secret.module'
+import { VariableModule } from '../variable/variable.module'
+import { ProjectService } from '../project/service/project.service'
+import { EnvironmentService } from '../environment/service/environment.service'
+import { SecretService } from '../secret/service/secret.service'
+import { VariableService } from '../variable/service/variable.service'
+import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
+import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
 
 const createMembership = async (
-  adminRoleId: string,
+  roleId: string,
   userId: string,
   workspaceId: string,
   prisma: PrismaService
@@ -40,7 +51,7 @@ const createMembership = async (
         create: {
           role: {
             connect: {
-              id: adminRoleId
+              id: roleId
             }
           }
         }
@@ -55,6 +66,11 @@ describe('Workspace Controller Tests', () => {
   let eventService: EventService
   let userService: UserService
   let workspaceService: WorkspaceService
+  let projectService: ProjectService
+  let environmentService: EnvironmentService
+  let secretService: SecretService
+  let variableService: VariableService
+  let workspaceRoleService: WorkspaceRoleService
 
   let user1: User, user2: User, user3: User
   let workspace1: Workspace, workspace2: Workspace
@@ -62,7 +78,17 @@ describe('Workspace Controller Tests', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, WorkspaceModule, EventModule, UserModule]
+      imports: [
+        AppModule,
+        WorkspaceModule,
+        EventModule,
+        UserModule,
+        ProjectModule,
+        EnvironmentModule,
+        SecretModule,
+        VariableModule,
+        WorkspaceRoleModule
+      ]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -75,6 +101,11 @@ describe('Workspace Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
     workspaceService = moduleRef.get(WorkspaceService)
+    projectService = moduleRef.get(ProjectService)
+    environmentService = moduleRef.get(EnvironmentService)
+    secretService = moduleRef.get(SecretService)
+    variableService = moduleRef.get(VariableService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -143,6 +174,11 @@ describe('Workspace Controller Tests', () => {
     expect(eventService).toBeDefined()
     expect(userService).toBeDefined()
     expect(workspaceService).toBeDefined()
+    expect(projectService).toBeDefined()
+    expect(environmentService).toBeDefined()
+    expect(secretService).toBeDefined()
+    expect(variableService).toBeDefined()
+    expect(workspaceRoleService).toBeDefined()
   })
 
   it('should be able to create a new workspace', async () => {
@@ -1361,6 +1397,254 @@ describe('Workspace Controller Tests', () => {
       statusCode: 400,
       error: 'Bad Request',
       message: `You cannot transfer ownership of default workspace ${workspace1.name} (${workspace1.id})`
+    })
+  })
+
+  describe('Global Search Tests', () => {
+    beforeEach(async () => {
+      // Assign member role to user 2
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+      // Create projects
+      const project1Response = await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Project 1',
+          description: 'Project 1 description',
+          environments: [
+            {
+              name: 'Dev'
+            }
+          ]
+        }
+      )
+      const project2Response = await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Project 2',
+          description: 'Project 2 description',
+          environments: [
+            {
+              name: 'Dev'
+            }
+          ]
+        }
+      )
+      const project3Response = await projectService.createProject(
+        user1,
+        workspace1.id,
+        {
+          name: 'Project 3',
+          description: 'Project 3 description',
+          accessLevel: ProjectAccessLevel.GLOBAL,
+          environments: [
+            {
+              name: 'Dev'
+            }
+          ]
+        }
+      )
+
+      // Update member role to include project 2
+      await workspaceRoleService.updateWorkspaceRole(user1, memberRole.id, {
+        authorities: [
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT,
+          Authority.READ_SECRET,
+          Authority.READ_VARIABLE,
+          Authority.READ_WORKSPACE
+        ],
+        projectIds: [project2Response.id]
+      })
+
+      const project1DevEnv = await prisma.environment.findUnique({
+        where: {
+          projectId_name: {
+            projectId: project1Response.id,
+            name: 'Dev'
+          }
+        }
+      })
+      const project2DevEnv = await prisma.environment.findUnique({
+        where: {
+          projectId_name: {
+            projectId: project2Response.id,
+            name: 'Dev'
+          }
+        }
+      })
+      const project3DevEnv = await prisma.environment.findUnique({
+        where: {
+          projectId_name: {
+            projectId: project3Response.id,
+            name: 'Dev'
+          }
+        }
+      })
+
+      // Create secrets
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'API_KEY',
+          entries: [
+            {
+              environmentId: project1DevEnv.id,
+              value: 'test'
+            }
+          ]
+        },
+        project1Response.id
+      )
+
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'API_TOKEN',
+          entries: [
+            {
+              environmentId: project3DevEnv.id,
+              value: 'test'
+            }
+          ]
+        },
+        project3Response.id
+      )
+
+      // Create variables
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'PORT',
+          entries: [
+            {
+              environmentId: project1DevEnv.id,
+              value: '3000'
+            }
+          ]
+        },
+        project1Response.id
+      )
+
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'PORT_NUMBER',
+          entries: [
+            {
+              environmentId: project2DevEnv.id,
+              value: '4000'
+            }
+          ]
+        },
+        project2Response.id
+      )
+    })
+
+    it('should be able to search for projects', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/project`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().projects).toHaveLength(3)
+    })
+
+    it('should be able to search for secrets', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/api`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().secrets).toHaveLength(2)
+    })
+
+    it('should be able to search for variables', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/port`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().variables).toHaveLength(2)
+    })
+
+    it('should be able to search for environments', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/dev`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().environments).toHaveLength(3)
+    })
+
+    it('should restrict search to projects the user has access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/project`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().projects).toHaveLength(2)
+    })
+
+    it('should restrict search to secrets the user has access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/api`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().secrets).toHaveLength(1)
+    })
+
+    it('should restrict search to variables the user has access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/port`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().variables).toHaveLength(1)
+    })
+
+    it('should restrict search to environments the user has access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.id}/global-search/dev`
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().environments).toHaveLength(2)
     })
   })
 })

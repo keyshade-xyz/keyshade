@@ -76,7 +76,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermission(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
 
     return workspace
   }
@@ -140,8 +140,14 @@ export class AuthorityCheckerService {
     const projectAccessLevel = project.accessLevel
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
-        if (!authorities.includes(Authority.READ_PROJECT)) {
-          this.checkHasPermission(
+        // In the global case, we check if the authorities being passed in
+        // contains just the READ_PROJECT authority. If not, we need to
+        // check if the user has access to the other authorities mentioned as well.
+        if (
+          authorities.length !== 1 ||
+          !authorities.includes(Authority.READ_PROJECT)
+        ) {
+          this.checkHasPermissionOverEntity(
             permittedAuthoritiesForWorkspace,
             authorities,
             userId
@@ -149,14 +155,14 @@ export class AuthorityCheckerService {
         }
         break
       case ProjectAccessLevel.INTERNAL:
-        this.checkHasPermission(
+        this.checkHasPermissionOverEntity(
           permittedAuthoritiesForWorkspace,
           authorities,
           userId
         )
         break
       case ProjectAccessLevel.PRIVATE:
-        this.checkHasPermission(
+        this.checkHasPermissionOverEntity(
           permittedAuthoritiesForProject,
           authorities,
           userId
@@ -219,7 +225,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermission(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
 
     return environment
   }
@@ -278,7 +284,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermission(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
 
     return variable
   }
@@ -337,7 +343,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermission(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
 
     return secret
   }
@@ -388,7 +394,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermission(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
 
     if (integration.projectId) {
       const project = await prisma.project.findUnique({
@@ -409,7 +415,7 @@ export class AuthorityCheckerService {
         prisma
       )
 
-      this.checkHasPermission(projectAuthorities, authorities, userId)
+      this.checkHasPermissionOverEntity(projectAuthorities, authorities, userId)
     }
 
     return integration
@@ -425,7 +431,7 @@ export class AuthorityCheckerService {
    * @returns void
    * @throws UnauthorizedException if the user does not have all the required authorities
    */
-  private checkHasPermission(
+  private checkHasPermissionOverEntity(
     permittedAuthorities: Set<Authority>,
     authorities: Authority[],
     userId: string
