@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { AppModule } from '../app/app.module'
-import { FeedbackService } from '../feedback/service/feedback.service'
-import { MockMailService } from '../mail/services/mock.service'
+import { AppModule } from '@/app/app.module'
+import { FeedbackService } from '@/feedback/service/feedback.service'
+import { MockMailService } from '@/mail/services/mock.service'
 import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { FeedbackModule } from './feedback.module'
-import { MailModule } from '../mail/mail.module'
-import { PrismaService } from '../prisma/prisma.service'
+import { MailModule } from '@/mail/mail.module'
+import { PrismaService } from '@/prisma/prisma.service'
 import { User } from '@prisma/client'
 
 describe('Feedback Controller (E2E)', () => {

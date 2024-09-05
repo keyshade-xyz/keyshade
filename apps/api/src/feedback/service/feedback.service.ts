@@ -1,8 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
-import {
-  IMailService,
-  MAIL_SERVICE
-} from '../../mail/services/interface.service'
+import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 
 @Injectable()
 export class FeedbackService {

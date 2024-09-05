@@ -1,13 +1,13 @@
 import { Test } from '@nestjs/testing'
-import { AppModule } from '../app/app.module'
+import { AppModule } from '@/app/app.module'
 import { EnvironmentModule } from './environment.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
 import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   Environment,
   EventSeverity,
@@ -19,15 +19,15 @@ import {
   User,
   Workspace
 } from '@prisma/client'
-import fetchEvents from '../common/fetch-events'
-import { ProjectModule } from '../project/project.module'
-import { ProjectService } from '../project/service/project.service'
-import { EventModule } from '../event/event.module'
-import { EventService } from '../event/service/event.service'
+import fetchEvents from '@/common/fetch-events'
+import { ProjectModule } from '@/project/project.module'
+import { ProjectService } from '@/project/service/project.service'
+import { EventModule } from '@/event/event.module'
+import { EventService } from '@/event/service/event.service'
 import { EnvironmentService } from './service/environment.service'
-import { UserModule } from '../user/user.module'
-import { UserService } from '../user/service/user.service'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { UserModule } from '@/user/user.module'
+import { UserService } from '@/user/service/user.service'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication

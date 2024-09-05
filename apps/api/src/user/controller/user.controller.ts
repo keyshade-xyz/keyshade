@@ -11,10 +11,10 @@ import {
   UseGuards
 } from '@nestjs/common'
 import { UserService } from '../service/user.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { Authority, User } from '@prisma/client'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { AdminGuard } from '../../auth/guard/admin/admin.guard'
+import { AdminGuard } from '@/auth/guard/admin/admin.guard'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import {
   ApiBearerAuth,
@@ -26,10 +26,10 @@ import {
   ApiSecurity,
   ApiTags
 } from '@nestjs/swagger'
-import { BypassOnboarding } from '../../decorators/bypass-onboarding.decorator'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
-import { ForbidApiKey } from '../../decorators/forbid-api-key.decorator'
-import { invalidAuthenticationResponse } from '../../common/static'
+import { BypassOnboarding } from '@/decorators/bypass-onboarding.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
+import { ForbidApiKey } from '@/decorators/forbid-api-key.decorator'
+import { invalidAuthenticationResponse } from '@/common/static'
 
 const userSchema = {
   type: 'object',

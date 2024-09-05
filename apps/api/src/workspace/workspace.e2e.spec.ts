@@ -2,12 +2,12 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
-import { AppModule } from '../app/app.module'
+import { PrismaService } from '@/prisma/prisma.service'
+import { AppModule } from '@/app/app.module'
 import { WorkspaceModule } from './workspace.module'
 import { Test } from '@nestjs/testing'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
 import {
   Authority,
   EventSeverity,
@@ -19,23 +19,23 @@ import {
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import fetchEvents from '../common/fetch-events'
-import { EventService } from '../event/service/event.service'
-import { EventModule } from '../event/event.module'
-import { UserModule } from '../user/user.module'
-import { UserService } from '../user/service/user.service'
+import fetchEvents from '@/common/fetch-events'
+import { EventService } from '@/event/service/event.service'
+import { EventModule } from '@/event/event.module'
+import { UserModule } from '@/user/user.module'
+import { UserService } from '@/user/service/user.service'
 import { WorkspaceService } from './service/workspace.service'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
-import { ProjectModule } from '../project/project.module'
-import { EnvironmentModule } from '../environment/environment.module'
-import { SecretModule } from '../secret/secret.module'
-import { VariableModule } from '../variable/variable.module'
-import { ProjectService } from '../project/service/project.service'
-import { EnvironmentService } from '../environment/service/environment.service'
-import { SecretService } from '../secret/service/secret.service'
-import { VariableService } from '../variable/service/variable.service'
-import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
-import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
+import { ProjectModule } from '@/project/project.module'
+import { EnvironmentModule } from '@/environment/environment.module'
+import { SecretModule } from '@/secret/secret.module'
+import { VariableModule } from '@/variable/variable.module'
+import { ProjectService } from '@/project/service/project.service'
+import { EnvironmentService } from '@/environment/service/environment.service'
+import { SecretService } from '@/secret/service/secret.service'
+import { VariableService } from '@/variable/service/variable.service'
+import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
+import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
 
 const createMembership = async (
   roleId: string,

@@ -9,11 +9,11 @@ import {
   Query
 } from '@nestjs/common'
 import { EnvironmentService } from '../service/environment.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { Authority, User } from '@prisma/client'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 
 @Controller('environment')
 export class EnvironmentController {

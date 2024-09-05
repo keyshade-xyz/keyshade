@@ -9,11 +9,11 @@ import {
   Query
 } from '@nestjs/common'
 import { ProjectService } from '../service/project.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { Authority, Project, User, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { ForkProject } from '../dto/fork.project/fork.project'
 
 @Controller('project')

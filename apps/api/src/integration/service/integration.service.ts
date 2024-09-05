@@ -4,7 +4,7 @@ import {
   Injectable,
   Logger
 } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
   EventSource,
@@ -15,11 +15,11 @@ import {
 } from '@prisma/client'
 import { CreateIntegration } from '../dto/create.integration/create.integration'
 import { UpdateIntegration } from '../dto/update.integration/update.integration'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import createEvent from '../../common/create-event'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import createEvent from '@/common/create-event'
 import IntegrationFactory from '../plugins/factory/integration.factory'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class IntegrationService {

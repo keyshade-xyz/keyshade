@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common'
 import { RedisClientType } from 'redis'
 import { User } from '@prisma/client'
-import { REDIS_CLIENT } from '../provider/redis.provider'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
 
 @Injectable()
 export class CacheService implements OnModuleDestroy {

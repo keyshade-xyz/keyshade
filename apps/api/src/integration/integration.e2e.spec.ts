@@ -2,15 +2,15 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
-import { UserService } from '../user/service/user.service'
+import { PrismaService } from '@/prisma/prisma.service'
+import { UserService } from '@/user/service/user.service'
 import { IntegrationService } from './service/integration.service'
-import { WorkspaceService } from '../workspace/service/workspace.service'
+import { WorkspaceService } from '@/workspace/service/workspace.service'
 import { Test } from '@nestjs/testing'
-import { UserModule } from '../user/user.module'
-import { WorkspaceModule } from '../workspace/workspace.module'
+import { UserModule } from '@/user/user.module'
+import { WorkspaceModule } from '@/workspace/workspace.module'
 import { IntegrationModule } from './integration.module'
-import { AppModule } from '../app/app.module'
+import { AppModule } from '@/app/app.module'
 import {
   Environment,
   EventType,
@@ -20,13 +20,13 @@ import {
   User,
   Workspace
 } from '@prisma/client'
-import { ProjectService } from '../project/service/project.service'
-import { ProjectModule } from '../project/project.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
-import { EnvironmentModule } from '../environment/environment.module'
-import { EnvironmentService } from '../environment/service/environment.service'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { ProjectService } from '@/project/service/project.service'
+import { ProjectModule } from '@/project/project.module'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { EnvironmentModule } from '@/environment/environment.module'
+import { EnvironmentService } from '@/environment/service/environment.service'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication

@@ -13,18 +13,18 @@ import {
   UseGuards
 } from '@nestjs/common'
 import { AuthService } from '../service/auth.service'
-import { Public } from '../../decorators/public.decorator'
+import { Public } from '@/decorators/public.decorator'
 import { AuthGuard } from '@nestjs/passport'
-import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
-import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
-import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
+import { GithubOAuthStrategyFactory } from '@/config/factory/github/github-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '@/config/factory/google/google-strategy.factory'
+import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strategy.factory'
 import { Response } from 'express'
 import { AuthProvider } from '@prisma/client'
-import setCookie from '../../common/set-cookie'
+import setCookie from '@/common/set-cookie'
 import {
   sendOAuthFailureRedirect,
   sendOAuthSuccessRedirect
-} from '../../common/redirect'
+} from '@/common/redirect'
 
 @Controller('auth')
 export class AuthController {

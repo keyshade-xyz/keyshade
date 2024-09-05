@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
   Environment,
@@ -18,18 +18,18 @@ import {
   VariableVersion
 } from '@prisma/client'
 import { CreateVariable } from '../dto/create.variable/create.variable'
-import createEvent from '../../common/create-event'
+import createEvent from '@/common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
 import { RedisClientType } from 'redis'
-import { REDIS_CLIENT } from '../../provider/redis.provider'
-import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class VariableService {

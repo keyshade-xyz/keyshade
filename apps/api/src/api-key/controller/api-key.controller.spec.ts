@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ApiKeyController } from './api-key.controller'
-import { ApiKeyService } from '../service/api-key.service'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+import { ApiKeyService } from '@/api-key/service/api-key.service'
 
 describe('ApiKeyController', () => {
   let controller: ApiKeyController

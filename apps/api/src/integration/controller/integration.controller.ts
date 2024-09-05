@@ -9,10 +9,10 @@ import {
   Query
 } from '@nestjs/common'
 import { IntegrationService } from '../service/integration.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateIntegration } from '../dto/create.integration/create.integration'
 import { Authority, User } from '@prisma/client'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { UpdateIntegration } from '../dto/update.integration/update.integration'
 
 @Controller('integration')

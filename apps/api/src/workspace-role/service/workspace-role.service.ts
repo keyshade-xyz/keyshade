@@ -15,15 +15,15 @@ import {
   WorkspaceRole
 } from '@prisma/client'
 import { CreateWorkspaceRole } from '../dto/create-workspace-role/create-workspace-role'
-import getCollectiveWorkspaceAuthorities from '../../common/get-collective-workspace-authorities'
+import getCollectiveWorkspaceAuthorities from '@/common/get-collective-workspace-authorities'
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
-import { PrismaService } from '../../prisma/prisma.service'
-import createEvent from '../../common/create-event'
+import { PrismaService } from '@/prisma/prisma.service'
+import createEvent from '@/common/create-event'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { paginate, PaginatedMetadata } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { paginate, PaginatedMetadata } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceRoleService {

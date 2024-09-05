@@ -2,9 +2,9 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
-import { ProjectService } from '../project/service/project.service'
-import { WorkspaceService } from '../workspace/service/workspace.service'
+import { PrismaService } from '@/prisma/prisma.service'
+import { ProjectService } from '@/project/service/project.service'
+import { WorkspaceService } from '@/workspace/service/workspace.service'
 import {
   Environment,
   EventSeverity,
@@ -19,24 +19,24 @@ import {
   Workspace
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
-import { AppModule } from '../app/app.module'
-import { EventModule } from '../event/event.module'
-import { WorkspaceModule } from '../workspace/workspace.module'
-import { ProjectModule } from '../project/project.module'
-import { EnvironmentModule } from '../environment/environment.module'
+import { AppModule } from '@/app/app.module'
+import { EventModule } from '@/event/event.module'
+import { WorkspaceModule } from '@/workspace/workspace.module'
+import { ProjectModule } from '@/project/project.module'
+import { EnvironmentModule } from '@/environment/environment.module'
 import { SecretModule } from './secret.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
-import { EnvironmentService } from '../environment/service/environment.service'
-import fetchEvents from '../common/fetch-events'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { EnvironmentService } from '@/environment/service/environment.service'
+import fetchEvents from '@/common/fetch-events'
 import { SecretService } from './service/secret.service'
-import { EventService } from '../event/service/event.service'
-import { REDIS_CLIENT } from '../provider/redis.provider'
+import { EventService } from '@/event/service/event.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
-import { UserService } from '../user/service/user.service'
-import { UserModule } from '../user/user.module'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { UserService } from '@/user/service/user.service'
+import { UserModule } from '@/user/user.module'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication

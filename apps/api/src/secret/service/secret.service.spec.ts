@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { SecretService } from './secret.service'
-import { MAIL_SERVICE } from '../../mail/services/interface.service'
-import { MockMailService } from '../../mail/services/mock.service'
-import { PrismaService } from '../../prisma/prisma.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
-import { REDIS_CLIENT } from '../../provider/redis.provider'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-import { ProviderModule } from '../../provider/provider.module'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { CommonModule } from '../../common/common.module'
+import { ProviderModule } from '@/provider/provider.module'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { CommonModule } from '@/common/common.module'
 
 describe('SecretService', () => {
   let service: SecretService

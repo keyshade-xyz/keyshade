@@ -5,7 +5,7 @@ import {
   Integration,
   ProjectAccessLevel
 } from '@prisma/client'
-import { VariableWithProjectAndVersion } from '../variable/variable.types'
+import { VariableWithProjectAndVersion } from '@/variable/variable.types'
 import {
   Injectable,
   InternalServerErrorException,
@@ -14,9 +14,9 @@ import {
 } from '@nestjs/common'
 import getCollectiveProjectAuthorities from './get-collective-project-authorities'
 import getCollectiveWorkspaceAuthorities from './get-collective-workspace-authorities'
-import { EnvironmentWithProject } from '../environment/environment.types'
-import { ProjectWithSecrets } from '../project/project.types'
-import { SecretWithProjectAndVersion } from '../secret/secret.types'
+import { EnvironmentWithProject } from '@/environment/environment.types'
+import { ProjectWithSecrets } from '@/project/project.types'
+import { SecretWithProjectAndVersion } from '@/secret/secret.types'
 import { CustomLoggerService } from './logger.service'
 
 export interface AuthorityInput {

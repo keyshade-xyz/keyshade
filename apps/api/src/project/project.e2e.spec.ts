@@ -2,12 +2,12 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { Test } from '@nestjs/testing'
-import { AppModule } from '../app/app.module'
+import { AppModule } from '@/app/app.module'
 import { ProjectModule } from './project.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
 import {
   Authority,
   Environment,
@@ -22,23 +22,23 @@ import {
   Variable,
   Workspace
 } from '@prisma/client'
-import fetchEvents from '../common/fetch-events'
-import { EventService } from '../event/service/event.service'
-import { EventModule } from '../event/event.module'
+import fetchEvents from '@/common/fetch-events'
+import { EventService } from '@/event/service/event.service'
+import { EventModule } from '@/event/event.module'
 import { ProjectService } from './service/project.service'
-import { WorkspaceService } from '../workspace/service/workspace.service'
-import { UserService } from '../user/service/user.service'
-import { WorkspaceModule } from '../workspace/workspace.module'
-import { UserModule } from '../user/user.module'
-import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
-import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
-import { EnvironmentService } from '../environment/service/environment.service'
-import { SecretService } from '../secret/service/secret.service'
-import { VariableService } from '../variable/service/variable.service'
-import { VariableModule } from '../variable/variable.module'
-import { SecretModule } from '../secret/secret.module'
-import { EnvironmentModule } from '../environment/environment.module'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { UserService } from '@/user/service/user.service'
+import { WorkspaceModule } from '@/workspace/workspace.module'
+import { UserModule } from '@/user/user.module'
+import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
+import { EnvironmentService } from '@/environment/service/environment.service'
+import { SecretService } from '@/secret/service/secret.service'
+import { VariableService } from '@/variable/service/variable.service'
+import { VariableModule } from '@/variable/variable.module'
+import { SecretModule } from '@/secret/secret.module'
+import { EnvironmentModule } from '@/environment/environment.module'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication

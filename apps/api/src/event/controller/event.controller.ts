@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { EventService } from '../service/event.service'
 import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
-import { CurrentUser } from '../../decorators/user.decorator'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 
 @Controller('event')
 export class EventController {

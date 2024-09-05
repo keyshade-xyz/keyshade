@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
-import { PrismaService } from '../../prisma/prisma.service'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class EventService {
