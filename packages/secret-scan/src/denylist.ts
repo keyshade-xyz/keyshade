@@ -53,7 +53,7 @@ import {
   infracost,
   intra42,
   // kubernetes,
-  linear, lob, planetscale, postman, prefect, pulumi
+  linear, lob, planetscale, postman, prefect, pulumi, readme, rubygems, scalingo, sendinblue, shippo
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -180,7 +180,17 @@ const denylist: SecretConfig = {
 
   prefect: prefect(),
 
-  pulumi: pulumi()
+  pulumi: pulumi(),
+
+  readme: readme(),
+
+  rubygems: rubygems(),
+
+  scalingo: scalingo(),
+
+  sendinblue: sendinblue(),
+
+  shippo: shippo()
 }
 
 export default denylist
