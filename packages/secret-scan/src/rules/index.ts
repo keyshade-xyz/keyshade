@@ -60,6 +60,11 @@ import planetscale from './planetscale'
 import postman from './postman'
 import prefect from './prefect'
 import pulumi from './pulumi'
+import readme from './readme'
+import rubygems from './rubygems'
+import scalingo from './scalingo'
+import sendinblue from './sendinblue'
+import shippo from './shippo'
 
 export {
   private_key,
@@ -123,5 +128,10 @@ export {
   planetscale,
   postman,
   prefect,
-  pulumi
+  pulumi,
+  readme,
+  rubygems,
+  scalingo,
+  sendinblue,
+  shippo
 }

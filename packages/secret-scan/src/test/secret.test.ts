@@ -62,7 +62,12 @@ import {
   planetscale,
   postman,
   prefect,
-  pulumi
+  pulumi,
+  readme,
+  rubygems,
+  scalingo,
+  sendinblue,
+  shippo
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -285,5 +290,20 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Pulumi Key'), () => {
     testSecret(pulumi.testcases)
+  });
+  it(testcaseTitleTemplate('Readme Key'), () => {
+    testSecret(readme.testcases)
+  });
+  it(testcaseTitleTemplate('Rubygems Key'), () => {
+    testSecret(rubygems.testcases)
+  });
+  it(testcaseTitleTemplate('Scalingo Key'), () => {
+    testSecret(scalingo.testcases)
+  });
+  it(testcaseTitleTemplate('Sendinblue Key'), () => {
+    testSecret(sendinblue.testcases)
+  });
+  it(testcaseTitleTemplate('Shippo Key'), () => {
+    testSecret(shippo.testcases)
   });
 })
