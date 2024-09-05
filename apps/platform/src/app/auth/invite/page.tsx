@@ -8,7 +8,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    inputRef.current?.focus()
+    inputRef.current.focus()
   }, [])
 
   return (
@@ -38,12 +38,12 @@ export default function AuthDetailsPage(): React.JSX.Element {
               <div
                 className={`${NunitoSansFont.className} flex h-[10vh] cursor-text flex-col items-start gap-1 rounded-md border border-white/10 bg-neutral-800 px-3 py-2 text-sm`}
                 onClick={() => {
-                  inputRef.current?.focus()
+                  inputRef.current.focus()
                 }}
                 onKeyDown={(e) => {
                   // Enter or space key
                   if (e.key === 'Enter' || e.key === ' ') {
-                    inputRef.current?.focus()
+                    inputRef.current.focus()
                   }
                 }}
                 role="button"

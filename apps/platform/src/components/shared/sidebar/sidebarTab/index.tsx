@@ -24,11 +24,7 @@ function SidebarTab({
    * @returns The background color for the tab.
    */
   const isCurrentActive = (tabName: string): boolean => {
-    if (
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This is necessary
-      currentPath !== null &&
-      currentPath.split('/')[1] === tabName.toLowerCase()
-    ) {
+    if (currentPath.split('/')[1] === tabName.toLowerCase()) {
       return true
     }
     return false
