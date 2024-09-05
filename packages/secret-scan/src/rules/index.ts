@@ -43,7 +43,23 @@ import dynatrace from './dynatrace'
 import easypost from './easypost'
 import facebook from "./facebook";
 import flutterwave from './flutterwave'
-import frameio from "@/rules/frameio";
+import frameio from "./frameio"
+import gitlab from './gitlab'
+import grafana from './grafana'
+import harness from './harness'
+import hashicorp from './hashicorp'
+import heroku from './heroku'
+import hubspot from './hubspot'
+import huggingface from './huggingface'
+import infracost from './infracost'
+import intra42 from './intra42'
+//import kubernetes from './kubernetes'
+import linear from './linear'
+import lob from './lob'
+import planetscale from './planetscale'
+import postman from './postman'
+import prefect from './prefect'
+import pulumi from './pulumi'
 
 export {
   private_key,
@@ -91,5 +107,21 @@ export {
   easypost,
   facebook,
   flutterwave,
-  frameio
+  frameio,
+  gitlab,
+  grafana,
+  harness,
+  hashicorp,
+  heroku,
+  hubspot,
+  huggingface,
+  infracost,
+  intra42,
+  //kubernetes,
+  linear,
+  lob,
+  planetscale,
+  postman,
+  prefect,
+  pulumi
 }
