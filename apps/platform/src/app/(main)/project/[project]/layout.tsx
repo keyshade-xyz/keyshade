@@ -51,7 +51,7 @@ function DetailedProjectPage({
   return (
     <main className="flex flex-col gap-4">
       <div className="flex justify-between ">
-        <div className="text-3xl">{currentProject?.name}</div>
+        <div className="text-3xl">{currentProject.name}</div>
         <Dialog>
           <DialogTrigger>
             <Button>

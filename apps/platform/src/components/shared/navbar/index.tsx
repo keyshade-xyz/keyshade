@@ -38,7 +38,7 @@ async function fetchNameImage(): Promise<UserNameImage | undefined> {
       throw new Error('Invalid data')
     }
     return {
-      name: data.name?.split(' ')[0] ?? data.email.split('@')[0],
+      name: data.name.split(' ')[0] ?? data.email.split('@')[0],
       image: data.profilePictureUrl
     }
   } catch (error) {

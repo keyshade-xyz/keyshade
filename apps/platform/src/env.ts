@@ -18,7 +18,7 @@ try {
   if (error instanceof z.ZodError) {
     const { fieldErrors } = error.flatten()
     const errorMessage = Object.entries(fieldErrors)
-      .map(([field, errors]) => `${field}: ${errors?.join(', ')}`)
+      .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
       .join('\n  ')
     throw new Error(
       `Missing environment variables: \n  ${errorMessage}\n  Please check your .env file.`
