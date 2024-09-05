@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { EventService } from './event.service'
-import { PrismaService } from '../../prisma/prisma.service'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { CommonModule } from '../../common/common.module'
+import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { CommonModule } from '@/common/common.module'
 
 describe('EventService', () => {
   let service: EventService

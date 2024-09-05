@@ -9,14 +9,14 @@ import {
   Query
 } from '@nestjs/common'
 import { WorkspaceService } from '../service/workspace.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
 import {
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 
 @Controller('workspace')
 export class WorkspaceController {

@@ -2,7 +2,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
   EventSeverity,
@@ -14,19 +14,19 @@ import {
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import { AppModule } from '../app/app.module'
+import { AppModule } from '@/app/app.module'
 import { WorkspaceRoleModule } from './workspace-role.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
-import fetchEvents from '../common/fetch-events'
-import { EventService } from '../event/service/event.service'
-import { EventModule } from '../event/event.module'
+import fetchEvents from '@/common/fetch-events'
+import { EventService } from '@/event/service/event.service'
+import { EventModule } from '@/event/event.module'
 import { WorkspaceRoleService } from './service/workspace-role.service'
-import { UserService } from '../user/service/user.service'
-import { UserModule } from '../user/user.module'
-import { QueryTransformPipe } from '../common/query.transform.pipe'
+import { UserService } from '@/user/service/user.service'
+import { UserModule } from '@/user/user.module'
+import { QueryTransformPipe } from '@/common/query.transform.pipe'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication

@@ -1,5 +1,5 @@
 import { Controller, Post, Body } from '@nestjs/common'
-import { Public } from '../../decorators/public.decorator'
+import { Public } from '@/decorators/public.decorator'
 import { FeedbackService } from '../service/feedback.service'
 
 @Controller('feedback')

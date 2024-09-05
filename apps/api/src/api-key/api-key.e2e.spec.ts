@@ -2,11 +2,11 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { ApiKeyModule } from './api-key.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
-import { AppModule } from '../app/app.module'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { AppModule } from '@/app/app.module'
 import { Test } from '@nestjs/testing'
 import { ApiKey, Authority, User } from '@prisma/client'
 import { ApiKeyService } from './service/api-key.service'

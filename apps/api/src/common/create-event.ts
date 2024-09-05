@@ -15,7 +15,7 @@ import {
   Integration
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
-import IntegrationFactory from '../integration/plugins/factory/integration.factory'
+import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
 
 const logger = new Logger('CreateEvent')
 

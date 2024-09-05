@@ -9,9 +9,9 @@ import {
   Query
 } from '@nestjs/common'
 import { VariableService } from '../service/variable.service'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Authority, User } from '@prisma/client'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
 

@@ -1,6 +1,6 @@
 import { User } from '@prisma/client'
 import { Response } from 'express'
-import { UserAuthenticatedResponse } from '../auth/auth.types'
+import { UserAuthenticatedResponse } from '@/auth/auth.types'
 
 /* istanbul ignore next */
 export default function setCookie(

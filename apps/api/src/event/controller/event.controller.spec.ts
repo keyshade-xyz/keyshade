@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { EventController } from './event.controller'
 import { EventService } from '../service/event.service'
-import { PrismaService } from '../../prisma/prisma.service'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { CommonModule } from '../../common/common.module'
+import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { CommonModule } from '@/common/common.module'
 
 describe('EventController', () => {
   let controller: EventController

@@ -1,6 +1,6 @@
 import { AuthProvider, User, Workspace } from '@prisma/client'
-import { PrismaService } from '../prisma/prisma.service'
-import { CreateUserDto } from '../user/dto/create.user/create.user'
+import { PrismaService } from '@/prisma/prisma.service'
+import { CreateUserDto } from '@/user/dto/create.user/create.user'
 import createWorkspace from './create-workspace'
 import { Logger } from '@nestjs/common'
 

@@ -1,8 +1,8 @@
 import { Authority, EventSource, EventType, User } from '@prisma/client'
 import createEvent from './create-event'
-import { CreateWorkspace } from '../workspace/dto/create.workspace/create.workspace'
+import { CreateWorkspace } from '@/workspace/dto/create.workspace/create.workspace'
 import { v4 } from 'uuid'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { Logger } from '@nestjs/common'
 
 export default async function createWorkspace(

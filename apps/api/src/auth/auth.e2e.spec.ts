@@ -2,12 +2,12 @@ import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { Test } from '@nestjs/testing'
 import { AuthModule } from './auth.module'
-import { MAIL_SERVICE } from '../mail/services/interface.service'
-import { MockMailService } from '../mail/services/mock.service'
-import { AppModule } from '../app/app.module'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { AppModule } from '@/app/app.module'
 import { AuthService } from './service/auth.service'
 
 describe('Auth Controller Tests', () => {

@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Authority } from '@prisma/client'
-import { REQUIRED_API_KEY_AUTHORITIES } from '../../../decorators/required-api-key-authorities.decorator'
+import { REQUIRED_API_KEY_AUTHORITIES } from '@/decorators/required-api-key-authorities.decorator'
 import { Observable } from 'rxjs'
 import { AuthenticatedUserContext } from '../../auth.types'
-import { FORBID_API_KEY } from '../../../decorators/forbid-api-key.decorator'
-import { IS_PUBLIC_KEY } from '../../../decorators/public.decorator'
+import { FORBID_API_KEY } from '@/decorators/forbid-api-key.decorator'
+import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {

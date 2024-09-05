@@ -14,11 +14,11 @@ import {
 } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
-import { PrismaService } from '../../prisma/prisma.service'
-import createEvent from '../../common/create-event'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { PrismaService } from '@/prisma/prisma.service'
+import createEvent from '@/common/create-event'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class EnvironmentService {

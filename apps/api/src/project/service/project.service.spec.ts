@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { ProjectService } from './project.service'
-import { MockMailService } from '../../mail/services/mock.service'
-import { MAIL_SERVICE } from '../../mail/services/interface.service'
-import { PrismaService } from '../../prisma/prisma.service'
+import { MockMailService } from '@/mail/services/mock.service'
+import { MAIL_SERVICE } from '@/mail/services/interface.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import { CommonModule } from '../../common/common.module'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { CommonModule } from '@/common/common.module'
 
 describe('ProjectService', () => {
   let service: ProjectService

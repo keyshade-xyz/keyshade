@@ -4,14 +4,14 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
-import { addHoursToDate } from '../../common/add-hours-to-date'
-import { generateApiKey } from '../../common/api-key-generator'
-import { toSHA256 } from '../../common/to-sha256'
+import { addHoursToDate } from '@/common/add-hours-to-date'
+import { generateApiKey } from '@/common/api-key-generator'
+import { toSHA256 } from '@/common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { ApiKey, User } from '@prisma/client'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class ApiKeyService {

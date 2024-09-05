@@ -10,11 +10,11 @@ import {
   Query
 } from '@nestjs/common'
 import { ApiKeyService } from '../service/api-key.service'
-import { CurrentUser } from '../../decorators/user.decorator'
+import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { Authority, User } from '@prisma/client'
-import { RequiredApiKeyAuthorities } from '../../decorators/required-api-key-authorities.decorator'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 
 @Controller('api-key')
 export class ApiKeyController {

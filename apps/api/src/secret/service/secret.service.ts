@@ -18,21 +18,21 @@ import {
 } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { decrypt } from '../../common/decrypt'
-import { PrismaService } from '../../prisma/prisma.service'
-import { addHoursToDate } from '../../common/add-hours-to-date'
-import { encrypt } from '../../common/encrypt'
-import createEvent from '../../common/create-event'
+import { decrypt } from '@/common/decrypt'
+import { PrismaService } from '@/prisma/prisma.service'
+import { addHoursToDate } from '@/common/add-hours-to-date'
+import { encrypt } from '@/common/encrypt'
+import createEvent from '@/common/create-event'
 import { RedisClientType } from 'redis'
-import { REDIS_CLIENT } from '../../provider/redis.provider'
-import { CHANGE_NOTIFIER_RSC } from '../../socket/change-notifier.socket'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class SecretService {

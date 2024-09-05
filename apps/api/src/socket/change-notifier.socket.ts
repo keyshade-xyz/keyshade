@@ -15,15 +15,15 @@ import {
   ChangeNotifierRegistration
 } from './socket.types'
 import { Authority, User } from '@prisma/client'
-import { CurrentUser } from '../decorators/user.decorator'
-import { PrismaService } from '../prisma/prisma.service'
-import { REDIS_CLIENT } from '../provider/redis.provider'
+import { CurrentUser } from '@/decorators/user.decorator'
+import { PrismaService } from '@/prisma/prisma.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-import { ApiKeyGuard } from '../auth/guard/api-key/api-key.guard'
-import { AuthGuard } from '../auth/guard/auth/auth.guard'
-import { RequiredApiKeyAuthorities } from '../decorators/required-api-key-authorities.decorator'
+import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
+import { AuthGuard } from '@/auth/guard/auth/auth.guard'
+import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { AuthorityCheckerService } from '../common/authority-checker.service'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
 
 // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'

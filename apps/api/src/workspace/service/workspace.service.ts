@@ -7,7 +7,7 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
   Environment,
@@ -26,19 +26,16 @@ import {
   CreateWorkspace,
   WorkspaceMemberDTO
 } from '../dto/create.workspace/create.workspace'
-import {
-  IMailService,
-  MAIL_SERVICE
-} from '../../mail/services/interface.service'
+import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
 import { v4 } from 'uuid'
-import createEvent from '../../common/create-event'
-import createWorkspace from '../../common/create-workspace'
-import { AuthorityCheckerService } from '../../common/authority-checker.service'
-import getCollectiveProjectAuthorities from '../../common/get-collective-project-authorities'
-import { paginate } from '../../common/paginate'
-import { limitMaxItemsPerPage } from '../../common/limit-max-items-per-page'
+import createEvent from '@/common/create-event'
+import createWorkspace from '@/common/create-workspace'
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import getCollectiveProjectAuthorities from '@/common/get-collective-project-authorities'
+import { paginate } from '@/common/paginate'
+import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
 
 @Injectable()
 export class WorkspaceService {
