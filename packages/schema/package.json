@@ -1,0 +1,17 @@
+{
+  "name": "@keyshade/schema",
+  "version": "1.0.0",
+  "main": "dist/src/index.js",
+  "description": "This package holds the schemas that other applications can use to validate the input data.",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "watch": "tsc -w",
+    "start": "node dist/index.js",
+    "dev": "npx tsc && node dist/index.js",
+    "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "test": "jest"
+  },
+  "dependencies": {}
+}
