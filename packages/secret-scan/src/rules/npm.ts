@@ -31,20 +31,20 @@ const testcase: TestCase[] = [
   {
     input:
       '//registry.npmjs.org:_authToken=743b294a-cd03-11ec-9d64-0242ac120002',
-    expected: false
+    expected: true
   },
   {
     input:
       'registry.npmjs.org/:_authToken=743b294a-cd03-11ec-9d64-0242ac120002',
-    expected: false
+    expected: true
   },
   {
     input: '///:_authToken=743b294a-cd03-11ec-9d64-0242ac120002',
-    expected: false
+    expected: true
   },
   {
     input: '_authToken=743b294a-cd03-11ec-9d64-0242ac120002',
-    expected: false
+    expected: true
   },
   {
     // eslint-disable-next-line no-template-curly-in-string
