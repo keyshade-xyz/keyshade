@@ -34,13 +34,6 @@ Please ensure your pull request adheres to the following guidelines:
 - Your PR should follow this pattern: `fix|feat|chore|docs|style|refactor|perf|test|ci|build|breaking-change|revert: <description>`. For example, `feat: add new feature` or `fix: fix a bug`. Note that description can contain only alphanumeric characters and `-`, `.` and `_` characters.
 - Before you make a push to your branch, make sure you rebase your branch with the latest changes from the `develop` branch.
 
-## API Documentation Contribution
-
-We are managing our API documentation using Postman. Hence, for any changes to the API that requires changes to the API documentation as well, they can be implemented in one way or the other:
-
-- Either, you can manually update the collections in [postman/collections](./postman/collections/) and make the PR.
-- Or, you can export the collection from Postman, paste them in the respective files in [postman/collections](./postman/collections) and make the PR.
-
 ## Documentation
 
 We love documentation contributions! Whether it's more complete descriptions, new examples, or better formatting, any help improving the documentation is appreciated.
