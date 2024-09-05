@@ -1,3 +1,39 @@
+## [2.4.0](https://github.com/keyshade-xyz/keyshade/compare/v2.3.0...v2.4.0) (2024-09-05)
+
+### 🚀 Features
+
+* **api-client:** Create controller for Event module ([#399](https://github.com/keyshade-xyz/keyshade/issues/399)) ([122df35](https://github.com/keyshade-xyz/keyshade/commit/122df351b551e88f0d854f6750faaef94f92e3de))
+* **api-client:** Create controller for Integration module ([#397](https://github.com/keyshade-xyz/keyshade/issues/397)) ([697d38b](https://github.com/keyshade-xyz/keyshade/commit/697d38bbd32d7c025c233fd1724a31d34e56e50c))
+* **api-client:** Create controller for Project module ([#370](https://github.com/keyshade-xyz/keyshade/issues/370)) ([fa25866](https://github.com/keyshade-xyz/keyshade/commit/fa25866cef5497620ab0af9ddc55d320c05050fe))
+* **api-client:** Create controller for Secret module ([#396](https://github.com/keyshade-xyz/keyshade/issues/396)) ([7e929c0](https://github.com/keyshade-xyz/keyshade/commit/7e929c08a2e97d5518efef7c7671aa52068702ca))
+* **api-client:** Create controller for Variable module ([#395](https://github.com/keyshade-xyz/keyshade/issues/395)) ([3e114d9](https://github.com/keyshade-xyz/keyshade/commit/3e114d9407e9a7243b1a24514e07a0b8ac939223))
+* **api:** Add global search in workspace ([c49962b](https://github.com/keyshade-xyz/keyshade/commit/c49962bf1f4441e95dbcbf1e10520f66c60496bb))
+* **api:** Add max page size ([#377](https://github.com/keyshade-xyz/keyshade/issues/377)) ([ed18eb0](https://github.com/keyshade-xyz/keyshade/commit/ed18eb0c846430f2263035431c851520f0cf6421))
+* **cli:** Add functionality to operate on Environments ([#324](https://github.com/keyshade-xyz/keyshade/issues/324)) ([4c6f3f8](https://github.com/keyshade-xyz/keyshade/commit/4c6f3f8ba20363f598bb85a76a9c1ebb7e849bce))
+* **cli:** Quit on decryption failure ([#381](https://github.com/keyshade-xyz/keyshade/issues/381)) ([1349d15](https://github.com/keyshade-xyz/keyshade/commit/1349d15b3879527876d41001bdb5d85c22d417ff))
+
+### 🐛 Bug Fixes
+
+* **api-client:** Fixed broken export ([096df2c](https://github.com/keyshade-xyz/keyshade/commit/096df2c4971570d093885f9be2392b14c65c4e7f))
+* **api:** Add NotFound exception on passing an invalid roleId while inviting user in workspace ([#408](https://github.com/keyshade-xyz/keyshade/issues/408)) ([ab441db](https://github.com/keyshade-xyz/keyshade/commit/ab441dbd3f60f2deae36465653c7665296c453d7))
+* **cli:** Fixed missing module ([f7a091f](https://github.com/keyshade-xyz/keyshade/commit/f7a091ff21ddef89d12b0208bba5e38e1549ffe6))
+* **platform:**  Build failure in platform ([#385](https://github.com/keyshade-xyz/keyshade/issues/385)) ([90dcb2c](https://github.com/keyshade-xyz/keyshade/commit/90dcb2c6f6cb3d89705f4374e66a7f1dc098b0c2))
+
+### 🔧 Miscellaneous Chores
+
+* Add api client build script and updated CI ([da0e27a](https://github.com/keyshade-xyz/keyshade/commit/da0e27aab1f725adf28d60592e73818bb1584df7))
+* **api:** Reorganized import using path alias ([d5befd1](https://github.com/keyshade-xyz/keyshade/commit/d5befd15a5324e217bff76ef834c4387f6a168ba))
+* **ci:** Update CLI CI name ([8f4c456](https://github.com/keyshade-xyz/keyshade/commit/8f4c4563c7597b9910859670b28a51af186e2928))
+* **cli:** Add Zod validation to parseInput function ([#362](https://github.com/keyshade-xyz/keyshade/issues/362)) ([34e6c39](https://github.com/keyshade-xyz/keyshade/commit/34e6c39bd6dea6a3f86d8c724d690b04bd6e2de4))
+* Fixed api client tests and rearranged controllers ([1307604](https://github.com/keyshade-xyz/keyshade/commit/1307604661b662f2495c9ec1816d9e51219078c3))
+* Housekeeping ([c5f1330](https://github.com/keyshade-xyz/keyshade/commit/c5f13306ede59f2c72c21256796387efb0262ca5))
+* **platform:** Added strict null check ([072254f](https://github.com/keyshade-xyz/keyshade/commit/072254f20c05fe0f2b2d099787e0562dc806394a))
+* **web:** Added strict null check ([7e12b47](https://github.com/keyshade-xyz/keyshade/commit/7e12b470e0310072c80da8ce7ee212bb75777779))
+
+### 🔨 Code Refactoring
+
+* **api:** Update logic for forking projects ([#398](https://github.com/keyshade-xyz/keyshade/issues/398)) ([4cf3838](https://github.com/keyshade-xyz/keyshade/commit/4cf38389e975977a85e28cce52b9f2b0ce795c1f))
+
 ## [2.3.0](https://github.com/keyshade-xyz/keyshade/compare/v2.2.0...v2.3.0) (2024-07-29)
 
 ### 🚀 Features
