@@ -46,7 +46,23 @@ import {
   easypost,
   facebook,
   flutterwave,
-
+  frameio,
+  gitlab,
+  grafana,
+  harness,
+  hashicorp,
+  heroku,
+  hubspot,
+  huggingface,
+  infracost,
+  intra42,
+  //kubernetes,
+  linear,
+  lob,
+  planetscale,
+  postman,
+  prefect,
+  pulumi
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -218,5 +234,56 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Flutterwave Key'), () => {
     testSecret(flutterwave.testcases)
+  });
+  it(testcaseTitleTemplate('Frameio Key'), () => {
+    testSecret(frameio.testcases)
+  });
+  it(testcaseTitleTemplate('Gitlab Key'), () => {
+    testSecret(gitlab.testcases)
+  });
+  it(testcaseTitleTemplate('Grafana Key'), () => {
+    testSecret(grafana.testcases)
+  });
+  it(testcaseTitleTemplate('Harness Key'), () => {
+    testSecret(harness.testcases)
+  });
+  it(testcaseTitleTemplate('Hashicorp Key'), () => {
+    testSecret(hashicorp.testcases)
+  });
+  it(testcaseTitleTemplate('Heroku Key'), () => {
+    testSecret(heroku.testcases)
+  });
+  it(testcaseTitleTemplate('Hubspot Key'), () => {
+    testSecret(hubspot.testcases)
+  });
+  it(testcaseTitleTemplate('Huggingface Key'), () => {
+    testSecret(huggingface.testcases)
+  });
+  it(testcaseTitleTemplate('Infracost Key'), () => {
+    testSecret(infracost.testcases)
+  });
+  it(testcaseTitleTemplate('Intra42 Key'), () => {
+    testSecret(intra42.testcases)
+  });
+  // it(testcaseTitleTemplate('Kubernetes Key'), () => {
+  //   testSecret(kubernetes.testcases)
+  // });
+  it(testcaseTitleTemplate('Linear Key'), () => {
+    testSecret(linear.testcases)
+  });
+  it(testcaseTitleTemplate('Lob Key'), () => {
+    testSecret(lob.testcases)
+  });
+  it(testcaseTitleTemplate('Planetscale Key'), () => {
+    testSecret(planetscale.testcases)
+  });
+  it(testcaseTitleTemplate('Postman Key'), () => {
+    testSecret(postman.testcases)
+  });
+  it(testcaseTitleTemplate('Prefect Key'), () => {
+    testSecret(prefect.testcases)
+  });
+  it(testcaseTitleTemplate('Pulumi Key'), () => {
+    testSecret(pulumi.testcases)
   });
 })

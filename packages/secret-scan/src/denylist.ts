@@ -42,7 +42,18 @@ import {
   easypost,
   facebook,
   flutterwave,
-  frameio
+  frameio,
+  gitlab,
+  grafana,
+  harness,
+  hashicorp,
+  heroku,
+  hubspot,
+  huggingface,
+  infracost,
+  intra42,
+  // kubernetes,
+  linear, lob, planetscale, postman, prefect, pulumi
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -137,7 +148,39 @@ const denylist: SecretConfig = {
 
   flutterwave: flutterwave(),
 
-  frameio: frameio()
+  frameio: frameio(),
+
+  gitlab: gitlab(),
+
+  grafana: grafana(),
+
+  harness: harness(),
+
+  hashicorp: hashicorp(),
+
+  heroku: heroku(),
+
+  hubspot: hubspot(),
+
+  huggingface: huggingface(),
+
+  infracost: infracost(),
+
+  intra42: intra42(),
+
+  //kubernetes: kubernetes(),
+
+  linear: linear(),
+
+  lob: lob(),
+
+  planetscale: planetscale(),
+
+  postman: postman(),
+
+  prefect: prefect(),
+
+  pulumi: pulumi()
 }
 
 export default denylist
