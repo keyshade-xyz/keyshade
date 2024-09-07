@@ -67,7 +67,9 @@ import {
   rubygems,
   scalingo,
   sendinblue,
-  shippo
+  shippo,
+  shopify,
+  sidekiq
 } from '@/rules'
 import type { TestCase } from '@/types'
 import secretDetector from '@/index'
@@ -305,5 +307,11 @@ describe('Detect Secrets from string', () => {
   });
   it(testcaseTitleTemplate('Shippo Key'), () => {
     testSecret(shippo.testcases)
+  });
+  it(testcaseTitleTemplate('Shopify Key'), () => {
+    testSecret(shopify.testcases)
+  });
+  it(testcaseTitleTemplate('Sidekiq Key'), () => {
+    testSecret(sidekiq.testcases)
   });
 })
