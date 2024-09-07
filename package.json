@@ -165,6 +165,7 @@
     "turbo": "^1.12.4"
   },
   "dependencies": {
+    "@keyshade/api-client": "workspace:*",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",
@@ -186,7 +187,6 @@
     "tsc-alias": "^1.8.10",
     "typescript": "^5.5.2",
     "typescript-transform-paths": "^3.5.0",
-    "zod": "^3.23.6",
-    "@keyshade/api-client": "workspace:*"
+    "zod": "^3.23.6"
   }
 }

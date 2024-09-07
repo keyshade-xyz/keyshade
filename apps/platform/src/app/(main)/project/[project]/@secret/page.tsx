@@ -53,7 +53,7 @@ function SecretPage(): React.JSX.Element {
         collapsible
         type="single"
       >
-        {allSecrets.map((secret) => {
+        {allSecrets?.map((secret) => {
           return (
             <AccordionItem
               className="rounded-xl bg-white/5 px-5"
