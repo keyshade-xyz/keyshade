@@ -56,9 +56,12 @@ export default function Index(): JSX.Element {
 
   const router = useRouter()
 
-  const currentWorkspace = JSON.parse(
-    localStorage.getItem('currentWorkspace') ?? '{}'
-  ) as Workspace
+  const currentWorkspace =
+    typeof localStorage !== 'undefined'
+      ? (JSON.parse(
+          localStorage.getItem('currentWorkspace') ?? '{}'
+        ) as Workspace)
+      : (JSON.parse(`{}`) as Workspace)
 
   useEffect(() => {
     Projects.getProjectsbyWorkspaceID(currentWorkspace.id)

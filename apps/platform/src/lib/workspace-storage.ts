@@ -3,14 +3,21 @@ import type { Workspace } from '@/types'
 export function setWorkspace(workspaceData: Workspace[]): void {
   const defaultWorkspace =
     workspaceData.find((workspace) => workspace.isDefault) || null
-  localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
-  if (getCurrentWorkspace() === null) {
-    localStorage.setItem('currentWorkspace', JSON.stringify(defaultWorkspace))
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
+
+    if (getCurrentWorkspace() === null) {
+      localStorage.setItem('currentWorkspace', JSON.stringify(defaultWorkspace))
+    }
   }
 }
 
 export function getCurrentWorkspace(): Workspace | null {
-  const currentWorkspace = localStorage.getItem('currentWorkspace')
+  const currentWorkspace =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('currentWorkspace')
+      : `{}`
+
   if (currentWorkspace) {
     return JSON.parse(currentWorkspace) as Workspace
   }

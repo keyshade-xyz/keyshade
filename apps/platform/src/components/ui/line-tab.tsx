@@ -79,7 +79,7 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
           customID={customID}
           key={tab}
           searchParams={searchParams}
-          selected={search.toLocaleLowerCase() === tab.toLocaleLowerCase()}
+          selected={search?.toLocaleLowerCase() === tab.toLocaleLowerCase()}
           text={tab}
         />
       ))}
