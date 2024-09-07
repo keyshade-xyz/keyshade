@@ -65,6 +65,8 @@ import rubygems from './rubygems'
 import scalingo from './scalingo'
 import sendinblue from './sendinblue'
 import shippo from './shippo'
+import shopify from './shopify'
+import sidekiq from './sidekiq'
 
 export {
   private_key,
@@ -133,5 +135,7 @@ export {
   rubygems,
   scalingo,
   sendinblue,
-  shippo
+  shippo,
+  shopify,
+  sidekiq
 }
