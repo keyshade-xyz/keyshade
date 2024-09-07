@@ -82,7 +82,8 @@ describe('User Controller Tests', () => {
     })
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
-      ...adminUser
+      ...adminUser,
+      defaultWorkspace: null
     })
   })
 
@@ -94,10 +95,37 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       }
     })
+
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        ownerId: regularUser.id,
+        isDefault: true
+      }
+    })
+
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
+      ...regularUser,
+      defaultWorkspace: expect.any(Object)
     })
+
+    expect(result.json().defaultWorkspace.id).toEqual(workspace.id)
+    expect(result.json().defaultWorkspace.name).toEqual(workspace.name)
+    expect(result.json().defaultWorkspace.description).toEqual(
+      workspace.description
+    )
+    expect(result.json().defaultWorkspace.isFreeTier).toEqual(
+      workspace.isFreeTier
+    )
+    expect(result.json().defaultWorkspace.createdAt).toEqual(
+      workspace.createdAt.toISOString()
+    )
+    expect(result.json().defaultWorkspace.updatedAt).toEqual(
+      workspace.updatedAt.toISOString()
+    )
+    expect(result.json().defaultWorkspace.lastUpdatedById).toEqual(
+      workspace.lastUpdatedById
+    )
   })
 
   it('should have created a default workspace', async () => {
