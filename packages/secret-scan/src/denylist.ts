@@ -38,7 +38,10 @@ import {
   square_OAuth,
   stripe,
   telegram_token,
-  twilio, dropbox, duffel, dynatrace,
+  twilio,
+  dropbox,
+  duffel,
+  dynatrace,
   easypost,
   facebook,
   flutterwave,
@@ -53,7 +56,19 @@ import {
   infracost,
   intra42,
   // kubernetes,
-  linear, lob, planetscale, postman, prefect, pulumi, readme, rubygems, scalingo, sendinblue, shippo
+  linear,
+  lob,
+  planetscale,
+  postman,
+  prefect,
+  pulumi,
+  readme,
+  rubygems,
+  scalingo,
+  sendinblue,
+  shippo,
+  shopify,
+  sidekiq
 } from '@/rules'
 
 const denylist: SecretConfig = {
@@ -190,7 +205,11 @@ const denylist: SecretConfig = {
 
   sendinblue: sendinblue(),
 
-  shippo: shippo()
+  shippo: shippo(),
+
+  shopify: shopify(),
+
+  sidekiq: sidekiq()
 }
 
 export default denylist
