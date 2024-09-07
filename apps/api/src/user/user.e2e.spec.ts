@@ -109,23 +109,15 @@ describe('User Controller Tests', () => {
       defaultWorkspace: expect.any(Object)
     })
 
-    expect(result.json().defaultWorkspace.id).toEqual(workspace.id)
-    expect(result.json().defaultWorkspace.name).toEqual(workspace.name)
-    expect(result.json().defaultWorkspace.description).toEqual(
-      workspace.description
-    )
-    expect(result.json().defaultWorkspace.isFreeTier).toEqual(
-      workspace.isFreeTier
-    )
-    expect(result.json().defaultWorkspace.createdAt).toEqual(
-      workspace.createdAt.toISOString()
-    )
-    expect(result.json().defaultWorkspace.updatedAt).toEqual(
-      workspace.updatedAt.toISOString()
-    )
-    expect(result.json().defaultWorkspace.lastUpdatedById).toEqual(
-      workspace.lastUpdatedById
-    )
+    expect(result.json().defaultWorkspace).toMatchObject({
+      id: workspace.id,
+      name: workspace.name,
+      description: workspace.description,
+      isFreeTier: workspace.isFreeTier,
+      createdAt: workspace.createdAt.toISOString(),
+      updatedAt: workspace.updatedAt.toISOString(),
+      lastUpdatedById: workspace.lastUpdatedById
+    })
   })
 
   it('should have created a default workspace', async () => {
