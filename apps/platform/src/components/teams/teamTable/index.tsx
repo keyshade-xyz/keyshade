@@ -89,7 +89,7 @@ export const columns: ColumnDef<Payment>[] = [
         aria-label="Select all"
         checked={
           table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
+          Boolean(table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => {
           table.toggleAllPageRowsSelected(Boolean(value))

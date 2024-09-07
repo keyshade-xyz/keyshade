@@ -6,7 +6,7 @@ export function middleware(req: NextRequest): NextResponse {
   const cookieStore = cookies()
 
   const token = cookieStore.has('token')
-  const isOnboardingFinished = cookieStore.get('isOnboardingFinished').value
+  const isOnboardingFinished = cookieStore.get('isOnboardingFinished')?.value
 
   const currentPath = req.nextUrl.pathname
 
