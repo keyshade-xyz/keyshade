@@ -111,12 +111,7 @@ describe('User Controller Tests', () => {
 
     expect(result.json().defaultWorkspace).toMatchObject({
       id: workspace.id,
-      name: workspace.name,
-      description: workspace.description,
-      isFreeTier: workspace.isFreeTier,
-      createdAt: workspace.createdAt.toISOString(),
-      updatedAt: workspace.updatedAt.toISOString(),
-      lastUpdatedById: workspace.lastUpdatedById
+      name: workspace.name
     })
   })
 

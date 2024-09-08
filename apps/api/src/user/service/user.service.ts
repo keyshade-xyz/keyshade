@@ -30,24 +30,21 @@ export class UserService {
   }
 
   async getSelf(user: User) {
-    let defaultWorkspace = null
-    if (!user.isAdmin) {
-      defaultWorkspace = await this.prisma.workspace.findFirst({
-        where: {
-          ownerId: user.id,
-          isDefault: true
-        },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          isFreeTier: true,
-          createdAt: true,
-          updatedAt: true,
-          lastUpdatedById: true
-        }
-      })
-    }
+    const defaultWorkspace = await this.prisma.workspace.findFirst({
+      where: {
+        ownerId: user.id,
+        isDefault: true
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isFreeTier: true,
+        createdAt: true,
+        updatedAt: true,
+        lastUpdatedById: true
+      }
+    })
 
     return { ...user, defaultWorkspace }
   }
