@@ -37,12 +37,7 @@ export class UserService {
       },
       select: {
         id: true,
-        name: true,
-        description: true,
-        isFreeTier: true,
-        createdAt: true,
-        updatedAt: true,
-        lastUpdatedById: true
+        name: true
       }
     })
 
