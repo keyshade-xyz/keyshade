@@ -68,7 +68,11 @@ export class ProjectController {
     return await this.service.forkProject(user, projectSlug, forkMetadata)
   }
 
+<<<<<<< HEAD
   @Put(':projectSlug/fork')
+=======
+  @Put(':projectId/sync-fork')
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.UPDATE_PROJECT)
   async syncFork(
     @CurrentUser() user: User,
@@ -78,7 +82,11 @@ export class ProjectController {
     return await this.service.syncFork(user, projectSlug, hardSync)
   }
 
+<<<<<<< HEAD
   @Delete(':projectSlug/fork')
+=======
+  @Put(':projectId/unlink-fork')
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
   async unlinkFork(
     @CurrentUser() user: User,

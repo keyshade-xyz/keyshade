@@ -20,6 +20,7 @@ import {
   User,
   Workspace
 } from '@prisma/client'
+<<<<<<< HEAD
 import { ProjectService } from '@/project/service/project.service'
 import { ProjectModule } from '@/project/project.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
@@ -27,6 +28,14 @@ import { MockMailService } from '@/mail/services/mock.service'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/service/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+=======
+import { ProjectService } from '../project/service/project.service'
+import { ProjectModule } from '../project/project.module'
+import { MAIL_SERVICE } from '../mail/services/interface.service'
+import { MockMailService } from '../mail/services/mock.service'
+import { EnvironmentModule } from '../environment/environment.module'
+import { EnvironmentService } from '../environment/service/environment.service'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -66,8 +75,6 @@ describe('Integration Controller Tests', () => {
     workspaceService = moduleRef.get(WorkspaceService)
     projectService = moduleRef.get(ProjectService)
     environmentService = moduleRef.get(EnvironmentService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -636,6 +643,7 @@ describe('Integration Controller Tests', () => {
     })
   })
 
+<<<<<<< HEAD
   it('should be able to fetch all integrations on first page', async () => {
     const result = await app.inject({
       method: 'GET',
@@ -683,6 +691,15 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(deletedIntegration).toBeNull()
+=======
+  it('should not be able to fetch an integration that does not exist', async () => {
+    const result = await app.inject({
+      method: 'GET',
+      url: `/integration/999999`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should not be able to delete an integration that does not exist', async () => {

@@ -33,10 +33,15 @@ import { EventService } from '@/event/service/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
+<<<<<<< HEAD
 import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+=======
+import { UserService } from '../user/service/user.service'
+import { UserModule } from '../user/user.module'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -83,8 +88,6 @@ describe('Variable Controller Tests', () => {
     variableService = moduleRef.get(VariableService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -435,7 +438,39 @@ describe('Variable Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(404)
+=======
+  it('should have created a VARIABLE_ADDED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should not be able to update a non-existing variable', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/non-existing-variable-id`,
+      payload: {
+        name: 'Updated Variable 1',
+        rotateAfter: '24'
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should have created a VARIABLE_UPDATED event', async () => {
@@ -786,11 +821,89 @@ describe('Variable Controller Tests', () => {
         ]
       })
 
+<<<<<<< HEAD
       const response = await app.inject({
         method: 'GET',
         url: `/variable/${variable1.slug}/revisions/${environment1.slug}`,
         headers: {
           'x-e2e-user-email': user1.email
+=======
+  it('should have created a VARIABLE_UPDATED event', async () => {
+    // Update a variable
+    await variableService.updateVariable(user1, variable1.id, {
+      name: 'Updated Variable 1'
+    })
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should not be able to roll back a non-existing variable', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/non-existing-variable-id/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Variable with id non-existing-variable-id not found'
+    )
+  })
+
+  it('should not be able to roll back a variable it does not have access to', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
+
+  it('should not be able to roll back to a non-existing version', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/2?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Invalid rollback version: 2 for variable: ${variable1.id}`
+    )
+  })
+
+  it('should be able to roll back a variable', async () => {
+    // Creating a few versions first
+    await variableService.updateVariable(user1, variable1.id, {
+      entries: [
+        {
+          value: 'Updated Variable 1 value',
+          environmentId: environment1.id
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         }
       })
 
@@ -806,6 +919,7 @@ describe('Variable Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       const response = await app.inject({
         method: 'GET',
         url: `/variable/${variable1.slug}/revisions/${environment1.slug}`,
@@ -856,5 +970,250 @@ describe('Variable Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+=======
+    let versions: VariableVersion[]
+
+    versions = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    expect(versions.length).toBe(3)
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().count).toEqual(2)
+
+    versions = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    expect(versions.length).toBe(1)
+  })
+
+  it('should not be able to roll back if the variable has no versions', async () => {
+    await prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/variable/${variable1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `No versions found for environment: ${environment1.id} for variable: ${variable1.id}`
+    )
+  })
+
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const variable = await variableService.createVariable(
+      user1,
+      {
+        name: 'Var 3',
+        note: 'Var 3 note'
+      },
+      project1.id
+    )
+
+    const variableVersions = await prisma.variableVersion.findMany({
+      where: {
+        variableId: variable.id
+      }
+    })
+
+    expect(variableVersions.length).toBe(0)
+  })
+
+  it('should be able to fetch all variables', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const { variable, values } = response.json()[0]
+    expect(variable).toBeDefined()
+    expect(values).toBeDefined()
+    expect(values.length).toBe(1)
+    expect(values[0].value).toBe('Variable 1 value')
+    expect(values[0].environment.id).toBe(environment1.id)
+    expect(variable.id).toBe(variable1.id)
+    expect(variable.name).toBe('Variable 1')
+  })
+
+  it('should not be able to fetch all variables if the user has no access to the project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
+
+  it('should not be able to fetch all variables if the project does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/non-existing-project-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Project with id non-existing-project-id not found'
+    )
+  })
+
+  it('should be able to fetch all variables by project and environment', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const variable = response.json()[0]
+    expect(variable.name).toBe('Variable 1')
+    expect(variable.value).toBe('Variable 1 value')
+    expect(variable.isPlaintext).toBe(true)
+  })
+
+  it('should not be able to fetch all variables by project and environment if the user has no access to the project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
+
+  it('should not be able to fetch all variables by project and environment if the project does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/non-existing-project-id/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Project with id non-existing-project-id not found'
+    )
+  })
+
+  it('should not be able to fetch all variables by project and environment if the environment does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/variable/${project1.id}/non-existing-environment-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('should not be able to delete a non-existing variable', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/variable/non-existing-variable-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Variable with id non-existing-variable-id not found'
+    )
+  })
+
+  it('should not be able to delete a variable it does not have access to', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/variable/${variable1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
+
+  it('should be able to delete a variable', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/variable/${variable1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a VARIABLE_DELETED event', async () => {
+    // Delete a variable
+    await variableService.deleteVariable(user1, variable1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.VARIABLE
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.VARIABLE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.VARIABLE_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 })

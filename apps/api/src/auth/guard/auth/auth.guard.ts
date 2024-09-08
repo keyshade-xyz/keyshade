@@ -11,9 +11,14 @@ import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '@/decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
+<<<<<<< HEAD
 import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
 import { toSHA256 } from '@/common/cryptography'
+=======
+import { toSHA256 } from '../../../common/to-sha256'
+import { EnvSchema } from '../../../common/env/env.schema'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -25,8 +30,12 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+<<<<<<< HEAD
     private readonly reflector: Reflector,
     private readonly cache: CacheService
+=======
+    private reflector: Reflector
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   ) {}
 
   /**
@@ -115,15 +124,11 @@ export class AuthGuard implements CanActivate {
             secret: process.env.JWT_SECRET
           })
 
-          const cachedUser = await this.cache.getUser(payload['id'])
-          if (cachedUser) user = cachedUser
-          else {
-            user = await this.prisma.user.findUnique({
-              where: {
-                id: payload['id']
-              }
-            })
-          }
+          user = await this.prisma.user.findUnique({
+            where: {
+              id: payload['id']
+            }
+          })
         } catch {
           throw new ForbiddenException()
         }

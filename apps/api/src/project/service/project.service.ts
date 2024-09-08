@@ -24,11 +24,14 @@ import { v4 } from 'uuid'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
+<<<<<<< HEAD
 import { paginate } from '@/common/paginate'
 import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class ProjectService {
@@ -382,6 +385,19 @@ export class ProjectService {
   ) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
+<<<<<<< HEAD
+=======
+        userId: user.id,
+        entity: { id: projectId },
+        authority: Authority.READ_PROJECT,
+        prisma: this.prisma
+      })
+
+    let workspaceId = forkMetadata.workspaceId
+
+    if (workspaceId) {
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         userId: user.id,
         entity: { slug: projectSlug },
         authorities: [Authority.READ_PROJECT],
@@ -694,6 +710,7 @@ export class ProjectService {
       }
     })
 
+<<<<<<< HEAD
     const forksAllowed = forks.filter(async (fork) => {
       const allowed =
         (await this.authorityCheckerService.checkAuthorityOverProject({
@@ -719,6 +736,21 @@ export class ProjectService {
     )
 
     return { items, metadata }
+=======
+    return forks
+      .slice(page * limit, (page + 1) * limit)
+      .filter(async (fork) => {
+        const allowed =
+          (await this.authorityCheckerService.checkAuthorityOverProject({
+            userId: user.id,
+            entity: { id: fork.id },
+            authority: Authority.READ_PROJECT,
+            prisma: this.prisma
+          })) != null
+
+        return allowed
+      })
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**
@@ -776,8 +808,7 @@ export class ProjectService {
       })
     const workspaceId = workspace.id
 
-    //fetch projects with required properties
-    const items = (
+    return (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
@@ -808,6 +839,7 @@ export class ProjectService {
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+<<<<<<< HEAD
 
     //calculate metadata
     const totalCount = await this.prisma.project.count({
@@ -844,6 +876,8 @@ export class ProjectService {
     })
 
     return { items, metadata }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

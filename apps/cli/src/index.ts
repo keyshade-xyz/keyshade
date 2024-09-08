@@ -1,17 +1,10 @@
 import { Command } from 'commander'
-<<<<<<< HEAD
-import type BaseCommand from './commands/base.command'
-import InitCommand from './commands/init.command'
-import RunCommand from './commands/run.command'
-import ProfileCommand from './commands/profile.command'
-import EnvironmentCommand from './commands/environment.command'
-=======
 import type BaseCommand from '@/commands/base.command'
 import ProfileCommand from '@/commands/profile.command'
 import InitCommand from '@/commands/init.command'
 import RunCommand from '@/commands/run.command'
 import ScanCommand from '@/commands/scan.command'
->>>>>>> c02e1d1 (feat(cli): add secret scan)
+import EnvironmentCommand from '@/commands/environment.command'
 
 const program = new Command()
 
@@ -23,11 +16,8 @@ const COMMANDS: BaseCommand[] = [
   new RunCommand(),
   new InitCommand(),
   new ProfileCommand(),
-<<<<<<< HEAD
+  new ScanCommand(),
   new EnvironmentCommand()
-=======
-  new ScanCommand()
->>>>>>> c02e1d1 (feat(cli): add secret scan)
 ]
 
 COMMANDS.forEach((command) => {

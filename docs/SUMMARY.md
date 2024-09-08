@@ -23,7 +23,7 @@
 - [Setting things up](contributing-to-keyshade/setting-things-up.md)
 - [Running things locally](contributing-to-keyshade/running-things-locally/README.md)
   - [Running the API](contributing-to-keyshade/running-things-locally/running-the-api.md)
-  - [Running the Web](contributing-to-keyshade/running-things-locally/running-the-web-app.md)
+  - [Running the Web](contributing-to-keyshade/running-things-locally/running-the-web.md)
   - [Running the CLI](contributing-to-keyshade/running-things-locally/running-the-cli.md)
   - [API Testing](contributing-to-keyshade/running-things-locally/api-testing.md)
 

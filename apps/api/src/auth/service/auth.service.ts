@@ -13,9 +13,13 @@ import { UserAuthenticatedResponse } from '../auth.types'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
+<<<<<<< HEAD
 import { CacheService } from '@/cache/cache.service'
 import { generateOtp } from '@/common/util'
 import { createUser } from '@/common/user'
+=======
+import generateOtp from '../../common/generate-otp'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class AuthService {
@@ -24,8 +28,7 @@ export class AuthService {
   constructor(
     @Inject(MAIL_SERVICE) private mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService,
-    private cache: CacheService
+    private jwt: JwtService
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -94,7 +97,7 @@ export class AuthService {
         }
       }
     })
-    this.cache.setUser(user) // Save user to cache
+
     this.logger.log(`User logged in: ${email}`)
 
     const token = await this.generateToken(user.id)

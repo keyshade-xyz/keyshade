@@ -13,9 +13,9 @@ describe('Environments Controller Tests', () => {
   let environmentSlug: string | null
 
   beforeAll(async () => {
-    //Create the user's workspace
-    const workspaceResponse = (await (
-      await client.post(
+    try {
+      //Create the user's workspace
+      const workspaceResponse = (await client.post(
         '/api/workspace',
         {
           name: 'My Workspace'
@@ -23,8 +23,7 @@ describe('Environments Controller Tests', () => {
         {
           'x-e2e-user-email': email
         }
-      )
-    ).json()) as any
+      )) as any
 
     workspaceSlug = workspaceResponse.slug
 
@@ -39,8 +38,7 @@ describe('Environments Controller Tests', () => {
         {
           'x-e2e-user-email': email
         }
-      )
-    ).json()) as any
+      )) as any
 
     projectSlug = projectResponse.slug
   })
@@ -137,7 +135,7 @@ describe('Environments Controller Tests', () => {
       )
     ).data
 
-    expect(createEnvironmentResponse.name).toBe('Prod')
+      expect(createEnvironmentResponse.name).toBe('Prod')
 
     const fetchEnvironmentResponse = (await (
       await client.get(`/api/environment/${createEnvironmentResponse.slug}`, {
@@ -145,7 +143,7 @@ describe('Environments Controller Tests', () => {
       })
     ).json()) as any
 
-    expect(fetchEnvironmentResponse.name).toBe('Prod')
+      expect(fetchEnvironmentResponse.name).toBe('Prod')
 
     // Delete the environment
     await client.delete(`/api/environment/${createEnvironmentResponse.slug}`, {
@@ -166,7 +164,7 @@ describe('Environments Controller Tests', () => {
       )
     ).data
 
-    expect(updateEnvironmentResponse.name).toBe('Prod')
+      expect(updateEnvironmentResponse.name).toBe('Prod')
 
     const fetchEnvironmentResponse = (await (
       await client.get(`/api/environment/${updateEnvironmentResponse.slug}`, {

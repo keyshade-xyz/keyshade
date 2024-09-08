@@ -88,7 +88,7 @@ export class VariableController {
 
   @Get('/:projectSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
-  async getAllVariablesOfEnvironment(
+  async getAllSecretsOfEnvironment(
     @CurrentUser() user: User,
     @Param('projectSlug') projectSlug: string,
     @Param('environmentSlug') environmentSlug: string
@@ -99,6 +99,7 @@ export class VariableController {
       environmentSlug
     )
   }
+<<<<<<< HEAD
 
   @Get('/:variableSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
@@ -119,4 +120,6 @@ export class VariableController {
       order
     )
   }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 }

@@ -60,8 +60,13 @@ export class EnvironmentController {
   @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironmentsOfProject(
     @CurrentUser() user: User,
+<<<<<<< HEAD
     @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
+=======
+    @Param('projectId') projectId: string,
+    @Query('page') page: number = 1,
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',

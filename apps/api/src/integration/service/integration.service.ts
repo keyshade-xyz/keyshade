@@ -19,10 +19,13 @@ import { CreateIntegration } from '../dto/create.integration/create.integration'
 import { UpdateIntegration } from '../dto/update.integration/update.integration'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import IntegrationFactory from '../plugins/factory/integration.factory'
+<<<<<<< HEAD
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { limitMaxItemsPerPage } from '@/common/util'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class IntegrationService {
@@ -387,6 +390,7 @@ export class IntegrationService {
       }
     })
 
+<<<<<<< HEAD
     // Calculate metadata for pagination
     const totalCount = await this.prisma.integration.count({
       where: {
@@ -415,6 +419,9 @@ export class IntegrationService {
     })
 
     return { items: integrations, metadata }
+=======
+    return integrations
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

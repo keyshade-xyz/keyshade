@@ -7,11 +7,17 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { AuthController } from './auth.controller'
 import { mockDeep } from 'jest-mock-extended'
 import { ConfigService } from '@nestjs/config'
+<<<<<<< HEAD
 import { GithubOAuthStrategyFactory } from '@/config/factory/github/github-strategy.factory'
 import { GoogleOAuthStrategyFactory } from '@/config/factory/google/google-strategy.factory'
 import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strategy.factory'
 import { CacheService } from '@/cache/cache.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
+=======
+import { GithubOAuthStrategyFactory } from '../../config/factory/github/github-strategy.factory'
+import { GoogleOAuthStrategyFactory } from '../../config/factory/google/google-strategy.factory'
+import { GitlabOAuthStrategyFactory } from '../../config/factory/gitlab/gitlab-strategy.factory'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -27,20 +33,7 @@ describe('AuthController', () => {
         ConfigService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
-        PrismaService,
-        CacheService,
-        {
-          provide: REDIS_CLIENT,
-          useValue: {
-            publisher: {
-              setEx: jest.fn(),
-              set: jest.fn(),
-              get: jest.fn(),
-              del: jest.fn(),
-              keys: jest.fn()
-            }
-          }
-        }
+        PrismaService
       ]
     })
       .overrideProvider(PrismaService)

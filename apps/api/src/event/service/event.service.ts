@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+<<<<<<< HEAD
 import {
   Authority,
   EventSeverity,
@@ -10,6 +11,11 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
 import { limitMaxItemsPerPage } from '@/common/util'
+=======
+import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
+import { PrismaService } from '../../prisma/prisma.service'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class EventService {
@@ -65,6 +71,7 @@ export class EventService {
     }
 
     // @ts-expect-error - Prisma does not have a type for severity
+<<<<<<< HEAD
     const items = await this.prisma.event.findMany(query)
 
     //calculate metadata for pagination
@@ -84,5 +91,8 @@ export class EventService {
     )
 
     return { items, metadata }
+=======
+    return await this.prisma.event.findMany(query)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 }

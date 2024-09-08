@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import EnvironmentController from '@api-client/controllers/environment'
 import SecretController from '@api-client/controllers/secret'
 import EventController from '@api-client/controllers/event'
@@ -13,3 +14,5 @@ export {
   ProjectController,
   VariableController
 }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")

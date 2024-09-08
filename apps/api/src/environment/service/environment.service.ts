@@ -14,12 +14,18 @@ import {
 } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
+<<<<<<< HEAD
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { limitMaxItemsPerPage } from '@/common/util'
+=======
+import { PrismaService } from '../../prisma/prisma.service'
+import createEvent from '../../common/create-event'
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class EnvironmentService {
@@ -282,8 +288,8 @@ export class EnvironmentService {
       })
     const projectId = project.id
 
-    // Get the environments for the required page
-    const items = await this.prisma.environment.findMany({
+    // Get the environments
+    return await this.prisma.environment.findMany({
       where: {
         projectId,
         name: {
@@ -312,6 +318,7 @@ export class EnvironmentService {
         [sort]: order
       }
     })
+<<<<<<< HEAD
     // Calculate metadata for pagination
     const totalCount = await this.prisma.environment.count({
       where: {
@@ -330,6 +337,8 @@ export class EnvironmentService {
     })
 
     return { items, metadata }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

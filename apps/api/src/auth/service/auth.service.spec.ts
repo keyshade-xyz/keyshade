@@ -5,8 +5,11 @@ import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from '@/prisma/prisma.service'
 import { mockDeep } from 'jest-mock-extended'
+<<<<<<< HEAD
 import { CacheService } from '@/cache/cache.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('AuthService', () => {
   let service: AuthService
@@ -17,20 +20,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: MAIL_SERVICE, useClass: MockMailService },
         JwtService,
-        PrismaService,
-        CacheService,
-        {
-          provide: REDIS_CLIENT,
-          useValue: {
-            publisher: {
-              setEx: jest.fn(),
-              set: jest.fn(),
-              get: jest.fn(),
-              del: jest.fn(),
-              keys: jest.fn()
-            }
-          }
-        }
+        PrismaService
       ]
     })
       .overrideProvider(PrismaService)

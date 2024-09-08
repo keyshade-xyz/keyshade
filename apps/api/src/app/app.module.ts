@@ -20,10 +20,16 @@ import { VariableModule } from '@/variable/variable.module'
 import { SocketModule } from '@/socket/socket.module'
 import { ProviderModule } from '@/provider/provider.module'
 import { ScheduleModule } from '@nestjs/schedule'
+<<<<<<< HEAD
 import { EnvSchema } from '@/common/env/env.schema'
 import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
+=======
+import { EnvSchema } from '../common/env/env.schema'
+import { IntegrationModule } from '../integration/integration.module'
+import { FeedbackModule } from '../feedback/feedback.module'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Module({
   controllers: [AppController],
@@ -54,8 +60,7 @@ import { CacheModule } from '@/cache/cache.module'
     SocketModule,
     ProviderModule,
     IntegrationModule,
-    FeedbackModule,
-    CacheModule
+    FeedbackModule
   ],
   providers: [
     {

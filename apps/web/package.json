@@ -36,6 +36,7 @@
     "eslint-config-custom": "workspace:*",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "^4.5.3"
   }
 }

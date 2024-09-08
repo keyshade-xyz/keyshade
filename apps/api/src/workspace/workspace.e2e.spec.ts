@@ -24,6 +24,7 @@ import { EventModule } from '@/event/event.module'
 import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/service/user.service'
 import { WorkspaceService } from './service/workspace.service'
+<<<<<<< HEAD
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
@@ -36,6 +37,8 @@ import { VariableService } from '@/variable/service/variable.service'
 import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
 import { fetchEvents } from '@/common/event'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 const createMembership = async (
   roleId: string,
@@ -106,8 +109,6 @@ describe('Workspace Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -234,6 +235,7 @@ describe('Workspace Controller Tests', () => {
         description: 'Workspace 1 description'
       })
 
+<<<<<<< HEAD
       const response = await app.inject({
         method: 'POST',
         headers: {
@@ -243,6 +245,107 @@ describe('Workspace Controller Tests', () => {
         payload: {
           name: 'Workspace 1',
           description: 'Workspace 1 description'
+=======
+    expect(response.statusCode).toBe(201)
+    workspace1 = response.json()
+
+    expect(workspace1.name).toBe('Workspace 1')
+    expect(workspace1.description).toBe('Workspace 1 description')
+    expect(workspace1.ownerId).toBe(user1.id)
+    expect(workspace1.isFreeTier).toBe(true)
+    expect(workspace1.isDefault).toBe(false)
+  })
+
+  it('should not be able to create a workspace with the same name', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: '/workspace',
+      payload: {
+        name: 'My Workspace',
+        description: 'My Workspace description'
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
+    expect(response.json()).toEqual({
+      statusCode: 409,
+      error: 'Conflict',
+      message: 'Workspace already exists'
+    })
+  })
+
+  it('should let other user to create workspace with same name', async () => {
+    await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1',
+      description: 'Workspace 1 description'
+    })
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: '/workspace',
+      payload: {
+        name: 'Workspace 1',
+        description: 'Workspace 1 description'
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+    workspace2 = response.json()
+
+    expect(workspace2.name).toBe('Workspace 1')
+    expect(workspace2.description).toBe('Workspace 1 description')
+    expect(workspace2.ownerId).toBe(user2.id)
+    expect(workspace2.isFreeTier).toBe(true)
+    expect(workspace2.isDefault).toBe(false)
+  })
+
+  it('should have created a WORKSPACE_CREATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_CREATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should have created a new role with name Admin', async () => {
+    expect(adminRole).toBeDefined()
+    expect(adminRole).toEqual({
+      id: expect.any(String),
+      name: 'Admin',
+      description: null,
+      colorCode: expect.any(String),
+      authorities: [Authority.WORKSPACE_ADMIN],
+      hasAdminAuthority: true,
+      workspaceId: workspace1.id,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    })
+  })
+
+  it('should have associated the admin role with the user', async () => {
+    const userRole = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          userId: user1.id,
+          workspaceId: workspace1.id
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         }
       })
 
@@ -291,12 +394,583 @@ describe('Workspace Controller Tests', () => {
       })
     })
 
+<<<<<<< HEAD
     it('should have associated the admin role with the user', async () => {
       const userRole = await prisma.workspaceMember.findUnique({
         where: {
           workspaceId_userId: {
             userId: user1.id,
             workspaceId: workspace1.id
+=======
+    expect(response.statusCode).toBe(409)
+    expect(response.json()).toEqual({
+      statusCode: 409,
+      error: 'Conflict',
+      message: 'Workspace already exists'
+    })
+  })
+
+  it('should not allow external user to update a workspace', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}`,
+      payload: {
+        name: 'Workspace 1 Updated',
+        description: 'Workspace 1 updated description'
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User ${user2.id} does not have the required authorities to perform the action`
+    })
+  })
+
+  it('should have created a WORKSPACE_UPDATED event', async () => {
+    await workspaceService.updateWorkspace(user1, workspace1.id, {
+      name: 'Workspace 1'
+    })
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should do nothing if null or empty array is sent for invitation of user', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: []
+    })
+
+    expect(response.statusCode).toBe(201)
+  })
+
+  it('should not allow user to invite another user ', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: user2.email,
+          roleIds: [adminRole.id]
+        }
+      ]
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Admin role cannot be assigned to the user`
+    })
+  })
+
+  it('should allow user to invite another user to the workspace', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: user2.email,
+          roleIds: [memberRole.id]
+        }
+      ]
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      }
+    })
+
+    expect(membership).toBeDefined()
+    expect(membership).toEqual({
+      id: expect.any(String),
+      userId: user2.id,
+      workspaceId: workspace1.id,
+      invitationAccepted: false
+    })
+  })
+
+  it('should not be able to update the membership to admin role', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/update-member-role/${user2.id}`,
+      payload: [adminRole.id]
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Admin role cannot be assigned to the user`
+    })
+  })
+
+  it('should not be able to add an existing user to the workspace', async () => {
+    // Add user2 to workspace1
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: user2.email,
+          roleIds: []
+        }
+      ]
+    })
+
+    expect(response.statusCode).toBe(409)
+    expect(response.json()).toEqual({
+      statusCode: 409,
+      error: 'Conflict',
+      message: `User ${user2.name} (${user2.id}) is already a member of workspace ${workspace1.name} (${workspace1.id})`
+    })
+  })
+
+  it('should have created a INVITED_TO_WORKSPACE event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.INVITED_TO_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to cancel the invitation', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/cancel-invitation/${user2.id}`
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      }
+    })
+
+    expect(membership).toBeNull()
+  })
+
+  it('should not be able to cancel the invitation if the user is not invited', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/cancel-invitation/${user2.id}`
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `User ${user2.id} is not invited to workspace ${workspace1.id}`
+    })
+  })
+
+  it('should have created a CANCELLED_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: []
+      }
+    ])
+
+    // Cancel the invitation
+    await workspaceService.cancelInvitation(user1, workspace1.id, user2.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.CANCELLED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to decline invitation to the workspace', async () => {
+    // Send an invitation
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
+
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/decline-invitation`
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      }
+    })
+
+    expect(membership).toBeNull()
+  })
+
+  it('should not be able to decline the invitation if the user is not invited', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/decline-invitation`
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `User ${user2.id} is not invited to workspace ${workspace1.id}`
+    })
+  })
+
+  it('should have created a DECLINED_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
+
+    // Decline the invitation
+    await workspaceService.declineInvitation(user2, workspace1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.DECLINED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to accept the invitation to the workspace', async () => {
+    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/accept-invitation`
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      }
+    })
+
+    expect(membership).toBeDefined()
+    expect(membership).toEqual({
+      id: expect.any(String),
+      userId: user2.id,
+      workspaceId: workspace1.id,
+      invitationAccepted: true
+    })
+  })
+
+  it('should not be able to accept the invitation if the user is not invited', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/accept-invitation`
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `User ${user2.id} is not invited to workspace ${workspace1.id}`
+    })
+  })
+
+  it('should have created a ACCEPT_INVITATION event', async () => {
+    // Invite user2 to workspace1
+    await workspaceService.inviteUsersToWorkspace(user1, workspace1.id, [
+      {
+        email: user2.email,
+        roleIds: [memberRole.id]
+      }
+    ])
+
+    // Accept the invitation
+    await workspaceService.acceptInvitation(user2, workspace1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ACCEPTED_INVITATION)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should have created a new user if they did not exist while inviting them to the workspace', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/invite-users`,
+      payload: [
+        {
+          email: 'joy@keyshade.xyz',
+          roleIds: [memberRole.id]
+        }
+      ]
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    // Expect the user to have been created
+    const user = await prisma.user.findUnique({
+      where: {
+        email: 'joy@keyshade.xyz'
+      }
+    })
+
+    expect(user).toBeDefined()
+  })
+
+  it('should be able to leave the workspace', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/leave`
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      }
+    })
+
+    expect(membership).toBeNull()
+  })
+
+  it('should not be able to leave the workspace if user is workspace owner', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/leave`
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.`
+    })
+  })
+
+  it('should not be able to leave the workspace if the user is not a member', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/leave`
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User ${user2.id} does not have the required authorities to perform the action`
+    })
+  })
+
+  it('should have created a LEFT_WORKSPACE event', async () => {
+    // Create membership
+    await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+    // Leave the workspace
+    await workspaceService.leaveWorkspace(user2, workspace1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.LEFT_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to update the role of a member', async () => {
+    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/update-member-role/${user2.id}`,
+      payload: [memberRole.id]
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+        }
+      },
+      select: {
+        roles: {
+          select: {
+            roleId: true
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
           }
         }
       })
@@ -311,6 +985,7 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
+<<<<<<< HEAD
   describe('Update Workspace Tests', () => {
     it('should be able to update the workspace', async () => {
       const response = await app.inject({
@@ -322,6 +997,52 @@ describe('Workspace Controller Tests', () => {
         payload: {
           name: 'Workspace 1 Updated',
           description: 'Workspace 1 updated description'
+=======
+  it('should have created a WORKSPACE_MEMBERSHIP_UPDATED event', async () => {
+    // Create membership
+    await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
+
+    // Update the membership
+    await workspaceService.updateMemberRoles(user1, workspace1.id, user2.id, [
+      memberRole.id
+    ])
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.WORKSPACE_MEMBERSHIP_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to remove users from workspace', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/remove-users`,
+      payload: [user2.id]
+    })
+
+    expect(response.statusCode).toBe(200)
+
+    const membership = await prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId: workspace1.id,
+          userId: user2.id
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         }
       })
 
@@ -403,8 +1124,42 @@ describe('Workspace Controller Tests', () => {
         url: `/workspace/${workspace1.slug}`
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(200)
       expect(response.json().name).toEqual(workspace1.name)
+=======
+    // Remove user2 from workspace1
+    await workspaceService.removeUsersFromWorkspace(user1, workspace1.id, [
+      user2.id
+    ])
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.WORKSPACE
+    )
+
+    const event = response[0]
+
+    expect(event).toBeDefined()
+    expect(event.source).toBe(EventSource.WORKSPACE)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.REMOVED_FROM_WORKSPACE)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should not be able to update the role of a non existing member', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      headers: {
+        'x-e2e-user-email': user1.email
+      },
+      url: `/workspace/${workspace1.id}/update-member-role/${user2.id}`,
+      payload: []
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should not be able to fetch the workspace by slug if user is not a member', async () => {
@@ -500,6 +1255,7 @@ describe('Workspace Controller Tests', () => {
       })
     })
 
+<<<<<<< HEAD
     it('should not be able to export data of a workspace it is not a member of', async () => {
       const response = await app.inject({
         method: 'GET',
@@ -510,6 +1266,20 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+=======
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toBeInstanceOf(Array)
+    expect(response.json()).toHaveLength(1)
+  })
+
+  it('should not be able to get all the members of the workspace if user is not a member', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      headers: {
+        'x-e2e-user-email': user2.email
+      },
+      url: `/workspace/${workspace1.id}/members`
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should be able to export data of the workspace', async () => {
@@ -781,6 +1551,7 @@ describe('Workspace Controller Tests', () => {
       expect(response.json().environments).toHaveLength(3)
     })
 
+<<<<<<< HEAD
     it('should restrict search to projects the user has access to', async () => {
       const response = await app.inject({
         method: 'GET',
@@ -805,6 +1576,16 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().secrets).toHaveLength(1)
+=======
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toEqual(2)
+  })
+
+  it('should be able to transfer the ownership of the workspace', async () => {
+    const newWorkspace = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 2',
+      description: 'Workspace 2 description'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should restrict search to variables the user has access to', async () => {

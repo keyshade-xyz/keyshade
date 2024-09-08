@@ -26,11 +26,14 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+<<<<<<< HEAD
 import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { limitMaxItemsPerPage } from '@/common/util'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class VariableService {
@@ -653,6 +656,7 @@ export class VariableService {
       }
     }
 
+<<<<<<< HEAD
     const items = Array.from(variablesWithEnvironmentalValues.values())
 
     //calculate metadata
@@ -741,6 +745,9 @@ export class VariableService {
     })
 
     return { items, metadata }
+=======
+    return Array.from(variablesWithEnvironmentalValues.values())
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

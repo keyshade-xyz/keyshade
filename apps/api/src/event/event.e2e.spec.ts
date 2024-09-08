@@ -20,6 +20,7 @@ import { AppModule } from '@/app/app.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { EventModule } from './event.module'
+<<<<<<< HEAD
 import { WorkspaceService } from '@/workspace/service/workspace.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { EnvironmentService } from '@/environment/service/environment.service'
@@ -33,6 +34,21 @@ import { VariableService } from '@/variable/service/variable.service'
 import { VariableModule } from '@/variable/variable.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { createEvent } from '@/common/event'
+=======
+import cleanUp from '../common/cleanup'
+import { WorkspaceService } from '../workspace/service/workspace.service'
+import { WorkspaceModule } from '../workspace/workspace.module'
+import { EnvironmentService } from '../environment/service/environment.service'
+import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
+import { ProjectService } from '../project/service/project.service'
+import { SecretService } from '../secret/service/secret.service'
+import { SecretModule } from '../secret/secret.module'
+import { ProjectModule } from '../project/project.module'
+import { EnvironmentModule } from '../environment/environment.module'
+import createEvent from '../common/create-event'
+import { VariableService } from '../variable/service/variable.service'
+import { VariableModule } from '../variable/variable.module'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -75,8 +91,6 @@ describe('Event Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
-
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
   })
@@ -111,8 +125,9 @@ describe('Event Controller Tests', () => {
         'x-e2e-user-email': user.email
       }
     })
+
     expect(response.statusCode).toBe(200)
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -123,6 +138,7 @@ describe('Event Controller Tests', () => {
     expect(event.timestamp).toBeDefined()
     expect(event.itemId).toBe(workspace.id)
     expect(event.userId).toBe(user.id)
+<<<<<<< HEAD
     expect(event.workspaceId).toBe(workspace.id)
 
     //check metadata
@@ -139,6 +155,9 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=WORKSPACE&page=0&limit=10&search=`
     )
+=======
+    expect(event.workspaceId).toBe(newWorkspace.id)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch a project event', async () => {
@@ -166,7 +185,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -178,6 +197,7 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(project.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+<<<<<<< HEAD
 
     //check metadata
     const metadata = response.json().metadata
@@ -193,6 +213,8 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=PROJECT&page=0&limit=10&search=`
     )
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch an environment event', async () => {
@@ -229,7 +251,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -241,6 +263,7 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(environment.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+<<<<<<< HEAD
 
     //check metadata
     const metadata = response.json().metadata
@@ -256,6 +279,8 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=ENVIRONMENT&page=0&limit=10&search=`
     )
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch a secret event', async () => {
@@ -308,7 +333,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -320,6 +345,7 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(secret.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+<<<<<<< HEAD
 
     //check metadata
     const metadata = response.json().metadata
@@ -335,6 +361,8 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=SECRET&page=0&limit=10&search=`
     )
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch a variable event', async () => {
@@ -387,7 +415,7 @@ describe('Event Controller Tests', () => {
 
     expect(response.statusCode).toBe(200)
     // expect(response.json()).toBe({})
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -399,6 +427,7 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(variable.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+<<<<<<< HEAD
 
     //check metadata
     const metadata = response.json().metadata
@@ -414,6 +443,8 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=VARIABLE&page=0&limit=10&search=`
     )
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch a workspace role event', async () => {
@@ -453,7 +484,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    const event = response.json().items[0]
+    const event = response.json()[0]
 
     expect(event.id).toBeDefined()
     expect(event.title).toBeDefined()
@@ -465,6 +496,7 @@ describe('Event Controller Tests', () => {
     expect(event.itemId).toBe(workspaceRole.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
+<<<<<<< HEAD
 
     //check metadata
     const metadata = response.json().metadata
@@ -480,6 +512,8 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
     )
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should be able to fetch all events', async () => {
@@ -497,6 +531,7 @@ describe('Event Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
+<<<<<<< HEAD
     expect(response.json().items).toHaveLength(1)
 
     //check metadata
@@ -513,6 +548,9 @@ describe('Event Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/event/${workspace.slug}?page=0&limit=10&search=`
     )
+=======
+    expect(response.json()).toHaveLength(6)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should throw an error with wrong severity value', async () => {

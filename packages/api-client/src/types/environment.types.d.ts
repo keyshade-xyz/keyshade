@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import { Page } from './index.types'
 
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 export interface CreateEnvironmentRequest {
   name: string
   description?: string
@@ -58,8 +61,8 @@ export interface GetAllEnvironmentsOfProjectRequest {
   search?: string
 }
 
-export interface GetAllEnvironmentsOfProjectResponse
-  extends Page<{
+export interface GetAllEnvironmentsOfProjectResponse {
+  items: {
     id: string
     slug: string
     name: string
@@ -72,7 +75,8 @@ export interface GetAllEnvironmentsOfProjectResponse
       email: string
       profilePictureUrl: string | null
     }
-  }> {}
+  }[]
+}
 
 export interface DeleteEnvironmentRequest {
   slug: string

@@ -145,26 +145,6 @@ describe('User Controller Tests', () => {
     expect(workspace.ownerId).toEqual(createUserResponse.id)
   })
 
-  it('should skip workspace creation for admin users', async () => {
-    const createAdminUserResponse = await userService.createUser({
-      email: '',
-      isAdmin: true,
-      isOnboardingFinished: true,
-      profilePictureUrl: null
-    })
-
-    expect(createAdminUserResponse.defaultWorkspace).toBeUndefined()
-
-    const workspace = await prisma.workspace.findFirst({
-      where: {
-        ownerId: createAdminUserResponse.id,
-        isDefault: true
-      }
-    })
-
-    expect(workspace).toBeNull()
-  })
-
   test('regular user should not be able to access other routes if onboarding is not finished', async () => {
     // Flip the user's onboarding status to false
     await prisma.user.update({

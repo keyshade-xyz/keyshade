@@ -15,8 +15,14 @@ You can get started with developing the CLI using the following steps:
   pnpm dev:api
   ```
 
-- To make a quick check of the features you have just built, run:
+- Run the build command to continuously build the code:
 
   ```bash
-  pnpm dev:cli -- <whatever command goes here>
+  cd apps/cli && pnpm build:cli
+  ```
+
+- Run the CLI:
+
+  ```bash
+  cd apps/cli && node dist/index.js <command> [subcommand] <arguments> [options]
   ```

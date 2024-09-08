@@ -33,10 +33,15 @@ import { EventService } from '@/event/service/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
+<<<<<<< HEAD
 import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+=======
+import { UserService } from '../user/service/user.service'
+import { UserModule } from '../user/user.module'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -81,8 +86,6 @@ describe('Secret Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -314,10 +317,34 @@ describe('Secret Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(404)
       expect(response.json().message).toEqual(
         'Secret non-existing-secret-slug not found'
       )
+=======
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should not be able to update a non-existing secret', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/non-existing-secret-id`,
+      payload: {
+        name: 'Updated Secret 1',
+        rotateAfter: '24'
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should be able to update the secret name and note without creating a new version', async () => {
@@ -930,7 +957,186 @@ describe('Secret Controller Tests', () => {
         ]
       })
 
+<<<<<<< HEAD
       await secretService.updateSecret(user1, secret1.slug, {
+=======
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('should have created a SECRET_UPDATED event', async () => {
+    // Update a secret
+    await secretService.updateSecret(user1, secret1.id, {
+      name: 'Updated Secret 1'
+    })
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.SECRET
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(secret1.id)
+  })
+
+  it('should not be able to roll back a non-existing secret', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/non-existing-secret-id/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Secret with id non-existing-secret-id not found'
+    )
+  })
+
+  it('should not be able to roll back a secret it does not have access to', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
+
+  it('should not be able to roll back to a non-existing version', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/2?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Invalid rollback version: 2 for secret: ${secret1.id}`
+    )
+  })
+
+  it('should not be able to roll back if the secret has no versions', async () => {
+    await prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `No versions found for environment: ${environment1.id} for secret: ${secret1.id}`
+    )
+  })
+
+  it('should not create a secret version entity if value-environmentId is not provided during creation', async () => {
+    const secret = await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 4',
+        note: 'Secret 4 note',
+        rotateAfter: '24'
+      },
+      project1.id
+    )
+
+    const secretVersion = await prisma.secretVersion.findMany({
+      where: {
+        secretId: secret.id
+      }
+    })
+
+    expect(secretVersion.length).toBe(0)
+  })
+
+  it('should be able to roll back a secret', async () => {
+    // Creating a few versions first
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    await secretService.updateSecret(user1, secret1.id, {
+      entries: [
+        {
+          value: 'Updated Secret 1 value 2',
+          environmentId: environment1.id
+        }
+      ]
+    })
+
+    let versions: SecretVersion[]
+
+    // eslint-disable-next-line prefer-const
+    versions = await prisma.secretVersion.findMany({
+      where: {
+        secretId: secret1.id
+      }
+    })
+
+    expect(versions.length).toBe(3)
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/secret/${secret1.id}/rollback/1?environmentId=${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    // expect(response.statusCode).toBe(200)
+    // expect(response.json().count).toEqual(2)
+
+    // versions = await prisma.secretVersion.findMany({
+    //   where: {
+    //     secretId: secret1.id
+    //   }
+    // })
+
+    // expect(versions.length).toBe(1)
+  })
+
+  it('should not be able to fetch decrypted secrets if the project does not store the private key', async () => {
+    // Fetch the environment of the project
+    const environment = await prisma.environment.findFirst({
+      where: {
+        projectId: project2.id
+      }
+    })
+
+    await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 20',
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         entries: [
           {
             value: 'Updated Secret 1 value 2',
@@ -939,6 +1145,7 @@ describe('Secret Controller Tests', () => {
         ]
       })
 
+<<<<<<< HEAD
       const response = await app.inject({
         method: 'GET',
         url: `/secret/${secret1.slug}/revisions/${environment1.slug}`,
@@ -1009,4 +1216,314 @@ describe('Secret Controller Tests', () => {
       expect(response.statusCode).toBe(401)
     })
   })
+=======
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project2.id}?decryptValue=true`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json().message).toEqual(
+      `Cannot decrypt secret values as the project does not store the private key`
+    )
+  })
+
+  it('should be able to fetch all secrets', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const { secret, values } = response.json()[0]
+    expect(secret.id).toBeDefined()
+    expect(secret.name).toBeDefined()
+    expect(secret.note).toBeDefined()
+    expect(secret.projectId).toBeDefined()
+    expect(values.length).toBe(1)
+
+    const value = values[0]
+    expect(value.environment).toBeDefined()
+    expect(value.value).not.toEqual('Secret 1 value')
+  })
+
+  it('should be able to fetch all secrets decrypted', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}?decryptValue=true`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const { secret, values } = response.json()[0]
+    expect(secret.id).toBeDefined()
+    expect(secret.name).toBeDefined()
+    expect(secret.note).toBeDefined()
+    expect(secret.projectId).toBeDefined()
+    expect(values.length).toBe(1)
+
+    const value = values[0]
+    expect(value.environment).toBeDefined()
+    expect(value.value).toEqual('Secret 1 value')
+  })
+
+  it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project2.id}?decryptValue=true`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json().message).toEqual(
+      `Cannot decrypt secret values as the project does not store the private key`
+    )
+  })
+
+  it('should not be able to fetch all secrets decrypted if somehow the project does not have a private key even though it stores it (hypothetical)', async () => {
+    await prisma.project.update({
+      where: {
+        id: project1.id
+      },
+      data: {
+        storePrivateKey: true,
+        privateKey: null
+      }
+    })
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}?decryptValue=true`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      `Cannot decrypt secret values as the project does not have a private key`
+    )
+
+    await prisma.project.update({
+      where: {
+        id: project1.id
+      },
+      data: {
+        privateKey: project1.privateKey
+      }
+    })
+  })
+
+  it('should not be able to fetch all secrets if the user has no access to the project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
+
+  it('should not be able to fetch all secrets if the project does not exist', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/non-existing-project-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Project with id non-existing-project-id not found'
+    )
+  })
+
+  it('should be able to fetch all secrets by project and environment', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const secret = response.json()[0]
+    expect(secret.name).toBe('Secret 1')
+    expect(secret.value).toBe('Secret 1 value')
+    expect(secret.isPlaintext).toBe(true)
+  })
+
+  it('should not be able to fetch all secrets by project and environment if project does not exists', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/non-existing-project-id/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Project with id non-existing-project-id not found'
+    )
+  })
+
+  it('should not be able to fetch all secrets by project and environment if environment does not exists', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}/non-existing-environment-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Environment with id non-existing-environment-id not found'
+    )
+  })
+
+  it('should not be able to fetch all secrets by project and environment if the user has no access to the project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project1.id}/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    )
+  })
+
+  it('should not be sending the plaintext secret if project does not store the private key', async () => {
+    // Get the first environment of project 2
+    const environment = await prisma.environment.findFirst({
+      where: {
+        projectId: project2.id
+      }
+    })
+
+    // Create a secret in project 2
+    await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 20',
+        entries: [
+          {
+            environmentId: environment.id,
+            value: 'Secret 20 value'
+          }
+        ],
+        rotateAfter: '24',
+        note: 'Secret 20 note'
+      },
+      project2.id
+    )
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/secret/${project2.id}/${environment.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toBe(1)
+
+    const secret = response.json()[0]
+    expect(secret.name).toBe('Secret 20')
+    expect(secret.value).not.toBe('Secret 20 value')
+    expect(secret.isPlaintext).toBe(false)
+  })
+
+  it('should not be able to delete a non-existing secret', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/secret/non-existing-secret-id`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json().message).toEqual(
+      'Secret with id non-existing-secret-id not found'
+    )
+  })
+
+  it('should not be able to delete a secret it does not have access to', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/secret/${secret1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json().message).toEqual(
+      `User ${user2.id} does not have the required authorities`
+    )
+  })
+
+  it('should be able to delete a secret', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/secret/${secret1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a SECRET_DELETED event', async () => {
+    // Delete a secret
+    await secretService.deleteSecret(user1, secret1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.SECRET
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.SECRET)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.SECRET_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(secret1.id)
+  })
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 })

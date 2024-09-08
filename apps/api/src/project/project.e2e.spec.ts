@@ -25,6 +25,7 @@ import {
 import { EventService } from '@/event/service/event.service'
 import { EventModule } from '@/event/event.module'
 import { ProjectService } from './service/project.service'
+<<<<<<< HEAD
 import { WorkspaceService } from '@/workspace/service/workspace.service'
 import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
 import { UserService } from '@/user/service/user.service'
@@ -41,6 +42,20 @@ import { SecretModule } from '@/secret/secret.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+=======
+import { WorkspaceService } from '../workspace/service/workspace.service'
+import { UserService } from '../user/service/user.service'
+import { WorkspaceModule } from '../workspace/workspace.module'
+import { UserModule } from '../user/user.module'
+import { WorkspaceRoleModule } from '../workspace-role/workspace-role.module'
+import { WorkspaceRoleService } from '../workspace-role/service/workspace-role.service'
+import { EnvironmentService } from '../environment/service/environment.service'
+import { SecretService } from '../secret/service/secret.service'
+import { VariableService } from '../variable/service/variable.service'
+import { VariableModule } from '../variable/variable.module'
+import { SecretModule } from '../secret/secret.module'
+import { EnvironmentModule } from '../environment/environment.module'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -91,8 +106,6 @@ describe('Project Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -163,6 +176,7 @@ describe('Project Controller Tests', () => {
     expect(variableService).toBeDefined()
   })
 
+<<<<<<< HEAD
   describe('Create Project Tests', () => {
     it('should allow workspace member to create a project', async () => {
       const response = await app.inject({
@@ -175,6 +189,92 @@ describe('Project Controller Tests', () => {
         },
         headers: {
           'x-e2e-user-email': user1.email
+=======
+  it('should allow workspace member to create a project', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/project/${workspace1.id}`,
+      payload: {
+        name: 'Project 3',
+        description: 'Project 3 description',
+        storePrivateKey: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+    expect(response.json().id).toBeDefined()
+    expect(response.json().name).toBe('Project 3')
+    expect(response.json().description).toBe('Project 3 description')
+    expect(response.json().storePrivateKey).toBe(true)
+    expect(response.json().workspaceId).toBe(workspace1.id)
+    expect(response.json().lastUpdatedById).toBe(user1.id)
+    expect(response.json().accessLevel).toBe(ProjectAccessLevel.PRIVATE)
+    expect(response.json().publicKey).toBeDefined()
+    expect(response.json().privateKey).toBeDefined()
+    expect(response.json().createdAt).toBeDefined()
+    expect(response.json().updatedAt).toBeDefined()
+  })
+
+  it('should have created a default environment', async () => {
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
+
+    expect(environments).toHaveLength(1)
+  })
+
+  it('should not allow workspace member to create a project with the same name', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/project/${workspace1.id}`,
+      payload: {
+        name: 'Project 1',
+        description: 'Project 1 description',
+        storePrivateKey: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(409)
+    expect(response.json()).toEqual({
+      statusCode: 409,
+      error: 'Conflict',
+      message: `Project with this name **Project 1** already exists`
+    })
+  })
+
+  it('should have created a PROJECT_CREATED event', async () => {
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.PROJECT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_CREATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should have added the project to the admin role of the workspace', async () => {
+    const adminRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_name: {
+          workspaceId: workspace1.id,
+          name: 'Admin'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         }
       })
 
@@ -517,8 +617,148 @@ describe('Project Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(401)
     })
+=======
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(project1.id)
+  })
+
+  it('should be able to fetch a project by its id', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      ...project1,
+      lastUpdatedById: user1.id,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String)
+    })
+  })
+
+  it('should not be able to fetch a non existing project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Project with id 123 not found`
+    })
+  })
+
+  it('should not be able to fetch a project if the user is not a member of the workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User with id ${user2.id} does not have the authority in the project with id ${project1.id}`
+    })
+  })
+
+  it('should be able to fetch all projects of a workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/all/${workspace1.id}?page=0`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().length).toEqual(2)
+  })
+
+  it('should not be able to fetch all projects of a non existing workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/all/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(response.json()).toEqual({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Workspace with id 123 not found`
+    })
+  })
+
+  it('should not be able to fetch all projects of a workspace if the user is not a member of the workspace', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/project/all/${workspace1.id}`,
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      statusCode: 401,
+      error: 'Unauthorized',
+      message: `User ${user2.id} does not have the required authorities to perform the action`
+    })
+  })
+
+  // ---------------------------------------------------------
+
+  it('should not store the private key if storePrivateKey is false', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: `/project/${workspace1.id}`,
+      payload: {
+        name: 'Project 2',
+        description: 'Project 2 description',
+        storePrivateKey: false
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+
+    const projectId = response.json().id
+
+    project2 = await prisma.project.findUnique({
+      where: {
+        id: projectId
+      }
+    })
+
+    expect(project2).toBeDefined()
+    expect(project2.privateKey).toBeNull()
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   it('should create environments if provided', async () => {
@@ -562,6 +802,7 @@ describe('Project Controller Tests', () => {
     expect(environments).toHaveLength(3)
   })
 
+<<<<<<< HEAD
   describe('Key Tests', () => {
     it('should not store the private key if storePrivateKey is false', async () => {
       const response = await app.inject({
@@ -574,6 +815,92 @@ describe('Project Controller Tests', () => {
         },
         headers: {
           'x-e2e-user-email': user1.email
+=======
+  it('should generate new key-pair if regenerateKeyPair is true and and the project stores the private key or a private key is specified', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/project/${project1.id}`,
+      payload: {
+        regenerateKeyPair: true
+      },
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().publicKey).not.toBeNull()
+    expect(response.json().privateKey).not.toBeNull()
+  })
+
+  it('should not regenerate key-pair if regenerateKeyPair is true and the project does not store the private key and a private key is not specified', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/project/${project2.id}`,
+      payload: {
+        regenerateKeyPair: true
+      },
+      headers: {
+        'x-e2e-user-email': user2.email
+      }
+    })
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('should be able to delete a project', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/project/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should have created a PROJECT_DELETED event', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.PROJECT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.PROJECT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.PROJECT_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBe(project1.id)
+  })
+
+  it('should have removed all environments of the project', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
+    const environments = await prisma.environment.findMany({
+      where: {
+        projectId: project1.id
+      }
+    })
+
+    expect(environments).toHaveLength(0)
+  })
+
+  it('should have removed the project from the admin role of the workspace', async () => {
+    await projectService.deleteProject(user1, project1.id)
+
+    const adminRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_name: {
+          workspaceId: workspace1.id,
+          name: 'Admin'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         }
       })
 
@@ -1432,7 +1759,11 @@ describe('Project Controller Tests', () => {
       // Sync the fork
       await app.inject({
         method: 'PUT',
+<<<<<<< HEAD
         url: `/project/${forkedProject.slug}/fork`,
+=======
+        url: `/project/${forkedProject.id}/sync-fork`,
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         headers: {
           'x-e2e-user-email': user2.email
         }
@@ -1622,7 +1953,11 @@ describe('Project Controller Tests', () => {
       // Sync the fork
       await app.inject({
         method: 'PUT',
+<<<<<<< HEAD
         url: `/project/${forkedProject.slug}/fork?hardSync=true`,
+=======
+        url: `/project/${forkedProject.id}/sync-fork?hardSync=true`,
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         headers: {
           'x-e2e-user-email': user2.email
         }
@@ -1657,7 +1992,11 @@ describe('Project Controller Tests', () => {
     it('should not be able to sync a project that is not forked', async () => {
       const response = await app.inject({
         method: 'PUT',
+<<<<<<< HEAD
         url: `/project/${project3.slug}/fork`,
+=======
+        url: `/project/${project3.id}/sync-fork`,
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         headers: {
           'x-e2e-user-email': user1.email
         }
@@ -1681,8 +2020,13 @@ describe('Project Controller Tests', () => {
       )
 
       const response = await app.inject({
+<<<<<<< HEAD
         method: 'DELETE',
         url: `/project/${forkedProject.slug}/fork`,
+=======
+        method: 'PUT',
+        url: `/project/${forkedProject.id}/unlink-fork`,
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         headers: {
           'x-e2e-user-email': user2.email
         }
@@ -1713,9 +2057,8 @@ describe('Project Controller Tests', () => {
           'x-e2e-user-email': user2.email
         }
       })
-      expect(response.statusCode).toBe(200)
-      expect(response.json().items).toHaveLength(1)
 
+<<<<<<< HEAD
       //check metadata
       const metadata = response.json().metadata
       expect(metadata.links.self).toBe(
@@ -1729,6 +2072,10 @@ describe('Project Controller Tests', () => {
       expect(metadata.links.last).toBe(
         `/project/${project3.slug}/forks?page=0&limit=10`
       )
+=======
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toHaveLength(1)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should not contain a forked project that has access level other than GLOBAL', async () => {
@@ -1758,7 +2105,7 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toHaveLength(1)
+      expect(response.json()).toHaveLength(1)
     })
   })
 })

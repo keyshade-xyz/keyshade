@@ -27,12 +27,15 @@ import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
+<<<<<<< HEAD
 import { paginate } from '@/common/paginate'
 import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
 import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class SecretService {
@@ -533,6 +536,7 @@ export class SecretService {
 
     return response
   }
+<<<<<<< HEAD
 
   /**
    * Gets all revisions of a secret in an environment
@@ -599,6 +603,8 @@ export class SecretService {
 
     return { items, metadata }
   }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
   /**
    * Gets all secrets of a project
@@ -737,6 +743,7 @@ export class SecretService {
       }
     }
 
+<<<<<<< HEAD
     const items = Array.from(secretsWithEnvironmentalValues.values())
 
     // Calculate pagination metadata
@@ -763,6 +770,9 @@ export class SecretService {
     )
 
     return { items, metadata }
+=======
+    return Array.from(secretsWithEnvironmentalValues.values())
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

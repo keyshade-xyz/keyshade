@@ -19,12 +19,16 @@ import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspa
 import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
+<<<<<<< HEAD
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate, PaginatedMetadata } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
 import { limitMaxItemsPerPage } from '@/common/util'
+=======
+import { AuthorityCheckerService } from '../../common/authority-checker.service'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -375,6 +379,7 @@ export class WorkspaceRoleService {
     sort: string,
     order: string,
     search: string
+<<<<<<< HEAD
   ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
     const { id: workspaceId } =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -385,12 +390,24 @@ export class WorkspaceRoleService {
       })
     //get workspace roles of a workspace for given page and limit
     const items = await this.prisma.workspaceRole.findMany({
+=======
+  ): Promise<WorkspaceRole[]> {
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { id: workspaceId },
+      authority: Authority.READ_WORKSPACE_ROLE,
+      prisma: this.prisma
+    })
+
+    return await this.prisma.workspaceRole.findMany({
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
       where: {
         workspaceId,
         name: {
           contains: search
         }
       },
+
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
 
@@ -398,6 +415,7 @@ export class WorkspaceRoleService {
         [sort]: order
       }
     })
+<<<<<<< HEAD
 
     //calculate metadata
     const totalCount = await this.prisma.workspaceRole.count({
@@ -422,6 +440,8 @@ export class WorkspaceRoleService {
     )
 
     return { items, metadata }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   }
 
   /**

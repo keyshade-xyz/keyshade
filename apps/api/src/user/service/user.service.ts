@@ -78,15 +78,22 @@ export class UserService {
       await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
     }
 
+<<<<<<< HEAD
+=======
+    this.log.log(`Updating user ${user.id} with data ${dto}`)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     const updatedUser = await this.prisma.user.update({
       where: {
         id: user.id
       },
       data
     })
+<<<<<<< HEAD
     await this.cache.setUser(updatedUser)
 
     this.log.log(`Updated user ${user.id} with data ${dto}`)
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
     return updatedUser
   }
@@ -125,7 +132,7 @@ export class UserService {
     }
 
     this.log.log(`Updating user ${userId} with data ${dto}`)
-    return this.prisma.user.update({
+    return await this.prisma.user.update({
       where: {
         id: userId
       },
@@ -211,7 +218,7 @@ export class UserService {
   }
 
   async getUserById(userId: string) {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: {
         id: userId
       }
@@ -225,7 +232,7 @@ export class UserService {
     order: string,
     search: string
   ): Promise<User[]> {
-    return this.prisma.user.findMany({
+    return await this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -249,11 +256,11 @@ export class UserService {
   }
 
   async deleteSelf(user: User) {
-    await this.deleteUserById(user.id)
+    this.deleteUserById(user.id)
   }
 
   async deleteUser(userId: User['id']) {
-    await this.deleteUserById(userId)
+    this.deleteUserById(userId)
   }
 
   private async deleteUserById(userId: User['id']) {

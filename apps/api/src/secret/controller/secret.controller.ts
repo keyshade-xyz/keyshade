@@ -101,6 +101,7 @@ export class SecretController {
       environmentSlug
     )
   }
+<<<<<<< HEAD
 
   @Get(':secretSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
@@ -121,4 +122,6 @@ export class SecretController {
       order
     )
   }
+=======
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 }

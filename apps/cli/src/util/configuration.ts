@@ -4,7 +4,7 @@ import type {
   ProjectRootConfig
 } from '@/types/index.types'
 import { existsSync } from 'fs'
-import { readFile, readdir, writeFile, mkdir } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 
 export const getOsType = (): 'unix' | 'windows' => {
   return process.platform === 'win32' ? 'windows' : 'unix'
@@ -59,7 +59,6 @@ export const writeProfileConfig = async (
   config: ProfileConfig
 ): Promise<void> => {
   const path = getProfileConfigurationFilePath()
-  await ensureDirectoryExists(path)
   await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
 }
 
@@ -67,7 +66,6 @@ export const writePrivateKeyConfig = async (
   config: PrivateKeyConfig
 ): Promise<void> => {
   const path = getPrivateKeyConfigurationFilePath()
-  await ensureDirectoryExists(path)
   await writeFile(path, JSON.stringify(config, null, 2), 'utf8')
 }
 
@@ -83,12 +81,4 @@ export const fetchUserRootConfigurationFiles = async (): Promise<string> => {
   const path = `${process.env[home]}/.keyshade`
   const files = await readdir(path)
   return `- ${files.join('\n- ')}`
-}
-
-const ensureDirectoryExists = async (path: string) => {
-  // Create the parent directory if it doesn't exist
-  const parentDirectory = path.split('/').slice(0, -1).join('/')
-  if (!existsSync(parentDirectory)) {
-    await mkdir(parentDirectory, { recursive: true })
-  }
 }

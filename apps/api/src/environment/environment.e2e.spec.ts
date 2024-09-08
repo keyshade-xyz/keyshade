@@ -24,10 +24,15 @@ import { ProjectService } from '@/project/service/project.service'
 import { EventModule } from '@/event/event.module'
 import { EventService } from '@/event/service/event.service'
 import { EnvironmentService } from './service/environment.service'
+<<<<<<< HEAD
 import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/service/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+=======
+import { UserModule } from '../user/user.module'
+import { UserService } from '../user/service/user.service'
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -64,8 +69,6 @@ describe('Environment Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
-
-    app.useGlobalPipes(new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -266,9 +269,34 @@ describe('Environment Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(200)
       expect(response.json()).toEqual({
         id: environment1.id,
+=======
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.ENVIRONMENT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_ADDED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to update an environment', async () => {
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/environment/${environment1.id}`,
+      payload: {
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
         name: 'Environment 1 Updated',
         slug: expect.any(String),
         description: 'Environment 1 description updated',
@@ -388,10 +416,37 @@ describe('Environment Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(200)
       expect(response.json().name).toBe('Environment 1')
       expect(response.json().slug).toBe(environment1.slug)
       expect(response.json().description).toBe('Environment 1 description')
+=======
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.ENVIRONMENT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_UPDATED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should be able to fetch an environment', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/${environment1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should not be able to fetch an environment that does not exist', async () => {
@@ -456,6 +511,7 @@ describe('Environment Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(404)
       expect(response.json().message).toBe('Project 123 not found')
     })
@@ -471,6 +527,18 @@ describe('Environment Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+=======
+  it('should be able to fetch all environments of a project', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: `/environment/all/${project1.id}`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
   })
 
   describe('Delete Environment Tests', () => {
@@ -529,7 +597,38 @@ describe('Environment Controller Tests', () => {
         }
       })
 
+<<<<<<< HEAD
       expect(response.statusCode).toBe(401)
+=======
+  it('should have created a ENVIRONMENT_DELETED event', async () => {
+    // Delete an environment
+    await environmentService.deleteEnvironment(user1, environment2.id)
+
+    const response = await fetchEvents(
+      eventService,
+      user1,
+      workspace1.id,
+      EventSource.ENVIRONMENT
+    )
+
+    const event = response[0]
+
+    expect(event.source).toBe(EventSource.ENVIRONMENT)
+    expect(event.triggerer).toBe(EventTriggerer.USER)
+    expect(event.severity).toBe(EventSeverity.INFO)
+    expect(event.type).toBe(EventType.ENVIRONMENT_DELETED)
+    expect(event.workspaceId).toBe(workspace1.id)
+    expect(event.itemId).toBeDefined()
+  })
+
+  it('should not be able to delete an environment that does not exist', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: `/environment/123`,
+      headers: {
+        'x-e2e-user-email': user1.email
+      }
+>>>>>>> 6ac6f14 (Revert "Fix: merge conflicts")
     })
 
     it('should not be able to delete the only environment in a project', async () => {
