@@ -2,9 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException
+  Logger
 } from '@nestjs/common'
 import {
   Authority,
@@ -21,18 +19,16 @@ import {
 } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { createKeyPair } from '@/common/create-key-pair'
-import { excludeFields } from '@/common/exclude-fields'
 import { PrismaService } from '@/prisma/prisma.service'
-import { decrypt } from '@/common/decrypt'
-import { encrypt } from '@/common/encrypt'
 import { v4 } from 'uuid'
-import createEvent from '@/common/create-event'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class ProjectService {
@@ -43,19 +39,28 @@ export class ProjectService {
     private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
+  /**
+   * Creates a new project in a workspace
+   *
+   * @param user The user who is creating the project
+   * @param workspaceSlug The slug of the workspace where the project will be created
+   * @param dto The data for the new project
+   * @returns The newly created project
+   */
   async createProject(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     dto: CreateProject
   ) {
     // Check if the workspace exists or not
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
-        entity: { id: workspaceId },
+        entity: { slug: workspaceSlug },
         authorities: [Authority.CREATE_PROJECT],
         prisma: this.prisma
       })
+    const workspaceId = workspace.id
 
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
@@ -68,6 +73,7 @@ export class ProjectService {
 
     const data: any = {
       name: dto.name,
+      slug: await generateEntitySlug(dto.name, 'PROJECT', this.prisma),
       description: dto.description,
       storePrivateKey:
         dto.accessLevel === ProjectAccessLevel.GLOBAL
@@ -140,6 +146,11 @@ export class ProjectService {
           this.prisma.environment.create({
             data: {
               name: environment.name,
+              slug: await generateEntitySlug(
+                environment.name,
+                'ENVIRONMENT',
+                this.prisma
+              ),
               description: environment.description,
               projectId: newProjectId,
               lastUpdatedById: user.id
@@ -152,6 +163,11 @@ export class ProjectService {
         this.prisma.environment.create({
           data: {
             name: 'Default',
+            slug: await generateEntitySlug(
+              'Default',
+              'ENVIRONMENT',
+              this.prisma
+            ),
             description: 'Default environment for the project',
             projectId: newProjectId,
             lastUpdatedById: user.id
@@ -193,9 +209,20 @@ export class ProjectService {
     return newProject
   }
 
+  /**
+   * Updates a project.
+   *
+   * @param user The user who is updating the project
+   * @param projectSlug The slug of the project to update
+   * @param dto The data to update the project with
+   * @returns The updated project
+   *
+   * @throws ConflictException If a project with the same name already exists for the user
+   * @throws BadRequestException If the private key is required but not supplied
+   */
   async updateProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     dto: UpdateProject
   ) {
     // Check if the user has the authority to update the project
@@ -207,7 +234,7 @@ export class ProjectService {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [authority],
         prisma: this.prisma
       })
@@ -254,6 +281,9 @@ export class ProjectService {
 
     const data: Partial<Project> = {
       name: dto.name,
+      slug: dto.name
+        ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
+        : project.slug,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? dto.privateKey : null,
@@ -334,42 +364,42 @@ export class ProjectService {
     }
   }
 
+  /**
+   * Forks a project.
+   *
+   * @param user The user who is creating the new project
+   * @param projectSlug The slug of the project to fork
+   * @param forkMetadata The metadata for the new project
+   * @returns The newly forked project
+   *
+   * @throws ConflictException If a project with the same name already exists for the user
+   * @throws BadRequestException If the private key is required but not supplied
+   */
   async forkProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     forkMetadata: ForkProject
   ) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        storePrivateKey: true,
-        accessLevel: true,
-        privateKey: true
-      }
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    if (project.accessLevel !== ProjectAccessLevel.GLOBAL) {
-      throw new UnauthorizedException(
-        `User with id ${user.id} does not have the authority in the project with id ${project.id}`
-      )
-    }
-
-    let workspaceId = forkMetadata.workspaceId
-
-    if (workspaceId) {
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: workspaceId },
-        authorities: [Authority.CREATE_PROJECT],
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
+
+    let workspaceId = null
+
+    if (forkMetadata.workspaceSlug) {
+      const workspace =
+        await this.authorityCheckerService.checkAuthorityOverWorkspace({
+          userId: user.id,
+          entity: { slug: forkMetadata.workspaceSlug },
+          authorities: [Authority.CREATE_PROJECT],
+          prisma: this.prisma
+        })
+
+      workspaceId = workspace.id
     } else {
       const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
         where: {
@@ -405,6 +435,7 @@ export class ProjectService {
       data: {
         id: newProjectId,
         name: newProjectName,
+        slug: await generateEntitySlug(newProjectName, 'PROJECT', this.prisma),
         description: project.description,
         storePrivateKey:
           forkMetadata.storePrivateKey || project.storePrivateKey,
@@ -480,13 +511,25 @@ export class ProjectService {
     return newProject
   }
 
-  async unlinkParentOfFork(user: User, projectId: Project['id']) {
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.UPDATE_PROJECT],
-      prisma: this.prisma
-    })
+  /**
+   * Unlinks a forked project from its parent project.
+   *
+   * @param user The user who is unlinking the project
+   * @param projectSlug The slug of the project to unlink
+   * @returns The updated project
+   *
+   * @throws BadRequestException If the project is not a forked project
+   * @throws UnauthorizedException If the user does not have the authority to update the project
+   */
+  async unlinkParentOfFork(user: User, projectSlug: Project['slug']) {
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.UPDATE_PROJECT],
+        prisma: this.prisma
+      })
+    const projectId = project.id
 
     await this.prisma.project.update({
       where: {
@@ -499,25 +542,45 @@ export class ProjectService {
     })
   }
 
-  async syncFork(user: User, projectId: Project['id'], hardSync: boolean) {
+  /**
+   * Syncs a forked project with its parent project.
+   *
+   * @param user The user who is syncing the project
+   * @param projectSlug The slug of the project to sync
+   * @param hardSync Whether to do a hard sync or not. If true, all items in the
+   * forked project will be replaced with the items from the parent project. If
+   * false, only items that are not present in the forked project will be added
+   * from the parent project.
+   *
+   * @throws BadRequestException If the project is not a forked project
+   * @throws UnauthorizedException If the user does not have the authority to update the project
+   */
+  async syncFork(user: User, projectSlug: Project['slug'], hardSync: boolean) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.UPDATE_PROJECT],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     if (!project.isForked || project.forkedFromId == null) {
       throw new BadRequestException(
-        `Project with id ${projectId} is not a forked project`
+        `Project ${projectSlug} is not a forked project`
       )
     }
+
+    const forkedFromProject = await this.prisma.project.findUnique({
+      where: {
+        id: project.forkedFromId
+      }
+    })
 
     const parentProject =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: project.forkedFromId },
+        entity: { slug: forkedFromProject.slug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
@@ -538,11 +601,18 @@ export class ProjectService {
     await this.prisma.$transaction(copyProjectOp)
   }
 
-  async deleteProject(user: User, projectId: Project['id']) {
+  /**
+   * Deletes a project.
+   * @param user The user who is deleting the project
+   * @param projectSlug The slug of the project to delete
+   *
+   * @throws UnauthorizedException If the user does not have the authority to delete the project
+   */
+  async deleteProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.DELETE_PROJECT],
         prisma: this.prisma
       })
@@ -592,18 +662,31 @@ export class ProjectService {
     this.log.debug(`Deleted project ${project}`)
   }
 
+  /**
+   * Gets all the forks of a project.
+   *
+   * @param user The user who is requesting the forks
+   * @param projectSlug The slug of the project to get forks for
+   * @param page The page number to get the forks for
+   * @param limit The number of forks to get per page
+   * @returns An object with two properties: `items` and `metadata`.
+   * `items` is an array of project objects that are forks of the given project,
+   * and `metadata` is the pagination metadata for the forks.
+   */
   async getAllProjectForks(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     page: number,
     limit: number
   ) {
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
+    const projectId = project.id
 
     const forks = await this.prisma.project.findMany({
       where: {
@@ -615,7 +698,7 @@ export class ProjectService {
       const allowed =
         (await this.authorityCheckerService.checkAuthorityOverProject({
           userId: user.id,
-          entity: { id: fork.id },
+          entity: { slug: fork.slug },
           authorities: [Authority.READ_PROJECT],
           prisma: this.prisma
         })) != null
@@ -624,10 +707,11 @@ export class ProjectService {
     })
 
     const items = forksAllowed.slice(page * limit, (page + 1) * limit)
-    //calculate metadata
+
+    // Calculate metadata
     const metadata = paginate(
       forksAllowed.length,
-      `/project/${projectId}/forks`,
+      `/project/${projectSlug}/forks`,
       {
         page,
         limit: limitMaxItemsPerPage(limit)
@@ -637,11 +721,20 @@ export class ProjectService {
     return { items, metadata }
   }
 
-  async getProjectById(user: User, projectId: Project['id']) {
+  /**
+   * Gets a project by slug.
+   *
+   * @param user The user who is requesting the project
+   * @param projectSlug The slug of the project to get
+   * @returns The project with secrets removed
+   *
+   * @throws UnauthorizedException If the user does not have the authority to read the project
+   */
+  async getProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
@@ -651,28 +744,43 @@ export class ProjectService {
     return project
   }
 
+  /**
+   * Gets all the projects in a workspace that the user has access to.
+   *
+   * @param user The user who is requesting the projects
+   * @param workspaceSlug The slug of the workspace to get the projects from
+   * @param page The page number to get the projects for
+   * @param limit The number of projects to get per page
+   * @param sort The field to sort the projects by
+   * @param order The order to sort the projects in
+   * @param search The search string to filter the projects by
+   * @returns An object with two properties: `items` and `metadata`.
+   * `items` is an array of project objects that match the given criteria,
+   * and `metadata` is an object with pagination metadata.
+   */
   async getProjectsOfWorkspace(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
     sort: string,
     order: string,
     search: string
   ) {
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
     //fetch projects with required properties
     const items = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
-
         orderBy: {
           [sort]: order
         },
@@ -727,7 +835,7 @@ export class ProjectService {
       }
     })
 
-    const metadata = paginate(totalCount, `/project/all/${workspaceId}`, {
+    const metadata = paginate(totalCount, `/project/all/${workspaceSlug}`, {
       page,
       limit,
       sort,
@@ -738,6 +846,13 @@ export class ProjectService {
     return { items, metadata }
   }
 
+  /**
+   * Checks if a project with a given name exists in a workspace.
+   *
+   * @param projectName The name of the project to check
+   * @param workspaceId The ID of the workspace to check in
+   * @returns true if the project exists, false otherwise
+   */
   private async projectExists(
     projectName: string,
     workspaceId: Workspace['id']
@@ -758,6 +873,16 @@ export class ProjectService {
     )
   }
 
+  /**
+   * Copies the project data from one project to another project.
+   *
+   * @param user The user who is performing the copy operation
+   * @param fromProject The project from which the data is being copied
+   * @param toProject The project to which the data is being copied
+   * @param hardCopy If true, replace all the data in the toProject with the fromProject,
+   * otherwise, only add the items in the fromProject that are not already present in the toProject.
+   * @returns An array of database operations that need to be performed to copy the data.
+   */
   private async copyProjectData(
     user: User,
     fromProject: {
@@ -845,6 +970,11 @@ export class ProjectService {
           data: {
             id: newEnvironmentId,
             name: environment.name,
+            slug: await generateEntitySlug(
+              environment.name,
+              'ENVIRONMENT',
+              this.prisma
+            ),
             description: environment.description,
             projectId: toProject.id,
             lastUpdatedById: user.id
@@ -892,6 +1022,7 @@ export class ProjectService {
         this.prisma.secret.create({
           data: {
             name: secret.name,
+            slug: await generateEntitySlug(secret.name, 'SECRET', this.prisma),
             projectId: toProject.id,
             lastUpdatedById: user.id,
             note: secret.note,
@@ -944,6 +1075,11 @@ export class ProjectService {
         this.prisma.variable.create({
           data: {
             name: variable.name,
+            slug: await generateEntitySlug(
+              variable.name,
+              'VARIABLE',
+              this.prisma
+            ),
             projectId: toProject.id,
             lastUpdatedById: user.id,
             note: variable.note,
@@ -963,6 +1099,18 @@ export class ProjectService {
     return [...createEnvironmentOps, ...createSecretOps, ...createVariableOps]
   }
 
+  /**
+   * Updates the key pair of a project.
+   *
+   * @param project The project to update
+   * @param oldPrivateKey The old private key of the project
+   * @param storePrivateKey Whether to store the new private key in the database
+   *
+   * @returns An object with three properties:
+   * - `txs`: an array of database operations that need to be performed to update the project
+   * - `newPrivateKey`: the new private key of the project
+   * - `newPublicKey`: the new public key of the project
+   */
   private async updateProjectKeyPair(
     project: ProjectWithSecrets,
     oldPrivateKey: string,

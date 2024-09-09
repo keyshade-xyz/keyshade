@@ -2,7 +2,6 @@ import {
   PrismaClient,
   Authority,
   Workspace,
-  Integration,
   ProjectAccessLevel
 } from '@prisma/client'
 import { VariableWithProjectAndVersion } from '@/variable/variable.types'
@@ -12,18 +11,21 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import getCollectiveProjectAuthorities from './get-collective-project-authorities'
-import getCollectiveWorkspaceAuthorities from './get-collective-workspace-authorities'
 import { EnvironmentWithProject } from '@/environment/environment.types'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { SecretWithProjectAndVersion } from '@/secret/secret.types'
 import { CustomLoggerService } from './logger.service'
+import {
+  getCollectiveProjectAuthorities,
+  getCollectiveWorkspaceAuthorities
+} from './collective-authorities'
+import { IntegrationWithWorkspace } from '@/integration/integration.types'
 
 export interface AuthorityInput {
   userId: string
   authorities: Authority[]
   prisma: PrismaClient
-  entity: { id?: string; name?: string }
+  entity: { slug?: string; name?: string }
 }
 
 @Injectable()
@@ -47,10 +49,10 @@ export class AuthorityCheckerService {
     let workspace: Workspace
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         workspace = await prisma.workspace.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
           }
         })
       } else {
@@ -67,11 +69,11 @@ export class AuthorityCheckerService {
     }
 
     if (!workspace) {
-      throw new NotFoundException(`Workspace with id ${entity.id} not found`)
+      throw new NotFoundException(`Workspace ${entity.slug} not found`)
     }
 
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
-      entity.id,
+      workspace.id,
       userId,
       prisma
     )
@@ -98,10 +100,10 @@ export class AuthorityCheckerService {
     let project: ProjectWithSecrets
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         project = await prisma.project.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
           },
           include: {
             secrets: true
@@ -124,7 +126,7 @@ export class AuthorityCheckerService {
     }
 
     if (!project) {
-      throw new NotFoundException(`Project with id ${entity.id} not found`)
+      throw new NotFoundException(`Project ${entity.slug} not found`)
     }
 
     const permittedAuthoritiesForProject: Set<Authority> =
@@ -190,10 +192,10 @@ export class AuthorityCheckerService {
     let environment: EnvironmentWithProject
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         environment = await prisma.environment.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
           },
           include: {
             project: true
@@ -216,7 +218,7 @@ export class AuthorityCheckerService {
     }
 
     if (!environment) {
-      throw new NotFoundException(`Environment with id ${entity.id} not found`)
+      throw new NotFoundException(`Environment ${entity.slug} not found`)
     }
 
     const permittedAuthorities = await getCollectiveProjectAuthorities(
@@ -247,10 +249,10 @@ export class AuthorityCheckerService {
     let variable: VariableWithProjectAndVersion
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         variable = await prisma.variable.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
           },
           include: {
             versions: true,
@@ -275,7 +277,7 @@ export class AuthorityCheckerService {
     }
 
     if (!variable) {
-      throw new NotFoundException(`Variable with id ${entity.id} not found`)
+      throw new NotFoundException(`Variable ${entity.slug} not found`)
     }
 
     const permittedAuthorities = await getCollectiveProjectAuthorities(
@@ -306,10 +308,10 @@ export class AuthorityCheckerService {
     let secret: SecretWithProjectAndVersion
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         secret = await prisma.secret.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
           },
           include: {
             versions: true,
@@ -334,7 +336,7 @@ export class AuthorityCheckerService {
     }
 
     if (!secret) {
-      throw new NotFoundException(`Secret with id ${entity.id} not found`)
+      throw new NotFoundException(`Secret ${entity.slug} not found`)
     }
 
     const permittedAuthorities = await getCollectiveProjectAuthorities(
@@ -359,16 +361,19 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverIntegration(
     input: AuthorityInput
-  ): Promise<Integration> {
+  ): Promise<IntegrationWithWorkspace> {
     const { userId, entity, authorities, prisma } = input
 
-    let integration: Integration | null
+    let integration: IntegrationWithWorkspace | null
 
     try {
-      if (entity.id) {
+      if (entity.slug) {
         integration = await prisma.integration.findUnique({
           where: {
-            id: entity.id
+            slug: entity.slug
+          },
+          include: {
+            workspace: true
           }
         })
       } else {
@@ -376,6 +381,9 @@ export class AuthorityCheckerService {
           where: {
             name: entity.name,
             workspace: { members: { some: { userId: userId } } }
+          },
+          include: {
+            workspace: true
           }
         })
       }
@@ -385,7 +393,7 @@ export class AuthorityCheckerService {
     }
 
     if (!integration) {
-      throw new NotFoundException(`Integration with id ${entity.id} not found`)
+      throw new NotFoundException(`Integration ${entity.slug} not found`)
     }
 
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
@@ -405,7 +413,7 @@ export class AuthorityCheckerService {
 
       if (!project) {
         throw new NotFoundException(
-          `Project with id ${integration.projectId} not found`
+          `Project with ID ${integration.projectId} not found`
         )
       }
 
@@ -427,7 +435,7 @@ export class AuthorityCheckerService {
    *
    * @param permittedAuthorities The set of authorities that the user has
    * @param authorities The set of authorities required to perform the action
-   * @param userId The id of the user
+   * @param userId The slug of the user
    * @returns void
    * @throws UnauthorizedException if the user does not have all the required authorities
    */

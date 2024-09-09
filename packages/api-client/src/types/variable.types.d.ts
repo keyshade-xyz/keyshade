@@ -1,13 +1,13 @@
 import { Page } from './index.types'
 
 export interface CreateVariableRequest {
-  projectId: string
+  projectSlug: string
   name: string
   note?: string
   entries?: [
     {
       value: string
-      environmentId: string
+      environmentSlug: string
     }
   ]
 }
@@ -15,6 +15,7 @@ export interface CreateVariableRequest {
 export interface CreateVariableResponse {
   id: string
   name: string
+  slug: string
   createdAt: string
   updatedAt: string
   note: string | null
@@ -31,12 +32,12 @@ export interface CreateVariableResponse {
   ]
 }
 export interface UpdateVariableRequest {
-  variableId: string
+  variableSlug: string
   name?: string
   entries?: [
     {
       value: string
-      environmentId: string
+      environmentSlug: string
     }
   ]
 }
@@ -45,6 +46,7 @@ export interface UpdateVariableResponse {
     id: string
     name: string
     note: string
+    slug: string
   }
   updatedVersions: [
     {
@@ -55,9 +57,9 @@ export interface UpdateVariableResponse {
 }
 
 export interface RollBackVariableRequest {
-  variableId: string
+  variableSlug: string
   version: number
-  environmentId: string
+  environmentSlug: string
 }
 
 export interface RollBackVariableResponse {
@@ -65,13 +67,13 @@ export interface RollBackVariableResponse {
 }
 
 export interface DeleteVariableRequest {
-  variableId: string
+  variableSlug: string
 }
 
 export interface DeleteVariableResponse {}
 
 export interface GetAllVariablesOfProjectRequest {
-  projectId: string
+  projectSlug: string
   page?: number
   limit?: number
   sort?: string
@@ -84,6 +86,7 @@ export interface GetAllVariablesOfProjectResponse
     variable: {
       id: string
       name: string
+      slug: string
       createdAt: string
       updatedAt: string
       note: string | null
@@ -105,8 +108,8 @@ export interface GetAllVariablesOfProjectResponse
   }> {}
 
 export interface GetAllVariablesOfEnvironmentRequest {
-  projectId: string
-  environmentId: string
+  projectSlug: string
+  environmentSlug: string
   page?: number
   limit?: number
   sort?: string

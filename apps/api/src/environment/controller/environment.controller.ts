@@ -19,44 +19,48 @@ import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authori
 export class EnvironmentController {
   constructor(private readonly environmentService: EnvironmentService) {}
 
-  @Post(':projectId')
+  @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_ENVIRONMENT)
   async createEnvironment(
     @CurrentUser() user: User,
     @Body() dto: CreateEnvironment,
-    @Param('projectId') projectId: string
+    @Param('projectSlug') projectSlug: string
   ) {
-    return await this.environmentService.createEnvironment(user, dto, projectId)
+    return await this.environmentService.createEnvironment(
+      user,
+      dto,
+      projectSlug
+    )
   }
 
-  @Put(':environmentId')
+  @Put(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_ENVIRONMENT)
   async updateEnvironment(
     @CurrentUser() user: User,
     @Body() dto: UpdateEnvironment,
-    @Param('environmentId') environmentId: string
+    @Param('environmentSlug') environmentSlug: string
   ) {
     return await this.environmentService.updateEnvironment(
       user,
       dto,
-      environmentId
+      environmentSlug
     )
   }
 
-  @Get(':environmentId')
+  @Get(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironment(
     @CurrentUser() user: User,
-    @Param('environmentId') environmentId: string
+    @Param('environmentSlug') environmentSlug: string
   ) {
-    return await this.environmentService.getEnvironment(user, environmentId)
+    return await this.environmentService.getEnvironment(user, environmentSlug)
   }
 
-  @Get('/all/:projectId')
+  @Get('/all/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironmentsOfProject(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -65,7 +69,7 @@ export class EnvironmentController {
   ) {
     return await this.environmentService.getEnvironmentsOfProject(
       user,
-      projectId,
+      projectSlug,
       page,
       limit,
       sort,
@@ -74,12 +78,15 @@ export class EnvironmentController {
     )
   }
 
-  @Delete(':environmentId')
+  @Delete(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(
     @CurrentUser() user: User,
-    @Param('environmentId') environmentId: string
+    @Param('environmentSlug') environmentSlug: string
   ) {
-    return await this.environmentService.deleteEnvironment(user, environmentId)
+    return await this.environmentService.deleteEnvironment(
+      user,
+      environmentSlug
+    )
   }
 }

@@ -28,7 +28,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<CreateSecretResponse>> {
     const response = await this.apiClient.post(
-      `/api/secret/${request.projectId}`,
+      `/api/secret/${request.projectSlug}`,
       request,
       headers
     )
@@ -41,7 +41,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateSecretResponse>> {
     const response = await this.apiClient.put(
-      `/api/secret/${request.secretId}`,
+      `/api/secret/${request.secretSlug}`,
       request,
       headers
     )
@@ -54,7 +54,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<RollBackSecretResponse>> {
     const response = await this.apiClient.put(
-      `/api/secret/${request.secretId}/rollback/${request.version}?environmentId=${request.environmentId}`,
+      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
       request,
       headers
     )
@@ -67,7 +67,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteSecretResponse>> {
     const response = await this.apiClient.delete(
-      `/api/secret/${request.secretId}`,
+      `/api/secret/${request.secretSlug}`,
       headers
     )
 
@@ -78,7 +78,7 @@ export default class SecretController {
     request: GetAllSecretsOfProjectRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllSecretsOfProjectResponse>> {
-    let url = `/api/secret/${request.projectId}?decryptValue=true`
+    let url = `/api/secret/${request.projectSlug}?decryptValue=true`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
@@ -93,7 +93,7 @@ export default class SecretController {
     request: GetAllSecretsOfEnvironmentRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
-    const url = `/api/secret/${request.projectId}/${request.environmentId}`
+    const url = `/api/secret/${request.projectSlug}/${request.environmentSlug}`
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)

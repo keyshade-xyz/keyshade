@@ -1,9 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { Authority, EventSeverity, EventSource, User } from '@prisma/client'
+import {
+  Authority,
+  EventSeverity,
+  EventSource,
+  User,
+  Workspace
+} from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class EventService {
@@ -14,7 +20,7 @@ export class EventService {
 
   async getEvents(
     user: User,
-    workspaceId: string,
+    workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
     search: string,
@@ -30,12 +36,14 @@ export class EventService {
     }
 
     // Check for workspace authority
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_EVENT],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_EVENT],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
     const query = {
       where: {
@@ -66,7 +74,7 @@ export class EventService {
 
     const metadata = paginate(
       totalCount,
-      `/event/${workspaceId}`,
+      `/event/${workspaceSlug}`,
       {
         page,
         limit: limitMaxItemsPerPage(limit),

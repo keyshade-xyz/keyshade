@@ -1,14 +1,14 @@
 import { Page } from './index.types'
 
 export interface CreateSecretRequest {
-  projectId: string
+  projectSlug: string
   name: string
   note?: string
   rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
   entries?: [
     {
       value: string
-      environmentId: string
+      environmentSlug: string
     }
   ]
 }
@@ -16,6 +16,7 @@ export interface CreateSecretRequest {
 export interface CreateSecretResponse {
   id: string
   name: string
+  slug: string
   createdAt: string
   updatedAt: string
   rotateAt: string | null
@@ -34,14 +35,14 @@ export interface CreateSecretResponse {
 }
 
 export interface UpdateSecretRequest {
-  secretId: string
+  secretSlug: string
   name?: string
   note?: string
   rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
   entries?: [
     {
       value: string
-      environmentId: string
+      environmentSlug: string
     }
   ]
 }
@@ -51,6 +52,7 @@ export interface UpdateSecretResponse {
     id: string
     name: string
     note: string
+    slug: string
   }
   updatedVersions: [
     {
@@ -62,22 +64,22 @@ export interface UpdateSecretResponse {
 }
 
 export interface DeleteSecretRequest {
-  secretId: string
+  secretSlug: string
 }
 
 export interface DeleteSecretResponse {}
 
 export interface RollBackSecretRequest {
-  environmentId: string
+  environmentSlug: string
   version: number
-  secretId: string
+  secretSlug: string
 }
 export interface RollBackSecretResponse {
   count: string
 }
 
 export interface GetAllSecretsOfProjectRequest {
-  projectId: string
+  projectSlug: string
   page?: number
   limit?: number
   sort?: string
@@ -88,6 +90,7 @@ export interface GetAllSecretsOfProjectResponse
   extends Page<{
     secret: {
       id: string
+      slug: string
       name: string
       createdAt: string
       updatedAt: string
@@ -111,8 +114,8 @@ export interface GetAllSecretsOfProjectResponse
   }> {}
 
 export interface GetAllSecretsOfEnvironmentRequest {
-  projectId: string
-  environmentId: string
+  projectSlug: string
+  environmentSlug: string
 }
 export type GetAllSecretsOfEnvironmentResponse = {
   name: string

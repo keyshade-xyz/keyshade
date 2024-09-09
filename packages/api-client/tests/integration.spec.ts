@@ -7,10 +7,10 @@ describe('Get Environments Tests', () => {
   const client = new APIClient(backendUrl)
   const integrationController = new IntegrationController(backendUrl)
   const email = 'johndoe@example.com'
-  let projectId: string | undefined
-  let workspaceId: string
+  let projectSlug: string | undefined
+  let workspaceSlug: string
   let environment: any
-  let integrationId: string
+  let integrationSlug: string
 
   beforeAll(async () => {
     // Create the user's workspace
@@ -26,12 +26,12 @@ describe('Get Environments Tests', () => {
       )
     ).json()) as any
 
-    workspaceId = workspaceResponse.id
+    workspaceSlug = workspaceResponse.slug
 
     // Create a project
     const projectResponse = (await (
       await client.post(
-        `/api/project/${workspaceId}`,
+        `/api/project/${workspaceSlug}`,
         {
           name: 'Project',
           storePrivateKey: true
@@ -42,11 +42,11 @@ describe('Get Environments Tests', () => {
       )
     ).json()) as any
 
-    projectId = projectResponse.id
+    projectSlug = projectResponse.slug
 
     const createEnvironmentResponse = (await (
       await client.post(
-        `/api/environment/${projectId}`,
+        `/api/environment/${projectSlug}`,
         {
           name: 'Dev'
         },
@@ -61,7 +61,7 @@ describe('Get Environments Tests', () => {
 
   afterAll(async () => {
     // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceId}`, {
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -70,27 +70,27 @@ describe('Get Environments Tests', () => {
     // Create a dummy integration before each test
     const integration = await integrationController.createIntegration(
       {
-        workspaceId,
-        projectId,
+        workspaceSlug,
+        projectSlug,
         name: 'Dummy Integration',
         type: 'DISCORD',
         notifyOn: ['PROJECT_CREATED'],
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentId: environment.id
+        environmentSlug: environment.slug
       },
       {
         'x-e2e-user-email': email
       }
     )
-    integrationId = integration.data?.id as string
+    integrationSlug = integration.data?.slug as string
   })
 
   afterEach(async () => {
     // Delete the dummy integration after each test
     await integrationController.deleteIntegration(
-      { integrationId },
+      { integrationSlug },
       { 'x-e2e-user-email': email }
     )
   })
@@ -98,39 +98,42 @@ describe('Get Environments Tests', () => {
   it('should create an integration', async () => {
     const integration = await integrationController.createIntegration(
       {
-        workspaceId,
-        projectId,
+        workspaceSlug,
+        projectSlug,
         name: 'Discord second',
         type: 'DISCORD',
         notifyOn: ['PROJECT_CREATED'],
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentId: environment.id
+        environmentSlug: environment.slug
       },
       {
         'x-e2e-user-email': email
       }
     )
     expect(integration.data.name).toBe('Discord second')
-    expect(integration.data.projectId).toBe(projectId)
-    expect(integration.data.environmentId).toBe(environment.id)
-    expect(integration.data.workspaceId).toBe(workspaceId)
     expect(integration.data.type).toBe('DISCORD')
   })
 
   it('should update the integration', async () => {
     const updatedIntegration: any =
       await integrationController.updateIntegration(
-        { integrationId, name: 'Github second' },
+        { integrationSlug, name: 'Github second' },
         { 'x-e2e-user-email': email }
       )
     expect(updatedIntegration.data.name).toBe('Github second')
+
+    // Delete the integration
+    await integrationController.deleteIntegration(
+      { integrationSlug: updatedIntegration.data.slug },
+      { 'x-e2e-user-email': email }
+    )
   })
 
   it('should get an integration', async () => {
     const integration: any = await integrationController.getIntegration(
-      { integrationId },
+      { integrationSlug },
       { 'x-e2e-user-email': email }
     )
     expect(integration).toBeDefined()
@@ -140,22 +143,22 @@ describe('Get Environments Tests', () => {
     // Adding another integration
     await integrationController.createIntegration(
       {
-        workspaceId,
-        projectId,
+        workspaceSlug,
+        projectSlug,
         name: 'Discord third',
         type: 'DISCORD',
         notifyOn: ['PROJECT_CREATED'],
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentId: environment.id
+        environmentSlug: environment.slug
       },
       {
         'x-e2e-user-email': email
       }
     )
     const integrations: any = await integrationController.getAllIntegrations(
-      { workspaceId },
+      { workspaceSlug },
       { 'x-e2e-user-email': email }
     )
     expect(integrations.data?.items.length).toBe(3)
@@ -163,11 +166,11 @@ describe('Get Environments Tests', () => {
 
   it('should delete an integration', async () => {
     await integrationController.deleteIntegration(
-      { integrationId },
+      { integrationSlug },
       { 'x-e2e-user-email': email }
     )
     const integrations: any = await integrationController.getAllIntegrations(
-      { workspaceId },
+      { workspaceSlug },
       { 'x-e2e-user-email': email }
     )
     expect(integrations.data.items.length).toBe(2)

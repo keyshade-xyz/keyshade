@@ -19,5 +19,5 @@ export class CreateWorkspaceRole {
 
   @IsArray()
   @IsOptional()
-  readonly projectIds?: string[]
+  readonly projectSlugs?: string[]
 }

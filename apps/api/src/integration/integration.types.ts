@@ -42,3 +42,7 @@ export interface IntegrationMetadata {}
 export interface DiscordIntegrationMetadata extends IntegrationMetadata {
   webhookUrl: string
 }
+
+export interface IntegrationWithWorkspace extends Integration {
+  workspace: Workspace
+}

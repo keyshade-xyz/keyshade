@@ -19,7 +19,6 @@ import {
   User,
   Workspace
 } from '@prisma/client'
-import fetchEvents from '@/common/fetch-events'
 import { ProjectModule } from '@/project/project.module'
 import { ProjectService } from '@/project/service/project.service'
 import { EventModule } from '@/event/event.module'
@@ -27,7 +26,8 @@ import { EventService } from '@/event/service/event.service'
 import { EnvironmentService } from './service/environment.service'
 import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/service/user.service'
-import { QueryTransformPipe } from '@/common/query.transform.pipe'
+import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+import { fetchEvents } from '@/common/event'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -92,7 +92,7 @@ describe('Environment Controller Tests', () => {
     user1 = createUser1
     user2 = createUser2
 
-    project1 = (await projectService.createProject(user1, workspace1.id, {
+    project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true,
@@ -138,382 +138,416 @@ describe('Environment Controller Tests', () => {
   it('should be defined', () => {
     expect(app).toBeDefined()
     expect(prisma).toBeDefined()
+    expect(projectService).toBeDefined()
+    expect(environmentService).toBeDefined()
+    expect(userService).toBeDefined()
+    expect(eventService).toBeDefined()
   })
 
-  it('should be able to create an environment under a project', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/environment/${project1.id}`,
-      payload: {
-        name: 'Environment 3',
-        description: 'Environment 3 description'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+  describe('Create Environment Tests', () => {
+    it('should be able to create an environment under a project', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment 3',
+          description: 'Environment 3 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      expect(response.json().name).toBe('Environment 3')
+      expect(response.json().description).toBe('Environment 3 description')
+      expect(response.json().slug).toBeDefined()
+
+      const environmentFromDb = await prisma.environment.findUnique({
+        where: {
+          id: response.json().id
+        }
+      })
+
+      expect(environmentFromDb).toBeDefined()
     })
 
-    expect(response.statusCode).toBe(201)
-    expect(response.json().name).toBe('Environment 3')
-    expect(response.json().description).toBe('Environment 3 description')
+    it('should not be able to create an environment in a project that does not exist', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/123`,
+        payload: {
+          name: 'Environment 1',
+          description: 'Environment 1 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-    const environmentFromDb = await prisma.environment.findUnique({
-      where: {
-        id: response.json().id
-      }
+      expect(response.statusCode).toBe(404)
+      expect(response.json().message).toBe('Project 123 not found')
     })
 
-    expect(environmentFromDb).toBeDefined()
-  })
+    it('should not be able to create an environment in a project that the user does not have access to', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment 1',
+          description: 'Environment 1 description'
+        },
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
 
-  it('should not be able to create an environment in a project that does not exist', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/environment/123`,
-      payload: {
-        name: 'Environment 1',
-        description: 'Environment 1 description'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(401)
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toBe('Project with id 123 not found')
-  })
+    it('should not be able to create a duplicate environment', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment 1',
+          description: 'Environment 1 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should not be able to create an environment in a project that the user does not have access to', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/environment/${project1.id}`,
-      payload: {
-        name: 'Environment 1',
-        description: 'Environment 1 description'
-      },
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
+      expect(response.statusCode).toBe(409)
+      expect(response.json().message).toBe(
+        `Environment with name Environment 1 already exists in project ${project1.slug}`
+      )
     })
 
-    expect(response.statusCode).toBe(401)
-  })
+    it('should have created a ENVIRONMENT_ADDED event', async () => {
+      // Create an environment
+      await environmentService.createEnvironment(
+        user1,
+        {
+          name: 'Environment 4'
+        },
+        project1.slug
+      )
 
-  it('should not be able to create a duplicate environment', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: `/environment/${project1.id}`,
-      payload: {
-        name: 'Environment 1',
-        description: 'Environment 1 description'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      const response = await fetchEvents(
+        eventService,
+        user1,
+        workspace1.slug,
+        EventSource.ENVIRONMENT
+      )
+
+      const event = response.items[0]
+
+      expect(event.source).toBe(EventSource.ENVIRONMENT)
+      expect(event.triggerer).toBe(EventTriggerer.USER)
+      expect(event.severity).toBe(EventSeverity.INFO)
+      expect(event.type).toBe(EventType.ENVIRONMENT_ADDED)
+      expect(event.workspaceId).toBe(workspace1.id)
+      expect(event.itemId).toBeDefined()
     })
-
-    expect(response.statusCode).toBe(409)
-    expect(response.json().message).toBe(
-      `Environment with name Environment 1 already exists in project ${project1.id}`
-    )
   })
 
-  it('should have created a ENVIRONMENT_ADDED event', async () => {
-    // Create an environment
-    await environmentService.createEnvironment(
-      user1,
-      {
-        name: 'Environment 4'
-      },
-      project1.id
-    )
+  describe('Update Environment Tests', () => {
+    it('should be able to update an environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/environment/${environment1.slug}`,
+        payload: {
+          name: 'Environment 1 Updated',
+          description: 'Environment 1 description updated'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-    const response = await fetchEvents(
-      eventService,
-      user1,
-      workspace1.id,
-      EventSource.ENVIRONMENT
-    )
-
-    const event = response.items[0]
-
-    expect(event.source).toBe(EventSource.ENVIRONMENT)
-    expect(event.triggerer).toBe(EventTriggerer.USER)
-    expect(event.severity).toBe(EventSeverity.INFO)
-    expect(event.type).toBe(EventType.ENVIRONMENT_ADDED)
-    expect(event.workspaceId).toBe(workspace1.id)
-    expect(event.itemId).toBeDefined()
-  })
-
-  it('should be able to update an environment', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/${environment1.id}`,
-      payload: {
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toEqual({
+        id: environment1.id,
         name: 'Environment 1 Updated',
-        description: 'Environment 1 description updated'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+        slug: expect.any(String),
+        description: 'Environment 1 description updated',
+        projectId: project1.id,
+        lastUpdatedById: user1.id,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String)
+      })
+
+      environment1 = response.json()
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      id: environment1.id,
-      name: 'Environment 1 Updated',
-      description: 'Environment 1 description updated',
-      projectId: project1.id,
-      lastUpdatedById: user1.id,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+    it('should update the slug if name is updated', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/environment/${environment1.slug}`,
+        payload: {
+          name: 'Environment 1 Updated'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().slug).toBeDefined()
+      expect(response.json().slug).not.toBe(environment1.slug)
     })
 
-    environment1 = response.json()
-  })
+    it('should not be able to update an environment that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/environment/123`,
+        payload: {
+          name: 'Environment 1 Updated',
+          description: 'Environment 1 description updated'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should not be able to update an environment that does not exist', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/123`,
-      payload: {
-        name: 'Environment 1 Updated',
-        description: 'Environment 1 description updated'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(404)
+      expect(response.json().message).toBe('Environment 123 not found')
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toBe('Environment with id 123 not found')
-  })
+    it('should not be able to update an environment that the user does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/environment/${environment1.slug}`,
+        payload: {
+          name: 'Environment 1 Updated',
+          description: 'Environment 1 description updated'
+        },
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
 
-  it('should not be able to update an environment that the user does not have access to', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/${environment1.id}`,
-      payload: {
-        name: 'Environment 1 Updated',
-        description: 'Environment 1 description updated'
-      },
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
+      expect(response.statusCode).toBe(401)
     })
 
-    expect(response.statusCode).toBe(401)
-  })
+    it('should not be able to update an environment to a duplicate name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/environment/${environment1.slug}`,
+        payload: {
+          name: 'Environment 2',
+          description: 'Environment 1 description updated'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should not be able to update an environment to a duplicate name', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/environment/${environment1.id}`,
-      payload: {
-        name: 'Environment 2',
-        description: 'Environment 1 description updated'
-      },
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(409)
+      expect(response.json().message).toBe(
+        `Environment with name Environment 2 already exists in project ${project1.slug}`
+      )
     })
 
-    expect(response.statusCode).toBe(409)
-    expect(response.json().message).toBe(
-      `Environment with name Environment 2 already exists in project ${project1.id}`
-    )
+    it('should create a ENVIRONMENT_UPDATED event', async () => {
+      // Update an environment
+      await environmentService.updateEnvironment(
+        user1,
+        {
+          name: 'Environment 1 Updated'
+        },
+        environment1.slug
+      )
+
+      const response = await fetchEvents(
+        eventService,
+        user1,
+        workspace1.slug,
+        EventSource.ENVIRONMENT
+      )
+
+      const event = response.items[0]
+
+      expect(event.source).toBe(EventSource.ENVIRONMENT)
+      expect(event.triggerer).toBe(EventTriggerer.USER)
+      expect(event.severity).toBe(EventSeverity.INFO)
+      expect(event.type).toBe(EventType.ENVIRONMENT_UPDATED)
+      expect(event.workspaceId).toBe(workspace1.id)
+      expect(event.itemId).toBeDefined()
+    })
   })
 
-  it('should create a ENVIRONMENT_UPDATED event', async () => {
-    // Update an environment
-    await environmentService.updateEnvironment(
-      user1,
-      {
-        name: 'Environment 1 Updated'
-      },
-      environment1.id
-    )
+  describe('Get Environment Tests', () => {
+    it('should be able to fetch an environment', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-    const response = await fetchEvents(
-      eventService,
-      user1,
-      workspace1.id,
-      EventSource.ENVIRONMENT
-    )
-
-    const event = response.items[0]
-
-    expect(event.source).toBe(EventSource.ENVIRONMENT)
-    expect(event.triggerer).toBe(EventTriggerer.USER)
-    expect(event.severity).toBe(EventSeverity.INFO)
-    expect(event.type).toBe(EventType.ENVIRONMENT_UPDATED)
-    expect(event.workspaceId).toBe(workspace1.id)
-    expect(event.itemId).toBeDefined()
-  })
-
-  it('should be able to fetch an environment', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/${environment1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(200)
+      expect(response.json().name).toBe('Environment 1')
+      expect(response.json().slug).toBe(environment1.slug)
+      expect(response.json().description).toBe('Environment 1 description')
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json().name).toBe('Environment 1')
-    expect(response.json().description).toBe('Environment 1 description')
-  })
+    it('should not be able to fetch an environment that does not exist', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/123`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should not be able to fetch an environment that does not exist', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/123`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(404)
+      expect(response.json().message).toBe('Environment 123 not found')
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toBe('Environment with id 123 not found')
+    it('should not be able to fetch an environment that the user does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
   })
 
-  it('should not be able to fetch an environment that the user does not have access to', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/${environment1.id}`,
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
+  describe('Get All Environments Tests', () => {
+    it('should be able to fetch all environments of a project', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project1.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      // Check metadata
+      const metadata = response.json().metadata
+      expect(metadata.totalCount).toEqual(2)
+      expect(metadata.links.self).toBe(
+        `/environment/all/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.first).toBe(
+        `/environment/all/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.previous).toBeNull()
+      expect(metadata.links.next).toBeNull()
+      expect(metadata.links.last).toBe(
+        `/environment/all/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
     })
 
-    expect(response.statusCode).toBe(401)
-  })
+    it('should not be able to fetch all environments of a project that does not exist', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/123`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should be able to fetch all environments of a project', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/all/${project1.id}?page=0&limit=10`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(404)
+      expect(response.json().message).toBe('Project 123 not found')
     })
 
-    expect(response.statusCode).toBe(200)
-    //check metadata
-    const metadata = response.json().metadata
-    expect(metadata.totalCount).toEqual(2)
-    expect(metadata.links.self).toBe(
-      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
-    )
-    expect(metadata.links.first).toBe(
-      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
-    )
-    expect(metadata.links.previous).toBeNull()
-    expect(metadata.links.next).toBeNull()
-    expect(metadata.links.last).toBe(
-      `/environment/all/${project1.id}?page=0&limit=10&sort=name&order=asc&search=`
-    )
+    it('should not be able to fetch all environments of a project that the user does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
   })
 
-  it('should not be able to fetch all environments of a project that does not exist', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/all/123`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+  describe('Delete Environment Tests', () => {
+    it('should be able to delete an environment', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/environment/${environment2.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toBe('Project with id 123 not found')
-  })
+    it('should have created a ENVIRONMENT_DELETED event', async () => {
+      // Delete an environment
+      await environmentService.deleteEnvironment(user1, environment2.slug)
 
-  it('should not be able to fetch all environments of a project that the user does not have access to', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/environment/all/${project1.id}`,
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
+      const response = await fetchEvents(
+        eventService,
+        user1,
+        workspace1.slug,
+        EventSource.ENVIRONMENT
+      )
+
+      const event = response.items[0]
+
+      expect(event.source).toBe(EventSource.ENVIRONMENT)
+      expect(event.triggerer).toBe(EventTriggerer.USER)
+      expect(event.severity).toBe(EventSeverity.INFO)
+      expect(event.type).toBe(EventType.ENVIRONMENT_DELETED)
+      expect(event.workspaceId).toBe(workspace1.id)
+      expect(event.itemId).toBeDefined()
     })
 
-    expect(response.statusCode).toBe(401)
-  })
+    it('should not be able to delete an environment that does not exist', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/environment/123`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-  it('should be able to delete an environment', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(404)
+      expect(response.json().message).toBe('Environment 123 not found')
     })
 
-    expect(response.statusCode).toBe(200)
-  })
+    it('should not be able to delete an environment that the user does not have access to', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/environment/${environment2.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
 
-  it('should have created a ENVIRONMENT_DELETED event', async () => {
-    // Delete an environment
-    await environmentService.deleteEnvironment(user1, environment2.id)
-
-    const response = await fetchEvents(
-      eventService,
-      user1,
-      workspace1.id,
-      EventSource.ENVIRONMENT
-    )
-
-    const event = response.items[0]
-
-    expect(event.source).toBe(EventSource.ENVIRONMENT)
-    expect(event.triggerer).toBe(EventTriggerer.USER)
-    expect(event.severity).toBe(EventSeverity.INFO)
-    expect(event.type).toBe(EventType.ENVIRONMENT_DELETED)
-    expect(event.workspaceId).toBe(workspace1.id)
-    expect(event.itemId).toBeDefined()
-  })
-
-  it('should not be able to delete an environment that does not exist', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/environment/123`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+      expect(response.statusCode).toBe(401)
     })
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().message).toBe('Environment with id 123 not found')
-  })
+    it('should not be able to delete the only environment in a project', async () => {
+      // Delete the other environment
+      await environmentService.deleteEnvironment(user1, environment2.slug)
 
-  it('should not be able to delete an environment that the user does not have access to', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/environment/${environment2.id}`,
-      headers: {
-        'x-e2e-user-email': user2.email
-      }
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/environment/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toBe(
+        'Cannot delete the last environment in the project'
+      )
     })
-
-    expect(response.statusCode).toBe(401)
-  })
-
-  it('should not be able to delete the only environment in a project', async () => {
-    // Delete the other environment
-    await environmentService.deleteEnvironment(user1, environment2.id)
-
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/environment/${environment1.id}`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
-    })
-
-    expect(response.statusCode).toBe(400)
-    expect(response.json().message).toBe(
-      'Cannot delete the last environment in the project'
-    )
   })
 })

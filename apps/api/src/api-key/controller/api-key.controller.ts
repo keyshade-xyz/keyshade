@@ -26,21 +26,24 @@ export class ApiKeyController {
     return this.apiKeyService.createApiKey(user, dto)
   }
 
-  @Put(':id')
+  @Put(':apiKeySlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_API_KEY)
   async updateApiKey(
     @CurrentUser() user: User,
     @Body() dto: UpdateApiKey,
-    @Param('id') id: string
+    @Param('apiKeySlug') apiKeySlug: string
   ) {
-    return this.apiKeyService.updateApiKey(user, id, dto)
+    return this.apiKeyService.updateApiKey(user, apiKeySlug, dto)
   }
 
-  @Delete(':id')
+  @Delete(':apiKeySlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_API_KEY)
   @HttpCode(204)
-  async deleteApiKey(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.apiKeyService.deleteApiKey(user, id)
+  async deleteApiKey(
+    @CurrentUser() user: User,
+    @Param('apiKeySlug') apiKeySlug: string
+  ) {
+    return this.apiKeyService.deleteApiKey(user, apiKeySlug)
   }
 
   @Get('/')
@@ -63,10 +66,13 @@ export class ApiKeyController {
     )
   }
 
-  @Get(':id')
+  @Get(':apiKeySlug')
   @RequiredApiKeyAuthorities(Authority.READ_API_KEY)
-  async getApiKey(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.apiKeyService.getApiKeyById(user, id)
+  async getApiKey(
+    @CurrentUser() user: User,
+    @Param('apiKeySlug') apiKeySlug: string
+  ) {
+    return this.apiKeyService.getApiKeyBySlug(user, apiKeySlug)
   }
 
   @Get('/access/live-updates')

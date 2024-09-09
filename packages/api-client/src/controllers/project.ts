@@ -34,7 +34,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<CreateProjectResponse>> {
     const response = await this.apiClient.post(
-      `/api/project/${request.workspaceId}`,
+      `/api/project/${request.workspaceSlug}`,
       request,
       headers
     )
@@ -47,7 +47,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<UpdateProjectResponse>> {
     const response = await this.apiClient.put(
-      `/api/project/${request.projectId}`,
+      `/api/project/${request.projectSlug}`,
       request,
       headers
     )
@@ -60,7 +60,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<DeleteProjectResponse>> {
     const response = await this.apiClient.delete(
-      `/api/project/${request.projectId}`,
+      `/api/project/${request.projectSlug}`,
       headers
     )
 
@@ -72,7 +72,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<GetProjectResponse>> {
     const response = await this.apiClient.get(
-      `/api/project/${request.projectId}`,
+      `/api/project/${request.projectSlug}`,
       headers
     )
 
@@ -84,7 +84,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<ForkProjectResponse>> {
     const response = await this.apiClient.post(
-      `/api/project/${request.projectId}/fork`,
+      `/api/project/${request.projectSlug}/fork`,
       request,
       headers
     )
@@ -97,7 +97,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<SyncProjectResponse>> {
     const response = await this.apiClient.put(
-      `/project/${request.projectId}/fork`,
+      `/project/${request.projectSlug}/fork`,
       request,
       headers
     )
@@ -110,7 +110,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<UnlinkProjectResponse>> {
     const response = await this.apiClient.delete(
-      `/api/project/${request.projectId}/fork`,
+      `/api/project/${request.projectSlug}/fork`,
       headers
     )
 
@@ -121,7 +121,7 @@ export default class ProjectController {
     request: GetForkRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetForkResponse>> {
-    let url = `/api/project/${request.projectId}/forks`
+    let url = `/api/project/${request.projectSlug}/forks`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
@@ -136,7 +136,7 @@ export default class ProjectController {
     request: GetAllProjectsRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllProjectsResponse>> {
-    let url = `/api/project/all/${request.workspaceId}`
+    let url = `/api/project/all/${request.workspaceSlug}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)

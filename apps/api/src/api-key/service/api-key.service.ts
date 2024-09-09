@@ -6,12 +6,11 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
-import { addHoursToDate } from '@/common/add-hours-to-date'
-import { generateApiKey } from '@/common/api-key-generator'
-import { toSHA256 } from '@/common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { ApiKey, User } from '@prisma/client'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import generateEntitySlug from '@/common/slug-generator'
+import { generateApiKey, toSHA256 } from '@/common/cryptography'
+import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class ApiKeyService {
@@ -19,6 +18,24 @@ export class ApiKeyService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private apiKeySelect = {
+    id: true,
+    expiresAt: true,
+    name: true,
+    slug: true,
+    authorities: true,
+    createdAt: true,
+    updatedAt: true
+  }
+
+  /**
+   * Creates a new API key for the given user.
+   *
+   * @throws `ConflictException` if the API key already exists.
+   * @param user The user to create the API key for.
+   * @param dto The data to create the API key with.
+   * @returns The created API key.
+   */
   async createApiKey(user: User, dto: CreateApiKey) {
     await this.isApiKeyUnique(user, dto.name)
 
@@ -27,6 +44,7 @@ export class ApiKeyService {
     const apiKey = await this.prisma.apiKey.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
         value: hashedApiKey,
         authorities: dto.authorities
           ? {
@@ -50,15 +68,29 @@ export class ApiKeyService {
     }
   }
 
-  async updateApiKey(user: User, apiKeyId: string, dto: UpdateApiKey) {
+  /**
+   * Updates an existing API key of the given user.
+   *
+   * @throws `ConflictException` if the API key name already exists.
+   * @throws `NotFoundException` if the API key with the given slug does not exist.
+   * @param user The user to update the API key for.
+   * @param apiKeySlug The slug of the API key to update.
+   * @param dto The data to update the API key with.
+   * @returns The updated API key.
+   */
+  async updateApiKey(
+    user: User,
+    apiKeySlug: ApiKey['slug'],
+    dto: UpdateApiKey
+  ) {
     await this.isApiKeyUnique(user, dto.name)
 
     const apiKey = await this.prisma.apiKey.findUnique({
       where: {
-        id: apiKeyId,
-        userId: user.id
+        slug: apiKeySlug
       }
     })
+    const apiKeyId = apiKey.id
 
     if (!apiKey) {
       throw new NotFoundException(`API key with id ${apiKeyId} not found`)
@@ -71,6 +103,9 @@ export class ApiKeyService {
       },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'API_KEY', this.prisma)
+          : apiKey.slug,
         authorities: {
           set: dto.authorities ? dto.authorities : apiKey.authorities
         },
@@ -78,14 +113,7 @@ export class ApiKeyService {
           ? addHoursToDate(dto.expiresAfter)
           : undefined
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
 
     this.logger.log(`User ${user.id} updated API key ${apiKeyId}`)
@@ -93,44 +121,63 @@ export class ApiKeyService {
     return updatedApiKey
   }
 
-  async deleteApiKey(user: User, apiKeyId: string) {
+  /**
+   * Deletes an API key of the given user.
+   *
+   * @throws `NotFoundException` if the API key with the given slug does not exist.
+   * @param user The user to delete the API key for.
+   * @param apiKeySlug The slug of the API key to delete.
+   */
+  async deleteApiKey(user: User, apiKeySlug: ApiKey['slug']) {
     try {
       await this.prisma.apiKey.delete({
         where: {
-          id: apiKeyId,
+          slug: apiKeySlug,
           userId: user.id
         }
       })
     } catch (error) {
-      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
     }
 
-    this.logger.log(`User ${user.id} deleted API key ${apiKeyId}`)
+    this.logger.log(`User ${user.id} deleted API key ${apiKeySlug}`)
   }
 
-  async getApiKeyById(user: User, apiKeyId: string) {
+  /**
+   * Retrieves an API key of the given user by slug.
+   *
+   * @throws `NotFoundException` if the API key with the given slug does not exist.
+   * @param user The user to retrieve the API key for.
+   * @param apiKeySlug The slug of the API key to retrieve.
+   * @returns The API key with the given slug.
+   */
+  async getApiKeyBySlug(user: User, apiKeySlug: ApiKey['slug']) {
     const apiKey = await this.prisma.apiKey.findUnique({
       where: {
-        id: apiKeyId,
+        slug: apiKeySlug,
         userId: user.id
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
 
     if (!apiKey) {
-      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
     }
 
     return apiKey
   }
 
+  /**
+   * Retrieves all API keys of the given user.
+   *
+   * @param user The user to retrieve the API keys for.
+   * @param page The page number to retrieve.
+   * @param limit The maximum number of items to retrieve per page.
+   * @param sort The column to sort by.
+   * @param order The order to sort by.
+   * @param search The search string to filter the API keys by.
+   * @returns The API keys of the given user, filtered by the search string.
+   */
   async getAllApiKeysOfUser(
     user: User,
     page: number,
@@ -151,17 +198,17 @@ export class ApiKeyService {
       orderBy: {
         [sort]: order
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
   }
 
+  /**
+   * Checks if an API key with the given name already exists for the given user.
+   *
+   * @throws `ConflictException` if the API key already exists.
+   * @param user The user to check for.
+   * @param apiKeyName The name of the API key to check.
+   */
   private async isApiKeyUnique(user: User, apiKeyName: string) {
     let apiKey: ApiKey | null = null
 

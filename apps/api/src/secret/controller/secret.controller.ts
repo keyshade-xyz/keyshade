@@ -19,56 +19,56 @@ import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authori
 export class SecretController {
   constructor(private readonly secretService: SecretService) {}
 
-  @Post(':projectId')
+  @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
   async createSecret(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Body() dto: CreateSecret
   ) {
-    return await this.secretService.createSecret(user, dto, projectId)
+    return await this.secretService.createSecret(user, dto, projectSlug)
   }
 
-  @Put(':secretId')
+  @Put(':secretSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async updateSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
+    @Param('secretSlug') secretSlug: string,
     @Body() dto: UpdateSecret
   ) {
-    return await this.secretService.updateSecret(user, secretId, dto)
+    return await this.secretService.updateSecret(user, secretSlug, dto)
   }
 
-  @Put(':secretId/rollback/:rollbackVersion')
+  @Put(':secretSlug/rollback/:rollbackVersion')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async rollbackSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
-    @Query('environmentId') environmentId: string,
+    @Param('secretSlug') secretSlug: string,
+    @Query('environmentSlug') environmentSlug: string,
     @Param('rollbackVersion') rollbackVersion: number
   ) {
     return await this.secretService.rollbackSecret(
       user,
-      secretId,
-      environmentId,
+      secretSlug,
+      environmentSlug,
       rollbackVersion
     )
   }
 
-  @Delete(':secretId')
+  @Delete(':secretSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string
+    @Param('secretSlug') secretSlug: string
   ) {
-    return await this.secretService.deleteSecret(user, secretId)
+    return await this.secretService.deleteSecret(user, secretSlug)
   }
 
-  @Get('/:projectId')
+  @Get('/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfProject(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -78,7 +78,7 @@ export class SecretController {
   ) {
     return await this.secretService.getAllSecretsOfProject(
       user,
-      projectId,
+      projectSlug,
       decryptValue,
       page,
       limit,
@@ -88,34 +88,34 @@ export class SecretController {
     )
   }
 
-  @Get('/:projectId/:environmentId')
+  @Get('/:projectSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfEnvironment(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
-    @Param('environmentId') environmentId: string
+    @Param('projectSlug') projectSlug: string,
+    @Param('environmentSlug') environmentSlug: string
   ) {
     return await this.secretService.getAllSecretsOfProjectAndEnvironment(
       user,
-      projectId,
-      environmentId
+      projectSlug,
+      environmentSlug
     )
   }
 
-  @Get(':secretId/revisions/:environmentId')
+  @Get(':secretSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getRevisionsOfSecret(
     @CurrentUser() user: User,
-    @Param('secretId') secretId: string,
-    @Param('environmentId') environmentId: string,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
-    @Query('order') order: string = 'desc'
+    @Query('order') order: 'asc' | 'desc' = 'desc'
   ) {
     return await this.secretService.getRevisionsOfSecret(
       user,
-      secretId,
-      environmentId,
+      secretSlug,
+      environmentSlug,
       page,
       limit,
       order

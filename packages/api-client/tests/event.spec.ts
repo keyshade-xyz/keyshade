@@ -16,8 +16,8 @@ describe('Event Controller Tests', () => {
   const client = new APIClient(backendUrl)
   const eventController = new EventController(backendUrl)
   const email = 'johndoe@example.com'
-  let projectId: string | null
-  let workspaceId: string | null
+  let projectSlug: string | null
+  let workspaceSlug: string | null
   let environment: any
 
   beforeAll(async () => {
@@ -33,12 +33,12 @@ describe('Event Controller Tests', () => {
         }
       )
     ).json()) as any
-    workspaceId = workspaceResponse.id
+    workspaceSlug = workspaceResponse.slug
   })
 
   afterAll(async () => {
     // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceId}`, {
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -46,7 +46,7 @@ describe('Event Controller Tests', () => {
   it('should fetch a Project Event', async () => {
     const projectResponse = (await (
       await client.post(
-        `/api/project/${workspaceId}`,
+        `/api/project/${workspaceSlug}`,
         {
           name: 'Project',
           storePrivateKey: true
@@ -57,20 +57,19 @@ describe('Event Controller Tests', () => {
       )
     ).json()) as any
 
-    projectId = projectResponse.id
+    projectSlug = projectResponse.slug
     const events = await eventController.getEvents(
-      { workspaceId, source: 'PROJECT' },
+      { workspaceSlug, source: 'PROJECT' },
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe(EventSource.PROJECT)
-    expect(events.data.items[0].metadata.projectId).toBe(projectId)
     expect(events.data.items[0].metadata.name).toBe('Project')
   })
 
   it('should fetch a Environment Event', async () => {
     const environmentResponse = (await (
       await client.post(
-        `/api/environment/${projectId}`,
+        `/api/environment/${projectSlug}`,
         {
           name: 'Dev'
         },
@@ -80,7 +79,7 @@ describe('Event Controller Tests', () => {
       )
     ).json()) as any
     const events = await eventController.getEvents(
-      { workspaceId, source: EventSource.ENVIRONMENT },
+      { workspaceSlug, source: EventSource.ENVIRONMENT },
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('ENVIRONMENT')
@@ -92,15 +91,15 @@ describe('Event Controller Tests', () => {
   })
 
   it('should fetch a Secret Event', async () => {
-    const secretRepsonse = (await (
+    const secretResponse = (await (
       await client.post(
-        `/api/secret/${projectId}`,
+        `/api/secret/${projectSlug}`,
         {
           name: 'My secret',
           entries: [
             {
               value: 'My value',
-              environmentId: environment.id
+              environmentSlug: environment.slug
             }
           ],
           note: 'Some note',
@@ -112,24 +111,24 @@ describe('Event Controller Tests', () => {
       )
     ).json()) as any
     const events = await eventController.getEvents(
-      { workspaceId, source: EventSource.SECRET },
+      { workspaceSlug, source: EventSource.SECRET },
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('SECRET')
-    expect(events.data.items[0].metadata.secretId).toBe(secretRepsonse.id)
+    expect(events.data.items[0].metadata.secretId).toBe(secretResponse.id)
     expect(events.data.items[0].metadata.name).toBe('My secret')
   })
 
   it('should fetch a Variable Event', async () => {
     const variableResponse = (await (
       await client.post(
-        `/api/variable/${projectId}`,
+        `/api/variable/${projectSlug}`,
         {
           name: 'My variable',
           entries: [
             {
               value: 'My value',
-              environmentId: environment.id
+              environmentSlug: environment.slug
             }
           ],
           note: 'Some note'
@@ -140,7 +139,7 @@ describe('Event Controller Tests', () => {
       )
     ).json()) as any
     const events = await eventController.getEvents(
-      { workspaceId, source: EventSource.VARIABLE },
+      { workspaceSlug, source: EventSource.VARIABLE },
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('VARIABLE')

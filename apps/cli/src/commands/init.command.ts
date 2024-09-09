@@ -16,17 +16,17 @@ export default class InitCommand extends BaseCommand {
       {
         short: '-w',
         long: '--workspace <string>',
-        description: 'Workspace name to configure'
+        description: 'Workspace slug to configure'
       },
       {
         short: '-p',
         long: '--project <string>',
-        description: 'Project name to configure'
+        description: 'Project slug to configure'
       },
       {
         short: '-e',
         long: '--environment <string>',
-        description: 'Environment to configure'
+        description: 'Environment slug to configure'
       },
       {
         short: '-k',
@@ -64,19 +64,19 @@ export default class InitCommand extends BaseCommand {
 
     if (!workspace) {
       workspace = await text({
-        message: 'Enter the workspace name'
+        message: 'Enter the workspace slug'
       })
     }
 
     if (!project) {
       project = await text({
-        message: 'Enter the project name'
+        message: 'Enter the project slug'
       })
     }
 
     if (!environment) {
       environment = await text({
-        message: 'Enter the environment name'
+        message: 'Enter the environment slug'
       })
     }
 

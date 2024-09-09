@@ -27,6 +27,14 @@ const getQueryString = (query: QueryOptions) => {
     .join('&')
 }
 
+/**
+ * Paginates a list of items.
+ * @param totalCount The total number of items
+ * @param relativeUrl The relative URL of the API endpoint
+ * @param query The query options
+ * @param defaultQuery The default query options
+ * @returns The paginated metadata
+ */
 export const paginate = (
   totalCount: number,
   relativeUrl: string,
@@ -57,7 +65,7 @@ export const paginate = (
 
   if (query.page >= metadata.pageCount) return {} as PaginatedMetadata
 
-  //create links from relativeUrl , defalutQueryStr and query of type QueryOptions
+  //create links from relativeUrl , defaultQueryStr and query of type QueryOptions
   metadata.links = {
     self: `${relativeUrl}?${defaultQueryStr + getQueryString(query)}`,
     first: `${relativeUrl}?${defaultQueryStr + getQueryString({ ...query, page: 0 })}`,

@@ -27,11 +27,11 @@ export class CreateIntegration {
 
   @IsString()
   @IsOptional()
-  environmentId?: Environment['id']
+  environmentSlug?: Environment['slug']
 
   @IsString()
   @IsOptional()
-  projectId?: Project['id']
+  projectSlug?: Project['slug']
 
   @IsObject()
   metadata: Record<string, string>

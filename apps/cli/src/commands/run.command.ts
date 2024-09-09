@@ -24,8 +24,8 @@ import { SecretController, VariableController } from '@keyshade/api-client'
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
 
-  private projectId: string
-  private environmentId: string
+  private projectSlug: string
+  private environmentSlug: string
 
   private shouldRestart = false
 
@@ -100,9 +100,9 @@ export default class RunCommand extends BaseCommand {
 
     ioClient.on('connect', async () => {
       ioClient.emit('register-client-app', {
-        workspaceName: data.workspace,
-        projectName: data.project,
-        environmentName: data.environment
+        workspaceSlug: data.workspace,
+        projectSlug: data.project,
+        environmentSlug: data.environment
       })
 
       ioClient.on('configuration-updated', async (data: Configuration) => {
@@ -135,10 +135,16 @@ export default class RunCommand extends BaseCommand {
       ioClient.on(
         'client-registered',
         (registrationResponse: ClientRegisteredResponse) => {
-          Logger.info('Successfully registered to API')
-
-          this.projectId = registrationResponse.projectId
-          this.environmentId = registrationResponse.environmentId
+          if (registrationResponse.success) {
+            this.projectSlug = data.project
+            this.environmentSlug = data.environment
+            Logger.info('Successfully registered to API')
+          } else {
+            Logger.error(
+              'Error registering to API: ' + registrationResponse.message
+            )
+            throw new Error(registrationResponse.message)
+          }
         }
       )
     })
@@ -184,8 +190,8 @@ export default class RunCommand extends BaseCommand {
 
     const secretsResponse = await secretController.getAllSecretsOfEnvironment(
       {
-        environmentId: this.environmentId,
-        projectId: this.projectId
+        environmentId: this.environmentSlug,
+        projectId: this.projectSlug
       },
       {
         'x-keyshade-token': this.apiKey
@@ -199,8 +205,8 @@ export default class RunCommand extends BaseCommand {
     const variablesResponse =
       await variableController.getAllVariablesOfEnvironment(
         {
-          environmentId: this.environmentId,
-          projectId: this.projectId
+          environmentId: this.environmentSlug,
+          projectId: this.projectSlug
         },
         {
           'x-keyshade-token': this.apiKey

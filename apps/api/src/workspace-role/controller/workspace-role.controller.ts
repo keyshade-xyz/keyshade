@@ -19,79 +19,79 @@ import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authori
 export class WorkspaceRoleController {
   constructor(private readonly workspaceRoleService: WorkspaceRoleService) {}
 
-  @Post(':workspaceId')
+  @Post(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_WORKSPACE_ROLE)
   async createWorkspaceRole(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Body() dto: CreateWorkspaceRole
   ) {
     return await this.workspaceRoleService.createWorkspaceRole(
       user,
-      workspaceId,
+      workspaceSlug,
       dto
     )
   }
 
-  @Put(':workspaceRoleId')
+  @Put(':workspaceRoleSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_WORKSPACE_ROLE)
   async updateWorkspaceRole(
     @CurrentUser() user: User,
-    @Param('workspaceRoleId') workspaceRoleId: WorkspaceRole['id'],
+    @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug'],
     @Body() dto: UpdateWorkspaceRole
   ) {
     return await this.workspaceRoleService.updateWorkspaceRole(
       user,
-      workspaceRoleId,
+      workspaceRoleSlug,
       dto
     )
   }
 
-  @Delete(':workspaceRoleId')
+  @Delete(':workspaceRoleSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_WORKSPACE_ROLE)
   async deleteWorkspaceRole(
     @CurrentUser() user: User,
-    @Param('workspaceRoleId') workspaceRoleId: WorkspaceRole['id']
+    @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug']
   ) {
     return await this.workspaceRoleService.deleteWorkspaceRole(
       user,
-      workspaceRoleId
+      workspaceRoleSlug
     )
   }
 
-  @Get(':workspaceId/exists/:workspaceRoleName')
+  @Get(':workspaceSlug/exists/:workspaceRoleName')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
   async checkWorkspaceRoleExists(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('workspaceRoleName') name: WorkspaceRole['name']
   ) {
     return {
       exists: await this.workspaceRoleService.checkWorkspaceRoleExists(
         user,
-        workspaceId,
+        workspaceSlug,
         name
       )
     }
   }
 
-  @Get(':workspaceRoleId')
+  @Get(':workspaceRoleSlug')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
   async getWorkspaceRole(
     @CurrentUser() user: User,
-    @Param('workspaceRoleId') workspaceRoleId: WorkspaceRole['id']
+    @Param('workspaceRoleSlug') workspaceRoleSlug: WorkspaceRole['slug']
   ) {
     return await this.workspaceRoleService.getWorkspaceRole(
       user,
-      workspaceRoleId
+      workspaceRoleSlug
     )
   }
 
-  @Get(':workspaceId/all')
+  @Get(':workspaceSlug/all')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
   async getAllWorkspaceRolesOfWorkspace(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -100,7 +100,7 @@ export class WorkspaceRoleController {
   ) {
     return await this.workspaceRoleService.getWorkspaceRolesOfWorkspace(
       user,
-      workspaceId,
+      workspaceSlug,
       page,
       limit,
       sort,
