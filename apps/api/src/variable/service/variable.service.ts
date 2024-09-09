@@ -48,6 +48,13 @@ export class VariableService {
     this.redis = redisClient.publisher
   }
 
+  /**
+   * Creates a new variable in a project
+   * @param user the user performing the action
+   * @param dto the variable to create
+   * @param projectSlug the slug of the project to create the variable in
+   * @returns the newly created variable
+   */
   async createVariable(
     user: User,
     dto: CreateVariable,
@@ -143,6 +150,13 @@ export class VariableService {
     return variable
   }
 
+  /**
+   * Updates a variable in a project
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable to update
+   * @param dto the data to update the variable with
+   * @returns the updated variable and its new versions
+   */
   async updateVariable(
     user: User,
     variableSlug: Variable['slug'],
@@ -291,6 +305,16 @@ export class VariableService {
     return result
   }
 
+  /**
+   * Rollback a variable to a specific version in a given environment.
+   *
+   * Throws a NotFoundException if the variable does not exist or if the version is invalid.
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable to rollback
+   * @param environmentSlug the slug of the environment to rollback in
+   * @param rollbackVersion the version to rollback to
+   * @returns the deleted variable versions
+   */
   async rollbackVariable(
     user: User,
     variableSlug: Variable['slug'],
@@ -384,6 +408,14 @@ export class VariableService {
     return result
   }
 
+  /**
+   * Deletes a variable from a project.
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable to delete
+   * @returns nothing
+   * @throws `NotFoundException` if the variable does not exist
+   * @throws `ForbiddenException` if the user does not have the required authority
+   */
   async deleteVariable(user: User, variableSlug: Variable['slug']) {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
@@ -421,6 +453,15 @@ export class VariableService {
     this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
   }
 
+  /**
+   * Gets all variables of a project and environment.
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project to get the variables from
+   * @param environmentSlug the slug of the environment to get the variables from
+   * @returns an array of objects containing the name, value and whether the value is a plaintext
+   * @throws `NotFoundException` if the project or environment does not exist
+   * @throws `ForbiddenException` if the user does not have the required authority
+   */
   async getAllVariablesOfProjectAndEnvironment(
     user: User,
     projectSlug: Project['slug'],
@@ -482,6 +523,19 @@ export class VariableService {
     )
   }
 
+  /**
+   * Gets all variables of a project, paginated, sorted and filtered by search query.
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project to get the variables from
+   * @param page the page number to fetch
+   * @param limit the number of items per page
+   * @param sort the field to sort by
+   * @param order the order to sort in
+   * @param search the search query to filter by
+   * @returns a paginated list of variables with their latest versions for each environment
+   * @throws `NotFoundException` if the project does not exist
+   * @throws `ForbiddenException` if the user does not have the required authority
+   */
   async getAllVariablesOfProject(
     user: User,
     projectSlug: Project['slug'],
@@ -621,6 +675,20 @@ export class VariableService {
     return { items, metadata }
   }
 
+  /**
+   * Gets all revisions of a variable in a given environment.
+   *
+   * The response is paginated and sorted by the version in the given order.
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable
+   * @param environmentSlug the slug of the environment
+   * @param page the page number to fetch
+   * @param limit the number of items per page
+   * @param order the order to sort in
+   * @returns a paginated list of variable versions with metadata
+   * @throws `NotFoundException` if the variable or environment does not exist
+   * @throws `ForbiddenException` if the user does not have the required authority
+   */
   async getRevisionsOfVariable(
     user: User,
     variableSlug: Variable['slug'],
@@ -674,6 +742,14 @@ export class VariableService {
     return { items, metadata }
   }
 
+  /**
+   * Checks if a variable with a given name already exists in a project.
+   * Throws a ConflictException if the variable already exists.
+   * @param variableName the name of the variable to check for
+   * @param project the project to check in
+   * @returns nothing
+   * @throws `ConflictException` if the variable already exists
+   */
   private async variableExists(
     variableName: Variable['name'],
     project: Project

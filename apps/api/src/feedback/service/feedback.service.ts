@@ -7,6 +7,11 @@ export class FeedbackService {
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
+  /**
+   * Registers a feedback to be sent to the admin's email.
+   * @param feedback The feedback to be sent.
+   * @throws {BadRequestException} If the feedback is null or empty.
+   */
   async registerFeedback(feedback: string): Promise<void> {
     if (!feedback || feedback.trim().length === 0) {
       throw new BadRequestException('Feedback cannot be null or empty')

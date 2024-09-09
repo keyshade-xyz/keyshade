@@ -94,32 +94,44 @@ export default class ChangeNotifier
   )
   @UseGuards(AuthGuard, ApiKeyGuard)
   @SubscribeMessage('register-client-app')
+  /**
+   * This event is emitted from the CLI to register
+   * itself with our services so that it can receive live updates.
+   *
+   * The CLI will send a `ChangeNotifierRegistration` object
+   * as the message body, containing the workspace slug, project slug,
+   * and environment slug that the client app wants to receive updates for.
+   *
+   * We will then check if the user has access to the workspace,
+   * project, and environment, and if so, add the client to the
+   * list of connected clients for that environment.
+   *
+   * Finally, we will send an ACK to the client with a status code of 200.
+   */
   async handleRegister(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChangeNotifierRegistration,
     @CurrentUser() user: User
   ) {
     // Check if the user has access to the workspace
-    const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
-        entity: { slug: data.workspaceSlug },
-        authorities: [
-          Authority.READ_WORKSPACE,
-          Authority.READ_VARIABLE,
-          Authority.READ_SECRET
-        ],
-        prisma: this.prisma
-      })
+    await this.authorityCheckerService.checkAuthorityOverWorkspace({
+      userId: user.id,
+      entity: { slug: data.workspaceSlug },
+      authorities: [
+        Authority.READ_WORKSPACE,
+        Authority.READ_VARIABLE,
+        Authority.READ_SECRET
+      ],
+      prisma: this.prisma
+    })
 
     // Check if the user has access to the project
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { slug: data.projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
-      })
+    await this.authorityCheckerService.checkAuthorityOverProject({
+      userId: user.id,
+      entity: { slug: data.projectSlug },
+      authorities: [Authority.READ_PROJECT],
+      prisma: this.prisma
+    })
 
     // Check if the user has access to the environment
     const environment =
@@ -133,18 +145,14 @@ export default class ChangeNotifier
     // Add the client to the environment
     await this.addClientToEnvironment(client, environment.id)
 
-    const clientRegisteredResponse = {
-      workspaceId: workspace.id,
-      projectId: project.id,
-      environmentId: environment.id
-    }
-
     // Send ACK to client
-    client.emit('client-registered', clientRegisteredResponse)
+    client.emit('client-registered', {
+      'status-code': 200
+    })
 
     this.logger.log(
       `Client registered: ${client.id} for configuration: ${JSON.stringify(
-        clientRegisteredResponse
+        data
       )}`
     )
   }

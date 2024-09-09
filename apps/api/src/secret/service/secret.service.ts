@@ -50,6 +50,13 @@ export class SecretService {
     this.redis = redisClient.publisher
   }
 
+  /**
+   * Creates a new secret in a project
+   * @param user the user creating the secret
+   * @param dto the secret data
+   * @param projectSlug the slug of the project
+   * @returns the created secret
+   */
   async createSecret(
     user: User,
     dto: CreateSecret,
@@ -149,6 +156,13 @@ export class SecretService {
     return secret
   }
 
+  /**
+   * Updates a secret in a project
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret to update
+   * @param dto the new secret data
+   * @returns the updated secret and the updated versions
+   */
   async updateSecret(
     user: User,
     secretSlug: Secret['slug'],
@@ -298,6 +312,14 @@ export class SecretService {
     return result
   }
 
+  /**
+   * Rollback a secret to a specific version
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret to rollback
+   * @param environmentSlug the slug of the environment to rollback
+   * @param rollbackVersion the version to rollback to
+   * @returns the deleted secret versions
+   */
   async rollbackSecret(
     user: User,
     secretSlug: Secret['slug'],
@@ -394,6 +416,12 @@ export class SecretService {
     return result
   }
 
+  /**
+   * Deletes a secret from a project
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret to delete
+   * @returns void
+   */
   async deleteSecret(user: User, secretSlug: Secret['slug']) {
     // Check if the user has the required role
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
@@ -428,6 +456,15 @@ export class SecretService {
     this.logger.log(`User ${user.id} deleted secret ${secret.id}`)
   }
 
+  /**
+   * Gets all secrets of a project and environment
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project
+   * @param environmentSlug the slug of the environment
+   * @returns an array of objects with the secret name and value
+   * @throws {NotFoundException} if the project or environment does not exist
+   * @throws {BadRequestException} if the user does not have the required role
+   */
   async getAllSecretsOfProjectAndEnvironment(
     user: User,
     projectSlug: Project['slug'],
@@ -495,6 +532,17 @@ export class SecretService {
 
     return response
   }
+
+  /**
+   * Gets all revisions of a secret in an environment
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret
+   * @param environmentSlug the slug of the environment
+   * @param page the page of items to return
+   * @param limit the number of items to return per page
+   * @param order the order of the items. Default is 'desc'
+   * @returns an object with the items and the pagination metadata
+   */
   async getRevisionsOfSecret(
     user: User,
     secretSlug: Secret['slug'],
@@ -551,6 +599,18 @@ export class SecretService {
     return { items, metadata }
   }
 
+  /**
+   * Gets all secrets of a project
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project
+   * @param decryptValue whether to decrypt the secret values or not
+   * @param page the page of items to return
+   * @param limit the number of items to return per page
+   * @param sort the field to sort the results by
+   * @param order the order of the results
+   * @param search the search query
+   * @returns an object with the items and the pagination metadata
+   */
   async getAllSecretsOfProject(
     user: User,
     projectSlug: Project['slug'],
@@ -704,6 +764,12 @@ export class SecretService {
     return { items, metadata }
   }
 
+  /**
+   * Checks if a secret with a given name already exists in the project
+   * @throws {ConflictException} if the secret already exists
+   * @param secretName the name of the secret to check
+   * @param project the project to check the secret in
+   */
   private async secretExists(secretName: Secret['name'], project: Project) {
     if (
       (await this.prisma.secret.findFirst({
@@ -719,6 +785,13 @@ export class SecretService {
     }
   }
 
+  /**
+   * Checks if the project is allowed to decrypt secret values
+   * @param decryptValue whether to decrypt the secret values or not
+   * @param project the project to check
+   * @throws {BadRequestException} if the project does not store the private key and decryptValue is true
+   * @throws {NotFoundException} if the project does not have a private key and decryptValue is true
+   */
   private async checkAutoDecrypt(decryptValue: boolean, project: Project) {
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {

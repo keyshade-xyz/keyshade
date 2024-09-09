@@ -29,6 +29,15 @@ export class AuthGuard implements CanActivate {
     private readonly cache: CacheService
   ) {}
 
+  /**
+   * This method is called by NestJS every time an HTTP request is made to an endpoint
+   * that is protected by this guard. It checks if the request is authenticated and if
+   * the user is active. If the user is not active, it throws an UnauthorizedException.
+   * If the onboarding is not finished, it throws an UnauthorizedException.
+   * @param context The ExecutionContext object that contains information about the
+   * request.
+   * @returns A boolean indicating if the request is authenticated and the user is active.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Get the kind of route. Routes marked with the @Public() decorator are public.
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

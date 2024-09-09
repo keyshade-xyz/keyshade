@@ -30,6 +30,11 @@ export class AuthService {
     this.logger = new Logger(AuthService.name)
   }
 
+  /**
+   * Sends a login code to the given email address
+   * @throws {BadRequestException} If the email address is invalid
+   * @param email The email address to send the login code to
+   */
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
@@ -45,6 +50,14 @@ export class AuthService {
   }
 
   /* istanbul ignore next */
+  /**
+   * Validates a login code sent to the given email address
+   * @throws {NotFoundException} If the user is not found
+   * @throws {UnauthorizedException} If the login code is invalid
+   * @param email The email address the login code was sent to
+   * @param otp The login code to validate
+   * @returns An object containing the user and a JWT token
+   */
   async validateOtp(
     email: string,
     otp: string
@@ -93,6 +106,14 @@ export class AuthService {
   }
 
   /* istanbul ignore next */
+  /**
+   * Handles a login with an OAuth provider
+   * @param email The email of the user
+   * @param name The name of the user
+   * @param profilePictureUrl The profile picture URL of the user
+   * @param oauthProvider The OAuth provider used
+   * @returns An object containing the user and a JWT token
+   */
   async handleOAuthLogin(
     email: string,
     name: string,
@@ -116,6 +137,10 @@ export class AuthService {
   }
 
   /* istanbul ignore next */
+  /**
+   * Cleans up expired OTPs every hour
+   * @throws {PrismaError} If there is an error deleting expired OTPs
+   */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
     try {
@@ -133,6 +158,17 @@ export class AuthService {
     }
   }
 
+  /**
+   * Creates a user if it doesn't exist yet. If the user has signed up with a
+   * different authentication provider, it throws an UnauthorizedException.
+   * @param email The email address of the user
+   * @param authProvider The AuthProvider used
+   * @param name The name of the user
+   * @param profilePictureUrl The profile picture URL of the user
+   * @returns The user
+   * @throws {UnauthorizedException} If the user has signed up with a different
+   * authentication provider
+   */
   private async createUserIfNotExists(
     email: string,
     authProvider: AuthProvider,

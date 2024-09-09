@@ -33,6 +33,30 @@ export class IntegrationService {
     private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
+  /**
+   * Creates a new integration in the given workspace. The user needs to have
+   * `CREATE_INTEGRATION` and `READ_WORKSPACE` authority in the workspace.
+   *
+   * If the integration is of type `PROJECT`, the user needs to have `READ_PROJECT`
+   * authority in the project specified by `projectSlug`.
+   *
+   * If the integration is of type `ENVIRONMENT`, the user needs to have `READ_ENVIRONMENT`
+   * authority in the environment specified by `environmentSlug`.
+   *
+   * If the integration is of type `PROJECT` and `environmentSlug` is provided,
+   * the user needs to have `READ_ENVIRONMENT` authority in the environment specified
+   * by `environmentSlug`.
+   *
+   * The integration is created with the given name, slug, type, metadata and
+   * notifyOn events. The slug is generated using the `name` and a unique
+   * identifier.
+   *
+   * @param user The user creating the integration
+   * @param dto The integration data
+   * @param workspaceSlug The slug of the workspace the integration is being
+   * created in
+   * @returns The created integration
+   */
   async createIntegration(
     user: User,
     dto: CreateIntegration,
@@ -127,6 +151,28 @@ export class IntegrationService {
     return integration
   }
 
+  /**
+   * Updates an integration. The user needs to have `UPDATE_INTEGRATION` authority
+   * over the integration.
+   *
+   * If the integration is of type `PROJECT`, the user needs to have `READ_PROJECT`
+   * authority in the project specified by `projectSlug`.
+   *
+   * If the integration is of type `ENVIRONMENT`, the user needs to have `READ_ENVIRONMENT`
+   * authority in the environment specified by `environmentSlug`.
+   *
+   * If the integration is of type `PROJECT` and `environmentSlug` is provided,
+   * the user needs to have `READ_ENVIRONMENT` authority in the environment specified
+   * by `environmentSlug`.
+   *
+   * The integration is updated with the given name, slug, metadata and
+   * notifyOn events.
+   *
+   * @param user The user updating the integration
+   * @param dto The integration data
+   * @param integrationSlug The slug of the integration to update
+   * @returns The updated integration
+   */
   async updateIntegration(
     user: User,
     dto: UpdateIntegration,
@@ -225,6 +271,14 @@ export class IntegrationService {
     return updatedIntegration
   }
 
+  /**
+   * Retrieves an integration by its slug. The user needs to have `READ_INTEGRATION`
+   * authority over the integration.
+   *
+   * @param user The user retrieving the integration
+   * @param integrationSlug The slug of the integration to retrieve
+   * @returns The integration with the given slug
+   */
   async getIntegration(user: User, integrationSlug: Integration['slug']) {
     return this.authorityCheckerService.checkAuthorityOverIntegration({
       userId: user.id,
@@ -236,6 +290,22 @@ export class IntegrationService {
 
   /* istanbul ignore next */
   // The e2e tests are not working, but the API calls work as expected
+  /**
+   * Retrieves all integrations in a workspace that the user has READ authority over.
+   *
+   * The user needs to have `READ_INTEGRATION` authority over the workspace.
+   *
+   * The results are paginated and can be sorted by name ascending or descending.
+   *
+   * @param user The user retrieving the integrations
+   * @param workspaceSlug The slug of the workspace to retrieve integrations from
+   * @param page The page number of the results
+   * @param limit The number of items per page
+   * @param sort The property to sort the results by (default: name)
+   * @param order The order to sort the results by (default: ascending)
+   * @param search The string to search for in the integration names
+   * @returns A paginated list of integrations in the workspace
+   */
   async getAllIntegrationsOfWorkspace(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -317,7 +387,7 @@ export class IntegrationService {
       }
     })
 
-    //calculate metadata for pagination
+    // Calculate metadata for pagination
     const totalCount = await this.prisma.integration.count({
       where: {
         name: {
@@ -347,6 +417,14 @@ export class IntegrationService {
     return { items: integrations, metadata }
   }
 
+  /**
+   * Deletes an integration by its slug. The user needs to have `DELETE_INTEGRATION`
+   * authority over the integration.
+   *
+   * @param user The user deleting the integration
+   * @param integrationSlug The slug of the integration to delete
+   * @returns Nothing
+   */
   async deleteIntegration(user: User, integrationSlug: Integration['slug']) {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration({
@@ -381,6 +459,13 @@ export class IntegrationService {
     )
   }
 
+  /**
+   * Checks if an integration with the same name already exists in the workspace.
+   * Throws a ConflictException if the integration already exists.
+   *
+   * @param name The name of the integration to check
+   * @param workspace The workspace to check in
+   */
   private async existsByNameAndWorkspaceId(
     name: Integration['name'],
     workspace: Workspace

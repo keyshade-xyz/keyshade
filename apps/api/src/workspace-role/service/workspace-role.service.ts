@@ -35,6 +35,15 @@ export class WorkspaceRoleService {
     private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
+  /**
+   * Creates a new workspace role
+   * @throws {BadRequestException} if the role has workspace admin authority
+   * @throws {ConflictException} if a workspace role with the same name already exists
+   * @param user the user that is creating the workspace role
+   * @param workspaceSlug the slug of the workspace
+   * @param dto the data for the new workspace role
+   * @returns the newly created workspace role
+   */
   async createWorkspaceRole(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -138,6 +147,15 @@ export class WorkspaceRoleService {
     return workspaceRole
   }
 
+  /**
+   * Updates a workspace role
+   * @throws {BadRequestException} if the role has workspace admin authority
+   * @throws {ConflictException} if a workspace role with the same name already exists
+   * @param user the user that is updating the workspace role
+   * @param workspaceRoleSlug the slug of the workspace role to be updated
+   * @param dto the data for the updated workspace role
+   * @returns the updated workspace role
+   */
   async updateWorkspaceRole(
     user: User,
     workspaceRoleSlug: WorkspaceRole['slug'],
@@ -238,6 +256,12 @@ export class WorkspaceRoleService {
     return updatedWorkspaceRole
   }
 
+  /**
+   * Deletes a workspace role
+   * @throws {UnauthorizedException} if the role has administrative authority
+   * @param user the user that is deleting the workspace role
+   * @param workspaceRoleSlug the slug of the workspace role to be deleted
+   */
   async deleteWorkspaceRole(
     user: User,
     workspaceRoleSlug: WorkspaceRole['slug']
@@ -281,6 +305,14 @@ export class WorkspaceRoleService {
     this.logger.log(`${user.email} deleted workspace role ${workspaceRoleSlug}`)
   }
 
+  /**
+   * Checks if a workspace role with the given name exists
+   * @throws {UnauthorizedException} if the user does not have the required authority
+   * @param user the user performing the check
+   * @param workspaceSlug the slug of the workspace
+   * @param name the name of the workspace role to check
+   * @returns true if a workspace role with the given name exists, false otherwise
+   */
   async checkWorkspaceRoleExists(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -305,6 +337,13 @@ export class WorkspaceRoleService {
     )
   }
 
+  /**
+   * Gets a workspace role by its slug
+   * @throws {UnauthorizedException} if the user does not have the required authority
+   * @param user the user performing the request
+   * @param workspaceRoleSlug the slug of the workspace role to get
+   * @returns the workspace role with the given slug
+   */
   async getWorkspaceRole(
     user: User,
     workspaceRoleSlug: WorkspaceRole['slug']
@@ -316,6 +355,18 @@ export class WorkspaceRoleService {
     )
   }
 
+  /**
+   * Gets all workspace roles of a workspace, with pagination and optional filtering by name
+   * @throws {UnauthorizedException} if the user does not have the required authority
+   * @param user the user performing the request
+   * @param workspaceSlug the slug of the workspace
+   * @param page the page to get (0-indexed)
+   * @param limit the maximum number of items to return
+   * @param sort the field to sort the results by (e.g. "name", "slug", etc.)
+   * @param order the order to sort the results in (e.g. "asc", "desc")
+   * @param search an optional search string to filter the results by
+   * @returns a PaginatedMetadata object containing the items and metadata
+   */
   async getWorkspaceRolesOfWorkspace(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -373,6 +424,15 @@ export class WorkspaceRoleService {
     return { items, metadata }
   }
 
+  /**
+   * Gets a workspace role by its slug, with additional authorities check
+   * @throws {NotFoundException} if the workspace role does not exist
+   * @throws {UnauthorizedException} if the user does not have the required authority
+   * @param userId the user that is performing the request
+   * @param workspaceRoleSlug the slug of the workspace role to get
+   * @param authorities the authorities to check against
+   * @returns the workspace role with the given slug
+   */
   private async getWorkspaceRoleWithAuthority(
     userId: User['id'],
     workspaceRoleSlug: Workspace['slug'],
@@ -411,6 +471,13 @@ export class WorkspaceRoleService {
     return workspaceRole
   }
 
+  /**
+   * Given an array of project slugs, returns a Map of slug to id for all projects
+   * found in the database.
+   *
+   * @param projectSlugs the array of project slugs
+   * @returns a Map of project slug to id
+   */
   private async getProjectSlugToIdMap(projectSlugs: string[]) {
     const projects = await this.prisma.project.findMany({
       where: {

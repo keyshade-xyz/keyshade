@@ -30,6 +30,31 @@ export class EnvironmentService {
     private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
+  /**
+   * Creates a new environment in the given project.
+   *
+   * This endpoint requires the following authorities:
+   * - `CREATE_ENVIRONMENT` on the project
+   * - `READ_ENVIRONMENT` on the project
+   * - `READ_PROJECT` on the project
+   *
+   * If the user does not have the required authorities, a `ForbiddenException` is thrown.
+   *
+   * If an environment with the same name already exists in the project, a `ConflictException` is thrown.
+   *
+   * The created environment is returned, with the slug generated using the `name` and `ENVIRONMENT` as the entity type.
+   *
+   * An event of type `ENVIRONMENT_ADDED` is created, with the following metadata:
+   * - `environmentId`: The ID of the created environment
+   * - `name`: The name of the created environment
+   * - `projectId`: The ID of the project in which the environment was created
+   * - `projectName`: The name of the project in which the environment was created
+   *
+   * @param user The user that is creating the environment
+   * @param dto The data for the new environment
+   * @param projectSlug The slug of the project in which to create the environment
+   * @returns The created environment
+   */
   async createEnvironment(
     user: User,
     dto: CreateEnvironment,
@@ -96,6 +121,31 @@ export class EnvironmentService {
     return environment
   }
 
+  /**
+   * Updates an environment in the given project.
+   *
+   * This endpoint requires the following authorities:
+   * - `UPDATE_ENVIRONMENT` on the environment
+   * - `READ_ENVIRONMENT` on the environment
+   * - `READ_PROJECT` on the project
+   *
+   * If the user does not have the required authorities, a `ForbiddenException` is thrown.
+   *
+   * If an environment with the same name already exists in the project, a `ConflictException` is thrown.
+   *
+   * The updated environment is returned, with the slug generated using the `name` and `ENVIRONMENT` as the entity type.
+   *
+   * An event of type `ENVIRONMENT_UPDATED` is created, with the following metadata:
+   * - `environmentId`: The ID of the updated environment
+   * - `name`: The name of the updated environment
+   * - `projectId`: The ID of the project in which the environment was updated
+   * - `projectName`: The name of the project in which the environment was updated
+   *
+   * @param user The user that is updating the environment
+   * @param dto The data for the updated environment
+   * @param environmentSlug The slug of the environment to update
+   * @returns The updated environment
+   */
   async updateEnvironment(
     user: User,
     dto: UpdateEnvironment,
@@ -157,6 +207,19 @@ export class EnvironmentService {
     return updatedEnvironment
   }
 
+  /**
+   * Gets an environment by its slug.
+   *
+   * This endpoint requires the `READ_ENVIRONMENT` authority on the environment.
+   *
+   * If the user does not have the required authority, a `ForbiddenException` is thrown.
+   *
+   * The returned environment object does not include the project property.
+   *
+   * @param user The user that is requesting the environment
+   * @param environmentSlug The slug of the environment to get
+   * @returns The environment
+   */
   async getEnvironment(user: User, environmentSlug: Environment['slug']) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
@@ -171,6 +234,36 @@ export class EnvironmentService {
     return environment
   }
 
+  /**
+   * Gets a list of all environments in the given project.
+   *
+   * This endpoint requires the `READ_ENVIRONMENT` authority on the project.
+   *
+   * If the user does not have the required authority, a `ForbiddenException` is thrown.
+   *
+   * The returned list of environments is paginated and sorted according to the provided parameters.
+   *
+   * The metadata object contains the following properties:
+   * - `href`: The URL to the current page
+   * - `next`: The URL to the next page (if it exists)
+   * - `prev`: The URL to the previous page (if it exists)
+   * - `totalPages`: The total number of pages
+   * - `totalItems`: The total number of items
+   * - `limit`: The maximum number of items per page
+   * - `page`: The current page number
+   * - `sort`: The sort field
+   * - `order`: The sort order
+   * - `search`: The search query
+   *
+   * @param user The user that is requesting the environments
+   * @param projectSlug The slug of the project in which to get the environments
+   * @param page The page number
+   * @param limit The maximum number of items per page
+   * @param sort The sort field
+   * @param order The sort order
+   * @param search The search query
+   * @returns An object with a list of environments and metadata
+   */
   async getEnvironmentsOfProject(
     user: User,
     projectSlug: Project['slug'],
@@ -239,6 +332,23 @@ export class EnvironmentService {
     return { items, metadata }
   }
 
+  /**
+   * Deletes an environment in a project.
+   *
+   * This endpoint requires the `DELETE_ENVIRONMENT` authority on the environment.
+   *
+   * If the user does not have the required authority, a `ForbiddenException` is thrown.
+   *
+   * If this is the only existing environment in the project, a `BadRequestException` is thrown.
+   *
+   * An event of type `ENVIRONMENT_DELETED` is created, with the following metadata:
+   * - `environmentId`: The ID of the deleted environment
+   * - `name`: The name of the deleted environment
+   * - `projectId`: The ID of the project in which the environment was deleted
+   *
+   * @param user The user that is deleting the environment
+   * @param environmentSlug The slug of the environment to delete
+   */
   async deleteEnvironment(user: User, environmentSlug: Environment['slug']) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
@@ -289,6 +399,11 @@ export class EnvironmentService {
     )
   }
 
+  /**
+   * Checks if an environment with the given name already exists in the given project.
+   * @throws ConflictException if an environment with the given name already exists
+   * @private
+   */
   private async environmentExists(name: Environment['name'], project: Project) {
     const { id: projectId, slug } = project
 

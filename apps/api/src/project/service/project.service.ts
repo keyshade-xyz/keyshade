@@ -39,6 +39,14 @@ export class ProjectService {
     private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
+  /**
+   * Creates a new project in a workspace
+   *
+   * @param user The user who is creating the project
+   * @param workspaceSlug The slug of the workspace where the project will be created
+   * @param dto The data for the new project
+   * @returns The newly created project
+   */
   async createProject(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -201,6 +209,17 @@ export class ProjectService {
     return newProject
   }
 
+  /**
+   * Updates a project.
+   *
+   * @param user The user who is updating the project
+   * @param projectSlug The slug of the project to update
+   * @param dto The data to update the project with
+   * @returns The updated project
+   *
+   * @throws ConflictException If a project with the same name already exists for the user
+   * @throws BadRequestException If the private key is required but not supplied
+   */
   async updateProject(
     user: User,
     projectSlug: Project['slug'],
@@ -345,6 +364,17 @@ export class ProjectService {
     }
   }
 
+  /**
+   * Forks a project.
+   *
+   * @param user The user who is creating the new project
+   * @param projectSlug The slug of the project to fork
+   * @param forkMetadata The metadata for the new project
+   * @returns The newly forked project
+   *
+   * @throws ConflictException If a project with the same name already exists for the user
+   * @throws BadRequestException If the private key is required but not supplied
+   */
   async forkProject(
     user: User,
     projectSlug: Project['slug'],
@@ -481,6 +511,16 @@ export class ProjectService {
     return newProject
   }
 
+  /**
+   * Unlinks a forked project from its parent project.
+   *
+   * @param user The user who is unlinking the project
+   * @param projectSlug The slug of the project to unlink
+   * @returns The updated project
+   *
+   * @throws BadRequestException If the project is not a forked project
+   * @throws UnauthorizedException If the user does not have the authority to update the project
+   */
   async unlinkParentOfFork(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -502,6 +542,19 @@ export class ProjectService {
     })
   }
 
+  /**
+   * Syncs a forked project with its parent project.
+   *
+   * @param user The user who is syncing the project
+   * @param projectSlug The slug of the project to sync
+   * @param hardSync Whether to do a hard sync or not. If true, all items in the
+   * forked project will be replaced with the items from the parent project. If
+   * false, only items that are not present in the forked project will be added
+   * from the parent project.
+   *
+   * @throws BadRequestException If the project is not a forked project
+   * @throws UnauthorizedException If the user does not have the authority to update the project
+   */
   async syncFork(user: User, projectSlug: Project['slug'], hardSync: boolean) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -548,6 +601,13 @@ export class ProjectService {
     await this.prisma.$transaction(copyProjectOp)
   }
 
+  /**
+   * Deletes a project.
+   * @param user The user who is deleting the project
+   * @param projectSlug The slug of the project to delete
+   *
+   * @throws UnauthorizedException If the user does not have the authority to delete the project
+   */
   async deleteProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -602,6 +662,17 @@ export class ProjectService {
     this.log.debug(`Deleted project ${project}`)
   }
 
+  /**
+   * Gets all the forks of a project.
+   *
+   * @param user The user who is requesting the forks
+   * @param projectSlug The slug of the project to get forks for
+   * @param page The page number to get the forks for
+   * @param limit The number of forks to get per page
+   * @returns An object with two properties: `items` and `metadata`.
+   * `items` is an array of project objects that are forks of the given project,
+   * and `metadata` is the pagination metadata for the forks.
+   */
   async getAllProjectForks(
     user: User,
     projectSlug: Project['slug'],
@@ -650,6 +721,15 @@ export class ProjectService {
     return { items, metadata }
   }
 
+  /**
+   * Gets a project by slug.
+   *
+   * @param user The user who is requesting the project
+   * @param projectSlug The slug of the project to get
+   * @returns The project with secrets removed
+   *
+   * @throws UnauthorizedException If the user does not have the authority to read the project
+   */
   async getProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -664,6 +744,20 @@ export class ProjectService {
     return project
   }
 
+  /**
+   * Gets all the projects in a workspace that the user has access to.
+   *
+   * @param user The user who is requesting the projects
+   * @param workspaceSlug The slug of the workspace to get the projects from
+   * @param page The page number to get the projects for
+   * @param limit The number of projects to get per page
+   * @param sort The field to sort the projects by
+   * @param order The order to sort the projects in
+   * @param search The search string to filter the projects by
+   * @returns An object with two properties: `items` and `metadata`.
+   * `items` is an array of project objects that match the given criteria,
+   * and `metadata` is an object with pagination metadata.
+   */
   async getProjectsOfWorkspace(
     user: User,
     workspaceSlug: Workspace['slug'],
@@ -753,6 +847,13 @@ export class ProjectService {
     return { items, metadata }
   }
 
+  /**
+   * Checks if a project with a given name exists in a workspace.
+   *
+   * @param projectName The name of the project to check
+   * @param workspaceId The ID of the workspace to check in
+   * @returns true if the project exists, false otherwise
+   */
   private async projectExists(
     projectName: string,
     workspaceId: Workspace['id']
@@ -773,6 +874,16 @@ export class ProjectService {
     )
   }
 
+  /**
+   * Copies the project data from one project to another project.
+   *
+   * @param user The user who is performing the copy operation
+   * @param fromProject The project from which the data is being copied
+   * @param toProject The project to which the data is being copied
+   * @param hardCopy If true, replace all the data in the toProject with the fromProject,
+   * otherwise, only add the items in the fromProject that are not already present in the toProject.
+   * @returns An array of database operations that need to be performed to copy the data.
+   */
   private async copyProjectData(
     user: User,
     fromProject: {
@@ -989,6 +1100,18 @@ export class ProjectService {
     return [...createEnvironmentOps, ...createSecretOps, ...createVariableOps]
   }
 
+  /**
+   * Updates the key pair of a project.
+   *
+   * @param project The project to update
+   * @param oldPrivateKey The old private key of the project
+   * @param storePrivateKey Whether to store the new private key in the database
+   *
+   * @returns An object with three properties:
+   * - `txs`: an array of database operations that need to be performed to update the project
+   * - `newPrivateKey`: the new private key of the project
+   * - `newPublicKey`: the new public key of the project
+   */
   private async updateProjectKeyPair(
     project: ProjectWithSecrets,
     oldPrivateKey: string,
