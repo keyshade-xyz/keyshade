@@ -82,7 +82,8 @@ describe('User Controller Tests', () => {
     })
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
-      ...adminUser
+      ...adminUser,
+      defaultWorkspace: null
     })
   })
 
@@ -94,9 +95,23 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       }
     })
+
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        ownerId: regularUser.id,
+        isDefault: true
+      }
+    })
+
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
+      ...regularUser,
+      defaultWorkspace: expect.any(Object)
+    })
+
+    expect(result.json().defaultWorkspace).toMatchObject({
+      id: workspace.id,
+      name: workspace.name
     })
   })
 
