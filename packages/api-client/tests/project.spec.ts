@@ -8,8 +8,8 @@ describe('Get Project Tests', () => {
   const projectController = new ProjectController(backendUrl)
 
   const email = 'johndoe@example.com'
-  let projectId: string | null
-  let workspaceId: string | null
+  let projectSlug: string | null
+  let workspaceSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -25,12 +25,12 @@ describe('Get Project Tests', () => {
       )
     ).json()) as any
 
-    workspaceId = workspaceResponse.id
+    workspaceSlug = workspaceResponse.slug
   })
 
   afterAll(async () => {
     // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceId}`, {
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -43,7 +43,7 @@ describe('Get Project Tests', () => {
           name: 'Project',
           description: 'Project Description',
           storePrivateKey: true,
-          workspaceId,
+          workspaceSlug,
           accessLevel: 'GLOBAL'
         },
         {
@@ -52,12 +52,12 @@ describe('Get Project Tests', () => {
       )
     ).data
 
-    projectId = project.id
+    projectSlug = project.slug
   })
 
   afterEach(async () => {
     // Delete all projects
-    await client.delete(`/api/project/${projectId}`, {
+    await client.delete(`/api/project/${projectSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -69,7 +69,7 @@ describe('Get Project Tests', () => {
           name: 'Project 2',
           description: 'Project Description',
           storePrivateKey: true,
-          workspaceId,
+          workspaceSlug,
           accessLevel: 'GLOBAL'
         },
         {
@@ -78,11 +78,10 @@ describe('Get Project Tests', () => {
       )
     ).data
 
-    expect(project.id).toBeDefined()
+    expect(project.slug).toBeDefined()
     expect(project.name).toBe('Project 2')
     expect(project.description).toBe('Project Description')
     expect(project.storePrivateKey).toBe(true)
-    expect(project.workspaceId).toBe(workspaceId)
     expect(project.publicKey).toBeDefined()
     expect(project.privateKey).toBeDefined()
     expect(project.createdAt).toBeDefined()
@@ -91,7 +90,7 @@ describe('Get Project Tests', () => {
     // Delete the project
     await projectController.deleteProject(
       {
-        projectId: project.id
+        projectSlug: project.slug
       },
       {
         'x-e2e-user-email': email
@@ -99,11 +98,12 @@ describe('Get Project Tests', () => {
     )
   })
 
-  it('should be able to get a project by ID', async () => {
+  it('should be able to update a project', async () => {
     const project = (
-      await projectController.getProject(
+      await projectController.updateProject(
         {
-          projectId
+          projectSlug,
+          name: 'Updated Project'
         },
         {
           'x-e2e-user-email': email
@@ -111,7 +111,32 @@ describe('Get Project Tests', () => {
       )
     ).data
 
-    expect(project.id).toBe(projectId)
+    expect(project.name).toBe('Updated Project')
+
+    // Delete the project
+    await projectController.deleteProject(
+      {
+        projectSlug: project.slug
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
+  })
+
+  it('should be able to get a project by slug', async () => {
+    const project = (
+      await projectController.getProject(
+        {
+          projectSlug
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).data
+
+    expect(project.slug).toBe(projectSlug)
     expect(project.name).toBe('Project')
   })
 
@@ -119,8 +144,8 @@ describe('Get Project Tests', () => {
     const fork = (
       await projectController.forkProject(
         {
-          projectId,
-          workspaceId,
+          projectSlug,
+          workspaceSlug,
           name: 'Forked Stuff'
         },
         {
@@ -130,12 +155,11 @@ describe('Get Project Tests', () => {
     ).data
 
     expect(fork.isForked).toBe(true)
-    expect(fork.forkedFromId).toBe(projectId)
 
     // Delete the fork
     await projectController.deleteProject(
       {
-        projectId: fork.id
+        projectSlug: fork.slug
       },
       {
         'x-e2e-user-email': email
@@ -148,8 +172,8 @@ describe('Get Project Tests', () => {
     const fork = (
       await projectController.forkProject(
         {
-          projectId,
-          workspaceId,
+          projectSlug,
+          workspaceSlug,
           name: 'Forked Stuff'
         },
         {
@@ -160,8 +184,8 @@ describe('Get Project Tests', () => {
 
     const forks = await projectController.getForks(
       {
-        projectId,
-        workspaceId
+        projectSlug,
+        workspaceSlug
       },
       {
         'x-e2e-user-email': email
@@ -172,7 +196,7 @@ describe('Get Project Tests', () => {
     // Delete the fork
     await projectController.deleteProject(
       {
-        projectId: fork.id
+        projectSlug: fork.slug
       },
       {
         'x-e2e-user-email': email
@@ -185,8 +209,8 @@ describe('Get Project Tests', () => {
     const fork = (
       await projectController.forkProject(
         {
-          projectId,
-          workspaceId,
+          projectSlug,
+          workspaceSlug,
           name: 'Forked Stuff'
         },
         {
@@ -198,8 +222,8 @@ describe('Get Project Tests', () => {
     // Unlink the fork
     await projectController.unlinkFork(
       {
-        projectId: fork.id,
-        workspaceId
+        projectSlug: fork.slug,
+        workspaceSlug
       },
       {
         'x-e2e-user-email': email
@@ -208,8 +232,8 @@ describe('Get Project Tests', () => {
 
     const forks = await projectController.getForks(
       {
-        projectId,
-        workspaceId
+        projectSlug,
+        workspaceSlug
       },
       {
         'x-e2e-user-email': email
@@ -220,7 +244,7 @@ describe('Get Project Tests', () => {
     // Delete the fork
     await projectController.deleteProject(
       {
-        projectId: fork.id
+        projectSlug: fork.slug
       },
       {
         'x-e2e-user-email': email
@@ -231,7 +255,7 @@ describe('Get Project Tests', () => {
   it('should get all projects in the workspace', async () => {
     const projects = await projectController.getAllProjects(
       {
-        workspaceId
+        workspaceSlug
       },
       {
         'x-e2e-user-email': email
@@ -243,7 +267,7 @@ describe('Get Project Tests', () => {
   it('should get delete a the project', async () => {
     await projectController.deleteProject(
       {
-        projectId
+        projectSlug
       },
       {
         'x-e2e-user-email': email
@@ -252,7 +276,7 @@ describe('Get Project Tests', () => {
 
     const projects = await projectController.getAllProjects(
       {
-        workspaceId
+        workspaceSlug
       },
       {
         'x-e2e-user-email': email

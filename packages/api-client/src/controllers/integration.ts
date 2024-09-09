@@ -26,7 +26,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<CreateIntegrationResponse>> {
     const response = await this.apiClient.post(
-      `/api/integration/${request.workspaceId}`,
+      `/api/integration/${request.workspaceSlug}`,
       request,
       headers
     )
@@ -38,7 +38,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateIntegrationResponse>> {
     const response = await this.apiClient.put(
-      `/api/integration/${request.integrationId}`,
+      `/api/integration/${request.integrationSlug}`,
       request,
       headers
     )
@@ -50,7 +50,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetIntegrationResponse>> {
     const response = await this.apiClient.get(
-      `/api/integration/${request.integrationId}`,
+      `/api/integration/${request.integrationSlug}`,
       headers
     )
     return await parseResponse<GetIntegrationResponse>(response)
@@ -60,7 +60,7 @@ export default class IntegrationController {
     request: GetAllIntegrationRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllIntegrationResponse>> {
-    let url = `/api/integration/all/${request.workspaceId}`
+    let url = `/api/integration/all/${request.workspaceSlug}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
@@ -76,7 +76,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteIntegrationResponse>> {
     const response = await this.apiClient.delete(
-      `/api/integration/${request.integrationId}`,
+      `/api/integration/${request.integrationSlug}`,
       headers
     )
     return await parseResponse<DeleteIntegrationResponse>(response)

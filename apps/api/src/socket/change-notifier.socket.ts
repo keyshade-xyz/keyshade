@@ -94,74 +94,76 @@ export default class ChangeNotifier
   )
   @UseGuards(AuthGuard, ApiKeyGuard)
   @SubscribeMessage('register-client-app')
+  /**
+   * This event is emitted from the CLI to register
+   * itself with our services so that it can receive live updates.
+   *
+   * The CLI will send a `ChangeNotifierRegistration` object
+   * as the message body, containing the workspace slug, project slug,
+   * and environment slug that the client app wants to receive updates for.
+   *
+   * We will then check if the user has access to the workspace,
+   * project, and environment, and if so, add the client to the
+   * list of connected clients for that environment.
+   *
+   * Finally, we will send an ACK to the client with a status code of 200.
+   */
   async handleRegister(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChangeNotifierRegistration,
     @CurrentUser() user: User
   ) {
-    // Check if the user has access to the workspace
-    const workspace = await this.prisma.workspace.findFirst({
-      where: {
-        name: data.workspaceName,
-        members: {
-          some: {
-            userId: user.id
-          }
-        }
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspace.id },
-      authorities: [Authority.READ_WORKSPACE],
-      prisma: this.prisma
-    })
+    try {
+      // Check if the user has access to the workspace
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: data.workspaceSlug },
+        authorities: [
+          Authority.READ_WORKSPACE,
+          Authority.READ_VARIABLE,
+          Authority.READ_SECRET
+        ],
+        prisma: this.prisma
+      })
 
-    // Check if the user has access to the project
-    const project = await this.prisma.project.findFirst({
-      where: {
-        name: data.projectName,
-        workspaceId: workspace.id
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: project.id },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+      // Check if the user has access to the project
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: data.projectSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
 
-    // Check if the user has access to the environment
-    const environment = await this.prisma.environment.findFirst({
-      where: {
-        name: data.environmentName,
-        projectId: project.id
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environment.id },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+      // Check if the user has access to the environment
+      const environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { slug: data.environmentSlug },
+          authorities: [Authority.READ_ENVIRONMENT],
+          prisma: this.prisma
+        })
 
-    // Add the client to the environment
-    await this.addClientToEnvironment(client, environment.id)
+      // Add the client to the environment
+      await this.addClientToEnvironment(client, environment.id)
 
-    const clientRegisteredResponse = {
-      workspaceId: workspace.id,
-      projectId: project.id,
-      environmentId: environment.id
+      // Send ACK to client
+      client.emit('client-registered', {
+        success: true,
+        message: 'Registration Successful'
+      })
+
+      this.logger.log(
+        `Client registered: ${client.id} for configuration: ${JSON.stringify(
+          data
+        )}`
+      )
+    } catch (error) {
+      this.logger.error(error)
+      client.emit('client-registered', {
+        success: false,
+        message: error as string
+      })
     }
-
-    // Send ACK to client
-    client.emit('client-registered', clientRegisteredResponse)
-
-    this.logger.log(
-      `Client registered: ${client.id} for configuration: ${JSON.stringify(
-        clientRegisteredResponse
-      )}`
-    )
   }
 
   private async addClientToEnvironment(client: Socket, environmentId: string) {

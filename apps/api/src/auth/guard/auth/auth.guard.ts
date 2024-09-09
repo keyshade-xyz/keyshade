@@ -11,9 +11,9 @@ import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '@/decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
-import { toSHA256 } from '@/common/to-sha256'
 import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
+import { toSHA256 } from '@/common/cryptography'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -25,10 +25,19 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    private reflector: Reflector,
-    private cache: CacheService
+    private readonly reflector: Reflector,
+    private readonly cache: CacheService
   ) {}
 
+  /**
+   * This method is called by NestJS every time an HTTP request is made to an endpoint
+   * that is protected by this guard. It checks if the request is authenticated and if
+   * the user is active. If the user is not active, it throws an UnauthorizedException.
+   * If the onboarding is not finished, it throws an UnauthorizedException.
+   * @param context The ExecutionContext object that contains information about the
+   * request.
+   * @returns A boolean indicating if the request is authenticated and the user is active.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Get the kind of route. Routes marked with the @Public() decorator are public.
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

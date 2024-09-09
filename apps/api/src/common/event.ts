@@ -16,10 +16,17 @@ import {
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
 import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
+import { EventService } from '@/event/service/event.service'
 
-const logger = new Logger('CreateEvent')
-
-export default async function createEvent(
+/**
+ * Creates a new event and saves it to the database.
+ *
+ * @param data The data for the event.
+ * @param prisma The Prisma client.
+ *
+ * @throws {InternalServerErrorException} If the user is not provided for non-system events.
+ */
+export const createEvent = async (
   data: {
     triggerer?: EventTriggerer
     severity?: EventSeverity
@@ -40,7 +47,9 @@ export default async function createEvent(
     metadata: JsonObject
   },
   prisma: PrismaClient
-) {
+): Promise<void> => {
+  const logger = new Logger('CreateEvent')
+
   if (data.triggerer !== EventTriggerer.SYSTEM && !data.triggeredBy) {
     throw new InternalServerErrorException(
       'User must be provided for non-system events'
@@ -151,4 +160,33 @@ export default async function createEvent(
   }
 
   logger.log(`Event with id ${event.id} created`)
+}
+
+/**
+ * Fetches events from the event service. It calls the getEvents method on the
+ * event service with the provided parameters.
+ *
+ * @param eventService The event service to call the getEvents method on.
+ * @param user The user to fetch events for.
+ * @param workspaceSlug The id of the workspace to fetch events for.
+ * @param source The source of the events to fetch. If undefined, all sources are fetched.
+ * @param severity The severity of the events to fetch. If undefined, all severities are fetched.
+ * @returns A promise that resolves to the events fetched from the event service.
+ */
+export const fetchEvents = async (
+  eventService: EventService,
+  user: User,
+  workspaceSlug: string,
+  source?: EventSource,
+  severity?: EventSeverity
+): Promise<any> => {
+  return await eventService.getEvents(
+    user,
+    workspaceSlug,
+    0,
+    10,
+    '',
+    severity,
+    source
+  )
 }

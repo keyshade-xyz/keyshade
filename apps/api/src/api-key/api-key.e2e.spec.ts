@@ -65,283 +65,317 @@ describe('Api Key Role Controller Tests', () => {
     expect(apiKeyService).toBeDefined()
   })
 
-  it('should be able to create api key', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api-key',
-      payload: {
-        name: 'Test',
-        expiresAfter: '24',
-        authorities: ['READ_API_KEY']
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
+  describe('Create API Key Tests', () => {
+    it('should be able to create api key', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api-key',
+        payload: {
+          name: 'Test',
+          expiresAfter: '24',
+          authorities: ['READ_API_KEY']
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      expect(response.json().id).toBeDefined()
+      expect(response.json().name).toBe('Test')
+      expect(response.json().slug).toBeDefined()
+      expect(response.json().value).toMatch(/^ks_*/)
+      expect(response.json().authorities).toEqual(['READ_API_KEY'])
+
+      const apiKey = await prisma.apiKey.findUnique({
+        where: {
+          id: response.json().id
+        }
+      })
+
+      expect(apiKey).toBeDefined()
+      expect(apiKey!.name).toBe('Test')
     })
 
-    expect(response.statusCode).toBe(201)
-    expect(response.json().id).toBeDefined()
-    expect(response.json().name).toBe('Test')
-    expect(response.json().value).toMatch(/^ks_*/)
-    expect(response.json().authorities).toEqual(['READ_API_KEY'])
+    it('should not be able to create api key with same name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api-key',
+        payload: {
+          name: 'Test Key',
+          expiresAfter: '24',
+          authorities: ['READ_API_KEY']
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
 
-    const apiKey = await prisma.apiKey.findUnique({
-      where: {
-        id: response.json().id
-      }
+      expect(response.statusCode).toBe(409)
     })
 
-    expect(apiKey).toBeDefined()
-    expect(apiKey!.name).toBe('Test')
+    it('should not have any authorities if none are provided', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api-key',
+        payload: {
+          name: 'Test',
+          expiresAfter: '24'
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      expect(response.json().id).toBeDefined()
+      expect(response.json().name).toBe('Test')
+      expect(response.json().value).toMatch(/^ks_*/)
+      expect(response.json().authorities).toEqual([])
+    })
+
+    it('should not be able to create api key with invalid authorities of API key', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api-key',
+        payload: {
+          name: 'Test Key',
+          expiresAfter: '24'
+        },
+        headers: {
+          'x-keyshade-token': apiKey.value
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
   })
 
-  it('should not be able to create api key with same name', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api-key',
-      payload: {
+  describe('Update API Key Tests', () => {
+    it('should not be able to update an api key with the same name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api-key/${apiKey.slug}`,
+        payload: {
+          name: 'Test Key',
+          expiresAfter: '168'
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(409)
+    })
+
+    it('should change the slug if the name is updated', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api-key/${apiKey.slug}`,
+        payload: {
+          name: 'Updated Test Key'
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().id).toBe(apiKey.id)
+      expect(response.json().name).toBe('Updated Test Key')
+      expect(response.json().slug).not.toBe(apiKey.slug)
+    })
+
+    it('should be able to update the api key without without changing the authorities', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api-key/${apiKey.slug}`,
+        payload: {
+          name: 'Updated Test Key'
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().id).toBe(apiKey.id)
+      expect(response.json().name).toBe('Updated Test Key')
+      expect(response.json().authorities).toEqual([
+        'READ_API_KEY',
+        'CREATE_ENVIRONMENT'
+      ])
+
+      const updatedApiKey = await prisma.apiKey.findUnique({
+        where: {
+          id: apiKey.id
+        }
+      })
+
+      expect(updatedApiKey).toBeDefined()
+      expect(updatedApiKey!.name).toBe('Updated Test Key')
+    })
+
+    it('should be able to update the api key with changing the expiry', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api-key/${apiKey.slug}`,
+        payload: {
+          name: 'Updated Test Key',
+          authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT']
+        },
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().id).toBe(apiKey.id)
+      expect(response.json().name).toBe('Updated Test Key')
+      expect(response.json().authorities).toEqual([
+        'READ_API_KEY',
+        'CREATE_ENVIRONMENT'
+      ])
+    })
+  })
+
+  describe('Get API Key Tests', () => {
+    it('should be able to get the api key', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api-key/${apiKey.slug}`,
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toEqual({
+        id: apiKey.id,
         name: 'Test Key',
-        expiresAfter: '24',
-        authorities: ['READ_API_KEY']
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
+        slug: apiKey.slug,
+        authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
+        expiresAt: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String)
+      })
     })
 
-    expect(response.statusCode).toBe(409)
-  })
+    it('should not be able to get the API key if not exists', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api-key/ks_1234567890`,
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
 
-  it('should not have any authorities if none are provided', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api-key',
-      payload: {
-        name: 'Test',
-        expiresAfter: '24'
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(201)
-    expect(response.json().id).toBeDefined()
-    expect(response.json().name).toBe('Test')
-    expect(response.json().value).toMatch(/^ks_*/)
-    expect(response.json().authorities).toEqual([])
-  })
-
-  it('should not be able to update an api key with the same name', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/api-key/${apiKey.id}`,
-      payload: {
-        name: 'Test Key',
-        expiresAfter: '168'
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(409)
-  })
-
-  it('should be able to update the api key without without changing the authorities', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/api-key/${apiKey.id}`,
-      payload: {
-        name: 'Updated Test Key'
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toBe(apiKey.id)
-    expect(response.json().name).toBe('Updated Test Key')
-    expect(response.json().authorities).toEqual([
-      'READ_API_KEY',
-      'CREATE_ENVIRONMENT'
-    ])
-
-    const updatedApiKey = await prisma.apiKey.findUnique({
-      where: {
-        id: apiKey.id
-      }
-    })
-
-    expect(updatedApiKey).toBeDefined()
-    expect(updatedApiKey!.name).toBe('Updated Test Key')
-  })
-
-  it('should be able to update the api key with changing the expiry', async () => {
-    const response = await app.inject({
-      method: 'PUT',
-      url: `/api-key/${apiKey.id}`,
-      payload: {
-        name: 'Updated Test Key',
-        authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT']
-      },
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().id).toBe(apiKey.id)
-    expect(response.json().name).toBe('Updated Test Key')
-    expect(response.json().authorities).toEqual([
-      'READ_API_KEY',
-      'CREATE_ENVIRONMENT'
-    ])
-  })
-
-  it('should be able to get the api key', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/api-key/${apiKey.id}`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      id: apiKey.id,
-      name: 'Test Key',
-      authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
-      expiresAt: expect.any(String),
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+      expect(response.statusCode).toBe(404)
     })
   })
 
-  it('should not be able to get the API key if not exists', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/api-key/ks_1234567890`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
+  describe('Get All API Keys Tests', () => {
+    it('should be able to get all the api keys of the user', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api-key',
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()[0].id).toBe(apiKey.id)
+      expect(response.json()[0].name).toBe('Test Key')
+      expect(response.json()[0].slug).toBe(apiKey.slug)
+      expect(response.json()[0].authorities).toEqual([
+        'READ_API_KEY',
+        'CREATE_ENVIRONMENT'
+      ])
     })
 
-    expect(response.statusCode).toBe(404)
+    it('should be able to get all api keys using the API key', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api-key',
+        headers: {
+          'x-keyshade-token': apiKey.value
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json()[0].id).toBe(apiKey.id)
+      expect(response.json()[0].name).toBe('Test Key')
+      expect(response.json()[0].slug).toBe(apiKey.slug)
+      expect(response.json()[0].authorities).toEqual([
+        'READ_API_KEY',
+        'CREATE_ENVIRONMENT'
+      ])
+    })
   })
 
-  it('should be able to get all the api keys of the user', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/api-key',
-      headers: {
-        'x-e2e-user-email': user.email
-      }
+  describe('Access Live Updates Tests', () => {
+    it('should be able to access live updates if API key has the required authorities', async () => {
+      // Create a new API key with the required authorities
+      const newApiKey = await apiKeyService.createApiKey(user, {
+        name: 'Test Key 2',
+        authorities: [
+          Authority.READ_SECRET,
+          Authority.READ_VARIABLE,
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT,
+          Authority.READ_WORKSPACE
+        ]
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api-key/access/live-updates',
+        headers: {
+          'x-keyshade-token': newApiKey.value
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()[0].id).toBe(apiKey.id)
-    expect(response.json()[0].name).toBe('Test Key')
-    expect(response.json()[0].authorities).toEqual([
-      'READ_API_KEY',
-      'CREATE_ENVIRONMENT'
-    ])
+    it('should not be able to access live updates if API key does not have the required authorities', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api-key/access/live-updates',
+        headers: {
+          'x-keyshade-token': apiKey.value
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
   })
 
-  it('should be able to get all api keys using the API key', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/api-key',
-      headers: {
-        'x-keyshade-token': apiKey.value
-      }
+  describe('Delete API Key Tests', () => {
+    it('should be able to delete the api key', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api-key/${apiKey.slug}`,
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
+
+      expect(response.statusCode).toBe(204)
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()[0].id).toBe(apiKey.id)
-    expect(response.json()[0].name).toBe('Test Key')
-    expect(response.json()[0].authorities).toEqual([
-      'READ_API_KEY',
-      'CREATE_ENVIRONMENT'
-    ])
-  })
+    it('should not be able to delete an api key that does not exist', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/api-key/ks_1234567890`,
+        headers: {
+          'x-e2e-user-email': user.email
+        }
+      })
 
-  it('should not be able to create api key with invalid authorities of API key', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api-key',
-      payload: {
-        name: 'Test Key',
-        expiresAfter: '24'
-      },
-      headers: {
-        'x-keyshade-token': apiKey.value
-      }
+      expect(response.statusCode).toBe(404)
     })
-
-    expect(response.statusCode).toBe(401)
-  })
-
-  it('should be able to access live updates if API key has the required authorities', async () => {
-    // Create a new API key with the required authorities
-    const newApiKey = await apiKeyService.createApiKey(user, {
-      name: 'Test Key 2',
-      authorities: [
-        Authority.READ_SECRET,
-        Authority.READ_VARIABLE,
-        Authority.READ_ENVIRONMENT,
-        Authority.READ_PROJECT,
-        Authority.READ_WORKSPACE
-      ]
-    })
-
-    const response = await app.inject({
-      method: 'GET',
-      url: '/api-key/access/live-updates',
-      headers: {
-        'x-keyshade-token': newApiKey.value
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-  })
-
-  it('should not be able to access live updates if API key does not have the required authorities', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/api-key/access/live-updates',
-      headers: {
-        'x-keyshade-token': apiKey.value
-      }
-    })
-
-    expect(response.statusCode).toBe(401)
-  })
-
-  it('should be able to delete the api key', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/api-key/${apiKey.id}`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(204)
-  })
-
-  it('should not be able to delete an api key that does not exist', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: `/api-key/ks_1234567890`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(404)
   })
 
   afterAll(async () => {

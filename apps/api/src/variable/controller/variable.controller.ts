@@ -19,56 +19,56 @@ import { UpdateVariable } from '../dto/update.variable/update.variable'
 export class VariableController {
   constructor(private readonly variableService: VariableService) {}
 
-  @Post(':projectId')
+  @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_VARIABLE)
   async createVariable(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Body() dto: CreateVariable
   ) {
-    return await this.variableService.createVariable(user, dto, projectId)
+    return await this.variableService.createVariable(user, dto, projectSlug)
   }
 
-  @Put(':variableId')
+  @Put(':variableSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async updateVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string,
+    @Param('variableSlug') variableSlug: string,
     @Body() dto: UpdateVariable
   ) {
-    return await this.variableService.updateVariable(user, variableId, dto)
+    return await this.variableService.updateVariable(user, variableSlug, dto)
   }
 
-  @Put(':variableId/rollback/:rollbackVersion')
+  @Put(':variableSlug/rollback/:rollbackVersion')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async rollbackVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string,
-    @Query('environmentId') environmentId: string,
+    @Param('variableSlug') variableSlug: string,
+    @Query('environmentSlug') environmentSlug: string,
     @Param('rollbackVersion') rollbackVersion: number
   ) {
     return await this.variableService.rollbackVariable(
       user,
-      variableId,
-      environmentId,
+      variableSlug,
+      environmentSlug,
       rollbackVersion
     )
   }
 
-  @Delete(':variableId')
+  @Delete(':variableSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_VARIABLE)
   async deleteVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string
+    @Param('variableSlug') variableSlug: string
   ) {
-    return await this.variableService.deleteVariable(user, variableId)
+    return await this.variableService.deleteVariable(user, variableSlug)
   }
 
-  @Get('/:projectId')
+  @Get('/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getAllVariablesOfProject(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -77,7 +77,7 @@ export class VariableController {
   ) {
     return await this.variableService.getAllVariablesOfProject(
       user,
-      projectId,
+      projectSlug,
       page,
       limit,
       sort,
@@ -86,34 +86,34 @@ export class VariableController {
     )
   }
 
-  @Get('/:projectId/:environmentId')
+  @Get('/:projectSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getAllVariablesOfEnvironment(
     @CurrentUser() user: User,
-    @Param('projectId') projectId: string,
-    @Param('environmentId') environmentId: string
+    @Param('projectSlug') projectSlug: string,
+    @Param('environmentSlug') environmentSlug: string
   ) {
     return await this.variableService.getAllVariablesOfProjectAndEnvironment(
       user,
-      projectId,
-      environmentId
+      projectSlug,
+      environmentSlug
     )
   }
 
-  @Get('/:variableId/revisions/:environmentId')
+  @Get('/:variableSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getRevisionsOfVariable(
     @CurrentUser() user: User,
-    @Param('variableId') variableId: string,
-    @Param('environmentId') environmentId: string,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('order') order: 'asc' | 'desc' = 'desc'
   ) {
     return await this.variableService.getRevisionsOfVariable(
       user,
-      variableId,
-      environmentId,
+      variableSlug,
+      environmentSlug,
       page,
       limit,
       order

@@ -16,6 +16,25 @@ import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 export class ApiKeyGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
+  /**
+   * This method will check if the user is authenticated via an API key,
+   * and if the API key has the required authorities for the route.
+   *
+   * If the user is not authenticated via an API key, or if the API key does not have the required authorities,
+   * then the canActivate method will return true.
+   *
+   * If the user is authenticated via an API key, and the API key has the required authorities,
+   * then the canActivate method will return true.
+   *
+   * If the user is authenticated via an API key, but the API key does not have the required authorities,
+   * then the canActivate method will throw an UnauthorizedException.
+   *
+   * If the user is authenticated via an API key, but the API key is forbidden for the route,
+   * then the canActivate method will throw an UnauthorizedException.
+   *
+   * @param context The ExecutionContext for the request.
+   * @returns A boolean indicating whether or not the user is authenticated via an API key and has the required authorities for the route.
+   */
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {

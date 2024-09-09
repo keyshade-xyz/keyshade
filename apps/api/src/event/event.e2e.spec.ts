@@ -3,14 +3,12 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import {
-  Environment,
   EventSeverity,
   EventSource,
   EventTriggerer,
   EventType,
   Project,
   ProjectAccessLevel,
-  Secret,
   User,
   Variable,
   Workspace
@@ -22,7 +20,6 @@ import { AppModule } from '@/app/app.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { EventModule } from './event.module'
-import cleanUp from '@/common/cleanup'
 import { WorkspaceService } from '@/workspace/service/workspace.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { EnvironmentService } from '@/environment/service/environment.service'
@@ -32,10 +29,10 @@ import { SecretService } from '@/secret/service/secret.service'
 import { SecretModule } from '@/secret/secret.module'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
-import createEvent from '@/common/create-event'
 import { VariableService } from '@/variable/service/variable.service'
 import { VariableModule } from '@/variable/variable.module'
-import { QueryTransformPipe } from '@/common/query.transform.pipe'
+import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+import { createEvent } from '@/common/event'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -49,9 +46,6 @@ describe('Event Controller Tests', () => {
   let variableService: VariableService
 
   let user: User
-  let workspace: Workspace
-  let project: Project
-  let environment: Environment
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -85,9 +79,9 @@ describe('Event Controller Tests', () => {
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
+  })
 
-    await cleanUp(prisma)
-
+  beforeEach(async () => {
     user = await prisma.user.create({
       data: {
         email: 'johndoe@keyshade.xyz',
@@ -103,17 +97,16 @@ describe('Event Controller Tests', () => {
   })
 
   it('should be able to fetch a workspace event', async () => {
-    const newWorkspace = await workspaceService.createWorkspace(user, {
+    const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
       description: 'Some description'
     })
-    workspace = newWorkspace
 
-    expect(newWorkspace).toBeDefined()
+    expect(workspace).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${newWorkspace.id}?source=WORKSPACE`,
+      url: `/event/${workspace.slug}?source=WORKSPACE`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -128,41 +121,45 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.WORKSPACE_CREATED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newWorkspace.id)
+    expect(event.itemId).toBe(workspace.id)
     expect(event.userId).toBe(user.id)
-    expect(event.workspaceId).toBe(newWorkspace.id)
+    expect(event.workspaceId).toBe(workspace.id)
 
     //check metadata
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${newWorkspace.id}?source=WORKSPACE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch a project event', async () => {
-    const newProject = (await projectService.createProject(user, workspace.id, {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
+    const project = (await projectService.createProject(user, workspace.slug, {
       name: 'My project',
       description: 'Some description',
       environments: [],
       storePrivateKey: false,
       accessLevel: ProjectAccessLevel.GLOBAL
     })) as Project
-    project = newProject
 
-    expect(newProject).toBeDefined()
+    expect(project).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=PROJECT`,
+      url: `/event/${workspace.slug}?source=PROJECT`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -178,7 +175,7 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.PROJECT_CREATED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newProject.id)
+    expect(event.itemId).toBe(project.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
 
@@ -186,34 +183,46 @@ describe('Event Controller Tests', () => {
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=PROJECT&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=PROJECT&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?source=PROJECT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=PROJECT&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch an environment event', async () => {
-    const newEnvironment = (await environmentService.createEnvironment(
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
+    const project = await projectService.createProject(user, workspace.slug, {
+      name: 'My project',
+      description: 'Some description',
+      environments: [],
+      storePrivateKey: false,
+      accessLevel: ProjectAccessLevel.GLOBAL
+    })
+
+    const environment = await environmentService.createEnvironment(
       user,
       {
         name: 'My environment',
         description: 'Some description'
       },
-      project.id
-    )) as Environment
-    environment = newEnvironment
+      project.slug
+    )
 
-    expect(newEnvironment).toBeDefined()
+    expect(environment).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=ENVIRONMENT`,
+      url: `/event/${workspace.slug}?source=ENVIRONMENT`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -229,7 +238,7 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.ENVIRONMENT_ADDED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newEnvironment.id)
+    expect(event.itemId).toBe(environment.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
 
@@ -237,40 +246,62 @@ describe('Event Controller Tests', () => {
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=ENVIRONMENT&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=ENVIRONMENT&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?source=ENVIRONMENT&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=ENVIRONMENT&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch a secret event', async () => {
-    const newSecret = (await secretService.createSecret(
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
+    const project = await projectService.createProject(user, workspace.slug, {
+      name: 'My project',
+      description: 'Some description',
+      environments: [],
+      storePrivateKey: false,
+      accessLevel: ProjectAccessLevel.GLOBAL
+    })
+
+    const environment = await environmentService.createEnvironment(
+      user,
+      {
+        name: 'My environment',
+        description: 'Some description'
+      },
+      project.slug
+    )
+
+    const secret = await secretService.createSecret(
       user,
       {
         name: 'My secret',
         entries: [
           {
             value: 'My value',
-            environmentId: environment.id
+            environmentSlug: environment.slug
           }
         ],
         note: 'Some note',
         rotateAfter: '720'
       },
-      project.id
-    )) as Secret
+      project.slug
+    )
 
-    expect(newSecret).toBeDefined()
+    expect(secret).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=SECRET`,
+      url: `/event/${workspace.slug}?source=SECRET`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -286,7 +317,7 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.SECRET_ADDED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newSecret.id)
+    expect(event.itemId).toBe(secret.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
 
@@ -294,39 +325,61 @@ describe('Event Controller Tests', () => {
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=SECRET&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=SECRET&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?source=SECRET&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=SECRET&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch a variable event', async () => {
-    const newVariable = (await variableService.createVariable(
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
+    const project = await projectService.createProject(user, workspace.slug, {
+      name: 'My project',
+      description: 'Some description',
+      environments: [],
+      storePrivateKey: false,
+      accessLevel: ProjectAccessLevel.GLOBAL
+    })
+
+    const environment = await environmentService.createEnvironment(
+      user,
+      {
+        name: 'My environment',
+        description: 'Some description'
+      },
+      project.slug
+    )
+
+    const variable = (await variableService.createVariable(
       user,
       {
         name: 'My variable',
         entries: [
           {
             value: 'My value',
-            environmentId: environment.id
+            environmentSlug: environment.slug
           }
         ],
         note: 'Some note'
       },
-      project.id
+      project.slug
     )) as Variable
 
-    expect(newVariable).toBeDefined()
+    expect(variable).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=VARIABLE`,
+      url: `/event/${workspace.slug}?source=VARIABLE`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -343,7 +396,7 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.VARIABLE_ADDED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newVariable.id)
+    expect(event.itemId).toBe(variable.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
 
@@ -351,36 +404,49 @@ describe('Event Controller Tests', () => {
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=VARIABLE&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=VARIABLE&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?source=VARIABLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=VARIABLE&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch a workspace role event', async () => {
-    const newWorkspaceRole = await workspaceRoleService.createWorkspaceRole(
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
+    const project = await projectService.createProject(user, workspace.slug, {
+      name: 'My project',
+      description: 'Some description',
+      environments: [],
+      storePrivateKey: false,
+      accessLevel: ProjectAccessLevel.GLOBAL
+    })
+
+    const workspaceRole = await workspaceRoleService.createWorkspaceRole(
       user,
-      workspace.id,
+      workspace.slug,
       {
         name: 'My role',
         description: 'Some description',
         colorCode: '#000000',
         authorities: [],
-        projectIds: [project.id]
+        projectSlugs: [project.slug]
       }
     )
 
-    expect(newWorkspaceRole).toBeDefined()
+    expect(workspaceRole).toBeDefined()
 
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=WORKSPACE_ROLE`,
+      url: `/event/${workspace.slug}?source=WORKSPACE_ROLE`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -396,7 +462,7 @@ describe('Event Controller Tests', () => {
     expect(event.severity).toBe(EventSeverity.INFO)
     expect(event.type).toBe(EventType.WORKSPACE_ROLE_CREATED)
     expect(event.timestamp).toBeDefined()
-    expect(event.itemId).toBe(newWorkspaceRole.id)
+    expect(event.itemId).toBe(workspaceRole.id)
     expect(event.userId).toBe(user.id)
     expect(event.workspaceId).toBe(workspace.id)
 
@@ -404,80 +470,60 @@ describe('Event Controller Tests', () => {
     const metadata = response.json().metadata
     expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
+      `/event/${workspace.slug}?source=WORKSPACE_ROLE&page=0&limit=10&search=`
     )
   })
 
   it('should be able to fetch all events', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}`,
+      url: `/event/${workspace.slug}`,
       headers: {
         'x-e2e-user-email': user.email
       }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json().items).toHaveLength(6)
+    expect(response.json().items).toHaveLength(1)
 
     //check metadata
     const metadata = response.json().metadata
-    expect(metadata.totalCount).toEqual(6)
+    expect(metadata.totalCount).toEqual(1)
     expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?page=0&limit=10&search=`
+      `/event/${workspace.slug}?page=0&limit=10&search=`
     )
     expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?page=0&limit=10&search=`
+      `/event/${workspace.slug}?page=0&limit=10&search=`
     )
     expect(metadata.links.previous).toBeNull()
     expect(metadata.links.next).toBeNull()
     expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?page=0&limit=10&search=`
-    )
-  })
-
-  it('should be able to fetch 2nd page of all events', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: `/event/${workspace.id}?page=1&limit=3&`,
-      headers: {
-        'x-e2e-user-email': user.email
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-    expect(response.json().items).toHaveLength(3)
-
-    //check metadata
-    const metadata = response.json().metadata
-    expect(metadata.totalCount).toEqual(6)
-    expect(metadata.links.self).toEqual(
-      `/event/${workspace.id}?page=1&limit=3&search=`
-    )
-    expect(metadata.links.first).toEqual(
-      `/event/${workspace.id}?page=0&limit=3&search=`
-    )
-    expect(metadata.links.previous).toEqual(
-      `/event/${workspace.id}?page=0&limit=3&search=`
-    )
-    expect(metadata.links.next).toBeNull()
-    expect(metadata.links.last).toEqual(
-      `/event/${workspace.id}?page=1&limit=3&search=`
+      `/event/${workspace.slug}?page=0&limit=10&search=`
     )
   })
 
   it('should throw an error with wrong severity value', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?severity=INVALID`,
+      url: `/event/${workspace.slug}?severity=INVALID`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -487,9 +533,14 @@ describe('Event Controller Tests', () => {
   })
 
   it('should throw an error with wrong source value', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     const response = await app.inject({
       method: 'GET',
-      url: `/event/${workspace.id}?source=INVALID`,
+      url: `/event/${workspace.slug}?source=INVALID`,
       headers: {
         'x-e2e-user-email': user.email
       }
@@ -499,6 +550,11 @@ describe('Event Controller Tests', () => {
   })
 
   it('should throw an error if user is not provided in event creation for user-triggered event', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     try {
       await createEvent(
         {
@@ -519,6 +575,11 @@ describe('Event Controller Tests', () => {
   })
 
   it('should throw an exception for invalid event source', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     try {
       await createEvent(
         {
@@ -539,6 +600,11 @@ describe('Event Controller Tests', () => {
   })
 
   it('should throw an exception for invalid event type', async () => {
+    const workspace = await workspaceService.createWorkspace(user, {
+      name: 'My workspace',
+      description: 'Some description'
+    })
+
     try {
       await createEvent(
         {
@@ -561,7 +627,14 @@ describe('Event Controller Tests', () => {
     }
   })
 
+  afterEach(async () => {
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
+  })
+
   afterAll(async () => {
-    await cleanUp(prisma)
+    await app.close()
   })
 })

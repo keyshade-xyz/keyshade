@@ -34,19 +34,19 @@ export class CreateEnvironment extends BaseCommand {
   getArguments(): CommandArgument[] {
     return [
       {
-        name: '<Project ID>',
+        name: '<Project Slug>',
         description:
-          'ID of the project under which you want to add the environment'
+          'Slug of the project under which you want to add the environment'
       }
     ]
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
-    const [projectId] = args
+    const [projectSlug] = args
     const { name, description } = await this.parseInput(options)
 
-    if (!projectId) {
-      Logger.error('Project ID is required')
+    if (!projectSlug) {
+      Logger.error('Project slug is required')
       return
     }
 
@@ -55,7 +55,7 @@ export class CreateEnvironment extends BaseCommand {
     const environmentData = {
       name,
       description,
-      projectId
+      projectSlug
     }
 
     const headers = {
@@ -72,7 +72,9 @@ export class CreateEnvironment extends BaseCommand {
     } = await environmentController.createEnvironment(environmentData, headers)
 
     if (success) {
-      Logger.info(`Environment created:${environment.name} (${environment.id})`)
+      Logger.info(
+        `Environment created:${environment.name} (${environment.slug})`
+      )
     } else {
       Logger.error(`Failed to create environment: ${error.message}`)
     }

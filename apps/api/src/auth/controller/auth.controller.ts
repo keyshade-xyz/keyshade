@@ -20,11 +20,11 @@ import { GoogleOAuthStrategyFactory } from '@/config/factory/google/google-strat
 import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strategy.factory'
 import { Response } from 'express'
 import { AuthProvider } from '@prisma/client'
-import setCookie from '@/common/set-cookie'
 import {
   sendOAuthFailureRedirect,
   sendOAuthSuccessRedirect
 } from '@/common/redirect'
+import { setCookie } from '@/common/util'
 
 @Controller('auth')
 export class AuthController {

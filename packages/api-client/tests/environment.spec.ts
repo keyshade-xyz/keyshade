@@ -8,9 +8,9 @@ describe('Environments Controller Tests', () => {
   const environmentController = new EnvironmentController(backendUrl)
 
   const email = 'johndoe@example.com'
-  let projectId: string | null
-  let workspaceId: string | null
-  let environmentId: string | null
+  let projectSlug: string | null
+  let workspaceSlug: string | null
+  let environmentSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -26,12 +26,12 @@ describe('Environments Controller Tests', () => {
       )
     ).json()) as any
 
-    workspaceId = workspaceResponse.id
+    workspaceSlug = workspaceResponse.slug
 
     // Create a project
     const projectResponse = (await (
       await client.post(
-        `/api/project/${workspaceId}`,
+        `/api/project/${workspaceSlug}`,
         {
           name: 'Project',
           storePrivateKey: true
@@ -42,12 +42,12 @@ describe('Environments Controller Tests', () => {
       )
     ).json()) as any
 
-    projectId = projectResponse.id
+    projectSlug = projectResponse.slug
   })
 
   afterAll(async () => {
     // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceId}`, {
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -56,7 +56,7 @@ describe('Environments Controller Tests', () => {
     // Create an environment
     const createEnvironmentResponse = (await (
       await client.post(
-        `/api/environment/${projectId}`,
+        `/api/environment/${projectSlug}`,
         {
           name: 'Dev'
         },
@@ -66,12 +66,12 @@ describe('Environments Controller Tests', () => {
       )
     ).json()) as any
 
-    environmentId = createEnvironmentResponse.id
+    environmentSlug = createEnvironmentResponse.slug
   })
 
   afterEach(async () => {
     // Delete the environment
-    await client.delete(`/api/environment/${environmentId}`, {
+    await client.delete(`/api/environment/${environmentSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -80,7 +80,7 @@ describe('Environments Controller Tests', () => {
     const environments = (
       await environmentController.getAllEnvironmentsOfProject(
         {
-          projectId,
+          projectSlug,
           page: 0,
           limit: 10
         },
@@ -96,23 +96,23 @@ describe('Environments Controller Tests', () => {
     //check metadata
     expect(environments.metadata.totalCount).toEqual(2)
     expect(environments.metadata.links.self).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
     expect(environments.metadata.links.first).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
     expect(environments.metadata.links.previous).toBeNull()
     expect(environments.metadata.links.next).toBeNull()
     expect(environments.metadata.links.last).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
   })
 
-  it('should be able to fetch environment by ID', async () => {
+  it('should be able to fetch environment by slug', async () => {
     const environmentResponse = (
-      await environmentController.getEnvironmentById(
+      await environmentController.getEnvironment(
         {
-          id: environmentId
+          slug: environmentSlug
         },
         {
           'x-e2e-user-email': email
@@ -120,7 +120,7 @@ describe('Environments Controller Tests', () => {
       )
     ).data
 
-    expect(environmentResponse.id).toBe(environmentId)
+    expect(environmentResponse.slug).toBe(environmentSlug)
     expect(environmentResponse.name).toBe('Dev')
   })
 
@@ -128,7 +128,7 @@ describe('Environments Controller Tests', () => {
     const createEnvironmentResponse = (
       await environmentController.createEnvironment(
         {
-          projectId,
+          projectId: projectSlug,
           name: 'Prod'
         },
         {
@@ -140,7 +140,7 @@ describe('Environments Controller Tests', () => {
     expect(createEnvironmentResponse.name).toBe('Prod')
 
     const fetchEnvironmentResponse = (await (
-      await client.get(`/api/environment/${createEnvironmentResponse.id}`, {
+      await client.get(`/api/environment/${createEnvironmentResponse.slug}`, {
         'x-e2e-user-email': email
       })
     ).json()) as any
@@ -148,7 +148,7 @@ describe('Environments Controller Tests', () => {
     expect(fetchEnvironmentResponse.name).toBe('Prod')
 
     // Delete the environment
-    await client.delete(`/api/environment/${createEnvironmentResponse.id}`, {
+    await client.delete(`/api/environment/${createEnvironmentResponse.slug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -157,7 +157,7 @@ describe('Environments Controller Tests', () => {
     const updateEnvironmentResponse = (
       await environmentController.updateEnvironment(
         {
-          id: environmentId,
+          slug: environmentSlug,
           name: 'Prod'
         },
         {
@@ -169,19 +169,24 @@ describe('Environments Controller Tests', () => {
     expect(updateEnvironmentResponse.name).toBe('Prod')
 
     const fetchEnvironmentResponse = (await (
-      await client.get(`/api/environment/${environmentId}`, {
+      await client.get(`/api/environment/${updateEnvironmentResponse.slug}`, {
         'x-e2e-user-email': email
       })
     ).json()) as any
 
     expect(fetchEnvironmentResponse.name).toBe('Prod')
+
+    // Delete this environment
+    await client.delete(`/api/environment/${updateEnvironmentResponse.slug}`, {
+      'x-e2e-user-email': email
+    })
   })
 
   it('should be able to delete an environment', async () => {
     // Create an environment
     const createEnvironmentResponse = (await (
       await client.post(
-        `/api/environment/${projectId}`,
+        `/api/environment/${projectSlug}`,
         {
           name: 'Prod'
         },
@@ -193,7 +198,7 @@ describe('Environments Controller Tests', () => {
 
     await environmentController.deleteEnvironment(
       {
-        id: createEnvironmentResponse.id
+        slug: createEnvironmentResponse.slug
       },
       {
         'x-e2e-user-email': email
@@ -204,7 +209,7 @@ describe('Environments Controller Tests', () => {
     const environments = (
       await environmentController.getAllEnvironmentsOfProject(
         {
-          projectId
+          projectSlug
         },
         {
           'x-e2e-user-email': email
@@ -215,15 +220,15 @@ describe('Environments Controller Tests', () => {
     expect(environments.items).toHaveLength(2)
     expect(environments.metadata.totalCount).toEqual(2)
     expect(environments.metadata.links.self).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
     expect(environments.metadata.links.first).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
     expect(environments.metadata.links.previous).toBeNull()
     expect(environments.metadata.links.next).toBeNull()
     expect(environments.metadata.links.last).toBe(
-      `/environment/all/${projectId}?page=0&limit=10&sort=name&order=asc&search=`
+      `/environment/all/${projectSlug}?page=0&limit=10&sort=name&order=asc&search=`
     )
   })
 })

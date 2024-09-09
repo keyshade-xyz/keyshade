@@ -8,11 +8,11 @@ import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authori
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @Get(':workspaceId')
+  @Get(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_EVENT)
   async getEvents(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: string,
+    @Param('workspaceSlug') workspaceSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('search') search: string = '',
@@ -21,7 +21,7 @@ export class EventController {
   ) {
     return await this.eventService.getEvents(
       user,
-      workspaceId,
+      workspaceSlug,
       page,
       limit,
       search,

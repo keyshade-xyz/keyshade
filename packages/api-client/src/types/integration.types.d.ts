@@ -37,18 +37,19 @@ export enum EventType {
   INTEGRATION_DELETED
 }
 export interface CreateIntegrationRequest {
-  workspaceId?: string
-  projectId?: string
+  workspaceSlug?: string
+  projectSlug?: string
   name: string
   type: string
   notifyOn: [string]
   metadata: Record<string, string>
-  environmentId: string
+  environmentSlug: string
 }
 
 export interface CreateIntegrationResponse {
   id: string
   name: string
+  slug: string
   metadata: Record<string, string>
   createdAt: string
   updatedAt: string
@@ -60,9 +61,9 @@ export interface CreateIntegrationResponse {
 }
 
 export interface UpdateIntegrationRequest {
-  integrationId: string
-  workspaceId?: string
-  projectId?: string
+  integrationSlug: string
+  workspaceSlug?: string
+  projectSlug?: string
   name?: string
   type?: IntegrationType
   notifyOn?: EventType[]
@@ -73,6 +74,7 @@ export interface UpdateIntegrationRequest {
 export interface UpdateIntegrationResponse {
   id: string
   name: string
+  slug: string
   metadata: Record<string, string>
   createdAt: string
   updatedAt: string
@@ -86,16 +88,17 @@ export interface UpdateIntegrationResponse {
 export interface DeleteIntegrationResponse {}
 
 export interface DeleteIntegrationRequest {
-  integrationId: string
+  integrationSlug: string
 }
 
 export interface GetIntegrationRequest {
-  integrationId: string
+  integrationSlug: string
 }
 
 export interface GetIntegrationResponse {
   id: string
   name: string
+  slug: string
   metadata: Record<string, string>
   createdAt: string
   updatedAt: string
@@ -112,13 +115,14 @@ export interface GetAllIntegrationRequest {
   sort?: string
   order?: string
   search?: string
-  workspaceId: string
+  workspaceSlug: string
 }
 
 export interface GetAllIntegrationResponse
   extends Page<{
     id: string
     name: string
+    slug: string
     metadata: Record<string, string>
     createdAt: string
     updatedAt: string

@@ -4,7 +4,7 @@ import { IsOptional, IsString } from 'class-validator'
 export class ForkProject {
   @IsString()
   @IsOptional()
-  workspaceId?: Workspace['id']
+  workspaceSlug?: Workspace['slug']
 
   @IsString()
   @IsOptional()

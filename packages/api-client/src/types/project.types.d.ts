@@ -2,7 +2,7 @@ import { Page } from './index.types'
 
 export interface CreateProjectRequest {
   name: string
-  workspaceId: string
+  workspaceSlug: string
   description?: string
   storePrivateKey?: boolean
   environments?: CreateEnvironment[]
@@ -12,6 +12,7 @@ export interface CreateProjectRequest {
 export interface CreateProjectResponse {
   id: string
   name: string
+  slug: string
   description: string
   createdAt: string
   updatedAt: string
@@ -28,13 +29,14 @@ export interface CreateProjectResponse {
 }
 
 export interface UpdateProjectRequest {
-  projectId: string
+  projectSlug: string
   name?: string
 }
 
 export interface UpdateProjectResponse {
   id: string
   name: string
+  slug: string
   description: string
   createdAt: string
   updatedAt: string
@@ -51,18 +53,19 @@ export interface UpdateProjectResponse {
 }
 
 export interface DeleteProjectRequest {
-  projectId: string
+  projectSlug: string
 }
 
 export interface DeleteProjectResponse {}
 
 export interface GetProjectRequest {
-  projectId: string
+  projectSlug: string
 }
 
 export interface GetProjectResponse {
   id: string
   name: string
+  slug: string
   description: string
   createdAt: string
   updatedAt: string
@@ -79,15 +82,16 @@ export interface GetProjectResponse {
 }
 
 export interface ForkProjectRequest {
-  projectId: string
+  projectSlug: string
   name?: string
-  workspaceId?: string
+  workspaceSlug?: string
   storePrivateKey?: boolean
 }
 
 export interface ForkProjectResponse {
   id: string
   name: string
+  slug: string
   description: string
   createdAt: string
   updatedAt: string
@@ -104,21 +108,21 @@ export interface ForkProjectResponse {
 }
 
 export interface SyncProjectRequest {
-  projectId: string
+  projectSlug: string
 }
 
 export interface SyncProjectResponse {}
 
 export interface UnlinkProjectRequest {
-  projectId: string
-  workspaceId: string
+  projectSlug: string
+  workspaceSlug: string
 }
 
 export interface UnlinkProjectResponse {}
 
 export interface GetForkRequest {
-  projectId: string
-  workspaceId: string
+  projectSlug: string
+  workspaceSlug: string
   page?: number
   limit?: number
   sort?: string
@@ -130,6 +134,7 @@ export interface GetForkResponse
   extends Page<{
     id: string
     name: string
+    slug: string
     description: string
     createdAt: string
     updatedAt: string
@@ -146,7 +151,7 @@ export interface GetForkResponse
   }> {}
 
 export interface GetAllProjectsRequest {
-  workspaceId: string
+  workspaceSlug: string
   page?: number
   limit?: number
   sort?: string
@@ -158,4 +163,16 @@ export interface GetAllProjectsResponse
   extends Page<{
     id: string
     name: string
+    slug: string
+    description: string
+    createdAt: string
+    updatedAt: string
+    storePrivateKey: boolean
+    isDisabled: boolean
+    accessLevel: string
+    pendingCreation: boolean
+    isForked: boolean
+    lastUpdatedById: string
+    workspaceId: string
+    forkedFromId: string
   }> {}
