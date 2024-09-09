@@ -34,31 +34,29 @@ export class UpdateEnvironment extends BaseCommand {
   getArguments(): CommandArgument[] {
     return [
       {
-        name: '<Environment ID>',
-        description: 'ID of the environment which you want to update.'
+        name: '<Environment Slug>',
+        description: 'Slug of the environment which you want to update.'
       }
     ]
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
-    const [environmentId] = args
+    const [environmentSlug] = args
     const { name, description } = options
 
-    if (!environmentId) {
-      Logger.error('Environment ID is required')
+    if (!environmentSlug) {
+      Logger.error('Environment slug is required')
       return
     }
 
-    const apiKey = this.apiKey
-
     const headers = {
-      'x-keyshade-token': apiKey
+      'x-keyshade-token': this.apiKey
     }
 
     const environmentData = {
       name,
       description,
-      id: environmentId
+      slug: environmentSlug
     }
 
     const environmentController = new EnvironmentController(this.baseUrl)
@@ -73,7 +71,7 @@ export class UpdateEnvironment extends BaseCommand {
     if (success) {
       Logger.info('Environment updated successfully')
       Logger.info(
-        `Environment ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
+        `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
       Logger.error(`Error updating Environment: ${error}`)

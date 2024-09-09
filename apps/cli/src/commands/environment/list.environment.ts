@@ -18,29 +18,22 @@ export class ListEnvironment extends BaseCommand {
   getArguments(): CommandArgument[] {
     return [
       {
-        name: '<Project ID>',
-        description: 'ID of the project whose environments you want.'
+        name: '<Project Slug>',
+        description: 'Slug of the project whose environments you want.'
       }
     ]
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [projectId] = args
+    const [projectSlug] = args
 
-    if (!projectId) {
-      Logger.error('Project ID is required')
+    if (!projectSlug) {
+      Logger.error('Project slug is required')
       return
     }
-
-    const apiKey = this.apiKey
 
     const headers = {
-      'x-keyshade-token': apiKey
-    }
-
-    if (!apiKey) {
-      Logger.error('Base URL and API Key must be set as environment variables')
-      return
+      'x-keyshade-token': this.apiKey
     }
 
     const environmentController = new EnvironmentController(this.baseUrl)
@@ -51,7 +44,7 @@ export class ListEnvironment extends BaseCommand {
       data: environments,
       error
     } = await environmentController.getAllEnvironmentsOfProject(
-      { projectId },
+      { projectSlug },
       headers
     )
 
