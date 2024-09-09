@@ -7,19 +7,22 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
+  Environment,
   EventSource,
   EventType,
   Integration,
+  Project,
   User,
   Workspace
 } from '@prisma/client'
 import { CreateIntegration } from '../dto/create.integration/create.integration'
 import { UpdateIntegration } from '../dto/update.integration/update.integration'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
-import createEvent from '@/common/create-event'
 import IntegrationFactory from '../plugins/factory/integration.factory'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class IntegrationService {
@@ -33,52 +36,50 @@ export class IntegrationService {
   async createIntegration(
     user: User,
     dto: CreateIntegration,
-    workspaceId: Workspace['id']
+    workspaceSlug: Workspace['slug']
   ) {
-    // Check if integration with the same name already exists
-    await this.existsByNameAndWorkspaceId(dto.name, workspaceId)
-
     // Check if the user is permitted to create integrations in the workspace
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.CREATE_INTEGRATION],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
-    // Check if the user has READ authority over the workspace
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_WORKSPACE],
-      prisma: this.prisma
-    })
+    // Check if integration with the same name already exists
+    await this.existsByNameAndWorkspaceId(dto.name, workspace)
+
+    let project: Project | null = null
+    let environment: Environment | null = null
 
     // Check if the user has READ authority over the project
-    if (dto.projectId) {
-      await this.authorityCheckerService.checkAuthorityOverProject({
+    if (dto.projectSlug) {
+      project = await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: dto.projectId },
+        entity: { slug: dto.projectSlug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
     }
 
     // Check if only environmentId is provided
-    if (dto.environmentId && !dto.projectId) {
+    if (dto.environmentSlug && !dto.projectSlug) {
       throw new BadRequestException(
         'Environment can only be provided if project is also provided'
       )
     }
 
     // Check if the user has READ authority over the environment
-    if (dto.environmentId) {
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
-        entity: { id: dto.environmentId },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
-      })
+    if (dto.environmentSlug) {
+      environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { slug: dto.environmentSlug },
+          authorities: [Authority.READ_ENVIRONMENT],
+          prisma: this.prisma
+        })
     }
 
     // Create the integration object
@@ -94,11 +95,12 @@ export class IntegrationService {
     const integration = await this.prisma.integration.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma),
         type: dto.type,
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
-        environmentId: dto.environmentId,
-        projectId: dto.projectId,
+        environmentId: environment?.id,
+        projectId: project?.id,
         workspaceId
       }
     })
@@ -128,46 +130,51 @@ export class IntegrationService {
   async updateIntegration(
     user: User,
     dto: UpdateIntegration,
-    integrationId: Integration['id']
+    integrationSlug: Integration['slug']
   ) {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration({
         userId: user.id,
-        entity: { id: integrationId },
+        entity: { slug: integrationSlug },
         authorities: [Authority.UPDATE_INTEGRATION],
         prisma: this.prisma
       })
+    const integrationId = integration.id
 
     // Check if the name of the integration is being changed, and if so, check if the new name is unique
     if (dto.name) {
-      await this.existsByNameAndWorkspaceId(dto.name, integration.workspaceId)
+      await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
     }
 
+    let project: Project | null = null
+    let environment: Environment | null = null
+
     // If the project is being changed, check if the user has READ authority over the new project
-    if (dto.projectId) {
-      await this.authorityCheckerService.checkAuthorityOverProject({
+    if (dto.projectSlug) {
+      project = await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: dto.projectId },
+        entity: { slug: dto.projectSlug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
     }
 
     // Check if only environmentId is provided, or if the integration has no project associated from prior
-    if (dto.environmentId && !integration.projectId && !dto.projectId) {
+    if (dto.environmentSlug && !integration.projectId && !dto.projectSlug) {
       throw new BadRequestException(
         'Environment can only be provided if project is also provided'
       )
     }
 
     // If the environment is being changed, check if the user has READ authority over the new environment
-    if (dto.environmentId) {
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
-        entity: { id: dto.environmentId },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
-      })
+    if (dto.environmentSlug) {
+      environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { slug: dto.environmentSlug },
+          authorities: [Authority.READ_ENVIRONMENT],
+          prisma: this.prisma
+        })
     }
 
     // Create the integration object
@@ -186,10 +193,13 @@ export class IntegrationService {
       where: { id: integrationId },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma)
+          : integration.slug,
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
-        environmentId: dto.environmentId,
-        projectId: dto.projectId
+        environmentId: environment?.id,
+        projectId: project?.id
       }
     })
 
@@ -215,10 +225,10 @@ export class IntegrationService {
     return updatedIntegration
   }
 
-  async getIntegration(user: User, integrationId: Integration['id']) {
+  async getIntegration(user: User, integrationSlug: Integration['slug']) {
     return this.authorityCheckerService.checkAuthorityOverIntegration({
       userId: user.id,
-      entity: { id: integrationId },
+      entity: { slug: integrationSlug },
       authorities: [Authority.READ_INTEGRATION],
       prisma: this.prisma
     })
@@ -228,7 +238,7 @@ export class IntegrationService {
   // The e2e tests are not working, but the API calls work as expected
   async getAllIntegrationsOfWorkspace(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
     sort: string,
@@ -236,12 +246,14 @@ export class IntegrationService {
     search: string
   ) {
     // Check if the user has READ authority over the workspace
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_INTEGRATION],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_INTEGRATION],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
     // We need to return only those integrations that have the following properties:
     // - belong to the workspace
@@ -324,7 +336,7 @@ export class IntegrationService {
         ]
       }
     })
-    const metadata = paginate(totalCount, `/integration/all/${workspaceId}`, {
+    const metadata = paginate(totalCount, `/integration/all/${workspaceSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),
       sort,
@@ -335,14 +347,15 @@ export class IntegrationService {
     return { items: integrations, metadata }
   }
 
-  async deleteIntegration(user: User, integrationId: Integration['id']) {
+  async deleteIntegration(user: User, integrationSlug: Integration['slug']) {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration({
         userId: user.id,
-        entity: { id: integrationId },
+        entity: { slug: integrationSlug },
         authorities: [Authority.DELETE_INTEGRATION],
         prisma: this.prisma
       })
+    const integrationId = integration.id
 
     await this.prisma.integration.delete({
       where: { id: integrationId }
@@ -370,8 +383,10 @@ export class IntegrationService {
 
   private async existsByNameAndWorkspaceId(
     name: Integration['name'],
-    workspaceId: Workspace['id']
+    workspace: Workspace
   ) {
+    const workspaceId = workspace.id
+
     if (
       (await this.prisma.integration.findUnique({
         where: {

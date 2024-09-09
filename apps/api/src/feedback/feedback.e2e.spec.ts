@@ -42,8 +42,8 @@ describe('Feedback Controller (E2E)', () => {
   beforeEach(async () => {
     user = await prisma.user.create({
       data: {
-        email: 'johndoe@keyshade.xyz',
-        name: 'John',
+        email: 'janice@keyshade.xyz',
+        name: 'Janice',
         isActive: true,
         isAdmin: false,
         isOnboardingFinished: false

@@ -18,11 +18,7 @@ import {
 } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { decrypt } from '@/common/decrypt'
 import { PrismaService } from '@/prisma/prisma.service'
-import { addHoursToDate } from '@/common/add-hours-to-date'
-import { encrypt } from '@/common/encrypt'
-import createEvent from '@/common/create-event'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
@@ -32,7 +28,11 @@ import {
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import generateEntitySlug from '@/common/slug-generator'
+import { decrypt, encrypt } from '@/common/cryptography'
+import { createEvent } from '@/common/event'
+import { getEnvironmentIdToSlugMap } from '@/common/environment'
 
 @Injectable()
 export class SecretService {
@@ -50,48 +50,42 @@ export class SecretService {
     this.redis = redisClient.publisher
   }
 
-  async createSecret(user: User, dto: CreateSecret, projectId: Project['id']) {
+  async createSecret(
+    user: User,
+    dto: CreateSecret,
+    projectSlug: Project['slug']
+  ) {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.CREATE_SECRET],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     // Check if the secret with the same name already exists in the project
-    await this.secretExists(dto.name, projectId)
+    await this.secretExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
 
     // Check if the user has access to the environments
-    if (shouldCreateRevisions) {
-      const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      await Promise.all(
-        environmentIds.map(async (environmentId) => {
-          const environment =
-            await this.authorityCheckerService.checkAuthorityOverEnvironment({
-              userId: user.id,
-              entity: { id: environmentId },
-              authorities: [Authority.READ_ENVIRONMENT],
-              prisma: this.prisma
-            })
-
-          // Check if the environment belongs to the project
-          if (environment.projectId !== projectId) {
-            throw new BadRequestException(
-              `Environment: ${environmentId} does not belong to project: ${projectId}`
-            )
-          }
-        })
-      )
-    }
+    const environmentSlugToIdMap = shouldCreateRevisions
+      ? await getEnvironmentIdToSlugMap(
+          dto,
+          user,
+          project,
+          this.prisma,
+          this.authorityCheckerService
+        )
+      : new Map<string, string>()
 
     // Create the secret
     const secret = await this.prisma.secret.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'SECRET', this.prisma),
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
         versions: shouldCreateRevisions && {
@@ -101,7 +95,7 @@ export class SecretService {
                 value: await encrypt(project.publicKey, entry.value),
                 version: 1,
                 createdById: user.id,
-                environmentId: entry.environmentId
+                environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
               }))
             )
           }
@@ -155,10 +149,14 @@ export class SecretService {
     return secret
   }
 
-  async updateSecret(user: User, secretId: Secret['id'], dto: UpdateSecret) {
+  async updateSecret(
+    user: User,
+    secretSlug: Secret['slug'],
+    dto: UpdateSecret
+  ) {
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
-      entity: { id: secretId },
+      entity: { slug: secretSlug },
       authorities: [Authority.UPDATE_SECRET],
       prisma: this.prisma
     })
@@ -166,30 +164,18 @@ export class SecretService {
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
 
     // Check if the secret with the same name already exists in the project
-    dto.name && (await this.secretExists(dto.name, secret.projectId))
+    dto.name && (await this.secretExists(dto.name, secret.project))
 
     // Check if the user has access to the environments
-    if (shouldCreateRevisions) {
-      const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      await Promise.all(
-        environmentIds.map(async (environmentId) => {
-          const environment =
-            await this.authorityCheckerService.checkAuthorityOverEnvironment({
-              userId: user.id,
-              entity: { id: environmentId },
-              authorities: [Authority.READ_ENVIRONMENT],
-              prisma: this.prisma
-            })
-
-          // Check if the environment belongs to the project
-          if (environment.projectId !== secret.projectId) {
-            throw new BadRequestException(
-              `Environment: ${environmentId} does not belong to project: ${secret.projectId}`
-            )
-          }
-        })
-      )
-    }
+    const environmentSlugToIdMap = shouldCreateRevisions
+      ? await getEnvironmentIdToSlugMap(
+          dto,
+          user,
+          secret.project,
+          this.prisma,
+          this.authorityCheckerService
+        )
+      : new Map<string, string>()
 
     const op = []
 
@@ -203,6 +189,9 @@ export class SecretService {
         },
         data: {
           name: dto.name,
+          slug: dto.name
+            ? await generateEntitySlug(dto.name, 'SECRET', this.prisma)
+            : undefined,
           note: dto.note,
           rotateAt: dto.rotateAfter
             ? addHoursToDate(dto.rotateAfter)
@@ -225,7 +214,7 @@ export class SecretService {
         const latestVersion = await this.prisma.secretVersion.findFirst({
           where: {
             secretId: secret.id,
-            environmentId: entry.environmentId
+            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
           },
           select: {
             version: true
@@ -243,7 +232,7 @@ export class SecretService {
               value: await encrypt(secret.project.publicKey, entry.value),
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: entry.environmentId,
+              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               secretId: secret.id
             },
             select: {
@@ -274,7 +263,7 @@ export class SecretService {
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
             JSON.stringify({
-              environmentId: entry.environmentId,
+              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               name: updatedSecret.name,
               value: entry.value,
               isPlaintext: true
@@ -311,17 +300,27 @@ export class SecretService {
 
   async rollbackSecret(
     user: User,
-    secretId: Secret['id'],
-    environmentId: Environment['id'],
+    secretSlug: Secret['slug'],
+    environmentSlug: Environment['slug'],
     rollbackVersion: SecretVersion['version']
   ) {
     // Fetch the secret
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
-      entity: { id: secretId },
+      entity: { slug: secretSlug },
       authorities: [Authority.UPDATE_SECRET],
       prisma: this.prisma
     })
+
+    // Fetch the environment
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_SECRET],
+        prisma: this.prisma
+      })
+    const environmentId = environment.id
 
     const project = secret.project
 
@@ -332,7 +331,7 @@ export class SecretService {
 
     if (secret.versions.length === 0) {
       throw new NotFoundException(
-        `No versions found for environment: ${environmentId} for secret: ${secretId}`
+        `No versions found for environment: ${environmentSlug} for secret: ${secretSlug}`
       )
     }
 
@@ -342,7 +341,7 @@ export class SecretService {
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for secret: ${secretId}`
+        `Invalid rollback version: ${rollbackVersion} for secret: ${secretSlug}`
       )
     }
 
@@ -395,11 +394,11 @@ export class SecretService {
     return result
   }
 
-  async deleteSecret(user: User, secretId: Secret['id']) {
+  async deleteSecret(user: User, secretSlug: Secret['slug']) {
     // Check if the user has the required role
     const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
-      entity: { id: secretId },
+      entity: { slug: secretSlug },
       authorities: [Authority.DELETE_SECRET],
       prisma: this.prisma
     })
@@ -431,25 +430,28 @@ export class SecretService {
 
   async getAllSecretsOfProjectAndEnvironment(
     user: User,
-    projectId: Project['id'],
-    environmentId: Environment['id']
+    projectSlug: Project['slug'],
+    environmentSlug: Environment['slug']
   ) {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.READ_SECRET],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     // Check access to the environment
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environmentId },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
+    const environmentId = environment.id
 
     const secrets = await this.prisma.secret.findMany({
       where: {
@@ -495,31 +497,33 @@ export class SecretService {
   }
   async getRevisionsOfSecret(
     user: User,
-    secretId: Secret['id'],
-    environmentId: Environment['id'],
+    secretSlug: Secret['slug'],
+    environmentSlug: Environment['slug'],
     page: number,
     limit: number,
-    order: string
+    order: 'asc' | 'desc' = 'desc'
   ) {
-    // assign order to variable dynamically
-    const sortOrder = order === 'asc' ? 'asc' : 'desc'
-    //check access to secret
-    await this.authorityCheckerService.checkAuthorityOverSecret({
+    // Fetch the secret
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
       userId: user.id,
-      entity: { id: secretId },
+      entity: { slug: secretSlug },
       authorities: [Authority.READ_SECRET],
       prisma: this.prisma
     })
+    const secretId = secret.id
 
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environmentId },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    // Fetch the environment
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
+    const environmentId = environment.id
 
-    // get the revisions
-    const revisions = await this.prisma.secretVersion.findMany({
+    // Get the revisions
+    const items = await this.prisma.secretVersion.findMany({
       where: {
         secretId: secretId,
         environmentId: environmentId
@@ -527,15 +531,29 @@ export class SecretService {
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
-        version: sortOrder
+        version: order
       }
     })
-    return revisions
+
+    const totalCount = await this.prisma.secretVersion.count({
+      where: {
+        secretId: secretId,
+        environmentId: environmentId
+      }
+    })
+
+    const metadata = paginate(totalCount, `/secret/${secretSlug}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      order
+    })
+
+    return { items, metadata }
   }
 
   async getAllSecretsOfProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     decryptValue: boolean,
     page: number,
     limit: number,
@@ -547,10 +565,11 @@ export class SecretService {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.READ_SECRET],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     // Check if the secret values can be decrypted
     await this.checkAutoDecrypt(decryptValue, project)
@@ -659,7 +678,7 @@ export class SecretService {
 
     const items = Array.from(secretsWithEnvironmentalValues.values())
 
-    //Calculate pagination metadata
+    // Calculate pagination metadata
     const totalCount = await this.prisma.secret.count({
       where: {
         projectId,
@@ -671,7 +690,7 @@ export class SecretService {
 
     const metadata = paginate(
       totalCount,
-      `/secret/${projectId}`,
+      `/secret/${projectSlug}`,
       {
         page,
         limit: limitMaxItemsPerPage(limit),
@@ -685,20 +704,17 @@ export class SecretService {
     return { items, metadata }
   }
 
-  private async secretExists(
-    secretName: Secret['name'],
-    projectId: Project['id']
-  ) {
+  private async secretExists(secretName: Secret['name'], project: Project) {
     if (
       (await this.prisma.secret.findFirst({
         where: {
           name: secretName,
-          projectId
+          projectId: project.id
         }
       })) !== null
     ) {
       throw new ConflictException(
-        `Secret already exists: ${secretName} in project ${projectId}`
+        `Secret already exists: ${secretName} in project ${project.slug}`
       )
     }
   }

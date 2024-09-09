@@ -7,7 +7,7 @@ import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 
 import { AppModule } from './app/app.module'
-import { QueryTransformPipe } from './common/query.transform.pipe'
+import { QueryTransformPipe } from './common/pipes/query.transform.pipe'
 import * as Sentry from '@sentry/node'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'

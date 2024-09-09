@@ -10,10 +10,10 @@ import { AuthProvider, User, Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
-import createUser from '@/common/create-user'
-import generateOtp from '@/common/generate-otp'
 import { EnvSchema } from '@/common/env/env.schema'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { generateOtp, limitMaxItemsPerPage } from '@/common/util'
+import { createUser } from '@/common/user'
+import { CacheService } from '@/cache/cache.service'
 
 @Injectable()
 export class UserService {
@@ -21,6 +21,7 @@ export class UserService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly cache: CacheService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
@@ -77,13 +78,17 @@ export class UserService {
       await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
     }
 
-    this.log.log(`Updating user ${user.id} with data ${dto}`)
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: {
         id: user.id
       },
       data
     })
+    await this.cache.setUser(updatedUser)
+
+    this.log.log(`Updated user ${user.id} with data ${dto}`)
+
+    return updatedUser
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {

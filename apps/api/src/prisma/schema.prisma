@@ -214,6 +214,7 @@ model Subscription {
 model Integration {
   id        String          @id @default(cuid())
   name      String
+  slug      String          @unique
   metadata  Json
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
@@ -236,6 +237,7 @@ model Integration {
 model Environment {
   id          String   @id @default(cuid())
   name        String
+  slug        String   @unique
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -257,6 +259,7 @@ model Environment {
 model Project {
   id              String             @id @default(cuid())
   name            String
+  slug            String             @unique
   description     String?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
@@ -298,6 +301,7 @@ model ProjectWorkspaceRoleAssociation {
 model WorkspaceRole {
   id                String   @id @default(cuid())
   name              String
+  slug              String   @unique
   description       String?
   colorCode         String?
   hasAdminAuthority Boolean  @default(false)
@@ -358,13 +362,14 @@ model SecretVersion {
 }
 
 model Secret {
-  id             String          @id @default(cuid())
-  name           String
-  versions       SecretVersion[] // Stores the versions of the secret
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  rotateAt       DateTime?
-  note           String?
+  id        String          @id @default(cuid())
+  name      String
+  slug      String          @unique
+  versions  SecretVersion[] // Stores the versions of the secret
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  rotateAt  DateTime?
+  note      String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -394,12 +399,13 @@ model VariableVersion {
 }
 
 model Variable {
-  id             String            @id @default(cuid())
-  name           String
-  versions       VariableVersion[] // Stores the versions of the variable
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  note           String?
+  id        String            @id @default(cuid())
+  name      String
+  slug      String            @unique
+  versions  VariableVersion[] // Stores the versions of the variable
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  note      String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -413,6 +419,7 @@ model Variable {
 model ApiKey {
   id          String      @id @default(cuid())
   name        String
+  slug        String      @unique
   value       String      @unique
   expiresAt   DateTime?
   createdAt   DateTime    @default(now())
@@ -441,6 +448,7 @@ model Otp {
 model Workspace {
   id          String   @id @default(cuid())
   name        String
+  slug        String   @unique
   description String?
   isFreeTier  Boolean  @default(true)
   createdAt   DateTime @default(now())

@@ -100,50 +100,35 @@ export default class ChangeNotifier
     @CurrentUser() user: User
   ) {
     // Check if the user has access to the workspace
-    const workspace = await this.prisma.workspace.findFirst({
-      where: {
-        name: data.workspaceName,
-        members: {
-          some: {
-            userId: user.id
-          }
-        }
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspace.id },
-      authorities: [Authority.READ_WORKSPACE],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: data.workspaceSlug },
+        authorities: [
+          Authority.READ_WORKSPACE,
+          Authority.READ_VARIABLE,
+          Authority.READ_SECRET
+        ],
+        prisma: this.prisma
+      })
 
     // Check if the user has access to the project
-    const project = await this.prisma.project.findFirst({
-      where: {
-        name: data.projectName,
-        workspaceId: workspace.id
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: project.id },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: data.projectSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
 
     // Check if the user has access to the environment
-    const environment = await this.prisma.environment.findFirst({
-      where: {
-        name: data.environmentName,
-        projectId: project.id
-      }
-    })
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environment.id },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: data.environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
 
     // Add the client to the environment
     await this.addClientToEnvironment(client, environment.id)

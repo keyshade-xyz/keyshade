@@ -1,22 +1,38 @@
-import { Authority, EventSource, EventType, User } from '@prisma/client'
-import createEvent from './create-event'
+import {
+  Authority,
+  EventSource,
+  EventType,
+  User,
+  Workspace
+} from '@prisma/client'
 import { CreateWorkspace } from '@/workspace/dto/create.workspace/create.workspace'
-import { v4 } from 'uuid'
 import { PrismaService } from '@/prisma/prisma.service'
 import { Logger } from '@nestjs/common'
+import { v4 } from 'uuid'
+import generateEntitySlug from './slug-generator'
+import { createEvent } from './event'
 
-export default async function createWorkspace(
+/**
+ * Creates a new workspace and adds the user as the owner.
+ * @param user The user creating the workspace
+ * @param dto The workspace data
+ * @param prisma The Prisma client
+ * @param isDefault Whether the workspace should be the default workspace
+ * @returns The created workspace
+ */
+export const createWorkspace = async (
   user: User,
   dto: CreateWorkspace,
   prisma: PrismaService,
   isDefault?: boolean
-) {
+): Promise<Workspace> => {
   const workspaceId = v4()
   const logger = new Logger('createWorkspace')
 
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,
+      slug: await generateEntitySlug(dto.name, 'WORKSPACE', prisma),
       name: dto.name,
       description: dto.description,
       isFreeTier: true,
@@ -27,6 +43,7 @@ export default async function createWorkspace(
           data: [
             {
               name: 'Admin',
+              slug: await generateEntitySlug('Admin', 'WORKSPACE_ROLE', prisma),
               authorities: [Authority.WORKSPACE_ADMIN],
               hasAdminAuthority: true,
               colorCode: '#FF0000'

@@ -15,10 +15,11 @@ import {
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '@/prisma/prisma.service'
-import createEvent from '@/common/create-event'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class EnvironmentService {
@@ -32,24 +33,30 @@ export class EnvironmentService {
   async createEnvironment(
     user: User,
     dto: CreateEnvironment,
-    projectId: Project['id']
+    projectSlug: Project['slug']
   ) {
     // Check if the user has the required role to create an environment
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
-        authorities: [Authority.CREATE_ENVIRONMENT],
+        entity: { slug: projectSlug },
+        authorities: [
+          Authority.CREATE_ENVIRONMENT,
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT
+        ],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     // Check if an environment with the same name already exists
-    await this.environmentExists(dto.name, projectId)
+    await this.environmentExists(dto.name, project)
 
     // Create the environment
     const environment = await this.prisma.environment.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'ENVIRONMENT', this.prisma),
         description: dto.description,
         project: {
           connect: {
@@ -92,18 +99,22 @@ export class EnvironmentService {
   async updateEnvironment(
     user: User,
     dto: UpdateEnvironment,
-    environmentId: Environment['id']
+    environmentSlug: Environment['slug']
   ) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
-        entity: { id: environmentId },
-        authorities: [Authority.UPDATE_ENVIRONMENT],
+        entity: { slug: environmentSlug },
+        authorities: [
+          Authority.UPDATE_ENVIRONMENT,
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT
+        ],
         prisma: this.prisma
       })
 
     // Check if an environment with the same name already exists
-    dto.name && (await this.environmentExists(dto.name, environment.projectId))
+    dto.name && (await this.environmentExists(dto.name, environment.project))
 
     // Update the environment
     const updatedEnvironment = await this.prisma.environment.update({
@@ -112,6 +123,9 @@ export class EnvironmentService {
       },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'ENVIRONMENT', this.prisma)
+          : environment.slug,
         description: dto.description,
         lastUpdatedById: user.id
       }
@@ -143,11 +157,11 @@ export class EnvironmentService {
     return updatedEnvironment
   }
 
-  async getEnvironment(user: User, environmentId: Environment['id']) {
+  async getEnvironment(user: User, environmentSlug: Environment['slug']) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
-        entity: { id: environmentId },
+        entity: { slug: environmentSlug },
         authorities: [Authority.READ_ENVIRONMENT],
         prisma: this.prisma
       })
@@ -159,19 +173,21 @@ export class EnvironmentService {
 
   async getEnvironmentsOfProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     page: number,
     limit: number,
     sort: string,
     order: string,
     search: string
   ) {
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
+    const projectId = project.id
 
     // Get the environments for the required page
     const items = await this.prisma.environment.findMany({
@@ -184,6 +200,7 @@ export class EnvironmentService {
       select: {
         id: true,
         name: true,
+        slug: true,
         description: true,
         createdAt: true,
         updatedAt: true,
@@ -211,7 +228,7 @@ export class EnvironmentService {
         }
       }
     })
-    const metadata = paginate(totalCount, `/environment/all/${projectId}`, {
+    const metadata = paginate(totalCount, `/environment/all/${projectSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),
       sort,
@@ -222,11 +239,11 @@ export class EnvironmentService {
     return { items, metadata }
   }
 
-  async deleteEnvironment(user: User, environmentId: Environment['id']) {
+  async deleteEnvironment(user: User, environmentSlug: Environment['slug']) {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment({
         userId: user.id,
-        entity: { id: environmentId },
+        entity: { slug: environmentSlug },
         authorities: [Authority.DELETE_ENVIRONMENT],
         prisma: this.prisma
       })
@@ -272,10 +289,9 @@ export class EnvironmentService {
     )
   }
 
-  private async environmentExists(
-    name: Environment['name'],
-    projectId: Project['id']
-  ) {
+  private async environmentExists(name: Environment['name'], project: Project) {
+    const { id: projectId, slug } = project
+
     if (
       (await this.prisma.environment.findUnique({
         where: {
@@ -287,7 +303,7 @@ export class EnvironmentService {
       })) !== null
     ) {
       throw new ConflictException(
-        `Environment with name ${name} already exists in project ${projectId}`
+        `Environment with name ${name} already exists in project ${slug}`
       )
     }
   }

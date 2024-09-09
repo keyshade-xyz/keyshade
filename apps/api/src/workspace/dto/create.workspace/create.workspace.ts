@@ -13,5 +13,5 @@ export class CreateWorkspace {
 
 export interface WorkspaceMemberDTO {
   email: string
-  roleIds: WorkspaceRole['id'][]
+  roleSlugs: WorkspaceRole['slug'][]
 }

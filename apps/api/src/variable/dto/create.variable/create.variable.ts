@@ -29,7 +29,7 @@ export class CreateVariable {
 class Entry {
   @IsString()
   @Transform(({ value }) => value.trim())
-  environmentId: string
+  environmentSlug: string
 
   @IsString()
   @Transform(({ value }) => value.trim())

@@ -6,18 +6,27 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateApiKey } from '../dto/create.api-key/create.api-key'
-import { addHoursToDate } from '@/common/add-hours-to-date'
-import { generateApiKey } from '@/common/api-key-generator'
-import { toSHA256 } from '@/common/to-sha256'
 import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { ApiKey, User } from '@prisma/client'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import generateEntitySlug from '@/common/slug-generator'
+import { generateApiKey, toSHA256 } from '@/common/cryptography'
+import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class ApiKeyService {
   private readonly logger = new Logger(ApiKeyService.name)
 
   constructor(private readonly prisma: PrismaService) {}
+
+  private apiKeySelect = {
+    id: true,
+    expiresAt: true,
+    name: true,
+    slug: true,
+    authorities: true,
+    createdAt: true,
+    updatedAt: true
+  }
 
   async createApiKey(user: User, dto: CreateApiKey) {
     await this.isApiKeyUnique(user, dto.name)
@@ -27,6 +36,7 @@ export class ApiKeyService {
     const apiKey = await this.prisma.apiKey.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
         value: hashedApiKey,
         authorities: dto.authorities
           ? {
@@ -50,15 +60,19 @@ export class ApiKeyService {
     }
   }
 
-  async updateApiKey(user: User, apiKeyId: string, dto: UpdateApiKey) {
+  async updateApiKey(
+    user: User,
+    apiKeySlug: ApiKey['slug'],
+    dto: UpdateApiKey
+  ) {
     await this.isApiKeyUnique(user, dto.name)
 
     const apiKey = await this.prisma.apiKey.findUnique({
       where: {
-        id: apiKeyId,
-        userId: user.id
+        slug: apiKeySlug
       }
     })
+    const apiKeyId = apiKey.id
 
     if (!apiKey) {
       throw new NotFoundException(`API key with id ${apiKeyId} not found`)
@@ -71,6 +85,9 @@ export class ApiKeyService {
       },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'API_KEY', this.prisma)
+          : apiKey.slug,
         authorities: {
           set: dto.authorities ? dto.authorities : apiKey.authorities
         },
@@ -78,14 +95,7 @@ export class ApiKeyService {
           ? addHoursToDate(dto.expiresAfter)
           : undefined
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
 
     this.logger.log(`User ${user.id} updated API key ${apiKeyId}`)
@@ -93,39 +103,32 @@ export class ApiKeyService {
     return updatedApiKey
   }
 
-  async deleteApiKey(user: User, apiKeyId: string) {
+  async deleteApiKey(user: User, apiKeySlug: ApiKey['slug']) {
     try {
       await this.prisma.apiKey.delete({
         where: {
-          id: apiKeyId,
+          slug: apiKeySlug,
           userId: user.id
         }
       })
     } catch (error) {
-      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
     }
 
-    this.logger.log(`User ${user.id} deleted API key ${apiKeyId}`)
+    this.logger.log(`User ${user.id} deleted API key ${apiKeySlug}`)
   }
 
-  async getApiKeyById(user: User, apiKeyId: string) {
+  async getApiKeyBySlug(user: User, apiKeySlug: ApiKey['slug']) {
     const apiKey = await this.prisma.apiKey.findUnique({
       where: {
-        id: apiKeyId,
+        slug: apiKeySlug,
         userId: user.id
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
 
     if (!apiKey) {
-      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
     }
 
     return apiKey
@@ -151,14 +154,7 @@ export class ApiKeyService {
       orderBy: {
         [sort]: order
       },
-      select: {
-        id: true,
-        expiresAt: true,
-        name: true,
-        authorities: true,
-        createdAt: true,
-        updatedAt: true
-      }
+      select: this.apiKeySelect
     })
   }
 

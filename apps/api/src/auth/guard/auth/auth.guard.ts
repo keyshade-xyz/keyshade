@@ -11,9 +11,9 @@ import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
 import { ONBOARDING_BYPASSED } from '@/decorators/bypass-onboarding.decorator'
 import { AuthenticatedUserContext } from '../../auth.types'
-import { toSHA256 } from '@/common/to-sha256'
 import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
+import { toSHA256 } from '@/common/cryptography'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -25,8 +25,8 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    private reflector: Reflector,
-    private cache: CacheService
+    private readonly reflector: Reflector,
+    private readonly cache: CacheService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

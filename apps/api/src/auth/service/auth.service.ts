@@ -12,10 +12,10 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { UserAuthenticatedResponse } from '../auth.types'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
-import createUser from '@/common/create-user'
 import { AuthProvider } from '@prisma/client'
-import generateOtp from '@/common/generate-otp'
 import { CacheService } from '@/cache/cache.service'
+import { generateOtp } from '@/common/util'
+import { createUser } from '@/common/user'
 
 @Injectable()
 export class AuthService {

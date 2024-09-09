@@ -19,7 +19,7 @@ import { UpdateIntegration } from '../dto/update.integration/update.integration'
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 
-  @Post(':workspaceId')
+  @Post(':workspaceSlug')
   @RequiredApiKeyAuthorities(
     Authority.CREATE_INTEGRATION,
     Authority.READ_WORKSPACE,
@@ -29,16 +29,16 @@ export class IntegrationController {
   async createIntegration(
     @CurrentUser() user: User,
     @Body() dto: CreateIntegration,
-    @Param('workspaceId') workspaceId: string
+    @Param('workspaceSlug') workspaceSlug: string
   ) {
     return await this.integrationService.createIntegration(
       user,
       dto,
-      workspaceId
+      workspaceSlug
     )
   }
 
-  @Put(':integrationId')
+  @Put(':integrationSlug')
   @RequiredApiKeyAuthorities(
     Authority.UPDATE_INTEGRATION,
     Authority.READ_PROJECT,
@@ -47,30 +47,30 @@ export class IntegrationController {
   async updateIntegration(
     @CurrentUser() user: User,
     @Body() dto: UpdateIntegration,
-    @Param('integrationId') integrationId: string
+    @Param('integrationSlug') integrationSlug: string
   ) {
     return await this.integrationService.updateIntegration(
       user,
       dto,
-      integrationId
+      integrationSlug
     )
   }
 
-  @Get(':integrationId')
+  @Get(':integrationSlug')
   @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
   async getIntegration(
     @CurrentUser() user: User,
-    @Param('integrationId') integrationId: string
+    @Param('integrationSlug') integrationSlug: string
   ) {
-    return await this.integrationService.getIntegration(user, integrationId)
+    return await this.integrationService.getIntegration(user, integrationSlug)
   }
 
   /* istanbul ignore next */
-  @Get('all/:workspaceId')
+  @Get('all/:workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
   async getAllIntegrations(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: string,
+    @Param('workspaceSlug') workspaceSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -79,7 +79,7 @@ export class IntegrationController {
   ) {
     return await this.integrationService.getAllIntegrationsOfWorkspace(
       user,
-      workspaceId,
+      workspaceSlug,
       page,
       limit,
       sort,
@@ -88,12 +88,15 @@ export class IntegrationController {
     )
   }
 
-  @Delete(':integrationId')
+  @Delete(':integrationSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_INTEGRATION)
   async deleteIntegration(
     @CurrentUser() user: User,
-    @Param('integrationId') integrationId: string
+    @Param('integrationSlug') integrationSlug: string
   ) {
-    return await this.integrationService.deleteIntegration(user, integrationId)
+    return await this.integrationService.deleteIntegration(
+      user,
+      integrationSlug
+    )
   }
 }

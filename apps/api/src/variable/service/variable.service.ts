@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -18,7 +17,6 @@ import {
   VariableVersion
 } from '@prisma/client'
 import { CreateVariable } from '../dto/create.variable/create.variable'
-import createEvent from '@/common/create-event'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
@@ -29,7 +27,10 @@ import {
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class VariableService {
@@ -50,56 +51,46 @@ export class VariableService {
   async createVariable(
     user: User,
     dto: CreateVariable,
-    projectId: Project['id']
+    projectSlug: Project['slug']
   ) {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.CREATE_VARIABLE],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     // Check if a variable with the same name already exists in the project
-    await this.variableExists(dto.name, projectId)
+    await this.variableExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
 
     // Check if the user has access to the environments
-    if (shouldCreateRevisions) {
-      const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      await Promise.all(
-        environmentIds.map(async (environmentId) => {
-          const environment =
-            await this.authorityCheckerService.checkAuthorityOverEnvironment({
-              userId: user.id,
-              entity: { id: environmentId },
-              authorities: [Authority.READ_ENVIRONMENT],
-              prisma: this.prisma
-            })
-
-          // Check if the environment belongs to the project
-          if (environment.projectId !== projectId) {
-            throw new BadRequestException(
-              `Environment: ${environmentId} does not belong to project: ${projectId}`
-            )
-          }
-        })
-      )
-    }
+    const environmentSlugToIdMap = shouldCreateRevisions
+      ? await getEnvironmentIdToSlugMap(
+          dto,
+          user,
+          project,
+          this.prisma,
+          this.authorityCheckerService
+        )
+      : new Map<string, string>()
 
     // Create the variable
     const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
+        slug: await generateEntitySlug(dto.name, 'VARIABLE', this.prisma),
         note: dto.note,
         versions: shouldCreateRevisions && {
           createMany: {
             data: dto.entries.map((entry) => ({
               value: entry.value,
               createdById: user.id,
-              environmentId: entry.environmentId
+              environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
             }))
           }
         },
@@ -154,44 +145,32 @@ export class VariableService {
 
   async updateVariable(
     user: User,
-    variableId: Variable['id'],
+    variableSlug: Variable['slug'],
     dto: UpdateVariable
   ) {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
         userId: user.id,
-        entity: { id: variableId },
+        entity: { slug: variableSlug },
         authorities: [Authority.UPDATE_VARIABLE],
         prisma: this.prisma
       })
 
     // Check if the variable already exists in the project
-    dto.name && (await this.variableExists(dto.name, variable.projectId))
+    dto.name && (await this.variableExists(dto.name, variable.project))
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
 
     // Check if the user has access to the environments
-    if (shouldCreateRevisions) {
-      const environmentIds = dto.entries.map((entry) => entry.environmentId)
-      await Promise.all(
-        environmentIds.map(async (environmentId) => {
-          const environment =
-            await this.authorityCheckerService.checkAuthorityOverEnvironment({
-              userId: user.id,
-              entity: { id: environmentId },
-              authorities: [Authority.READ_ENVIRONMENT],
-              prisma: this.prisma
-            })
-
-          // Check if the environment belongs to the project
-          if (environment.projectId !== variable.projectId) {
-            throw new BadRequestException(
-              `Environment: ${environmentId} does not belong to project: ${variable.projectId}`
-            )
-          }
-        })
-      )
-    }
+    const environmentSlugToIdMap = shouldCreateRevisions
+      ? await getEnvironmentIdToSlugMap(
+          dto,
+          user,
+          variable.project,
+          this.prisma,
+          this.authorityCheckerService
+        )
+      : new Map<string, string>()
 
     const op = []
 
@@ -205,6 +184,9 @@ export class VariableService {
         },
         data: {
           name: dto.name,
+          slug: dto.name
+            ? await generateEntitySlug(dto.name, 'VARIABLE', this.prisma)
+            : undefined,
           note: dto.note,
           lastUpdatedById: user.id
         },
@@ -224,7 +206,7 @@ export class VariableService {
         const latestVersion = await this.prisma.variableVersion.findFirst({
           where: {
             variableId: variable.id,
-            environmentId: entry.environmentId
+            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
           },
           select: {
             version: true
@@ -242,7 +224,7 @@ export class VariableService {
               value: entry.value,
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: entry.environmentId,
+              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               variableId: variable.id
             },
             select: {
@@ -272,7 +254,7 @@ export class VariableService {
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
             JSON.stringify({
-              environmentId: entry.environmentId,
+              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               name: updatedVariable.name,
               value: entry.value,
               isPlaintext: true
@@ -311,14 +293,23 @@ export class VariableService {
 
   async rollbackVariable(
     user: User,
-    variableId: Variable['id'],
-    environmentId: Environment['id'],
+    variableSlug: Variable['slug'],
+    environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
   ) {
+    const environment =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_VARIABLE],
+        prisma: this.prisma
+      })
+    const environmentId = environment.id
+
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
         userId: user.id,
-        entity: { id: variableId },
+        entity: { slug: variableSlug },
         authorities: [Authority.UPDATE_VARIABLE],
         prisma: this.prisma
       })
@@ -330,7 +321,7 @@ export class VariableService {
 
     if (variable.versions.length === 0) {
       throw new NotFoundException(
-        `No versions found for environment: ${environmentId} for variable: ${variableId}`
+        `No versions found for environment: ${environmentSlug} for variable: ${variableSlug}`
       )
     }
 
@@ -340,7 +331,7 @@ export class VariableService {
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for variable: ${variableId}`
+        `Invalid rollback version: ${rollbackVersion} for variable: ${variableSlug}`
       )
     }
 
@@ -393,11 +384,11 @@ export class VariableService {
     return result
   }
 
-  async deleteVariable(user: User, variableId: Variable['id']) {
+  async deleteVariable(user: User, variableSlug: Variable['slug']) {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable({
         userId: user.id,
-        entity: { id: variableId },
+        entity: { slug: variableSlug },
         authorities: [Authority.DELETE_VARIABLE],
         prisma: this.prisma
       })
@@ -432,24 +423,26 @@ export class VariableService {
 
   async getAllVariablesOfProjectAndEnvironment(
     user: User,
-    projectId: Project['id'],
-    environmentId: Environment['id']
+    projectSlug: Project['slug'],
+    environmentSlug: Environment['slug']
   ) {
     // Check if the user has the required authorities in the project
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.READ_VARIABLE],
-      prisma: this.prisma
-    })
+    const { id: projectId } =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_VARIABLE],
+        prisma: this.prisma
+      })
 
     // Check if the user has the required authorities in the environment
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environmentId },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    const { id: environmentId } =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
 
     const variables = await this.prisma.variable.findMany({
       where: {
@@ -491,7 +484,7 @@ export class VariableService {
 
   async getAllVariablesOfProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     page: number,
     limit: number,
     sort: string,
@@ -499,12 +492,13 @@ export class VariableService {
     search: string
   ) {
     // Check if the user has the required authorities in the project
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.READ_VARIABLE],
-      prisma: this.prisma
-    })
+    const { id: projectId } =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_VARIABLE],
+        prisma: this.prisma
+      })
 
     const variables = await this.prisma.variable.findMany({
       where: {
@@ -616,7 +610,7 @@ export class VariableService {
       }
     })
 
-    const metadata = paginate(totalCount, `/variable/${projectId}`, {
+    const metadata = paginate(totalCount, `/variable/${projectSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),
       sort,
@@ -629,27 +623,29 @@ export class VariableService {
 
   async getRevisionsOfVariable(
     user: User,
-    variableId: Variable['id'],
-    environmentId: Environment['id'],
+    variableSlug: Variable['slug'],
+    environmentSlug: Environment['slug'],
     page: number,
     limit: number,
-    order: 'asc' | 'desc'
+    order: 'asc' | 'desc' = 'desc'
   ) {
-    await this.authorityCheckerService.checkAuthorityOverVariable({
-      userId: user.id,
-      entity: { id: variableId },
-      authorities: [Authority.READ_VARIABLE],
-      prisma: this.prisma
-    })
+    const { id: variableId } =
+      await this.authorityCheckerService.checkAuthorityOverVariable({
+        userId: user.id,
+        entity: { slug: variableSlug },
+        authorities: [Authority.READ_VARIABLE],
+        prisma: this.prisma
+      })
 
-    await this.authorityCheckerService.checkAuthorityOverEnvironment({
-      userId: user.id,
-      entity: { id: environmentId },
-      authorities: [Authority.READ_ENVIRONMENT],
-      prisma: this.prisma
-    })
+    const { id: environmentId } =
+      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+        userId: user.id,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT],
+        prisma: this.prisma
+      })
 
-    const revisions = await this.prisma.variableVersion.findMany({
+    const items = await this.prisma.variableVersion.findMany({
       where: {
         variableId: variableId,
         environmentId: environmentId
@@ -662,23 +658,36 @@ export class VariableService {
       }
     })
 
-    return revisions
+    const total = await this.prisma.variableVersion.count({
+      where: {
+        variableId: variableId,
+        environmentId: environmentId
+      }
+    })
+
+    const metadata = paginate(total, `/variable/${variableSlug}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      order
+    })
+
+    return { items, metadata }
   }
 
   private async variableExists(
     variableName: Variable['name'],
-    projectId: Project['id']
+    project: Project
   ) {
     if (
       (await this.prisma.variable.findFirst({
         where: {
           name: variableName,
-          projectId
+          projectId: project.id
         }
       })) !== null
     ) {
       throw new ConflictException(
-        `Variable already exists: ${variableName} in project ${projectId}`
+        `Variable already exists: ${variableName} in project ${project.slug}`
       )
     }
   }

@@ -28,135 +28,143 @@ export class WorkspaceController {
     return this.workspaceService.createWorkspace(user, dto)
   }
 
-  @Put(':workspaceId')
+  @Put(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_WORKSPACE)
   async update(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Body() dto: UpdateWorkspace
   ) {
-    return this.workspaceService.updateWorkspace(user, workspaceId, dto)
+    return this.workspaceService.updateWorkspace(user, workspaceSlug, dto)
   }
 
-  @Put(':workspaceId/transfer-ownership/:userId')
+  @Put(':workspaceSlug/transfer-ownership/:userEmail')
   @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   async transferOwnership(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
-    @Param('userId') userId: User['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('userEmail') userEmail: User['email']
   ) {
-    return this.workspaceService.transferOwnership(user, workspaceId, userId)
+    return this.workspaceService.transferOwnership(
+      user,
+      workspaceSlug,
+      userEmail
+    )
   }
 
-  @Delete(':workspaceId')
+  @Delete(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_WORKSPACE)
   async delete(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
-    return this.workspaceService.deleteWorkspace(user, workspaceId)
+    return this.workspaceService.deleteWorkspace(user, workspaceSlug)
   }
 
-  @Post(':workspaceId/invite-users')
+  @Post(':workspaceSlug/invite-users')
   @RequiredApiKeyAuthorities(Authority.ADD_USER)
   async addUsers(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Body() members: WorkspaceMemberDTO[]
   ) {
     return this.workspaceService.inviteUsersToWorkspace(
       user,
-      workspaceId,
+      workspaceSlug,
       members
     )
   }
 
-  @Delete(':workspaceId/remove-users')
+  @Delete(':workspaceSlug/remove-users')
   @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
   async removeUsers(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
-    @Body() userIds: User['id'][]
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Body() userEmails: User['email'][]
   ) {
     return this.workspaceService.removeUsersFromWorkspace(
       user,
-      workspaceId,
-      userIds
+      workspaceSlug,
+      userEmails
     )
   }
 
-  @Put(':workspaceId/update-member-role/:userId')
+  @Put(':workspaceSlug/update-member-role/:userEmail')
   @RequiredApiKeyAuthorities(Authority.UPDATE_USER_ROLE)
   async updateMemberRoles(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
-    @Param('userId') userId: User['id'],
-    @Body() roleIds: WorkspaceRole['id'][]
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('userEmail') userEmail: User['email'],
+    @Body() roleSlugs: WorkspaceRole['slug'][]
   ) {
     return this.workspaceService.updateMemberRoles(
       user,
-      workspaceId,
-      userId,
-      roleIds
+      workspaceSlug,
+      userEmail,
+      roleSlugs
     )
   }
 
-  @Post(':workspaceId/accept-invitation')
+  @Post(':workspaceSlug/accept-invitation')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async acceptInvitation(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
-    return this.workspaceService.acceptInvitation(user, workspaceId)
+    return this.workspaceService.acceptInvitation(user, workspaceSlug)
   }
 
-  @Delete(':workspaceId/decline-invitation')
+  @Delete(':workspaceSlug/decline-invitation')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async declineInvitation(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
-    return this.workspaceService.declineInvitation(user, workspaceId)
+    return this.workspaceService.declineInvitation(user, workspaceSlug)
   }
 
-  @Delete(':workspaceId/cancel-invitation/:userId')
+  @Delete(':workspaceSlug/cancel-invitation/:userEmail')
   @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
   async cancelInvitation(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
-    @Param('userId') userId: User['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('userEmail') userEmail: User['email']
   ) {
-    return this.workspaceService.cancelInvitation(user, workspaceId, userId)
-  }
-
-  @Delete(':workspaceId/leave')
-  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
-  async leave(
-    @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
-  ) {
-    return this.workspaceService.leaveWorkspace(user, workspaceId)
-  }
-
-  @Get(':workspaceId/is-member/:userId')
-  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
-  async isMember(
-    @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
-    @Param('userId') userId: User['id']
-  ) {
-    return this.workspaceService.isUserMemberOfWorkspace(
+    return this.workspaceService.cancelInvitation(
       user,
-      workspaceId,
-      userId
+      workspaceSlug,
+      userEmail
     )
   }
 
-  @Get(':workspaceId/members')
+  @Delete(':workspaceSlug/leave')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
+  async leave(
+    @CurrentUser() user: User,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
+  ) {
+    return this.workspaceService.leaveWorkspace(user, workspaceSlug)
+  }
+
+  @Get(':workspaceSlug/is-member/:userEmail')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
+  async isMember(
+    @CurrentUser() user: User,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('userEmail') userEmail: User['email']
+  ) {
+    return this.workspaceService.isUserMemberOfWorkspace(
+      user,
+      workspaceSlug,
+      userEmail
+    )
+  }
+
+  @Get(':workspaceSlug/members')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getMembers(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
@@ -165,7 +173,7 @@ export class WorkspaceController {
   ) {
     return this.workspaceService.getAllMembersOfWorkspace(
       user,
-      workspaceId,
+      workspaceSlug,
       page,
       limit,
       sort,
@@ -174,22 +182,22 @@ export class WorkspaceController {
     )
   }
 
-  @Get(':workspaceId')
+  @Get(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getWorkspace(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
-    return this.workspaceService.getWorkspaceById(user, workspaceId)
+    return this.workspaceService.getWorkspaceBySlug(user, workspaceSlug)
   }
 
-  @Get(':workspaceId/export-data')
+  @Get(':workspaceSlug/export-data')
   @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   async exportData(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id']
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
-    return this.workspaceService.exportData(user, workspaceId)
+    return this.workspaceService.exportData(user, workspaceSlug)
   }
 
   @Get()
@@ -212,7 +220,7 @@ export class WorkspaceController {
     )
   }
 
-  @Get(':workspaceId/global-search/:searchTerm')
+  @Get(':workspaceSlug/global-search/:searchTerm')
   @RequiredApiKeyAuthorities(
     Authority.READ_WORKSPACE,
     Authority.READ_ENVIRONMENT,
@@ -222,9 +230,9 @@ export class WorkspaceController {
   )
   async globalSearch(
     @CurrentUser() user: User,
-    @Param('workspaceId') workspaceId: Workspace['id'],
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('searchTerm') searchTerm: string
   ) {
-    return this.workspaceService.globalSearch(user, workspaceId, searchTerm)
+    return this.workspaceService.globalSearch(user, workspaceSlug, searchTerm)
   }
 }

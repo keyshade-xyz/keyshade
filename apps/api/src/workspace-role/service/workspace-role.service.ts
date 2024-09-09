@@ -15,15 +15,16 @@ import {
   WorkspaceRole
 } from '@prisma/client'
 import { CreateWorkspaceRole } from '../dto/create-workspace-role/create-workspace-role'
-import getCollectiveWorkspaceAuthorities from '@/common/get-collective-workspace-authorities'
 import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspace-role'
 import { PrismaService } from '@/prisma/prisma.service'
-import createEvent from '@/common/create-event'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate, PaginatedMetadata } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
+import { limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -36,7 +37,7 @@ export class WorkspaceRoleService {
 
   async createWorkspaceRole(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     dto: CreateWorkspaceRole
   ) {
     if (
@@ -51,12 +52,13 @@ export class WorkspaceRoleService {
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
-        entity: { id: workspaceId },
+        entity: { slug: workspaceSlug },
         authorities: [Authority.CREATE_WORKSPACE_ROLE],
         prisma: this.prisma
       })
+    const workspaceId = workspace.id
 
-    if (await this.checkWorkspaceRoleExists(user, workspaceId, dto.name)) {
+    if (await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) {
       throw new ConflictException(
         'Workspace role with the same name already exists'
       )
@@ -72,6 +74,7 @@ export class WorkspaceRoleService {
         data: {
           id: workspaceRoleId,
           name: dto.name,
+          slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
           description: dto.description,
           colorCode: dto.colorCode,
           authorities: dto.authorities ?? [],
@@ -93,12 +96,16 @@ export class WorkspaceRoleService {
     )
 
     // Create the project associations
-    if (dto.projectIds && dto.projectIds.length > 0) {
+    const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+      dto.projectSlugs
+    )
+
+    if (dto.projectSlugs && dto.projectSlugs.length > 0) {
       op.push(
         this.prisma.projectWorkspaceRoleAssociation.createMany({
-          data: dto.projectIds.map((projectId) => ({
+          data: dto.projectSlugs.map((projectSlug) => ({
             roleId: workspaceRoleId,
-            projectId
+            projectId: projectSlugToIdMap.get(projectSlug)
           }))
         })
       )
@@ -125,7 +132,7 @@ export class WorkspaceRoleService {
     )
 
     this.logger.log(
-      `User with id ${user.id} created workspace role with id ${workspaceRole.id}`
+      `${user.email} created workspace role ${workspaceRole.slug}`
     )
 
     return workspaceRole
@@ -133,7 +140,7 @@ export class WorkspaceRoleService {
 
   async updateWorkspaceRole(
     user: User,
-    workspaceRoleId: WorkspaceRole['id'],
+    workspaceRoleSlug: WorkspaceRole['slug'],
     dto: UpdateWorkspaceRole
   ) {
     if (
@@ -145,19 +152,25 @@ export class WorkspaceRoleService {
       )
     }
 
-    let workspaceRole = (await this.getWorkspaceRoleWithAuthority(
+    const workspaceRole = (await this.getWorkspaceRoleWithAuthority(
       user.id,
-      workspaceRoleId,
+      workspaceRoleSlug,
       Authority.UPDATE_WORKSPACE_ROLE
     )) as WorkspaceRoleWithProjects
+    const workspaceRoleId = workspaceRole.id
+
+    const { slug: workspaceSlug } = await this.prisma.workspace.findUnique({
+      where: {
+        id: workspaceRole.workspaceId
+      },
+      select: {
+        slug: true
+      }
+    })
 
     if (
       dto.name &&
-      ((await this.checkWorkspaceRoleExists(
-        user,
-        workspaceRole.workspaceId,
-        dto.name
-      )) ||
+      ((await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) ||
         dto.name === workspaceRole.name)
     ) {
       throw new ConflictException(
@@ -165,22 +178,26 @@ export class WorkspaceRoleService {
       )
     }
 
-    if (dto.projectIds) {
+    if (dto.projectSlugs) {
       await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
         where: {
           roleId: workspaceRoleId
         }
       })
 
+      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+        dto.projectSlugs
+      )
+
       await this.prisma.projectWorkspaceRoleAssociation.createMany({
-        data: dto.projectIds.map((projectId) => ({
+        data: dto.projectSlugs.map((projectSlug) => ({
           roleId: workspaceRoleId,
-          projectId
+          projectId: projectSlugToIdMap.get(projectSlug)
         }))
       })
     }
 
-    workspaceRole = await this.prisma.workspaceRole.update({
+    const updatedWorkspaceRole = await this.prisma.workspaceRole.update({
       where: {
         id: workspaceRoleId
       },
@@ -216,19 +233,21 @@ export class WorkspaceRoleService {
       this.prisma
     )
 
-    this.logger.log(
-      `User with id ${user.id} updated workspace role with id ${workspaceRoleId}`
-    )
+    this.logger.log(`${user.email} updated workspace role ${workspaceRoleSlug}`)
 
-    return workspaceRole
+    return updatedWorkspaceRole
   }
 
-  async deleteWorkspaceRole(user: User, workspaceRoleId: WorkspaceRole['id']) {
+  async deleteWorkspaceRole(
+    user: User,
+    workspaceRoleSlug: WorkspaceRole['slug']
+  ) {
     const workspaceRole = await this.getWorkspaceRoleWithAuthority(
       user.id,
-      workspaceRoleId,
+      workspaceRoleSlug,
       Authority.DELETE_WORKSPACE_ROLE
     )
+    const workspaceRoleId = workspaceRole.id
 
     if (workspaceRole.hasAdminAuthority) {
       throw new UnauthorizedException(
@@ -259,22 +278,22 @@ export class WorkspaceRoleService {
       this.prisma
     )
 
-    this.logger.log(
-      `User with id ${user.id} deleted workspace role with id ${workspaceRoleId}`
-    )
+    this.logger.log(`${user.email} deleted workspace role ${workspaceRoleSlug}`)
   }
 
   async checkWorkspaceRoleExists(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     name: string
   ) {
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_WORKSPACE_ROLE],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_WORKSPACE_ROLE],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
     return (
       (await this.prisma.workspaceRole.count({
@@ -288,30 +307,31 @@ export class WorkspaceRoleService {
 
   async getWorkspaceRole(
     user: User,
-    workspaceRoleId: WorkspaceRole['id']
+    workspaceRoleSlug: WorkspaceRole['slug']
   ): Promise<WorkspaceRole> {
     return await this.getWorkspaceRoleWithAuthority(
       user.id,
-      workspaceRoleId,
+      workspaceRoleSlug,
       Authority.READ_WORKSPACE_ROLE
     )
   }
 
   async getWorkspaceRolesOfWorkspace(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
     sort: string,
     order: string,
     search: string
   ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_WORKSPACE_ROLE],
-      prisma: this.prisma
-    })
+    const { id: workspaceId } =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_WORKSPACE_ROLE],
+        prisma: this.prisma
+      })
     //get workspace roles of a workspace for given page and limit
     const items = await this.prisma.workspaceRole.findMany({
       where: {
@@ -340,7 +360,7 @@ export class WorkspaceRoleService {
 
     const metadata = paginate(
       totalCount,
-      `/workspace-role/${workspaceId}/all`,
+      `/workspace-role/${workspaceSlug}/all`,
       {
         page,
         limit: limitMaxItemsPerPage(limit),
@@ -355,12 +375,12 @@ export class WorkspaceRoleService {
 
   private async getWorkspaceRoleWithAuthority(
     userId: User['id'],
-    workspaceRoleId: Workspace['id'],
+    workspaceRoleSlug: Workspace['slug'],
     authorities: Authority
   ) {
     const workspaceRole = (await this.prisma.workspaceRole.findUnique({
       where: {
-        id: workspaceRoleId
+        slug: workspaceRoleSlug
       },
       include: {
         projects: true
@@ -369,7 +389,7 @@ export class WorkspaceRoleService {
 
     if (!workspaceRole) {
       throw new NotFoundException(
-        `Workspace role with id ${workspaceRoleId} not found`
+        `Workspace role ${workspaceRoleSlug} not found`
       )
     }
 
@@ -389,5 +409,17 @@ export class WorkspaceRoleService {
     }
 
     return workspaceRole
+  }
+
+  private async getProjectSlugToIdMap(projectSlugs: string[]) {
+    const projects = await this.prisma.project.findMany({
+      where: {
+        slug: {
+          in: projectSlugs
+        }
+      }
+    })
+
+    return new Map(projects.map((project) => [project.slug, project.id]))
   }
 }

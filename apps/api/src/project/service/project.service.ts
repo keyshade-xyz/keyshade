@@ -2,9 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException
+  Logger
 } from '@nestjs/common'
 import {
   Authority,
@@ -21,18 +19,16 @@ import {
 } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
-import { createKeyPair } from '@/common/create-key-pair'
-import { excludeFields } from '@/common/exclude-fields'
 import { PrismaService } from '@/prisma/prisma.service'
-import { decrypt } from '@/common/decrypt'
-import { encrypt } from '@/common/encrypt'
 import { v4 } from 'uuid'
-import createEvent from '@/common/create-event'
 import { ProjectWithSecrets } from '../project.types'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/limit-max-items-per-page'
+import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
+import generateEntitySlug from '@/common/slug-generator'
+import { createEvent } from '@/common/event'
+import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class ProjectService {
@@ -45,17 +41,18 @@ export class ProjectService {
 
   async createProject(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     dto: CreateProject
   ) {
     // Check if the workspace exists or not
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
-        entity: { id: workspaceId },
+        entity: { slug: workspaceSlug },
         authorities: [Authority.CREATE_PROJECT],
         prisma: this.prisma
       })
+    const workspaceId = workspace.id
 
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
@@ -68,6 +65,7 @@ export class ProjectService {
 
     const data: any = {
       name: dto.name,
+      slug: await generateEntitySlug(dto.name, 'PROJECT', this.prisma),
       description: dto.description,
       storePrivateKey:
         dto.accessLevel === ProjectAccessLevel.GLOBAL
@@ -140,6 +138,11 @@ export class ProjectService {
           this.prisma.environment.create({
             data: {
               name: environment.name,
+              slug: await generateEntitySlug(
+                environment.name,
+                'ENVIRONMENT',
+                this.prisma
+              ),
               description: environment.description,
               projectId: newProjectId,
               lastUpdatedById: user.id
@@ -152,6 +155,11 @@ export class ProjectService {
         this.prisma.environment.create({
           data: {
             name: 'Default',
+            slug: await generateEntitySlug(
+              'Default',
+              'ENVIRONMENT',
+              this.prisma
+            ),
             description: 'Default environment for the project',
             projectId: newProjectId,
             lastUpdatedById: user.id
@@ -195,7 +203,7 @@ export class ProjectService {
 
   async updateProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     dto: UpdateProject
   ) {
     // Check if the user has the authority to update the project
@@ -207,7 +215,7 @@ export class ProjectService {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [authority],
         prisma: this.prisma
       })
@@ -254,6 +262,9 @@ export class ProjectService {
 
     const data: Partial<Project> = {
       name: dto.name,
+      slug: dto.name
+        ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
+        : project.slug,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? dto.privateKey : null,
@@ -336,40 +347,29 @@ export class ProjectService {
 
   async forkProject(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     forkMetadata: ForkProject
   ) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        storePrivateKey: true,
-        accessLevel: true,
-        privateKey: true
-      }
-    })
-
-    if (!project) {
-      throw new NotFoundException(`Project with id ${projectId} not found`)
-    }
-
-    if (project.accessLevel !== ProjectAccessLevel.GLOBAL) {
-      throw new UnauthorizedException(
-        `User with id ${user.id} does not have the authority in the project with id ${project.id}`
-      )
-    }
-
-    let workspaceId = forkMetadata.workspaceId
-
-    if (workspaceId) {
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: workspaceId },
-        authorities: [Authority.CREATE_PROJECT],
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
+
+    let workspaceId = null
+
+    if (forkMetadata.workspaceSlug) {
+      const workspace =
+        await this.authorityCheckerService.checkAuthorityOverWorkspace({
+          userId: user.id,
+          entity: { slug: forkMetadata.workspaceSlug },
+          authorities: [Authority.CREATE_PROJECT],
+          prisma: this.prisma
+        })
+
+      workspaceId = workspace.id
     } else {
       const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
         where: {
@@ -405,6 +405,7 @@ export class ProjectService {
       data: {
         id: newProjectId,
         name: newProjectName,
+        slug: await generateEntitySlug(newProjectName, 'PROJECT', this.prisma),
         description: project.description,
         storePrivateKey:
           forkMetadata.storePrivateKey || project.storePrivateKey,
@@ -480,13 +481,15 @@ export class ProjectService {
     return newProject
   }
 
-  async unlinkParentOfFork(user: User, projectId: Project['id']) {
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.UPDATE_PROJECT],
-      prisma: this.prisma
-    })
+  async unlinkParentOfFork(user: User, projectSlug: Project['slug']) {
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.UPDATE_PROJECT],
+        prisma: this.prisma
+      })
+    const projectId = project.id
 
     await this.prisma.project.update({
       where: {
@@ -499,25 +502,32 @@ export class ProjectService {
     })
   }
 
-  async syncFork(user: User, projectId: Project['id'], hardSync: boolean) {
+  async syncFork(user: User, projectSlug: Project['slug'], hardSync: boolean) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.UPDATE_PROJECT],
         prisma: this.prisma
       })
+    const projectId = project.id
 
     if (!project.isForked || project.forkedFromId == null) {
       throw new BadRequestException(
-        `Project with id ${projectId} is not a forked project`
+        `Project ${projectSlug} is not a forked project`
       )
     }
+
+    const forkedFromProject = await this.prisma.project.findUnique({
+      where: {
+        id: project.forkedFromId
+      }
+    })
 
     const parentProject =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: project.forkedFromId },
+        entity: { slug: forkedFromProject.slug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
@@ -538,11 +548,11 @@ export class ProjectService {
     await this.prisma.$transaction(copyProjectOp)
   }
 
-  async deleteProject(user: User, projectId: Project['id']) {
+  async deleteProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.DELETE_PROJECT],
         prisma: this.prisma
       })
@@ -594,16 +604,18 @@ export class ProjectService {
 
   async getAllProjectForks(
     user: User,
-    projectId: Project['id'],
+    projectSlug: Project['slug'],
     page: number,
     limit: number
   ) {
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { id: projectId },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+    const project =
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
+    const projectId = project.id
 
     const forks = await this.prisma.project.findMany({
       where: {
@@ -615,7 +627,7 @@ export class ProjectService {
       const allowed =
         (await this.authorityCheckerService.checkAuthorityOverProject({
           userId: user.id,
-          entity: { id: fork.id },
+          entity: { slug: fork.slug },
           authorities: [Authority.READ_PROJECT],
           prisma: this.prisma
         })) != null
@@ -624,10 +636,11 @@ export class ProjectService {
     })
 
     const items = forksAllowed.slice(page * limit, (page + 1) * limit)
-    //calculate metadata
+
+    // Calculate metadata
     const metadata = paginate(
       forksAllowed.length,
-      `/project/${projectId}/forks`,
+      `/project/${projectSlug}/forks`,
       {
         page,
         limit: limitMaxItemsPerPage(limit)
@@ -637,11 +650,11 @@ export class ProjectService {
     return { items, metadata }
   }
 
-  async getProjectById(user: User, projectId: Project['id']) {
+  async getProject(user: User, projectSlug: Project['slug']) {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
         userId: user.id,
-        entity: { id: projectId },
+        entity: { slug: projectSlug },
         authorities: [Authority.READ_PROJECT],
         prisma: this.prisma
       })
@@ -653,19 +666,21 @@ export class ProjectService {
 
   async getProjectsOfWorkspace(
     user: User,
-    workspaceId: Workspace['id'],
+    workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
     sort: string,
     order: string,
     search: string
   ) {
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { id: workspaceId },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
+    const workspaceId = workspace.id
 
     //fetch projects with required properties
     const items = (
@@ -727,7 +742,7 @@ export class ProjectService {
       }
     })
 
-    const metadata = paginate(totalCount, `/project/all/${workspaceId}`, {
+    const metadata = paginate(totalCount, `/project/all/${workspaceSlug}`, {
       page,
       limit,
       sort,
@@ -845,6 +860,11 @@ export class ProjectService {
           data: {
             id: newEnvironmentId,
             name: environment.name,
+            slug: await generateEntitySlug(
+              environment.name,
+              'ENVIRONMENT',
+              this.prisma
+            ),
             description: environment.description,
             projectId: toProject.id,
             lastUpdatedById: user.id
@@ -892,6 +912,7 @@ export class ProjectService {
         this.prisma.secret.create({
           data: {
             name: secret.name,
+            slug: await generateEntitySlug(secret.name, 'SECRET', this.prisma),
             projectId: toProject.id,
             lastUpdatedById: user.id,
             note: secret.note,
@@ -944,6 +965,11 @@ export class ProjectService {
         this.prisma.variable.create({
           data: {
             name: variable.name,
+            slug: await generateEntitySlug(
+              variable.name,
+              'VARIABLE',
+              this.prisma
+            ),
             projectId: toProject.id,
             lastUpdatedById: user.id,
             note: variable.note,
