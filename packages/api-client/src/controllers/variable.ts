@@ -28,7 +28,7 @@ export default class VariableController {
     headers: Record<string, string>
   ): Promise<ClientResponse<CreateVariableResponse>> {
     const response = await this.apiClient.post(
-      `/api/variable/${request.projectId}`,
+      `/api/variable/${request.projectSlug}`,
       request,
       headers
     )
@@ -40,7 +40,7 @@ export default class VariableController {
     headers: Record<string, string>
   ): Promise<ClientResponse<UpdateVariableResponse>> {
     const response = await this.apiClient.put(
-      `/api/variable/${request.variableId}`,
+      `/api/variable/${request.variableSlug}`,
       request,
       headers
     )
@@ -53,7 +53,7 @@ export default class VariableController {
     headers: Record<string, string>
   ): Promise<ClientResponse<RollBackVariableResponse>> {
     const response = await this.apiClient.put(
-      `/api/variable/${request.variableId}/rollback/${request.version}?environmentId=${request.environmentId}`,
+      `/api/variable/${request.variableSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
       request,
       headers
     )
@@ -66,7 +66,7 @@ export default class VariableController {
     headers: Record<string, string>
   ): Promise<ClientResponse<DeleteVariableResponse>> {
     const response = await this.apiClient.delete(
-      `/api/variable/${request.variableId}`,
+      `/api/variable/${request.variableSlug}`,
       headers
     )
 
@@ -77,7 +77,7 @@ export default class VariableController {
     request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllVariablesOfProjectResponse>> {
-    let url = `/api/variable/${request.projectId}`
+    let url = `/api/variable/${request.projectSlug}`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
@@ -92,7 +92,7 @@ export default class VariableController {
     request: GetAllVariablesOfEnvironmentRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
-    const url = `/api/variable/${request.projectId}/${request.environmentId}`
+    const url = `/api/variable/${request.projectSlug}/${request.environmentSlug}`
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)

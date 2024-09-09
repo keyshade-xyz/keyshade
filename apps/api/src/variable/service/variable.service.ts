@@ -207,7 +207,8 @@ export class VariableService {
         select: {
           id: true,
           name: true,
-          note: true
+          note: true,
+          slug: true
         }
       })
     )

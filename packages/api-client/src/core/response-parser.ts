@@ -1,5 +1,13 @@
 import { ClientResponse, ResponseError } from '@api-client/types/index.types'
 
+/**
+ * Takes a Response object and parses its contents into a ClientResponse object.
+ * This function assumes that the response is either a successful JSON response,
+ * or a failed JSON response with an error object in its body.
+ *
+ * @param {Response} response - The response object to parse.
+ * @returns {Promise<ClientResponse<T>>} A promise that resolves to a ClientResponse object.
+ */
 export async function parseResponse<T>(
   response: Response
 ): Promise<ClientResponse<T>> {

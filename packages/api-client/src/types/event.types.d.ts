@@ -52,7 +52,7 @@ export enum EventType {
 }
 
 export interface GetEventsRequest {
-  workspaceId: string
+  workspaceSlug: string
   source: string
 }
 

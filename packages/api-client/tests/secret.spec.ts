@@ -8,10 +8,10 @@ describe('Secret Controller Tests', () => {
   const secretController = new SecretController(backendUrl)
 
   const email = 'johndoe@example.com'
-  let projectId: string | null
-  let workspaceId: string | null
-  let environmentId: string | null
-  let secretId: string | null
+  let projectSlug: string | null
+  let workspaceSlug: string | null
+  let environmentSlug: string | null
+  let secretSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -28,12 +28,12 @@ describe('Secret Controller Tests', () => {
       )
     ).json()) as any
 
-    workspaceId = workspaceResponse.id
+    workspaceSlug = workspaceResponse.slug
 
     // Create a project
     const projectResponse = (await (
       await client.post(
-        `/api/project/${workspaceId}`,
+        `/api/project/${workspaceSlug}`,
         {
           name: 'Project',
           storePrivateKey: true
@@ -44,11 +44,11 @@ describe('Secret Controller Tests', () => {
       )
     ).json()) as any
 
-    projectId = projectResponse.id
+    projectSlug = projectResponse.slug
 
     const createEnvironmentResponse = (await (
       await client.post(
-        `/api/environment/${projectId}`,
+        `/api/environment/${projectSlug}`,
         {
           name: 'Dev'
         },
@@ -58,12 +58,12 @@ describe('Secret Controller Tests', () => {
       )
     ).json()) as any
 
-    environmentId = createEnvironmentResponse.id
+    environmentSlug = createEnvironmentResponse.slug
   })
 
   afterAll(async () => {
     // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceId}`, {
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
     })
   })
@@ -76,22 +76,32 @@ describe('Secret Controller Tests', () => {
         note: 'Secret 1 note',
         entries: [
           {
-            environmentId,
+            environmentSlug,
             value: 'Secret 1 value'
           }
         ],
-        projectId
+        projectSlug
       },
       { 'x-e2e-user-email': email }
     )
 
-    secretId = createSecretResponse.data.id
+    expect(createSecretResponse.data.slug).toBeDefined()
+
+    secretSlug = createSecretResponse.data.slug
+
+    // Fetch all secrets
+    const secrets = await secretController.getAllSecretsOfProject(
+      { projectSlug },
+      { 'x-e2e-user-email': email }
+    )
+
+    expect(secrets.data.items.length).toBe(1)
   })
 
   afterEach(async () => {
     // Delete the secret
     await secretController.deleteSecret(
-      { secretId },
+      { secretSlug },
       { 'x-e2e-user-email': email }
     )
   })
@@ -104,24 +114,23 @@ describe('Secret Controller Tests', () => {
         note: 'Secret 2 note',
         entries: [
           {
-            environmentId,
+            environmentSlug,
             value: 'Secret 1 value'
           }
         ],
-        projectId
+        projectSlug
       },
       { 'x-e2e-user-email': email }
     )
 
-    expect(secret.data.projectId).toBe(projectId)
-    expect(secret.data.project.workspaceId).toBe(workspaceId)
     expect(secret.data.name).toBe('Secret 2')
+    expect(secret.data.slug).toBeDefined()
     expect(secret.data.versions.length).toBe(1)
     expect(secret.error).toBe(null)
 
     // Delete the secret
     await secretController.deleteSecret(
-      { secretId: secret.data.id },
+      { secretSlug: secret.data.slug },
       { 'x-e2e-user-email': email }
     )
   })
@@ -131,11 +140,19 @@ describe('Secret Controller Tests', () => {
     const updatedSecret = await secretController.updateSecret(
       {
         name: 'Updated Secret 1',
-        secretId
+        secretSlug
       },
       { 'x-e2e-user-email': email }
     )
     expect(updatedSecret.data.secret.name).toBe('Updated Secret 1')
+
+    // Delete the secret since the slug will be updated
+    const deleteSecretResponse = await secretController.deleteSecret(
+      { secretSlug: updatedSecret.data.secret.slug },
+      { 'x-e2e-user-email': email }
+    )
+
+    expect(deleteSecretResponse.error).toBe(null)
   })
 
   // // Add Version to a Secret
@@ -145,10 +162,10 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentId
+            environmentSlug
           }
         ],
-        secretId
+        secretSlug
       },
       { 'x-e2e-user-email': email }
     )
@@ -163,10 +180,10 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Secret 1 value',
-            environmentId
+            environmentSlug
           }
         ],
-        secretId
+        secretSlug
       },
       { 'x-e2e-user-email': email }
     )
@@ -176,16 +193,16 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentId
+            environmentSlug
           }
         ],
-        secretId
+        secretSlug
       },
       { 'x-e2e-user-email': email }
     )
 
     const rollbackSecret = await secretController.rollbackSecret(
-      { secretId, environmentId, version: 1 },
+      { secretSlug, environmentSlug, version: 1 },
       { 'x-e2e-user-email': email }
     )
 
@@ -195,7 +212,7 @@ describe('Secret Controller Tests', () => {
   // // Get all secrets of a Project
   it('should get all secrets of a project', async () => {
     const secrets: any = await secretController.getAllSecretsOfProject(
-      { projectId },
+      { projectSlug },
       { 'x-e2e-user-email': email }
     )
     expect(secrets.data.items.length).toBe(1)
@@ -205,8 +222,8 @@ describe('Secret Controller Tests', () => {
   it('should get all secrets of an environment', async () => {
     const secrets: any = await secretController.getAllSecretsOfEnvironment(
       {
-        environmentId,
-        projectId: projectId
+        environmentSlug,
+        projectSlug
       },
       { 'x-e2e-user-email': email }
     )
@@ -223,14 +240,14 @@ describe('Secret Controller Tests', () => {
     })
   })
 
-  // // Delete a Secert from a Project
+  // Delete a Secret from a Project
   it('should delete a secret', async () => {
     await secretController.deleteSecret(
-      { secretId },
+      { secretSlug },
       { 'x-e2e-user-email': email }
     )
     const secrets: any = await secretController.getAllSecretsOfProject(
-      { projectId },
+      { projectSlug },
       { 'x-e2e-user-email': email }
     )
     expect(secrets.data.items.length).toBe(0)

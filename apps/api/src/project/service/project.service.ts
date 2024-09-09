@@ -781,7 +781,6 @@ export class ProjectService {
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
-
         orderBy: {
           [sort]: order
         },

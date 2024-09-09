@@ -215,7 +215,8 @@ export class SecretService {
         select: {
           id: true,
           name: true,
-          note: true
+          note: true,
+          slug: true
         }
       })
     )

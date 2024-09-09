@@ -9,6 +9,7 @@ export interface CreateEnvironmentRequest {
 export interface CreateEnvironmentResponse {
   id: string
   name: string
+  slug: string
   description: string | null
   createdAt: string
   updatedAt: string
@@ -17,7 +18,7 @@ export interface CreateEnvironmentResponse {
 }
 
 export interface UpdateEnvironmentRequest {
-  id: string
+  slug: string
   name?: string
   description?: string
 }
@@ -25,6 +26,7 @@ export interface UpdateEnvironmentRequest {
 export interface UpdateEnvironmentResponse {
   id: string
   name: string
+  slug: string
   description: string | null
   createdAt: string
   updatedAt: string
@@ -32,13 +34,14 @@ export interface UpdateEnvironmentResponse {
   projectId: string
 }
 
-export interface GetEnvironmentByIdRequest {
-  id: string
+export interface GetEnvironmentRequest {
+  slug: string
 }
 
-export interface GetEnvironmentByIdResponse {
+export interface GetEnvironmentResponse {
   id: string
   name: string
+  slug: string
   description: string | null
   createdAt: string
   updatedAt: string
@@ -47,7 +50,7 @@ export interface GetEnvironmentByIdResponse {
 }
 
 export interface GetAllEnvironmentsOfProjectRequest {
-  projectId: string
+  projectSlug: string
   page?: number
   limit?: number
   sort?: string
@@ -58,6 +61,7 @@ export interface GetAllEnvironmentsOfProjectRequest {
 export interface GetAllEnvironmentsOfProjectResponse
   extends Page<{
     id: string
+    slug: string
     name: string
     description: string | null
     createdAt: string
@@ -71,7 +75,7 @@ export interface GetAllEnvironmentsOfProjectResponse
   }> {}
 
 export interface DeleteEnvironmentRequest {
-  id: string
+  slug: string
 }
 
 export interface DeleteEnvironmentResponse {}

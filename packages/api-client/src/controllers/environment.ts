@@ -7,8 +7,8 @@ import {
   DeleteEnvironmentResponse,
   GetAllEnvironmentsOfProjectRequest,
   GetAllEnvironmentsOfProjectResponse,
-  GetEnvironmentByIdRequest,
-  GetEnvironmentByIdResponse,
+  GetEnvironmentRequest,
+  GetEnvironmentResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
 } from '@api-client/types/environment.types'
@@ -39,7 +39,7 @@ export default class EnvironmentController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateEnvironmentResponse>> {
     const response = await this.apiClient.put(
-      `/api/environment/${request.id}`,
+      `/api/environment/${request.slug}`,
       request,
       headers
     )
@@ -47,23 +47,23 @@ export default class EnvironmentController {
     return await parseResponse<UpdateEnvironmentResponse>(response)
   }
 
-  async getEnvironmentById(
-    request: GetEnvironmentByIdRequest,
+  async getEnvironment(
+    request: GetEnvironmentRequest,
     headers?: Record<string, string>
-  ): Promise<ClientResponse<GetEnvironmentByIdResponse>> {
+  ): Promise<ClientResponse<GetEnvironmentResponse>> {
     const response = await this.apiClient.get(
-      `/api/environment/${request.id}`,
+      `/api/environment/${request.slug}`,
       headers
     )
 
-    return await parseResponse<GetEnvironmentByIdResponse>(response)
+    return await parseResponse<GetEnvironmentResponse>(response)
   }
 
   async getAllEnvironmentsOfProject(
     request: GetAllEnvironmentsOfProjectRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllEnvironmentsOfProjectResponse>> {
-    let url = `/api/environment/all/${request.projectId}?`
+    let url = `/api/environment/all/${request.projectSlug}?`
     request.page && (url += `page=${request.page}&`)
     request.limit && (url += `limit=${request.limit}&`)
     request.sort && (url += `sort=${request.sort}&`)
@@ -80,7 +80,7 @@ export default class EnvironmentController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteEnvironmentResponse>> {
     const response = await this.apiClient.delete(
-      `/api/environment/${request.id}`,
+      `/api/environment/${request.slug}`,
       headers
     )
 
