@@ -113,48 +113,57 @@ export default class ChangeNotifier
     @MessageBody() data: ChangeNotifierRegistration,
     @CurrentUser() user: User
   ) {
-    // Check if the user has access to the workspace
-    await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { slug: data.workspaceSlug },
-      authorities: [
-        Authority.READ_WORKSPACE,
-        Authority.READ_VARIABLE,
-        Authority.READ_SECRET
-      ],
-      prisma: this.prisma
-    })
-
-    // Check if the user has access to the project
-    await this.authorityCheckerService.checkAuthorityOverProject({
-      userId: user.id,
-      entity: { slug: data.projectSlug },
-      authorities: [Authority.READ_PROJECT],
-      prisma: this.prisma
-    })
-
-    // Check if the user has access to the environment
-    const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
+    try {
+      // Check if the user has access to the workspace
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
         userId: user.id,
-        entity: { slug: data.environmentSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
+        entity: { slug: data.workspaceSlug },
+        authorities: [
+          Authority.READ_WORKSPACE,
+          Authority.READ_VARIABLE,
+          Authority.READ_SECRET
+        ],
         prisma: this.prisma
       })
 
-    // Add the client to the environment
-    await this.addClientToEnvironment(client, environment.id)
+      // Check if the user has access to the project
+      await this.authorityCheckerService.checkAuthorityOverProject({
+        userId: user.id,
+        entity: { slug: data.projectSlug },
+        authorities: [Authority.READ_PROJECT],
+        prisma: this.prisma
+      })
 
-    // Send ACK to client
-    client.emit('client-registered', {
-      'status-code': 200
-    })
+      // Check if the user has access to the environment
+      const environment =
+        await this.authorityCheckerService.checkAuthorityOverEnvironment({
+          userId: user.id,
+          entity: { slug: data.environmentSlug },
+          authorities: [Authority.READ_ENVIRONMENT],
+          prisma: this.prisma
+        })
 
-    this.logger.log(
-      `Client registered: ${client.id} for configuration: ${JSON.stringify(
-        data
-      )}`
-    )
+      // Add the client to the environment
+      await this.addClientToEnvironment(client, environment.id)
+
+      // Send ACK to client
+      client.emit('client-registered', {
+        success: true,
+        message: 'Registration Successful'
+      })
+
+      this.logger.log(
+        `Client registered: ${client.id} for configuration: ${JSON.stringify(
+          data
+        )}`
+      )
+    } catch (error) {
+      this.logger.error(error)
+      client.emit('client-registered', {
+        success: false,
+        message: error as string
+      })
+    }
   }
 
   private async addClientToEnvironment(client: Socket, environmentId: string) {

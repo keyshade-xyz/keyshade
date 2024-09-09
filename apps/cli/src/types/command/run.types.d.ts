@@ -1,4 +1,4 @@
-import { ProjectRootConfig } from '../index.types'
+import { type ProjectRootConfig } from '../index.types'
 
 export interface Configuration {
   name: string
@@ -7,9 +7,8 @@ export interface Configuration {
 }
 
 export interface ClientRegisteredResponse {
-  workspaceId: string
-  projectId: string
-  environmentId: string
+  success: boolean
+  message: string
 }
 
 export interface RunData extends ProjectRootConfig {
