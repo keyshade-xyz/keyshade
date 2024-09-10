@@ -1,14 +1,12 @@
 import { PrismaService } from '@/prisma/prisma.service'
-import { Workspace } from '@prisma/client'
 
 /**
- * Generates a unique slug for the given name. It keeps generating slugs until it finds
- * one that does not exist in the database.
+ * Generates the base slug from the given name.
  *
  * @param name The name of the entity.
- * @returns A unique slug for the given entity.
+ * @returns The base slug.
  */
-const generateSlug = (name: string,counter:number): string => {
+const generateBaseSlug = (name: string): string => {
   // Convert to lowercase
   const lowerCaseName = name.trim().toLowerCase()
 
@@ -18,75 +16,64 @@ const generateSlug = (name: string,counter:number): string => {
   // Replace all non-alphanumeric characters with hyphens
   const alphanumericName = hyphenatedName.replace(/[^a-zA-Z0-9-]/g, '-')
 
-  // Append the name with 5 alphanumeric characters
-  const slug =
-    alphanumericName + '-' + counter.toString(36)
-  return slug
+  return alphanumericName
 }
 
-const checkWorkspaceRoleSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.workspaceRole.count({ where: { slug } })) > 0
-}
+const convertEntityTypeToCamelCase = (entityType: string): string => {
+  return entityType
+    .toLowerCase() 
+    .split('_')  
+    .map((word, index) => 
+      index === 0 
+        ? word  // First word stays lowercase
+        : word.charAt(0).toUpperCase() + word.slice(1) // Capitalize the first letter of subsequent words
+    )
+    .join('');
+};
 
-const checkWorkspaceSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.workspace.count({ where: { slug } })) > 0
-}
+const incrementSlugSuffix = (suffix: string): string => {
+  const charset = '0123456789abcdefghijklmnopqrstuvwxyz'; 
 
-const checkProjectSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.project.count({ where: { slug } })) > 0
-}
+  if (!suffix) {
+    return '0';
+  }
 
-const checkVariableSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.variable.count({ where: { slug } })) > 0
-}
+  let result = '';
+  let carry = true;
 
-const checkSecretSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.secret.count({ where: { slug } })) > 0
-}
+  for (let i = suffix.length - 1; i >= 0; i--) {
+    if (carry) {
+      const currentChar = suffix[i];
+      const index = charset.indexOf(currentChar);
 
-const checkIntegrationSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.integration.count({ where: { slug } })) > 0
-}
+      if (index === -1) {
+        throw new Error(`Invalid character in slug suffix: ${currentChar}`);
+      }
+      const nextIndex = (index + 1) % charset.length;
+      result = charset[nextIndex] + result;
 
-const checkEnvironmentSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.environment.count({ where: { slug } })) > 0
-}
+      // Carry over if we wrapped around to '0'
+      carry = nextIndex === 0;
+    } else {
+      // No carry, just append the remaining part of the suffix
+      result = suffix[i] + result;
+    }
+  }
 
-const checkApiKeySlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<boolean> => {
-  return (await prisma.apiKey.count({ where: { slug } })) > 0
-}
+  if (carry) {
+    result = '0' + result;
+  }
+
+  return result;
+};
 
 /**
- * Generates a unique slug for the given entity type and name. It keeps
- * generating slugs until it finds one that does not exist in the database.
+ * Generates a unique slug for the given entity type and name.
+ * It queries existing slugs, determines the highest suffix, and generates a new unique slug.
  *
  * @param name The name of the entity.
  * @param entityType The type of the entity.
- * @param prisma The Prisma client to use to check the existence of the slug.
+ * @param prisma The Prisma client to use.
  * @returns A unique slug for the given entity.
  */
 export default async function generateEntitySlug(
@@ -102,58 +89,35 @@ export default async function generateEntitySlug(
     | 'API_KEY',
   prisma: PrismaService
 ): Promise<string> {
-  let counter=0
-  while (true) {
-    const slug = generateSlug(name,counter)
-    switch (entityType) {
-      case 'WORKSPACE_ROLE':
-        if (await checkWorkspaceRoleSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'WORKSPACE':
-        if (await checkWorkspaceSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'PROJECT':
-        if (await checkProjectSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'VARIABLE':
-        if (await checkVariableSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'SECRET':
-        if (await checkSecretSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'INTEGRATION':
-        if (await checkIntegrationSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'ENVIRONMENT':
-        if (await checkEnvironmentSlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
-      case 'API_KEY':
-        if (await checkApiKeySlugExists(slug, prisma)) {
-          counter++
-          continue
-        }
-        return slug
+  const baseSlug = generateBaseSlug(name)
+
+  const existingSlugs = await prisma[convertEntityTypeToCamelCase(entityType)].findMany({
+    where: {
+      slug: {
+        startsWith: baseSlug
+      }
+    },
+    orderBy: {
+      slug: 'desc'
+    }
+  });
+
+  let highestSuffix = '';
+
+  if (existingSlugs.length > 0) {
+    for (const item of existingSlugs) {
+      const slug = item.slug;
+      const suffix = slug.substring(baseSlug.length + 1);
+
+      if (suffix > highestSuffix) {
+        highestSuffix = suffix;
+      }
     }
   }
+
+  // Increment the highest suffix to generate the new unique slug
+  const newSuffix = incrementSlugSuffix(highestSuffix);
+  const uniqueSlug = `${baseSlug}-${newSuffix}`;
+
+  return uniqueSlug;
 }
