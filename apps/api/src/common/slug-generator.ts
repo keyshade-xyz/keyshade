@@ -8,7 +8,7 @@ import { Workspace } from '@prisma/client'
  * @param name The name of the entity.
  * @returns A unique slug for the given entity.
  */
-const generateSlug = (name: string): string => {
+const generateSlug = (name: string,counter:number): string => {
   // Convert to lowercase
   const lowerCaseName = name.trim().toLowerCase()
 
@@ -20,7 +20,7 @@ const generateSlug = (name: string): string => {
 
   // Append the name with 5 alphanumeric characters
   const slug =
-    alphanumericName + '-' + Math.random().toString(36).substring(2, 7)
+    alphanumericName + '-' + counter.toString(36)
   return slug
 }
 
@@ -102,46 +102,55 @@ export default async function generateEntitySlug(
     | 'API_KEY',
   prisma: PrismaService
 ): Promise<string> {
+  let counter=0
   while (true) {
-    const slug = generateSlug(name)
+    const slug = generateSlug(name,counter)
     switch (entityType) {
       case 'WORKSPACE_ROLE':
         if (await checkWorkspaceRoleSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'WORKSPACE':
         if (await checkWorkspaceSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'PROJECT':
         if (await checkProjectSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'VARIABLE':
         if (await checkVariableSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'SECRET':
         if (await checkSecretSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'INTEGRATION':
         if (await checkIntegrationSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'ENVIRONMENT':
         if (await checkEnvironmentSlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
       case 'API_KEY':
         if (await checkApiKeySlugExists(slug, prisma)) {
+          counter++
           continue
         }
         return slug
