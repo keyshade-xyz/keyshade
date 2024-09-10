@@ -93,7 +93,7 @@ export class ApiKeyService {
     const apiKeyId = apiKey.id
 
     if (!apiKey) {
-      throw new NotFoundException(`API key with id ${apiKeyId} not found`)
+      throw new NotFoundException(`API key ${apiKeySlug} not found`)
     }
 
     const updatedApiKey = await this.prisma.apiKey.update({
@@ -137,7 +137,7 @@ export class ApiKeyService {
         }
       })
     } catch (error) {
-      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
+      throw new NotFoundException(`API key ${apiKeySlug} not found`)
     }
 
     this.logger.log(`User ${user.id} deleted API key ${apiKeySlug}`)
@@ -161,7 +161,7 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
-      throw new NotFoundException(`API key with id ${apiKeySlug} not found`)
+      throw new NotFoundException(`API key ${apiKeySlug} not found`)
     }
 
     return apiKey
