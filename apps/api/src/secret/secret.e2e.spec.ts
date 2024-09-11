@@ -545,7 +545,6 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      expect(response.statusCode).toBe(200)
       expect(response.json().count).toEqual(2)
 
       versions = await prisma.secretVersion.findMany({

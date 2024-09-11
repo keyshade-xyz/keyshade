@@ -75,7 +75,7 @@ describe('Workspace Membership Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
 
   let user1: User, user2: User, user3: User
-  let workspace1: Workspace, workspace2: Workspace
+  let workspace1: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
 
   beforeAll(async () => {
@@ -137,7 +137,6 @@ describe('Workspace Membership Controller Tests', () => {
     })
 
     workspace1 = createUser1.defaultWorkspace
-    workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
@@ -288,12 +287,16 @@ describe('Workspace Membership Controller Tests', () => {
 
     it('should not be able to transfer ownership of default workspace', async () => {
       // Invite another user to the workspace
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: [memberRole.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
 
       // Accept the invitation
       await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
@@ -416,12 +419,16 @@ describe('Workspace Membership Controller Tests', () => {
 
     it('should have created a INVITED_TO_WORKSPACE event', async () => {
       // Invite user2 to workspace1
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: []
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: []
+          }
+        ]
+      )
 
       const response = await fetchEvents(
         eventService,
@@ -517,9 +524,11 @@ describe('Workspace Membership Controller Tests', () => {
       await createMembership(adminRole.id, user2.id, workspace1.id, prisma)
 
       // Remove user2 from workspace1
-      await workspaceMembershipService.removeUsersFromWorkspace(user1, workspace1.slug, [
-        user2.email
-      ])
+      await workspaceMembershipService.removeUsersFromWorkspace(
+        user1,
+        workspace1.slug,
+        [user2.email]
+      )
 
       const response = await fetchEvents(
         eventService,
@@ -651,12 +660,16 @@ describe('Workspace Membership Controller Tests', () => {
   describe('Cancel Invitation Tests', () => {
     it('should be able to cancel the invitation', async () => {
       // Invite user2 to workspace1
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: []
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: []
+          }
+        ]
+      )
 
       const response = await app.inject({
         method: 'DELETE',
@@ -699,12 +712,16 @@ describe('Workspace Membership Controller Tests', () => {
 
     it('should have created a CANCELLED_INVITATION event', async () => {
       // Invite user2 to workspace1
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: []
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: []
+          }
+        ]
+      )
 
       // Cancel the invitation
       await workspaceMembershipService.cancelInvitation(
@@ -735,12 +752,16 @@ describe('Workspace Membership Controller Tests', () => {
   describe('Decline Invitation Tests', () => {
     it('should be able to decline invitation to the workspace', async () => {
       // Send an invitation
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: [memberRole.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
 
       const response = await app.inject({
         method: 'DELETE',
@@ -783,12 +804,16 @@ describe('Workspace Membership Controller Tests', () => {
 
     it('should have created a DECLINED_INVITATION event', async () => {
       // Invite user2 to workspace1
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: [memberRole.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
 
       // Decline the invitation
       await workspaceMembershipService.declineInvitation(user2, workspace1.slug)
@@ -863,12 +888,16 @@ describe('Workspace Membership Controller Tests', () => {
 
     it('should have created a ACCEPT_INVITATION event', async () => {
       // Invite user2 to workspace1
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: user2.email,
-          roleSlugs: [memberRole.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
 
       // Accept the invitation
       await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
@@ -1043,5 +1072,4 @@ describe('Workspace Membership Controller Tests', () => {
       expect(response.statusCode).toBe(401)
     })
   })
-
 })

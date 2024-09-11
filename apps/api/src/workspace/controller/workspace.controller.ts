@@ -10,10 +10,8 @@ import {
 } from '@nestjs/common'
 import { WorkspaceService } from '../service/workspace.service'
 import { CurrentUser } from '@/decorators/user.decorator'
-import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
-import {
-  CreateWorkspace,
-} from '../dto/create.workspace/create.workspace'
+import { Authority, User, Workspace } from '@prisma/client'
+import { CreateWorkspace } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 
@@ -37,7 +35,6 @@ export class WorkspaceController {
     return this.workspaceService.updateWorkspace(user, workspaceSlug, dto)
   }
 
-
   @Delete(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_WORKSPACE)
   async delete(
@@ -46,7 +43,6 @@ export class WorkspaceController {
   ) {
     return this.workspaceService.deleteWorkspace(user, workspaceSlug)
   }
-
 
   @Get(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)

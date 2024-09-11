@@ -35,7 +35,7 @@ export class WorkspaceMembershipController {
   }
 
   @Post(':workspaceSlug/invite-users')
-  @RequiredApiKeyAuthorities(Authority.ADD_USER)
+  @RequiredApiKeyAuthorities(Authority.ADD_USER, Authority.READ_WORKSPACE)
   async addUsers(
     @CurrentUser() user: User,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
@@ -49,7 +49,7 @@ export class WorkspaceMembershipController {
   }
 
   @Delete(':workspaceSlug/remove-users')
-  @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
+  @RequiredApiKeyAuthorities(Authority.REMOVE_USER, Authority.READ_WORKSPACE)
   async removeUsers(
     @CurrentUser() user: User,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
@@ -63,7 +63,10 @@ export class WorkspaceMembershipController {
   }
 
   @Put(':workspaceSlug/update-member-role/:userEmail')
-  @RequiredApiKeyAuthorities(Authority.UPDATE_USER_ROLE)
+  @RequiredApiKeyAuthorities(
+    Authority.UPDATE_USER_ROLE,
+    Authority.READ_WORKSPACE
+  )
   async updateMemberRoles(
     @CurrentUser() user: User,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
