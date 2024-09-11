@@ -26,8 +26,10 @@ import { EventService } from '@/event/service/event.service'
 import { EventModule } from '@/event/event.module'
 import { ProjectService } from './service/project.service'
 import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
 import { UserService } from '@/user/service/user.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { UserModule } from '@/user/user.module'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
 import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
@@ -46,6 +48,7 @@ describe('Project Controller Tests', () => {
   let eventService: EventService
   let projectService: ProjectService
   let workspaceService: WorkspaceService
+  let workspaceMembershipService: WorkspaceMembershipService
   let userService: UserService
   let workspaceRoleService: WorkspaceRoleService
   let environmentService: EnvironmentService
@@ -63,6 +66,7 @@ describe('Project Controller Tests', () => {
         ProjectModule,
         EventModule,
         WorkspaceModule,
+        WorkspaceMembershipModule,
         UserModule,
         WorkspaceRoleModule,
         EnvironmentModule,
@@ -81,6 +85,7 @@ describe('Project Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     projectService = moduleRef.get(ProjectService)
     workspaceService = moduleRef.get(WorkspaceService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
     userService = moduleRef.get(UserService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
     environmentService = moduleRef.get(EnvironmentService)
@@ -150,6 +155,7 @@ describe('Project Controller Tests', () => {
     expect(eventService).toBeDefined()
     expect(projectService).toBeDefined()
     expect(workspaceService).toBeDefined()
+    expect(workspaceMembershipService).toBeDefined()
     expect(userService).toBeDefined()
     expect(workspaceRoleService).toBeDefined()
     expect(environmentService).toBeDefined()
@@ -846,7 +852,7 @@ describe('Project Controller Tests', () => {
       )
 
       // Add user to workspace as a member
-      await workspaceService.inviteUsersToWorkspace(user1, workspace1.slug, [
+      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
         {
           email: johnny.email,
           roleSlugs: [role.slug]
@@ -854,7 +860,7 @@ describe('Project Controller Tests', () => {
       ])
 
       // Accept the invitation on behalf of the user
-      await workspaceService.acceptInvitation(johnny, workspace1.slug)
+      await workspaceMembershipService.acceptInvitation(johnny, workspace1.slug)
 
       // Update the access level of the project
       const response = await app.inject({
