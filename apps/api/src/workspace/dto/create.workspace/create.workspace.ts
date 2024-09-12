@@ -10,8 +10,3 @@ export class CreateWorkspace {
   @IsOptional()
   description?: string
 }
-
-export interface WorkspaceMemberDTO {
-  email: string
-  roleSlugs: WorkspaceRole['slug'][]
-}
