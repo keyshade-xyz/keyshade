@@ -6,7 +6,7 @@ const incrementSlugSuffix = (foundSlug: string, baseSlug: string): string => {
 
   let suffix = ''
 
-  if (!foundSlug) {
+  if (foundSlug) {
     suffix = foundSlug.substring(baseSlug.length + 1)
   }
 
@@ -44,11 +44,11 @@ const incrementSlugSuffix = (foundSlug: string, baseSlug: string): string => {
 }
 
 /**
- * Generates a unique slug for the given name. It keeps generating slugs until it finds
+ * Generates a slug for the given name. It keeps generating slugs until it finds
  * one that does not exist in the database.
  *
  * @param name The name of the entity.
- * @returns A unique slug for the given entity.
+ * @returns A alphanumeric slug for the given name.
  */
 const generateSlugName = (name: string): string => {
   // Convert to lowercase
