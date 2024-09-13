@@ -15,7 +15,8 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
 import { CacheService } from '@/cache/cache.service'
 import { generateOtp } from '@/common/util'
-import { createUser } from '@/common/user'
+import { createUser, getUserByEmailOrId } from '@/common/user'
+import { UserWithWorkspace } from '@/user/user.types'
 
 @Injectable()
 export class AuthService {
@@ -62,7 +63,7 @@ export class AuthService {
     email: string,
     otp: string
   ): Promise<UserAuthenticatedResponse> {
-    const user = await this.findUserByEmail(email)
+    const user = await getUserByEmailOrId(email, this.prisma)
     if (!user) {
       this.logger.error(`User not found: ${email}`)
       throw new NotFoundException('User not found')
@@ -175,7 +176,11 @@ export class AuthService {
     name?: string,
     profilePictureUrl?: string
   ) {
-    let user = await this.findUserByEmail(email)
+    let user: UserWithWorkspace | null
+
+    try {
+      user = await getUserByEmailOrId(email, this.prisma)
+    } catch (ignored) {}
 
     // We need to create the user if it doesn't exist yet
     if (!user) {
@@ -203,13 +208,5 @@ export class AuthService {
 
   private async generateToken(id: string) {
     return await this.jwt.signAsync({ id })
-  }
-
-  private async findUserByEmail(email: string) {
-    return await this.prisma.user.findUnique({
-      where: {
-        email
-      }
-    })
   }
 }

@@ -27,6 +27,7 @@ import {
 import { Test } from '@nestjs/testing'
 import {
   Authority,
+  AuthProvider,
   EventSeverity,
   EventSource,
   EventTriggerer,
@@ -237,6 +238,30 @@ describe('Workspace Membership Controller Tests', () => {
       })
     })
 
+    it('should not be able to transfer ownership to a member who did not accept the invitation', async () => {
+      const newWorkspace = await workspaceService.createWorkspace(user1, {
+        name: 'Workspace 2',
+        description: 'Workspace 2 description'
+      })
+
+      // Create membership
+      await createMembership(memberRole.id, user3.id, newWorkspace.id, prisma)
+
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${newWorkspace.slug}/transfer-ownership/${user3.email}`
+      })
+
+      expect(response.json()).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: `${user3.email} has not accepted the invitation to workspace ${newWorkspace.name} (${newWorkspace.slug})`
+      })
+    })
+
     it('should be able to transfer the ownership of the workspace', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
@@ -245,6 +270,19 @@ describe('Workspace Membership Controller Tests', () => {
 
       // Create membership
       await createMembership(memberRole.id, user2.id, newWorkspace.id, prisma)
+
+      // Set the membership accepted status to true
+      await prisma.workspaceMember.update({
+        where: {
+          workspaceId_userId: {
+            userId: user2.id,
+            workspaceId: newWorkspace.id
+          }
+        },
+        data: {
+          invitationAccepted: true
+        }
+      })
 
       const response = await app.inject({
         method: 'PUT',
@@ -473,6 +511,8 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(user).toBeDefined()
+      expect(user.email).toBe('joy@keyshade.xyz')
+      expect(user.authProvider).toBe(AuthProvider.EMAIL_OTP)
     })
   })
 

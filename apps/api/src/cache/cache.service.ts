@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common'
 import { RedisClientType } from 'redis'
-import { User } from '@prisma/client'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { UserWithWorkspace } from '@/user/user.types'
 
 @Injectable()
 export class CacheService implements OnModuleDestroy {
@@ -15,7 +15,10 @@ export class CacheService implements OnModuleDestroy {
     return `${CacheService.USER_PREFIX}${userId}`
   }
 
-  async setUser(user: User, expirationInSeconds?: number): Promise<void> {
+  async setUser(
+    user: UserWithWorkspace,
+    expirationInSeconds?: number
+  ): Promise<void> {
     const key = this.getUserKey(user.id)
     const userJson = JSON.stringify(user)
     if (expirationInSeconds) {
@@ -25,11 +28,11 @@ export class CacheService implements OnModuleDestroy {
     }
   }
 
-  async getUser(userId: string): Promise<User | null> {
+  async getUser(userId: string): Promise<UserWithWorkspace | null> {
     const key = this.getUserKey(userId)
     const userData = await this.redisClient.publisher.get(key)
     if (userData) {
-      return JSON.parse(userData) as User
+      return JSON.parse(userData) as UserWithWorkspace
     }
     return null
   }

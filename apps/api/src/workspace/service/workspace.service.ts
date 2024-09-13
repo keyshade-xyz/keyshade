@@ -4,9 +4,7 @@ import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { limitMaxItemsPerPage } from '@/common/util'
-import {
-  createWorkspace
-} from '@/common/workspace'
+import { createWorkspace } from '@/common/workspace'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import {
@@ -29,9 +27,7 @@ import {
   Variable,
   Workspace
 } from '@prisma/client'
-import {
-  CreateWorkspace,
-} from '../dto/create.workspace/create.workspace'
+import { CreateWorkspace } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
 
 @Injectable()

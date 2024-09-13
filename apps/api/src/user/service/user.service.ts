@@ -14,6 +14,7 @@ import { EnvSchema } from '@/common/env/env.schema'
 import { generateOtp, limitMaxItemsPerPage } from '@/common/util'
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
+import { UserWithWorkspace } from '../user.types'
 
 @Injectable()
 export class UserService {
@@ -30,7 +31,7 @@ export class UserService {
     await this.createDummyUser()
   }
 
-  async getSelf(user: User) {
+  async getSelf(user: UserWithWorkspace) {
     const defaultWorkspace: Workspace | null =
       await this.prisma.workspace.findFirst({
         where: {
@@ -42,7 +43,7 @@ export class UserService {
     return { ...user, defaultWorkspace }
   }
 
-  async updateSelf(user: User, dto: UpdateUserDto) {
+  async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
     const data = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
@@ -84,7 +85,10 @@ export class UserService {
       },
       data
     })
-    await this.cache.setUser(updatedUser)
+    await this.cache.setUser({
+      ...updatedUser,
+      defaultWorkspace: user.defaultWorkspace
+    })
 
     this.log.log(`Updated user ${user.id} with data ${dto}`)
 
@@ -133,7 +137,10 @@ export class UserService {
     })
   }
 
-  async validateEmailChangeOtp(user: User, otpCode: string): Promise<User> {
+  async validateEmailChangeOtp(
+    user: UserWithWorkspace,
+    otpCode: string
+  ): Promise<User> {
     const otp = await this.prisma.otp.findUnique({
       where: {
         userId: user.id,
@@ -186,7 +193,7 @@ export class UserService {
     return results[2]
   }
 
-  async resendEmailChangeOtp(user: User) {
+  async resendEmailChangeOtp(user: UserWithWorkspace) {
     const oldOtp = await this.prisma.otp.findUnique({
       where: {
         userId: user.id
@@ -248,7 +255,7 @@ export class UserService {
     })
   }
 
-  async deleteSelf(user: User) {
+  async deleteSelf(user: UserWithWorkspace) {
     await this.deleteUserById(user.id)
   }
 
