@@ -1,3 +1,10 @@
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { getEnvironmentsOfProjectHelper } from '@/common/environment'
+import { createEvent } from '@/common/event'
+import { paginate } from '@/common/paginate'
+import generateEntitySlug from '@/common/slug-generator'
+import { limitMaxItemsPerPage } from '@/common/util'
+import { PrismaService } from '@/prisma/prisma.service'
 import {
   BadRequestException,
   ConflictException,
@@ -14,13 +21,6 @@ import {
 } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
-import { PrismaService } from '@/prisma/prisma.service'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
-import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
-import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
-
 @Injectable()
 export class EnvironmentService {
   private readonly logger = new Logger(EnvironmentService.name)
@@ -273,54 +273,18 @@ export class EnvironmentService {
     order: string,
     search: string
   ) {
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { slug: projectSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
-      })
-    const projectId = project.id
+    const { items, totalCount } = await getEnvironmentsOfProjectHelper({
+      user,
+      projectSlug,
+      prisma: this.prisma,
+      authorityCheckerService: this.authorityCheckerService,
+      page,
+      limit,
+      sort,
+      order,
+      search
+    })
 
-    // Get the environments for the required page
-    const items = await this.prisma.environment.findMany({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            email: true,
-            profilePictureUrl: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-      orderBy: {
-        [sort]: order
-      }
-    })
-    // Calculate metadata for pagination
-    const totalCount = await this.prisma.environment.count({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      }
-    })
     const metadata = paginate(totalCount, `/environment/all/${projectSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),

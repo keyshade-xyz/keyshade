@@ -1,3 +1,13 @@
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import { createEvent } from '@/common/event'
+import { paginate } from '@/common/paginate'
+import generateEntitySlug from '@/common/slug-generator'
+import { limitMaxItemsPerPage } from '@/common/util'
+import { getVariablesOfProjectHelper } from '@/common/variable'
+import { PrismaService } from '@/prisma/prisma.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import {
   ConflictException,
   Inject,
@@ -5,7 +15,6 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { PrismaService } from '@/prisma/prisma.service'
 import {
   Authority,
   Environment,
@@ -16,21 +25,13 @@ import {
   Variable,
   VariableVersion
 } from '@prisma/client'
-import { CreateVariable } from '../dto/create.variable/create.variable'
-import { UpdateVariable } from '../dto/update.variable/update.variable'
 import { RedisClientType } from 'redis'
-import { REDIS_CLIENT } from '@/provider/redis.provider'
-import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
-import { paginate } from '@/common/paginate'
-import { getEnvironmentIdToSlugMap } from '@/common/environment'
-import generateEntitySlug from '@/common/slug-generator'
-import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { CreateVariable } from '../dto/create.variable/create.variable'
+import { UpdateVariable } from '../dto/update.variable/update.variable'
 
 @Injectable()
 export class VariableService {
@@ -546,125 +547,17 @@ export class VariableService {
     order: string,
     search: string
   ) {
-    // Check if the user has the required authorities in the project
-    const { id: projectId } =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { slug: projectSlug },
-        authorities: [Authority.READ_VARIABLE],
-        prisma: this.prisma
-      })
-
-    const variables = await this.prisma.variable.findMany({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-
-      orderBy: {
-        [sort]: order
-      }
+    const { items, totalCount } = await getVariablesOfProjectHelper({
+      user,
+      projectSlug,
+      prisma: this.prisma,
+      authorityCheckerService: this.authorityCheckerService,
+      page,
+      limit,
+      order,
+      sort,
+      search
     })
-
-    const variablesWithEnvironmentalValues = new Map<
-      Variable['id'],
-      {
-        variable: Variable
-        values: {
-          environment: {
-            name: Environment['name']
-            id: Environment['id']
-          }
-          value: VariableVersion['value']
-          version: VariableVersion['version']
-        }[]
-      }
-    >()
-
-    // Find all the environments for this project
-    const environments = await this.prisma.environment.findMany({
-      where: {
-        projectId
-      }
-    })
-    const environmentIds = new Map(
-      environments.map((env) => [env.id, env.name])
-    )
-
-    for (const variable of variables) {
-      // Make a copy of the environment IDs
-      const envIds = new Map(environmentIds)
-      let iterations = envIds.size
-
-      // Find the latest version for each environment
-      while (iterations--) {
-        const latestVersion = await this.prisma.variableVersion.findFirst({
-          where: {
-            variableId: variable.id,
-            environmentId: {
-              in: Array.from(envIds.keys())
-            }
-          },
-          orderBy: {
-            version: 'desc'
-          }
-        })
-
-        if (!latestVersion) continue
-
-        if (variablesWithEnvironmentalValues.has(variable.id)) {
-          variablesWithEnvironmentalValues.get(variable.id).values.push({
-            environment: {
-              id: latestVersion.environmentId,
-              name: envIds.get(latestVersion.environmentId)
-            },
-            value: latestVersion.value,
-            version: latestVersion.version
-          })
-        } else {
-          variablesWithEnvironmentalValues.set(variable.id, {
-            variable,
-            values: [
-              {
-                environment: {
-                  id: latestVersion.environmentId,
-                  name: envIds.get(latestVersion.environmentId)
-                },
-                value: latestVersion.value,
-                version: latestVersion.version
-              }
-            ]
-          })
-        }
-
-        envIds.delete(latestVersion.environmentId)
-      }
-    }
-
-    const items = Array.from(variablesWithEnvironmentalValues.values())
-
-    //calculate metadata
-    const totalCount = await this.prisma.variable.count({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      }
-    })
-
     const metadata = paginate(totalCount, `/variable/${projectSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),

@@ -29,6 +29,9 @@ import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
+import { getEnvironmentsOfProjectHelper } from '@/common/environment'
+import { getVariablesOfProjectHelper } from '@/common/variable'
+import { getSecretsOfProjectHelper } from '@/common/secret'
 
 @Injectable()
 export class ProjectService {
@@ -777,7 +780,7 @@ export class ProjectService {
     const workspaceId = workspace.id
 
     //fetch projects with required properties
-    const items = (
+    const projects = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
@@ -809,6 +812,43 @@ export class ProjectService {
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
 
+    const items = await Promise.all(
+      projects.map(async (project) => {
+        const { items: envItems, totalCount: envTotalCount } =
+          await getEnvironmentsOfProjectHelper({
+            user,
+            projectSlug: project.slug,
+            prisma: this.prisma,
+            authorityCheckerService: this.authorityCheckerService,
+            skipPagination: true
+          })
+
+        const { items: variableItems, totalCount: variableTotalCount } =
+          await getVariablesOfProjectHelper({
+            user,
+            projectSlug: project.slug,
+            prisma: this.prisma,
+            authorityCheckerService: this.authorityCheckerService,
+            skipPagination: true
+          })
+        const { items: secretItems, totalCount: secretTotalCount } =
+          await getSecretsOfProjectHelper({
+            user,
+            projectSlug: project.slug,
+            decryptValue: true,
+            prisma: this.prisma,
+            authorityCheckerService: this.authorityCheckerService,
+            skipPagination: true
+          })
+
+        return {
+          ...project,
+          environmentsOfProject: envItems,
+          variablesOfProject: variableItems,
+          secretsOfProject: secretItems
+        }
+      })
+    )
     //calculate metadata
     const totalCount = await this.prisma.project.count({
       where: {

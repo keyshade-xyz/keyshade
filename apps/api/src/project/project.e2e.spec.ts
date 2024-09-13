@@ -57,7 +57,7 @@ describe('Project Controller Tests', () => {
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
-  let project1: Project, project2: Project, project3: Project
+  let project1: Project, project2: Project, project3: Project, project4: Project
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -141,6 +141,13 @@ describe('Project Controller Tests', () => {
       description: 'Project for fork',
       storePrivateKey: true,
       accessLevel: ProjectAccessLevel.GLOBAL
+    })) as Project
+
+    project4 = (await projectService.createProject(user2, workspace2.slug, {
+      name: 'Project4',
+      description:
+        'Project for testing if all environments,secrets and keys are being fetched or not',
+      storePrivateKey: true
     })) as Project
   })
 
@@ -519,6 +526,91 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+
+    it('should be able fetch all environments,variables,secrets of all projects of a workspace', async () => {
+      // Add an environment to the project
+      const environment = (await environmentService.createEnvironment(
+        user2,
+        {
+          name: 'Dev'
+        },
+        project4.slug
+      )) as Environment
+
+      // Add two secrets
+      const secret1 = (await secretService.createSecret(
+        user2,
+        {
+          name: 'API_KEY',
+          entries: [
+            {
+              value: 'some_key',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Secret
+
+      const secret2 = (await secretService.createSecret(
+        user2,
+        {
+          name: 'DB_PASSWORD',
+          entries: [
+            {
+              value: 'password',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Secret
+
+      // Add two variables
+      const variable1 = (await variableService.createVariable(
+        user2,
+        {
+          name: 'PORT',
+          entries: [
+            {
+              value: '8080',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Variable
+
+      const variable2 = (await variableService.createVariable(
+        user2,
+        {
+          name: 'EXPIRY',
+          entries: [
+            {
+              value: '3600',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Variable
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/all/${workspace2.slug}?page=0&limit=10&search=Project4`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().items.length).toEqual(1)
+      //One is added by default
+      expect(response.json().items[0].environmentsOfProject.length).toEqual(2)
+
+      expect(response.json().items[0].variablesOfProject.length).toEqual(2)
+      expect(response.json().items[0].secretsOfProject.length).toEqual(2)
+    })
   })
 
   it('should create environments if provided', async () => {
@@ -852,12 +944,16 @@ describe('Project Controller Tests', () => {
       )
 
       // Add user to workspace as a member
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: johnny.email,
-          roleSlugs: [role.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: johnny.email,
+            roleSlugs: [role.slug]
+          }
+        ]
+      )
 
       // Accept the invitation on behalf of the user
       await workspaceMembershipService.acceptInvitation(johnny, workspace1.slug)

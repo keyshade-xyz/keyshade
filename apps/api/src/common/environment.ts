@@ -6,6 +6,20 @@ import { UpdateVariable } from '@/variable/dto/update.variable/update.variable'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { Authority, Project, User } from '@prisma/client'
 import { AuthorityCheckerService } from './authority-checker.service'
+import { limitMaxItemsPerPage } from './util'
+
+export interface getEnvironmentsOfProjectHelperInput {
+  user: User
+  projectSlug: Project['slug']
+  prisma: PrismaService
+  authorityCheckerService: AuthorityCheckerService
+  skipPagination?: boolean
+  page?: number
+  limit?: number
+  sort?: string
+  order?: string
+  search?: string
+}
 
 /**
  * Given a list of environment slugs in a CreateSecret, UpdateSecret, CreateVariable, or UpdateVariable DTO,
@@ -60,4 +74,94 @@ export const getEnvironmentIdToSlugMap = async (
   )
 
   return environmentSlugToIdMap
+}
+
+/**
+ * Gets a list of all environments in the given project.
+ *
+ * This endpoint requires the `READ_ENVIRONMENT` authority on the project.
+ *
+ * If the user does not have the required authority, a `ForbiddenException` is thrown.
+ *
+ * The returned list of environments is paginated if skip-pagination is false and sorted according to the provided parameters.
+ *
+
+ * @param user The user that is requesting the environments
+ * @param projectSlug The slug of the project in which to get the environments
+ * @param prisma Prisma service to query DB
+ * @param authorityCheckerService authority check service to check if user has required authority
+ * @param skipPagination Boolean to see if pagnation is required or not
+ * @param page The page number
+ * @param limit The maximum number of items per page
+ * @param sort The sort field
+ * @param order The sort order
+ * @param search The search query
+ * @returns An object with a list of environments and totalCount according to search query provided
+ */
+export const getEnvironmentsOfProjectHelper = async (
+  input: getEnvironmentsOfProjectHelperInput
+) => {
+  const {
+    user,
+    projectSlug,
+    prisma,
+    authorityCheckerService,
+    skipPagination = false,
+    page = 0,
+    limit = 10,
+    sort = 'name',
+    order = 'asc',
+    search = ''
+  } = input
+
+  const project = await authorityCheckerService.checkAuthorityOverProject({
+    userId: user.id,
+    entity: { slug: projectSlug },
+    authorities: [Authority.READ_ENVIRONMENT],
+    prisma
+  })
+  const projectId = project.id
+
+  // Get the environments for the required page
+  const items = await prisma.environment.findMany({
+    where: {
+      projectId,
+      name: {
+        contains: search
+      }
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      createdAt: true,
+      updatedAt: true,
+      lastUpdatedBy: {
+        select: {
+          id: true,
+          email: true,
+          profilePictureUrl: true,
+          name: true
+        }
+      }
+    },
+    ...(skipPagination
+      ? {}
+      : { skip: page * limit, take: limitMaxItemsPerPage(limit) }),
+    orderBy: {
+      [sort]: order
+    }
+  })
+  // Calculate totalCount
+  const totalCount = await prisma.environment.count({
+    where: {
+      projectId,
+      name: {
+        contains: search
+      }
+    }
+  })
+
+  return { items, totalCount }
 }

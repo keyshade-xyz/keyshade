@@ -1,3 +1,14 @@
+import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { decrypt, encrypt } from '@/common/cryptography'
+import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import { createEvent } from '@/common/event'
+import { paginate } from '@/common/paginate'
+import { getSecretsOfProjectHelper } from '@/common/secret'
+import generateEntitySlug from '@/common/slug-generator'
+import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import { PrismaService } from '@/prisma/prisma.service'
+import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import {
   BadRequestException,
   ConflictException,
@@ -16,23 +27,13 @@ import {
   SecretVersion,
   User
 } from '@prisma/client'
-import { CreateSecret } from '../dto/create.secret/create.secret'
-import { UpdateSecret } from '../dto/update.secret/update.secret'
-import { PrismaService } from '@/prisma/prisma.service'
 import { RedisClientType } from 'redis'
-import { REDIS_CLIENT } from '@/provider/redis.provider'
-import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import {
   ChangeNotification,
   ChangeNotificationEvent
 } from 'src/socket/socket.types'
-import { paginate } from '@/common/paginate'
-import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
-import generateEntitySlug from '@/common/slug-generator'
-import { decrypt, encrypt } from '@/common/cryptography'
-import { createEvent } from '@/common/event'
-import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import { CreateSecret } from '../dto/create.secret/create.secret'
+import { UpdateSecret } from '../dto/update.secret/update.secret'
 
 @Injectable()
 export class SecretService {
@@ -622,133 +623,18 @@ export class SecretService {
     order: string,
     search: string
   ) {
-    // Fetch the project
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { slug: projectSlug },
-        authorities: [Authority.READ_SECRET],
-        prisma: this.prisma
-      })
-    const projectId = project.id
-
-    // Check if the secret values can be decrypted
-    await this.checkAutoDecrypt(decryptValue, project)
-
-    const secrets = await this.prisma.secret.findMany({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-
-      orderBy: {
-        [sort]: order
-      }
+    const { items, totalCount } = await getSecretsOfProjectHelper({
+      user,
+      projectSlug,
+      decryptValue,
+      prisma: this.prisma,
+      authorityCheckerService: this.authorityCheckerService,
+      page,
+      limit,
+      sort,
+      order,
+      search
     })
-
-    const secretsWithEnvironmentalValues = new Map<
-      Secret['id'],
-      {
-        secret: Secret
-        values: {
-          environment: {
-            name: Environment['name']
-            id: Environment['id']
-          }
-          value: SecretVersion['value']
-          version: SecretVersion['version']
-        }[]
-      }
-    >()
-
-    // Find all the environments for this project
-    const environments = await this.prisma.environment.findMany({
-      where: {
-        projectId
-      }
-    })
-    const environmentIds = new Map(
-      environments.map((env) => [env.id, env.name])
-    )
-
-    for (const secret of secrets) {
-      // Make a copy of the environment IDs
-      const envIds = new Map(environmentIds)
-      let iterations = envIds.size
-
-      // Find the latest version for each environment
-      while (iterations--) {
-        const latestVersion = await this.prisma.secretVersion.findFirst({
-          where: {
-            secretId: secret.id,
-            environmentId: {
-              in: Array.from(envIds.keys())
-            }
-          },
-          orderBy: {
-            version: 'desc'
-          }
-        })
-
-        if (!latestVersion) continue
-
-        if (secretsWithEnvironmentalValues.has(secret.id)) {
-          secretsWithEnvironmentalValues.get(secret.id).values.push({
-            environment: {
-              id: latestVersion.environmentId,
-              name: envIds.get(latestVersion.environmentId)
-            },
-            value: decryptValue
-              ? await decrypt(project.privateKey, latestVersion.value)
-              : latestVersion.value,
-            version: latestVersion.version
-          })
-        } else {
-          secretsWithEnvironmentalValues.set(secret.id, {
-            secret,
-            values: [
-              {
-                environment: {
-                  id: latestVersion.environmentId,
-                  name: envIds.get(latestVersion.environmentId)
-                },
-                value: decryptValue
-                  ? await decrypt(project.privateKey, latestVersion.value)
-                  : latestVersion.value,
-                version: latestVersion.version
-              }
-            ]
-          })
-        }
-
-        envIds.delete(latestVersion.environmentId)
-      }
-    }
-
-    const items = Array.from(secretsWithEnvironmentalValues.values())
-
-    // Calculate pagination metadata
-    const totalCount = await this.prisma.secret.count({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      }
-    })
-
     const metadata = paginate(
       totalCount,
       `/secret/${projectSlug}`,
@@ -782,30 +668,6 @@ export class SecretService {
     ) {
       throw new ConflictException(
         `Secret already exists: ${secretName} in project ${project.slug}`
-      )
-    }
-  }
-
-  /**
-   * Checks if the project is allowed to decrypt secret values
-   * @param decryptValue whether to decrypt the secret values or not
-   * @param project the project to check
-   * @throws {BadRequestException} if the project does not store the private key and decryptValue is true
-   * @throws {NotFoundException} if the project does not have a private key and decryptValue is true
-   */
-  private async checkAutoDecrypt(decryptValue: boolean, project: Project) {
-    // Check if the project is allowed to store the private key
-    if (decryptValue && !project.storePrivateKey) {
-      throw new BadRequestException(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
-    }
-
-    // Check if the project has a private key. This is just to ensure that we don't run into any
-    // problems while decrypting the secret
-    if (decryptValue && !project.privateKey) {
-      throw new NotFoundException(
-        `Cannot decrypt secret values as the project does not have a private key`
       )
     }
   }
