@@ -25,6 +25,7 @@ import {
   sendOAuthFailureRedirect,
   sendOAuthSuccessRedirect
 } from '../../common/redirect'
+import removeCookie from 'src/common/remove-cookie'
 
 @Controller('auth')
 export class AuthController {
@@ -167,6 +168,13 @@ export class AuthController {
       AuthProvider.GOOGLE,
       res
     )
+  }
+
+  @Public()
+  @Post('logout')
+  async logout(@Req() _req: any, @Res() res: Response) {
+    removeCookie(res)
+    res.status(200).json({ message: 'successfully logged out' })
   }
 
   /* istanbul ignore next */
