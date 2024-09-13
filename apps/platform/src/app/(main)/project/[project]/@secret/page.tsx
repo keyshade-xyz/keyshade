@@ -28,14 +28,17 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Skeleton } from '@/components/ui/skeleton'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
   const [allSecrets, setAllSecrets] = useState<Secret[]>()
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const pathname = usePathname()
 
   useEffect(() => {
+    setIsLoading(true)
     Secrets.getAllSecretbyProjectId(pathname.split('/')[2])
       .then((data) => {
         setAllSecrets(data)
@@ -44,7 +47,20 @@ function SecretPage(): React.JSX.Element {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }, [pathname])
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <SerectLoader />
+        <SerectLoader />
+        <SerectLoader />
+      </div>
+    )
+  }
 
   return (
     <ScrollArea className=" mb-4 h-[50rem]">
@@ -117,6 +133,24 @@ function SecretPage(): React.JSX.Element {
         })}
       </Accordion>
     </ScrollArea>
+  )
+}
+
+function SerectLoader(): React.JSX.Element {
+  return (
+    <div className=" rounded-xl bg-white/5 p-4">
+      <div className="flex justify-between">
+        <div className="flex items-center gap-x-6">
+          <Skeleton className=" h-6 w-32 rounded" />
+          <Skeleton className=" size-6 rounded" />
+        </div>
+        <div className="flex items-center gap-x-3">
+          <Skeleton className=" h-6 w-24 rounded" />
+          <Skeleton className=" h-6 w-16 rounded" />
+          <Skeleton className=" ml-5 size-4 rounded" />
+        </div>
+      </div>
+    </div>
   )
 }
 
