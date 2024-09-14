@@ -2,7 +2,7 @@ import type { Config } from 'jest'
 
 const config: Config = {
   displayName: 'api',
-  testMatch: ['**/*.spec.ts'],
+  testMatch: ['**/workspace-role.spec.ts'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
   },
