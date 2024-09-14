@@ -39,7 +39,7 @@ describe('generateEntitySlug', () => {
 
   describe('generateEntitySlug for each entity type', () => {
     it('should generate a unique slug for WORKSPACE_ROLE', async () => {
-      prisma.workspaceRole.findMany.mockResolvedValue([
+      prisma.$queryRaw.mockResolvedValue([
         {
           slug: 'workspace-role-0'
         }
@@ -54,35 +54,35 @@ describe('generateEntitySlug', () => {
     })
 
     it('should generate a unique slug for WORKSPACE', async () => {
-      prisma.workspace.findMany.mockResolvedValue([])
+      prisma.$queryRaw.mockResolvedValue([])
 
       const slug = await generateEntitySlug('Workspace', 'WORKSPACE', prisma)
       expect(slug).toBe('workspace-0')
     })
 
     it('should generate a unique slug for PROJECT', async () => {
-      prisma.project.findMany.mockResolvedValue([{ slug: 'project-z' }])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'project-z' }])
 
       const slug = await generateEntitySlug('Project', 'PROJECT', prisma)
       expect(slug).toBe('project-00')
     })
 
     it('should generate a unique slug for VARIABLE', async () => {
-      prisma.variable.findMany.mockResolvedValue([{ slug: 'variable-az' }])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'variable-az' }])
 
       const slug = await generateEntitySlug('Variable', 'VARIABLE', prisma)
       expect(slug).toBe('variable-b0')
     })
 
     it('should generate a unique slug for SECRET', async () => {
-      prisma.secret.findMany.mockResolvedValue([{ slug: 'secret-9' }])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'secret-9' }])
 
       const slug = await generateEntitySlug('Secret', 'SECRET', prisma)
       expect(slug).toBe('secret-a')
     })
 
     it('should generate a unique slug for INTEGRATION', async () => {
-      prisma.integration.findMany.mockResolvedValue([{ slug: 'integration-b' }])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'integration-b' }])
 
       const slug = await generateEntitySlug(
         'Integration',
@@ -93,9 +93,7 @@ describe('generateEntitySlug', () => {
     })
 
     it('should generate a unique slug for ENVIRONMENT', async () => {
-      prisma.environment.findMany.mockResolvedValue([
-        { slug: 'environment-zz' }
-      ])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'environment-zz' }])
 
       const slug = await generateEntitySlug(
         'Environment',
@@ -106,7 +104,7 @@ describe('generateEntitySlug', () => {
     })
 
     it('should generate a unique slug for API_KEY', async () => {
-      prisma.apiKey.findMany.mockResolvedValue([{ slug: 'api-key-09' }])
+      prisma.$queryRaw.mockResolvedValue([{ slug: 'api-key-09' }])
 
       const slug = await generateEntitySlug('Api @Key', 'API_KEY', prisma)
       expect(slug).toBe('api-key-0a')

@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service'
 import { Workspace } from '@prisma/client'
 
-const incrementSlugSuffix = (
+export const incrementSlugSuffix = (
   existingSlug: string,
   baseSlug: string
 ): string => {
@@ -71,7 +71,9 @@ const getWorkspaceRoleIfSlugExists = async (
   prisma: PrismaService
 ): Promise<string> => {
   const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+  const existingSlug: { slug: string }[] = await prisma.$queryRaw<
+    { slug: string }[]
+  >`
     SELECT slug
     FROM "WorkspaceRole"
     WHERE slug ~ ${search}
