@@ -15,6 +15,7 @@ import {
   UpdateSecretRequest,
   UpdateSecretResponse
 } from '@api-client/types/secret.types'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
 export default class SecretController {
   private apiClient: APIClient
@@ -78,13 +79,14 @@ export default class SecretController {
     request: GetAllSecretsOfProjectRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllSecretsOfProjectResponse>> {
-    let url = `/api/secret/${request.projectSlug}?decryptValue=true`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
-    const response = await this.apiClient.get(url, headers)
+    const url = parsePaginationUrl(
+      `/api/secret/${request.projectSlug}`,
+      request
+    )
+    const response = await this.apiClient.get(
+      `${url}&decryptValue=true`,
+      headers
+    )
 
     return await parseResponse<GetAllSecretsOfProjectResponse>(response)
   }

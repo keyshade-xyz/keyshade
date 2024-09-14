@@ -1,4 +1,5 @@
 import { APIClient } from '@api-client/core/client'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateEnvironmentRequest,
@@ -63,13 +64,10 @@ export default class EnvironmentController {
     request: GetAllEnvironmentsOfProjectRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllEnvironmentsOfProjectResponse>> {
-    let url = `/api/environment/all/${request.projectSlug}?`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
-
+    const url = parsePaginationUrl(
+      `/api/environment/all/${request.projectSlug}`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllEnvironmentsOfProjectResponse>(response)
