@@ -1,8 +1,9 @@
-import { AuthProvider, User, Workspace } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '@/user/dto/create.user/create.user'
 import { Logger, NotFoundException } from '@nestjs/common'
 import { createWorkspace } from './workspace'
+import { UserWithWorkspace } from '@/user/user.types'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
@@ -11,14 +12,15 @@ import { createWorkspace } from './workspace'
  * @returns The created user and, if the user is not an admin, a default workspace.
  */
 export async function createUser(
-  dto: Partial<CreateUserDto> & { authProvider: AuthProvider },
+  dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
   prisma: PrismaService
-): Promise<User & { defaultWorkspace?: Workspace }> {
+): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
   // Create the user
   const user = await prisma.user.create({
     data: {
+      id: dto.id,
       email: dto.email,
       name: dto.name,
       profilePictureUrl: dto.profilePictureUrl,
@@ -31,7 +33,10 @@ export async function createUser(
 
   if (user.isAdmin) {
     logger.log(`Created admin user ${user.id}`)
-    return user
+    return {
+      ...user,
+      defaultWorkspace: null
+    }
   }
 
   // Create the user's default workspace
@@ -51,26 +56,41 @@ export async function createUser(
 }
 
 /**
- * Finds a user by their email address.
- *
- * @param email The email address to search for.
- * @param prisma The Prisma client instance.
- * @returns The user with the given email address, or null if no user is found.
- * @throws NotFoundException if no user is found with the given email address.
+ * Finds a user by their email or ID.
+ * @param input The email or ID of the user to find.
+ * @param prisma The Prisma client to use for the database operation.
+ * @throws {NotFoundException} If the user is not found.
+ * @returns The user with their default workspace.
  */
-export async function getUserByEmail(
-  email: User['email'],
+export async function getUserByEmailOrId(
+  input: User['email'] | User['id'],
   prisma: PrismaService
-): Promise<User | null> {
-  const user = await prisma.user.findUnique({
+): Promise<UserWithWorkspace> {
+  const user =
+    (await prisma.user.findUnique({
+      where: {
+        email: input
+      }
+    })) ??
+    (await prisma.user.findUnique({
+      where: {
+        id: input
+      }
+    }))
+
+  if (!user) {
+    throw new NotFoundException(`User ${input} not found`)
+  }
+
+  const defaultWorkspace = await prisma.workspace.findFirst({
     where: {
-      email
+      ownerId: user.id,
+      isDefault: true
     }
   })
 
-  if (!user) {
-    throw new NotFoundException(`User ${email} not found`)
+  return {
+    ...user,
+    defaultWorkspace
   }
-
-  return user
 }
