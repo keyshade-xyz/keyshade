@@ -1,7 +1,10 @@
 import { PrismaService } from '@/prisma/prisma.service'
 import { Workspace } from '@prisma/client'
 
-const incrementSlugSuffix = (foundSlug: string, baseSlug: string): string => {
+export const incrementSlugSuffix = (
+  foundSlug: string,
+  baseSlug: string
+): string => {
   const charset = '0123456789abcdefghijklmnopqrstuvwxyz'
 
   let suffix = ''
@@ -50,7 +53,7 @@ const incrementSlugSuffix = (foundSlug: string, baseSlug: string): string => {
  * @param name The name of the entity.
  * @returns A alphanumeric slug for the given name.
  */
-const generateSlugName = (name: string): string => {
+export const generateSlugName = (name: string): string => {
   // Convert to lowercase
   const lowerCaseName = name.trim().toLowerCase()
 
@@ -73,6 +76,9 @@ const getWorkspaceRoleIfSlugExists = async (
         startsWith: `${slug}-`
       }
     },
+    select: {
+      slug: true
+    },
     orderBy: {
       slug: 'desc'
     },
@@ -90,6 +96,9 @@ const getWorkspaceSlugExists = async (
       slug: {
         startsWith: `${slug}-`
       }
+    },
+    select: {
+      slug: true
     },
     orderBy: {
       slug: 'desc'
@@ -109,6 +118,9 @@ const getProjectSlugExists = async (
         startsWith: `${slug}-`
       }
     },
+    select: {
+      slug: true
+    },
     orderBy: {
       slug: 'desc'
     },
@@ -126,6 +138,9 @@ const getVariableSlugExists = async (
       slug: {
         startsWith: `${slug}-`
       }
+    },
+    select: {
+      slug: true
     },
     orderBy: {
       slug: 'desc'
@@ -145,6 +160,9 @@ const getSecretSlugExists = async (
         startsWith: `${slug}-`
       }
     },
+    select: {
+      slug: true
+    },
     orderBy: {
       slug: 'desc'
     },
@@ -162,6 +180,9 @@ const getIntegrationSlugExists = async (
       slug: {
         startsWith: `${slug}-`
       }
+    },
+    select: {
+      slug: true
     },
     orderBy: {
       slug: 'desc'
@@ -181,6 +202,9 @@ const getEnvironmentSlugExists = async (
         startsWith: `${slug}-`
       }
     },
+    select: {
+      slug: true
+    },
     orderBy: {
       slug: 'desc'
     },
@@ -198,6 +222,9 @@ const getApiKeySlugExists = async (
       slug: {
         startsWith: `${slug}-`
       }
+    },
+    select: {
+      slug: true
     },
     orderBy: {
       slug: 'desc'
