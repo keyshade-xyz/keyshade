@@ -1,4 +1,5 @@
 import { UserAuthenticatedResponse } from '@/auth/auth.types'
+import { UserWithWorkspace } from '@/user/user.types'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
 
@@ -26,7 +27,7 @@ export const limitMaxItemsPerPage = (
 export const setCookie = (
   response: Response,
   data: UserAuthenticatedResponse
-): User => {
+): UserWithWorkspace => {
   const { token, ...user } = data
   response.cookie('token', `Bearer ${token}`, {
     domain: process.env.DOMAIN ?? 'localhost',

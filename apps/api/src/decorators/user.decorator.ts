@@ -1,10 +1,10 @@
+import { UserWithWorkspace } from '@/user/user.types'
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { User as DBUser } from '@prisma/client'
 
 export const CurrentUser = createParamDecorator<
   unknown,
   ExecutionContext,
-  DBUser
+  UserWithWorkspace
 >((_: unknown, ctx: ExecutionContext) => {
   const request = ctx.switchToHttp().getRequest()
   return request.user

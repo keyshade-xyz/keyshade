@@ -153,7 +153,7 @@ describe('User Controller Tests', () => {
       profilePictureUrl: null
     })
 
-    expect(createAdminUserResponse.defaultWorkspace).toBeUndefined()
+    expect(createAdminUserResponse.defaultWorkspace).toBeNull()
 
     const workspace = await prisma.workspace.findFirst({
       where: {

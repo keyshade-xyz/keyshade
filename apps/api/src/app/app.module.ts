@@ -24,6 +24,7 @@ import { EnvSchema } from '@/common/env/env.schema'
 import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 
 @Module({
   controllers: [AppController],
@@ -55,7 +56,8 @@ import { CacheModule } from '@/cache/cache.module'
     ProviderModule,
     IntegrationModule,
     FeedbackModule,
-    CacheModule
+    CacheModule,
+    WorkspaceMembershipModule
   ],
   providers: [
     {

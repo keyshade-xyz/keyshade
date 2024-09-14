@@ -1,6 +1,6 @@
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
-import { getUserByEmail } from '@/common/user'
+import { createUser, getUserByEmailOrId } from '@/common/user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import {
@@ -15,6 +15,7 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import {
   Authority,
+  AuthProvider,
   EventSource,
   EventType,
   User,
@@ -63,7 +64,7 @@ export class WorkspaceMembershipService {
         prisma: this.prisma
       })
 
-    const otherUser = await getUserByEmail(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
 
     if (otherUser.id === user.id) {
       throw new BadRequestException(
@@ -88,6 +89,13 @@ export class WorkspaceMembershipService {
     if (!workspaceMembership) {
       throw new NotFoundException(
         `${otherUser.email} is not a member of workspace ${workspace.name} (${workspace.slug})`
+      )
+    }
+
+    // Check if the user has accepted the invitation
+    if (!workspaceMembership.invitationAccepted) {
+      throw new BadRequestException(
+        `${otherUser.email} has not accepted the invitation to workspace ${workspace.name} (${workspace.slug})`
       )
     }
 
@@ -322,7 +330,7 @@ export class WorkspaceMembershipService {
     otherUserEmail: User['email'],
     roleSlugs: WorkspaceRole['slug'][]
   ): Promise<void> {
-    const otherUser = await getUserByEmail(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
 
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -604,7 +612,7 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug'],
     inviteeEmail: User['email']
   ): Promise<void> {
-    const inviteeUser = await getUserByEmail(inviteeEmail, this.prisma)
+    const inviteeUser = await getUserByEmailOrId(inviteeEmail, this.prisma)
 
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -755,7 +763,13 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug'],
     otherUserEmail: User['email']
   ): Promise<boolean> {
-    const otherUser = await getUserByEmail(otherUserEmail, this.prisma)
+    let otherUser: User | null = null
+
+    try {
+      otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+    } catch (e) {
+      return false
+    }
 
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace({
@@ -827,13 +841,13 @@ export class WorkspaceMembershipService {
       ) {
         this.log.warn(
           `User ${
-            memberUser.name ?? 'NO_NAME_YET'
+            memberUser.name || memberUser.email
           } (${userId}) is already a member of workspace ${workspace.name} (${
             workspace.slug
           }). Skipping.`
         )
         throw new ConflictException(
-          `User ${memberUser.name} (${userId}) is already a member of workspace ${workspace.name} (${workspace.slug})`
+          `User ${memberUser.name || memberUser.email} (${userId}) is already a member of workspace ${workspace.name} (${workspace.slug})`
         )
       }
 
@@ -876,7 +890,7 @@ export class WorkspaceMembershipService {
         this.mailService.workspaceInvitationMailForUsers(
           member.email,
           workspace.name,
-          `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.id}/join`,
+          `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.slug}/join`,
           currentUser.name,
           true
         )
@@ -885,15 +899,17 @@ export class WorkspaceMembershipService {
           `Sent workspace invitation mail to registered user ${memberUser}`
         )
       } else {
-        const createMember = this.prisma.user.create({
-          data: {
+        // Create the user
+        await createUser(
+          {
             id: userId,
             email: member.email,
-            isOnboardingFinished: false
-          }
-        })
+            authProvider: AuthProvider.EMAIL_OTP
+          },
+          this.prisma
+        )
 
-        await this.prisma.$transaction([createMember, createMembership])
+        await this.prisma.$transaction([createMembership])
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
