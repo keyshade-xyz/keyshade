@@ -2,15 +2,15 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { Workspace } from '@prisma/client'
 
 export const incrementSlugSuffix = (
-  foundSlug: string,
+  existingSlug: string,
   baseSlug: string
 ): string => {
   const charset = '0123456789abcdefghijklmnopqrstuvwxyz'
 
   let suffix = ''
 
-  if (foundSlug) {
-    suffix = foundSlug.substring(baseSlug.length + 1)
+  if (existingSlug) {
+    suffix = existingSlug.substring(baseSlug.length + 1)
   }
 
   if (!suffix) {
@@ -61,7 +61,7 @@ export const generateSlugName = (name: string): string => {
   const hyphenatedName = lowerCaseName.replace(/\s+/g, '-')
 
   // Replace all non-alphanumeric characters with hyphens
-  const alphanumericName = hyphenatedName.replace(/[^a-zA-Z0-9-]/g, '-')
+  const alphanumericName = hyphenatedName.replace(/[^a-zA-Z0-9-]/g, '')
 
   return alphanumericName
 }
@@ -257,32 +257,32 @@ export default async function generateEntitySlug(
   prisma: PrismaService
 ): Promise<string> {
   const baseSlug = generateSlugName(name)
-  let foundSlug = ''
+  let existingSlug = ''
   switch (entityType) {
     case 'WORKSPACE_ROLE':
-      foundSlug = await getWorkspaceRoleIfSlugExists(baseSlug, prisma)
+      existingSlug = await getWorkspaceRoleIfSlugExists(baseSlug, prisma)
       break
     case 'WORKSPACE':
-      foundSlug = await getWorkspaceSlugExists(baseSlug, prisma)
+      existingSlug = await getWorkspaceSlugExists(baseSlug, prisma)
       break
     case 'PROJECT':
-      foundSlug = await getProjectSlugExists(baseSlug, prisma)
+      existingSlug = await getProjectSlugExists(baseSlug, prisma)
       break
     case 'VARIABLE':
-      foundSlug = await getVariableSlugExists(baseSlug, prisma)
+      existingSlug = await getVariableSlugExists(baseSlug, prisma)
       break
     case 'SECRET':
-      foundSlug = await getSecretSlugExists(baseSlug, prisma)
+      existingSlug = await getSecretSlugExists(baseSlug, prisma)
       break
     case 'INTEGRATION':
-      foundSlug = await getIntegrationSlugExists(baseSlug, prisma)
+      existingSlug = await getIntegrationSlugExists(baseSlug, prisma)
       break
     case 'ENVIRONMENT':
-      foundSlug = await getEnvironmentSlugExists(baseSlug, prisma)
+      existingSlug = await getEnvironmentSlugExists(baseSlug, prisma)
       break
     case 'API_KEY':
-      foundSlug = await getApiKeySlugExists(baseSlug, prisma)
+      existingSlug = await getApiKeySlugExists(baseSlug, prisma)
       break
   }
-  return incrementSlugSuffix(foundSlug, baseSlug)
+  return incrementSlugSuffix(existingSlug, baseSlug)
 }

@@ -16,7 +16,7 @@ describe('generateEntitySlug', () => {
     it('should convert name to slug format', () => {
       expect(generateSlugName('Hello World')).toBe('hello-world')
       expect(generateSlugName('Entity with 123')).toBe('entity-with-123')
-      expect(generateSlugName('Special #Name!')).toBe('special--name-')
+      expect(generateSlugName('Special #Name!')).toBe('special-name')
     })
   })
 
@@ -106,10 +106,10 @@ describe('generateEntitySlug', () => {
     })
 
     it('should generate a unique slug for API_KEY', async () => {
-      prisma.apiKey.findMany.mockResolvedValue([{ slug: 'api--key-09' }])
+      prisma.apiKey.findMany.mockResolvedValue([{ slug: 'api-key-09' }])
 
       const slug = await generateEntitySlug('Api @Key', 'API_KEY', prisma)
-      expect(slug).toBe('api--key-0a')
+      expect(slug).toBe('api-key-0a')
     })
   })
 })
