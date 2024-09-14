@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 interface Workspace {
   id: string
@@ -39,15 +39,10 @@ export interface GetWorkspaceRequest {
 
 export interface GetWorkspaceResponse extends Workspace {}
 
-export interface GetAllWorkspacesOfUserRequest {
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
-}
+export interface GetAllWorkspacesOfUserRequest extends PageRequest {}
 
-export interface GetAllWorkspacesOfUserResponse extends Page<Workspace> {}
+export interface GetAllWorkspacesOfUserResponse
+  extends PageResponse<Workspace> {}
 
 export interface ExportDataRequest {
   workspaceSlug: string

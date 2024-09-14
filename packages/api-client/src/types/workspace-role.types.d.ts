@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 interface WorkspaceRole {
   id: string
@@ -40,7 +40,7 @@ export interface DeleteWorkspaceRoleRequest {
 
 export interface DeleteWorkspaceRoleResponse {}
 
-export interface CheckWOrkspaceRoleExistsRequest {
+export interface CheckWorkspaceRoleExistsRequest {
   workspaceSlug: string
   workspaceRoleName: string
 }
@@ -55,14 +55,9 @@ export interface GetWorkspaceRoleRequest {
 
 export interface GetWorkspaceRoleResponse extends WorkspaceRole {}
 
-export interface GetWorkspaceRolesOfWorkspaceRequest {
+export interface GetWorkspaceRolesOfWorkspaceRequest extends PageRequest {
   workspaceSlug: string
-  page: number
-  limit: number
-  sort: string
-  order: string
-  search: string
 }
 
 export interface GetWorkspaceRolesOfWorkspaceResponse
-  extends Page<Omit<WorkspaceRole, 'projects'>> {}
+  extends PageResponse<Omit<WorkspaceRole, 'projects'>> {}

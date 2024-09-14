@@ -36,7 +36,7 @@ describe('Workspace Role Controller Tests', () => {
   beforeEach(async () => {
     // Create a workspace role for the tests
     const createWorkspaceRoleRequest: CreateWorkspaceRoleRequest = {
-      workspaceSlug: workspaceSlug!,
+      workspaceSlug,
       name: 'Developer',
       description: 'Role for developers',
       colorCode: '#FF0000',

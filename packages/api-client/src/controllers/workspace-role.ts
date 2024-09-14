@@ -1,4 +1,5 @@
 import { APIClient } from '@api-client/core/client'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
 import { ClientResponse } from '@api-client/types/index.types'
 import {
@@ -13,7 +14,7 @@ import {
   GetWorkspaceRoleResponse,
   GetWorkspaceRolesOfWorkspaceRequest,
   GetWorkspaceRolesOfWorkspaceResponse,
-  CheckWOrkspaceRoleExistsRequest
+  CheckWorkspaceRoleExistsRequest
 } from '@api-client/types/workspace-role.types'
 
 export default class WorkspaceRoleController {
@@ -62,7 +63,7 @@ export default class WorkspaceRoleController {
   }
 
   async checkWorkspaceRoleExists(
-    request: CheckWOrkspaceRoleExistsRequest,
+    request: CheckWorkspaceRoleExistsRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<CheckWorkspaceRoleExistsResponse>> {
     const response = await this.apiClient.get(
@@ -89,12 +90,10 @@ export default class WorkspaceRoleController {
     request: GetWorkspaceRolesOfWorkspaceRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetWorkspaceRolesOfWorkspaceResponse>> {
-    let url = `/api/workspace-role/${request.workspaceSlug}/all?`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = parsePaginationUrl(
+      `/api/workspace-role/${request.workspaceSlug}/all`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetWorkspaceRolesOfWorkspaceResponse>(response)

@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 export interface CreateVariableRequest {
   projectSlug: string
@@ -72,17 +72,12 @@ export interface DeleteVariableRequest {
 
 export interface DeleteVariableResponse {}
 
-export interface GetAllVariablesOfProjectRequest {
+export interface GetAllVariablesOfProjectRequest extends PageRequest {
   projectSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 
 export interface GetAllVariablesOfProjectResponse
-  extends Page<{
+  extends PageResponse<{
     variable: {
       id: string
       name: string
@@ -107,14 +102,9 @@ export interface GetAllVariablesOfProjectResponse
     }
   }> {}
 
-export interface GetAllVariablesOfEnvironmentRequest {
+export interface GetAllVariablesOfEnvironmentRequest extends PageRequest {
   projectSlug: string
   environmentSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 
 export type GetAllVariablesOfEnvironmentResponse = {

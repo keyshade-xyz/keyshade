@@ -1,4 +1,4 @@
-export interface Page<T> {
+export interface PageResponse<T> {
   items: T[]
   metadata: {
     page: number
@@ -13,6 +13,14 @@ export interface Page<T> {
       last: string
     }
   }
+}
+
+export interface PageRequest {
+  page?: number
+  limit?: number
+  sort?: string
+  order?: string
+  search?: string
 }
 
 export interface ResponseError {
