@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 export interface CreateProjectRequest {
   name: string
@@ -120,18 +120,13 @@ export interface UnlinkProjectRequest {
 
 export interface UnlinkProjectResponse {}
 
-export interface GetForkRequest {
+export interface GetForkRequest extends PageRequest {
   projectSlug: string
   workspaceSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 
 export interface GetForkResponse
-  extends Page<{
+  extends PageResponse<{
     id: string
     name: string
     slug: string
@@ -150,17 +145,12 @@ export interface GetForkResponse
     forkedFromId: string
   }> {}
 
-export interface GetAllProjectsRequest {
+export interface GetAllProjectsRequest extends PageRequest {
   workspaceSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 
 export interface GetAllProjectsResponse
-  extends Page<{
+  extends PageResponse<{
     id: string
     name: string
     slug: string

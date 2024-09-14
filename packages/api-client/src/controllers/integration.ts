@@ -13,6 +13,7 @@ import {
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@api-client/types/index.types'
 import { parseResponse } from '@api-client/core/response-parser'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
 export default class IntegrationController {
   private apiClient: APIClient
@@ -60,13 +61,10 @@ export default class IntegrationController {
     request: GetAllIntegrationRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllIntegrationResponse>> {
-    let url = `/api/integration/all/${request.workspaceSlug}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
-
+    const url = parsePaginationUrl(
+      `/api/integration/all/${request.workspaceSlug}`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
     return await parseResponse<GetAllIntegrationResponse>(response)
   }

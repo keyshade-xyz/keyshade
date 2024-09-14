@@ -1,4 +1,5 @@
 import { APIClient } from '@api-client/core/client'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
 import { ClientResponse } from '@api-client/types/index.types'
 import {
@@ -77,12 +78,10 @@ export default class VariableController {
     request: GetAllVariablesOfProjectRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllVariablesOfProjectResponse>> {
-    let url = `/api/variable/${request.projectSlug}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = parsePaginationUrl(
+      `/api/variable/${request.projectSlug}`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllVariablesOfProjectResponse>(response)

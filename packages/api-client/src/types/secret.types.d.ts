@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 export interface CreateSecretRequest {
   projectSlug: string
@@ -78,16 +78,11 @@ export interface RollBackSecretResponse {
   count: string
 }
 
-export interface GetAllSecretsOfProjectRequest {
+export interface GetAllSecretsOfProjectRequest extends PageRequest {
   projectSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 export interface GetAllSecretsOfProjectResponse
-  extends Page<{
+  extends PageResponse<{
     secret: {
       id: string
       slug: string

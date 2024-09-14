@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageResponse } from './index.types'
 
 export enum EventSource {
   SECRET,
@@ -57,7 +57,7 @@ export interface GetEventsRequest {
 }
 
 export interface GetEventsResponse
-  extends Page<{
+  extends PageResponse<{
     id: string
     source: EventSource
     triggerer: EventTriggerer

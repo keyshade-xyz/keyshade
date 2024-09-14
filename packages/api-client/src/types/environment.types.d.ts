@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 export interface CreateEnvironmentRequest {
   name: string
@@ -49,17 +49,12 @@ export interface GetEnvironmentResponse {
   projectId: string
 }
 
-export interface GetAllEnvironmentsOfProjectRequest {
+export interface GetAllEnvironmentsOfProjectRequest extends PageRequest {
   projectSlug: string
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
 }
 
 export interface GetAllEnvironmentsOfProjectResponse
-  extends Page<{
+  extends PageResponse<{
     id: string
     slug: string
     name: string
