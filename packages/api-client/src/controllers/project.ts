@@ -21,6 +21,7 @@ import {
   UpdateProjectResponse
 } from '@api-client/types/project.types'
 import { parseResponse } from '@api-client/core/response-parser'
+import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
 export default class ProjectController {
   private apiClient: APIClient
@@ -121,12 +122,10 @@ export default class ProjectController {
     request: GetForkRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetForkResponse>> {
-    let url = `/api/project/${request.projectSlug}/forks`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = parsePaginationUrl(
+      `/api/project/${request.projectSlug}/forks`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetForkResponse>(response)
@@ -136,12 +135,10 @@ export default class ProjectController {
     request: GetAllProjectsRequest,
     headers: Record<string, string>
   ): Promise<ClientResponse<GetAllProjectsResponse>> {
-    let url = `/api/project/all/${request.workspaceSlug}`
-    request.page && (url += `page=${request.page}&`)
-    request.limit && (url += `limit=${request.limit}&`)
-    request.sort && (url += `sort=${request.sort}&`)
-    request.order && (url += `order=${request.order}&`)
-    request.search && (url += `search=${request.search}&`)
+    const url = parsePaginationUrl(
+      `/api/project/all/${request.workspaceSlug}`,
+      request
+    )
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllProjectsResponse>(response)

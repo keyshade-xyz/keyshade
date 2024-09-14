@@ -1,4 +1,4 @@
-import { Page } from './index.types'
+import { PageRequest, PageResponse } from './index.types'
 
 export enum IntegrationType {
   DISCORD,
@@ -109,17 +109,12 @@ export interface GetIntegrationResponse {
   environmentId: string
 }
 
-export interface GetAllIntegrationRequest {
-  page?: number
-  limit?: number
-  sort?: string
-  order?: string
-  search?: string
+export interface GetAllIntegrationRequest extends PageRequest {
   workspaceSlug: string
 }
 
 export interface GetAllIntegrationResponse
-  extends Page<{
+  extends PageResponse<{
     id: string
     name: string
     slug: string
