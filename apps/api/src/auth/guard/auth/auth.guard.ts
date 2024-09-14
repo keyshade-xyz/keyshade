@@ -14,6 +14,7 @@ import { AuthenticatedUserContext } from '../../auth.types'
 import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
 import { toSHA256 } from '@/common/cryptography'
+import { getUserByEmailOrId } from '@/common/user'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -75,11 +76,7 @@ export class AuthGuard implements CanActivate {
         throw new ForbiddenException()
       }
 
-      user = await this.prisma.user.findUnique({
-        where: {
-          email
-        }
-      })
+      user = await getUserByEmailOrId(email, this.prisma)
     } else {
       const request = context.switchToHttp().getRequest()
 
@@ -102,7 +99,17 @@ export class AuthGuard implements CanActivate {
           throw new ForbiddenException('Invalid API key')
         }
 
-        user = apiKey.user
+        const defaultWorkspace = await this.prisma.workspace.findFirst({
+          where: {
+            ownerId: apiKey.userId,
+            isDefault: true
+          }
+        })
+
+        user = {
+          ...apiKey.user,
+          defaultWorkspace
+        }
         user.isAuthViaApiKey = true
         user.apiKeyAuthorities = new Set(apiKey.authorities)
       } else if (authType === 'JWT') {
@@ -118,11 +125,7 @@ export class AuthGuard implements CanActivate {
           const cachedUser = await this.cache.getUser(payload['id'])
           if (cachedUser) user = cachedUser
           else {
-            user = await this.prisma.user.findUnique({
-              where: {
-                id: payload['id']
-              }
-            })
+            user = await getUserByEmailOrId(payload['id'], this.prisma)
           }
         } catch {
           throw new ForbiddenException()
