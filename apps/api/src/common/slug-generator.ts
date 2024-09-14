@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service'
 import { Workspace } from '@prisma/client'
 
-export const incrementSlugSuffix = (
+const incrementSlugSuffix = (
   existingSlug: string,
   baseSlug: string
 ): string => {
@@ -70,20 +70,14 @@ const getWorkspaceRoleIfSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.workspaceRole.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "WorkspaceRole"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -91,20 +85,14 @@ const getWorkspaceSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.workspace.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Workspace"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -112,20 +100,14 @@ const getProjectSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.project.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Project"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -133,20 +115,14 @@ const getVariableSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.variable.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Variable"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -154,20 +130,14 @@ const getSecretSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.secret.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Secret"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -175,20 +145,14 @@ const getIntegrationSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.integration.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Integration"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -196,20 +160,14 @@ const getEnvironmentSlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.environment.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "Environment"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
@@ -217,31 +175,24 @@ const getApiKeySlugExists = async (
   slug: Workspace['slug'],
   prisma: PrismaService
 ): Promise<string> => {
-  const existingSlug = await prisma.apiKey.findMany({
-    where: {
-      slug: {
-        startsWith: `${slug}-`
-      }
-    },
-    select: {
-      slug: true
-    },
-    orderBy: {
-      slug: 'desc'
-    },
-    take: 1
-  })
+  const search = `${slug}-[a-z0-9]*`
+  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug
+    FROM "ApiKey"
+    WHERE slug ~ ${search}
+    ORDER BY slug DESC
+    LIMIT 1
+  `
   return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
 /**
- * Generates a unique slug for the given entity type and name. It keeps
- * generating slugs until it finds one that does not exist in the database.
+ * Generates a slug for the given name and entity type. It keeps generating slugs until it finds
+ * one that does not exist in the database.
  *
  * @param name The name of the entity.
  * @param entityType The type of the entity.
- * @param prisma The Prisma client to use to check the existence of the slug.
- * @returns A unique slug for the given entity.
+ * @returns A alphanumeric slug for the given name.
  */
 export default async function generateEntitySlug(
   name: string,
