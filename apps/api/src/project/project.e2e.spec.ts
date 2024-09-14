@@ -538,7 +538,7 @@ describe('Project Controller Tests', () => {
       )) as Environment
 
       // Add two secrets
-      const secret1 = (await secretService.createSecret(
+      ;(await secretService.createSecret(
         user2,
         {
           name: 'API_KEY',
@@ -551,8 +551,7 @@ describe('Project Controller Tests', () => {
         },
         project4.slug
       )) as Secret
-
-      const secret2 = (await secretService.createSecret(
+      ;(await secretService.createSecret(
         user2,
         {
           name: 'DB_PASSWORD',
@@ -567,7 +566,7 @@ describe('Project Controller Tests', () => {
       )) as Secret
 
       // Add two variables
-      const variable1 = (await variableService.createVariable(
+      ;(await variableService.createVariable(
         user2,
         {
           name: 'PORT',
@@ -580,8 +579,7 @@ describe('Project Controller Tests', () => {
         },
         project4.slug
       )) as Variable
-
-      const variable2 = (await variableService.createVariable(
+      ;(await variableService.createVariable(
         user2,
         {
           name: 'EXPIRY',
@@ -605,11 +603,11 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toEqual(1)
-      //One is added by default
-      expect(response.json().items[0].environmentsOfProject.length).toEqual(2)
+      //One environment is added by default
+      expect(response.json().items[0].totalEnvironmentsOfProject).toEqual(2)
 
-      expect(response.json().items[0].variablesOfProject.length).toEqual(2)
-      expect(response.json().items[0].secretsOfProject.length).toEqual(2)
+      expect(response.json().items[0].totalVariablesOfProject).toEqual(2)
+      expect(response.json().items[0].totalSecretsOfProject).toEqual(2)
     })
   })
 

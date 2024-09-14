@@ -814,7 +814,7 @@ export class ProjectService {
 
     const items = await Promise.all(
       projects.map(async (project) => {
-        const { items: envItems, totalCount: envTotalCount } =
+        const { totalCount: envTotalCount } =
           await getEnvironmentsOfProjectHelper({
             user,
             projectSlug: project.slug,
@@ -823,7 +823,7 @@ export class ProjectService {
             skipPagination: true
           })
 
-        const { items: variableItems, totalCount: variableTotalCount } =
+        const { totalCount: variableTotalCount } =
           await getVariablesOfProjectHelper({
             user,
             projectSlug: project.slug,
@@ -831,7 +831,7 @@ export class ProjectService {
             authorityCheckerService: this.authorityCheckerService,
             skipPagination: true
           })
-        const { items: secretItems, totalCount: secretTotalCount } =
+        const { totalCount: secretTotalCount } =
           await getSecretsOfProjectHelper({
             user,
             projectSlug: project.slug,
@@ -843,9 +843,9 @@ export class ProjectService {
 
         return {
           ...project,
-          environmentsOfProject: envItems,
-          variablesOfProject: variableItems,
-          secretsOfProject: secretItems
+          totalEnvironmentsOfProject: envTotalCount,
+          totalVariablesOfProject: variableTotalCount,
+          totalSecretsOfProject: secretTotalCount
         }
       })
     )

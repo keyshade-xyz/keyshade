@@ -10,7 +10,6 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
