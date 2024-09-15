@@ -1,19 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-export interface CreateSecretRequest {
-  projectSlug: string
-  name: string
-  note?: string
-  rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
-  entries?: [
-    {
-      value: string
-      environmentSlug: string
-    }
-  ]
-}
-
-export interface CreateSecretResponse {
+interface Secret {
   id: string
   name: string
   slug: string
@@ -28,15 +15,16 @@ export interface CreateSecretResponse {
   }
   versions: [
     {
-      value: string
+      id?: string
       environmentId: string
+      value: string
     }
   ]
 }
 
-export interface UpdateSecretRequest {
-  secretSlug: string
-  name?: string
+export interface CreateSecretRequest {
+  projectSlug: string
+  name: string
   note?: string
   rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
   entries?: [
@@ -47,13 +35,15 @@ export interface UpdateSecretRequest {
   ]
 }
 
+export interface CreateSecretResponse extends Secret {}
+
+export interface UpdateSecretRequest
+  extends Partial<Omit<CreateSecretRequest, 'projectSlug'>> {
+  secretSlug: string
+}
+
 export interface UpdateSecretResponse {
-  secret: {
-    id: string
-    name: string
-    note: string
-    slug: string
-  }
+  secret: Pick<Secret, 'id' | 'name' | 'slug' | 'note'>
   updatedVersions: [
     {
       id?: string
@@ -83,16 +73,7 @@ export interface GetAllSecretsOfProjectRequest extends PageRequest {
 }
 export interface GetAllSecretsOfProjectResponse
   extends PageResponse<{
-    secret: {
-      id: string
-      slug: string
-      name: string
-      createdAt: string
-      updatedAt: string
-      rotateAt: string
-      note: string | null
-      lastUpdatedById: string
-      projectId: string
+    secret: Omit<Secret, 'versions' | 'project'> & {
       lastUpdatedBy: {
         id: string
         name: string
@@ -117,3 +98,18 @@ export type GetAllSecretsOfEnvironmentResponse = {
   value: string
   isPlaintext: boolean
 }[]
+
+export interface GetRevisionsOfSecretRequest extends Partial<PageRequest> {
+  secretSlug: string
+  environmentSlug: string
+}
+
+export interface GetRevisionsOfSecretResponse
+  extends PageResponse<{
+    id: string
+    value: string
+    version: number
+    createdOn: string
+    createdById: string
+    environmentId: string
+  }> {}

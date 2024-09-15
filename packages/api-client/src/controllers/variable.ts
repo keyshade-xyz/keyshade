@@ -11,6 +11,8 @@ import {
   GetAllVariablesOfEnvironmentResponse,
   GetAllVariablesOfProjectRequest,
   GetAllVariablesOfProjectResponse,
+  GetRevisionsOfVariableRequest,
+  GetRevisionsOfVariableResponse,
   RollBackVariableRequest,
   RollBackVariableResponse,
   UpdateVariableRequest,
@@ -95,5 +97,18 @@ export default class VariableController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)
+  }
+
+  async getRevisionsOfVariable(
+    request: GetRevisionsOfVariableRequest,
+    headers: Record<string, string>
+  ): Promise<ClientResponse<GetRevisionsOfVariableResponse>> {
+    const url = parsePaginationUrl(
+      `/api/variable/${request.variableSlug}/revisions/${request.environmentSlug}`,
+      request
+    )
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetRevisionsOfVariableResponse>(response)
   }
 }

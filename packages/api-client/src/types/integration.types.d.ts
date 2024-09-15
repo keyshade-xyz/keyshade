@@ -36,6 +36,21 @@ export enum EventType {
   INTEGRATION_UPDATED,
   INTEGRATION_DELETED
 }
+
+interface Integration {
+  id: string
+  name: string
+  slug: string
+  metadata: Record<string, string>
+  createdAt: string
+  updatedAt: string
+  type: IntegrationType
+  notifyOn: EventType[]
+  workspaceId: string
+  projectId: string
+  environmentId: string
+}
+
 export interface CreateIntegrationRequest {
   workspaceSlug?: string
   projectSlug?: string
@@ -46,44 +61,14 @@ export interface CreateIntegrationRequest {
   environmentSlug: string
 }
 
-export interface CreateIntegrationResponse {
-  id: string
-  name: string
-  slug: string
-  metadata: Record<string, string>
-  createdAt: string
-  updatedAt: string
-  type: IntegrationType
-  notifyOn: EventType[]
-  workspaceId: string
-  projectId: string
-  environmentId: string
-}
+export interface CreateIntegrationResponse extends Integration {}
 
-export interface UpdateIntegrationRequest {
+export interface UpdateIntegrationRequest
+  extends Partial<Omit<CreateIntegrationRequest, 'workspaceSlug'>> {
   integrationSlug: string
-  workspaceSlug?: string
-  projectSlug?: string
-  name?: string
-  type?: IntegrationType
-  notifyOn?: EventType[]
-  metadata?: Record<string, string>
-  environmentId?: string
 }
 
-export interface UpdateIntegrationResponse {
-  id: string
-  name: string
-  slug: string
-  metadata: Record<string, string>
-  createdAt: string
-  updatedAt: string
-  type: IntegrationType
-  notifyOn: EventType[]
-  workspaceId: string
-  projectId: string
-  environmentId: string
-}
+export interface UpdateIntegrationResponse extends Integration {}
 
 export interface DeleteIntegrationResponse {}
 
@@ -95,35 +80,10 @@ export interface GetIntegrationRequest {
   integrationSlug: string
 }
 
-export interface GetIntegrationResponse {
-  id: string
-  name: string
-  slug: string
-  metadata: Record<string, string>
-  createdAt: string
-  updatedAt: string
-  type: IntegrationType
-  notifyOn: EventType[]
-  workspaceId: string
-  projectId: string
-  environmentId: string
-}
+export interface GetIntegrationResponse extends Integration {}
 
 export interface GetAllIntegrationRequest extends PageRequest {
   workspaceSlug: string
 }
 
-export interface GetAllIntegrationResponse
-  extends PageResponse<{
-    id: string
-    name: string
-    slug: string
-    metadata: Record<string, string>
-    createdAt: string
-    updatedAt: string
-    type: IntegrationType
-    notifyOn: EventType[]
-    workspaceId: string
-    projectId: string
-    environmentId: string
-  }> {}
+export interface GetAllIntegrationResponse extends PageResponse<Integration> {}
