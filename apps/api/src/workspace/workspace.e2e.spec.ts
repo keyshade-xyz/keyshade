@@ -192,7 +192,7 @@ describe('Workspace Controller Tests', () => {
         url: '/workspace',
         payload: {
           name: 'Workspace 1',
-          description: 'Workspace 1 description'
+            icon: "🤓"
         }
       })
 
@@ -201,7 +201,7 @@ describe('Workspace Controller Tests', () => {
 
       expect(body.name).toBe('Workspace 1')
       expect(body.slug).toBeDefined()
-      expect(body.description).toBe('Workspace 1 description')
+      expect(body.icon).toBe("🤓")
       expect(body.ownerId).toBe(user1.id)
       expect(body.isFreeTier).toBe(true)
       expect(body.isDefault).toBe(false)
@@ -216,7 +216,7 @@ describe('Workspace Controller Tests', () => {
         url: '/workspace',
         payload: {
           name: 'My Workspace',
-          description: 'My Workspace description'
+            icon: "🤓"
         }
       })
 
@@ -231,7 +231,7 @@ describe('Workspace Controller Tests', () => {
     it('should let other user to create workspace with same name', async () => {
       await workspaceService.createWorkspace(user1, {
         name: 'Workspace 1',
-        description: 'Workspace 1 description'
+         icon: "🤓"
       })
 
       const response = await app.inject({
@@ -242,7 +242,7 @@ describe('Workspace Controller Tests', () => {
         url: '/workspace',
         payload: {
           name: 'Workspace 1',
-          description: 'Workspace 1 description'
+            icon: "🤓"
         }
       })
 
@@ -250,7 +250,7 @@ describe('Workspace Controller Tests', () => {
       workspace2 = response.json()
 
       expect(workspace2.name).toBe('Workspace 1')
-      expect(workspace2.description).toBe('Workspace 1 description')
+      expect(workspace2.icon).toBe("🤓")
       expect(workspace2.ownerId).toBe(user2.id)
       expect(workspace2.isFreeTier).toBe(true)
       expect(workspace2.isDefault).toBe(false)
@@ -321,7 +321,7 @@ describe('Workspace Controller Tests', () => {
         url: `/workspace/${workspace1.slug}`,
         payload: {
           name: 'Workspace 1 Updated',
-          description: 'Workspace 1 updated description'
+            icon: "🔥"
         }
       })
 
@@ -330,7 +330,7 @@ describe('Workspace Controller Tests', () => {
 
       expect(body.name).toBe('Workspace 1 Updated')
       expect(body.slug).not.toBe(workspace1.slug)
-      expect(body.description).toBe('Workspace 1 updated description')
+      expect(body.icon).toBe("🔥")
     })
 
     it('should not be able to change the name to an existing workspace or same name', async () => {
@@ -362,7 +362,7 @@ describe('Workspace Controller Tests', () => {
         url: `/workspace/${workspace1.slug}`,
         payload: {
           name: 'Workspace 1 Updated',
-          description: 'Workspace 1 updated description'
+            icon: "🤓"
         }
       })
 
@@ -371,7 +371,7 @@ describe('Workspace Controller Tests', () => {
 
     it('should have created a WORKSPACE_UPDATED event', async () => {
       await workspaceService.updateWorkspace(user1, workspace1.slug, {
-        description: 'Workspace 1 Description'
+          icon: "🤓"
       })
 
       const response = await fetchEvents(
@@ -526,7 +526,7 @@ describe('Workspace Controller Tests', () => {
       const body = response.json()
 
       expect(body.name).toEqual(workspace1.name)
-      expect(body.description).toEqual(workspace1.description)
+      expect(body.icon).toEqual(workspace1.icon)
       expect(body.workspaceRoles).toBeInstanceOf(Array)
       expect(body.projects).toBeInstanceOf(Array)
     })
@@ -536,7 +536,7 @@ describe('Workspace Controller Tests', () => {
     it('should be able to delete the workspace', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
-        description: 'Workspace 2 description'
+          icon: "🤓"
       })
 
       const response = await app.inject({
