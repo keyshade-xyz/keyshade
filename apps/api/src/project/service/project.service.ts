@@ -801,7 +801,19 @@ export class ProjectService {
           workspace: {
             members: {
               some: {
-                userId: user.id
+                userId: user.id,
+                roles: {
+                  some: {
+                    role: {
+                      authorities: {
+                        hasSome: [
+                          Authority.WORKSPACE_ADMIN,
+                          Authority.READ_PROJECT
+                        ]
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -815,10 +827,17 @@ export class ProjectService {
         let totalVariablesOfProject = 0
         let totalSecretsOfProject = 0
 
+        // When we later implement RBAC for environments, we would need to updated
+        // this code to only include environments like we do while fetching projects.
+
+        // What would be even better is, we should fetch environments directly. And then,
+        // accumulate the projects into a set of projects. And then, return that set along
+        // with the required data.
         const allEnvs = await this.prisma.environment.findMany({
           where: { projectId: project.id }
         })
 
+        // This entire block will become invalid after RBAC for environments are implemented
         const envPromises = allEnvs.map(async (env) => {
           const hasRequiredPermission =
             await this.authorityCheckerService.checkAuthorityOverEnvironment({
