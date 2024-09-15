@@ -10,6 +10,8 @@ import {
   GetAllSecretsOfEnvironmentResponse,
   GetAllSecretsOfProjectRequest,
   GetAllSecretsOfProjectResponse,
+  GetRevisionsOfSecretRequest,
+  GetRevisionsOfSecretResponse,
   RollBackSecretRequest,
   RollBackSecretResponse,
   UpdateSecretRequest,
@@ -99,5 +101,18 @@ export default class SecretController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)
+  }
+
+  async getRevisionsOfSecret(
+    request: GetRevisionsOfSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetRevisionsOfSecretResponse>> {
+    const url = parsePaginationUrl(
+      `/api/secret/${request.secretSlug}/revisions/${request.environmentSlug}`,
+      request
+    )
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetRevisionsOfSecretResponse>(response)
   }
 }

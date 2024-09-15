@@ -1,5 +1,24 @@
 import { PageRequest, PageResponse } from './index.types'
 
+interface Project {
+  id: string
+  name: string
+  slug: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  publicKey: string
+  privateKey: string
+  storePrivateKey: boolean
+  isDisabled: boolean
+  accessLevel: string
+  pendingCreation: boolean
+  isForked: boolean
+  lastUpdatedById: string
+  workspaceId: string
+  forkedFromId: string
+}
+
 export interface CreateProjectRequest {
   name: string
   workspaceSlug: string
@@ -9,48 +28,16 @@ export interface CreateProjectRequest {
   accessLevel: string
 }
 
-export interface CreateProjectResponse {
-  id: string
-  name: string
-  slug: string
-  description: string
-  createdAt: string
-  updatedAt: string
-  publicKey: string
-  privateKey: string
-  storePrivateKey: boolean
-  isDisabled: boolean
-  accessLevel: string
-  pendingCreation: boolean
-  isForked: boolean
-  lastUpdatedById: string
-  workspaceId: string
-  forkedFromId: string
-}
+export interface CreateProjectResponse extends Project {}
 
-export interface UpdateProjectRequest {
+export interface UpdateProjectRequest
+  extends Partial<Omit<CreateProjectRequest, 'workspaceSlug'>> {
   projectSlug: string
-  name?: string
+  regenerateKeyPair?: boolean
+  privateKey?: string
 }
 
-export interface UpdateProjectResponse {
-  id: string
-  name: string
-  slug: string
-  description: string
-  createdAt: string
-  updatedAt: string
-  publicKey: string
-  privateKey: string
-  storePrivateKey: boolean
-  isDisabled: boolean
-  accessLevel: string
-  pendingCreation: boolean
-  isForked: boolean
-  lastUpdatedById: string
-  workspaceId: string
-  forkedFromId: string
-}
+export interface UpdateProjectResponse extends Project {}
 
 export interface DeleteProjectRequest {
   projectSlug: string
@@ -62,24 +49,7 @@ export interface GetProjectRequest {
   projectSlug: string
 }
 
-export interface GetProjectResponse {
-  id: string
-  name: string
-  slug: string
-  description: string
-  createdAt: string
-  updatedAt: string
-  publicKey: string
-  privateKey: string
-  storePrivateKey: boolean
-  isDisabled: boolean
-  accessLevel: string
-  pendingCreation: boolean
-  isForked: boolean
-  lastUpdatedById: string
-  workspaceId: string
-  forkedFromId: string
-}
+export interface GetProjectResponse extends Project {}
 
 export interface ForkProjectRequest {
   projectSlug: string
@@ -88,24 +58,7 @@ export interface ForkProjectRequest {
   storePrivateKey?: boolean
 }
 
-export interface ForkProjectResponse {
-  id: string
-  name: string
-  slug: string
-  description: string
-  createdAt: string
-  updatedAt: string
-  publicKey: string
-  privateKey: string
-  storePrivateKey: boolean
-  isDisabled: boolean
-  accessLevel: string
-  pendingCreation: boolean
-  isForked: boolean
-  lastUpdatedById: string
-  workspaceId: string
-  forkedFromId: string
-}
+export interface ForkProjectResponse extends Project {}
 
 export interface SyncProjectRequest {
   projectSlug: string
@@ -125,44 +78,10 @@ export interface GetForkRequest extends PageRequest {
   workspaceSlug: string
 }
 
-export interface GetForkResponse
-  extends PageResponse<{
-    id: string
-    name: string
-    slug: string
-    description: string
-    createdAt: string
-    updatedAt: string
-    publicKey: string
-    privateKey: string
-    storePrivateKey: boolean
-    isDisabled: boolean
-    accessLevel: string
-    pendingCreation: boolean
-    isForked: boolean
-    lastUpdatedById: string
-    workspaceId: string
-    forkedFromId: string
-  }> {}
+export interface GetForkResponse extends PageResponse<Project> {}
 
 export interface GetAllProjectsRequest extends PageRequest {
   workspaceSlug: string
 }
 
-export interface GetAllProjectsResponse
-  extends PageResponse<{
-    id: string
-    name: string
-    slug: string
-    description: string
-    createdAt: string
-    updatedAt: string
-    storePrivateKey: boolean
-    isDisabled: boolean
-    accessLevel: string
-    pendingCreation: boolean
-    isForked: boolean
-    lastUpdatedById: string
-    workspaceId: string
-    forkedFromId: string
-  }> {}
+export interface GetAllProjectsResponse extends PageResponse<Project> {}

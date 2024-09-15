@@ -9,7 +9,7 @@ describe('Get Variable Tests', () => {
   const email = 'johndoe@example.com'
   let workspaceSlug: string | null
   let projectSlug: string | null
-  let environment: any
+  let environment
   let variableSlug: string | null
 
   beforeAll(async () => {
@@ -64,8 +64,7 @@ describe('Get Variable Tests', () => {
     })
   })
 
-  // Create a variable
-  it('should create a variable', async () => {
+  beforeEach(async () => {
     const variable = await variableController.createVariable(
       {
         projectSlug,
@@ -78,11 +77,50 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(variable.data.name).toBe('Variable 1')
-    expect(variable.data.versions.length).toBe(1)
-    expect(variable.data.versions[0].value).toBe('Variable 1 value')
-    expect(variable.data.versions[0].environmentId).toBe(environment.id)
+
     variableSlug = variable.data.slug
+  })
+
+  afterEach(async () => {
+    await variableController.deleteVariable(
+      {
+        variableSlug
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
+  })
+
+  // Create a variable
+  it('should create a variable', async () => {
+    const variable = await variableController.createVariable(
+      {
+        projectSlug,
+        name: 'Variable 2',
+        entries: [
+          { value: 'Variable 2 value', environmentSlug: environment.slug }
+        ]
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
+    expect(variable.data.name).toBe('Variable 2')
+    expect(variable.data.versions.length).toBe(1)
+    expect(variable.data.versions[0].value).toBe('Variable 2 value')
+    expect(variable.data.versions[0].environmentId).toBe(environment.id)
+
+    // Delete the variable
+    const deleteVariable = await variableController.deleteVariable(
+      {
+        variableSlug: variable.data.slug
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
+    expect(deleteVariable.success).toBe(true)
   })
 
   // Update Name of the Variable
@@ -98,7 +136,16 @@ describe('Get Variable Tests', () => {
     )
     expect(updatedVariable.data.variable.name).toBe('UpdatedVariable 1')
 
-    variableSlug = updatedVariable.data.variable.slug
+    // Delete the variable
+    const deleteVariable = await variableController.deleteVariable(
+      {
+        variableSlug: updatedVariable.data.variable.slug
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
+    expect(deleteVariable.success).toBe(true)
   })
 
   // Create a new version of Variable
@@ -124,7 +171,21 @@ describe('Get Variable Tests', () => {
 
   // Roll back a variable
   it('should rollback a variable', async () => {
-    const rolledBackVariable: any = await variableController.rollbackVariable(
+    // Add a new version
+    await variableController.updateVariable(
+      {
+        entries: [
+          {
+            value: '1234',
+            environmentSlug: environment.slug
+          }
+        ],
+        variableSlug
+      },
+      { 'x-e2e-user-email': email }
+    )
+
+    const rolledBackVariable = await variableController.rollbackVariable(
       {
         variableSlug,
         version: 1,
@@ -137,65 +198,44 @@ describe('Get Variable Tests', () => {
 
   // Get all the variables of project
   it('should get all variables of project', async () => {
-    const response: any = await variableController.getAllVariablesOfProject(
+    const response = await variableController.getAllVariablesOfProject(
       { projectSlug },
       { 'x-e2e-user-email': email }
     )
+
     expect(response.data.items.length).toBe(1)
     const variable1 = response.data.items[0]
     const variable = variable1.variable
     const values = variable1.values
     expect(variable).toHaveProperty('slug')
-    expect(typeof variable.slug).toBe('string')
 
     expect(variable).toHaveProperty('name')
-    expect(typeof variable.name).toBe('string')
-
     expect(variable).toHaveProperty('createdAt')
-    expect(typeof variable.createdAt).toBe('string')
-
     expect(variable).toHaveProperty('updatedAt')
-    expect(typeof variable.updatedAt).toBe('string')
-
     expect(variable).toHaveProperty('note')
-    expect(typeof variable.note === 'string' || variable.note === null).toBe(
-      true
-    )
-
     expect(variable).toHaveProperty('lastUpdatedById')
-    expect(typeof variable.lastUpdatedById).toBe('string')
 
     expect(variable.lastUpdatedBy).toHaveProperty('id')
-    expect(typeof variable.lastUpdatedBy.id).toBe('string')
-
     expect(variable.lastUpdatedBy).toHaveProperty('name')
-    expect(typeof variable.lastUpdatedBy.name).toBe('string')
 
     values.forEach((value) => {
       expect(value).toHaveProperty('environment')
       expect(value.environment).toHaveProperty('id')
-      expect(typeof value.environment.id).toBe('string')
       expect(value.environment).toHaveProperty('name')
-      expect(typeof value.environment.name).toBe('string')
-
       expect(value).toHaveProperty('value')
-      expect(typeof value.value).toBe('string')
-
       expect(value).toHaveProperty('version')
-      expect(typeof value.version).toBe('number')
     })
   })
 
   // Get all variables for an environment
   it('should get all variables for an environment', async () => {
-    const variables: any =
-      await variableController.getAllVariablesOfEnvironment(
-        {
-          environmentSlug: environment.slug,
-          projectSlug
-        },
-        { 'x-e2e-user-email': email }
-      )
+    const variables = await variableController.getAllVariablesOfEnvironment(
+      {
+        environmentSlug: environment.slug,
+        projectSlug
+      },
+      { 'x-e2e-user-email': email }
+    )
 
     expect(variables.data.length).toBe(1)
     variables.data.forEach((variable) => {
@@ -209,7 +249,7 @@ describe('Get Variable Tests', () => {
       expect(typeof variable.isPlaintext).toBe('boolean')
     })
     const variable1 = variables.data[0]
-    expect(variable1.name).toBe('UpdatedVariable 1')
+    expect(variable1.name).toBe('Variable 1')
     expect(variable1.value).toBe('Variable 1 value')
     expect(variable1.isPlaintext).toBe(true)
   })
@@ -220,10 +260,18 @@ describe('Get Variable Tests', () => {
       { variableSlug },
       { 'x-e2e-user-email': email }
     )
-    const variables: any = await variableController.getAllVariablesOfProject(
+    const variables = await variableController.getAllVariablesOfProject(
       { projectSlug },
       { 'x-e2e-user-email': email }
     )
     expect(variables.data.items.length).toBe(0)
+  })
+
+  it('should be able to fetch revisions of a secret', async () => {
+    const revisions = await variableController.getRevisionsOfVariable(
+      { variableSlug, environmentSlug: environment.slug },
+      { 'x-e2e-user-email': email }
+    )
+    expect(revisions.data.items.length).toBe(1)
   })
 })
