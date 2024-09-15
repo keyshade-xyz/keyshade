@@ -10,7 +10,7 @@ import { PageRequest } from '@api-client/types/index.types'
  */
 export function parsePaginationUrl(
   baseUrl: string,
-  request: PageRequest
+  request: Partial<PageRequest>
 ): string {
   let url = `${baseUrl}?`
   request.page && (url += `page=${request.page}&`)

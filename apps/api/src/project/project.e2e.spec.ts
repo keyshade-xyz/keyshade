@@ -852,12 +852,16 @@ describe('Project Controller Tests', () => {
       )
 
       // Add user to workspace as a member
-      await workspaceMembershipService.inviteUsersToWorkspace(user1, workspace1.slug, [
-        {
-          email: johnny.email,
-          roleSlugs: [role.slug]
-        }
-      ])
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: johnny.email,
+            roleSlugs: [role.slug]
+          }
+        ]
+      )
 
       // Accept the invitation on behalf of the user
       await workspaceMembershipService.acceptInvitation(johnny, workspace1.slug)
