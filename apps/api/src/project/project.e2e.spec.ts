@@ -527,7 +527,7 @@ describe('Project Controller Tests', () => {
       expect(response.statusCode).toBe(401)
     })
 
-    it('should be able fetch all environments,variables,secrets of all projects of a workspace', async () => {
+    it('should fetch correct counts of environments, variables, and secrets for projects in a workspace', async () => {
       // Add an environment to the project
       const environment = (await environmentService.createEnvironment(
         user2,
