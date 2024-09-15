@@ -777,7 +777,7 @@ export class ProjectService {
     const workspaceId = workspace.id
 
     //fetch projects with required properties
-    const items = (
+    const projects = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
@@ -808,6 +808,59 @@ export class ProjectService {
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+
+    const items = await Promise.all(
+      projects.map(async (project) => {
+        let totalEnvironmentsOfProject = 0
+        let totalVariablesOfProject = 0
+        let totalSecretsOfProject = 0
+
+        const allEnvs = await this.prisma.environment.findMany({
+          where: { projectId: project.id }
+        })
+
+        const envPromises = allEnvs.map(async (env) => {
+          const hasRequiredPermission =
+            await this.authorityCheckerService.checkAuthorityOverEnvironment({
+              userId: user.id,
+              entity: { slug: env.slug },
+              authorities: [Authority.READ_ENVIRONMENT],
+              prisma: this.prisma
+            })
+
+          if (hasRequiredPermission) {
+            totalEnvironmentsOfProject += 1
+
+            const [secretCount, variableCount] = await Promise.all([
+              this.prisma.secret.count({
+                where: {
+                  projectId: project.id,
+                  versions: { some: { environmentId: env.id } }
+                }
+              }),
+              this.prisma.variable.count({
+                where: {
+                  projectId: project.id,
+                  versions: { some: { environmentId: env.id } }
+                }
+              })
+            ])
+
+            totalSecretsOfProject += secretCount
+            totalVariablesOfProject += variableCount
+          }
+        })
+
+        await Promise.all(envPromises)
+
+        return {
+          ...project,
+          totalEnvironmentsOfProject,
+          totalVariablesOfProject,
+          totalSecretsOfProject
+        }
+      })
+    )
 
     //calculate metadata
     const totalCount = await this.prisma.project.count({

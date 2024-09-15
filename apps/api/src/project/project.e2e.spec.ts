@@ -57,7 +57,7 @@ describe('Project Controller Tests', () => {
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
-  let project1: Project, project2: Project, project3: Project
+  let project1: Project, project2: Project, project3: Project, project4: Project
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -141,6 +141,13 @@ describe('Project Controller Tests', () => {
       description: 'Project for fork',
       storePrivateKey: true,
       accessLevel: ProjectAccessLevel.GLOBAL
+    })) as Project
+
+    project4 = (await projectService.createProject(user2, workspace2.slug, {
+      name: 'Project4',
+      description:
+        'Project for testing if all environments,secrets and keys are being fetched or not',
+      storePrivateKey: true
     })) as Project
   })
 
@@ -518,6 +525,89 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+
+    it('should be able fetch all environments,variables,secrets of all projects of a workspace', async () => {
+      // Add an environment to the project
+      const environment = (await environmentService.createEnvironment(
+        user2,
+        {
+          name: 'Dev'
+        },
+        project4.slug
+      )) as Environment
+
+      // Add two secrets
+      ;(await secretService.createSecret(
+        user2,
+        {
+          name: 'API_KEY',
+          entries: [
+            {
+              value: 'some_key',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Secret
+      ;(await secretService.createSecret(
+        user2,
+        {
+          name: 'DB_PASSWORD',
+          entries: [
+            {
+              value: 'password',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Secret
+
+      // Add two variables
+      ;(await variableService.createVariable(
+        user2,
+        {
+          name: 'PORT',
+          entries: [
+            {
+              value: '8080',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Variable
+      ;(await variableService.createVariable(
+        user2,
+        {
+          name: 'EXPIRY',
+          entries: [
+            {
+              value: '3600',
+              environmentSlug: environment.slug
+            }
+          ]
+        },
+        project4.slug
+      )) as Variable
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/all/${workspace2.slug}?page=0&limit=10&search=Project4`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().items.length).toEqual(1)
+      //One environment is added by default
+      expect(response.json().items[0].totalEnvironmentsOfProject).toEqual(2)
+
+      expect(response.json().items[0].totalVariablesOfProject).toEqual(2)
+      expect(response.json().items[0].totalSecretsOfProject).toEqual(2)
     })
   })
 
