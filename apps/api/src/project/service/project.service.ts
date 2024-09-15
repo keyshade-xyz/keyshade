@@ -821,12 +821,12 @@ export class ProjectService {
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
 
+    let totalEnvironmentsOfProject = 0
+    let totalVariablesOfProject = 0
+    let totalSecretsOfProject = 0
+
     const items = await Promise.all(
       projects.map(async (project) => {
-        let totalEnvironmentsOfProject = 0
-        let totalVariablesOfProject = 0
-        let totalSecretsOfProject = 0
-
         // When we later implement RBAC for environments, we would need to updated
         // this code to only include environments like we do while fetching projects.
 
@@ -843,7 +843,11 @@ export class ProjectService {
             await this.authorityCheckerService.checkAuthorityOverEnvironment({
               userId: user.id,
               entity: { slug: env.slug },
-              authorities: [Authority.READ_ENVIRONMENT],
+              authorities: [
+                Authority.READ_ENVIRONMENT,
+                Authority.READ_SECRET,
+                Authority.READ_VARIABLE
+              ],
               prisma: this.prisma
             })
 
