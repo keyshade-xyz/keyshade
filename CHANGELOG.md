@@ -1,3 +1,35 @@
+## [2.5.0](https://github.com/keyshade-xyz/keyshade/compare/v2.4.0...v2.5.0) (2024-09-16)
+
+### 🚀 Features
+
+* **api-client:** Added workspace controller ([#427](https://github.com/keyshade-xyz/keyshade/issues/427)) ([2f4edec](https://github.com/keyshade-xyz/keyshade/commit/2f4edecd0837f7658892a37902c62f05ab96c884))
+* **api-client:** Added workspace role controller ([#430](https://github.com/keyshade-xyz/keyshade/issues/430)) ([b03ce8e](https://github.com/keyshade-xyz/keyshade/commit/b03ce8ee346ee054b2460093ee5542551c175f60))
+* **api-client:** Synced with latest API ([27f4309](https://github.com/keyshade-xyz/keyshade/commit/27f4309817b7736d273e9c3532af00e3ed73d943))
+* **api:** Add slug in entities ([#415](https://github.com/keyshade-xyz/keyshade/issues/415)) ([89e2fcc](https://github.com/keyshade-xyz/keyshade/commit/89e2fccc390771c925ea9d1c4ede8270ec6e5a80))
+* **api:** Included default workspace details in getSelf function ([#414](https://github.com/keyshade-xyz/keyshade/issues/414)) ([e67bbd6](https://github.com/keyshade-xyz/keyshade/commit/e67bbd6d37f01732bbfe65e17b71b2ba8202200b))
+* **platform:** Add loading skeleton in the [secure]s page ([#423](https://github.com/keyshade-xyz/keyshade/issues/423)) ([a97681e](https://github.com/keyshade-xyz/keyshade/commit/a97681edab4ffb670b4479e3a8d2d2879c75f992))
+* **schema:** Added a schema package ([01ea232](https://github.com/keyshade-xyz/keyshade/commit/01ea232a9d1bc51a0b0cae3fd6edd378b88a5755))
+* **web:** Update about and careers page ([e167f53](https://github.com/keyshade-xyz/keyshade/commit/e167f537bca0218eb071b42e31d963e9852e2885))
+
+### 🐛 Bug Fixes
+
+* **api:** Error messages fixed in api-key service ([#418](https://github.com/keyshade-xyz/keyshade/issues/418)) ([edfbce0](https://github.com/keyshade-xyz/keyshade/commit/edfbce068dc0c3d23a92ce3a9d69c06f8457b7d8))
+
+### 📚 Documentation
+
+* Fixed minor typo in postman workspace link ([#411](https://github.com/keyshade-xyz/keyshade/issues/411)) ([ed23116](https://github.com/keyshade-xyz/keyshade/commit/ed231165e341be91f753b02200f8d4d11d42c3b3))
+* Updated Postman links ([444bfb1](https://github.com/keyshade-xyz/keyshade/commit/444bfb1a5d85656ce98011c442e5238d2b786a72))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Suppressed version check test in [secure] ([4688e8c](https://github.com/keyshade-xyz/keyshade/commit/4688e8c429e63b3fb18ba0bb77d53fa875999792))
+* **api:** Update slug generation method ([#420](https://github.com/keyshade-xyz/keyshade/issues/420)) ([1f864df](https://github.com/keyshade-xyz/keyshade/commit/1f864df4180f65c8f42f8984b6a014d44c366901))
+
+### 🔨 Code Refactoring
+
+* **API:** Refactor workspace-membership into a separate module ([#421](https://github.com/keyshade-xyz/keyshade/issues/421)) ([574170f](https://github.com/keyshade-xyz/keyshade/commit/574170f39d0a56d6087d8518ca02bbe6b9fd9740))
+* **platform:** added optional chaining due to strict null check ([#413](https://github.com/keyshade-xyz/keyshade/issues/413)) ([907e369](https://github.com/keyshade-xyz/keyshade/commit/907e3694cd23d01f2190e0ed80a0fffb97d0268d))
+
 ## [2.4.0](https://github.com/keyshade-xyz/keyshade/compare/v2.3.0...v2.4.0) (2024-09-05)
 
 ### 🚀 Features
