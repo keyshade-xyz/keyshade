@@ -777,7 +777,7 @@ export class ProjectService {
     const workspaceId = workspace.id
 
     //fetch projects with required properties
-    const items = (
+    const projects = (
       await this.prisma.project.findMany({
         skip: page * limit,
         take: limitMaxItemsPerPage(limit),
@@ -801,13 +801,95 @@ export class ProjectService {
           workspace: {
             members: {
               some: {
-                userId: user.id
+                userId: user.id,
+                roles: {
+                  some: {
+                    role: {
+                      authorities: {
+                        hasSome: [
+                          Authority.WORKSPACE_ADMIN,
+                          Authority.READ_PROJECT
+                        ]
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+
+    const items = await Promise.all(
+      projects.map(async (project) => {
+        let totalEnvironmentsOfProject = 0
+        let totalVariablesOfProject = 0
+        let totalSecretsOfProject = 0
+        // When we later implement RBAC for environments, we would need to updated
+        // this code to only include environments like we do while fetching projects.
+
+        // What would be even better is, we should fetch environments directly. And then,
+        // accumulate the projects into a set of projects. And then, return that set along
+        // with the required data.
+        const allEnvs = await this.prisma.environment.findMany({
+          where: { projectId: project.id }
+        })
+
+        // This entire block will become invalid after RBAC for environments are implemented
+        const envPromises = allEnvs.map(async (env) => {
+          const hasRequiredPermission =
+            await this.authorityCheckerService.checkAuthorityOverEnvironment({
+              userId: user.id,
+              entity: { slug: env.slug },
+              authorities: [
+                Authority.READ_ENVIRONMENT,
+                Authority.READ_SECRET,
+                Authority.READ_VARIABLE
+              ],
+              prisma: this.prisma
+            })
+          if (hasRequiredPermission) {
+            totalEnvironmentsOfProject += 1
+
+            const fetchSecretCount = this.prisma.secret.count({
+              where: {
+                projectId: project.id,
+                versions: { some: { environmentId: env.id } }
+              }
+            })
+
+            const fetchVariableCount = this.prisma.variable.count({
+              where: {
+                projectId: project.id,
+                versions: { some: { environmentId: env.id } }
+              }
+            })
+
+            return this.prisma.$transaction([
+              fetchSecretCount,
+              fetchVariableCount
+            ])
+          }
+          return [0, 0]
+        })
+        const counts = await Promise.all(envPromises)
+        totalSecretsOfProject = counts.reduce(
+          (sum, [secretCount]) => sum + secretCount,
+          0
+        )
+        totalVariablesOfProject = counts.reduce(
+          (sum, [, variableCount]) => sum + variableCount,
+          0
+        )
+        return {
+          ...project,
+          totalEnvironmentsOfProject,
+          totalVariablesOfProject,
+          totalSecretsOfProject
+        }
+      })
+    )
 
     //calculate metadata
     const totalCount = await this.prisma.project.count({
