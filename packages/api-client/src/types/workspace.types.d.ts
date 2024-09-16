@@ -4,7 +4,7 @@ interface Workspace {
   id: string
   name: string
   slug: string
-  description: string
+  icon: string
   isFreeTier: boolean
   createdAt: string
   updatedAt: string
@@ -15,7 +15,7 @@ interface Workspace {
 
 export interface CreateWorkspaceRequest {
   name: string
-  description?: string
+  icon?: string
 }
 
 export interface CreateWorkspaceResponse extends Workspace {}
@@ -50,7 +50,7 @@ export interface ExportDataRequest {
 
 export interface ExportDataResponse {
   name: string
-  description: string
+  icon: string
   workspaceRoles: {
     name: string
     description: string

@@ -225,11 +225,10 @@ export class WorkspaceService {
             userId: user.id
           }
         },
-       
-            name: {
-              contains: search
-            }
-         
+
+        name: {
+          contains: search
+        }
       }
     })
 
