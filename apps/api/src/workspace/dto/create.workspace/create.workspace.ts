@@ -7,5 +7,5 @@ export class CreateWorkspace {
 
   @IsString()
   @IsOptional()
-  description?: string
+  icon?: string
 }

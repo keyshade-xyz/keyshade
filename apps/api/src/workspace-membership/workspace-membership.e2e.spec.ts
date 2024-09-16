@@ -220,7 +220,7 @@ describe('Workspace Membership Controller Tests', () => {
     it('should not be able to transfer ownership to a non member', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
-        description: 'Workspace 2 description'
+        icon: '🤓'
       })
 
       const response = await app.inject({
@@ -241,7 +241,7 @@ describe('Workspace Membership Controller Tests', () => {
     it('should not be able to transfer ownership to a member who did not accept the invitation', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
-        description: 'Workspace 2 description'
+        icon: '🤓'
       })
 
       // Create membership
@@ -265,7 +265,7 @@ describe('Workspace Membership Controller Tests', () => {
     it('should be able to transfer the ownership of the workspace', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
-        description: 'Workspace 2 description'
+        icon: '🤓'
       })
 
       // Create membership
@@ -306,7 +306,7 @@ describe('Workspace Membership Controller Tests', () => {
     it('should not be able to transfer ownership if is not admin', async () => {
       const newWorkspace = await workspaceService.createWorkspace(user1, {
         name: 'Workspace 2',
-        description: 'Workspace 2 description'
+        icon: '🤓'
       })
 
       // Create membership
