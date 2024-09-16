@@ -5,7 +5,7 @@
   "main": "index.ts",
   "private": false,
   "scripts": {
-    "build": "tsc && tsc-alias && tsup",
+    "build": "tsc && tsc-alias",
     "build:prod": "NODE_ENV=production tsup --minify",
     "start": "node dist/src/index.js",
     "dev": "NODE_ENV=development pnpm build && node dist/index.js"
