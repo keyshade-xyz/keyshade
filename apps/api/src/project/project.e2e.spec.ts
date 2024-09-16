@@ -603,11 +603,19 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toEqual(1)
-      //One environment is added by default
-      expect(response.json().items[0].totalEnvironmentsOfProject).toEqual(2)
 
-      expect(response.json().items[0].totalVariablesOfProject).toEqual(2)
-      expect(response.json().items[0].totalSecretsOfProject).toEqual(2)
+      const project = response.json().items[0]
+      expect(project.totalEnvironmentsOfProject).toEqual(2)
+      expect(project.totalVariablesOfProject).toEqual(2)
+      expect(project.totalSecretsOfProject).toEqual(2)
+      // Verify project details
+      expect(project.name).toEqual('Project4')
+      expect(project.description).toEqual(
+        'Project for testing if all environments,secrets and keys are being fetched or not'
+      )
+      // Verify that sensitive data is not included
+      expect(project).not.toHaveProperty('privateKey')
+      expect(project).not.toHaveProperty('publicKey')
     })
   })
 

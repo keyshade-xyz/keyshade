@@ -821,12 +821,11 @@ export class ProjectService {
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
 
-    let totalEnvironmentsOfProject = 0
-    let totalVariablesOfProject = 0
-    let totalSecretsOfProject = 0
-
     const items = await Promise.all(
       projects.map(async (project) => {
+        let totalEnvironmentsOfProject = 0
+        let totalVariablesOfProject = 0
+        let totalSecretsOfProject = 0
         // When we later implement RBAC for environments, we would need to updated
         // this code to only include environments like we do while fetching projects.
 
@@ -850,32 +849,39 @@ export class ProjectService {
               ],
               prisma: this.prisma
             })
-
           if (hasRequiredPermission) {
             totalEnvironmentsOfProject += 1
 
-            const [secretCount, variableCount] = await Promise.all([
-              this.prisma.secret.count({
-                where: {
-                  projectId: project.id,
-                  versions: { some: { environmentId: env.id } }
-                }
-              }),
-              this.prisma.variable.count({
-                where: {
-                  projectId: project.id,
-                  versions: { some: { environmentId: env.id } }
-                }
-              })
+            const fetchSecretCount = this.prisma.secret.count({
+              where: {
+                projectId: project.id,
+                versions: { some: { environmentId: env.id } }
+              }
+            })
+
+            const fetchVariableCount = this.prisma.variable.count({
+              where: {
+                projectId: project.id,
+                versions: { some: { environmentId: env.id } }
+              }
+            })
+
+            return this.prisma.$transaction([
+              fetchSecretCount,
+              fetchVariableCount
             ])
-
-            totalSecretsOfProject += secretCount
-            totalVariablesOfProject += variableCount
           }
+          return [0, 0]
         })
-
-        await Promise.all(envPromises)
-
+        const counts = await Promise.all(envPromises)
+        totalSecretsOfProject = counts.reduce(
+          (sum, [secretCount]) => sum + secretCount,
+          0
+        )
+        totalVariablesOfProject = counts.reduce(
+          (sum, [, variableCount]) => sum + variableCount,
+          0
+        )
         return {
           ...project,
           totalEnvironmentsOfProject,
