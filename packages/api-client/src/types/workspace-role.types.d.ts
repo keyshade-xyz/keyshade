@@ -12,7 +12,11 @@ interface WorkspaceRole {
   authorities: string[]
   workspaceId: string
   projects: {
-    projectId: string
+    project: {
+      id: string
+      name: string
+      slug: string
+    }[]
   }[]
 }
 
