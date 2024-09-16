@@ -78,7 +78,7 @@ describe('Workspaces Controller Tests', () => {
       await workspaceController.createWorkspace(
         {
           name: 'New Workspace',
-          description: 'This is a new workspace'
+          icon: '🤓'
         },
         {
           'x-e2e-user-email': email
