@@ -1,29 +1,36 @@
 import type { Workspace } from '@/types'
+import { atom, useAtom } from 'jotai'
+
+const defaultWorkspaceAtom = atom<Workspace | null>(null)
+const currentWorkspaceAtom = atom<Workspace | null>(null)
 
 export function setWorkspace(workspaceData: Workspace[]): void {
   const defaultWorkspace =
     workspaceData.find((workspace) => workspace.isDefault) || null
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
 
-    if (getCurrentWorkspace() === null) {
-      localStorage.setItem('currentWorkspace', JSON.stringify(defaultWorkspace))
-    }
+  setDefaultWorkspaceAtom(defaultWorkspace)
+
+  if (getCurrentWorkspace() === null) {
+    setCurrentWorkspace(defaultWorkspace!)
   }
 }
 
 export function getCurrentWorkspace(): Workspace | null {
-  const currentWorkspace =
-    typeof localStorage !== 'undefined'
-      ? localStorage.getItem('currentWorkspace')
-      : `{}`
-
-  if (currentWorkspace) {
-    return JSON.parse(currentWorkspace) as Workspace
-  }
-  return null
+  const [currentWorkspace] = useAtom(currentWorkspaceAtom)
+  return currentWorkspace
 }
 
 export function setCurrentWorkspace(workspace: Workspace): void {
-  localStorage.setItem('currentWorkspace', JSON.stringify(workspace))
+  setCurrentWorkspaceAtom(workspace)
+}
+
+//Utility functions
+export function setDefaultWorkspaceAtom(workspace: Workspace | null): void {
+  const [, setDefaultWorkspace] = useAtom(defaultWorkspaceAtom)
+  setDefaultWorkspace(workspace)
+}
+
+export function setCurrentWorkspaceAtom(workspace: Workspace | null): void {
+  const [, setCurrentWorkspace] = useAtom(currentWorkspaceAtom)
+  setCurrentWorkspace(workspace)
 }
