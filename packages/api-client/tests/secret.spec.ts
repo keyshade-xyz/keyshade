@@ -84,18 +84,7 @@ describe('Secret Controller Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-
-    expect(createSecretResponse.data.slug).toBeDefined()
-
     secretSlug = createSecretResponse.data.slug
-
-    // Fetch all secrets
-    const secrets = await secretController.getAllSecretsOfProject(
-      { projectSlug },
-      { 'x-e2e-user-email': email }
-    )
-
-    expect(secrets.data.items.length).toBe(1)
   })
 
   afterEach(async () => {
@@ -251,5 +240,13 @@ describe('Secret Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(secrets.data.items.length).toBe(0)
+  })
+
+  it('should be able to fetch revisions of a secret', async () => {
+    const revisions = await secretController.getRevisionsOfSecret(
+      { secretSlug, environmentSlug },
+      { 'x-e2e-user-email': email }
+    )
+    expect(revisions.data.items.length).toBe(1)
   })
 })

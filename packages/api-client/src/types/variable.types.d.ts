@@ -1,18 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-export interface CreateVariableRequest {
-  projectSlug: string
-  name: string
-  note?: string
-  entries?: [
-    {
-      value: string
-      environmentSlug: string
-    }
-  ]
-}
-
-export interface CreateVariableResponse {
+interface Variable {
   id: string
   name: string
   slug: string
@@ -31,6 +19,21 @@ export interface CreateVariableResponse {
     }
   ]
 }
+
+export interface CreateVariableRequest {
+  projectSlug: string
+  name: string
+  note?: string
+  entries?: [
+    {
+      value: string
+      environmentSlug: string
+    }
+  ]
+}
+
+export interface CreateVariableResponse extends Variable {}
+
 export interface UpdateVariableRequest {
   variableSlug: string
   name?: string
@@ -42,12 +45,7 @@ export interface UpdateVariableRequest {
   ]
 }
 export interface UpdateVariableResponse {
-  variable: {
-    id: string
-    name: string
-    note: string
-    slug: string
-  }
+  variable: Pick<Variable, 'id' | 'name' | 'slug' | 'note'>
   updatedVersions: [
     {
       value: string
@@ -77,32 +75,26 @@ export interface GetAllVariablesOfProjectRequest extends PageRequest {
 }
 
 export interface GetAllVariablesOfProjectResponse
-  extends PageResponse<{
-    variable: {
-      id: string
-      name: string
-      slug: string
-      createdAt: string
-      updatedAt: string
-      note: string | null
-      lastUpdatedById: string
-      projectId: string
-      lastUpdatedBy: {
-        id: string
-        name: string
+  extends PageResponse<
+    Omit<Variable, 'project' | 'versions'> & {
+      variable: {
+        lastUpdatedBy: {
+          id: string
+          name: string
+        }
       }
+      values: {
+        environment: {
+          id: string
+          name: string
+        }
+        value: string
+        version: number
+      }[]
     }
-    values: {
-      environment: {
-        id: string
-        name: string
-      }
-      value: string
-      version: number
-    }
-  }> {}
+  > {}
 
-export interface GetAllVariablesOfEnvironmentRequest extends PageRequest {
+export interface GetAllVariablesOfEnvironmentRequest {
   projectSlug: string
   environmentSlug: string
 }
@@ -112,3 +104,19 @@ export type GetAllVariablesOfEnvironmentResponse = {
   value: string
   isPlaintext: boolean
 }[]
+
+export interface GetRevisionsOfVariableRequest extends Partial<PageRequest> {
+  variableSlug: string
+  environmentSlug: string
+}
+
+export interface GetRevisionsOfVariableResponse
+  extends PageResponse<{
+    id: string
+    value: string
+    version: number
+    variableId: string
+    createdOn: string
+    createdById: string
+    environmentId: string
+  }> {}

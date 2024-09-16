@@ -99,7 +99,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a workspace event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     expect(workspace).toBeDefined()
@@ -144,7 +144,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a project event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const project = (await projectService.createProject(user, workspace.slug, {
@@ -198,7 +198,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch an environment event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const project = await projectService.createProject(user, workspace.slug, {
@@ -261,7 +261,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a secret event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const project = await projectService.createProject(user, workspace.slug, {
@@ -340,7 +340,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a variable event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const project = await projectService.createProject(user, workspace.slug, {
@@ -419,7 +419,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch a workspace role event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const project = await projectService.createProject(user, workspace.slug, {
@@ -485,7 +485,7 @@ describe('Event Controller Tests', () => {
   it('should be able to fetch all events', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const response = await app.inject({
@@ -518,7 +518,7 @@ describe('Event Controller Tests', () => {
   it('should throw an error with wrong severity value', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const response = await app.inject({
@@ -535,7 +535,7 @@ describe('Event Controller Tests', () => {
   it('should throw an error with wrong source value', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     const response = await app.inject({
@@ -552,7 +552,7 @@ describe('Event Controller Tests', () => {
   it('should throw an error if user is not provided in event creation for user-triggered event', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     try {
@@ -577,7 +577,7 @@ describe('Event Controller Tests', () => {
   it('should throw an exception for invalid event source', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     try {
@@ -602,7 +602,7 @@ describe('Event Controller Tests', () => {
   it('should throw an exception for invalid event type', async () => {
     const workspace = await workspaceService.createWorkspace(user, {
       name: 'My workspace',
-      description: 'Some description'
+      icon: '🤓'
     })
 
     try {
