@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as eccrypto from 'eccrypto'
 
+/**
+ * Decrypts a given encrypted data using a given private key.
+ *
+ * @param privateKey - The private key to use for decryption.
+ * @param data - The encrypted data to decrypt.
+ *
+ * @returns The decrypted data as a string.
+ */
 export const decrypt = async (
   privateKey: string,
   data: string

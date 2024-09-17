@@ -4,11 +4,13 @@
   "description": "CLI for keyshade",
   "main": "index.ts",
   "private": false,
+  "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",
     "dev": "pnpm build && node dist/index.js",
-    "publish": "npm publish"
+    "publish": "npm publish",
+    "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +27,7 @@
     "fs": "0.0.1-security",
     "glob": "^11.0.0",
     "nodemon": "^3.1.4",
-    "secret-scan": "workspace:*",
+    "@keyshade/secret-scan": "workspace:*",
     "socket.io-client": "^4.7.5",
     "typescript": "^5.5.2"
   },

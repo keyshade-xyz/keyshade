@@ -2,6 +2,7 @@
   "name": "@keyshade/api-client",
   "version": "1.0.0",
   "main": "dist/src/index.js",
+  "type": "module",
   "description": "This package holds all the API request logic",
   "private": true,
   "scripts": {

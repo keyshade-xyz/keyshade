@@ -1,6 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface WorkspaceRole {
+export interface WorkspaceRole {
   id: string
   name: string
   slug: string
