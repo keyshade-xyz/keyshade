@@ -27,9 +27,9 @@ function Footer(): React.JSX.Element {
       </div>
 
       <div className="mt-5 w-[60%] justify-between md:flex">
-        {/* <div className='pr-[2vw]'> */}
-        <FooterLogoSVG />
-        {/* </div> */}
+        <div className="pr-[2vw]">
+          <FooterLogoSVG />
+        </div>
 
         {/* <EncryptButton TARGET_TEXT="email us" /> */}
         <div className="gap-x-9 md:flex">
