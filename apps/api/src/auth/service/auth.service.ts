@@ -41,13 +41,37 @@ export class AuthService {
       this.logger.error(`Invalid email address: ${email}`)
       throw new BadRequestException('Please enter a valid email address')
     }
+    try {
+      const user = await this.createUserIfNotExists(
+        email,
+        AuthProvider.EMAIL_OTP
+      )
+      const otp = await generateOtp(email, user.id, this.prisma)
+      await this.mailService.sendOtp(email, otp.code)
+    } catch (e) {
+      throw e
+    }
 
-    const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
-
-    const otp = await generateOtp(email, user.id, this.prisma)
-
-    await this.mailService.sendOtp(email, otp.code)
     this.logger.log(`Login code sent to ${email}`)
+  }
+
+  /**
+   * resend a login code to the given email address after resend otp button is pressed
+   * @throws {BadRequestException} If the email address is invalid
+   * @param email The email address to resend the login code to
+   */
+  async resendOtp(email: string): Promise<void> {
+    /**
+     *TODO Resend the otp based on another function send otp but
+     *TODO with a throttler to rate limit the api
+     */
+    try {
+      const user = await getUserByEmailOrId(email, this.prisma)
+      const otp = await generateOtp(email, user.id, this.prisma)
+      await this.mailService.sendOtp(email, otp.code)
+    } catch (e) {
+      this.logger.error(`Resending OTP failed ${e}`)
+    }
   }
 
   /* istanbul ignore next */

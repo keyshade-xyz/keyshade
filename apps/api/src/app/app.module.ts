@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 import { AuthModule } from '@/auth/auth.module'
 import { PrismaModule } from '@/prisma/prisma.module'
@@ -25,7 +25,7 @@ import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
-
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 @Module({
   controllers: [AppController],
   imports: [
@@ -37,6 +37,16 @@ import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-memb
         allowUnknown: false,
         abortEarly: true
       }
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: seconds(config.get('THROTTLE_TTL')),
+          limit: config.get('THROTTLE_LIMIT')
+        }
+      ]
     }),
     ScheduleModule.forRoot(),
     PassportModule,
@@ -67,6 +77,10 @@ import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-memb
     {
       provide: APP_GUARD,
       useClass: ApiKeyGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
     }
   ]
 })
