@@ -607,10 +607,18 @@ describe('Workspace Role Controller Tests', () => {
         updatedAt: expect.any(String),
         projects: expect.arrayContaining([
           {
-            projectId: projects[0].id
+            project: {
+              id: projects[0].id,
+              name: projects[0].name,
+              slug: projects[0].slug
+            }
           },
           {
-            projectId: projects[1].id
+            project: {
+              id: projects[1].id,
+              name: projects[1].name,
+              slug: projects[1].slug
+            }
           }
         ])
       })
@@ -654,10 +662,18 @@ describe('Workspace Role Controller Tests', () => {
         hasAdminAuthority: true,
         projects: expect.arrayContaining([
           {
-            projectId: projects[0].id
+            project: {
+              id: projects[0].id,
+              name: projects[0].name,
+              slug: projects[0].slug
+            }
           },
           {
-            projectId: projects[1].id
+            project: {
+              id: projects[1].id,
+              name: projects[1].name,
+              slug: projects[1].slug
+            }
           }
         ])
       })
