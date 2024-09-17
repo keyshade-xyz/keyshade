@@ -22,9 +22,9 @@ import { apiClient } from '@/lib/api-client'
 import type { Workspace } from '@/types'
 import { zWorkspace } from '@/types'
 import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  setWorkspace
+  GetCurrentWorkspace,
+  SetCurrentWorkspace,
+  SetWorkspace
 } from '@/lib/workspace-storage'
 import { Input } from './input'
 import { Label } from './label'
@@ -74,7 +74,7 @@ export function Combobox(): React.JSX.Element {
       const response = await apiClient.post<Workspace>('/workspace', {
         name
       })
-      setCurrentWorkspace(response)
+      SetCurrentWorkspace(response)
       setOpen(false)
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
@@ -87,7 +87,7 @@ export function Combobox(): React.JSX.Element {
       .then((data) => {
         if (data) {
           setAllWorkspace(data)
-          setWorkspace(data)
+          SetWorkspace(data)
         }
       })
       .catch((error) => {
@@ -112,7 +112,7 @@ export function Combobox(): React.JSX.Element {
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
-                {getCurrentWorkspace()?.name ?? 'No workspace'}
+                {GetCurrentWorkspace()?.name ?? 'No workspace'}
               </div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
@@ -132,7 +132,7 @@ export function Combobox(): React.JSX.Element {
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setCurrentWorkspace(workspace)
+                      SetCurrentWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}
@@ -141,7 +141,7 @@ export function Combobox(): React.JSX.Element {
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        getCurrentWorkspace()?.name === workspace.name
+                        GetCurrentWorkspace()?.name === workspace.name
                           ? 'opacity-100'
                           : 'opacity-0'
                       )}
