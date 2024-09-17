@@ -22,8 +22,11 @@
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",
     "fs": "0.0.1-security",
+    "glob": "^11.0.0",
     "nodemon": "^3.1.4",
-    "socket.io-client": "^4.7.5"
+    "secret-scan": "workspace:*",
+    "socket.io-client": "^4.7.5",
+    "typescript": "^5.5.2"
   },
   "devDependencies": {
     "@swc/cli": "^0.4.0",
@@ -32,6 +35,7 @@
     "@types/figlet": "^1.5.8",
     "@types/eccrypto": "^1.1.6",
     "@types/node": "^20.14.10",
-    "eslint-config-standard-with-typescript": "^43.0.1"
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "tsup": "^8.1.2"
   }
 }
