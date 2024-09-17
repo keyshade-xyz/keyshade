@@ -1,6 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface Project {
+export interface Project {
   id: string
   name: string
   slug: string

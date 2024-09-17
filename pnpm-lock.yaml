@@ -286,6 +286,9 @@ importers:
       '@clack/prompts':
         specifier: ^0.7.0
         version: 0.7.0
+      '@keyshade/secret-scan':
+        specifier: workspace:*
+        version: link:../../packages/secret-scan
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -313,9 +316,6 @@ importers:
       nodemon:
         specifier: ^3.1.4
         version: 3.1.4
-      secret-scan:
-        specifier: workspace:*
-        version: link:../../packages/secret-scan
       socket.io-client:
         specifier: ^4.7.5
         version: 4.7.5

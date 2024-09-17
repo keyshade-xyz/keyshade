@@ -7,6 +7,7 @@ import { fetchProfileConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
 import { getDefaultProfile } from '@/util/profile'
 import type { Command } from 'commander'
+import ControllerInstance from '@/util/controller-instance'
 
 /**
  * The base class for all commands. All commands should extend this class.
@@ -17,6 +18,17 @@ export default abstract class BaseCommand {
   protected apiKey: string | null = null
   protected baseUrl: string | null = null
 
+  // Headers to be used by the API requests
+  protected headers: Record<string, string> | null = null
+
+  /**
+   * Technically the entrypoint to the entire application. This function
+   * is used to register the various commands across the entire CLI. The
+   * function is only called from index.ts to register the commands and
+   * should not be overridden.
+   *
+   * @param program The program to add the command to.
+   */
   readonly prepare = (program: Command): void => {
     const argsCount = this.getArguments().length
 
@@ -82,7 +94,7 @@ export default abstract class BaseCommand {
   }
 
   getVersion(): string {
-    return null
+    return '1'
   }
 
   /**
@@ -102,11 +114,9 @@ export default abstract class BaseCommand {
   /**
    * The action that the command should take.
    * @param data The data passed to the command.
-   * @param data.options The options passed to the command.
-   * @param data.args The arguments passed to the command.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  action({ options, args }: CommandActionData): Promise<void> | void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty-pattern
+  action({}: CommandActionData): Promise<void> | void {}
 
   /**
    * If the command has subcommands, return them here.
@@ -154,5 +164,13 @@ export default abstract class BaseCommand {
         this.baseUrl = defaultProfile.baseUrl
       }
     }
+
+    // Initialize the header
+    this.headers = {
+      'x-keyshade-token': this.apiKey
+    }
+
+    // Initialize Controller Instance
+    ControllerInstance.initialize(this.baseUrl)
   }
 }
