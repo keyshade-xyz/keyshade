@@ -7,7 +7,7 @@ import { execSync } from 'child_process'
 import { readFileSync, statSync } from 'fs'
 import { globSync } from 'glob'
 import path from 'path'
-import secretDetector from 'secret-scan'
+import secretDetector from '@keyshade/secret-scan'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const colors = require('colors/safe')
 
@@ -83,7 +83,10 @@ export default class ScanCommand extends BaseCommand {
             skipNextLine = true
             return
           }
-          const { found, regex } = secretDetector.detect(line)
+          const { found, regex } = secretDetector.detect(line) as {
+            found: boolean
+            regex: RegExp
+          }
           if (found) {
             const matched = line.match(regex)
             const highlightedLine = line
