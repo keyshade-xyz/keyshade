@@ -1,5 +1,5 @@
 {
-  "name": "secret-scan",
+  "name": "@keyshade/secret-scan",
   "version": "1.0.0",
   "description": "Do static analysis of a string to find secrets",
   "main": "dist/index.js",

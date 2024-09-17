@@ -2,6 +2,7 @@
   "extends": "../tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "declaration": true,
     "paths": {
       "@api-client/*": ["./src/*"]
     },
@@ -12,6 +13,11 @@
     "resolveFullPaths": true,
     "verbose": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "jest.config.ts",
+    ".eslintrc.cjs"
+  ],
   "exclude": ["node_modules", "dist"]
 }

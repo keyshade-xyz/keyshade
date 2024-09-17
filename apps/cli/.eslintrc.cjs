@@ -26,6 +26,6 @@ module.exports = {
     '@typescript-eslint/space-before-function-paren': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
-    'space-before-function-paren': 'off',
+    'space-before-function-paren': 'off'
   }
 }
