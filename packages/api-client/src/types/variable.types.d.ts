@@ -1,6 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface Variable {
+export interface Variable {
   id: string
   name: string
   slug: string

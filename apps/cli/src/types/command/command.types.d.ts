@@ -11,6 +11,6 @@ export interface CommandArgument {
 }
 
 export interface CommandActionData {
-  options: Record<string, any>
-  args: string[]
+  options: Record<string, any> // Any parameters that might be passed to the command
+  args: string[] // The arguments passed to the command
 }

@@ -1,6 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface Secret {
+export interface Secret {
   id: string
   name: string
   slug: string

@@ -4,7 +4,7 @@ import type {
   ProjectRootConfig
 } from '@/types/index.types'
 import { existsSync } from 'fs'
-import { readFile, readdir, writeFile, mkdir } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
 
 export const getOsType = (): 'unix' | 'windows' => {
   return process.platform === 'win32' ? 'windows' : 'unix'
@@ -75,14 +75,6 @@ export const writeProjectRootConfig = async (
   config: ProjectRootConfig
 ): Promise<void> => {
   await writeFile('./keyshade.json', JSON.stringify(config, null, 2), 'utf8')
-}
-
-export const fetchUserRootConfigurationFiles = async (): Promise<string> => {
-  const osType = getOsType()
-  const home = osType === 'windows' ? 'USERPROFILE' : 'HOME'
-  const path = `${process.env[home]}/.keyshade`
-  const files = await readdir(path)
-  return `- ${files.join('\n- ')}`
 }
 
 const ensureDirectoryExists = async (path: string) => {

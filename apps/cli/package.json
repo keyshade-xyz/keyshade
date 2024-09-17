@@ -4,10 +4,12 @@
   "description": "CLI for keyshade",
   "main": "index.ts",
   "private": false,
+  "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",
-    "dev": "pnpm build && node dist/index.js"
+    "dev": "pnpm build && node dist/index.js",
+    "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "keywords": [],
   "author": "",

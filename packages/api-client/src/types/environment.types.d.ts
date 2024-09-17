@@ -1,6 +1,6 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface Environment {
+export interface Environment {
   id: string
   name: string
   slug: string
