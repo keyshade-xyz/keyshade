@@ -25,15 +25,14 @@ function Footer(): React.JSX.Element {
           <div className="absolute inset-0 h-full w-full bg-[#04050A] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
         </div>
       </div>
-      <div className="w-[90%] mx-auto flex justify-center items-center">
+      <div className="mx-auto flex w-[90%] items-center justify-center">
         <div className="mt-5 lg:flex">
-
-          <div className="pr-[2vw] pb-[2vw]">
+          <div className="pb-[2vw] pr-[2vw]">
             <FooterLogoSVG />
           </div>
 
           {/* <EncryptButton TARGET_TEXT="email us" /> */}
-          <div className="md:gap-8 md:flex">
+          <div className="md:flex md:gap-8">
             <div>
               <span className="text-lg font-medium uppercase text-white/40">
                 Resources
