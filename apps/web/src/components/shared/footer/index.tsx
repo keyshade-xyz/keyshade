@@ -25,124 +25,126 @@ function Footer(): React.JSX.Element {
           <div className="absolute inset-0 h-full w-full bg-[#04050A] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
         </div>
       </div>
+      <div className="w-[90%] mx-auto flex justify-center items-center">
+        <div className="mt-5 lg:flex">
 
-      <div className="mt-5 w-[60%] justify-between md:flex">
-        {/* <div className='pr-[2vw]'> */}
-        <FooterLogoSVG />
-        {/* </div> */}
+          <div className="pr-[2vw] pb-[2vw]">
+            <FooterLogoSVG />
+          </div>
 
-        {/* <EncryptButton TARGET_TEXT="email us" /> */}
-        <div className="gap-x-9 md:flex">
-          <div>
-            <span className="text-lg font-medium uppercase text-white/40">
-              Resources
-            </span>
-            <ul className="mt-3 flex flex-col gap-y-3">
-              <a
-                href="https://docs.keyshade.xyz/"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <EncryptText TARGET_TEXT="Docs" />
-              </a>
-              <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="Blog" />
-              </li>
-            </ul>
-          </div>
-          <div>
-            <span className="text-lg font-medium uppercase text-white/40">
-              products
-            </span>
-            <ul className="mt-3 flex flex-col gap-y-3">
-              <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="CLI" />
-              </li>
-              <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="SMK" />
-              </li>
-              <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="Secret Scanner" />
-              </li>
-            </ul>
-          </div>
-          <div>
-            <span className="text-lg font-medium uppercase text-white/40">
-              company
-            </span>
-            <ul className="mt-3 flex flex-col gap-y-3">
-              <li className="text-white/60 transition-colors hover:text-white">
-                <Link href="/about">
-                  <EncryptText TARGET_TEXT="About" />
+          {/* <EncryptButton TARGET_TEXT="email us" /> */}
+          <div className="md:gap-8 md:flex">
+            <div>
+              <span className="text-lg font-medium uppercase text-white/40">
+                Resources
+              </span>
+              <ul className="mt-3 flex flex-col gap-y-3">
+                <a
+                  href="https://docs.keyshade.xyz/"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <EncryptText TARGET_TEXT="Docs" />
+                </a>
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <EncryptText TARGET_TEXT="Blog" />
+                </li>
+              </ul>
+            </div>
+            <div>
+              <span className="text-lg font-medium uppercase text-white/40">
+                products
+              </span>
+              <ul className="mt-3 flex flex-col gap-y-3">
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <EncryptText TARGET_TEXT="CLI" />
+                </li>
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <EncryptText TARGET_TEXT="SMK" />
+                </li>
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <EncryptText TARGET_TEXT="Secret Scanner" />
+                </li>
+              </ul>
+            </div>
+            <div>
+              <span className="text-lg font-medium uppercase text-white/40">
+                company
+              </span>
+              <ul className="mt-3 flex flex-col gap-y-3">
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <Link href="/about">
+                    <EncryptText TARGET_TEXT="About" />
+                  </Link>
+                </li>
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <Link href="/career">
+                    <EncryptText TARGET_TEXT="Career" />
+                  </Link>
+                </li>
+                <li className="text-white/60 transition-colors hover:text-white">
+                  <EncryptText TARGET_TEXT="Contact" />
+                </li>
+              </ul>
+            </div>
+            <div>
+              <span className="text-lg font-medium uppercase text-white/40">
+                legal
+              </span>
+              <ul className="mt-3 flex flex-col gap-y-3">
+                <Link
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="/terms_and_condition"
+                >
+                  <EncryptText TARGET_TEXT="Terms and Conditions" />
                 </Link>
-              </li>
-              <li className="text-white/60 transition-colors hover:text-white">
-                <Link href="/career">
-                  <EncryptText TARGET_TEXT="Career" />
+                <Link
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="/privacy"
+                >
+                  <EncryptText TARGET_TEXT="Privacy Policy" />
                 </Link>
-              </li>
-              <li className="text-white/60 transition-colors hover:text-white">
-                <EncryptText TARGET_TEXT="Contact" />
-              </li>
-            </ul>
-          </div>
-          <div>
-            <span className="text-lg font-medium uppercase text-white/40">
-              legal
-            </span>
-            <ul className="mt-3 flex flex-col gap-y-3">
-              <Link
-                className="text-white/60 transition-colors hover:text-white"
-                href="/terms_and_condition"
-              >
-                <EncryptText TARGET_TEXT="Terms and Conditions" />
-              </Link>
-              <Link
-                className="text-white/60 transition-colors hover:text-white"
-                href="/privacy"
-              >
-                <EncryptText TARGET_TEXT="Privacy Policy" />
-              </Link>
-            </ul>
-          </div>
-          <div>
-            <span className="text-lg font-medium uppercase text-white/40">
-              Socials
-            </span>
-            <ul className="mt-3 flex flex-col gap-y-3">
-              <a
-                className="text-white/60 transition-colors hover:text-white"
-                href="https://twitter.com/keyshade_xyz"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <EncryptText TARGET_TEXT="Twitter" />
-              </a>
-              <a
-                className="text-white/60 transition-colors hover:text-white"
-                href="https://linkedin.com/company/keyshade-xyz/"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <EncryptText TARGET_TEXT="LinkedIn" />
-              </a>
-              <a
-                className="text-white/60 transition-colors hover:text-white"
-                href="https://discord.gg/mV9PsXsjaH"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <EncryptText TARGET_TEXT="Discord" />
-              </a>
-              <a
-                className="text-white/60 transition-colors hover:text-white"
-                href="https://github.com/keyshade-xyz/keyshade"
-                rel="noreferrer"
-                target="_blank"
-              >
-                <EncryptText TARGET_TEXT="GitHub" />
-              </a>
-            </ul>
+              </ul>
+            </div>
+            <div>
+              <span className="text-lg font-medium uppercase text-white/40">
+                Socials
+              </span>
+              <ul className="mt-3 flex flex-col gap-y-3">
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://twitter.com/keyshade_xyz"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <EncryptText TARGET_TEXT="Twitter" />
+                </a>
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://linkedin.com/company/keyshade-xyz/"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <EncryptText TARGET_TEXT="LinkedIn" />
+                </a>
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://discord.gg/mV9PsXsjaH"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <EncryptText TARGET_TEXT="Discord" />
+                </a>
+                <a
+                  className="text-white/60 transition-colors hover:text-white"
+                  href="https://github.com/keyshade-xyz/keyshade"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <EncryptText TARGET_TEXT="GitHub" />
+                </a>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
