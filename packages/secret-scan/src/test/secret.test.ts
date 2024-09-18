@@ -8,7 +8,6 @@ import {
   discord,
   github,
   ip_public,
-  jwt,
   mailchimp,
   npm,
   openAI,
@@ -30,7 +29,6 @@ import {
   bitbucket,
   bittrex,
   clojars,
-  cloudflare,
   codecov,
   coinbase,
   confluent,
@@ -56,7 +54,6 @@ import {
   huggingface,
   infracost,
   intra42,
-  //kubernetes,
   linear,
   lob,
   planetscale,
@@ -161,157 +158,150 @@ describe('Detect Secrets from string', () => {
   })
   it(testcaseTitleTemplate('Adobe Key'), () => {
     testSecret(adobe.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Age Key'), () => {
     testSecret(age.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Airtable Key'), () => {
     testSecret(airtable.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Asana Key'), () => {
     testSecret(asana.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Atlassian Key'), () => {
     testSecret(atlassian.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Authress Key'), () => {
     testSecret(authress.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Beamer Key'), () => {
     testSecret(beamer.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Bitbucket Key'), () => {
     testSecret(bitbucket.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Bittrex Key'), () => {
     testSecret(bittrex.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Clojars Key'), () => {
     testSecret(clojars.testcases)
-  });
-
-  /* TODO: Fix the cloudflare testcase and regex, it's breaking OpenAI, Pypi, Sendgrid, NPM, GitHub, Beamer, Bittrex,
-      Clojars, Cloudflare etc. tests
-      path: ./packages/secret-scan/src/rules/cloudflare.ts
-  it(testcaseTitleTemplate('Cloudflare Key'), () => {
-    testSecret(cloudflare.testcases)
-  });*/
+  })
 
   it(testcaseTitleTemplate('Codecov Key'), () => {
     testSecret(codecov.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Coinbase Key'), () => {
     testSecret(coinbase.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Confluent Key'), () => {
     testSecret(confluent.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Contentful Key'), () => {
     testSecret(contentful.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Databricks Key'), () => {
     testSecret(databricks.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Datadog Key'), () => {
     testSecret(datadog.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Defined Networking Key'), () => {
     testSecret(definednetworking.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Digital Ocean Key'), () => {
     testSecret(digitalocean.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Doppler Key'), () => {
     testSecret(doppler.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Dropbox Key'), () => {
     testSecret(dropbox.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Duffel Key'), () => {
     testSecret(duffel.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Dynatrace Key'), () => {
     testSecret(dynatrace.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Easypost Key'), () => {
     testSecret(easypost.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Facebook Key'), () => {
     testSecret(facebook.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Flutterwave Key'), () => {
     testSecret(flutterwave.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Frameio Key'), () => {
     testSecret(frameio.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Gitlab Key'), () => {
     testSecret(gitlab.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Grafana Key'), () => {
     testSecret(grafana.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Harness Key'), () => {
     testSecret(harness.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Hashicorp Key'), () => {
     testSecret(hashicorp.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Heroku Key'), () => {
     testSecret(heroku.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Hubspot Key'), () => {
     testSecret(hubspot.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Huggingface Key'), () => {
     testSecret(huggingface.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Infracost Key'), () => {
     testSecret(infracost.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Intra42 Key'), () => {
     testSecret(intra42.testcases)
-  });
+  })
   // it(testcaseTitleTemplate('Kubernetes Key'), () => {
   //   testSecret(kubernetes.testcases)
   // });
   it(testcaseTitleTemplate('Linear Key'), () => {
     testSecret(linear.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Lob Key'), () => {
     testSecret(lob.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Planetscale Key'), () => {
     testSecret(planetscale.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Postman Key'), () => {
     testSecret(postman.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Prefect Key'), () => {
     testSecret(prefect.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Pulumi Key'), () => {
     testSecret(pulumi.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Readme Key'), () => {
     testSecret(readme.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Rubygems Key'), () => {
     testSecret(rubygems.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Scalingo Key'), () => {
     testSecret(scalingo.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Sendinblue Key'), () => {
     testSecret(sendinblue.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Shippo Key'), () => {
     testSecret(shippo.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Shopify Key'), () => {
     testSecret(shopify.testcases)
-  });
+  })
   it(testcaseTitleTemplate('Sidekiq Key'), () => {
     testSecret(sidekiq.testcases)
-  });
+  })
 })
