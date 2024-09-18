@@ -22,7 +22,7 @@ function LifeEasySection(): React.JSX.Element {
         </span> */}
       </div>
 
-      <div className="grid gap-9 md:grid-cols-3">
+      <div className="grid gap-9 md:grid-cols-2 xl:grid-cols-3">
         <div className="grid gap-9">
           <Card>
             <StandardKitSVG />
@@ -59,7 +59,7 @@ function LifeEasySection(): React.JSX.Element {
             <SeemlessIntegrationSVG />
           </div>
         </Card>
-        <div className="grid gap-9">
+        <div className="grid gap-9 md:hidden xl:grid">
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-medium">Command Line Interface</h3>
@@ -70,6 +70,30 @@ function LifeEasySection(): React.JSX.Element {
             </div>
             <CommandLineSVG />
           </Card>
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-medium">Snapshot</h3>
+              <span className="text-base text-[#9394A1]">
+                Capture &quot;Pictures&quot; of Your Entire Workspace for Easy
+                Restoration at Any Time.
+              </span>
+            </div>
+            <SnapshotSVG />
+          </Card>
+        </div>
+        <div className="hidden md:grid xl:hidden">
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-medium">Command Line Interface</h3>
+              <span className="text-base text-[#9394A1]">
+                Manage Your Configurations Directly from Your Terminal across
+                Multiple OS
+              </span>
+            </div>
+            <CommandLineSVG />
+          </Card>
+        </div>
+        <div className="hidden md:grid xl:hidden">
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-medium">Snapshot</h3>
