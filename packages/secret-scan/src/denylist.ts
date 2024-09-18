@@ -1,4 +1,4 @@
-import { SecretConfig } from './index'
+import { type SecretConfig } from './index'
 import {
   adafruit,
   adobe,
@@ -15,7 +15,6 @@ import {
   bitbucket,
   bittrex,
   clojars,
-  cloudflare,
   codecov,
   coinbase,
   confluent,
@@ -55,7 +54,6 @@ import {
   huggingface,
   infracost,
   intra42,
-  // kubernetes,
   linear,
   lob,
   planetscale,
@@ -131,8 +129,6 @@ const denylist: SecretConfig = {
 
   clojars: clojars(),
 
-  //cloudflare: cloudflare(),  // This regex is breaking other regexes, TODO: Fix this
-
   codecov: codecov(),
 
   coinbase: coinbase(),
@@ -182,8 +178,6 @@ const denylist: SecretConfig = {
   infracost: infracost(),
 
   intra42: intra42(),
-
-  //kubernetes: kubernetes(),
 
   linear: linear(),
 

@@ -12,6 +12,11 @@ import secretDetector from '@keyshade/secret-scan'
 const colors = require('colors/safe')
 
 export default class ScanCommand extends BaseCommand {
+  public constructor() {
+    super()
+    console.log(colors.cyan.bold('🔍 Secret Scan Started'))
+  }
+
   getOptions(): CommandOption[] {
     return [
       {
@@ -59,10 +64,10 @@ export default class ScanCommand extends BaseCommand {
     }
   }
 
-  private scanFiles(allfiles: string[]) {
+  private scanFiles(allFiles: string[]) {
     const foundSecrets = []
     let skipNextLine = false
-    for (const file of allfiles) {
+    for (const file of allFiles) {
       const stats = statSync(file)
       if (stats.isFile()) {
         const content = readFileSync(file, 'utf8').split(/\r?\n/)
