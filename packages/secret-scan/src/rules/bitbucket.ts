@@ -2,10 +2,10 @@
 import type { TestCase } from '@/types'
 
 export default function bitbucket(): RegExp[] {
-	return [
-		// BitBucket key regex
-		/bitbucket[a-zA-Z0-9]{32}|bitbucket[a-zA-Z0-9=_\-]{64}/i
-	]
+  return [
+    // BitBucket key regex
+    /bitbucket[a-zA-Z0-9]{32}|bitbucket[a-zA-Z0-9=_\-]{64}/i
+  ]
 }
 
 const testcase: TestCase[] = [
@@ -14,23 +14,28 @@ const testcase: TestCase[] = [
     expected: true
   },
   {
-    input: 'bitbucketI8rtKWnU-hHJuFNaY_cVrPlFulcTFQT=qYwSXLwW9-69XzdR1ivUSmtop1b6mrCX',
+    input:
+      'bitbucketI8rtKWnU-hHJuFNaY_cVrPlFulcTFQT=qYwSXLwW9-69XzdR1ivUSmtop1b6mrCX',
     expected: true
   },
   {
-    input: 'bitbucketOi=XuIk3yALKtwdNMJBoyaG3nJ0AQDL5Hr-9bN9eh0J_W4818YHGIPLWCu3TVYyB',
+    input:
+      'bitbucketOi=XuIk3yALKtwdNMJBoyaG3nJ0AQDL5Hr-9bN9eh0J_W4818YHGIPLWCu3TVYyB',
     expected: true
   },
   {
-    input: 'bitbuckete7fg_=_gOBjbbqJgDGDWyUG8e38a2StbEvllkc6d3_QxKAYdcq5EVZTY4TANrAkw',
+    input:
+      'bitbuckete7fg_=_gOBjbbqJgDGDWyUG8e38a2StbEvllkc6d3_QxKAYdcq5EVZTY4TANrAkw',
     expected: true
   },
   {
-    input: 'bitbucket1TNov1LIYBgHTwLzvjQSByUV5Xux3mFZWO38dwIHy98l_5EfAIVB=AHVzQiKyG4Z',
+    input:
+      'bitbucket1TNov1LIYBgHTwLzvjQSByUV5Xux3mFZWO38dwIHy98l_5EfAIVB=AHVzQiKyG4Z',
     expected: true
   },
   {
-    input: 'bitbucketAyBGxwkWYcb26PxsNSAu5siG5XT=Jgb__FDPVxC-PCAJT2T57YqhkvWRjKKxALwi',
+    input:
+      'bitbucketAyBGxwkWYcb26PxsNSAu5siG5XT=Jgb__FDPVxC-PCAJT2T57YqhkvWRjKKxALwi',
     expected: true
   },
   {
@@ -38,7 +43,8 @@ const testcase: TestCase[] = [
     expected: true
   },
   {
-    input: 'bitbucket1O_2D5VrXBcD-IEOyBn_KvAUYuKFxHYMEjlBf9l1pJS=27KlFUPWVD1eQ9eOwJw5',
+    input:
+      'bitbucket1O_2D5VrXBcD-IEOyBn_KvAUYuKFxHYMEjlBf9l1pJS=27KlFUPWVD1eQ9eOwJw5',
     expected: true
   },
   {
@@ -49,14 +55,14 @@ const testcase: TestCase[] = [
     input: 'bitbucketRSsSg2xwRDgT4PjJXMA5mJgfQKG8Z6lT',
     expected: true
   },
-	{
-		input: 'bitbucket2343283kjsgdfj',
-		expected: false
-	},
-	{
-		input: 'bitbucket',
-		expected: false
-	}
+  {
+    input: 'bitbucket2343283kjsgdfj',
+    expected: false
+  },
+  {
+    input: 'bitbucket',
+    expected: false
+  }
 ]
 
 bitbucket.testcases = testcase
