@@ -442,7 +442,7 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, description: true }
+      select: { slug: true, name: true, description: true }
     })
   }
 
@@ -467,7 +467,7 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, description: true }
+      select: { slug: true, name: true, description: true }
     })
   }
 
@@ -493,7 +493,7 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, note: true }
+      select: { slug: true, name: true, note: true }
     })
   }
 
@@ -518,7 +518,7 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, note: true }
+      select: { slug: true, name: true, note: true }
     })
   }
 
