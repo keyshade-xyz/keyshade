@@ -8,15 +8,9 @@ import { readFileSync, statSync } from 'fs'
 import { globSync } from 'glob'
 import path from 'path'
 import secretDetector from '@keyshade/secret-scan'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const colors = require('colors/safe')
+import { Logger } from '@/util/logger'
 
 export default class ScanCommand extends BaseCommand {
-  public constructor() {
-    super()
-    console.log(colors.cyan.bold('🔍 Secret Scan Started'))
-  }
-
   getOptions(): CommandOption[] {
     return [
       {
@@ -42,23 +36,24 @@ export default class ScanCommand extends BaseCommand {
   }
 
   action({ options }: CommandActionData): Promise<void> | void {
+    Logger.info('🔍 Secret Scan Started')
     const { currentChanges, file } = options
 
-    console.log('\n=============================')
-    console.log(colors.cyan.bold('🔍 Secret Scan Started'))
-    console.log('=============================')
+    Logger.info('\n=============================')
+    Logger.info('🔍 Secret Scan Started')
+    Logger.info('=============================')
 
     if (file) {
-      console.log(`Scanning file: ${file}`)
+      Logger.info(`Scanning file: ${file}`)
       this.scanFiles([file as string])
       return
     }
     if (currentChanges) {
-      console.log('Scanning only the current changes')
+      Logger.info('Scanning only the current changes')
       const files = this.getChangedFiles()
       this.scanFiles(files)
     } else {
-      console.log('\n\n📂 Scanning all files...\n')
+      Logger.info('\n\n📂 Scanning all files...\n')
       const files = this.getAllFiles()
       this.scanFiles(files)
     }
@@ -94,10 +89,7 @@ export default class ScanCommand extends BaseCommand {
           }
           if (found) {
             const matched = line.match(regex)
-            const highlightedLine = line
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              .replace(regex, colors.red.underline(matched[0]) as string)
-              .trim()
+            const highlightedLine = line.replace(regex, matched[0]).trim()
             foundSecrets.push({
               file,
               line: index + 1,
@@ -108,31 +100,25 @@ export default class ScanCommand extends BaseCommand {
       }
     }
     if (foundSecrets.length > 0) {
-      console.log(
-        colors.red(`\n 🚨 Found ${foundSecrets.length} hardcoded secrets:\n`)
-      )
+      Logger.info(`\n 🚨 Found ${foundSecrets.length} hardcoded secrets:\n`)
       foundSecrets.forEach((secret) => {
-        console.log(
-          `${colors.underline(`${secret.file}:${secret.line}`)}: ${secret.content}`
-        )
-        console.log(
-          colors.yellow(
-            'Suggestion: Replace with environment variables or secure storage solutions.\n'
-          )
+        Logger.info(`${`${secret.file}:${secret.line}`}: ${secret.content}`)
+        Logger.info(
+          'Suggestion: Replace with environment variables or secure storage solutions.\n'
         )
       })
-      console.log('=============================')
-      console.log('Summary:')
-      console.log('=============================')
-      console.log(`🚨 Total Secrets Found: ${foundSecrets.length}\n`)
+      Logger.info('=============================')
+      Logger.info('Summary:')
+      Logger.info('=============================')
+      Logger.info(`🚨 Total Secrets Found: ${foundSecrets.length}\n`)
 
       process.exit(1)
     } else {
-      console.log('=============================')
-      console.log('Summary:')
-      console.log('=============================')
-      console.log('✅ Total Secrets Found: 0\n')
-      console.log(colors.green('No hardcoded secrets found.'))
+      Logger.info('=============================')
+      Logger.info('Summary:')
+      Logger.info('=============================')
+      Logger.info('✅ Total Secrets Found: 0\n')
+      Logger.info('No hardcoded secrets found.')
     }
   }
 
@@ -148,7 +134,7 @@ export default class ScanCommand extends BaseCommand {
         .split('\n')
         .filter((line) => line.trim() !== '' && !line.startsWith('#'))
     } catch (error) {
-      console.log("Repository doesn't have .gitignore file")
+      Logger.info("Repository doesn't have .gitignore file")
     }
 
     return globSync(currentWorkDir + '/**/**', {
