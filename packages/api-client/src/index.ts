@@ -4,7 +4,8 @@ import EventController from '@api-client/controllers/event'
 import IntegrationController from '@api-client/controllers/integration'
 import ProjectController from '@api-client/controllers/project'
 import VariableController from '@api-client/controllers/variable'
-import WorkspaceController from './controllers/workspace'
+import WorkspaceController from '@api-client/controllers/workspace'
+import WorkspaceMembershipController from '@api-client/controllers/workspace-membership'
 
 export {
   EnvironmentController,
@@ -13,5 +14,6 @@ export {
   IntegrationController,
   ProjectController,
   VariableController,
-  WorkspaceController
+  WorkspaceController,
+  WorkspaceMembershipController
 }
