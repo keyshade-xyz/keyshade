@@ -6,12 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAtom } from 'jotai'
 import Cookies from 'js-cookie'
 import { LoadingSVG } from '@public/svg/shared'
-import {
-  GithubSVG,
-  GoogleSVG,
-  KeyshadeBigSVG,
-  GitlabSVG
-} from '@public/svg/auth'
+import { GithubSVG, GoogleSVG, KeyshadeBigSVG ,GitlabSVG} from '@public/svg/auth'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { authEmailAtom } from '@/store'

@@ -10,13 +10,11 @@ export default function age(): RegExp[] {
 
 const testcase: TestCase[] = [
   {
-    input:
-      'AGE-SECRET-KEY-17TWAXMPDQAJV0RH43E5FJH5F0LUTFR3JTCM999XEF70QA57SZGXFJ3NQZK',
+    input: 'AGE-SECRET-KEY-17TWAXMPDQAJV0RH43E5FJH5F0LUTFR3JTCM999XEF70QA57SZGXFJ3NQZK',
     expected: true
   },
   {
-    input:
-      'AGE-SECRET-KEY-1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L',
+    input: 'AGE-SECRET-KEY-1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L1QZRY9X8GF2TVDW0S3JN54KHCE6MUA7L',
     expected: false
   },
   {
@@ -24,11 +22,11 @@ const testcase: TestCase[] = [
     expected: false
   },
   {
-    input: 'AGE-SECRET-KEY',
+    input: "AGE-SECRET-KEY",
     expected: false
   },
   {
-    input: 'AGE',
+    input: "AGE",
     expected: false
   }
 ]
