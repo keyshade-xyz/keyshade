@@ -37,7 +37,7 @@ export enum EventType {
   INTEGRATION_DELETED
 }
 
-interface Integration {
+export interface Integration {
   id: string
   name: string
   slug: string

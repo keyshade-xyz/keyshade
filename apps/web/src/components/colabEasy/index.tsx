@@ -22,7 +22,7 @@ function ColabEasy(): React.JSX.Element {
         </span>
       </div>
 
-      <div className="auto-cols-min grid-cols-3 gap-5 space-y-5 md:grid md:space-y-0">
+      <div className="auto-cols-min gap-5 space-y-5 md:grid md:grid-cols-2 md:space-y-0 xl:grid-cols-3">
         <article className="row-span-2">
           <Card>
             <div className="p-6">

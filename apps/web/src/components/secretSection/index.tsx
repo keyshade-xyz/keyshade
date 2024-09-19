@@ -60,7 +60,7 @@ function SecrectSection(): React.JSX.Element {
         {/* <span>Built for your Seamless Secret Integration</span> */}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3 2xl:gap-9">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:gap-9">
         {cardData.map((card, index) => {
           const { heading, description, svg } = card
           return (

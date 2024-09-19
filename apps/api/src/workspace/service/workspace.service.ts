@@ -277,12 +277,7 @@ export class WorkspaceService {
         description: true,
         colorCode: true,
         hasAdminAuthority: true,
-        authorities: true,
-        projects: {
-          select: {
-            id: true
-          }
-        }
+        authorities: true
       }
     })
 

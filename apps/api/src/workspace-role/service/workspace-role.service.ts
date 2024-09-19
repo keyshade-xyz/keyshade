@@ -97,7 +97,13 @@ export class WorkspaceRoleService {
         include: {
           projects: {
             select: {
-              projectId: true
+              project: {
+                select: {
+                  id: true,
+                  slug: true,
+                  name: true
+                }
+              }
             }
           }
         }
@@ -228,7 +234,13 @@ export class WorkspaceRoleService {
       include: {
         projects: {
           select: {
-            projectId: true
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
           }
         }
       }
@@ -443,7 +455,17 @@ export class WorkspaceRoleService {
         slug: workspaceRoleSlug
       },
       include: {
-        projects: true
+        projects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
+          }
+        }
       }
     })) as WorkspaceRoleWithProjects
 

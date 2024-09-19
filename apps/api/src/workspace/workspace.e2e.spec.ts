@@ -529,6 +529,13 @@ describe('Workspace Controller Tests', () => {
       expect(body.icon).toEqual(workspace1.icon)
       expect(body.workspaceRoles).toBeInstanceOf(Array)
       expect(body.projects).toBeInstanceOf(Array)
+
+      const exampleWorkspaceRole = body.workspaceRoles[0]
+      expect(exampleWorkspaceRole).toHaveProperty('name')
+      expect(exampleWorkspaceRole).toHaveProperty('description')
+      expect(exampleWorkspaceRole).toHaveProperty('hasAdminAuthority')
+      expect(exampleWorkspaceRole).toHaveProperty('authorities')
+      expect(exampleWorkspaceRole).toHaveProperty('colorCode')
     })
   })
 
