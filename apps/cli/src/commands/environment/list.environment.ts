@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client/src'
+import { EnvironmentController } from '@keyshade/api-client'
 import {
   CommandOption,
   type CommandActionData,
