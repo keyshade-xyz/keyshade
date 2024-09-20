@@ -6,6 +6,7 @@ import ProjectController from '@api-client/controllers/project'
 import VariableController from '@api-client/controllers/variable'
 import WorkspaceController from '@api-client/controllers/workspace'
 import WorkspaceRoleController from '@api-client/controllers/workspace-role'
+import WorkspaceMembershipController from '@api-client/controllers/workspace-membership'
 
 export {
   EnvironmentController,
@@ -15,5 +16,6 @@ export {
   ProjectController,
   VariableController,
   WorkspaceController,
-  WorkspaceRoleController
+  WorkspaceRoleController,
+  WorkspaceMembershipController
 }
