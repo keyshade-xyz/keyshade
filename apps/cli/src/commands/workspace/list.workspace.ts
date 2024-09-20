@@ -2,7 +2,7 @@ import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
 import { CommandActionData, CommandOption } from '@/types/command/command.types'
-import { getPaginationOptions } from '@/util/pagination-options'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListWorkspace extends BaseCommand {
   getName(): string {
@@ -14,7 +14,7 @@ export default class ListWorkspace extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return getPaginationOptions()
+    return PAGINATION_OPTION
   }
 
   async action({ options }: CommandActionData): Promise<void> {

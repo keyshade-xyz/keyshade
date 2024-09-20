@@ -6,7 +6,7 @@ import {
   type CommandArgument
 } from 'src/types/command/command.types'
 import { Logger } from '@/util/logger'
-import { getPaginationOptions } from '@/util/pagination-options'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -27,7 +27,7 @@ export class ListEnvironment extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return getPaginationOptions()
+    return PAGINATION_OPTION
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
