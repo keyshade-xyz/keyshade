@@ -286,9 +286,6 @@ importers:
       '@clack/prompts':
         specifier: ^0.7.0
         version: 0.7.0
-      '@keyshade/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
       '@keyshade/secret-scan':
         specifier: workspace:*
         version: link:../../packages/secret-scan
