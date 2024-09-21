@@ -16,7 +16,7 @@ export interface WorkspaceRole {
       id: string
       name: string
       slug: string
-    }[]
+    }
   }[]
 }
 

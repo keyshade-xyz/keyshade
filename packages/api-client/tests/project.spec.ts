@@ -222,8 +222,7 @@ describe('Get Project Tests', () => {
     // Unlink the fork
     await projectController.unlinkFork(
       {
-        projectSlug: fork.slug,
-        workspaceSlug
+        projectSlug: fork.slug
       },
       {
         'x-e2e-user-email': email

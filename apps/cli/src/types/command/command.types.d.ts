@@ -3,6 +3,7 @@ export interface CommandOption {
   long: string
   description: string
   defaultValue?: string | boolean
+  choices?: string[]
 }
 
 export interface CommandArgument {

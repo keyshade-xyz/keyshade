@@ -6,7 +6,7 @@ import type {
 import { fetchProfileConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
 import { getDefaultProfile } from '@/util/profile'
-import type { Command } from 'commander'
+import { Option, type Command } from 'commander'
 import ControllerInstance from '@/util/controller-instance'
 
 /**
@@ -55,13 +55,18 @@ export default abstract class BaseCommand {
         }
       })
 
-    this.getOptions().forEach((option) =>
-      command.option(
+    this.getOptions().forEach((option) => {
+      const newOption: Option = new Option(
         `${option.short}, ${option.long}`,
-        option.description,
-        option.defaultValue
-      )
-    )
+        option.description
+      ).default(option.defaultValue)
+
+      option.choices &&
+        option.choices.length > 0 &&
+        newOption.choices(option.choices)
+
+      command.addOption(newOption)
+    })
     this.getArguments().forEach((argument) =>
       command.argument(argument.name, argument.description)
     )
