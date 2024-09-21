@@ -2,13 +2,13 @@
   "name": "cli",
   "version": "1.0.0",
   "description": "CLI for keyshade",
-  "main": "index.ts",
+  "main": "dist/src/index.js",
   "private": false,
   "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",
-    "dev": "pnpm build && node dist/index.js",
+    "dev": "pnpm build && node dist/src/index.js",
     "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "keywords": [],
