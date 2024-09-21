@@ -1,10 +1,12 @@
 import BaseCommand from '../base.command'
 import { EnvironmentController } from '@keyshade/api-client'
 import {
+  CommandOption,
   type CommandActionData,
   type CommandArgument
 } from 'src/types/command/command.types'
 import { Logger } from '@/util/logger'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -24,7 +26,11 @@ export class ListEnvironment extends BaseCommand {
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return PAGINATION_OPTION
+  }
+
+  async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
     if (!projectSlug) {
@@ -44,7 +50,7 @@ export class ListEnvironment extends BaseCommand {
       data: environments,
       error
     } = await environmentController.getAllEnvironmentsOfProject(
-      { projectSlug },
+      { projectSlug, ...options },
       headers
     )
 

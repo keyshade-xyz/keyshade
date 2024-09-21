@@ -1,6 +1,8 @@
 import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
+import { CommandActionData, CommandOption } from '@/types/command/command.types'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListWorkspace extends BaseCommand {
   getName(): string {
@@ -11,12 +13,18 @@ export default class ListWorkspace extends BaseCommand {
     return 'Fetches all the workspace you have access to'
   }
 
-  async action(): Promise<void> {
+  getOptions(): CommandOption[] {
+    return PAGINATION_OPTION
+  }
+
+  async action({ options }: CommandActionData): Promise<void> {
     Logger.info('Fetching all workspaces...')
 
     const { success, data, error } =
       await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
-        {},
+        {
+          ...options
+        },
         this.headers
       )
 
