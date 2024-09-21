@@ -96,22 +96,22 @@ export interface GlobalSearchRequest {
 
 export interface GlobalSearchResponse {
   projects: {
-    id: string
+    slug: string
     name: string
     description: string
   }[]
   environments: {
-    id: string
+    slug: string
     name: string
     description: string
   }[]
   secrets: {
-    id: string
+    slug: string
     name: string
     note: string
   }[]
   variables: {
-    id: string
+    slug: string
     name: string
     note: string
   }[]
