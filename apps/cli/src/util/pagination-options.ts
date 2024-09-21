@@ -15,7 +15,8 @@ export const PAGINATION_OPTION: CommandOption[] = [
     short: '-o',
     long: '--order <string>',
     description:
-      'Order to sort by - either ascending (ASC) or descending (DESC).'
+      'Order to sort by - either ascending (ASC) or descending (DESC).',
+    choices: ['ASC', 'DESC']
   },
   {
     short: '--sort',
