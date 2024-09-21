@@ -62,13 +62,13 @@ export interface ForkProjectResponse extends Project {}
 
 export interface SyncProjectRequest {
   projectSlug: string
+  hardSync?: boolean
 }
 
 export interface SyncProjectResponse {}
 
 export interface UnlinkProjectRequest {
   projectSlug: string
-  workspaceSlug: string
 }
 
 export interface UnlinkProjectResponse {}

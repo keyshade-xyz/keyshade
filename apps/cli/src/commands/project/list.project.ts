@@ -36,9 +36,15 @@ export default class ListProject extends BaseCommand {
       )
 
     if (success) {
-      data.items.forEach((project: any) => {
-        Logger.info(`- ${project.name} (${project.slug})`)
-      })
+      const projects = data.items
+
+      if (projects.length > 0) {
+        data.items.forEach((project: any) => {
+          Logger.info(`- ${project.name} (${project.slug})`)
+        })
+      } else {
+        Logger.info('No forks found')
+      }
     } else {
       Logger.error(`Failed fetching projects: ${error.message}`)
     }

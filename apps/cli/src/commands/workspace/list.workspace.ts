@@ -21,9 +21,14 @@ export default class ListWorkspace extends BaseCommand {
       )
 
     if (success) {
-      data.items.forEach((workspace: any) => {
-        Logger.info(`- ${workspace.name} (${workspace.slug})`)
-      })
+      const workspaces = data.items
+      if (workspaces.length > 0) {
+        data.items.forEach((workspace: any) => {
+          Logger.info(`- ${workspace.name} (${workspace.slug})`)
+        })
+      } else {
+        Logger.info('No workspaces found')
+      }
     } else {
       Logger.error(`Failed fetching workspaces: ${error.message}`)
     }
