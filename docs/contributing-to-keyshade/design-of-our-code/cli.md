@@ -21,9 +21,8 @@ We are following the principles of OOP to design a clean and extendible CLI. The
 ### Folder structure
 
 - **commands**: Contains the command files that are used by the CLI
-- **utils**: Contains utility functions that are used across the CLI
+- **util**: Contains utility functions that are used across the CLI
 - **types**: Contains the types that are used across the CLI
-- **http**: Contains the HTTP client that is used to interact with the keyshade API
 
 ### The `BaseCommand` class
 
