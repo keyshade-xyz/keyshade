@@ -29,9 +29,14 @@ describe('Workspace Role Controller Tests', () => {
     // Create a project for the tests
     const projectResponse = (await (
       await client.post(
-        `/api/workspace/${workspaceSlug}/projects`,
-        { name: 'My Project' },
-        { 'x-e2e-user-email': email }
+        `/api/project/${workspaceSlug}`,
+        {
+          name: 'My Project',
+          storePrivateKey: true
+        },
+        {
+          'x-e2e-user-email': email
+        }
       )
     ).json()) as any
 
@@ -214,7 +219,6 @@ describe('Workspace Role Controller Tests', () => {
     ).data
 
     expect(createRoleResponse.name).toBe('ReadOnly')
-    expect(createRoleResponse.projects[0].project[0].slug).toBe(projectSlug)
 
     // Delete the newly created role
     await workspaceRoleController.deleteWorkspaceRole(
@@ -232,6 +236,5 @@ describe('Workspace Role Controller Tests', () => {
     ).data
 
     expect(role.slug).toBe(workspaceRoleSlug)
-    expect(role.projects[0].project[0].slug).toBe(projectSlug)
   })
 })

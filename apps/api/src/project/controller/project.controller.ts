@@ -73,7 +73,7 @@ export class ProjectController {
   async syncFork(
     @CurrentUser() user: User,
     @Param('projectSlug') projectSlug: Project['slug'],
-    @Param('hardSync') hardSync: boolean = false
+    @Query('hardSync') hardSync: boolean = false
   ) {
     return await this.service.syncFork(user, projectSlug, hardSync)
   }

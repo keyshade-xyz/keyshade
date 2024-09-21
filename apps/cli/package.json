@@ -2,7 +2,7 @@
   "name": "cli",
   "version": "1.0.0",
   "description": "CLI for keyshade",
-  "main": "index.ts",
+  "main": "dist/src/index.js",
   "private": false,
   "type": "module",
   "scripts": {
