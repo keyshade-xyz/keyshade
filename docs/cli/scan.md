@@ -20,6 +20,18 @@ These are the options supported by the `scan` command:
 
 Scan a specific file.
 
+Example:
+
+```bash
+keyshade scan -f path/to/your/file.js
+```
+
 ### `-c, --current-changes`
 
 Scan only the current changed files that are not committed.
+
+Example:
+
+```bash
+keyshade scan -c
+```
