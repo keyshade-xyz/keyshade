@@ -20,6 +20,7 @@ import {
   Environment,
   EventSource,
   EventType,
+  Prisma,
   Project,
   ProjectAccessLevel,
   Secret,
@@ -434,12 +435,10 @@ export class WorkspaceService {
     searchTerm: string
   ): Promise<Partial<Project>[]> {
     // Fetch projects where user has READ_PROJECT authority and match search term
-    return this.prisma.project.findMany(
-      this.createSearchQuery<Project>(projectIds, searchTerm, [
-        'name',
-        'description'
-      ])
-    )
+    return this.createSearchQuery('Project', projectIds, searchTerm, [
+      'name',
+      'description'
+    ])
   }
 
   /**
@@ -453,12 +452,10 @@ export class WorkspaceService {
     projectIds: string[],
     searchTerm: string
   ): Promise<Partial<Environment>[]> {
-    return this.prisma.environment.findMany(
-      this.createSearchQuery<Environment>(projectIds, searchTerm, [
-        'name',
-        'description'
-      ])
-    )
+    return this.createSearchQuery('Environment', projectIds, searchTerm, [
+      'name',
+      'description'
+    ])
   }
 
   /**
@@ -473,9 +470,10 @@ export class WorkspaceService {
     searchTerm: string
   ): Promise<Partial<Secret>[]> {
     // Fetch secrets associated with projects user has READ_SECRET authority on
-    return await this.prisma.secret.findMany(
-      this.createSearchQuery<Secret>(projectIds, searchTerm, ['name', 'note'])
-    )
+    return this.createSearchQuery('Secret', projectIds, searchTerm, [
+      'name',
+      'note'
+    ])
   }
 
   /**
@@ -489,9 +487,10 @@ export class WorkspaceService {
     projectIds: string[],
     searchTerm: string
   ): Promise<Partial<Variable>[]> {
-    return this.prisma.variable.findMany(
-      this.createSearchQuery<Variable>(projectIds, searchTerm, ['name', 'note'])
-    )
+    return this.createSearchQuery('Variable', projectIds, searchTerm, [
+      'name',
+      'note'
+    ])
   }
 
   /**
@@ -517,6 +516,7 @@ export class WorkspaceService {
 
   /**
    * Creates a search query object based on provided project IDs and search term.
+   * @param model The Prisma model name (e.g., 'Project', 'Environment')
    * @param projectIds The IDs of projects to query
    * @param searchTerm The search term to query by
    * @param fields The fields to apply the search term in the query
@@ -524,21 +524,31 @@ export class WorkspaceService {
    * @private
    */
   private createSearchQuery<T>(
+    model: Prisma.ModelName,
     projectIds: string[],
     searchTerm: string,
     fields: Array<Exclude<keyof T, 'slug'>>
-  ) {
-    return {
+  ): Promise<Partial<T>[]> {
+    const idQueryFilter =
+      model === 'Project'
+        ? { id: { in: projectIds } }
+        : { projectId: { in: projectIds } }
+
+    const searchConditions = fields.map((field) => ({
+      [field]: { contains: searchTerm, mode: 'insensitive' }
+    }))
+
+    const selectFields = Object.fromEntries([
+      ['slug', true],
+      ...fields.map((field) => [field, true])
+    ])
+
+    return this.prisma[model].findMany({
       where: {
-        id: { in: projectIds },
-        OR: fields.map((field) => ({
-          [field]: { contains: searchTerm, mode: 'insensitive' }
-        }))
+        ...idQueryFilter,
+        OR: searchConditions
       },
-      select: Object.fromEntries([
-        ['slug', true],
-        ...fields.map((field) => [field, true])
-      ])
-    }
+      select: selectFields
+    })
   }
 }
