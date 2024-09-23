@@ -28,7 +28,7 @@ keyshade environment create <project-slug> [options]
 
 ### Arguments
 
-These are the arguments supported by the update command:
+These are the arguments supported by the create command:
 
 #### `<project-slug>`
 
@@ -56,6 +56,8 @@ keyshade environment delete <environment-id> [options]
 
 ### Arguments
 
+These are the arguments supported by the delete command:
+
 #### `<environment-id>`
 
 The ID of the environment which you want to delete.
@@ -69,6 +71,8 @@ keyshade environment get <environment-slug> [options]
 ```
 
 ### Arguments
+
+These are the arguments supported by the get command:
 
 #### `<environment-slug>`
 
@@ -84,7 +88,7 @@ keyshade environment list <project-slug> [options]
 
 ### Arguments
 
-These are the arguments supported by the update command:
+These are the arguments supported by the list command:
 
 #### `<project-slug>`
 
@@ -92,7 +96,7 @@ Slug of the project whose environments you want.
 
 ### Options
 
-These are the options supported by the `create` command:
+These are the options supported by the `list` command:
 
 #### `PAGINATION_OPTION`
 
@@ -107,6 +111,8 @@ keyshade environment update <environment-slug> [options]
 ```
 
 ### Arguments
+
+These are the arguments supported by the update command:
 
 #### `<environment-slug>`
 
@@ -123,4 +129,3 @@ The new name for the environment.
 #### `-d, --description <string>`
 
 The new description for the environment.
-
