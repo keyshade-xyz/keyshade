@@ -4,7 +4,7 @@ description: The `environment` command
 
 # `environment`
 
-The `environment` command is used to manage environments in Keyshade. An environment is a context in which secrets are stored and accessed. It has a set of subcommands:
+The `environment` command is used to manage environments in Keyshade. An environment is a context in which secrets and variables are stored and accessed. It has a set of subcommands:
 
 - [`create`](#create): This command is used to create a new environment.
 - [`delete`](#delete): This command is used to delete an existing environment.
