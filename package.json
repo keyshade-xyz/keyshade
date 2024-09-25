@@ -90,6 +90,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "preinstall": "if [[ \"$npm_config_user_agent\" != *pnpm* ]]; then echo 'This project uses pnpm. Please run using pnpm.'; exit 1; fi",
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
     "dev:platform": "turbo run dev --filter=platform",
