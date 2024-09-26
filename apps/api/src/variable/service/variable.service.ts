@@ -121,6 +121,11 @@ export class VariableService {
         versions: {
           select: {
             environmentId: true,
+            environment: {
+              select: {
+                slug: true
+              }
+            },
             value: true
           }
         }
@@ -245,6 +250,11 @@ export class VariableService {
             select: {
               id: true,
               environmentId: true,
+              environment: {
+                select: {
+                  slug: true
+                }
+              },
               value: true,
               version: true
             }
@@ -506,6 +516,15 @@ export class VariableService {
           where: {
             environmentId
           },
+          select: {
+            value: true,
+            environmentId: true,
+            environment: {
+              select: {
+                slug: true
+              }
+            }
+          },
           orderBy: {
             version: 'desc'
           },
@@ -568,11 +587,20 @@ export class VariableService {
             id: true,
             name: true
           }
+        },
+        versions: {
+          select: {
+            environmentId: true,
+            environment: {
+              select: {
+                slug: true
+              }
+            }
+          }
         }
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       }
@@ -586,6 +614,7 @@ export class VariableService {
           environment: {
             name: Environment['name']
             id: Environment['id']
+            slug: Environment['slug']
           }
           value: VariableVersion['value']
           version: VariableVersion['version']
@@ -619,6 +648,9 @@ export class VariableService {
           },
           orderBy: {
             version: 'desc'
+          },
+          include: {
+            environment: true
           }
         })
 
@@ -628,7 +660,8 @@ export class VariableService {
           variablesWithEnvironmentalValues.get(variable.id).values.push({
             environment: {
               id: latestVersion.environmentId,
-              name: envIds.get(latestVersion.environmentId)
+              name: envIds.get(latestVersion.environmentId),
+              slug: latestVersion.environment.slug
             },
             value: latestVersion.value,
             version: latestVersion.version
@@ -640,7 +673,8 @@ export class VariableService {
               {
                 environment: {
                   id: latestVersion.environmentId,
-                  name: envIds.get(latestVersion.environmentId)
+                  name: envIds.get(latestVersion.environmentId),
+                  slug: latestVersion.environment.slug
                 },
                 value: latestVersion.value,
                 version: latestVersion.version
