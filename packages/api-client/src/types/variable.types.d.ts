@@ -16,7 +16,7 @@ export interface Variable {
     {
       value: string
       environmentId: string
-      enivronment: {
+      environment: {
         slug: string
       }
     }
