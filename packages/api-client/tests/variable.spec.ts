@@ -110,7 +110,7 @@ describe('Get Variable Tests', () => {
     expect(variable.data.versions.length).toBe(1)
     expect(variable.data.versions[0].value).toBe('Variable 2 value')
     expect(variable.data.versions[0].environmentId).toBe(environment.id)
-    expect(variable.data.versions[0].enivronment.slug).toBe(environment.slug)
+    expect(variable.data.versions[0].environment.slug).toBe(environment.slug)
 
     // Delete the variable
     const deleteVariable = await variableController.deleteVariable(
