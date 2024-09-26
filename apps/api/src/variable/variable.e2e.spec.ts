@@ -204,6 +204,7 @@ describe('Variable Controller Tests', () => {
       expect(body.projectId).toBe(project1.id)
       expect(body.versions.length).toBe(1)
       expect(body.versions[0].value).toBe('Variable 3 value')
+      expect(body.versions[0].environment.slug).toBe(environment2.slug)
 
       const variable = await prisma.variable.findUnique({
         where: {
@@ -382,10 +383,14 @@ describe('Variable Controller Tests', () => {
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
           variableId: variable1.id
+        },
+        include: {
+          environment: true
         }
       })
 
       expect(variableVersion.length).toBe(1)
+      expect(variableVersion[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should create a new version if the value is updated', async () => {
@@ -596,6 +601,7 @@ describe('Variable Controller Tests', () => {
       expect(values.length).toBe(1)
       expect(values[0].value).toBe('Variable 1 value')
       expect(values[0].environment.id).toBe(environment1.id)
+      expect(values[0].environment.slug).toBe(environment1.slug)
       expect(variable.id).toBe(variable1.id)
       expect(variable.name).toBe('Variable 1')
 
