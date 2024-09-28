@@ -1,4 +1,5 @@
 import BaseCommand from '../base.command'
+import ListRoleCommand from './role/list.role'
 
 export default class WorkspaceRoleCommand extends BaseCommand {
   getName(): string {
@@ -7,5 +8,9 @@ export default class WorkspaceRoleCommand extends BaseCommand {
 
   getDescription(): string {
     return 'Manage workspace roles'
+  }
+
+  getSubCommands(): BaseCommand[] {
+    return [new ListRoleCommand()]
   }
 }
