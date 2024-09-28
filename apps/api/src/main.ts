@@ -9,7 +9,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import { QueryTransformPipe } from './common/pipes/query.transform.pipe'
 import * as Sentry from '@sentry/node'
-import { ProfilingIntegration } from '@sentry/profiling-node'
+import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
@@ -28,20 +28,34 @@ async function initializeSentry() {
     logger.warn(
       'Missing one or more Sentry environment variables. Skipping initialization...'
     )
-  } else {
+    return
+  }
+
+  try {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
       enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
       environment: sentryEnv,
-      tracesSampleRate:
-        parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 1.0,
-      profilesSampleRate:
-        parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 1.0,
-      integrations: [new ProfilingIntegration()],
+      tracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+      profilesSampleRate: process.env.SENTRY_PROFILES_SAMPLE_RATE,
+      integrations: [nodeProfilingIntegration()],
       debug: sentryEnv.startsWith('dev')
     })
 
-    logger.log('Sentry initialized')
+    logger.log('Sentry initialized with the following configuration:')
+    logger.log(`Sentry Organization: ${process.env.SENTRY_ORG}`)
+    logger.log(`Sentry Project: ${process.env.SENTRY_PROJECT}`)
+    logger.log(`Sentry Environment: ${sentryEnv}`)
+    logger.log(
+      `Sentry Traces Sample Rate: ${process.env.SENTRY_TRACES_SAMPLE_RATE}`
+    )
+    logger.log(
+      `Sentry Profiles Sample Rate: ${process.env.SENTRY_PROFILES_SAMPLE_RATE}`
+    )
+    logger.log(`Sentry Debug Mode: ${sentryEnv.startsWith('dev')}`)
+  } catch (error) {
+    logger.error(`Failed to initialize Sentry: ${error.message}`)
+    Sentry.captureException(error)
   }
 }
 
