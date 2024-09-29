@@ -123,6 +123,7 @@ export class VariableService {
             environmentId: true,
             environment: {
               select: {
+                id: true,
                 slug: true
               }
             },
@@ -252,6 +253,7 @@ export class VariableService {
               environmentId: true,
               environment: {
                 select: {
+                  id: true,
                   slug: true
                 }
               },
@@ -521,6 +523,7 @@ export class VariableService {
             environmentId: true,
             environment: {
               select: {
+                id: true,
                 slug: true
               }
             }
@@ -593,6 +596,7 @@ export class VariableService {
             environmentId: true,
             environment: {
               select: {
+                id: true,
                 slug: true
               }
             }
