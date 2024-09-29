@@ -184,7 +184,7 @@ describe('Variable Controller Tests', () => {
           entries: [
             {
               value: 'Variable 3 value',
-              environmentId: environment2.id
+              environmentId: environment1.id
             }
           ]
         },
