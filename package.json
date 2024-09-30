@@ -91,6 +91,7 @@
   "scripts": {
     "preinstall": "node -e \"if (!process.env.npm_execpath || !process.env.npm_execpath.includes('pnpm')) { console.error('Error: Only pnpm is allowed. Please use pnpm instead.'); process.exit(1); }\"",
     "dev": "turbo run dev",
+    "preinstall": "if [[ \"$npm_config_user_agent\" != *pnpm* ]]; then echo 'This project uses pnpm. Please run using pnpm.'; exit 1; fi",
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
     "dev:platform": "turbo run dev --filter=platform",
