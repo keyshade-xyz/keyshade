@@ -89,6 +89,7 @@
     ]
   },
   "scripts": {
+    "preinstall": "node -e \"if (!process.env.npm_execpath || !process.env.npm_execpath.includes('pnpm')) { console.error('Error: Only pnpm is allowed. Please use pnpm instead.'); process.exit(1); }\"",
     "dev": "turbo run dev",
     "dev:api": "turbo run dev --filter=api",
     "dev:web": "turbo run dev --filter=web",
