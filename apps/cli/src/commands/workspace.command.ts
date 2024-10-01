@@ -6,6 +6,7 @@ import GetWorkspace from '@/commands/workspace/get.workspace'
 import ListWorkspace from '@/commands/workspace/list.workspace'
 import SearchWorkspace from '@/commands/workspace/search.workspace'
 import UpdateWorkspace from '@/commands/workspace/update.workspace'
+import WorkspaceRoleCommand from '@/commands/workspace/role.workspace'
 
 export default class WorkspaceCommand extends BaseCommand {
   getName(): string {
@@ -24,7 +25,8 @@ export default class WorkspaceCommand extends BaseCommand {
       new GetWorkspace(),
       new ListWorkspace(),
       new SearchWorkspace(),
-      new UpdateWorkspace()
+      new UpdateWorkspace(),
+      new WorkspaceRoleCommand()
     ]
   }
 }
