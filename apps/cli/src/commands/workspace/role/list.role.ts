@@ -1,10 +1,12 @@
 import BaseCommand from '@/commands/base.command'
 import {
   type CommandActionData,
-  type CommandArgument
+  type CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListRoleCommand extends BaseCommand {
   getName(): string {
@@ -24,7 +26,11 @@ export default class ListRoleCommand extends BaseCommand {
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return PAGINATION_OPTION
+  }
+
+  async action({ args, options }: CommandActionData): Promise<void> {
     Logger.info("Fetching workspace's roles...")
 
     const [workspaceSlug] = args
@@ -32,7 +38,8 @@ export default class ListRoleCommand extends BaseCommand {
     const { data, error, success } =
       await ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
         {
-          workspaceSlug
+          workspaceSlug,
+          ...options
         },
         this.headers
       )
