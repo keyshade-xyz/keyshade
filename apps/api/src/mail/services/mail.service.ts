@@ -158,6 +158,109 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
+  async projectRemoval(
+    email: string,
+    projectName: string,
+    removedOn: string
+  ): Promise<void> {
+    const subject = 'Project Removal Notification'
+    const body = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <style>
+              body {
+                  font-family: 'Segoe UI', 'Roboto', sans-serif;
+                  line-height: 1.6;
+                  color: #04050a;
+                  background-color: #fafafa;
+                  margin: 0;
+                  padding: 20px;
+              }
+
+              table {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: #fff;
+                  border-radius: 5px;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                  border-spacing: 0;
+                  width: 100%;
+              }
+
+              h1 {
+                  color: #000;
+                  margin-bottom: 20px;
+                  font-size: 24px;
+                  font-weight: 600;
+              }
+
+              p {
+                  margin-bottom: 15px;
+                  color: #666;
+              }
+
+              .p-40 {
+                  padding: 40px;
+              }
+
+              table tr td:first-child {
+                  color: #000;
+              }
+
+              table tr td:last-child {
+                  color: #666;
+              }
+
+              .info-table {
+                  background-color: #fafafa;
+                  border-radius: 5px;
+                  margin-bottom: 20px;
+              }
+
+              hr {
+                  border: none;
+                  border-top: 1px solid #eaeaea;
+                  margin: 20px 0;
+              }
+
+              .footer-text {
+                  font-size: 12px;
+                  color: #999;
+                  text-align: center;
+              }
+          </style>
+      </head>
+      <body>
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                  <td class="p-40">
+                      <h1>Project Removal Notification</h1>
+                      <p>Dear User,</p>
+                      <p>We hope this email finds you well. We wanted to inform you that your access to the following project has been removed:</p>
+                      <table cellpadding="10" cellspacing="0" border="0" width="100%" style="background-color: #fafafa; border-radius: 5px; margin-bottom: 20px;">
+                          <tr>
+                              <td>Project Name:</td>
+                              <td>${projectName}</td>
+                          </tr>
+                          <tr>
+                              <td>Removed On:</td>
+                              <td>${removedOn}</td>
+                          </tr>
+                      </table>
+                      <p>If you believe this action was taken in error or have any questions regarding this change, please don't hesitate to contact your project administrator or our support team.</p>
+                      <p>We appreciate your understanding and thank you for your contributions to the project.</p>
+                      <p>Best regards,<br>Team Keyshade</p>
+                      <hr />
+                      <p class="footer-text">This is an automated message. Please do not reply to this email.</p>
+                  </td>
+              </tr>
+          </table>
+      </body>
+      </html>
+    `
+    await this.sendEmail(email, subject, body)
+  }
+
   private async sendEmail(
     email: string,
     subject: string,

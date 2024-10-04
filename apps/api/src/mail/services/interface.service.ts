@@ -18,4 +18,10 @@ export interface IMailService {
   adminUserCreateEmail(email: string): Promise<void>
 
   feedbackEmail(email: string, feedback: string): Promise<void>
+
+  projectRemoval(
+    email: string,
+    projectName: string,
+    removedOn: string
+  ): Promise<void>
 }
