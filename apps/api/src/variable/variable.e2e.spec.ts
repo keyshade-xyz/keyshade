@@ -53,6 +53,7 @@ describe('Variable Controller Tests', () => {
   let project1: Project
   let environment1: Environment
   let environment2: Environment
+  let environment3: Environment
   let variable1: Variable
 
   beforeAll(async () => {
@@ -124,6 +125,10 @@ describe('Variable Controller Tests', () => {
         {
           name: 'Environment 2',
           description: 'Environment 2 description'
+        },
+        {
+          name: 'Test Environment',
+          description: 'Test environment description'
         }
       ]
     })) as Project
@@ -139,6 +144,13 @@ describe('Variable Controller Tests', () => {
       where: {
         projectId: project1.id,
         name: 'Environment 2'
+      }
+    })
+
+    environment3 = await prisma.environment.findFirst({
+      where: {
+        projectId: project1.id,
+        name: 'Test Environment'
       }
     })
 
@@ -184,7 +196,7 @@ describe('Variable Controller Tests', () => {
           entries: [
             {
               value: 'Variable 3 value',
-              environmentId: environment2.id
+              environmentId: environment3.id
             }
           ]
         },
@@ -204,6 +216,8 @@ describe('Variable Controller Tests', () => {
       expect(body.projectId).toBe(project1.id)
       expect(body.versions.length).toBe(1)
       expect(body.versions[0].value).toBe('Variable 3 value')
+      // expect(body.versions[0].environment.id).toBe(environment2.id)
+      expect(body.versions[0].environment.slug).toBe(environment3.slug)
 
       const variable = await prisma.variable.findUnique({
         where: {
@@ -382,10 +396,15 @@ describe('Variable Controller Tests', () => {
       const variableVersion = await prisma.variableVersion.findMany({
         where: {
           variableId: variable1.id
+        },
+        include: {
+          environment: true
         }
       })
 
       expect(variableVersion.length).toBe(1)
+      expect(variableVersion[0].environment.id).toBe(environment1.id)
+      expect(variableVersion[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should create a new version if the value is updated', async () => {
@@ -596,6 +615,7 @@ describe('Variable Controller Tests', () => {
       expect(values.length).toBe(1)
       expect(values[0].value).toBe('Variable 1 value')
       expect(values[0].environment.id).toBe(environment1.id)
+      expect(values[0].environment.slug).toBe(environment1.slug)
       expect(variable.id).toBe(variable1.id)
       expect(variable.name).toBe('Variable 1')
 
