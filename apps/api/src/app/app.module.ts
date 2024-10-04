@@ -26,6 +26,7 @@ import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+
 @Module({
   controllers: [AppController],
   imports: [
@@ -38,16 +39,7 @@ import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
         abortEarly: true
       }
     }),
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: seconds(config.get('THROTTLE_TTL')),
-          limit: config.get('THROTTLE_LIMIT')
-        }
-      ]
-    }),
+
     ScheduleModule.forRoot(),
     PassportModule,
     AuthModule,
@@ -77,10 +69,6 @@ import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
     {
       provide: APP_GUARD,
       useClass: ApiKeyGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard
     }
   ]
 })

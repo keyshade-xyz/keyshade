@@ -25,7 +25,8 @@ import {
   sendOAuthSuccessRedirect
 } from '@/common/redirect'
 import { setCookie } from '@/common/util'
-import { seconds, Throttle, ThrottlerGuard } from '@nestjs/throttler'
+import { ThrottlerGuard } from '@nestjs/throttler'
+
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name)
@@ -49,7 +50,6 @@ export class AuthController {
   @Public()
   @Post('resend-otp/:email')
   @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { ttl: seconds(1), limit: 2 } })
   async resendOtp(
     @Param('email')
     email: string
