@@ -1,7 +1,9 @@
+import { LoggerService } from '@nestjs/common'
 import PgBoss from 'pg-boss'
 
 class JobHandler {
   private boss: PgBoss
+  private readonly logger: LoggerService
 
   constructor(connectionString: string) {
     this.boss = new PgBoss(connectionString)
@@ -11,10 +13,10 @@ class JobHandler {
   private async initialize() {
     try {
       await this.boss.start()
-      console.log('PgBoss started successfully')
+      this.logger.log('PgBoss started successfully')
     } catch (error) {
-      console.error('Error starting PgBoss:', error)
-      throw error
+      this.logger.error(`Error starting PgBoss ${error}`)
+      throw new Error(`Error starting PgBoss ${error}`)
     }
   }
 
@@ -25,21 +27,22 @@ class JobHandler {
     try {
       await this.boss.work(queue, async ([job]) => {
         try {
-          await callback(job.data)
+          const jobData = job.data as V
+          await callback(jobData)
           await this.boss.complete(queue, job.id)
         } catch (error) {
-          console.error(`Error processing job in queue ${queue}:`, error)
-          throw error
+          this.logger.error(`Error processing job in queue ${queue}`)
+          throw new Error(`Error processing job in queue ${queue}`)
         }
       })
-      console.log(`Registered job handler for queue: ${queue}`)
+      this.logger.log(`Registered job handler for queue ${queue}`)
     } catch (error) {
-      console.error(`Error registering job handler for queue ${queue}:`, error)
-      throw error
+      this.logger.error(`Error registering job handler for queue ${queue}`)
+      throw new Error(`Error registering job handler for queue ${queue}`)
     }
   }
 
-  async scheduleJob<V>(
+  async scheduleJob<V extends object>(
     name: string,
     cron: string,
     data: V,
@@ -47,10 +50,10 @@ class JobHandler {
   ): Promise<void> {
     try {
       const jobId = await this.boss.schedule(name, cron, data, options)
-      console.log(`Scheduled job in queue ${name} with ID: ${jobId}`)
+      this.logger.log(`Scheduled job in queue ${name} with ID: ${jobId}`)
     } catch (error) {
-      console.error(`Error scheduling job in queue ${name}:`, error)
-      throw error
+      this.logger.error(`Error scheduling job in queue ${name}`)
+      throw new Error(`Error scheduling job in queue ${name}:`, error)
     }
   }
 
@@ -58,9 +61,10 @@ class JobHandler {
     try {
       await this.boss.stop()
       console.log('PgBoss stopped successfully')
+      this.logger.log('PgBoss stopped successfully')
     } catch (error) {
-      console.error('Error stopping PgBoss:', error)
-      throw error
+      this.logger.error('Error stopping PgBoss:', error)
+      throw new Error('Error stopping PgBoss:', error)
     }
   }
 }
