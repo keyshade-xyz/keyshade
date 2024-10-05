@@ -1,13 +1,15 @@
-import { Injectable, LoggerService } from '@nestjs/common'
+import { Inject, Injectable, LoggerService } from '@nestjs/common'
 import PgBoss from 'pg-boss'
 
 @Injectable()
-export default class JobHandlerService {
+export class JobHandlerService {
   private boss: PgBoss
   private readonly logger: LoggerService
 
-  constructor(connectionString: string) {
-    this.boss = new PgBoss(connectionString)
+  constructor(
+    @Inject('DATABASE_CONNECTION_STRING') private connectionString: string
+  ) {
+    this.boss = new PgBoss(this.connectionString)
     this.initialize()
   }
 
