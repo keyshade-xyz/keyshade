@@ -1,7 +1,8 @@
-import { LoggerService } from '@nestjs/common'
+import { Injectable, LoggerService } from '@nestjs/common'
 import PgBoss from 'pg-boss'
 
-class JobHandler {
+@Injectable()
+export default class JobHandlerService {
   private boss: PgBoss
   private readonly logger: LoggerService
 
@@ -68,5 +69,3 @@ class JobHandler {
     }
   }
 }
-
-export default JobHandler
