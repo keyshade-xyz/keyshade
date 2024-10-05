@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '../../util/controller-instance'
 import {
   CommandOption,
   type CommandActionData,
@@ -38,21 +38,14 @@ export class ListEnvironment extends BaseCommand {
       return
     }
 
-    const headers = {
-      'x-keyshade-token': this.apiKey
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Fetching all environments...')
 
-    const {
-      success,
-      data: environments,
-      error
-    } = await environmentController.getAllEnvironmentsOfProject(
-      { projectSlug, ...options },
-      headers
-    )
+    const { data: environments, error, success } = await ControllerInstance
+      .getInstance()
+      .environmentController.getAllEnvironmentsOfProject(
+        { projectSlug, ...options },
+        this.headers
+      )
 
     if (success) {
       Logger.info('Fetched environments:')
