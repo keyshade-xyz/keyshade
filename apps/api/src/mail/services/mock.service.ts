@@ -38,4 +38,17 @@ export class MockMailService implements IMailService {
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
     this.log.log(`Email change OTP for email ${email} is ${otp}`)
   }
+
+  async userInvitation(
+    email: string,
+    projectName: string,
+    projectUrl: string,
+    invitedBy: string,
+    invitedOn: string,
+    invitationRole: string
+  ): Promise<void> {
+    this.log.log(
+      `User ${email} has been invited to the project ${projectName} by ${invitedBy} on ${invitedOn} as a ${invitationRole}. Project details can be accessed at ${projectUrl}.`
+    )
+  }
 }
