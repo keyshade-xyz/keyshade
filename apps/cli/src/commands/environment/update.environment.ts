@@ -1,6 +1,6 @@
 import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '../../util/controller-instance'
 import {
   type CommandActionData,
   type CommandArgument,
@@ -49,24 +49,18 @@ export class UpdateEnvironment extends BaseCommand {
       return
     }
 
-    const headers = {
-      'x-keyshade-token': this.apiKey
-    }
-
-    const environmentData = {
-      name,
-      description,
-      slug: environmentSlug
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Updating Environment...')
 
     const {
       success,
       error,
       data: environment
-    } = await environmentController.updateEnvironment(environmentData, headers)
+    } = await ControllerInstance
+    .getInstance().
+    environmentController.updateEnvironment(
+      {name, description, slug: environmentSlug},
+      this.headers
+    )
 
     if (success) {
       Logger.info('Environment updated successfully')

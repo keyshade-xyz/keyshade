@@ -1,6 +1,6 @@
 import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '../../util/controller-instance'
 import {
   type CommandActionData,
   type CommandArgument
@@ -32,20 +32,17 @@ export class GetEnvironment extends BaseCommand {
       return
     }
 
-    const headers = {
-      'x-keyshade-token': this.apiKey
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Fetching Environment...')
 
     const {
       success,
       error,
       data: environment
-    } = await environmentController.getEnvironment(
+    } = await ControllerInstance
+    .getInstance()
+    .environmentController.getEnvironment(
       { slug: environmentSlug },
-      headers
+      this.headers
     )
 
     if (success) {
