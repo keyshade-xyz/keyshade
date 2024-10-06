@@ -1,5 +1,5 @@
-import { ColorBGSVG } from '@public/hero'
 import Link from 'next/link'
+import { ColorBGSVG } from '@public/hero'
 import EncryptButton from '@/components/ui/encrypt-btn'
 
 function Career(): React.JSX.Element {
