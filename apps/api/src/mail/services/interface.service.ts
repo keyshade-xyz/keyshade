@@ -19,9 +19,9 @@ export interface IMailService {
 
   feedbackEmail(email: string, feedback: string): Promise<void>
 
-  projectRemoval(
+  workspaceRemoval(
     email: string,
-    projectName: string,
+    workspaceName: string,
     removedOn: string
   ): Promise<void>
 }
