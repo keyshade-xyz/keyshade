@@ -1,10 +1,10 @@
 import { PageRequest, PageResponse } from './index.types'
 
-interface Workspace {
+export interface Workspace {
   id: string
   name: string
   slug: string
-  description: string
+  icon: string
   isFreeTier: boolean
   createdAt: string
   updatedAt: string
@@ -15,7 +15,7 @@ interface Workspace {
 
 export interface CreateWorkspaceRequest {
   name: string
-  description?: string
+  icon?: string
 }
 
 export interface CreateWorkspaceResponse extends Workspace {}
@@ -50,7 +50,7 @@ export interface ExportDataRequest {
 
 export interface ExportDataResponse {
   name: string
-  description: string
+  icon: string
   workspaceRoles: {
     name: string
     description: string
@@ -96,22 +96,22 @@ export interface GlobalSearchRequest {
 
 export interface GlobalSearchResponse {
   projects: {
-    id: string
+    slug: string
     name: string
     description: string
   }[]
   environments: {
-    id: string
+    slug: string
     name: string
     description: string
   }[]
   secrets: {
-    id: string
+    slug: string
     name: string
     note: string
   }[]
   variables: {
-    id: string
+    slug: string
     name: string
     note: string
   }[]

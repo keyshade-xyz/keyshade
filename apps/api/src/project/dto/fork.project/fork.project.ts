@@ -1,5 +1,5 @@
 import { Workspace } from '@prisma/client'
-import { IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsOptional, IsString } from 'class-validator'
 
 export class ForkProject {
   @IsString()
@@ -10,7 +10,7 @@ export class ForkProject {
   @IsOptional()
   name?: string
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
   storePrivateKey?: boolean
 }

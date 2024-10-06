@@ -96,7 +96,7 @@ export class WorkspaceService {
         slug: dto.name
           ? await generateEntitySlug(dto.name, 'WORKSPACE', this.prisma)
           : undefined,
-        description: dto.description,
+        icon: dto.icon,
         lastUpdatedBy: {
           connect: {
             id: user.id
@@ -210,18 +210,10 @@ export class WorkspaceService {
             userId: user.id
           }
         },
-        OR: [
-          {
-            name: {
-              contains: search
-            }
-          },
-          {
-            description: {
-              contains: search
-            }
-          }
-        ]
+
+        name: {
+          contains: search
+        }
       }
     })
 
@@ -233,18 +225,10 @@ export class WorkspaceService {
             userId: user.id
           }
         },
-        OR: [
-          {
-            name: {
-              contains: search
-            }
-          },
-          {
-            description: {
-              contains: search
-            }
-          }
-        ]
+
+        name: {
+          contains: search
+        }
       }
     })
 
@@ -281,7 +265,7 @@ export class WorkspaceService {
     const data: any = {}
 
     data.name = workspace.name
-    data.description = workspace.description
+    data.icon = workspace.icon
 
     // Get all the roles of the workspace
     data.workspaceRoles = await this.prisma.workspaceRole.findMany({
@@ -293,12 +277,7 @@ export class WorkspaceService {
         description: true,
         colorCode: true,
         hasAdminAuthority: true,
-        authorities: true,
-        projects: {
-          select: {
-            id: true
-          }
-        }
+        authorities: true
       }
     })
 
@@ -463,7 +442,7 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, description: true }
+      select: { slug: true, name: true, description: true }
     })
   }
 
@@ -488,7 +467,7 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, description: true }
+      select: { slug: true, name: true, description: true }
     })
   }
 
@@ -514,7 +493,7 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, note: true }
+      select: { slug: true, name: true, note: true }
     })
   }
 
@@ -539,7 +518,7 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { id: true, name: true, note: true }
+      select: { slug: true, name: true, note: true }
     })
   }
 

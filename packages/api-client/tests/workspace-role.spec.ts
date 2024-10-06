@@ -12,6 +12,7 @@ describe('Workspace Role Controller Tests', () => {
   const email = 'johndoe@example.com'
   let workspaceSlug: string | null
   let workspaceRoleSlug: string | null
+  let projectSlug: string | null
 
   beforeAll(async () => {
     // Create a workspace for the tests
@@ -24,9 +25,31 @@ describe('Workspace Role Controller Tests', () => {
     ).json()) as any
 
     workspaceSlug = workspaceResponse.slug
+
+    // Create a project for the tests
+    const projectResponse = (await (
+      await client.post(
+        `/api/project/${workspaceSlug}`,
+        {
+          name: 'My Project',
+          storePrivateKey: true
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).json()) as any
+
+    projectSlug = projectResponse.slug
   })
 
   afterAll(async () => {
+    await client.delete(
+      `/api/workspace/${workspaceSlug}/projects/${projectSlug}`,
+      {
+        'x-e2e-user-email': email
+      }
+    )
     // Delete the workspace after tests
     await client.delete(`/api/workspace/${workspaceSlug}`, {
       'x-e2e-user-email': email
@@ -41,7 +64,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role for developers',
       colorCode: '#FF0000',
       authorities: ['READ_WORKSPACE', 'READ_PROJECT'],
-      projectSlugs: []
+      projectSlugs: [projectSlug!]
     }
 
     const createWorkspaceRoleResponse = (
@@ -176,5 +199,42 @@ describe('Workspace Role Controller Tests', () => {
     ).data
 
     expect(roleExists.exists).toBe(true)
+  })
+
+  it('should create a new workspace role with a project', async () => {
+    const createWorkspaceRoleRequest: CreateWorkspaceRoleRequest = {
+      workspaceSlug: workspaceSlug!,
+      name: 'ReadOnly',
+      description: 'Role with project access',
+      colorCode: '#0000FF',
+      authorities: ['READ_WORKSPACE'],
+      projectSlugs: [projectSlug!]
+    }
+
+    const createRoleResponse = (
+      await workspaceRoleController.createWorkspaceRole(
+        createWorkspaceRoleRequest,
+        { 'x-e2e-user-email': email }
+      )
+    ).data
+
+    expect(createRoleResponse.name).toBe('ReadOnly')
+
+    // Delete the newly created role
+    await workspaceRoleController.deleteWorkspaceRole(
+      { workspaceRoleSlug: createRoleResponse.slug },
+      { 'x-e2e-user-email': email }
+    )
+  })
+
+  it('should fetch a workspace role with its assigned project', async () => {
+    const role = (
+      await workspaceRoleController.getWorkspaceRole(
+        { workspaceRoleSlug: workspaceRoleSlug! },
+        { 'x-e2e-user-email': email }
+      )
+    ).data
+
+    expect(role.slug).toBe(workspaceRoleSlug)
   })
 })

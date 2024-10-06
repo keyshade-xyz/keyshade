@@ -34,7 +34,7 @@ export const createWorkspace = async (
       id: workspaceId,
       slug: await generateEntitySlug(dto.name, 'WORKSPACE', prisma),
       name: dto.name,
-      description: dto.description,
+      icon: dto.icon,
       isFreeTier: true,
       ownerId: user.id,
       isDefault,

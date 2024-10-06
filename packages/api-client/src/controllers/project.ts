@@ -98,7 +98,7 @@ export default class ProjectController {
     headers: Record<string, string>
   ): Promise<ClientResponse<SyncProjectResponse>> {
     const response = await this.apiClient.put(
-      `/project/${request.projectSlug}/fork`,
+      `/api/project/${request.projectSlug}/fork?hardSync=${request.hardSync}`,
       request,
       headers
     )

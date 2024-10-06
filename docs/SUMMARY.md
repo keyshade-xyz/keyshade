@@ -6,6 +6,10 @@
 
 - [Introduction](cli/introduction.md)
 - [Profile](cli/profile.md)
+- [Project](cli/project.md)
+- [Environment](cli/environment.md)
+- [Workspace](cli/workspace.md)
+- [Scan](cli/scan.md)
 - [Init](cli/init.md)
 - [Run](cli/run.md)
 
@@ -24,8 +28,10 @@
 - [Running things locally](contributing-to-keyshade/running-things-locally/README.md)
   - [Running the API](contributing-to-keyshade/running-things-locally/running-the-api.md)
   - [Running the Web](contributing-to-keyshade/running-things-locally/running-the-web-app.md)
+  - [Running the Platform](contributing-to-keyshade/running-things-locally/running-the-platform.md)
   - [Running the CLI](contributing-to-keyshade/running-things-locally/running-the-cli.md)
   - [API Testing](contributing-to-keyshade/running-things-locally/api-testing.md)
+  - [Docker Support](contributing-to-keyshade/running-things-locally/docker-support.md)
 
 ## Internals
 

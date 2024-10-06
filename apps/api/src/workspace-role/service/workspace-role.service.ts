@@ -97,27 +97,35 @@ export class WorkspaceRoleService {
         include: {
           projects: {
             select: {
-              projectId: true
+              project: {
+                select: {
+                  id: true,
+                  slug: true,
+                  name: true
+                }
+              }
             }
           }
         }
       })
     )
 
-    // Create the project associations
-    const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-      dto.projectSlugs
-    )
-
-    if (dto.projectSlugs && dto.projectSlugs.length > 0) {
-      op.push(
-        this.prisma.projectWorkspaceRoleAssociation.createMany({
-          data: dto.projectSlugs.map((projectSlug) => ({
-            roleId: workspaceRoleId,
-            projectId: projectSlugToIdMap.get(projectSlug)
-          }))
-        })
+    if (dto.projectSlugs) {
+      // Create the project associations
+      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+        dto.projectSlugs
       )
+
+      if (dto.projectSlugs && dto.projectSlugs.length > 0) {
+        op.push(
+          this.prisma.projectWorkspaceRoleAssociation.createMany({
+            data: dto.projectSlugs.map((projectSlug) => ({
+              roleId: workspaceRoleId,
+              projectId: projectSlugToIdMap.get(projectSlug)
+            }))
+          })
+        )
+      }
     }
 
     const workspaceRole = (await this.prisma.$transaction(op))[0]
@@ -228,7 +236,13 @@ export class WorkspaceRoleService {
       include: {
         projects: {
           select: {
-            projectId: true
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
           }
         }
       }
@@ -443,7 +457,17 @@ export class WorkspaceRoleService {
         slug: workspaceRoleSlug
       },
       include: {
-        projects: true
+        projects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
+          }
+        }
       }
     })) as WorkspaceRoleWithProjects
 
