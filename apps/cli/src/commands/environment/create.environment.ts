@@ -5,7 +5,7 @@ import {
   type CommandArgument,
   type CommandOption
 } from 'src/types/command/command.types'
-import ControllerInstance from '../../util/controller-instance'
+import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {

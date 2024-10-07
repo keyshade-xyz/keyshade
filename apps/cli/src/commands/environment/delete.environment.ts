@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import ControllerInstance from '../../util/controller-instance'
+import ControllerInstance from '@/util/controller-instance'
 import {
   type CommandActionData,
   type CommandArgument
