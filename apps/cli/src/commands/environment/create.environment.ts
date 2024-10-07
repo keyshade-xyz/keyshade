@@ -5,7 +5,7 @@ import {
   type CommandArgument,
   type CommandOption
 } from 'src/types/command/command.types'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -50,26 +50,18 @@ export class CreateEnvironment extends BaseCommand {
       return
     }
 
-    const apiKey = this.apiKey
-
-    const environmentData = {
-      name,
-      description,
-      projectSlug
-    }
-
-    const headers = {
-      'x-keyshade-token': apiKey
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Creating Environment...')
 
     const {
       data: environment,
       error,
       success
-    } = await environmentController.createEnvironment(environmentData, headers)
+    } = await ControllerInstance
+    .getInstance()
+    .environmentController.createEnvironment(
+      {name, description, projectSlug}, 
+      this.headers
+    )
 
     if (success) {
       Logger.info(
