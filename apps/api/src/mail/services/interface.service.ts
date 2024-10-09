@@ -18,4 +18,10 @@ export interface IMailService {
   adminUserCreateEmail(email: string): Promise<void>
 
   feedbackEmail(email: string, feedback: string): Promise<void>
+
+  workspaceRemoval(
+    email: string,
+    workspaceName: string,
+    removedOn: string
+  ): Promise<void>
 }
