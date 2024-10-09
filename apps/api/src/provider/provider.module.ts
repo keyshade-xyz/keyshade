@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { REDIS_CLIENT, RedisProvider } from './redis.provider'
 import { MINIO_CLIENT, MinioProvider } from './minio.provider'
+import { PG_BOSS, PgBossProvider } from './pgboss.provider'
 
 @Global()
 @Module({
@@ -12,8 +13,12 @@ import { MINIO_CLIENT, MinioProvider } from './minio.provider'
     {
       provide: MINIO_CLIENT,
       useValue: MinioProvider
+    },
+    {
+      provide: PG_BOSS,
+      useValue: PgBossProvider
     }
   ],
-  providers: [RedisProvider, MinioProvider]
+  providers: [RedisProvider, MinioProvider, PgBossProvider]
 })
 export class ProviderModule {}
