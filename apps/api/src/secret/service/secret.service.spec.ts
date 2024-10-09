@@ -9,6 +9,8 @@ import { RedisClientType } from 'redis'
 import { ProviderModule } from '@/provider/provider.module'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { CommonModule } from '@/common/common.module'
+import { PG_BOSS } from '@/provider/pgboss.provider'
+import PgBoss from 'pg-boss'
 
 describe('SecretService', () => {
   let service: SecretService
@@ -30,6 +32,8 @@ describe('SecretService', () => {
       .useValue(mockDeep<RedisClientType>())
       .overrideProvider(PrismaService)
       .useValue(mockDeep<PrismaService>())
+      .overrideProvider(PG_BOSS)
+      .useValue(mockDeep<PgBoss>())
       .compile()
 
     service = module.get<SecretService>(SecretService)
