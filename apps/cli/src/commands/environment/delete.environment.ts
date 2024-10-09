@@ -34,12 +34,11 @@ export class DeleteEnvironment extends BaseCommand {
 
     Logger.info('Deleting Environment...')
 
-    const { success, error } = await ControllerInstance
-    .getInstance()
-    .environmentController.deleteEnvironment(
-      { id: environmentId },
-      this.headers
-    )
+    const { success, error } =
+      await ControllerInstance.getInstance().environmentController.deleteEnvironment(
+        { id: environmentId },
+        this.headers
+      )
 
     if (success) {
       Logger.info('Environment deleted successfully')

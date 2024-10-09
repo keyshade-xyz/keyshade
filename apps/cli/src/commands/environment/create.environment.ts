@@ -56,10 +56,8 @@ export class CreateEnvironment extends BaseCommand {
       data: environment,
       error,
       success
-    } = await ControllerInstance
-    .getInstance()
-    .environmentController.createEnvironment(
-      {name, description, projectSlug}, 
+    } = await ControllerInstance.getInstance().environmentController.createEnvironment(
+      { name, description, projectSlug },
       this.headers
     )
 

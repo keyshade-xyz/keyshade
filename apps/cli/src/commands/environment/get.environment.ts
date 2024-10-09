@@ -38,9 +38,7 @@ export class GetEnvironment extends BaseCommand {
       success,
       error,
       data: environment
-    } = await ControllerInstance
-    .getInstance()
-    .environmentController.getEnvironment(
+    } = await ControllerInstance.getInstance().environmentController.getEnvironment(
       { slug: environmentSlug },
       this.headers
     )

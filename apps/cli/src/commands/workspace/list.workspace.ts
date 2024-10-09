@@ -1,7 +1,10 @@
 import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
-import { CommandActionData, CommandOption } from '@/types/command/command.types'
+import {
+  type CommandActionData,
+  type CommandOption
+} from '@/types/command/command.types'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListWorkspace extends BaseCommand {

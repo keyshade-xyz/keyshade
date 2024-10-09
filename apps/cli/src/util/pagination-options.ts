@@ -1,4 +1,4 @@
-import { CommandOption } from '@/types/command/command.types'
+import { type CommandOption } from '@/types/command/command.types'
 
 export const PAGINATION_OPTION: CommandOption[] = [
   {
