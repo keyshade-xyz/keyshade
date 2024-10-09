@@ -16,7 +16,7 @@ function Hero(): React.JSX.Element {
     if (email === '') {
       toast.custom(() => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
-          <p className="text-sm">Pleasse enter an email address </p>
+          <p className="text-sm">Please enter an email address </p>
         </div>
       ))
       return
@@ -39,6 +39,8 @@ function Hero(): React.JSX.Element {
         await fetch(`${url}&EMAIL=${email}`, {
           mode: 'no-cors'
         })
+        setEmail('');
+
       } catch (error) {
         // eslint-disable-next-line no-console -- chill
         console.error(error)
