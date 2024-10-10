@@ -43,11 +43,21 @@ export class AuthService {
     }
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
-
     const otp = await generateOtp(email, user.id, this.prisma)
-
     await this.mailService.sendOtp(email, otp.code)
+
     this.logger.log(`Login code sent to ${email}`)
+  }
+
+  /**
+   * resend a login code to the given email address after resend otp button is pressed
+   * @throws {BadRequestException} If the email address is invalid
+   * @param email The email address to resend the login code to
+   */
+  async resendOtp(email: string): Promise<void> {
+    const user = await getUserByEmailOrId(email, this.prisma)
+    const otp = await generateOtp(email, user.id, this.prisma)
+    await this.mailService.sendOtp(email, otp.code)
   }
 
   /* istanbul ignore next */

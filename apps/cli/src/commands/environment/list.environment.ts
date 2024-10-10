@@ -1,7 +1,7 @@
 import BaseCommand from '../base.command'
 import ControllerInstance from '@/util/controller-instance'
 import {
-  CommandOption,
+  type CommandOption,
   type CommandActionData,
   type CommandArgument
 } from 'src/types/command/command.types'

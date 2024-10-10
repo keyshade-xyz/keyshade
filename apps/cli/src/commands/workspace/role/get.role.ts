@@ -36,16 +36,16 @@ export default class GetRoleCommand extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Workspace role fetched successfully!`)
+      Logger.info('Workspace role fetched successfully!')
       Logger.info(`Workspace role: ${data.name} (${data.slug})`)
       Logger.info(`Description: ${data.description || 'N/A'}`)
       Logger.info(`Created at ${data.createdAt}`)
       Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Authorities:`)
+      Logger.info('Authorities:')
       for (const authority of data.authorities) {
         Logger.info(`- ${authority}`)
       }
-      Logger.info(`Projects:`)
+      Logger.info('Projects:')
       for (const project of data.projects) {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }

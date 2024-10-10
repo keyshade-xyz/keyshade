@@ -9,6 +9,8 @@ import { GoogleOAuthStrategyFactory } from '@/config/factory/google/google-strat
 import { GoogleStrategy } from '@/config/oauth-strategy/google/google.strategy'
 import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strategy.factory'
 import { GitlabStrategy } from '@/config/oauth-strategy/gitlab/gitlab.strategy'
+import { seconds, ThrottlerModule } from '@nestjs/throttler'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
@@ -21,7 +23,17 @@ import { GitlabStrategy } from '@/config/oauth-strategy/gitlab/gitlab.strategy'
         algorithm: 'HS256'
       }
     }),
-    UserModule
+    UserModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: seconds(config.get('THROTTLE_TTL')),
+          limit: config.get('THROTTLE_LIMIT')
+        }
+      ],
+      inject: [ConfigService]
+    })
   ],
   providers: [
     AuthService,

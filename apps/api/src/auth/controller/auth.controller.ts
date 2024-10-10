@@ -25,6 +25,7 @@ import {
   sendOAuthSuccessRedirect
 } from '@/common/redirect'
 import { setCookie } from '@/common/util'
+import { ThrottlerGuard } from '@nestjs/throttler'
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +45,16 @@ export class AuthController {
     email: string
   ): Promise<void> {
     await this.authService.sendOtp(email)
+  }
+
+  @Public()
+  @Post('resend-otp/:email')
+  @UseGuards(ThrottlerGuard)
+  async resendOtp(
+    @Param('email')
+    email: string
+  ): Promise<void> {
+    return await this.authService.resendOtp(email)
   }
 
   /* istanbul ignore next */

@@ -2,7 +2,7 @@ import BaseCommand from '@/commands/base.command'
 import {
   type CommandActionData,
   type CommandArgument,
-  CommandOption
+  type CommandOption
 } from '@/types/command/command.types'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
