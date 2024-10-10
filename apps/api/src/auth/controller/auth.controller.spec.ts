@@ -12,6 +12,8 @@ import { GoogleOAuthStrategyFactory } from '@/config/factory/google/google-strat
 import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strategy.factory'
 import { CacheService } from '@/cache/cache.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
+import { ThrottlerGuard, ThrottlerStorage } from '@nestjs/throttler'
+import { Reflector } from '@nestjs/core'
 
 describe('AuthController', () => {
   let controller: AuthController
@@ -40,7 +42,21 @@ describe('AuthController', () => {
               keys: jest.fn()
             }
           }
-        }
+        },
+        //Mocked values for throttler
+        {
+          provide: ThrottlerGuard,
+          useValue: { canActivate: jest.fn(() => true) } // Mocking ThrottlerGuard
+        },
+        {
+          provide: 'THROTTLER:MODULE_OPTIONS', // Mocking THROTTLER:MODULE_OPTIONS
+          useValue: {} // Empty or default value to satisfy dependency
+        },
+        {
+          provide: ThrottlerStorage, // Mocking Symbol(ThrottlerStorage)
+          useValue: {} // Empty or default value to satisfy dependency
+        },
+        Reflector
       ]
     })
       .overrideProvider(PrismaService)
@@ -50,6 +66,9 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController)
   })
 
+  it('should be defined', () => {
+    expect(controller).toBeDefined()
+  })
   it('should be defined', () => {
     expect(controller).toBeDefined()
   })
