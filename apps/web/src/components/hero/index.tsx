@@ -18,7 +18,7 @@ function Hero(): React.JSX.Element {
     const validation = emailSchema.safeParse(email)
 
     if (!validation.success) {
-      toast.custom(() => (
+      toast.custom((_t) => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
           <p className="text-sm">Please enter a valid email address</p>
         </div>
