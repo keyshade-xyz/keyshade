@@ -1,5 +1,6 @@
 'use client'
 // import { GeistSans } from 'geist/font/sans'
+import { z } from 'zod'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Toaster, toast } from 'sonner'
@@ -9,14 +10,17 @@ import { InputBorderSpotlight } from '../ui/input-spotlight'
 
 function Hero(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
+  const emailSchema = z.string().email({ message: "Invalid email address" })
 
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
 
-    if (email === '') {
-      toast.custom(() => (
+    const validation = emailSchema.safeParse(email)
+
+    if (!validation.success) {
+      toast.custom((_t) => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
-          <p className="text-sm">Please enter an email address </p>
+          <p className="text-sm">Please enter a valid email address</p>
         </div>
       ))
       return
