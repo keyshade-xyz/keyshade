@@ -196,7 +196,7 @@ describe('Variable Controller Tests', () => {
           entries: [
             {
               value: 'Variable 3 value',
-              environmentId: environment3.id
+              environmentSlug: environment3.slug
             }
           ]
         },
@@ -216,7 +216,6 @@ describe('Variable Controller Tests', () => {
       expect(body.projectId).toBe(project1.id)
       expect(body.versions.length).toBe(1)
       expect(body.versions[0].value).toBe('Variable 3 value')
-      // expect(body.versions[0].environment.id).toBe(environment2.id)
       expect(body.versions[0].environment.slug).toBe(environment3.slug)
 
       const variable = await prisma.variable.findUnique({

@@ -39,8 +39,7 @@ function Hero(): React.JSX.Element {
         await fetch(`${url}&EMAIL=${email}`, {
           mode: 'no-cors'
         })
-        setEmail('');
-
+        setEmail('')
       } catch (error) {
         // eslint-disable-next-line no-console -- chill
         console.error(error)
