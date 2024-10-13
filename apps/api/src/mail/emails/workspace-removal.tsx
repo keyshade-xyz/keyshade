@@ -10,7 +10,6 @@ import {
   Text
 } from '@react-email/components'
 import * as React from 'react'
-
 interface WorkspaceRemovalEmailProps {
   workspaceName: string
   removedOn: string
@@ -101,7 +100,7 @@ const container = {
 }
 
 const content = {
-  padding: '40px'
+  padding: '20px 40px'
 }
 
 const h1 = {
@@ -112,7 +111,7 @@ const h1 = {
 }
 
 const text = {
-  marginBottom: '15px',
+  marginBottom: '5px',
   color: '#666'
 }
 
@@ -120,24 +119,24 @@ const workspaceDetails = {
   width: '100%',
   backgroundColor: '#fafafa',
   borderRadius: '5px',
-  marginBottom: '20px',
-  padding: '18px'
+  margin: '20px 0px',
+  padding: '10px 20px'
 }
 
 const workspaceInfo = {
-  marginBottom: '5px'
+  margin: '7px 0px'
 }
 
 const footer = {
   borderTop: '1px solid #eaeaea',
-  padding: '20px 40px'
+  padding: '20px'
 }
 
 const footerText = {
   fontSize: '12px',
   color: '#999',
   textAlign: 'center' as const,
-  marginBottom: '5px'
+  margin: '0'
 }
 
 const link = {
