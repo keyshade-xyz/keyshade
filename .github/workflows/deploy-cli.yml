@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: alpha
     name: Build and push Web docker image for release
-    if: github.ref == 'refs/heads/main'
+    if: github.event.ref == 'refs/heads/main'
   
   
     steps:
