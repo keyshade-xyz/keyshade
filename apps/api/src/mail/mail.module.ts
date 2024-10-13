@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { MailService } from './services/mail.service'
+import { MailService } from './services/mail.service.tsx'
 import { MAIL_SERVICE } from './services/interface.service'
 
 @Global()
