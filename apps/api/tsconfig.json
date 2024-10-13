@@ -11,8 +11,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": ".",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -23,6 +21,6 @@
     "moduleResolution": "NodeNext",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
   }
 }
