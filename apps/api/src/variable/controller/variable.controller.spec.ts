@@ -10,6 +10,8 @@ import { mockDeep } from 'jest-mock-extended'
 import { ProviderModule } from '@/provider/provider.module'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { CommonModule } from '@/common/common.module'
+import { PG_BOSS } from '@/provider/pgboss.provider'
+import PgBoss from 'pg-boss'
 
 describe('VariableController', () => {
   let controller: VariableController
@@ -30,6 +32,8 @@ describe('VariableController', () => {
     })
       .overrideProvider(REDIS_CLIENT)
       .useValue(mockDeep<RedisClientType>())
+      .overrideProvider(PG_BOSS)
+      .useValue(mockDeep<PgBoss>())
       .compile()
 
     controller = module.get<VariableController>(VariableController)
