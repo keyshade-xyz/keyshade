@@ -51,10 +51,8 @@ export class ListEnvironment extends BaseCommand {
 
     if (success) {
       Logger.info('Fetched environments:')
-      environments.items.forEach((environment) => {
-        Logger.info(
-          `- ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
-        )
+      environments.items.forEach((environment: any) => {
+        Logger.info(`- ${environment.name} (${environment.slug})`)
       })
     } else {
       Logger.error(`Failed to fetch environments: ${error.message}`)
