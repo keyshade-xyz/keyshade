@@ -1,6 +1,6 @@
 import BaseCommand from '@/commands/base.command'
 import {
-  CommandOption,
+  type CommandOption,
   type CommandActionData,
   type CommandArgument
 } from '@/types/command/command.types'
@@ -76,17 +76,17 @@ export default class UpdateRoleCommand extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Workspace role updated successfully:`)
+      Logger.info('Workspace role updated successfully:')
       Logger.info(`Workspace role: ${data.name} (${data.slug})`)
       Logger.info(`Description: ${data.description || 'N/A'}`)
       Logger.info(`Created at ${data.createdAt}`)
       Logger.info(`Updated at ${data.updatedAt}`)
       Logger.info(`Color code: ${data.colorCode}`)
-      Logger.info(`Authorities:`)
+      Logger.info('Authorities:')
       for (const authority of data.authorities) {
         Logger.info(`- ${authority}`)
       }
-      Logger.info(`Projects:`)
+      Logger.info('Projects:')
       for (const project of data.projects) {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }

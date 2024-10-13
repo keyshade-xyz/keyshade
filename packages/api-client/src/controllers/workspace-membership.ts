@@ -139,7 +139,7 @@ export default class WorkspaceMembershipController {
     request: GetMembersRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetMembersResponse>> {
-    let url = parsePaginationUrl(
+    const url = parsePaginationUrl(
       `/api/workspace-membership/${request.workspaceSlug}/members`,
       request
     )
