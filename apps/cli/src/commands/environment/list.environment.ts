@@ -40,19 +40,19 @@ export class ListEnvironment extends BaseCommand {
 
     Logger.info('Fetching all environments...')
 
-    const { data: environments, error, success } = await ControllerInstance
-      .getInstance()
-      .environmentController.getAllEnvironmentsOfProject(
-        { projectSlug, ...options },
-        this.headers
-      )
+    const {
+      data: environments,
+      error,
+      success
+    } = await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      { projectSlug, ...options },
+      this.headers
+    )
 
     if (success) {
       Logger.info('Fetched environments:')
-      environments.items.forEach((environment) => {
-        Logger.info(
-          `- ID: ${environment.id}, Name: ${environment.name}, Description: ${environment.description}`
-        )
+      environments.items.forEach((environment: any) => {
+        Logger.info(`- ${environment.name} (${environment.slug})`)
       })
     } else {
       Logger.error(`Failed to fetch environments: ${error.message}`)
