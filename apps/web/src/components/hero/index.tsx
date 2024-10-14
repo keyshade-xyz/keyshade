@@ -4,8 +4,11 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { Toaster, toast } from 'sonner'
 import { ColorBGSVG, HeroImage } from '@public/hero'
+import { z } from 'zod'
 import EncryptButton from '../ui/encrypt-btn'
 import { InputBorderSpotlight } from '../ui/input-spotlight'
+
+const emailSchema = z.string().email()
 
 function Hero(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
@@ -13,10 +16,12 @@ function Hero(): React.JSX.Element {
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
 
-    if (email === '') {
+    const result = emailSchema.safeParse(email)
+
+    if (!result.success) {
       toast.custom(() => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
-          <p className="text-sm">Please enter an email address </p>
+          <p className="text-sm">Please enter a valid email address </p>
         </div>
       ))
       return
