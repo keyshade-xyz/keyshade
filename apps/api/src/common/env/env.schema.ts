@@ -18,6 +18,16 @@ Use the .optional() property if you are okay with a variable being omitted from 
 
 */
 
+const sampleRateSchema = (name: string) =>
+  z
+    .string()
+    .optional()
+    .transform((val) => (val === undefined ? undefined : parseFloat(val)))
+    .pipe(z.number().min(0).max(1).optional())
+    .refine((val) => val === undefined || !isNaN(val), {
+      message: `${name} must be a number between 0 and 1`
+    })
+
 const e2eEnvSchema = z.object({
   NODE_ENV: z.literal('e2e'),
   DATABASE_URL: z.string(),
@@ -47,11 +57,14 @@ const devSchema = z.object({
   GITLAB_CLIENT_SECRET: z.string().optional(),
   GITLAB_CALLBACK_URL: z.string().optional(),
 
-  SENTRY_DSN: z.string().optional(),
+  SENTRY_DSN: z
+    .string()
+    .url({ message: 'SENTRY_DSN must be a valid URL' })
+    .optional(),
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
-  SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
-  SENTRY_PROFILES_SAMPLE_RATE: z.string().optional(),
+  SENTRY_TRACES_SAMPLE_RATE: sampleRateSchema('SENTRY_TRACES_SAMPLE_RATE'),
+  SENTRY_PROFILES_SAMPLE_RATE: sampleRateSchema('SENTRY_PROFILES_SAMPLE_RATE'),
   SENTRY_ENV: z.string().optional(),
 
   SMTP_HOST: z.string(),
@@ -78,7 +91,9 @@ const devSchema = z.object({
   MINIO_BUCKET_NAME: z.string().optional(),
   MINIO_USE_SSL: z.string().optional(),
 
-  FEEDBACK_FORWARD_EMAIL: z.string().email()
+  FEEDBACK_FORWARD_EMAIL: z.string().email(),
+  THROTTLE_TTL: z.string().transform((val) => parseInt(val, 10)),
+  THROTTLE_LIMIT: z.string().transform((val) => parseInt(val, 10))
 })
 
 const prodSchema = z.object({
@@ -103,11 +118,14 @@ const prodSchema = z.object({
   GITLAB_CLIENT_SECRET: z.string().min(1),
   GITLAB_CALLBACK_URL: z.string().min(1),
 
-  SENTRY_DSN: z.string().min(1),
+  SENTRY_DSN: z
+    .string()
+    .url({ message: 'SENTRY_DSN must be a valid URL' })
+    .min(1),
   SENTRY_ORG: z.string().min(1),
   SENTRY_PROJECT: z.string().min(1),
-  SENTRY_TRACES_SAMPLE_RATE: z.string().min(1),
-  SENTRY_PROFILES_SAMPLE_RATE: z.string().min(1),
+  SENTRY_TRACES_SAMPLE_RATE: sampleRateSchema('SENTRY_TRACES_SAMPLE_RATE'),
+  SENTRY_PROFILES_SAMPLE_RATE: sampleRateSchema('SENTRY_PROFILES_SAMPLE_RATE'),
   SENTRY_ENV: z.string().min(1),
 
   SMTP_HOST: z.string().min(1),

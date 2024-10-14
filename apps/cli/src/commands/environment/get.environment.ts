@@ -1,6 +1,6 @@
 import { Logger } from '@/util/logger'
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '@/util/controller-instance'
 import {
   type CommandActionData,
   type CommandArgument
@@ -32,27 +32,23 @@ export class GetEnvironment extends BaseCommand {
       return
     }
 
-    const headers = {
-      'x-keyshade-token': this.apiKey
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Fetching Environment...')
 
     const {
       success,
       error,
       data: environment
-    } = await environmentController.getEnvironment(
+    } = await ControllerInstance.getInstance().environmentController.getEnvironment(
       { slug: environmentSlug },
-      headers
+      this.headers
     )
 
     if (success) {
-      Logger.info('Environment fetched successfully:')
-      Logger.info(
-        `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
-      )
+      Logger.info(`Name: ${environment.name}`)
+      Logger.info(`Slug: ${environment.slug}`)
+      Logger.info(`Description: ${environment.description}`)
+      Logger.info(`Created On: ${environment.createdAt}`)
+      Logger.info(`Updated On: ${environment.updatedAt}`)
     } else {
       Logger.error(`Error fetching environment: ${error.message}`)
     }

@@ -1,5 +1,5 @@
 import BaseCommand from '../base.command'
-import { EnvironmentController } from '@keyshade/api-client'
+import ControllerInstance from '@/util/controller-instance'
 import {
   type CommandActionData,
   type CommandArgument
@@ -32,19 +32,13 @@ export class DeleteEnvironment extends BaseCommand {
       return
     }
 
-    const apiKey = this.apiKey
-
-    const headers = {
-      'x-keyshade-token': apiKey
-    }
-
-    const environmentController = new EnvironmentController(this.baseUrl)
     Logger.info('Deleting Environment...')
 
-    const { success, error } = await environmentController.deleteEnvironment(
-      { id: environmentId },
-      headers
-    )
+    const { success, error } =
+      await ControllerInstance.getInstance().environmentController.deleteEnvironment(
+        { id: environmentId },
+        this.headers
+      )
 
     if (success) {
       Logger.info('Environment deleted successfully')
