@@ -26,6 +26,7 @@ export default function AuthOTPPage(): React.JSX.Element {
   const [otp, setOtp] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isInvalidOtp, setIsInvalidOtp] = useState<boolean>(false)
+  const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false)
 
   const router = useRouter()
 
@@ -88,7 +89,28 @@ export default function AuthOTPPage(): React.JSX.Element {
       }
     }
   }
-
+  const handleResendOtp = async (userEmail: string): Promise<void> => {
+    try {
+      setIsLoadingRefresh(true)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/resend-otp/${encodeURIComponent(userEmail)}`,
+        {
+          method: 'POST'
+        }
+      )
+      if (response.status === 429) {
+        toast.error("Couldn't send OTP, too many requests")
+        setIsLoadingRefresh(false)
+      } else if (response.ok)
+        toast.success('OTP successfully sent to your email')
+      setIsLoadingRefresh(false)
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(`Failed to send OTP: ${error}`)
+      toast.error("Couldn't send OTP .")
+      setIsLoadingRefresh(false)
+    }
+  }
   return (
     <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
@@ -144,6 +166,28 @@ export default function AuthOTPPage(): React.JSX.Element {
             >
               {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
             </Button>
+            <div className="space-x-reverse-2 flex items-center justify-center text-[#71717A]">
+              <span>Didn’t receive OTP?</span>
+              <span>
+                {isLoadingRefresh ? (
+                  <span>
+                    <LoadingSVG className="w-10 h-10" />
+                  </span>
+                ) : (
+                  <Button
+                    className="text-[#71717A]"
+                    disabled={isLoading}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      void handleResendOtp(email)
+                    }}
+                    variant="link"
+                  >
+                    Resend OTP
+                  </Button>
+                )}
+              </span>
+            </div>
           </form>
         </div>
       </div>
