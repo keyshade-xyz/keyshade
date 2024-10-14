@@ -15,7 +15,7 @@ interface WorkspaceRemovalEmailProps {
   removedOn: string
 }
 
-export const WorkspaceRemovalEmail = ({
+export const RemovedFromWorkspaceEmail = ({
   workspaceName,
   removedOn
 }: WorkspaceRemovalEmailProps) => {
@@ -80,7 +80,7 @@ export const WorkspaceRemovalEmail = ({
   )
 }
 
-export default WorkspaceRemovalEmail
+export default RemovedFromWorkspaceEmail
 
 const main = {
   fontFamily: "'Segoe UI', 'Roboto', sans-serif",

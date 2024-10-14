@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common'
 import { IMailService } from './interface.service'
 import { Transporter, createTransport } from 'nodemailer'
-import WorkspaceRemovalEmail from '../emails/workspace-removal'
+import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
 import { render } from '@react-email/render'
 import React from 'react'
 
@@ -166,10 +166,10 @@ export class MailService implements IMailService {
     workspaceName: string,
     removedOn: string
   ): Promise<void> {
-    const subject = 'Workspace Removal Notification'
+    const subject = `Your access was revoked from ${workspaceName}`
 
     const body = await render(
-      <WorkspaceRemovalEmail
+      <RemovedFromWorkspaceEmail
         workspaceName={workspaceName}
         removedOn={removedOn}
       />
