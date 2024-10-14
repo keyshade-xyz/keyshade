@@ -44,10 +44,11 @@ export class GetEnvironment extends BaseCommand {
     )
 
     if (success) {
-      Logger.info('Environment fetched successfully:')
-      Logger.info(
-        `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
-      )
+      Logger.info(`Name: ${environment.name}`)
+      Logger.info(`Slug: ${environment.slug}`)
+      Logger.info(`Description: ${environment.description}`)
+      Logger.info(`Created On: ${environment.createdAt}`)
+      Logger.info(`Updated On: ${environment.updatedAt}`)
     } else {
       Logger.error(`Error fetching environment: ${error.message}`)
     }

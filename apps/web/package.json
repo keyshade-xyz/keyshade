@@ -24,7 +24,8 @@
     "react-dom": "^18.2.0",
     "sharp": "^0.33.3",
     "sonner": "^1.4.41",
-    "tailwind-merge": "^2.2.1"
+    "tailwind-merge": "^2.2.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.19",
