@@ -31,19 +31,20 @@ function Hero(): React.JSX.Element {
       'https://xyz.us18.list-manage.com/subscribe/post?u=2e44b940cafe6e54d8b9e0790&amp;id=bd382dd7c5&amp;f_id=00e5c2e1f0'
 
     async function fetchData(): Promise<void> {
-      toast.custom((_t) => (
-        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-2 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
-          <h1 className="font-semibold">Welcome to Keyshade 🎉</h1>
-          <p className="text-sm">
-            You have been added to the waitlist. We will notify you once we
-            launch
-          </p>
-        </div>
-      ))
       try {
         await fetch(`${url}&EMAIL=${email}`, {
           mode: 'no-cors'
         })
+
+        toast.custom((_t) => (
+          <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-2 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
+            <h1 className="font-semibold">Welcome to Keyshade 🎉</h1>
+            <p className="text-sm">
+              You have been added to the waitlist. We will notify you once we
+              launch
+            </p>
+          </div>
+        ))        
         setEmail('');
 
       } catch (error) {
