@@ -12,8 +12,6 @@ const emailSchema = z.string().email()
 
 function Hero(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
-  //@typescript-eslint/no-unused-vars
-  const [_waitListData, setWaitListData] = useState<string[]>([])
 
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
@@ -65,11 +63,8 @@ function Hero(): React.JSX.Element {
 
         ))    
 
-        setWaitListData((prevData) => {
-          const updatedData: string[] = [...prevData, email]
-          localStorage.setItem('waitListData', JSON.stringify(updatedData))
-          return updatedData
-        })
+        waitListedEmails.push(email)
+        localStorage.setItem('waitListData', JSON.stringify(waitListedEmails))
         setEmail('')
 
       } catch (error) {
