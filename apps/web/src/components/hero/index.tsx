@@ -12,6 +12,8 @@ const emailSchema = z.string().email()
 
 function Hero(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
+  //@typescript-eslint/no-unused-vars
+  const [_waitListData, setWaitListData] = useState<string[]>([])
 
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
@@ -22,6 +24,22 @@ function Hero(): React.JSX.Element {
       toast.custom(() => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
           <p className="text-sm">Please enter a valid email address </p>
+        </div>
+      ))
+      return
+    }
+
+    const dataInStorage: string | null = localStorage.getItem('waitListData')
+    const waitListedEmails: string[] = dataInStorage ? (JSON.parse(dataInStorage) as string[]) : []
+  
+    // actual logic where we are checking if this email is already in waitlisted users or not
+    if (waitListedEmails.includes(email)) {
+      toast.custom(() => (
+        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+          <p className="text-sm">
+            You have been already added to the waitlist. We will notify you once
+            we launch.{' '}
+          </p>
         </div>
       ))
       return
@@ -44,8 +62,14 @@ function Hero(): React.JSX.Element {
               launch
             </p>
           </div>
-        ))        
-        setEmail('');
+        ))    
+
+        setWaitListData((prevData) => {
+          const updatedData: string[] = [...prevData, email]
+          localStorage.setItem('waitListData', JSON.stringify(updatedData))
+          return updatedData
+        })
+        setEmail('')
 
       } catch (error) {
         // eslint-disable-next-line no-console -- chill
