@@ -62,6 +62,7 @@ function Hero(): React.JSX.Element {
               launch
             </p>
           </div>
+
         ))    
 
         setWaitListData((prevData) => {
