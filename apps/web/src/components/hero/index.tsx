@@ -44,9 +44,8 @@ function Hero(): React.JSX.Element {
               launch
             </p>
           </div>
-        ))        
-        setEmail('');
-
+        ))
+        setEmail('')
       } catch (error) {
         // eslint-disable-next-line no-console -- chill
         console.error(error)
