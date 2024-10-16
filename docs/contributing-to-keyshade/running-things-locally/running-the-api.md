@@ -24,6 +24,12 @@ pnpm run db:deploy-migrations
 pnpm run dev:api
 ```
 
+- Whenever you need to reset the database, use this command:
+
+```bash
+pnpm run db:reset
+```
+
 ## Testing your code
 
 We currently perform two kinds of tests: **unit tests** and **integration tests.**&#x20;
