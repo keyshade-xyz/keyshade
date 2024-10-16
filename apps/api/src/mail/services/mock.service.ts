@@ -39,7 +39,7 @@ export class MockMailService implements IMailService {
     this.log.log(`Email change OTP for email ${email} is ${otp}`)
   }
 
-  async workspaceRemoval(
+  async removedFromWorkspace(
     email: string,
     workspaceName: string,
     removedOn: string

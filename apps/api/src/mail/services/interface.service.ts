@@ -19,7 +19,7 @@ export interface IMailService {
 
   feedbackEmail(email: string, feedback: string): Promise<void>
 
-  workspaceRemoval(
+  removedFromWorkspace(
     email: string,
     workspaceName: string,
     removedOn: string

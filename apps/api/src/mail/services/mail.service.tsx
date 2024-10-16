@@ -161,7 +161,7 @@ export class MailService implements IMailService {
     await this.sendEmail(email, subject, body)
   }
 
-  async workspaceRemoval(
+  async removedFromWorkspace(
     email: string,
     workspaceName: string,
     removedOn: string
