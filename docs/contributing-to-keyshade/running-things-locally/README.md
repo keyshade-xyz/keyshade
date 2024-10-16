@@ -13,4 +13,5 @@ You can pick up any of these topics from the following and start with it.
 - [Running the API](running-the-api.md)
 - [Running the Web](running-the-web-app.md)
 - [Running the CLI](running-the-cli.md)
+- [Running the Platform](running-the-platform.md)
 - [API Testing](api-testing.md)
