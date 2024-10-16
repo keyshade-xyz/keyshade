@@ -27,16 +27,16 @@ function Hero(): React.JSX.Element {
       return
     }
 
-    const dataInStorage: string | null = localStorage.getItem('waitListData')
-    const waitListedEmails: string[] = dataInStorage ? (JSON.parse(dataInStorage) as string[]) : []
+    const dataInStorage: string | null = localStorage.getItem('waitlistData')
+    const emailsInWaitlist: string[] = dataInStorage ? (JSON.parse(dataInStorage) as string[]) : []
   
     // actual logic where we are checking if this email is already in waitlisted users or not
-    if (waitListedEmails.includes(email)) {
+    if (emailsInWaitlist.includes(email)) {
       toast.custom(() => (
         <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
           <p className="text-sm">
             You have been already added to the waitlist. We will notify you once
-            we launch.{' '}
+            we launch.
           </p>
         </div>
       ))
@@ -63,8 +63,8 @@ function Hero(): React.JSX.Element {
 
         ))    
 
-        waitListedEmails.push(email)
-        localStorage.setItem('waitListData', JSON.stringify(waitListedEmails))
+        emailsInWaitlist.push(email)
+        localStorage.setItem('waitlistData', JSON.stringify(emailsInWaitlist))
         setEmail('')
 
       } catch (error) {
