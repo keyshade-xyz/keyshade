@@ -120,7 +120,6 @@ export class VariableService {
         },
         versions: {
           select: {
-            environmentId: true,
             environment: {
               select: {
                 id: true,
@@ -250,7 +249,6 @@ export class VariableService {
             },
             select: {
               id: true,
-              environmentId: true,
               environment: {
                 select: {
                   id: true,
@@ -520,7 +518,6 @@ export class VariableService {
           },
           select: {
             value: true,
-            environmentId: true,
             environment: {
               select: {
                 id: true,
@@ -593,7 +590,6 @@ export class VariableService {
         },
         versions: {
           select: {
-            environmentId: true,
             environment: {
               select: {
                 id: true,
