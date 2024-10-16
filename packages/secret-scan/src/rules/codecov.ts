@@ -1,11 +1,11 @@
 // keyshade-ignore-all
-import type { TestCase }from '@/types'
+import type { TestCase } from '@/types'
 
 export default function codecov(): RegExp[] {
-	return [
-		// Codecov key regex
-		/codecov[a-zA-Z0-9]{32}/i
-	]
+  return [
+    // Codecov key regex
+    /codecov[a-zA-Z0-9]{32}/i
+  ]
 }
 
 const testcase: TestCase[] = [
