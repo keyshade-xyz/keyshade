@@ -6,7 +6,9 @@
   "scripts": {
     "genKey": "tsx src/generateKey.ts",
     "build": "tsup",
-    "test": "mocha"
+    "test": "mocha",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint \"{src,tests}/**/*.ts\" --fix"
   },
   "publishConfig": {
     "access": "public"

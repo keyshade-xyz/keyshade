@@ -40,7 +40,7 @@ We love documentation contributions! Whether it's more complete descriptions, ne
 
 ## Community
 
-You can chat with the core team on [our discord](https://discord.gg/m6TcpWBSdt). Please be respectful to each other and follow our code of conduct.
+You can chat with the core team on [our discord](https://discord.gg/xJFggHUPAf). Please be respectful to each other and follow our code of conduct.
 
 Thank you again for your interest in our project, your contribution, and your support!
 
