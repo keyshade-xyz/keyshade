@@ -24,7 +24,7 @@ pnpm run db:deploy-migrations
 pnpm run dev:api
 ```
 
-- Whenever you need to reset the database, use this command:
+- There might be a case when you would like to create a completely fresh copy of the database. In that case, you might use the reset command:
 
 ```bash
 pnpm run db:reset
