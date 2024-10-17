@@ -109,7 +109,8 @@ describe('Get Variable Tests', () => {
     expect(variable.data.name).toBe('Variable 2')
     expect(variable.data.versions.length).toBe(1)
     expect(variable.data.versions[0].value).toBe('Variable 2 value')
-    expect(variable.data.versions[0].environmentId).toBe(environment.id)
+    expect(variable.data.versions[0].environment.id).toBe(environment.id)
+    expect(variable.data.versions[0].environment.slug).toBe(environment.slug)
 
     // Delete the variable
     const deleteVariable = await variableController.deleteVariable(
@@ -164,8 +165,11 @@ describe('Get Variable Tests', () => {
     )
     expect(updateVariable.data.updatedVersions.length).toBe(1)
     expect(updateVariable.data.updatedVersions[0].value).toBe('1234')
-    expect(updateVariable.data.updatedVersions[0].environmentId).toBe(
+    expect(updateVariable.data.updatedVersions[0].environment.id).toBe(
       environment.id
+    )
+    expect(updateVariable.data.updatedVersions[0].environment.slug).toBe(
+      environment.slug
     )
   })
 
@@ -222,6 +226,7 @@ describe('Get Variable Tests', () => {
       expect(value).toHaveProperty('environment')
       expect(value.environment).toHaveProperty('id')
       expect(value.environment).toHaveProperty('name')
+      expect(value.environment).toHaveProperty('slug')
       expect(value).toHaveProperty('value')
       expect(value).toHaveProperty('version')
     })
