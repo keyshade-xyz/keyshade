@@ -18,4 +18,13 @@ export interface IMailService {
   adminUserCreateEmail(email: string): Promise<void>
 
   feedbackEmail(email: string, feedback: string): Promise<void>
+
+  userInvitation(
+    email: string,
+    projectName: string,
+    projectUrl: string,
+    invitedBy: string,
+    invitedOn: string,
+    invitationRole: string
+  ): Promise<void>
 }
