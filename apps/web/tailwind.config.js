@@ -11,7 +11,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brandBlue: '#CAECF1'
+        brandBlue: '#CAECF1',
+        errorRed: '#852b2c',
       }
     }
   },
