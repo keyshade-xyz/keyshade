@@ -5,6 +5,9 @@ import {
 } from '@nestjs/common'
 import { IMailService } from './interface.service'
 import { Transporter, createTransport } from 'nodemailer'
+import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
+import { render } from '@react-email/render'
+import React from 'react'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -133,7 +136,7 @@ export class MailService implements IMailService {
            <p>keyshade Team</p>
         </body>
         `
-    await this.sendEmail(process.env.ADMIN_EMAIL, subject, body)
+    await this.sendEmail(process.env.ADMIN_EMAIL!, subject, body)
   }
 
   async feedbackEmail(email: string, feedback: string): Promise<void> {
@@ -155,6 +158,23 @@ export class MailService implements IMailService {
     </body>
     </html>
     `
+    await this.sendEmail(email, subject, body)
+  }
+
+  async removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: string
+  ): Promise<void> {
+    const subject = `Your access was revoked from ${workspaceName}`
+
+    const body = await render(
+      <RemovedFromWorkspaceEmail
+        workspaceName={workspaceName}
+        removedOn={removedOn}
+      />
+    )
+
     await this.sendEmail(email, subject, body)
   }
 
