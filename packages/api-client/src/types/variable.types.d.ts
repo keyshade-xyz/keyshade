@@ -16,6 +16,10 @@ export interface Variable {
     {
       value: string
       environmentId: string
+      environment: {
+        id: string
+        slug: string
+      }
     }
   ]
 }
@@ -50,6 +54,10 @@ export interface UpdateVariableResponse {
     {
       value: string
       environmentId: string
+      environment: {
+        id: string
+        slug: string
+      }
     }
   ]
 }
@@ -87,6 +95,7 @@ export interface GetAllVariablesOfProjectResponse
         environment: {
           id: string
           name: string
+          slug: string
         }
         value: string
         version: number
