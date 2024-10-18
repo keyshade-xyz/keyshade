@@ -20,7 +20,7 @@ function Hero(): React.JSX.Element {
 
     if (!result.success) {
       toast.custom(() => (
-        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-errorRed p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
           <p className="text-sm">Please enter a valid email address </p>
         </div>
       ))
@@ -33,7 +33,7 @@ function Hero(): React.JSX.Element {
     // actual logic where we are checking if this email is already in waitlisted users or not
     if (emailsInWaitlist.includes(email)) {
       toast.custom(() => (
-        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-errorRed p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
           <p className="text-sm">
             You have been already added to the waitlist. We will notify you once
             we launch.
