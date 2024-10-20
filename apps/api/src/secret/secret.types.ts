@@ -1,4 +1,4 @@
-import { Project, Secret, SecretVersion } from '@prisma/client'
+import { Environment, Project, Secret, SecretVersion } from '@prisma/client'
 
 export interface SecretWithValue extends Secret {
   value: string

@@ -18,6 +18,10 @@ export interface Secret {
       id?: string
       environmentId: string
       value: string
+      environment: {
+        id: string
+        slug: string
+      }
     }
   ]
 }
@@ -48,6 +52,10 @@ export interface UpdateSecretResponse {
     {
       id?: string
       environmentId: string
+      environment: {
+        id: string
+        slug: string
+      }
       value: string
     }
   ]
@@ -83,6 +91,7 @@ export interface GetAllSecretsOfProjectResponse
       environment: {
         id: string
         name: string
+        slug: string
       }
       value: string
       version: number
