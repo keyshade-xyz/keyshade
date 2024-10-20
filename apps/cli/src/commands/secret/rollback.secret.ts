@@ -7,20 +7,20 @@ import BaseCommand from '@/commands/base.command'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
 
-export default class UpdateSecret extends BaseCommand {
+export default class RollbackSecret extends BaseCommand {
   getName(): string {
-    return 'update'
+    return 'rollback'
   }
 
   getDescription(): string {
-    return 'Updates a secret'
+    return 'Rollbacks a secret'
   }
 
   getArguments(): CommandArgument[] {
     return [
       {
         name: '<Secret Slug>',
-        description: 'Slug of the secret that you want to update'
+        description: 'Slug of the secret that you want to rollback'
       }
     ]
   }
@@ -28,38 +28,28 @@ export default class UpdateSecret extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
       {
-        short: '-n',
-        long: '--name <string>',
-        description: 'Name of the secret'
-      },
-      {
-        short: '-d',
-        long: '--note <string>',
-        description: ' An optional note describing the usage of the secret.'
-      },
-      {
-        short: '-r',
-        long: '--rotate-after',
-        description:
-          'The duration in days after which the value of the secret should be rotated. Accepted values are `24`, `168`, `720`, `8769` and `never`. Defaults to `never`.',
-        defaultValue: 'never'
+        short: '-v',
+        long: '--version <string>',
+        description: 'Version of the secret to which you want to rollback'
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
-        description: 'An array of values for the secret.'
+        long: '--environmentSlug <string>',
+        description:
+          'Slug of the environment of the secret to which you want to rollback'
       }
     ]
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
-
+    const { environmentSlug, version } = await this.parseInput(options)
     const { data, error, success } =
-      await ControllerInstance.getInstance().secretController.updateSecret(
+      await ControllerInstance.getInstance().secretController.rollbackSecret(
         {
-          secretSlug,
-          ...options
+          environmentSlug,
+          version,
+          secretSlug
         },
         this.headers
       )
@@ -72,6 +62,18 @@ export default class UpdateSecret extends BaseCommand {
       Logger.info(`rotateAfter: ${data.rotateAfter}`)
     } else {
       Logger.error(`Failed to update secret: ${error.message}`)
+    }
+  }
+
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    environmentSlug: string
+    version: string
+  }> {
+    const { environmentSlug, version } = options
+
+    return {
+      environmentSlug,
+      version
     }
   }
 }

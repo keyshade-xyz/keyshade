@@ -7,6 +7,7 @@ import EnvironmentCommand from './commands/environment.command'
 import WorkspaceCommand from '@/commands/workspace.command'
 import ScanCommand from '@/commands/scan.command'
 import ProjectCommand from './commands/project.command'
+import SecretCommand from './commands/secret.command'
 
 const program = new Command()
 
@@ -21,6 +22,7 @@ const COMMANDS: BaseCommand[] = [
   new WorkspaceCommand(),
   new ProjectCommand(),
   new EnvironmentCommand(),
+  new SecretCommand(),
   new ScanCommand()
 ]
 

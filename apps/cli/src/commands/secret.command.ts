@@ -1,6 +1,13 @@
 import BaseCommand from '@/commands/base.command'
+import CreateSecret from '@/commands/secret/create.secret'
+import DeleteSecret from '@/commands/secret/delete.secret'
+import ListSecret from '@/commands/secret/list.secret'
+import FetchSecretRevisions from '@/commands/secret/revisions.secret'
+import UpdateSecret from '@/commands/secret/update.secret'
+import RollbackSecret from '@/commands/secret/rollback.secret'
+import GetSecret from '@/commands/secret/get.secret'
 
-export default class WorkspaceCommand extends BaseCommand {
+export default class SecretCommand extends BaseCommand {
   getName(): string {
     return 'secret'
   }
@@ -11,14 +18,13 @@ export default class WorkspaceCommand extends BaseCommand {
 
   getSubCommands(): BaseCommand[] {
     return [
-      new CreateWorkspace(), //change these
-      new DeleteWorkspace(),
-      new ExportWorkspace(),
-      new GetWorkspace(),
-      new ListWorkspace(),
-      new SearchWorkspace(),
-      new UpdateWorkspace(),
-      new WorkspaceRoleCommand()
+      new CreateSecret(),
+      new DeleteSecret(),
+      new GetSecret(),
+      new ListSecret(),
+      new FetchSecretRevisions(),
+      new UpdateSecret(),
+      new RollbackSecret()
     ]
   }
 }
