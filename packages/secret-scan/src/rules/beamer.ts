@@ -4,7 +4,7 @@ import type { TestCase } from '@/types'
 export default function beamer(): RegExp[] {
   return [
     // Beamer API key regex
-    /b_[a-z0-9=_\-]{44}/i
+    /b_[a-z0-9=_-]{44}/i
   ]
 }
 

@@ -4,7 +4,7 @@ import type { TestCase } from '@/types'
 export default function contentful(): RegExp[] {
   return [
     // Contentful Delivery API Token regex
-    /contentful[a-zA-Z0-9=_\-]{43}/i
+    /contentful[a-zA-Z0-9=_-]{43}/i
   ]
 }
 

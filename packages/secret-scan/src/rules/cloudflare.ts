@@ -12,7 +12,7 @@ export default function cloudflare(): RegExp[] {
    * */
   return [
     // Cloudflare key regex
-    /(?:[a-z0-9]{37}|[a-zA-Z0-9=_\-]{40}|v1\.0-[a-f0-9]{24}-[a-f0-9]{146})/i
+    /(?:[a-z0-9]{37}|[a-zA-Z0-9=_-]{40}|v1\.0-[a-f0-9]{24}-[a-f0-9]{146})/i
   ]
 }
 

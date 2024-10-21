@@ -2,7 +2,7 @@
 import type { TestCase } from '@/types'
 
 export default function coinbase(): RegExp[] {
-  return [/coinbase[a-zA-Z0-9=_\-]{64}/i]
+  return [/coinbase[a-zA-Z0-9=_-]{64}/i]
 }
 
 const testcase: TestCase[] = [

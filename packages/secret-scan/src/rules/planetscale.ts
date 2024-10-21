@@ -4,13 +4,13 @@ import type { TestCase } from '@/types'
 export default function planetscale(): RegExp[] {
   return [
     // Planetscale Password regex
-    /pscale_pw_[a-z0-9=\-_\.]{32,64}/i,
+    /pscale_pw_[a-z0-9=\-_.]{32,64}/i,
 
     // Planetscale API Token Regex
-    /pscale_tkn_[a-z0-9=\-_\.]{32,64}/i,
+    /pscale_tkn_[a-z0-9=\-_.]{32,64}/i,
 
     // Planetscale OAuth Token Regex
-    /pscale_oauth_[a-z0-9=\-_\.]{32,64}/i
+    /pscale_oauth_[a-z0-9=\-_.]{32,64}/i
   ]
 }
 

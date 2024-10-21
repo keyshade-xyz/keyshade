@@ -4,7 +4,7 @@ import type { TestCase } from '@/types'
 export default function bitbucket(): RegExp[] {
   return [
     // BitBucket key regex
-    /bitbucket[a-zA-Z0-9]{32}|bitbucket[a-zA-Z0-9=_\-]{64}/i
+    /bitbucket[a-zA-Z0-9]{32}|bitbucket[a-zA-Z0-9=_-]{64}/i
   ]
 }
 
