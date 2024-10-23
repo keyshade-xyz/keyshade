@@ -7,7 +7,7 @@ export default function sidekiq(): RegExp[] {
     /BUNDLE_ENTERPRISE__CONTRIBSYS__COM|BUNDLE_GEMS__CONTRIBSYS__COM( = |=)[^\n]*[a-f0-9]{8}:[a-f0-9]{8}/,
 
     // Sidekiq Sensitive URL Regex
-    /\bhttps?:\/\/([a-f0-9]{8}:[a-f0-9]{8})@(gems\.contribsys\.com|enterprise\.contribsys\.com)(?:[\/|#|?|:]|$)/i
+    /\bhttps?:\/\/([a-f0-9]{8}:[a-f0-9]{8})@(gems\.contribsys\.com|enterprise\.contribsys\.com)(?:[/|#|?|:]|$)/i
   ]
 }
 

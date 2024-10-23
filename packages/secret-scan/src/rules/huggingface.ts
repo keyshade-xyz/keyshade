@@ -7,7 +7,7 @@ export default function huggingface(): RegExp[] {
     /(?:^|[\\'"` + "`" + ` >=:])(hf_[a-zA-Z]{34})(?:$|[\\'"` + "`" + ` <])/,
 
     // Huggingface Organization Access Token Regex
-    /(?:^|[\\'"` + "`" + ` >=:\(,)])(api_org_[a-zA-Z]{34})(?:$|[\\'"` + "`" + ` <\),])/
+    /(?:^|[\\'"` + "`" + ` >=:(,)])(api_org_[a-zA-Z]{34})(?:$|[\\'"` + "`" + ` <),])/
   ]
 }
 

@@ -4,7 +4,7 @@ import type { TestCase } from '@/types'
 export default function definednetworking(): RegExp[] {
   return [
     // Defined Networking API Token Regex
-    /dnkey-[a-z0-9=_\-]{26}-[a-z0-9=_\-]{52}/i
+    /dnkey-[a-z0-9=_-]{26}-[a-z0-9=_-]{52}/i
   ]
 }
 
