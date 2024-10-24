@@ -30,4 +30,4 @@ jobs:
           GITHUB_CALLBACK_URL: dummy
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: secret
-        run: pnpx semantic-release
+        run: pnpm dlx semantic-release
