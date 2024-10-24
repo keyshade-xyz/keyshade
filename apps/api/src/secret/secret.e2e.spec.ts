@@ -209,6 +209,8 @@ describe('Secret Controller Tests', () => {
       expect(body.projectId).toBe(project1.id)
       expect(body.versions.length).toBe(1)
       expect(body.versions[0].value).not.toBe('Secret 2 value')
+      expect(body.versions[0].environment.id).toBe(environment1.id)
+      expect(body.versions[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should have created a secret version', async () => {
@@ -341,10 +343,15 @@ describe('Secret Controller Tests', () => {
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
           secretId: secret1.id
+        },
+        include: {
+          environment: true
         }
       })
 
       expect(secretVersion.length).toBe(1)
+      expect(secretVersion[0].environment.id).toBe(environment1.id)
+      expect(secretVersion[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should create a new version if the value is updated', async () => {
@@ -371,6 +378,9 @@ describe('Secret Controller Tests', () => {
         where: {
           secretId: secret1.id,
           environmentId: environment1.id
+        },
+        include: {
+          environment: true
         }
       })
 
