@@ -671,6 +671,7 @@ export class SecretService {
           select: {
             environment: {
               select: {
+                name: true,
                 id: true,
                 slug: true
               }

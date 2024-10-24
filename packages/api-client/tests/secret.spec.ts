@@ -1,5 +1,6 @@
 import { APIClient } from '../src/core/client'
 import SecretController from '../src/controllers/secret'
+import { Environment } from '@api-client/types/environment.types'
 
 describe('Secret Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
@@ -10,9 +11,8 @@ describe('Secret Controller Tests', () => {
   const email = 'johndoe@example.com'
   let projectSlug: string | null
   let workspaceSlug: string | null
-  let environmentSlug: string | null
   let secretSlug: string | null
-  let environment
+  let environment: Environment
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -60,7 +60,6 @@ describe('Secret Controller Tests', () => {
     ).json()) as any
 
     environment = createEnvironmentResponse
-    environmentSlug = environment.slug
   })
 
   afterAll(async () => {
@@ -78,7 +77,7 @@ describe('Secret Controller Tests', () => {
         note: 'Secret 1 note',
         entries: [
           {
-            environmentSlug,
+            environmentSlug: environment.slug,
             value: 'Secret 1 value'
           }
         ],
@@ -105,7 +104,7 @@ describe('Secret Controller Tests', () => {
         note: 'Secret 2 note',
         entries: [
           {
-            environmentSlug,
+            environmentSlug: environment.slug,
             value: 'Secret 1 value'
           }
         ],
@@ -117,8 +116,7 @@ describe('Secret Controller Tests', () => {
     expect(secret.data.name).toBe('Secret 2')
     expect(secret.data.slug).toBeDefined()
     expect(secret.data.versions.length).toBe(1)
-    expect(secret.data.versions[0].environment.id).toBe(environment.id)
-    expect(secret.data.versions[0].environment.slug).toBe(environmentSlug)
+    expect(secret.data.versions[0].environment.slug).toBe(environment.slug)
     expect(secret.error).toBe(null)
 
     // Delete the secret
@@ -155,7 +153,7 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentSlug
+            environmentSlug: environment.slug
           }
         ],
         secretSlug
@@ -173,7 +171,7 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Secret 1 value',
-            environmentSlug
+            environmentSlug: environment.slug
           }
         ],
         secretSlug
@@ -186,7 +184,7 @@ describe('Secret Controller Tests', () => {
         entries: [
           {
             value: 'Updated Secret 1 value',
-            environmentSlug
+            environmentSlug: environment.slug
           }
         ],
         secretSlug
@@ -195,7 +193,7 @@ describe('Secret Controller Tests', () => {
     )
 
     const rollbackSecret = await secretController.rollbackSecret(
-      { secretSlug, environmentSlug, version: 1 },
+      { secretSlug, environmentSlug: environment.slug, version: 1 },
       { 'x-e2e-user-email': email }
     )
 
@@ -215,7 +213,7 @@ describe('Secret Controller Tests', () => {
   it('should get all secrets of an environment', async () => {
     const secrets: any = await secretController.getAllSecretsOfEnvironment(
       {
-        environmentSlug,
+        environmentSlug: environment.slug,
         projectSlug
       },
       { 'x-e2e-user-email': email }
@@ -248,7 +246,7 @@ describe('Secret Controller Tests', () => {
 
   it('should be able to fetch revisions of a secret', async () => {
     const revisions = await secretController.getRevisionsOfSecret(
-      { secretSlug, environmentSlug },
+      { secretSlug, environmentSlug: environment.slug },
       { 'x-e2e-user-email': email }
     )
     expect(revisions.data.items.length).toBe(1)
