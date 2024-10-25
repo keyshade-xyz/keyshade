@@ -126,7 +126,12 @@ export class SecretService {
         },
         versions: {
           select: {
-            environmentId: true,
+            environment: {
+              select: {
+                id: true,
+                slug: true
+              }
+            },
             value: true
           }
         }
@@ -252,7 +257,12 @@ export class SecretService {
             },
             select: {
               id: true,
-              environmentId: true,
+              environment: {
+                select: {
+                  id: true,
+                  slug: true
+                }
+              },
               value: true,
               version: true
             }
@@ -514,7 +524,15 @@ export class SecretService {
           orderBy: {
             version: 'desc'
           },
-          take: 1
+          take: 1,
+          include: {
+            environment: {
+              select: {
+                id: true,
+                slug: true
+              }
+            }
+          }
         }
       }
     })
@@ -648,6 +666,17 @@ export class SecretService {
             id: true,
             name: true
           }
+        },
+        versions: {
+          select: {
+            environment: {
+              select: {
+                name: true,
+                id: true,
+                slug: true
+              }
+            }
+          }
         }
       },
       skip: page * limit,
@@ -699,6 +728,14 @@ export class SecretService {
           },
           orderBy: {
             version: 'desc'
+          },
+          include: {
+            environment: {
+              select: {
+                id: true,
+                slug: true
+              }
+            }
           }
         })
 
