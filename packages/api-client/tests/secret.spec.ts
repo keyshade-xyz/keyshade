@@ -115,7 +115,7 @@ describe('Secret Controller Tests', () => {
     expect(secret.data.name).toBe('Secret 2')
     expect(secret.data.slug).toBeDefined()
     expect(secret.data.versions.length).toBe(1)
-    expect(secret.data.versions[0].environment.slug).toBe(environment.slug)
+    expect(secret.data.versions[0].environment.slug).toBe(environmentSlug)
     expect(secret.error).toBe(null)
 
     // Delete the secret
