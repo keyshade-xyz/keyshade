@@ -8,6 +8,8 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import type { ClientResponse } from '@keyshade/api-client/dist/src/types/index.types'
+import type { ResendOTPRequest } from '@keyshade/api-client/dist/src/types/auth.types'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +21,7 @@ import {
 import { authEmailAtom } from '@/store'
 import type { User } from '@/types'
 import { zUser } from '@/types'
+import ControllerInstance from '@/lib/controller-instance'
 
 export default function AuthOTPPage(): React.JSX.Element {
   const email = useAtomValue(authEmailAtom)
@@ -92,18 +95,22 @@ export default function AuthOTPPage(): React.JSX.Element {
   const handleResendOtp = async (userEmail: string): Promise<void> => {
     try {
       setIsLoadingRefresh(true)
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/resend-otp/${encodeURIComponent(userEmail)}`,
-        {
-          method: 'POST'
-        }
-      )
-      if (response.status === 429) {
+      //TODO:Remove this once initialisation is fixed
+      // ControllerInstance.initialize('http://localhost:4200')
+
+      const { error, success } =
+        (await ControllerInstance.getInstance().authController.resendOTP({
+          userEmail: encodeURIComponent(userEmail)
+        })) as ClientResponse<ResendOTPRequest>
+      if (success) {
+        toast.success('OTP successfully sent to your email')
+        setIsLoadingRefresh(false)
+      } else {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.log(error)
         toast.error("Couldn't send OTP, too many requests")
         setIsLoadingRefresh(false)
-      } else if (response.ok)
-        toast.success('OTP successfully sent to your email')
-      setIsLoadingRefresh(false)
+      }
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(`Failed to send OTP: ${error}`)
@@ -171,7 +178,7 @@ export default function AuthOTPPage(): React.JSX.Element {
               <span>
                 {isLoadingRefresh ? (
                   <span>
-                    <LoadingSVG className="w-10 h-10" />
+                    <LoadingSVG className="h-10 w-10" />
                   </span>
                 ) : (
                   <Button
