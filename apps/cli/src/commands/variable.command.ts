@@ -1,10 +1,10 @@
 import BaseCommand from '@/commands/base.command'
-import CreateVariable from './variable/create.variable'
-import DeleteVariable from './variable/delete.variable'
-import ListVariable from './variable/list.variable'
-import FetchVariableRevisions from './variable/revisions.variable'
-import UpdateVariable from './variable/update.variable'
-import RollbackVariable from './variable/rollback.variable'
+import CreateVariable from '@/commands/variable/create.variable'
+import DeleteVariable from '@/commands/variable/delete.variable'
+import ListVariable from '@/commands/variable/list.variable'
+import FetchVariableRevisions from '@/commands/variable/revisions.variable'
+import UpdateVariable from '@/commands/variable/update.variable'
+import RollbackVariable from '@/commands/variable/rollback.variable'
 
 export default class VariableCommand extends BaseCommand {
   getName(): string {
