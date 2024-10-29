@@ -8,8 +8,6 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import type { ClientResponse } from '@keyshade/api-client/dist/src/types/index.types'
-import type { ResendOTPRequest } from '@keyshade/api-client/dist/src/types/auth.types'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -99,9 +97,9 @@ export default function AuthOTPPage(): React.JSX.Element {
       // ControllerInstance.initialize('http://localhost:4200')
 
       const { error, success } =
-        (await ControllerInstance.getInstance().authController.resendOTP({
+        await ControllerInstance.getInstance().authController.resendOTP({
           userEmail: encodeURIComponent(userEmail)
-        })) as ClientResponse<ResendOTPRequest>
+        })
       if (success) {
         toast.success('OTP successfully sent to your email')
         setIsLoadingRefresh(false)
