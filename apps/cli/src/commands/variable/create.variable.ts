@@ -99,15 +99,11 @@ export default class CreateVariable extends BaseCommand {
     }
 
     const parsedEntries = entries.map((entry) => {
-      const entryObj: { value: string; environmentSlug: string } = {
-        value: '',
-        environmentSlug: ''
+      const [environmentSlug, value] = entry.split('=').map(s => s.trim())
+      if (!environmentSlug || !value) {
+        throw new Error(`Invalid entry format: ${entry}. Expected format: "environmentSlug=value"`)
       }
-      entry.split(' ').forEach((pair) => {
-        const [key, value] = pair.split('=')
-        entryObj[key] = value
-      })
-      return entryObj
+      return { environmentSlug, value }
     })
 
     return {
