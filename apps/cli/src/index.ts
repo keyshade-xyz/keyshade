@@ -8,6 +8,7 @@ import WorkspaceCommand from '@/commands/workspace.command'
 import ScanCommand from '@/commands/scan.command'
 import ProjectCommand from './commands/project.command'
 import SecretCommand from './commands/secret.command'
+import VariableCommand from './commands/variable.command'
 
 const program = new Command()
 
@@ -23,7 +24,8 @@ const COMMANDS: BaseCommand[] = [
   new ProjectCommand(),
   new EnvironmentCommand(),
   new SecretCommand(),
-  new ScanCommand()
+  new ScanCommand(),
+  new VariableCommand()
 ]
 
 COMMANDS.forEach((command) => {
