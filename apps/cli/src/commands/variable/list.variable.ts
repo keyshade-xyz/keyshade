@@ -35,13 +35,13 @@ export default class ListVariable extends BaseCommand {
       )
 
     if (success) {
-      const variable = data
-      if (variable.length > 0) {
+      const variables = data
+      if (variables.length > 0) {
         data.forEach((variable: any) => {
           Logger.info(`- ${variable.name} (${variable.value})`)
         })
       } else {
-        Logger.info('No variable found')
+        Logger.info('No variables found')
       }
     } else {
       Logger.error(`Failed fetching variables: ${error.message}`)
