@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { AddSVG } from '@public/svg/shared'
+import Image from 'next/image'
+import fileIcon from '../../assets/Group 12.png'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
   Sheet,
@@ -79,80 +80,7 @@ export default function Index(): JSX.Element {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
-
-        <Dialog>
-          <DialogTrigger>
-            <Button>
-              {' '}
-              <AddSVG /> Create a new Project
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>Create a new project</DialogHeader>
-            <DialogDescription>
-              Fill in the details to create a new project
-            </DialogDescription>
-            <div className="flex flex-col gap-y-8">
-              <div className="flex w-full flex-col gap-y-4">
-                <div className="flex flex-col items-start gap-4">
-                  <Label className="text-right" htmlFor="name">
-                    Name
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="name"
-                    onChange={(e) => {
-                      setNewProjectData((prev) => ({
-                        ...prev,
-                        name: e.target.value
-                      }))
-                    }}
-                    placeholder="Enter the name"
-                  />
-                </div>
-                <div className="flex flex-col items-start gap-4">
-                  <Label className="text-right" htmlFor="name">
-                    Description
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="name"
-                    onChange={(e) => {
-                      setNewProjectData((prev) => ({
-                        ...prev,
-                        description: e.target.value
-                      }))
-                    }}
-                    placeholder="Enter the name"
-                  />
-                </div>
-                {/* {isNameEmpty ? (
-                  <span className="ml-[3.5rem] mt-1 text-red-500">
-                    Name cannot be empty
-                  </span>
-                ) : null} */}
-              </div>
-            </div>
-            <div className="flex w-full justify-end">
-              <Button
-                onClick={() => {
-                  Projects.createProject(newProjectData, currentWorkspace.id)
-                    .then(() => {
-                      toast.success('New project added successfully')
-                      router.refresh()
-                    })
-                    .catch(() => {
-                      toast.error('Failed to add new project')
-                    })
-                }}
-                variant="secondary"
-              >
-                Add project
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* <h1 className="text-[1.75rem] font-semibold ">My Projects</h1> */}
       </div>
 
       {projects.length !== 0 ? (
@@ -173,8 +101,92 @@ export default function Index(): JSX.Element {
           })}
         </div>
       ) : (
-        <div className="mt-[10vh] flex justify-center">
-          <div>No projects yet? Get started by creating a new project.</div>
+        <div className="border-2px mt-[10vh] flex justify-center">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <Image alt="" height={100} src={fileIcon} width={100} />
+            <h1 className="text-[1.4rem] font-normal">
+              Start your First Project
+            </h1>
+            <p className="font-medium">
+              Create a file and start setting up your environment and secret
+              keys
+            </p>
+            <Dialog>
+              <DialogTrigger>
+                <Button className="border-2px bg-white text-black hover:text-white">
+                  {' '}
+                  Create project
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>Create a new project</DialogHeader>
+                <DialogDescription>
+                  Fill in the details to create a new project
+                </DialogDescription>
+                <div className="flex flex-col gap-y-8">
+                  <div className="flex w-full flex-col gap-y-4">
+                    <div className="flex flex-col items-start gap-4">
+                      <Label className="text-right" htmlFor="name">
+                        Name
+                      </Label>
+                      <Input
+                        className="col-span-3"
+                        id="name"
+                        onChange={(e) => {
+                          setNewProjectData((prev) => ({
+                            ...prev,
+                            name: e.target.value
+                          }))
+                        }}
+                        placeholder="Enter the name"
+                      />
+                    </div>
+                    <div className="flex flex-col items-start gap-4">
+                      <Label className="text-right" htmlFor="name">
+                        Description
+                      </Label>
+                      <Input
+                        className="col-span-3"
+                        id="name"
+                        onChange={(e) => {
+                          setNewProjectData((prev) => ({
+                            ...prev,
+                            description: e.target.value
+                          }))
+                        }}
+                        placeholder="Enter the name"
+                      />
+                    </div>
+                    {/* {isNameEmpty ? (
+                  <span className="ml-[3.5rem] mt-1 text-red-500">
+                    Name cannot be empty
+                  </span>
+                ) : null} */}
+                  </div>
+                </div>
+                <div className="flex w-full justify-end">
+                  <Button
+                    onClick={() => {
+                      Projects.createProject(
+                        newProjectData,
+                        currentWorkspace.id
+                      )
+                        .then(() => {
+                          toast.success('New project added successfully')
+                          router.refresh()
+                        })
+                        .catch(() => {
+                          toast.error('Failed to add new project')
+                        })
+                    }}
+                    variant="secondary"
+                  >
+                    Add project
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       )}
 
