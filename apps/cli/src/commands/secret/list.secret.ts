@@ -40,7 +40,6 @@ export default class ListSecret extends BaseCommand {
       )
 
     if (success) {
-      console.log(data)
       const secrets = data
       if (secrets.length > 0) {
         data.forEach((secret: any) => {
