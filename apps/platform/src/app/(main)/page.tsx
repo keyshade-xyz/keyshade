@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import fileIcon from '../../assets/Group 12.png'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
   Sheet,
@@ -28,6 +27,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Projects } from '@/lib/api-functions/projects'
+import fileIcon from '../../assets/Group 12.png'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -79,10 +79,6 @@ export default function Index(): JSX.Element {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        {/* <h1 className="text-[1.75rem] font-semibold ">My Projects</h1> */}
-      </div>
-
       {projects.length !== 0 ? (
         <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map((project: ProjectWithoutKeys) => {
