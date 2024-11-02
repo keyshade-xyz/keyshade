@@ -5,6 +5,7 @@ import {
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
 import { ClientResponse } from '@api-client/types/index.types'
+
 export default class AuthController {
   private apiClient: APIClient
 

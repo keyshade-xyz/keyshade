@@ -93,8 +93,6 @@ export default function AuthOTPPage(): React.JSX.Element {
   const handleResendOtp = async (userEmail: string): Promise<void> => {
     try {
       setIsLoadingRefresh(true)
-      //TODO:Remove this once initialisation is fixed
-      // ControllerInstance.initialize('http://localhost:4200')
 
       const { error, success } =
         await ControllerInstance.getInstance().authController.resendOTP({
