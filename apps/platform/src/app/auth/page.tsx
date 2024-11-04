@@ -1,6 +1,6 @@
 'use client'
 import { GeistSans } from 'geist/font/sans'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useAtom } from 'jotai'
@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { authEmailAtom } from '@/store'
+import type { User } from '@/types'
 
 export default function AuthPage(): React.JSX.Element {
   const [email, setEmail] = useAtom(authEmailAtom)
@@ -51,6 +52,49 @@ export default function AuthPage(): React.JSX.Element {
     }
   }
 
+  const handleGithubLogin = (): void => {
+    setIsLoading(true)
+    window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/github`
+  }
+
+  const handleGithubRedirect = async () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
+
+    if (code) {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/github/callback?code=${code}`,
+          {
+            method: 'GET',
+            credentials: 'include'
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+
+        const data = (await response.json()) as User
+        setEmail(data.email)
+
+        if (response.status === 200) {
+          router.push('/auth/account-details')
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(`Failed to fetch user data: ${error}`)
+      }
+    } else {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error('No authorization code found in the URL')
+    }
+  }
+
+  useEffect(() => {
+    void handleGithubRedirect()
+  }, [])
+
   return (
     <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
@@ -66,7 +110,11 @@ export default function AuthPage(): React.JSX.Element {
           <Button>
             <GoogleSVG />
           </Button>
-          <Button>
+          <Button
+            onClick={() => {
+              handleGithubLogin()
+            }}
+          >
             <GithubSVG />
           </Button>
           <Button>
