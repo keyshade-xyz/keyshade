@@ -26,9 +26,6 @@ function Navbar(): React.JSX.Element {
           </a>
         </li>
         <li>
-          <Link href="/about">About</Link>
-        </li>
-        <li>
           <Link href="/pricing">Pricing</Link>
         </li>
         <li>
