@@ -1,3 +1,23 @@
+## [2.7.0](https://github.com/keyshade-xyz/keyshade/compare/v2.6.0...v2.7.0) (2024-11-05)
+
+### 🚀 Features
+
+* **cli:** Add functionality to operate on Variables ([#514](https://github.com/keyshade-xyz/keyshade/issues/514)) ([32d93e6](https://github.com/keyshade-xyz/keyshade/commit/32d93e6146a87175674107319d918157dbcec6d3))
+* **platform:** Create ui link for resend otp ([#489](https://github.com/keyshade-xyz/keyshade/issues/489)) ([46eb5c5](https://github.com/keyshade-xyz/keyshade/commit/46eb5c5aeee76f60015e65174e9cb9ea97f5e771))
+
+### 🐛 Bug Fixes
+
+* **api,api-client:** Add environmentSlug in multiple places across the [secure] module ([#509](https://github.com/keyshade-xyz/keyshade/issues/509)) ([ee58f07](https://github.com/keyshade-xyz/keyshade/commit/ee58f071e30c24f12cd657c11e24e01f8a648a93))
+* **cli:** Removed unnecessary console log in [secure]s ([#515](https://github.com/keyshade-xyz/keyshade/issues/515)) ([9403cc4](https://github.com/keyshade-xyz/keyshade/commit/9403cc4a0147528815244fa425534c70156d5dad))
+
+### 🔧 Miscellaneous Chores
+
+* Fixed lint issues ([835397a](https://github.com/keyshade-xyz/keyshade/commit/835397ad4feb85c112f0e0702cbaba3468d8ccca))
+* Minor housekeeping ([922bf31](https://github.com/keyshade-xyz/keyshade/commit/922bf31839d7ace51958ca991754d38dca9f35e2))
+* Update eslint ([c583718](https://github.com/keyshade-xyz/keyshade/commit/c58371805cddd16503136ee9403da4272dff991c))
+* Update eslint ([7c0c596](https://github.com/keyshade-xyz/keyshade/commit/7c0c5966432d06cff0bf74125f63a5b2021d4139))
+* Update pnpx commands to pnpm dlx ([#511](https://github.com/keyshade-xyz/keyshade/issues/511)) ([534a231](https://github.com/keyshade-xyz/keyshade/commit/534a2315d8fc14caca89e484159523ab37629d63))
+
 ## [2.6.0](https://github.com/keyshade-xyz/keyshade/compare/v2.5.0...v2.6.0) (2024-10-24)
 
 ### 🚀 Features
