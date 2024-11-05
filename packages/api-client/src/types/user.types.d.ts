@@ -1,4 +1,3 @@
-import { PageRequest, PageResponse } from '@api-client/index'
 import { Workspace } from '@api-client/types/workspace.types'
 
 export interface GetSelfResponse {

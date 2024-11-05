@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { Toaster, toast } from 'sonner'
-import { ColorBGSVG, HeroImage } from '@public/hero'
 import { z } from 'zod'
+import { ColorBGSVG, HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
 import { InputBorderSpotlight } from '../ui/input-spotlight'
 

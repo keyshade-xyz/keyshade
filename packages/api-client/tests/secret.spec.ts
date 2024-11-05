@@ -245,7 +245,7 @@ describe('Secret Controller Tests', () => {
 
   it('should be able to fetch revisions of a secret', async () => {
     const revisions = await secretController.getRevisionsOfSecret(
-      { secretSlug, environmentSlug},
+      { secretSlug, environmentSlug },
       { 'x-e2e-user-email': email }
     )
     expect(revisions.data.items.length).toBe(1)

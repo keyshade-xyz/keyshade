@@ -12,9 +12,11 @@ export default class CreateVariable extends BaseCommand {
   getName(): string {
     return 'create'
   }
+
   getDescription(): string {
     return 'Create a variable'
   }
+
   getArguments(): CommandArgument[] {
     return [
       {
@@ -99,9 +101,11 @@ export default class CreateVariable extends BaseCommand {
     }
 
     const parsedEntries = entries.map((entry) => {
-      const [environmentSlug, value] = entry.split('=').map(s => s.trim())
+      const [environmentSlug, value] = entry.split('=').map((s) => s.trim())
       if (!environmentSlug || !value) {
-        throw new Error(`Invalid entry format: ${entry}. Expected format: "environmentSlug=value"`)
+        throw new Error(
+          `Invalid entry format: ${entry}. Expected format: "environmentSlug=value"`
+        )
       }
       return { environmentSlug, value }
     })

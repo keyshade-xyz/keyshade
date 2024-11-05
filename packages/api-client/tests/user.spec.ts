@@ -10,7 +10,6 @@ describe('User Controller Tests', () => {
   const email = 'johndoe@example.com'
   let projectSlug: string | null
   let workspaceSlug: string | null
-  let environmentSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -44,19 +43,15 @@ describe('User Controller Tests', () => {
 
     projectSlug = projectResponse.slug
 
-    const createEnvironmentResponse = (await (
-      await client.post(
-        `/api/environment/${projectSlug}`,
-        {
-          name: 'Dev'
-        },
-        {
-          'x-e2e-user-email': email
-        }
-      )
-    ).json()) as any
-
-    environmentSlug = createEnvironmentResponse.slug
+    await client.post(
+      `/api/environment/${projectSlug}`,
+      {
+        name: 'Dev'
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
   })
 
   afterAll(async () => {
