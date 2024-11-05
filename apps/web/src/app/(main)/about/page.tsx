@@ -5,7 +5,7 @@ function About(): React.JSX.Element {
   return (
     <div className="relative flex  flex-col items-center justify-center ">
       <ColorBGSVG className="absolute -z-10 -translate-y-[6vw]" />
-      <TracingBeam className="mt-[10vw] px-6 ">
+      <TracingBeam className="mt-[10vw] px-6">
         <div className="flex flex-col gap-6">
           <article className="flex flex-col gap-y-10 px-2 md:w-[60vw]">
             <div className="flex flex-col gap-5">
