@@ -14,5 +14,7 @@
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
-  "dependencies": {}
+  "dependencies": {
+    "@keyshade/schema": "workspace:*"
+  }
 }
