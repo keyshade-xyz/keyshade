@@ -67,4 +67,4 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           flags: api-e2e-tests
-          files: /coverage-e2e/api/coverage-final.json
+          files: /coverage/apps/api/coverage-final.json

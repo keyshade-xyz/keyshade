@@ -64,3 +64,4 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           flags: schema
+          files: /coverage/packages/schema/coverage-final.json

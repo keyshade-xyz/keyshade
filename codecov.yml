@@ -34,3 +34,21 @@ flag_management:
           target: 85%
         - type: patch
           target: 98%
+    - name: api-client
+      paths:
+        - packages/api-client/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 98%
+    - name: schema
+      paths:
+        - packages/schema/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 98%
