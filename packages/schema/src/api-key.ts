@@ -1,5 +1,5 @@
 import z from 'zod'
-import { expiresAfterEnum } from './enums'
+import { expiresAfterEnum } from '@/enums/enums'
 
 export const CreateApiKeySchema = z.object({
   name: z.string(),

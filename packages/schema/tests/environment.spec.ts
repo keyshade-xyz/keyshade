@@ -15,13 +15,13 @@ describe('Environment Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should not validate if required values are not specified', () => {
     const result = CreateEnvironmentSchema.safeParse({})
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 })

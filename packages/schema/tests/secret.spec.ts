@@ -1,5 +1,5 @@
 import { CreateSecretSchema } from '@/secret'
-import { rotateAfterEnum } from '@/enums'
+import { rotateAfterEnum } from '@/enums/enums'
 
 describe('Secret Schema Tests', () => {
   it('should validate if proper input is specified for CreateSecretSchema', () => {
@@ -27,7 +27,7 @@ describe('Secret Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should not validate if invalid types are specified for CreateSecretSchema', () => {
@@ -37,7 +37,7 @@ describe('Secret Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate if optional fields are omitted for CreateSecretSchema', () => {

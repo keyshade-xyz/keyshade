@@ -1,17 +1,10 @@
 import { z } from 'zod'
-import { PageRequestSchema, PageResponseSchema } from '../index'
-
-export const CreateWorkspaceSchema = z.object({
-  name: z.string(),
-  icon: z.string().optional(),
-  isDefault: z.boolean().optional()
-})
-
-export const UpdateWorkspaceSchema = CreateWorkspaceSchema.partial()
+import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
+import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums/enums'
 
 export const InviteMemberSchema = z.object({
   email: z.string(),
-  roleIds: z.array(z.string()).optional()
+  roleSlugs: z.array(z.string()).optional()
 })
 
 //Request and Response types
@@ -30,7 +23,8 @@ export const WorkspaceSchema = z.object({
 
 export const CreateWorkspaceRequestSchema = z.object({
   name: z.string(),
-  icon: z.string().optional()
+  icon: z.string().optional(),
+  isDefault: z.boolean().optional()
 })
 
 export const CreateWorkspaceResponseSchema = WorkspaceSchema
@@ -46,7 +40,7 @@ export const DeleteWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
 })
 
-export const DeleteWorkspaceResponseSchema = z.object({}).strict()
+export const DeleteWorkspaceResponseSchema = z.never()
 
 export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
@@ -82,7 +76,7 @@ export const ExportDataResponseSchema = z.object({
       publicKey: z.string(),
       privateKey: z.string(),
       storePrivateKey: z.boolean(),
-      accessLevel: z.enum(['GLOBAL', 'PRIVATE', 'INTERNAL']),
+      accessLevel: projectAccessLevelEnum,
       environments: z.array(
         z.object({
           name: z.string(),
@@ -93,7 +87,7 @@ export const ExportDataResponseSchema = z.object({
         z.object({
           name: z.string(),
           note: z.string(),
-          rotateAt: z.string(),
+          rotateAt: rotateAfterEnum,
           versions: z.array(
             z.object({
               value: z.string(),

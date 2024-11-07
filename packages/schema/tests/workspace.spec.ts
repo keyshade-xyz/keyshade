@@ -1,5 +1,4 @@
 import {
-  CreateWorkspaceSchema,
   InviteMemberSchema,
   CreateWorkspaceRequestSchema,
   UpdateWorkspaceRequestSchema,
@@ -8,7 +7,6 @@ import {
   ExportDataRequestSchema,
   GlobalSearchRequestSchema,
   CreateWorkspaceResponseSchema,
-  UpdateWorkspaceSchema,
   UpdateWorkspaceResponseSchema,
   DeleteWorkspaceResponseSchema,
   GetWorkspaceResponseSchema,
@@ -19,72 +17,10 @@ import {
 } from '@/workspace/workspace'
 
 describe('Workspace Schema Tests', () => {
-  it('should validate if proper input is specified for CreateWorkspaceSchema', () => {
-    const result = CreateWorkspaceSchema.safeParse({
-      name: 'Workspace Test',
-      isDefault: true
-    })
-
-    expect(result.success).toBe(true)
-  })
-
-  it('should validate if only required fields are specified for CreateWorkspaceSchema', () => {
-    const result = CreateWorkspaceSchema.safeParse({
-      name: 'Workspace Test'
-    })
-
-    expect(result.success).toBe(true)
-  })
-
-  it('should validate if optional fields are omitted for CreateWorkspaceSchema', () => {
-    const result = CreateWorkspaceSchema.safeParse({
-      name: 'Workspace Test'
-    })
-
-    expect(result.success).toBe(true)
-  })
-
-  it('should not validate if required fields are missing for CreateWorkspaceSchema', () => {
-    const result = CreateWorkspaceSchema.safeParse({
-      isDefault: true
-    })
-
-    expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
-  })
-
-  it('should not validate if invalid types are specified for CreateWorkspaceSchema', () => {
-    const result = CreateWorkspaceSchema.safeParse({
-      name: 123,
-      isDefault: 'true'
-    })
-
-    expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
-  })
-
-  it('should validate with proper input for UpdateWorkspaceSchema', () => {
-    const result = UpdateWorkspaceSchema.safeParse({
-      name: 'Updated Workspace'
-    })
-
-    expect(result.success).toBe(true)
-  })
-
-  it('should not validate if invalid types are provided for UpdateWorkspaceSchema', () => {
-    const result = UpdateWorkspaceSchema.safeParse({
-      name: 123 // should be a string
-    })
-
-    expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
-    expect(result.error.issues[0].path).toEqual(['name'])
-  })
-
   it('should validate if proper input is specified for InviteMemberSchema', () => {
     const result = InviteMemberSchema.safeParse({
       email: 'test@example.com',
-      roleIds: ['role1', 'role2']
+      roleSlugs: ['role1', 'role2']
     })
 
     expect(result.success).toBe(true)
@@ -100,21 +36,30 @@ describe('Workspace Schema Tests', () => {
 
   it('should not validate if required fields are missing for InviteMemberSchema', () => {
     const result = InviteMemberSchema.safeParse({
-      roleIds: ['role1']
+      roleSlugs: ['role1']
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should not validate if invalid types are specified for InviteMemberSchema', () => {
     const result = InviteMemberSchema.safeParse({
       email: 123,
-      roleIds: 'invalid_role'
+      roleSlugs: 'invalid_role'
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
+  })
+
+  it('should not validate if roleIds are specified instead of roleSlugs for InviteMemberSchema', () => {
+    const result = InviteMemberSchema.safeParse({
+      roleIds: ['role1', 'role2'] //should be roleSlugs
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should validate if proper input is specified for CreateWorkspaceRequestSchema', () => {
@@ -140,6 +85,25 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it('should not validate if required fields are missing for CreateWorkspaceRequestSchema', () => {
+    const result = CreateWorkspaceRequestSchema.safeParse({
+      isDefault: true
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
+  it('should not validate if invalid types are specified for CreateWorkspaceRequestSchema', () => {
+    const result = CreateWorkspaceRequestSchema.safeParse({
+      name: 123,
+      isDefault: 'true'
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate with proper input for CreateWorkspaceResponseSchema', () => {
@@ -174,8 +138,8 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
-    expect(result.error.issues[0].path).toEqual(['slug'])
+    expect(result.error?.issues).toHaveLength(1)
+    expect(result.error?.issues[0].path).toEqual(['slug'])
   })
 
   it('should validate if proper input is specified for UpdateWorkspaceRequestSchema', () => {
@@ -194,6 +158,17 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it('should not validate if invalid types are provided for UpdateWorkspaceRequestSchema', () => {
+    const result = UpdateWorkspaceRequestSchema.safeParse({
+      name: 123 // should be a string
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(2)
+    expect(result.error?.issues[0].path).toEqual(['name'])
+    expect(result.error?.issues[1].path).toEqual(['workspaceSlug'])
   })
 
   it('should validate with proper input for UpdateWorkspaceResponseSchema', () => {
@@ -228,8 +203,8 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
-    expect(result.error.issues[0].path).toEqual(['slug'])
+    expect(result.error?.issues).toHaveLength(1)
+    expect(result.error?.issues[0].path).toEqual(['slug'])
   })
 
   it('should validate if proper input is specified for DeleteWorkspaceRequestSchema', () => {
@@ -246,7 +221,7 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should validate if proper input is specified for GetWorkspaceRequestSchema', () => {
@@ -326,7 +301,7 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues[0].path).toEqual(['items'])
+    expect(result.error?.issues[0].path).toEqual(['items'])
   })
 
   it('should validate if proper input is specified for ExportDataRequestSchema', () => {
@@ -368,7 +343,7 @@ describe('Workspace Schema Tests', () => {
             {
               name: 'API_KEY',
               note: 'API Key for external service',
-              rotateAt: '2024-12-31T00:00:00Z',
+              rotateAt: '720',
               versions: [
                 {
                   value: 'secret-value',
@@ -405,7 +380,7 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues[0].path).toEqual(['name'])
+    expect(result.error?.issues[0].path).toEqual(['name'])
   })
 
   it('should validate if proper input is specified for GlobalSearchRequestSchema', () => {
