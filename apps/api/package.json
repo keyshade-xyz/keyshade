@@ -2,6 +2,7 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build": "nest build",
@@ -16,7 +17,7 @@
     "db:format": "pnpm dlx prisma format --schema=src/prisma/schema.prisma",
     "db:reset": "pnpm dlx dotenv-cli -e ../../.env -- pnpm dlx prisma migrate reset --force --schema=src/prisma/schema.prisma",
     "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'",
-    "e2e:prepare": "cd ../../ && docker compose down && docker compose -f docker-compose-test.yml up -d && sleep 3 && cd apps/api && pnpm db:generate-types && cross-env NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
+    "e2e:prepare": "cd ../../ && docker compose down && docker compose -f docker-compose-test.yml up -d && cd apps/api && node --loader ts-node/esm src/common/cross-platform-sleep.ts && pnpm db:generate-types && cross-env NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
     "e2e": "pnpm run e2e:prepare && cross-env NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' jest --runInBand --config=jest.e2e-config.ts && pnpm run e2e:teardown",
     "e2e:teardown": "cd ../../ && docker compose -f docker-compose-test.yml down",
     "unit": "pnpm db:generate-types && jest --config=jest.config.ts"
@@ -59,6 +60,7 @@
     "@types/eccrypto": "^1.1.6",
     "@types/express": "^4.17.17",
     "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.10",
     "@types/supertest": "^6.0.0",
     "@types/uuid": "^9.0.8",
     "ajv": "^7",
@@ -71,7 +73,9 @@
     "source-map-support": "^0.5.21",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
-    "ts-loader": "^9.4.3"
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.16.2"
   },
   "jest": {
     "moduleFileExtensions": [
