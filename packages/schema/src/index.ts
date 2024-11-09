@@ -15,5 +15,4 @@ export * from './workspace/workspace.types'
 
 export * from './workspace-role'
 
-export * from './enums/enums'
-export * from './enums/enums.types'
+export * from './enums'
