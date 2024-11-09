@@ -1,5 +1,5 @@
 import { CreateIntegrationSchema } from '@/integration'
-import { eventTypeEnum, integrationTypeEnum } from '@/enums/enums'
+import { eventTypeEnum, integrationTypeEnum } from '@/enums'
 
 describe('Integration Schema Tests', () => {
   it('should validate if proper input is specified', () => {

@@ -1,5 +1,5 @@
 import { CreateSecretSchema } from '@/secret'
-import { rotateAfterEnum } from '@/enums/enums'
+import { rotateAfterEnum } from '@/enums'
 
 describe('Secret Schema Tests', () => {
   it('should validate if proper input is specified for CreateSecretSchema', () => {

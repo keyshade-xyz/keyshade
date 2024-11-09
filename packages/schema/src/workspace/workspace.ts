@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
-import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums/enums'
+import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
 
 export const InviteMemberSchema = z.object({
   email: z.string(),

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { projectAccessLevelEnum } from '@/enums/enums'
+import { projectAccessLevelEnum } from '@/enums'
 import { CreateEnvironmentSchema } from './environment'
 
 export const CreateProjectSchema = z.object({

@@ -1,5 +1,5 @@
 import { CreateProjectSchema, ForkProjectSchema } from '@/project'
-import { projectAccessLevelEnum } from '@/enums/enums'
+import { projectAccessLevelEnum } from '@/enums'
 
 describe('Project Schema Tests', () => {
   it('should validate if proper input is specified for CreateProjectSchema', () => {

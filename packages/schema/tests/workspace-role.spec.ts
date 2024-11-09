@@ -1,5 +1,5 @@
 import { CreateWorkspaceRoleSchema } from '@/workspace-role'
-import { authorityEnum } from '@/enums/enums'
+import { authorityEnum } from '@/enums'
 
 describe('Workspace Role Schema Tests', () => {
   it('should validate if proper input is specified for CreateWorkspaceRoleSchema', () => {

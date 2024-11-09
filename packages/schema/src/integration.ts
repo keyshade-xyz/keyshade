@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { eventTypeEnum, integrationTypeEnum } from '@/enums/enums'
+import { eventTypeEnum, integrationTypeEnum } from '@/enums'
 
 export const CreateIntegrationSchema = z.object({
   name: z.string(),
