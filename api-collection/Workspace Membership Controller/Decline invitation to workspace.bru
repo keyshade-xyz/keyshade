@@ -1,0 +1,21 @@
+meta {
+  name: Decline invitation to workspace
+  type: http
+  seq: 10
+}
+
+delete {
+  url: {{BASE_URL}}/api/workspace-membership/:workspace_slug/decline-invitation
+  body: none
+  auth: none
+}
+
+params:path {
+  workspace_slug: workspace-1-cahli
+}
+
+docs {
+  ## Description
+  
+  As a user, declines the invitation to join a workspace sent t you.
+}

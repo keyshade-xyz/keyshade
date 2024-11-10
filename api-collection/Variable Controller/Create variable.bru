@@ -1,0 +1,50 @@
+meta {
+  name: Create variable
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/variable/:project_slug
+  body: json
+  auth: bearer
+}
+
+params:path {
+  project_slug: project-1-uzukc
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "PORT_NUMBER",
+      "entries": [
+          {
+              "value": "8080",
+              "environmentSlug": "alpha-l7xvp"
+          }
+      ]
+  }
+}
+
+docs {
+  ## Description
+  
+  This endpoint is used to create a variable.
+  
+  ### Request Body
+  
+  - `name`: The name of the variable. Should be unique in the project.
+  - `note`: (Optional) An optional note regarding the use case of the variable.
+  - `entries`: (Optional) An optional array of Entries that will contain the actual values of the variable.
+      
+  
+  #### Entry Object:
+  
+  - `environmentSlug`: The ID of the environment under which you would like to add the value of the secret to.
+      
+  - `value`: The value of the secret.
+}

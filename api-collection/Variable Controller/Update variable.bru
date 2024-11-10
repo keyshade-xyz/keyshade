@@ -1,0 +1,44 @@
+meta {
+  name: Update variable
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{BASE_URL}}/api/variable/:variable_slug
+  body: json
+  auth: bearer
+}
+
+params:path {
+  variable_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "PORT_NUMBER"
+  }
+}
+
+docs {
+  ## Description
+  
+  Update the fields of an existing variable. Set only those values that you would want to update. Note that, setting one or more entries would create a new revision of the variable, and will NOT change the existing value.
+  
+  ### Request Body
+  
+  - `name`: (Optional) The name of the variable. Should be unique in the project.
+  - `note`: (Optional) An optional note regarding the use case of the variable.
+  - `entries`: (Optional) An optional array of Entries that will contain the actual values of the variable.
+      
+  
+  #### Entry Object:
+  
+  - `environmentSlug`: The ID of the environment under which you would like to add the value of the secret to.
+      
+  - `value`: The value of the secret.
+}

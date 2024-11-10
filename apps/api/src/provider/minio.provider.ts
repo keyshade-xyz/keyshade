@@ -70,6 +70,7 @@ export const MinioProvider: Provider = {
       isServiceLoaded = true
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function uploadFile(file) {
       if (!isServiceLoaded) {
         throw new InternalServerErrorException('Minio Client has not loaded')
@@ -91,6 +92,7 @@ export const MinioProvider: Provider = {
       return fileName
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function getFileUrl(fileName: string) {
       if (!isServiceLoaded) {
         throw new InternalServerErrorException('Minio Client has not loaded')
@@ -106,6 +108,7 @@ export const MinioProvider: Provider = {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function deleteFile(fileName: string) {
       if (!isServiceLoaded) {
         throw new InternalServerErrorException('Minio Client has not loaded')

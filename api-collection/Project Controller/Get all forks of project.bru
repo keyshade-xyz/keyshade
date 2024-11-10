@@ -1,0 +1,19 @@
+meta {
+  name: Get all forks of project
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{BASE_URL}}/api/project/:project_slug/forks
+  body: none
+  auth: bearer
+}
+
+params:path {
+  project_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}

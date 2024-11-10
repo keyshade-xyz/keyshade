@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Api Kei Controller",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

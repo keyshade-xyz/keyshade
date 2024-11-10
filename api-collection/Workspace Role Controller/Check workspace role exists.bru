@@ -1,0 +1,26 @@
+meta {
+  name: Check workspace role exists
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{BASE_URL}}/api/workspace-role/:workspace_slug/exists/:workspace_role_name
+  body: none
+  auth: bearer
+}
+
+params:path {
+  workspace_slug: new-workspace-7dbgu
+  workspace_role_name: Admins
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Checks if a workspace role with the same name exists or not.
+}

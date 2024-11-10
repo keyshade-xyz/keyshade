@@ -1,0 +1,15 @@
+meta {
+  name: Remove users from workspace
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{BASE_URL}}/api/workspace-membership/:workspace_slug/remove-users
+  body: none
+  auth: none
+}
+
+params:path {
+  workspace_slug: workspace-1-cahli
+}
