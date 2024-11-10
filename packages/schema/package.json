@@ -20,6 +20,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@keyshade/schema": "file:",
     "zod": "^3.23.6"
   }
 }

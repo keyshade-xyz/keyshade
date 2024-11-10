@@ -17,6 +17,7 @@
     ".": "./dist/index.js"
   },
   "dependencies": {
+    "@keyshade/secret-scan": "file:",
     "mocha": "^10.6.0",
     "randexp": "^0.5.3",
     "tsx": "^4.16.2"

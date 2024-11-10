@@ -43,6 +43,12 @@ export interface DiscordIntegrationMetadata extends IntegrationMetadata {
   webhookUrl: string
 }
 
+export interface SlackIntegrationMetadata extends IntegrationMetadata {
+  botToken: string;
+  signingSecret: string;
+  channelId: string;
+}
+
 export interface IntegrationWithWorkspace extends Integration {
   workspace: Workspace
 }
