@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { rotateAfterEnum } from './enums'
+import { rotateAfterEnum } from '@/enums'
 
 export const CreateSecretSchema = z.object({
   name: z.string(),

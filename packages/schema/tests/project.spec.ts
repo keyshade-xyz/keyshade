@@ -19,7 +19,7 @@ describe('Project Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate if only required fields are specified for CreateProjectSchema', () => {
@@ -63,6 +63,6 @@ describe('Project Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 })
