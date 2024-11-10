@@ -1,0 +1,28 @@
+meta {
+  name: Global search
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{BASE_URL}}/api/workspace/:workspace_slug/global-search/:search
+  body: none
+  auth: bearer
+}
+
+params:path {
+  workspace_slug: new-workspace-7dbgu
+  search: pro
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Given a workspace, this endpoint is used to search projects, secrets, environments and variables in that workspace.
+  
+  Needless to say, access control is imposed by default. A user won't be shown resources that they don't have access to.
+}

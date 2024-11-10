@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "Api Key Controller",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

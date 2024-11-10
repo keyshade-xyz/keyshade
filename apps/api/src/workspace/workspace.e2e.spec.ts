@@ -72,7 +72,7 @@ describe('Workspace Controller Tests', () => {
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
 
-  let user1: User, user2: User, user3: User
+  let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
 
@@ -141,7 +141,6 @@ describe('Workspace Controller Tests', () => {
 
     user1 = createUser1
     user2 = createUser2
-    user3 = createUser3
 
     memberRole = await prisma.workspaceRole.create({
       data: {

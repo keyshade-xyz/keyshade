@@ -1,0 +1,25 @@
+meta {
+  name: Delete integration
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{BASE_URL}}/api/integration/:integration_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  integration_slug: discord-second-ntbqs
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Deletes an existing integration.
+}

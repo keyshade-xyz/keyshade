@@ -1,0 +1,25 @@
+meta {
+  name: Get all environments of project
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{BASE_URL}}/api/environment/all/:project_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  project_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Fetches all the environments of a project.
+}

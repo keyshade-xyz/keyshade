@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 import { AuthModule } from '@/auth/auth.module'
 import { PrismaModule } from '@/prisma/prisma.module'
@@ -25,7 +25,6 @@ import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
-import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 
 @Module({
   controllers: [AppController],

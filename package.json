@@ -59,10 +59,6 @@
               {
                 "type": "test",
                 "hidden": true
-              },
-              {
-                "type": "postman",
-                "hidden": true
               }
             ]
           }

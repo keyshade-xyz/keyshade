@@ -1,0 +1,36 @@
+meta {
+  name: Can access live updates
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BASE_URL}}/api/api-key/access/live-updates
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: x-keyshade-token
+  value: {{vault:API_KEY}}
+  placement: header
+}
+
+docs {
+  ## Description
+  
+  This endpoint is specific to the keyshade CLI. In order for `keyshade run` to be successful, it needs to check that the API key has access to the following authorities or not:
+  
+  - `READ_WORKSPACE`
+      
+  - `READ_PROJECT`
+      
+  - `READ_ENVIRONMENT`
+      
+  - `READ_SECRET`
+      
+  - `READ_VARIABLE`
+      
+  
+  If this is satisfied, the client can proceed.
+}
