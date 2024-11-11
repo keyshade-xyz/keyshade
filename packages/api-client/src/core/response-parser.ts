@@ -1,4 +1,4 @@
-import { ClientResponse, ResponseError } from '@api-client/types/index.types'
+import { ClientResponse, ResponseError } from '@keyshade/schema'
 
 /**
  * Takes a Response object and parses its contents into a ClientResponse object.

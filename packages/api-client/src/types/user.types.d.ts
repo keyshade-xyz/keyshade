@@ -1,4 +1,4 @@
-import { Workspace } from '@api-client/types/workspace.types'
+import { Workspace } from '@keyshade/schema'
 
 export interface GetSelfResponse {
   id: string

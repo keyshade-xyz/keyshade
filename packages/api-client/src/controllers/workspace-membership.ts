@@ -23,7 +23,7 @@ import {
   GetMembersRequest,
   GetMembersResponse
 } from '@api-client/types/workspace-membership.types'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 
 export default class WorkspaceMembershipController {
   private apiClient: APIClient

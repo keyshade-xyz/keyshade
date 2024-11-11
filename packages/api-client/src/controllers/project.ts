@@ -1,4 +1,4 @@
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import {
   CreateProjectRequest,

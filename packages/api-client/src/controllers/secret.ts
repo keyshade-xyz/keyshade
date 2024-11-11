@@ -1,5 +1,5 @@
 import { APIClient } from '@api-client/core/client'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateSecretRequest,
