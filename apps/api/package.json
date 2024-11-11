@@ -34,6 +34,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/throttler": "^6.2.1",
     "@nestjs/websockets": "^10.3.7",
+    "@slack/bolt": "^3.22.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "@supabase/supabase-js": "^2.39.6",
     "class-transformer": "^0.5.1",
