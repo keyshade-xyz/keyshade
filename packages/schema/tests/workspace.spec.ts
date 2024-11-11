@@ -215,6 +215,12 @@ describe('Workspace Schema Tests', () => {
     expect(result.success).toBe(true)
   })
 
+  it('should validate an empty response for DeleteWorkspaceResponseSchema', () => {
+    const result = DeleteWorkspaceResponseSchema.safeParse(undefined)
+
+    expect(result.success).toBe(true)
+  })
+
   it('should not validate if unexpected fields are provided for DeleteWorkspaceResponseSchema', () => {
     const result = DeleteWorkspaceResponseSchema.safeParse({
       unexpectedField: 'value'

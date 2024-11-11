@@ -40,7 +40,7 @@ export const DeleteWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
 })
 
-export const DeleteWorkspaceResponseSchema = z.never()
+export const DeleteWorkspaceResponseSchema = z.void()
 
 export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
@@ -120,6 +120,7 @@ export const GlobalSearchRequestSchema = z.object({
 export const GlobalSearchResponseSchema = z.object({
   projects: z.array(
     z.object({
+      id: z.string(),
       slug: z.string(),
       name: z.string(),
       description: z.string()
@@ -127,6 +128,7 @@ export const GlobalSearchResponseSchema = z.object({
   ),
   environments: z.array(
     z.object({
+      id: z.string(),
       slug: z.string(),
       name: z.string(),
       description: z.string()
@@ -134,6 +136,7 @@ export const GlobalSearchResponseSchema = z.object({
   ),
   secrets: z.array(
     z.object({
+      id: z.string(),
       slug: z.string(),
       name: z.string(),
       note: z.string()
@@ -141,6 +144,7 @@ export const GlobalSearchResponseSchema = z.object({
   ),
   variables: z.array(
     z.object({
+      id: z.string(),
       slug: z.string(),
       name: z.string(),
       note: z.string()
