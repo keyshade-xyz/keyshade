@@ -6,8 +6,16 @@
   "private": true,
   "exports": {
     ".": {
+      "types": "./dist/src/index.types.d.ts",
+      "default": "./dist/src/index.types.js"
+    },
+    "./schemas": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
+    },
+    "./*": {
+      "types": "./dist/src/*",
+      "default": "./dist/src/*"
     }
   },
   "scripts": {
