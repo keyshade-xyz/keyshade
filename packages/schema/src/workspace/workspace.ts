@@ -3,7 +3,7 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
 import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
 
 export const InviteMemberSchema = z.object({
-  email: z.string(),
+  email: z.string().email(),
   roleSlugs: z.array(z.string()).optional()
 })
 

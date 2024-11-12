@@ -43,6 +43,15 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
+  it('should not validate if invalid email string is specified for InviteMemberSchema', () => {
+    const result = InviteMemberSchema.safeParse({
+      email: 'invalid-email'
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
   it('should not validate if invalid types are specified for InviteMemberSchema', () => {
     const result = InviteMemberSchema.safeParse({
       email: 123,
