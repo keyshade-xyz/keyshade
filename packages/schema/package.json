@@ -12,10 +12,6 @@
     "./schemas": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
-    },
-    "./*": {
-      "types": "./dist/src/*",
-      "default": "./dist/src/*"
     }
   },
   "scripts": {
