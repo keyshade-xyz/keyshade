@@ -1,4 +1,4 @@
-import { PageRequest } from '@api-client/types/index.types'
+import { PageRequest } from '@keyshade/schema'
 
 /**
  * Constructs a URL by appending the given page request

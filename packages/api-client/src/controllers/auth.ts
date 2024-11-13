@@ -1,10 +1,7 @@
-import {
-  ResendOTPResponse,
-  ResendOTPRequest
-} from '@api-client/types/auth.types'
+import { ResendOTPResponse, ResendOTPRequest } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 
 export default class AuthController {
   private apiClient: APIClient

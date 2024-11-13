@@ -10,17 +10,18 @@ import {
 import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
-  CreateWorkspaceSchema,
-  InviteMemberSchema,
-  UpdateWorkspaceSchema
-} from './workspace'
-import {
   CreateWorkspaceRoleSchema,
   UpdateWorkspaceRoleSchema
 } from './workspace-role'
 
+//Export types from pagination.types.ts
+export * from './pagination/pagination.types'
+
 export type TCreateApiKey = z.infer<typeof CreateApiKeySchema>
 export type TUpdateApiKey = z.infer<typeof UpdateApiKeySchema>
+
+// Export types from auth.types.ts
+export * from './auth/auth.types'
 
 export type TCreateEnvironment = z.infer<typeof CreateEnvironmentSchema>
 export type TUpdateEnvironment = z.infer<typeof UpdateEnvironmentSchema>
@@ -38,9 +39,8 @@ export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>
 export type TCreateVariable = z.infer<typeof CreateVariableSchema>
 export type TUpdateVariable = z.infer<typeof UpdateVariableSchema>
 
-export type TCreateWorkspace = z.infer<typeof CreateWorkspaceSchema>
-export type TUpdateWorkspace = z.infer<typeof UpdateWorkspaceSchema>
-export type TInviteMember = z.infer<typeof InviteMemberSchema>
+// Export types from workspace.types.ts
+export * from './workspace/workspace.types'
 
 export type TCreateWorkspaceRole = z.infer<typeof CreateWorkspaceRoleSchema>
 export type TUpdateWorkspaceRole = z.infer<typeof UpdateWorkspaceRoleSchema>

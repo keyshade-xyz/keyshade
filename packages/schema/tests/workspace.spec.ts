@@ -43,6 +43,15 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
+  it('should not validate if invalid email string is specified for InviteMemberSchema', () => {
+    const result = InviteMemberSchema.safeParse({
+      email: 'invalid-email'
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
   it('should not validate if invalid types are specified for InviteMemberSchema', () => {
     const result = InviteMemberSchema.safeParse({
       email: 123,
@@ -211,6 +220,12 @@ describe('Workspace Schema Tests', () => {
     const result = DeleteWorkspaceRequestSchema.safeParse({
       workspaceSlug: 'workspace-slug'
     })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate an empty response for DeleteWorkspaceResponseSchema', () => {
+    const result = DeleteWorkspaceResponseSchema.safeParse(undefined)
 
     expect(result.success).toBe(true)
   })
@@ -396,6 +411,7 @@ describe('Workspace Schema Tests', () => {
     const result = GlobalSearchResponseSchema.safeParse({
       projects: [
         {
+          id: 'project-id',
           slug: 'project-slug',
           name: 'Project Name',
           description: 'Project Description'
@@ -403,6 +419,7 @@ describe('Workspace Schema Tests', () => {
       ],
       environments: [
         {
+          id: 'environment-id',
           slug: 'environment-slug',
           name: 'Environment Name',
           description: 'Environment Description'
@@ -410,6 +427,7 @@ describe('Workspace Schema Tests', () => {
       ],
       secrets: [
         {
+          id: 'secret-id',
           slug: 'secret-slug',
           name: 'Secret Name',
           note: 'Secret Note'
@@ -417,6 +435,7 @@ describe('Workspace Schema Tests', () => {
       ],
       variables: [
         {
+          id: 'variable-id',
           slug: 'variable-slug',
           name: 'Variable Name',
           note: 'Variable Note'
@@ -442,10 +461,6 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error?.issues[0]?.path).toEqual([
-      'projects',
-      0,
-      'description'
-    ])
+    expect(result.error?.issues[0]?.path).toEqual(['projects', 0, 'id'])
   })
 })
