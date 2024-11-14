@@ -15,19 +15,20 @@ RUN corepack enable
 
 COPY --chown=root:root --chmod=755 package.json turbo.json pnpm-*.yaml ./
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-pnpm install --ignore-scripts --frozen-lockfile && \
-rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
+COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json /app
 
 COPY --chown=root:root --chmod=755 packages packages
-COPY --chown=root:root --chmod=755 apps/api/package.json apps/api/tsconfig.json apps/api/
 
+# Install dependencies using pnpm with cache mount
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --ignore-scripts --frozen-lockfile && \
+    rm -rf /root/.npm /root/.node-gyp /tmp/npm-*
 
-COPY --chown=root:root --chmod=755 apps/api/src apps/api/src
+COPY --chown=root:root --chmod=755 apps/api/src /app/src
 
 RUN pnpm db:generate-types && \
-	pnpm build:api && \
-	pnpm sourcemaps:api
+    pnpm build:api && \
+    pnpm sourcemaps:api
 
 # USER node
 
@@ -40,10 +41,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# COPY --chown=root:root --chmod=755 --from=build /app/node_modules /app/node_modules
-COPY --chown=node:node --chmod=755 --from=build /app/apps/api/node_modules /app/apps/api/node_modules
-COPY --chown=node:node --chmod=755 --from=build /app/apps/api/dist /app/apps/api/dist
+COPY --chown=node:node --chmod=755 --from=build /app/node_modules /app/node_modules
+
+COPY --chown=node:node --chmod=755 --from=build /app/dist /app/dist
 
 EXPOSE ${API_PORT}
 
-ENTRYPOINT ["node", "/app/apps/api/dist/main.js"]
+ENTRYPOINT ["node", "/app/dist/main.js"]
