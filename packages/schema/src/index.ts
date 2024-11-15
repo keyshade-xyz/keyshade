@@ -8,7 +8,9 @@ export * from './auth/auth'
 
 export * from './environment'
 export * from './integration'
-export * from './project'
+
+export * from './project/project'
+
 export * from './secret'
 export * from './variable'
 

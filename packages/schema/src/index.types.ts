@@ -2,11 +2,6 @@ import { z } from 'zod'
 import { CreateApiKeySchema, UpdateApiKeySchema } from './api-key'
 import { CreateEnvironmentSchema, UpdateEnvironmentSchema } from './environment'
 import { CreateIntegrationSchema, UpdateIntegrationSchema } from './integration'
-import {
-  CreateProjectSchema,
-  ForkProjectSchema,
-  UpdateProjectSchema
-} from './project'
 import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
@@ -29,9 +24,8 @@ export type TUpdateEnvironment = z.infer<typeof UpdateEnvironmentSchema>
 export type TCreateIntegration = z.infer<typeof CreateIntegrationSchema>
 export type TUpdateIntegration = z.infer<typeof UpdateIntegrationSchema>
 
-export type TCreateProject = z.infer<typeof CreateProjectSchema>
-export type TUpdateProject = z.infer<typeof UpdateProjectSchema>
-export type TForkProject = z.infer<typeof ForkProjectSchema>
+// Export types from project.types.ts
+export * from './project/project.types'
 
 export type TCreateSecret = z.infer<typeof CreateSecretSchema>
 export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>
