@@ -44,7 +44,8 @@ export default class UpdateProfile extends BaseCommand {
       {
         short: '-m',
         long: '--enable-metrics <boolean>',
-        description: 'Enable or disable anonymous metrics collection'
+        description:
+          'Should keyshade collect anonymous metrics for development?'
       }
     ]
   }

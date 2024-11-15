@@ -47,7 +47,8 @@ export default class CreateProfile extends BaseCommand {
       {
         short: '-m',
         long: '--enable-metrics',
-        description: 'Enable anonymous metrics collection',
+        description:
+          'Should keyshade collect anonymous metrics for development?',
         defaultValue: false
       }
     ]
