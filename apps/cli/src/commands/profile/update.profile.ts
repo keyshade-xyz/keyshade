@@ -40,6 +40,11 @@ export default class UpdateProfile extends BaseCommand {
         short: '-b',
         long: '--base-url <string>',
         description: 'New base URL for the keyshade server'
+      },
+      {
+        short: '-m',
+        long: '--enable-metrics <boolean>',
+        description: 'Enable or disable anonymous metrics collection'
       }
     ]
   }
@@ -48,7 +53,7 @@ export default class UpdateProfile extends BaseCommand {
     this.profiles = await fetchProfileConfig()
 
     const profile = args[0]
-    const { name, apiKey, baseUrl } = options
+    const { name, apiKey, baseUrl, enableMetrics } = options
 
     const s = spinner()
     s.start('Updating the profile')
@@ -58,7 +63,8 @@ export default class UpdateProfile extends BaseCommand {
       profile,
       name as string,
       apiKey as string,
-      baseUrl as string
+      baseUrl as string,
+      enableMetrics as boolean
     )
     await writeProfileConfig(this.profiles)
 
@@ -69,7 +75,8 @@ export default class UpdateProfile extends BaseCommand {
     profile: string,
     name: string,
     apiKey: string,
-    baseUrl: string
+    baseUrl: string,
+    enableMetrics: boolean
   ): void {
     const isDefaultProfile = checkIsDefaultProfile(this.profiles, profile)
 
@@ -79,6 +86,10 @@ export default class UpdateProfile extends BaseCommand {
 
     if (baseUrl) {
       this.profiles[profile].baseUrl = baseUrl
+    }
+
+    if (enableMetrics !== undefined) {
+      this.profiles[profile].metrics_enabled = enableMetrics
     }
 
     if (name) {
