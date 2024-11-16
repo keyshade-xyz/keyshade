@@ -6,7 +6,8 @@ export * from './api-key'
 
 export * from './auth/auth'
 
-export * from './environment'
+export * from './environment/environment'
+
 export * from './integration'
 
 export * from './project/project'

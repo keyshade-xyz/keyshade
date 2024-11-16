@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
-import { CreateEnvironmentSchema } from '@/environment'
+import { CreateEnvironmentRequestSchema } from '@/environment/environment'
 import { projectAccessLevelEnum } from '@/enums'
 
 export const ProjectSchema = z
@@ -31,7 +31,7 @@ export const CreateProjectRequestSchema = z.object({
   workspaceSlug: z.string(),
   description: z.string().optional(),
   storePrivateKey: z.boolean().optional(),
-  environments: CreateEnvironmentSchema.array().optional(),
+  environments: CreateEnvironmentRequestSchema.array().optional(),
   accessLevel: projectAccessLevelEnum
 })
 
