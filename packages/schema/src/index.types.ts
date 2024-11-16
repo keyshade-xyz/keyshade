@@ -7,7 +7,6 @@ import {
   ForkProjectSchema,
   UpdateProjectSchema
 } from './project'
-import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
   CreateWorkspaceRoleSchema,
@@ -33,8 +32,8 @@ export type TCreateProject = z.infer<typeof CreateProjectSchema>
 export type TUpdateProject = z.infer<typeof UpdateProjectSchema>
 export type TForkProject = z.infer<typeof ForkProjectSchema>
 
-export type TCreateSecret = z.infer<typeof CreateSecretSchema>
-export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>
+// Export types from secret.types.ts
+export * from './secret/secret.types'
 
 export type TCreateVariable = z.infer<typeof CreateVariableSchema>
 export type TUpdateVariable = z.infer<typeof UpdateVariableSchema>
