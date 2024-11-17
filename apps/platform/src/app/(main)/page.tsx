@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import type { CreateProjectRequest, CreateProjectResponse } from '@keyshade/api-client';
+import type { Workspace } from '@keyshade/schema'
+import ProjectController from '@keyshade/api-client'
 import { AddSVG } from '@public/svg/shared'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
@@ -17,8 +20,16 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { 
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue, } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import type { NewProject, ProjectWithoutKeys, Workspace } from '@/types'
+import type { NewProject, ProjectWithoutKeys } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -37,26 +48,56 @@ export default function Index(): JSX.Element {
     storePrivateKey: false,
     environments: [
       {
-        name: 'Dev',
-        description: 'Development environment',
-        isDefault: true
+        name: '',
+        description: '',
+        isDefault: false,
       },
-      {
-        name: 'Stage',
-        description: 'Staging environment',
-        isDefault: false
-      },
-      {
-        name: 'Prod',
-        description: 'Production environment',
-        isDefault: false
-      }
-    ]
+    ],
+    accessLevel: 'GLOBAL'
   })
 
   const router = useRouter()
 
-  const currentWorkspace =
+  
+
+  const createNewProject = async () => {
+
+    const projectController = new ProjectController(process.env.NEXT_PUBLIC_BACKEND_URL);
+
+    const request: CreateProjectRequest = {
+      name: newProjectData.name,
+      workspaceSlug: currentWorkspace.slug,
+      description: newProjectData.description ?? undefined,
+      environments: newProjectData.environments,
+      accessLevel: newProjectData.accessLevel
+    }
+
+    const response = await projectController.createProject(request);
+
+    if( response.success ){
+
+      const createdProject: ProjectWithoutKeys = {
+        id: response.data.id,
+        name: response.data.name,
+        description: response.data.description,
+        createdAt: response.data.createdAt,
+        updatedAt: response.data.updatedAt,
+        storePrivateKey: response.data.storePrivateKey,
+        isDisabled: response.data.isDisabled,
+        accessLevel: response.data.accessLevel,
+        lastUpdatedById: response.data.lastUpdatedById,
+        workspaceId: response.data.workspaceId,
+        isForked: response.data.isForked,
+        forkedFromId: response.data.forkedFromId,
+      }
+
+      setProjects((prevProjects) => [...prevProjects, createdProject]);
+
+    }
+
+  }
+
+  const currentWorkspace: Workspace =
     typeof localStorage !== 'undefined'
       ? (JSON.parse(
           localStorage.getItem('currentWorkspace') ?? '{}'
@@ -88,19 +129,30 @@ export default function Index(): JSX.Element {
               <AddSVG /> Create a new Project
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>Create a new project</DialogHeader>
-            <DialogDescription>
-              Fill in the details to create a new project
-            </DialogDescription>
+          <DialogContent className='h-[39.5rem] w-[28.625rem] bg-[#1E1E1F] border rounded-[12px] '>
+
+            <div className='h-[3.125rem] w-[25.625rem] flex flex-col justify-center items-start'>
+              <DialogHeader className=' h-[1.875rem] w-[8.5rem] font-geist font-semibold text-white text-[1.125rem] '
+              >
+                Create Projects
+              </DialogHeader>
+
+              <DialogDescription className=' h-[1.25rem] w-[25.625rem] font-inter font-normal text-[#D4D4D4] text-[0.875rem]'>
+                Create your new project
+              </DialogDescription>
+
+            </div>
             <div className="flex flex-col gap-y-8">
-              <div className="flex w-full flex-col gap-y-4">
-                <div className="flex flex-col items-start gap-4">
-                  <Label className="text-right" htmlFor="name">
+
+              <div className="h-[29.125rem] w-[25.813rem] flex flex-col py-[1rem] gap-[1rem] ">
+
+                {/* NAME */}
+                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
+                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="name">
                     Name
                   </Label>
                   <Input
-                    className="col-span-3"
+                    className="col-span-3 h-[2.25rem] w-[20rem] "
                     id="name"
                     onChange={(e) => {
                       setNewProjectData((prev) => ({
@@ -111,12 +163,14 @@ export default function Index(): JSX.Element {
                     placeholder="Enter the name"
                   />
                 </div>
-                <div className="flex flex-col items-start gap-4">
-                  <Label className="text-right" htmlFor="name">
+                
+                {/* DESCRIPTION */}
+                <div className="flex h-[5.625rem] w-[25.813rem] gap-[1rem] justify-center items-center">
+                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="name">
                     Description
                   </Label>
                   <Input
-                    className="col-span-3"
+                    className="col-span-3 h-[5.625rem] w-[20rem] gap-[0.25rem]"
                     id="name"
                     onChange={(e) => {
                       setNewProjectData((prev) => ({
@@ -127,28 +181,102 @@ export default function Index(): JSX.Element {
                     placeholder="Enter the name"
                   />
                 </div>
-                {/* {isNameEmpty ? (
-                  <span className="ml-[3.5rem] mt-1 text-red-500">
-                    Name cannot be empty
-                  </span>
-                ) : null} */}
+                
+                {/* ENV. NAME */}
+                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
+                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="envName">
+                    Env. Name
+                  </Label>
+                  <Input
+                    className="col-span-3 h-[2.25rem] w-[20rem] "
+                    id="envName"
+                    onChange={(e) => {
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        envName: e.target.value
+                      }))
+                    }}
+                    placeholder="Your project default environment name"
+                  />
+                </div>
+                
+                {/* ENV. DESCRIPTION */}
+                <div className="flex justify-center items-center h-[4.875rem] w-[25.813rem] gap-[1rem]">
+                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem]" htmlFor="envDescription">
+                    Env. Description
+                  </Label>
+                  <Input
+                    className="col-span-3 h-[4.875rem] w-[20rem] "
+                    id="envDescription"
+                    onChange={(e) => {
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        envDescription: e.target.value
+                      }))
+                    }}
+                    placeholder="Detailed description about your environment"
+                  />
+                </div>
+
+                {/* ACCESS LEVEL */}
+                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
+                  <Label className="text-left h-[0.875rem] w-[5.5rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="accessLevel">
+                    Access Level
+                  </Label>
+                  <Select defaultValue="GLOBAL"
+                  onValueChange={(currValue) =>
+                    { setNewProjectData((prevData) => ({
+                      ...prevData,
+                      accessLevel: currValue as "GLOBAL" | "INTERNAL" | "PRIVATE",
+                    })); }
+                  }
+                  >
+                    <SelectTrigger className=" h-[2.25rem] w-[20rem] border-[0.013rem] border-white/10 rounded-[0.375rem] focus:border-[#3b82f6]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-neutral-800 border-[0.013rem] border-white/10 text-white ">
+                      <SelectGroup>
+                        {["Global", "Internal", "Private"].map((accessValue) => (
+                          <SelectItem
+                            className="group rounded-sm cursor-pointer"
+                            key={accessValue.toLowerCase()}
+                            value={accessValue.toLowerCase()}
+                          >
+                              {accessValue} 
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex justify-center items-center h-[4.875rem] w-[25.813rem] gap-[1rem]">
+
+                  <div className='h-[2.875rem] w-[22.563rem] flex flex-col justify-center items-start'>
+                    <h1 className='h-[1.5rem] w-[18.688rem] font-geist font-[500] text-[1rem]'>
+                      Should the private key be saved or not?
+                    </h1>
+                    <h1 className='h-[1.25rem] w-[16.563rem] font-inter font-normal text-[0.8rem] text-[#A1A1AA] '>
+                      Choose if you want to save your private key
+                    </h1>
+
+                  </div>
+                  
+                  <div className='p-[0.125rem]'>
+                    <Switch className='h-[1.25rem] w-[2.25rem] ' />
+                  </div>
+
+                </div>
+
               </div>
             </div>
-            <div className="flex w-full justify-end">
+            <div className="h-[2.25rem] w-[25.625rem] flex justify-end">
               <Button
-                onClick={() => {
-                  Projects.createProject(newProjectData, currentWorkspace.id)
-                    .then(() => {
-                      toast.success('New project added successfully')
-                      router.refresh()
-                    })
-                    .catch(() => {
-                      toast.error('Failed to add new project')
-                    })
-                }}
+                className='h-[2.25rem] w-[8rem] rounded-[0.375rem] font-inter font-[500] text-[0.875rem]'
+                onClick={ () => void createNewProject() }
                 variant="secondary"
               >
-                Add project
+                Create project
               </Button>
             </div>
           </DialogContent>

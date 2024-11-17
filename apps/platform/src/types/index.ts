@@ -50,7 +50,8 @@ export const zNewProject = z.object({
   name: z.string(),
   description: z.string().nullable(),
   storePrivateKey: z.boolean(),
-  environments: z.array(zEnvironment)
+  environments: z.array(zEnvironment),
+  accessLevel: z.enum(['GLOBAL', 'INTERNAL', 'PRIVATE'])
 })
 
 export const zProjectWithoutKeys = zProject.omit({
