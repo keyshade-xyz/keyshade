@@ -4,7 +4,7 @@ import {
   PageRequestSchema,
   PageResponseSchema,
   ResponseErrorSchema
-} from './pagination'
+} from '.'
 
 export type PageRequest = z.infer<typeof PageRequestSchema>
 

@@ -29,14 +29,14 @@ export default class UserController {
     request: UpdateSelfRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateSelfResponse>> {
-    const response = await this.apiClient.put(`./api/user`, request, headers)
+    const response = await this.apiClient.put(`/api/user`, request, headers)
     return await parseResponse<UpdateSelfResponse>(response)
   }
 
   async deleteSelf(
     headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteSelfResponse>> {
-    const response = await this.apiClient.delete(`./api/user`, headers)
+    const response = await this.apiClient.delete(`/api/user`, headers)
     return await parseResponse<DeleteSelfResponse>(response)
   }
 
@@ -57,7 +57,7 @@ export default class UserController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<ResendEmailChangeOTPResponse>> {
     const response = await this.apiClient.post(
-      `./api/user/resend-email-change-otp`,
+      `/api/user/resend-email-change-otp`,
       request,
       headers
     )

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { WorkspaceSchema } from '@/workspace/workspace'
+import { WorkspaceSchema } from '@/workspace'
 
 export const GetSelfResponseSchema = z.object({
   id: z.string(),

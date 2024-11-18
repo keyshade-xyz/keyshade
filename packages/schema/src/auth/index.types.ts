@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ResendOTPRequestSchema, ResendOTPResponseSchema } from './auth'
+import { ResendOTPRequestSchema, ResendOTPResponseSchema } from '.'
 
 export type ResendOTPRequest = z.infer<typeof ResendOTPRequestSchema>
 
