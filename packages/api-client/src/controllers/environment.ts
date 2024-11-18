@@ -12,7 +12,7 @@ import {
   GetEnvironmentResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
-} from '@api-client/types/environment.types'
+} from '@keyshade/schema'
 import { ClientResponse } from '@keyshade/schema'
 
 export default class EnvironmentController {

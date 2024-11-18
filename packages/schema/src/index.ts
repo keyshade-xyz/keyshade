@@ -7,7 +7,6 @@ export * from './api-key'
 export * from './auth/auth'
 
 export * from './enums'
-
 export * from './environment'
 export * from './integration'
 export * from './project'
