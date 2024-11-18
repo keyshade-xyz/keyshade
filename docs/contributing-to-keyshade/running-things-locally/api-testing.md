@@ -1,10 +1,10 @@
----
+⁸---
 description: API testing using Bruno
 ---
 
 # API Testing
 
-We use Bruno to test our APIs. All of our endpoints are tested using Bruno and we maintain a detailed documentation of every endpoint in our Bruno collection. You can find the it in [here](../../../api-collection/).
+We use Bruno to test our APIs. All of our endpoints are tested using Bruno and we maintain a detailed documentation of every endpoint in our Bruno collection. You can find it in [here](../../../api-collection/).
 
 Although we recommend to use Bruno, you can always import the collections into your favorite tool.
 
