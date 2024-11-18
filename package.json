@@ -108,7 +108,7 @@
     "build:web": "turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=cli",
-    "build:api-client": "turbo run --filter=api-client build",
+    "build:api-client": "pnpm build:schema && turbo run --filter=api-client build",
     "build:schema": "turbo run build --filter=schema",
     "build:secret-scan": "turbo run build --filter=secret-scan",
     "start": "turbo run start",
