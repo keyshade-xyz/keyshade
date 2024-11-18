@@ -9,7 +9,7 @@ import {
   ValidateEmailChangeOTPResponseSchema,
   ResendEmailChangeOTPRequestSchema,
   ResendEmailChangeOTPResponseSchema
-} from './user'
+} from '.'
 
 export type GetSelfResponse = z.infer<typeof GetSelfResponseSchema>
 

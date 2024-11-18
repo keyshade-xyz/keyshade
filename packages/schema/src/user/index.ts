@@ -29,7 +29,7 @@ export const DeleteSelfRequestSchema = z.void()
 export const DeleteSelfResponseSchema = z.void()
 
 export const ValidateEmailChangeOTPRequestSchema = z.object({
-  otp: z.string()
+  otp: z.string().min(6).max(6)
 })
 
 export const ValidateEmailChangeOTPResponseSchema =

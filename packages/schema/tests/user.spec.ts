@@ -8,7 +8,7 @@ import {
   ValidateEmailChangeOTPResponseSchema,
   ResendEmailChangeOTPRequestSchema,
   ResendEmailChangeOTPResponseSchema
-} from '@/user/user'
+} from '@/user'
 
 describe('User Schema Tests', () => {
   // Tests for GetSelfResponseSchema
@@ -120,6 +120,14 @@ describe('User Schema Tests', () => {
       otp: '123456'
     })
     expect(result.success).toBe(true)
+  })
+
+  it('should fail validation for OTP of length other than 6 ValidateEmailChangeOTPRequestSchema', () => {
+    const result = ValidateEmailChangeOTPRequestSchema.safeParse({
+      otp: '234' // Should be a 6 digit string
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues.length).toBe(1)
   })
 
   it('should fail validation for invalid ValidateEmailChangeOTPRequestSchema', () => {
