@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import type { CreateProjectRequest, CreateProjectResponse } from '@keyshade/api-client';
-import type { Workspace } from '@keyshade/schema'
-import ProjectController from '@keyshade/api-client'
+import type {
+  CreateProjectRequestSchema,
+  CreateProjectResponseSchema
+} from '@keyshade/schema'
+import { ProjectController } from '@keyshade/api-client'
 import { AddSVG } from '@public/svg/shared'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
@@ -20,14 +22,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { 
+import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue, } from '@/components/ui/select'
+  SelectValue
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import type { NewProject, ProjectWithoutKeys } from '@/types'
 import {
@@ -38,6 +41,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Projects } from '@/lib/api-functions/projects'
+import { z } from 'zod'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -50,21 +54,20 @@ export default function Index(): JSX.Element {
       {
         name: '',
         description: '',
-        isDefault: false,
-      },
+        isDefault: false
+      }
     ],
     accessLevel: 'GLOBAL'
   })
 
   const router = useRouter()
 
-  
-
   const createNewProject = async () => {
+    const projectController = new ProjectController(
+      process.env.NEXT_PUBLIC_BACKEND_URL
+    )
 
-    const projectController = new ProjectController(process.env.NEXT_PUBLIC_BACKEND_URL);
-
-    const request: CreateProjectRequest = {
+    const request: z.infer<typeof CreateProjectRequestSchema> = {
       name: newProjectData.name,
       workspaceSlug: currentWorkspace.slug,
       description: newProjectData.description ?? undefined,
@@ -72,10 +75,9 @@ export default function Index(): JSX.Element {
       accessLevel: newProjectData.accessLevel
     }
 
-    const response = await projectController.createProject(request);
+    const response = await projectController.createProject(request, {})
 
-    if( response.success ){
-
+    if (response.success) {
       const createdProject: ProjectWithoutKeys = {
         id: response.data.id,
         name: response.data.name,
@@ -88,13 +90,11 @@ export default function Index(): JSX.Element {
         lastUpdatedById: response.data.lastUpdatedById,
         workspaceId: response.data.workspaceId,
         isForked: response.data.isForked,
-        forkedFromId: response.data.forkedFromId,
+        forkedFromId: response.data.forkedFromId
       }
 
-      setProjects((prevProjects) => [...prevProjects, createdProject]);
-
+      setProjects((prevProjects) => [...prevProjects, createdProject])
     }
-
   }
 
   const currentWorkspace: Workspace =
@@ -129,26 +129,24 @@ export default function Index(): JSX.Element {
               <AddSVG /> Create a new Project
             </Button>
           </DialogTrigger>
-          <DialogContent className='h-[39.5rem] w-[28.625rem] bg-[#1E1E1F] border rounded-[12px] '>
-
-            <div className='h-[3.125rem] w-[25.625rem] flex flex-col justify-center items-start'>
-              <DialogHeader className=' h-[1.875rem] w-[8.5rem] font-geist font-semibold text-white text-[1.125rem] '
-              >
+          <DialogContent className="h-[39.5rem] w-[28.625rem] rounded-[12px] border bg-[#1E1E1F] ">
+            <div className="flex h-[3.125rem] w-[25.625rem] flex-col items-start justify-center">
+              <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
                 Create Projects
               </DialogHeader>
 
-              <DialogDescription className=' h-[1.25rem] w-[25.625rem] font-inter font-normal text-[#D4D4D4] text-[0.875rem]'>
+              <DialogDescription className=" font-inter h-[1.25rem] w-[25.625rem] text-[0.875rem] font-normal text-[#D4D4D4]">
                 Create your new project
               </DialogDescription>
-
             </div>
             <div className="flex flex-col gap-y-8">
-
-              <div className="h-[29.125rem] w-[25.813rem] flex flex-col py-[1rem] gap-[1rem] ">
-
+              <div className="flex h-[29.125rem] w-[25.813rem] flex-col gap-[1rem] py-[1rem] ">
                 {/* NAME */}
-                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
-                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="name">
+                <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <Label
+                    className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                    htmlFor="name"
+                  >
                     Name
                   </Label>
                   <Input
@@ -163,10 +161,13 @@ export default function Index(): JSX.Element {
                     placeholder="Enter the name"
                   />
                 </div>
-                
+
                 {/* DESCRIPTION */}
-                <div className="flex h-[5.625rem] w-[25.813rem] gap-[1rem] justify-center items-center">
-                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="name">
+                <div className="flex h-[5.625rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <Label
+                    className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                    htmlFor="name"
+                  >
                     Description
                   </Label>
                   <Input
@@ -181,10 +182,13 @@ export default function Index(): JSX.Element {
                     placeholder="Enter the name"
                   />
                 </div>
-                
+
                 {/* ENV. NAME */}
-                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
-                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="envName">
+                <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <Label
+                    className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                    htmlFor="envName"
+                  >
                     Env. Name
                   </Label>
                   <Input
@@ -199,10 +203,13 @@ export default function Index(): JSX.Element {
                     placeholder="Your project default environment name"
                   />
                 </div>
-                
+
                 {/* ENV. DESCRIPTION */}
-                <div className="flex justify-center items-center h-[4.875rem] w-[25.813rem] gap-[1rem]">
-                  <Label className="text-left h-[1.25rem] w-[4.813rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem]" htmlFor="envDescription">
+                <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <Label
+                    className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500]"
+                    htmlFor="envDescription"
+                  >
                     Env. Description
                   </Label>
                   <Input
@@ -219,61 +226,66 @@ export default function Index(): JSX.Element {
                 </div>
 
                 {/* ACCESS LEVEL */}
-                <div className="flex justify-center items-center h-[2.25rem] w-[25.813rem] gap-[1rem]">
-                  <Label className="text-left h-[0.875rem] w-[5.5rem] font-geist font-[500] text-[0.875rem] gap-[0.25rem] " htmlFor="accessLevel">
+                <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <Label
+                    className="font-geist h-[0.875rem] w-[5.5rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
+                    htmlFor="accessLevel"
+                  >
                     Access Level
                   </Label>
-                  <Select defaultValue="GLOBAL"
-                  onValueChange={(currValue) =>
-                    { setNewProjectData((prevData) => ({
-                      ...prevData,
-                      accessLevel: currValue as "GLOBAL" | "INTERNAL" | "PRIVATE",
-                    })); }
-                  }
+                  <Select
+                    defaultValue="GLOBAL"
+                    onValueChange={(currValue) => {
+                      setNewProjectData((prevData) => ({
+                        ...prevData,
+                        accessLevel: currValue as
+                          | 'GLOBAL'
+                          | 'INTERNAL'
+                          | 'PRIVATE'
+                      }))
+                    }}
                   >
-                    <SelectTrigger className=" h-[2.25rem] w-[20rem] border-[0.013rem] border-white/10 rounded-[0.375rem] focus:border-[#3b82f6]">
+                    <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 focus:border-[#3b82f6]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-neutral-800 border-[0.013rem] border-white/10 text-white ">
+                    <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
                       <SelectGroup>
-                        {["Global", "Internal", "Private"].map((accessValue) => (
-                          <SelectItem
-                            className="group rounded-sm cursor-pointer"
-                            key={accessValue.toLowerCase()}
-                            value={accessValue.toLowerCase()}
-                          >
-                              {accessValue} 
-                          </SelectItem>
-                        ))}
+                        {['Global', 'Internal', 'Private'].map(
+                          (accessValue) => (
+                            <SelectItem
+                              className="group cursor-pointer rounded-sm"
+                              key={accessValue.toLowerCase()}
+                              value={accessValue.toLowerCase()}
+                            >
+                              {accessValue}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="flex justify-center items-center h-[4.875rem] w-[25.813rem] gap-[1rem]">
-
-                  <div className='h-[2.875rem] w-[22.563rem] flex flex-col justify-center items-start'>
-                    <h1 className='h-[1.5rem] w-[18.688rem] font-geist font-[500] text-[1rem]'>
+                <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+                  <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
+                    <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
                       Should the private key be saved or not?
                     </h1>
-                    <h1 className='h-[1.25rem] w-[16.563rem] font-inter font-normal text-[0.8rem] text-[#A1A1AA] '>
+                    <h1 className="font-inter h-[1.25rem] w-[16.563rem] text-[0.8rem] font-normal text-[#A1A1AA] ">
                       Choose if you want to save your private key
                     </h1>
-
-                  </div>
-                  
-                  <div className='p-[0.125rem]'>
-                    <Switch className='h-[1.25rem] w-[2.25rem] ' />
                   </div>
 
+                  <div className="p-[0.125rem]">
+                    <Switch className="h-[1.25rem] w-[2.25rem] " />
+                  </div>
                 </div>
-
               </div>
             </div>
-            <div className="h-[2.25rem] w-[25.625rem] flex justify-end">
+            <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
               <Button
-                className='h-[2.25rem] w-[8rem] rounded-[0.375rem] font-inter font-[500] text-[0.875rem]'
-                onClick={ () => void createNewProject() }
+                className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
+                onClick={() => void createNewProject()}
                 variant="secondary"
               >
                 Create project
