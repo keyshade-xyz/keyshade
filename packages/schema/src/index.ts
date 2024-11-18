@@ -5,13 +5,9 @@ export * from './pagination/pagination'
 export * from './api-key'
 
 export * from './auth/auth'
-
-export * from './environment/environment'
-
+export * from './environment'
 export * from './integration'
-
-export * from './project/project'
-
+export * from './project'
 export * from './secret'
 export * from './variable'
 

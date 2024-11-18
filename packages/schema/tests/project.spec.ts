@@ -18,7 +18,7 @@ import {
   GetForkResponseSchema,
   GetAllProjectsRequestSchema,
   GetAllProjectsResponseSchema
-} from '@/project/project'
+} from '@/project'
 import { projectAccessLevelEnum } from '@/enums'
 
 describe('Project Schema Tests', () => {

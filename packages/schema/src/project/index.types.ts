@@ -19,7 +19,7 @@ import {
   GetForkResponseSchema,
   GetAllProjectsRequestSchema,
   GetAllProjectsResponseSchema
-} from './project'
+} from '.'
 
 export type Project = z.infer<typeof ProjectSchema>
 

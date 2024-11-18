@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
-import { CreateEnvironmentRequestSchema } from '@/environment/environment'
+import { CreateEnvironmentRequestSchema } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 
 export const ProjectSchema = z

@@ -11,7 +11,7 @@ import {
   GetAllEnvironmentsOfProjectResponseSchema,
   DeleteEnvironmentRequestSchema,
   DeleteEnvironmentResponseSchema
-} from './environment'
+} from '.'
 
 export type Environment = z.infer<typeof EnvironmentSchema>
 

@@ -17,14 +17,12 @@ export type TUpdateApiKey = z.infer<typeof UpdateApiKeySchema>
 // Export types from auth.types.ts
 export * from './auth/auth.types'
 
-// Export types from environment.types.ts
-export * from './environment/environment.types'
+export * from './environment/index.types'
 
 export type TCreateIntegration = z.infer<typeof CreateIntegrationSchema>
 export type TUpdateIntegration = z.infer<typeof UpdateIntegrationSchema>
 
-// Export types from project.types.ts
-export * from './project/project.types'
+export * from './project/index.types'
 
 export type TCreateSecret = z.infer<typeof CreateSecretSchema>
 export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>

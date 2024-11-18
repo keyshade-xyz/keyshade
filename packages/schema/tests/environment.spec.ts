@@ -10,7 +10,7 @@ import {
   GetAllEnvironmentsOfProjectResponseSchema,
   DeleteEnvironmentRequestSchema,
   DeleteEnvironmentResponseSchema
-} from '@/environment/environment'
+} from '@/environment'
 
 describe('Environment Schema Tests', () => {
   // Tests for EnvironmentSchema
