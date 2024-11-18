@@ -14,7 +14,7 @@ import {
   ExportDataResponseSchema,
   GlobalSearchRequestSchema,
   GlobalSearchResponseSchema
-} from './workspace'
+} from '.'
 import { PageRequestSchema } from '..'
 
 export type Workspace = z.infer<typeof WorkspaceSchema>

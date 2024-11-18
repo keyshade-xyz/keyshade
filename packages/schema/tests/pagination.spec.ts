@@ -4,7 +4,7 @@ import {
   PageResponseSchema,
   ResponseErrorSchema,
   ClientResponseSchema
-} from '@/pagination/pagination'
+} from '@/pagination'
 
 describe('Pagination Schema Tests', () => {
   // Tests for PageRequestSchema

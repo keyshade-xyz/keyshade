@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
+import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
 export const EnvironmentSchema = z.object({
   id: z.string(),

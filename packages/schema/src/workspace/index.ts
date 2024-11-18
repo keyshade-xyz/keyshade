@@ -1,13 +1,7 @@
 import { z } from 'zod'
-import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
+import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
 
-export const InviteMemberSchema = z.object({
-  email: z.string().email(),
-  roleSlugs: z.array(z.string()).optional()
-})
-
-//Request and Response types
 export const WorkspaceSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -44,6 +38,11 @@ export const DeleteWorkspaceResponseSchema = z.void()
 
 export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
+})
+
+export const InviteMemberSchema = z.object({
+  email: z.string().email(),
+  roleSlugs: z.array(z.string()).optional()
 })
 
 export const GetWorkspaceResponseSchema = WorkspaceSchema

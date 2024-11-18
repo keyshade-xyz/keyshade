@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PageRequestSchema, PageResponseSchema } from '@/pagination/pagination'
+import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { rotateAfterEnum } from '@/enums'
 
 export const SecretSchema = z.object({

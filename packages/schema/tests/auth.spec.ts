@@ -1,7 +1,4 @@
-import {
-  ResendOTPRequestSchema,
-  ResendOTPResponseSchema
-} from '../src/auth/auth'
+import { ResendOTPRequestSchema, ResendOTPResponseSchema } from '../src/auth'
 
 describe('Auth Schema Tests', () => {
   // Tests for ResendOTPRequestSchema

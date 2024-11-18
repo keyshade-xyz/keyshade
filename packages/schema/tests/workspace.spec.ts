@@ -14,7 +14,7 @@ import {
   GetAllWorkspacesOfUserResponseSchema,
   GlobalSearchResponseSchema,
   GetAllWorkspacesOfUserRequestSchema
-} from '@/workspace/workspace'
+} from '@/workspace'
 
 describe('Workspace Schema Tests', () => {
   it('should validate if proper input is specified for InviteMemberSchema', () => {
