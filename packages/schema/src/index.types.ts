@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { CreateApiKeySchema, UpdateApiKeySchema } from './api-key'
 import { CreateIntegrationSchema, UpdateIntegrationSchema } from './integration'
-import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
   CreateWorkspaceRoleSchema,
