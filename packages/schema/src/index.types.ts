@@ -27,6 +27,8 @@ export * from './project/index.types'
 export type TCreateSecret = z.infer<typeof CreateSecretSchema>
 export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>
 
+export * from './user/index.types'
+
 export type TCreateVariable = z.infer<typeof CreateVariableSchema>
 export type TUpdateVariable = z.infer<typeof UpdateVariableSchema>
 
