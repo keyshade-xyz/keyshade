@@ -1,12 +1,7 @@
 import { z } from 'zod'
 import { CreateApiKeySchema, UpdateApiKeySchema } from './api-key'
-import { CreateEnvironmentSchema, UpdateEnvironmentSchema } from './environment'
 import { CreateIntegrationSchema, UpdateIntegrationSchema } from './integration'
-import {
-  CreateProjectSchema,
-  ForkProjectSchema,
-  UpdateProjectSchema
-} from './project'
+import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
   CreateWorkspaceRoleSchema,
@@ -22,15 +17,12 @@ export type TUpdateApiKey = z.infer<typeof UpdateApiKeySchema>
 // Export types from auth.types.ts
 export * from './auth/auth.types'
 
-export type TCreateEnvironment = z.infer<typeof CreateEnvironmentSchema>
-export type TUpdateEnvironment = z.infer<typeof UpdateEnvironmentSchema>
+export * from './environment/index.types'
 
 export type TCreateIntegration = z.infer<typeof CreateIntegrationSchema>
 export type TUpdateIntegration = z.infer<typeof UpdateIntegrationSchema>
 
-export type TCreateProject = z.infer<typeof CreateProjectSchema>
-export type TUpdateProject = z.infer<typeof UpdateProjectSchema>
-export type TForkProject = z.infer<typeof ForkProjectSchema>
+export * from './project/index.types'
 
 export * from './secret/index.types'
 
