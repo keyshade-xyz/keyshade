@@ -34,6 +34,8 @@ export type TForkProject = z.infer<typeof ForkProjectSchema>
 
 export * from './secret/index.types'
 
+export * from './user/index.types'
+
 export type TCreateVariable = z.infer<typeof CreateVariableSchema>
 export type TUpdateVariable = z.infer<typeof UpdateVariableSchema>
 

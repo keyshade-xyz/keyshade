@@ -10,6 +10,7 @@ export interface ProfileConfig {
   [name: string]: {
     apiKey: string
     baseUrl: string
+    metrics_enabled: boolean
   }
 }
 

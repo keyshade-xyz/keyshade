@@ -17,6 +17,7 @@ export default abstract class BaseCommand {
   // Use these fields from the subclasses to make API requests if needed
   protected apiKey: string | null = null
   protected baseUrl: string | null = null
+  protected metricsEnabled: boolean | null = null
 
   // Headers to be used by the API requests
   protected headers: Record<string, string> | null = null
@@ -150,6 +151,7 @@ export default abstract class BaseCommand {
 
         this.apiKey = profile.apiKey
         this.baseUrl = profile.baseUrl
+        this.metricsEnabled = profile.metrics_enabled
       } else {
         throw new Error('Profile not found')
       }
@@ -167,6 +169,7 @@ export default abstract class BaseCommand {
       if (defaultProfile) {
         this.apiKey = defaultProfile.apiKey
         this.baseUrl = defaultProfile.baseUrl
+        this.metricsEnabled = defaultProfile.metrics_enabled
       }
     }
 
