@@ -10,7 +10,7 @@ import {
   ResendEmailChangeOTPRequest,
   DeleteSelfResponse,
   ResendEmailChangeOTPResponse
-} from '@api-client/types/user.types'
+} from '@keyshade/schema'
 
 export default class UserController {
   private apiClient: APIClient
