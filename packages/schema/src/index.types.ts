@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { CreateApiKeySchema, UpdateApiKeySchema } from './api-key'
 import { CreateIntegrationSchema, UpdateIntegrationSchema } from './integration'
-import { CreateSecretSchema, UpdateSecretSchema } from './secret'
 import { CreateVariableSchema, UpdateVariableSchema } from './variable'
 import {
   CreateWorkspaceRoleSchema,
@@ -24,8 +23,7 @@ export type TUpdateIntegration = z.infer<typeof UpdateIntegrationSchema>
 
 export * from './project/index.types'
 
-export type TCreateSecret = z.infer<typeof CreateSecretSchema>
-export type TUpdateSecret = z.infer<typeof UpdateSecretSchema>
+export * from './secret/index.types'
 
 export * from './user/index.types'
 

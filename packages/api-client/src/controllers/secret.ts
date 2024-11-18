@@ -16,7 +16,7 @@ import {
   RollBackSecretResponse,
   UpdateSecretRequest,
   UpdateSecretResponse
-} from '@api-client/types/secret.types'
+} from '@keyshade/schema'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
 export default class SecretController {
