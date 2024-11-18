@@ -1,4 +1,4 @@
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import {
   CreateProjectRequest,
@@ -19,7 +19,7 @@ import {
   UnlinkProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse
-} from '@api-client/types/project.types'
+} from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 

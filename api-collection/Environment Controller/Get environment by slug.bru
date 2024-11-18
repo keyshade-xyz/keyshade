@@ -1,0 +1,25 @@
+meta {
+  name: Get environment by slug
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{BASE_URL}}/api/environment/:environment_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  environment_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Fetches a single environment by its ID.
+}

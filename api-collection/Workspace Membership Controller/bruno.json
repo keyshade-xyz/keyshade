@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Workspace Membership Controller",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

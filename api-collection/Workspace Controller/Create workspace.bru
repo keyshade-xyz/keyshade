@@ -1,0 +1,34 @@
+meta {
+  name: Create workspace
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/workspace
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "Workspace 1"
+  }
+}
+
+docs {
+  ## Description
+  
+  Creates a workspace for the current user.
+  
+  ### Request Body
+  
+  - `name`: The name of the workspace. Must be unique for the user.
+  - `icon`: (Optional) A icon for the workspace.
+      
+  - `isDefault`: (Optional) Sets the current workspace as default.
+}

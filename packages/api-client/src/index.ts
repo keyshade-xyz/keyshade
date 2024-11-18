@@ -7,7 +7,7 @@ import VariableController from '@api-client/controllers/variable'
 import WorkspaceController from '@api-client/controllers/workspace'
 import WorkspaceRoleController from '@api-client/controllers/workspace-role'
 import WorkspaceMembershipController from '@api-client/controllers/workspace-membership'
-
+import AuthController from '@api-client/controllers/auth'
 export {
   EnvironmentController,
   SecretController,
@@ -17,5 +17,6 @@ export {
   VariableController,
   WorkspaceController,
   WorkspaceRoleController,
-  WorkspaceMembershipController
+  WorkspaceMembershipController,
+  AuthController
 }

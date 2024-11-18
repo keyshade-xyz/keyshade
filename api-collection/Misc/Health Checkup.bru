@@ -1,0 +1,22 @@
+meta {
+  name: Health Checkup
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/api/health
+  body: none
+  auth: none
+}
+
+docs {
+  This endpoint is used to check if the server is up and running
+  
+  **Response:**
+  
+  ```
+  UP
+  
+   ```
+}

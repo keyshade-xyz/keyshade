@@ -1,0 +1,22 @@
+meta {
+  name: Check if user is member of workspace
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{BASE_URL}}/api/workspace-membership/:workspace_slug/is-member/:user_email
+  body: none
+  auth: none
+}
+
+params:path {
+  workspace_slug: workspace-1-cahli
+  user_email: rajdip@keyshade.abc
+}
+
+docs {
+  ## Description
+  
+  Check if a user is a member of the workspace or not
+}

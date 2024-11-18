@@ -7,7 +7,7 @@ describe('Workspace Membership Controller Tests', () => {
   const workspaceMembershipController = new WorkspaceMembershipController(
     backendUrl
   )
-  const userEmail = 'testuser@example.com'
+  const userEmail = 'johndoe@example.com'
   let workspaceSlug: string | null
 
   beforeAll(async () => {
@@ -140,7 +140,7 @@ describe('Workspace Membership Controller Tests', () => {
       'x-e2e-user-email': userEmail
     })
 
-    expect(response).toBe(true)
+    expect(response.data).toBe(true)
   })
 
   it('should get a list of members', async () => {

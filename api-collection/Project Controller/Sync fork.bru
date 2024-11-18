@@ -1,0 +1,35 @@
+meta {
+  name: Sync fork
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{BASE_URL}}/api/project/:project_slug/fork?hardSync=true
+  body: none
+  auth: bearer
+}
+
+params:query {
+  hardSync: true
+}
+
+params:path {
+  project_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Forked projects can be synchronized with their parent project. This will pull down all the new data that has been added to the parent project into the forked project. Syncing will only work if the project was forked, and wasn't unlinked.
+  
+  There are two kinds of syncing possible:
+  
+  - Soft sync: This will only pull down the new data - secrets, variables and environments from the parent project, and will keep your existing data intact.
+      
+  - Hard sync: This is essentially a reset. Do then when you want a fresh copy of the parent project pulled into your fork. This will replace your data with the remote version.
+}

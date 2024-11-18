@@ -25,7 +25,7 @@ describe('Variable Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should not validate if invalid types are specified for CreateVariableSchema', () => {
@@ -35,7 +35,7 @@ describe('Variable Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate if optional fields are omitted for CreateVariableSchema', () => {

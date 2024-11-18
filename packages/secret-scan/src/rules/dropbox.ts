@@ -3,7 +3,7 @@ import type { TestCase } from '@/types'
 
 export default function dropbox(): RegExp[] {
   return [
-    //	/[a-zA-Z0-9]{15}/i,  		                        // Dropbox API Secret   TODO: This regex is too generic
+    // /[a-zA-Z0-9]{15}/i,                          // Dropbox API Secret   TODO: This regex is too generic
     /sl\.[a-z0-9\-=_]{135}/i, // Dropbox Short Lived API Secret
     /[a-z0-9]{11}AAAAAAAAAA[a-z0-9\-_=]{43}/i // Dropbox Long Lived API Secret
   ]
@@ -11,8 +11,8 @@ export default function dropbox(): RegExp[] {
 
 const testcase: TestCase[] = [
   // {
-  // 	input: 'v3tpJLAgvfvDuOR',
-  // 	expected: true
+  // input: 'v3tpJLAgvfvDuOR',
+  // expected: true
   // },
   {
     input:

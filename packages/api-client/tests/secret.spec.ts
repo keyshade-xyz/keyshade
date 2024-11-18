@@ -10,8 +10,8 @@ describe('Secret Controller Tests', () => {
   const email = 'johndoe@example.com'
   let projectSlug: string | null
   let workspaceSlug: string | null
-  let environmentSlug: string | null
   let secretSlug: string | null
+  let environmentSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -115,6 +115,7 @@ describe('Secret Controller Tests', () => {
     expect(secret.data.name).toBe('Secret 2')
     expect(secret.data.slug).toBeDefined()
     expect(secret.data.versions.length).toBe(1)
+    expect(secret.data.versions[0].environment.slug).toBe(environmentSlug)
     expect(secret.error).toBe(null)
 
     // Delete the secret

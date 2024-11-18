@@ -12,8 +12,8 @@ import {
   GetEnvironmentResponse,
   UpdateEnvironmentRequest,
   UpdateEnvironmentResponse
-} from '@api-client/types/environment.types'
-import { ClientResponse } from '@api-client/types/index.types'
+} from '@keyshade/schema'
+import { ClientResponse } from '@keyshade/schema'
 
 export default class EnvironmentController {
   private apiClient: APIClient

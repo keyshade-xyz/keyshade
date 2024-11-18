@@ -43,6 +43,13 @@ export default class CreateProfile extends BaseCommand {
         long: '--set-default',
         description: 'Set the profile as the default profile',
         defaultValue: false
+      },
+      {
+        short: '-m',
+        long: '--enable-metrics',
+        description:
+          'Should keyshade collect anonymous metrics for development?',
+        defaultValue: false
       }
     ]
   }
@@ -50,7 +57,8 @@ export default class CreateProfile extends BaseCommand {
   async action({ options }: CommandActionData): Promise<void> {
     intro('Creating a new profile')
 
-    const { name, apiKey, baseUrl, setDefault } = await this.parseInput(options)
+    const { name, apiKey, baseUrl, setDefault, enableMetrics } =
+      await this.parseInput(options)
 
     this.profiles = await fetchProfileConfig()
     await this.checkOverwriteExistingProfile(name)
@@ -58,7 +66,7 @@ export default class CreateProfile extends BaseCommand {
     const s = spinner()
     s.start('Saving changes...')
 
-    this.setProfileConfigData(name, apiKey, baseUrl, setDefault)
+    this.setProfileConfigData(name, apiKey, baseUrl, setDefault, enableMetrics)
     await writeProfileConfig(this.profiles)
 
     s.stop()
@@ -70,8 +78,9 @@ export default class CreateProfile extends BaseCommand {
     apiKey?: string
     baseUrl?: string
     setDefault?: boolean
+    enableMetrics?: boolean
   }> {
-    let { name, apiKey, baseUrl, setDefault } = options
+    let { name, apiKey, baseUrl, setDefault, enableMetrics } = options
 
     if (!name) {
       name = await text({
@@ -84,6 +93,12 @@ export default class CreateProfile extends BaseCommand {
       apiKey = await text({
         message: 'Enter the API key for the profile',
         placeholder: 'ks_************'
+      })
+    }
+
+    if (!enableMetrics === undefined) {
+      enableMetrics = await confirm({
+        message: 'Should keyshade collect anonymous metrics for development?'
       })
     }
 
@@ -101,11 +116,18 @@ export default class CreateProfile extends BaseCommand {
           'API key must start with "ks_" and contain only letters and numbers.'
         ),
       baseUrl: z.string().url().or(z.string().length(0)).optional(),
-      setDefault: z.boolean().optional()
+      setDefault: z.boolean().optional(),
+      enableMetrics: z.boolean().optional()
     })
 
     // Validate the collected data
-    const parsedData = inputSchema.parse({ name, apiKey, baseUrl, setDefault })
+    const parsedData = inputSchema.parse({
+      name,
+      apiKey,
+      baseUrl,
+      setDefault,
+      enableMetrics
+    })
 
     return parsedData
   }
@@ -126,7 +148,8 @@ export default class CreateProfile extends BaseCommand {
     name: string,
     apiKey: string,
     baseUrl: string,
-    setDefault: boolean
+    setDefault: boolean,
+    enableMetrics: boolean
   ): void {
     if (setDefault) {
       this.profiles.default = name
@@ -134,7 +157,8 @@ export default class CreateProfile extends BaseCommand {
 
     this.profiles[name] = {
       apiKey,
-      baseUrl
+      baseUrl,
+      metrics_enabled: enableMetrics
     }
   }
 }

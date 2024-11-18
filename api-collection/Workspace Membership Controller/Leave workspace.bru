@@ -1,0 +1,21 @@
+meta {
+  name: Leave workspace
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{BASE_URL}}/api/workspace-membership/:workspace_slug/leave
+  body: none
+  auth: none
+}
+
+params:path {
+  workspace_slug: workspace-1-cahli
+}
+
+docs {
+  ## Description
+  
+  Leave the workspace
+}

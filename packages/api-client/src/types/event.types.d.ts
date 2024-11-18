@@ -1,4 +1,4 @@
-import { PageResponse } from './index.types'
+import { PageResponse } from '@keyshade/schema'
 
 export enum EventSource {
   SECRET,

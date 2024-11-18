@@ -3,10 +3,10 @@ import type { TestCase } from '@/types'
 
 export default function authress(): RegExp[] {
   /*
-		Authress API key regex
+Authress API key regex
 
-		reference: https://authress.io/knowledge-base/docs/authorization/service-clients/secrets-scanning/#1-detection
-	*/
+reference: https://authress.io/knowledge-base/docs/authorization/service-clients/secrets-scanning/#1-detection
+*/
   return [
     /(?:sc|ext|scauth|authress)_[a-z0-9]{5,30}\.[a-z0-9]{4,6}\.acc[_-][a-z0-9-]{10,32}\.[a-z0-9+/_=-]{30,120}/i
   ]

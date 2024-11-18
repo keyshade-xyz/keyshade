@@ -65,6 +65,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          version: 'v0.1.15'
         with:
           flags: api-e2e-tests
-          files: /coverage-e2e/api/coverage-final.json
+          files: /coverage/apps/api/coverage-final.json

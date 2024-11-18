@@ -1,4 +1,4 @@
-import { PageRequest, PageResponse } from './index.types'
+import { PageRequest, PageResponse } from '@keyshade/schema'
 
 export enum IntegrationType {
   DISCORD,

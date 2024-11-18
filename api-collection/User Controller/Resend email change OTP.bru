@@ -1,0 +1,17 @@
+meta {
+  name: Resend email change OTP
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{BASE_URL}}/api/user/resend-email-change-otp
+  body: none
+  auth: none
+}
+
+docs {
+  ## Description
+  
+  When an email change request was triggered, this endpoint allows users to re-generate the OTP in case they lost it or it got invalid. This doesn't take any parameters but will infer the change request based upon internal queries and will only resend the OTP if it finds that a request already exists.
+}

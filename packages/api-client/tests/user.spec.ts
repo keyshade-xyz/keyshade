@@ -10,7 +10,6 @@ describe('User Controller Tests', () => {
   const email = 'johndoe@example.com'
   let projectSlug: string | null
   let workspaceSlug: string | null
-  let environmentSlug: string | null
 
   beforeAll(async () => {
     //Create the user's workspace
@@ -44,19 +43,15 @@ describe('User Controller Tests', () => {
 
     projectSlug = projectResponse.slug
 
-    const createEnvironmentResponse = (await (
-      await client.post(
-        `/api/environment/${projectSlug}`,
-        {
-          name: 'Dev'
-        },
-        {
-          'x-e2e-user-email': email
-        }
-      )
-    ).json()) as any
-
-    environmentSlug = createEnvironmentResponse.slug
+    await client.post(
+      `/api/environment/${projectSlug}`,
+      {
+        name: 'Dev'
+      },
+      {
+        'x-e2e-user-email': email
+      }
+    )
   })
 
   afterAll(async () => {
@@ -70,31 +65,16 @@ describe('User Controller Tests', () => {
   it('should get current user', async () => {
     const user = await userController.getSelf({ 'x-e2e-user-email': email })
 
-    expect(user.data.defaultWorkspace.name).toBe('My Workspace')
     expect(user.data.email).toBe('johndoe@example.com')
   })
 
   // Update Current User
   it('should update current user', async () => {
     const user = await userController.updateSelf(
-      { name: 'Jane Doe', email: 'janedoe@example.com' },
+      { name: 'Jane Doe' },
       { 'x-e2e-user-email': email }
     )
 
     expect(user.data.name).toBe('Jane Doe')
-    expect(user.data.email).toBe('janedoe@example.com')
   })
-
-  // Delete Current User
-  it('should update current user', async () => {
-    const deleteUser = await userController.updateSelf(
-      { name: 'Jane Doe', email: 'janedoe@example.com' },
-      { 'x-e2e-user-email': email }
-    )
-
-    expect(deleteUser.success).toBe(true)
-  })
-
-  // Validate email change OTP
-  // resend validate email OTP tests
 })

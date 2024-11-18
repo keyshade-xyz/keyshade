@@ -6,7 +6,8 @@
       "@/*": ["./src/*"]
     },
     "outDir": "dist",
-    "plugins": [{ "transform": "typescript-transform-paths" }]
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "strictNullChecks": true
   },
   "tsc-alias": {
     "resolveFullPaths": true,
