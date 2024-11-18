@@ -32,8 +32,7 @@ export type TCreateProject = z.infer<typeof CreateProjectSchema>
 export type TUpdateProject = z.infer<typeof UpdateProjectSchema>
 export type TForkProject = z.infer<typeof ForkProjectSchema>
 
-// Export types from secret.types.ts
-export * from './secret/secret.types'
+export * from './secret/index.types'
 
 export type TCreateVariable = z.infer<typeof CreateVariableSchema>
 export type TUpdateVariable = z.infer<typeof UpdateVariableSchema>

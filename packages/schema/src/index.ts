@@ -9,8 +9,7 @@ export * from './auth/auth'
 export * from './environment'
 export * from './integration'
 export * from './project'
-export * from './secret/secret'
-
+export * from './secret'
 export * from './variable'
 
 export * from './workspace/workspace'

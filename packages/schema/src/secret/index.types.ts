@@ -15,7 +15,7 @@ import {
   GetAllSecretsOfEnvironmentResponseSchema,
   GetRevisionsOfSecretRequestSchema,
   GetRevisionsOfSecretResponseSchema
-} from './secret'
+} from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
 

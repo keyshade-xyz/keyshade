@@ -14,7 +14,7 @@ import {
   GetAllSecretsOfEnvironmentResponseSchema,
   GetRevisionsOfSecretRequestSchema,
   GetRevisionsOfSecretResponseSchema
-} from '@/secret/secret'
+} from '@/secret'
 import { rotateAfterEnum } from '@/enums'
 
 describe('Secret Schema Tests', () => {
