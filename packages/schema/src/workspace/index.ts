@@ -40,12 +40,14 @@ export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: z.string()
 })
 
-export const InviteMemberSchema = z.object({
+export const GetWorkspaceResponseSchema = WorkspaceSchema
+
+export const InviteMemberRequestSchema = z.object({
   email: z.string().email(),
   roleSlugs: z.array(z.string()).optional()
 })
 
-export const GetWorkspaceResponseSchema = WorkspaceSchema
+export const InviteMemberResponseSchema = z.void()
 
 export const GetAllWorkspacesOfUserRequestSchema = PageRequestSchema
 
