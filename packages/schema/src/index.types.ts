@@ -14,6 +14,7 @@ export * from './secret/index.types'
 export * from './user/index.types'
 export * from './workspace/index.types'
 export * from './variable/index.types'
+export * from './event/index.types'
 
 export type TCreateApiKey = z.infer<typeof CreateApiKeySchema>
 export type TUpdateApiKey = z.infer<typeof UpdateApiKeySchema>

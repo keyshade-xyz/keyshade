@@ -15,7 +15,7 @@ export const ProjectSchema = z
     privateKey: z.string(),
     storePrivateKey: z.boolean(),
     isDisabled: z.boolean(),
-    accessLevel: z.string(),
+    accessLevel: projectAccessLevelEnum,
     pendingCreation: z.boolean(),
     isForked: z.boolean(),
     lastUpdatedById: z.string(),
