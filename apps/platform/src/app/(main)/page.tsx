@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type {
-  CreateProjectRequestSchema,
-  CreateProjectResponseSchema
+  CreateProjectRequest,
+  CreateProjectResponse
 } from '@keyshade/schema'
 import { ProjectController } from '@keyshade/api-client'
 import { AddSVG } from '@public/svg/shared'
@@ -67,7 +67,7 @@ export default function Index(): JSX.Element {
       process.env.NEXT_PUBLIC_BACKEND_URL
     )
 
-    const request: z.infer<typeof CreateProjectRequestSchema> = {
+    const request: CreateProjectRequest = {
       name: newProjectData.name,
       workspaceSlug: currentWorkspace.slug,
       description: newProjectData.description ?? undefined,
