@@ -35,6 +35,7 @@ export default function AuthPage(): React.JSX.Element {
     setInInvalidEmail(false)
 
     try {
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/send-otp/${encodeURIComponent(userEmail)}`,
         {

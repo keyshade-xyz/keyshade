@@ -4,7 +4,8 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type {
   CreateProjectRequest,
-  CreateProjectResponse
+  CreateProjectResponse,
+  Workspace
 } from '@keyshade/schema'
 import { ProjectController } from '@keyshade/api-client'
 import { AddSVG } from '@public/svg/shared'
@@ -41,7 +42,6 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Projects } from '@/lib/api-functions/projects'
-import { z } from 'zod'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -53,8 +53,8 @@ export default function Index(): JSX.Element {
     environments: [
       {
         name: '',
-        description: '',
-        isDefault: false
+        projectId: Date.now().toString(),
+        description: ''
       }
     ],
     accessLevel: 'GLOBAL'
@@ -62,7 +62,7 @@ export default function Index(): JSX.Element {
 
   const router = useRouter()
 
-  const createNewProject = async () => {
+  const createNewProject = async ()  => {
     const projectController = new ProjectController(
       process.env.NEXT_PUBLIC_BACKEND_URL
     )
@@ -77,20 +77,23 @@ export default function Index(): JSX.Element {
 
     const response = await projectController.createProject(request, {})
 
-    if (response.success) {
+    const data = response.data as CreateProjectResponse;
+
+    if (response.success && response.data ) {
+
       const createdProject: ProjectWithoutKeys = {
-        id: response.data.id,
-        name: response.data.name,
-        description: response.data.description,
-        createdAt: response.data.createdAt,
-        updatedAt: response.data.updatedAt,
-        storePrivateKey: response.data.storePrivateKey,
-        isDisabled: response.data.isDisabled,
-        accessLevel: response.data.accessLevel,
-        lastUpdatedById: response.data.lastUpdatedById,
-        workspaceId: response.data.workspaceId,
-        isForked: response.data.isForked,
-        forkedFromId: response.data.forkedFromId
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        storePrivateKey: data.storePrivateKey,
+        isDisabled: data.isDisabled,
+        accessLevel: data.accessLevel as "GLOBAL" | "INTERNAL" | "PRIVATE",
+        lastUpdatedById: data.lastUpdatedById,
+        workspaceId: data.workspaceId,
+        isForked: data.isForked,
+        forkedFromId: data.forkedFromId
       }
 
       setProjects((prevProjects) => [...prevProjects, createdProject])
@@ -285,7 +288,7 @@ export default function Index(): JSX.Element {
             <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
               <Button
                 className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
-                onClick={() => void createNewProject()}
+                onClick={createNewProject}
                 variant="secondary"
               >
                 Create project
