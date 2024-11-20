@@ -1,15 +1,16 @@
 import {
-  InviteMemberSchema,
   CreateWorkspaceRequestSchema,
   UpdateWorkspaceRequestSchema,
   DeleteWorkspaceRequestSchema,
-  GetWorkspaceRequestSchema,
   ExportDataRequestSchema,
   GlobalSearchRequestSchema,
   CreateWorkspaceResponseSchema,
   UpdateWorkspaceResponseSchema,
   DeleteWorkspaceResponseSchema,
+  GetWorkspaceRequestSchema,
   GetWorkspaceResponseSchema,
+  InviteMemberRequestSchema,
+  InviteMemberResponseSchema,
   ExportDataResponseSchema,
   GetAllWorkspacesOfUserResponseSchema,
   GlobalSearchResponseSchema,
@@ -17,8 +18,8 @@ import {
 } from '@/workspace'
 
 describe('Workspace Schema Tests', () => {
-  it('should validate if proper input is specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should validate if proper input is specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'test@example.com',
       roleSlugs: ['role1', 'role2']
     })
@@ -26,16 +27,16 @@ describe('Workspace Schema Tests', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate if only required fields are specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should validate if only required fields are specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'test@example.com'
     })
 
     expect(result.success).toBe(true)
   })
 
-  it('should not validate if required fields are missing for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if required fields are missing for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       roleSlugs: ['role1']
     })
 
@@ -43,8 +44,8 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
-  it('should not validate if invalid email string is specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if invalid email string is specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'invalid-email'
     })
 
@@ -52,8 +53,8 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
-  it('should not validate if invalid types are specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if invalid types are specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 123,
       roleSlugs: 'invalid_role'
     })
@@ -62,9 +63,24 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(2)
   })
 
-  it('should not validate if roleIds are specified instead of roleSlugs for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if roleIds are specified instead of roleSlugs for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       roleIds: ['role1', 'role2'] //should be roleSlugs
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
+  it('should validate an empty response for InviteMemberResponseSchema', () => {
+    const result = InviteMemberResponseSchema.safeParse(undefined)
+
+    expect(result.success).toBe(true)
+  })
+
+  it('should not validate if unexpected fields are provided for InviteMemberResponseSchema', () => {
+    const result = InviteMemberResponseSchema.safeParse({
+      unexpectedField: 'value'
     })
 
     expect(result.success).toBe(false)

@@ -9,6 +9,8 @@ import {
   DeleteWorkspaceResponseSchema,
   GetWorkspaceRequestSchema,
   GetWorkspaceResponseSchema,
+  InviteMemberRequestSchema,
+  InviteMemberResponseSchema,
   GetAllWorkspacesOfUserResponseSchema,
   ExportDataRequestSchema,
   ExportDataResponseSchema,
@@ -46,6 +48,10 @@ export type DeleteWorkspaceResponse = z.infer<
 export type GetWorkspaceRequest = z.infer<typeof GetWorkspaceRequestSchema>
 
 export type GetWorkspaceResponse = z.infer<typeof GetWorkspaceResponseSchema>
+
+export type InviteMemberRequest = z.infer<typeof InviteMemberRequestSchema>
+
+export type InviteMemberResponse = z.infer<typeof InviteMemberResponseSchema>
 
 export type GetAllWorkspacesOfUserRequest = z.infer<typeof PageRequestSchema>
 
