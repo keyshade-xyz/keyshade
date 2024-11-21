@@ -1,8 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import type {
+  Project,
   CreateProjectRequest,
   CreateProjectResponse,
   Workspace
@@ -33,7 +32,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import type { NewProject, ProjectWithoutKeys } from '@/types'
+// import type { NewProject, ProjectWithoutKeys } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -42,25 +41,41 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Projects } from '@/lib/api-functions/projects'
+import { ProjectWithoutKeys } from '@/types'
+
+// type ProjectWithoutKeys = {
+//   id: string;
+//   name: string;
+//   description: string | null;
+//   createdAt: string;
+//   updatedAt: string;
+//   storePrivateKey: boolean;
+//   isDisabled: boolean;
+//   accessLevel: "GLOBAL" | "INTERNAL" | "PRIVATE";
+//   lastUpdatedById: string;
+// workspaceId: string;
+    // isForked: boolean;
+    // forkedFromId: string | null;
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
   const [projects, setProjects] = useState<ProjectWithoutKeys[] | []>([])
-  const [newProjectData, setNewProjectData] = useState<NewProject>({
+  const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
     name: '',
+    workspaceSlug: '',
     description: '',
     storePrivateKey: false,
     environments: [
       {
         name: '',
-        projectId: Date.now().toString(),
+        projectId: '',
         description: ''
       }
     ],
     accessLevel: 'GLOBAL'
   })
 
-  const router = useRouter()
+  // const router = useRouter()
 
   const createNewProject = async ()  => {
     const projectController = new ProjectController(
@@ -76,12 +91,12 @@ export default function Index(): JSX.Element {
     }
 
     const response = await projectController.createProject(request, {})
-
     const data = response.data as CreateProjectResponse;
 
     if (response.success && response.data ) {
 
       const createdProject: ProjectWithoutKeys = {
+        
         id: data.id,
         name: data.name,
         description: data.description,
@@ -89,11 +104,28 @@ export default function Index(): JSX.Element {
         updatedAt: data.updatedAt,
         storePrivateKey: data.storePrivateKey,
         isDisabled: data.isDisabled,
-        accessLevel: data.accessLevel as "GLOBAL" | "INTERNAL" | "PRIVATE",
+        accessLevel: data.accessLevel as 'GLOBAL' | 'INTERNAL' | 'PRIVATE' ,
         lastUpdatedById: data.lastUpdatedById,
         workspaceId: data.workspaceId,
         isForked: data.isForked,
         forkedFromId: data.forkedFromId
+
+        // id: data.id,
+        // name: data.name,
+        // slug: data.slug,
+        // description: data.description,
+        // createdAt: data.createdAt,
+        // updatedAt: data.updatedAt,
+        // publicKey: data.publicKey,
+        // privateKey: data.privateKey,
+        // storePrivateKey: data.storePrivateKey,
+        // isDisabled: data.isDisabled,
+        // accessLevel: data.accessLevel as "GLOBAL" | "INTERNAL" | "PRIVATE",
+        // pendingCreation: data.pendingCreation,
+        // isForked: data.isForked,
+        // lastUpdatedById: data.lastUpdatedById,
+        // workspaceId: data.workspaceId,
+        // forkedFromId: data.forkedFromId
       }
 
       setProjects((prevProjects) => [...prevProjects, createdProject])
@@ -111,7 +143,7 @@ export default function Index(): JSX.Element {
     Projects.getProjectsbyWorkspaceID(currentWorkspace.id)
       .then((data: ProjectWithoutKeys[] | [] | undefined) => {
         if (data) {
-          setProjects(data)
+          setProjects(data)  
         }
       })
       .catch((error) => {
