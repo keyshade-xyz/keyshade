@@ -9,7 +9,7 @@ import {
   GetIntegrationResponse,
   UpdateIntegrationRequest,
   UpdateIntegrationResponse
-} from '@api-client/types/integration.types'
+} from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'

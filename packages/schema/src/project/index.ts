@@ -3,28 +3,28 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { CreateEnvironmentRequestSchema } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 
-export const ProjectSchema = z
-  .object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    description: z.string(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
-    publicKey: z.string(),
-    privateKey: z.string(),
-    storePrivateKey: z.boolean(),
-    isDisabled: z.boolean(),
-    accessLevel: projectAccessLevelEnum,
-    pendingCreation: z.boolean(),
-    isForked: z.boolean(),
-    lastUpdatedById: z.string(),
-    workspaceId: z.string(),
-    forkedFromId: z.string().nullable()
-  })
-  .refine((obj) =>
-    obj.isForked ? obj.forkedFromId !== null : obj.forkedFromId === null
-  )
+export const BaseProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  publicKey: z.string(),
+  privateKey: z.string(),
+  storePrivateKey: z.boolean(),
+  isDisabled: z.boolean(),
+  accessLevel: z.string(),
+  pendingCreation: z.boolean(),
+  isForked: z.boolean(),
+  lastUpdatedById: z.string(),
+  workspaceId: z.string(),
+  forkedFromId: z.string().nullable()
+})
+
+export const ProjectSchema = BaseProjectSchema.refine((obj) =>
+  obj.isForked ? obj.forkedFromId !== null : obj.forkedFromId === null
+)
 
 export const CreateProjectRequestSchema = z.object({
   name: z.string(),
