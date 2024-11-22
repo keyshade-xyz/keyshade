@@ -4,6 +4,8 @@ import type {
   Project,
   CreateProjectRequest,
   CreateProjectResponse,
+  GetAllProjectsRequest,
+  GetAllProjectsResponse,
   Workspace
 } from '@keyshade/schema'
 import { ProjectController } from '@keyshade/api-client'
@@ -40,26 +42,15 @@ import {
   DialogHeader,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Projects } from '@/lib/api-functions/projects'
-import { ProjectWithoutKeys } from '@/types'
-
-// type ProjectWithoutKeys = {
-//   id: string;
-//   name: string;
-//   description: string | null;
-//   createdAt: string;
-//   updatedAt: string;
-//   storePrivateKey: boolean;
-//   isDisabled: boolean;
-//   accessLevel: "GLOBAL" | "INTERNAL" | "PRIVATE";
-//   lastUpdatedById: string;
-// workspaceId: string;
-    // isForked: boolean;
-    // forkedFromId: string | null;
+// import { Projects } from '@/lib/api-functions/projects'
+// import { ProjectWithoutKeys } from '@/types'
 
 export default function Index(): JSX.Element {
+  
+  type projectItem = GetAllProjectsResponse["items"][number]
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
-  const [projects, setProjects] = useState<ProjectWithoutKeys[] | []>([])
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [projects, setProjects] = useState< projectItem[] | []>([])
   const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
     name: '',
     workspaceSlug: '',
@@ -93,43 +84,8 @@ export default function Index(): JSX.Element {
     const response = await projectController.createProject(request, {})
     const data = response.data as CreateProjectResponse;
 
-    if (response.success && response.data ) {
+    setIsDialogOpen(false);
 
-      const createdProject: ProjectWithoutKeys = {
-        
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        storePrivateKey: data.storePrivateKey,
-        isDisabled: data.isDisabled,
-        accessLevel: data.accessLevel as 'GLOBAL' | 'INTERNAL' | 'PRIVATE' ,
-        lastUpdatedById: data.lastUpdatedById,
-        workspaceId: data.workspaceId,
-        isForked: data.isForked,
-        forkedFromId: data.forkedFromId
-
-        // id: data.id,
-        // name: data.name,
-        // slug: data.slug,
-        // description: data.description,
-        // createdAt: data.createdAt,
-        // updatedAt: data.updatedAt,
-        // publicKey: data.publicKey,
-        // privateKey: data.privateKey,
-        // storePrivateKey: data.storePrivateKey,
-        // isDisabled: data.isDisabled,
-        // accessLevel: data.accessLevel as "GLOBAL" | "INTERNAL" | "PRIVATE",
-        // pendingCreation: data.pendingCreation,
-        // isForked: data.isForked,
-        // lastUpdatedById: data.lastUpdatedById,
-        // workspaceId: data.workspaceId,
-        // forkedFromId: data.forkedFromId
-      }
-
-      setProjects((prevProjects) => [...prevProjects, createdProject])
-    }
   }
 
   const currentWorkspace: Workspace =
@@ -138,18 +94,27 @@ export default function Index(): JSX.Element {
           localStorage.getItem('currentWorkspace') ?? '{}'
         ) as Workspace)
       : (JSON.parse(`{}`) as Workspace)
+  
+  useEffect( () => {
 
-  useEffect(() => {
-    Projects.getProjectsbyWorkspaceID(currentWorkspace.id)
-      .then((data: ProjectWithoutKeys[] | [] | undefined) => {
+    console.log("Current workspace slug: ", currentWorkspace.slug);
+
+    const projectController = new ProjectController(
+          process.env.NEXT_PUBLIC_BACKEND_URL
+    )
+    
+    projectController.getAllProjects({workspaceSlug: currentWorkspace.slug}, {})
+      .then((data: GetAllProjectsResponse) => {
         if (data) {
-          setProjects(data)  
+          //@ts-ignore
+          setProjects(data.data.items)  
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       })
+
   }, [currentWorkspace.id])
 
   return (
@@ -157,9 +122,9 @@ export default function Index(): JSX.Element {
       <div className="flex items-center justify-between">
         <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
 
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger>
-            <Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
               {' '}
               <AddSVG /> Create a new Project
             </Button>
@@ -285,12 +250,12 @@ export default function Index(): JSX.Element {
                     </SelectTrigger>
                     <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
                       <SelectGroup>
-                        {['Global', 'Internal', 'Private'].map(
+                        {['GLOBAL', 'INTERNAL', 'PRIVATE'].map(
                           (accessValue) => (
                             <SelectItem
                               className="group cursor-pointer rounded-sm"
-                              key={accessValue.toLowerCase()}
-                              value={accessValue.toLowerCase()}
+                              key={accessValue.toUpperCase()}
+                              value={accessValue.toUpperCase()}
                             >
                               {accessValue}
                             </SelectItem>
@@ -332,7 +297,7 @@ export default function Index(): JSX.Element {
 
       {projects.length !== 0 ? (
         <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
-          {projects.map((project: ProjectWithoutKeys) => {
+          {projects.map((project: GetAllProjectsResponse['items'][number]) => {
             return (
               <ProjectCard
                 config={10}

@@ -19,13 +19,14 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { apiClient } from '@/lib/api-client'
-import type { Workspace } from '@/types'
+// import type { Workspace } from '@/types'
 import { zWorkspace } from '@/types'
 import {
   getCurrentWorkspace,
   setCurrentWorkspace,
   setWorkspace
 } from '@/lib/workspace-storage'
+import type { Workspace } from '@keyshade/schema';
 import { Input } from './input'
 import { Label } from './label'
 import {
@@ -37,19 +38,40 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
+import { WorkspaceSchema } from '@keyshade/schema/schemas'
+
+interface WorkspaceResponse {
+  items: Workspace[];
+  "metadata": {
+    page: number;
+    perPage: number,
+    pageCount: number,
+    totalCount: number,
+    links: {
+        self: string,
+        first: string,
+        previous: string | null,
+        next: string | null,
+        last: string
+    }
+}
+}
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
-    const workspaceData: Workspace[] =
-      await apiClient.get<Workspace[]>('/workspace')
+    const workspaceData: WorkspaceResponse =
+      await apiClient.get<WorkspaceResponse>('/workspace')
+    
+    // TODO: We are getting error here from the success flag, need to see this again
+    // const { success, data } = WorkspaceSchema.array().safeParse(workspaceData.items)
+    // if (!success) {
+    //   throw new Error('Invalid data')
+    // }
+    
+    return workspaceData.items;
+    // return data
+    // return workspaceData;
 
-    const { success, data } = zWorkspace.array().safeParse(workspaceData)
-
-    if (!success) {
-      throw new Error('Invalid data')
-    }
-
-    return data
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
     console.error(error)
@@ -83,16 +105,18 @@ export function Combobox(): React.JSX.Element {
   }
 
   useEffect(() => {
+
     getAllWorkspace()
       .then((data) => {
         if (data) {
           setAllWorkspace(data)
           setWorkspace(data)
+
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        console.error("error:", error)
       })
   }, [])
 
