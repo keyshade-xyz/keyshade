@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { CreateApiKeySchema, UpdateApiKeySchema } from './api-key'
 import {
   CreateWorkspaceRoleSchema,
   UpdateWorkspaceRoleSchema
@@ -15,9 +14,7 @@ export * from './workspace/index.types'
 export * from './variable/index.types'
 export * from './event/index.types'
 export * from './integration/index.types'
-
-export type TCreateApiKey = z.infer<typeof CreateApiKeySchema>
-export type TUpdateApiKey = z.infer<typeof UpdateApiKeySchema>
+export * from './api-key/index.types'
 
 export type TCreateWorkspaceRole = z.infer<typeof CreateWorkspaceRoleSchema>
 export type TUpdateWorkspaceRole = z.infer<typeof UpdateWorkspaceRoleSchema>
