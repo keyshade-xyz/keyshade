@@ -15,8 +15,8 @@ export const IntegrationSchema = z.object({
   type: integrationTypeEnum,
   notifyOn: z.array(eventTypeEnum),
   workspaceId: WorkspaceSchema.shape.id,
-  projectId: BaseProjectSchema.shape.id,
-  environmentId: EnvironmentSchema.shape.id
+  projectId: BaseProjectSchema.shape.id.nullable(),
+  environmentId: EnvironmentSchema.shape.id.nullable()
 })
 
 export const CreateIntegrationRequestSchema = z.object({

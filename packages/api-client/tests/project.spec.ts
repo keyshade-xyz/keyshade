@@ -184,8 +184,7 @@ describe('Get Project Tests', () => {
 
     const forks = await projectController.getForks(
       {
-        projectSlug,
-        workspaceSlug
+        projectSlug
       },
       {
         'x-e2e-user-email': email
@@ -231,8 +230,7 @@ describe('Get Project Tests', () => {
 
     const forks = await projectController.getForks(
       {
-        projectSlug,
-        workspaceSlug
+        projectSlug
       },
       {
         'x-e2e-user-email': email
