@@ -7,12 +7,9 @@ export const ApiKeySchema = z.object({
   name: z.string(),
   slug: z.string(),
   value: z.string(),
-  expiresAt: z
-    .date()
-    .transform((d) => d.toISOString())
-    .nullable(),
-  createdAt: z.date().transform((d) => d.toISOString()),
-  updatedAt: z.date().transform((d) => d.toISOString()),
+  expiresAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
   authorities: z.array(authorityEnum),
   userId: z.string()
 })

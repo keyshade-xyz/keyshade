@@ -24,8 +24,8 @@ describe('Secret Schema Tests', () => {
       id: 'secret123',
       name: 'Secret Name',
       slug: 'secret-slug',
-      createdAt: '2023-10-01T00:00:00Z',
-      updatedAt: '2023-10-01T00:00:00Z',
+      createdAt: '2024-10-01T00:00:00Z',
+      updatedAt: '2024-10-01T00:00:00Z',
       rotateAt: null,
       note: 'This is a note',
       lastUpdatedById: 'user123',
@@ -35,8 +35,6 @@ describe('Secret Schema Tests', () => {
       },
       versions: [
         {
-          id: 'version123',
-          environmentId: 'env123',
           value: 'secret-value',
           environment: {
             id: 'env123',
@@ -53,8 +51,8 @@ describe('Secret Schema Tests', () => {
       id: 'secret123',
       name: 'Secret Name',
       slug: 'secret-slug',
-      createdAt: '2023-10-01T00:00:00Z',
-      updatedAt: '2023-10-01T00:00:00Z',
+      createdAt: '2024-10-01T00:00:00Z',
+      updatedAt: '2024-10-01T00:00:00Z',
       rotateAt: null,
       note: 'This is a note',
       lastUpdatedById: 'user123',
@@ -64,8 +62,6 @@ describe('Secret Schema Tests', () => {
       },
       versions: [
         {
-          id: 'version123',
-          environmentId: 'env123',
           value: 'secret-value',
           environment: {
             id: 'env123'
@@ -118,8 +114,8 @@ describe('Secret Schema Tests', () => {
       id: 'secret123',
       name: 'Secret Name',
       slug: 'secret-slug',
-      createdAt: '2023-10-01T00:00:00Z',
-      updatedAt: '2023-10-01T00:00:00Z',
+      createdAt: '2024-10-01T00:00:00Z',
+      updatedAt: '2024-10-01T00:00:00Z',
       rotateAt: null,
       note: 'This is a note',
       lastUpdatedById: 'user123',
@@ -129,8 +125,6 @@ describe('Secret Schema Tests', () => {
       },
       versions: [
         {
-          id: 'version123',
-          environmentId: 'env123',
           value: 'secret-value',
           environment: {
             id: 'env123',
@@ -147,8 +141,8 @@ describe('Secret Schema Tests', () => {
       id: 'secret123',
       name: 'Secret Name',
       slug: 'secret-slug',
-      createdAt: '2023-10-01T00:00:00Z',
-      updatedAt: '2023-10-01T00:00:00Z',
+      createdAt: '2024-10-01T00:00:00Z',
+      updatedAt: '2024-10-01T00:00:00Z',
       rotateAt: null,
       note: 'This is a note',
       lastUpdatedById: 'user123',
@@ -158,8 +152,6 @@ describe('Secret Schema Tests', () => {
       },
       versions: [
         {
-          id: 'version123',
-          environmentId: 'env123',
           value: 'secret-value',
           environment: {
             id: 'env123'
@@ -204,7 +196,7 @@ describe('Secret Schema Tests', () => {
       updatedVersions: [
         {
           id: 'version123',
-          environmentId: 'env123',
+          version: 3,
           environment: {
             id: 'env123',
             slug: 'development'
@@ -227,7 +219,7 @@ describe('Secret Schema Tests', () => {
       updatedVersions: [
         {
           id: 'version123',
-          environmentId: 'env123',
+          // Missing version
           environment: {
             id: 'env123'
             // Missing slug
@@ -237,7 +229,7 @@ describe('Secret Schema Tests', () => {
       ]
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   // Tests for DeleteSecretRequestSchema
@@ -334,8 +326,8 @@ describe('Secret Schema Tests', () => {
             id: 'secret123',
             name: 'Secret Name',
             slug: 'secret-slug',
-            createdAt: '2023-10-01T00:00:00Z',
-            updatedAt: '2023-10-01T00:00:00Z',
+            createdAt: '2024-10-01T00:00:00Z',
+            updatedAt: '2024-10-01T00:00:00Z',
             rotateAt: null,
             note: 'This is a note',
             lastUpdatedById: 'user123',
@@ -465,7 +457,8 @@ describe('Secret Schema Tests', () => {
           id: 'revision123',
           value: 'secret-value',
           version: 1,
-          createdOn: '2023-10-01T00:00:00Z',
+          secretId: 'secret123',
+          createdOn: '2024-10-01T00:00:00Z',
           createdById: 'user123',
           environmentId: 'env123'
         }
@@ -494,7 +487,8 @@ describe('Secret Schema Tests', () => {
           id: 'revision123',
           value: 'secret-value',
           version: 'one', // Should be a number
-          createdOn: '2023-10-01T00:00:00Z',
+          // Missing secretId
+          createdOn: '2024-10-01T00:00:00Z',
           createdById: 'user123',
           environmentId: 'env123'
         }
@@ -514,6 +508,6 @@ describe('Secret Schema Tests', () => {
       }
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(3)
   })
 })

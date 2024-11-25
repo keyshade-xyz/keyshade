@@ -22,9 +22,9 @@ describe('API Key Schema Tests', () => {
       name: 'API Key Name',
       slug: 'api-key-slug',
       value: 'api-key-value',
-      expiresAt: new Date(Date.now() + 3600 * 1000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: '2024-10-10T10:00:00Z',
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['READ_SECRET', 'READ_VARIABLE'],
       userId: 'user123'
     })
@@ -37,9 +37,9 @@ describe('API Key Schema Tests', () => {
       name: 'API Key Name',
       slug: 'api-key-slug',
       value: 'api-key-value',
-      expiresAt: 'invalid-date', // Should be a Date object
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: 'invalid-date', // Should be a valid date string
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['INVALID_AUTHORITY'] // Invalid authority
       // no userId
     })
@@ -82,9 +82,9 @@ describe('API Key Schema Tests', () => {
       name: 'API Key Name',
       slug: 'api-key-slug',
       value: 'api-key-value',
-      expiresAt: new Date(Date.now() + 3600 * 1000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: '2024-10-10T10:00:00Z',
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['READ_SECRET', 'READ_VARIABLE'],
       userId: 'user123'
     })
@@ -97,9 +97,9 @@ describe('API Key Schema Tests', () => {
       name: 'API Key Name',
       slug: 'api-key-slug',
       value: 'api-key-value',
-      expiresAt: 'invalid-date', // Should be a Date object
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: 'invalid-date', // Should be a valid date string
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['INVALID_AUTHORITY'], // Invalid authority
       expiresAfter: 'INVALID_EXPIRES_AFTER' // Invalid expiresAfter
       // no userId
@@ -136,9 +136,9 @@ describe('API Key Schema Tests', () => {
       id: 'apikey123',
       name: 'API Key Name',
       slug: 'api-key-slug',
-      expiresAt: new Date(Date.now() + 3600 * 1000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: '2024-10-10T10:00:00Z',
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['READ_SECRET', 'READ_VARIABLE']
     })
     expect(result.success).toBe(true)
@@ -149,9 +149,9 @@ describe('API Key Schema Tests', () => {
       id: 'apikey123',
       name: 'API Key Name',
       slug: 'api-key-slug',
-      expiresAt: 'invalid-date', // Should be a Date object
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: 'invalid-date', // Should be a valid date string
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['INVALID_AUTHORITY'] // Invalid authority
     })
     expect(result.success).toBe(false)
@@ -212,9 +212,9 @@ describe('API Key Schema Tests', () => {
         id: 'apikey123',
         name: 'API Key Name',
         slug: 'api-key-slug',
-        expiresAt: new Date(Date.now() + 3600 * 1000),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        expiresAt: '2024-10-10T10:00:00Z',
+        createdAt: '2024-10-09T10:00:00Z',
+        updatedAt: '2024-10-09T10:00:00Z',
         authorities: ['READ_SECRET', 'READ_VARIABLE']
       }
     ])
@@ -227,9 +227,9 @@ describe('API Key Schema Tests', () => {
         id: 'apikey123',
         name: 'API Key Name',
         slug: 'api-key-slug',
-        expiresAt: 'invalid-date', // Should be a Date object
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        expiresAt: 'invalid-date', // Should be a valid date string
+        createdAt: '2024-10-09T10:00:00Z',
+        updatedAt: '2024-10-09T10:00:00Z',
         authorities: ['INVALID_AUTHORITY'] // Invalid authority
       }
     ])
@@ -259,9 +259,9 @@ describe('API Key Schema Tests', () => {
       id: 'apikey123',
       name: 'API Key Name',
       slug: 'api-key-slug',
-      expiresAt: new Date(Date.now() + 3600 * 1000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: '2024-10-10T10:00:00Z',
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['READ_SECRET', 'READ_VARIABLE']
     })
     expect(result.success).toBe(true)
@@ -272,9 +272,9 @@ describe('API Key Schema Tests', () => {
       id: 'apikey123',
       name: 'API Key Name',
       slug: 'api-key-slug',
-      expiresAt: 'invalid-date', // Should be a Date object
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      expiresAt: 'invalid-date', // Should be a valid date string
+      createdAt: '2024-10-09T10:00:00Z',
+      updatedAt: '2024-10-09T10:00:00Z',
       authorities: ['INVALID_AUTHORITY'] // Invalid authority
     })
     expect(result.success).toBe(false)

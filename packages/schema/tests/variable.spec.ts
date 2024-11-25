@@ -11,6 +11,7 @@ import {
   GetAllVariablesOfProjectRequestSchema,
   GetAllVariablesOfProjectResponseSchema
 } from '@/variable'
+import { version } from 'os'
 
 describe('Variable Schema Tests', () => {
   // Tests for VariableSchema
@@ -30,7 +31,6 @@ describe('Variable Schema Tests', () => {
       versions: [
         {
           value: 'variable-value',
-          environmentId: 'env123',
           environment: {
             id: 'env123',
             slug: 'development'
@@ -57,7 +57,6 @@ describe('Variable Schema Tests', () => {
       versions: [
         {
           value: 'variable-value',
-          environmentId: 'env123',
           environment: {
             id: 'env123',
             slug: 'development'
@@ -174,7 +173,6 @@ describe('Variable Schema Tests', () => {
       versions: [
         {
           value: 'variable-value',
-          environmentId: 'env123',
           environment: {
             id: 'env123',
             slug: 'development'
@@ -201,7 +199,6 @@ describe('Variable Schema Tests', () => {
       versions: [
         {
           value: 'variable-value',
-          environmentId: 'env123',
           environment: {
             id: 'env123'
             // Missing slug
@@ -256,8 +253,9 @@ describe('Variable Schema Tests', () => {
       },
       updatedVersions: [
         {
+          id: 'variable123',
           value: 'variable-value',
-          environmentId: 'env123',
+          version: 4,
           environment: {
             id: 'env123',
             slug: 'development'
@@ -278,8 +276,9 @@ describe('Variable Schema Tests', () => {
       },
       updatedVersions: [
         {
+          id: 'variable123',
           value: 'variable-value',
-          environmentId: 'env123',
+          // Missing version
           environment: {
             id: 'env123'
             // Missing slug
@@ -288,7 +287,7 @@ describe('Variable Schema Tests', () => {
       ]
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   // Tests for RollBackVariableRequestSchema

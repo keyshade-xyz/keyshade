@@ -2,23 +2,24 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { CreateEnvironmentRequestSchema } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
+import { WorkspaceSchema } from '@/workspace'
 
 export const BaseProjectSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
   description: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
   publicKey: z.string(),
   privateKey: z.string(),
   storePrivateKey: z.boolean(),
   isDisabled: z.boolean(),
-  accessLevel: z.string(),
+  accessLevel: projectAccessLevelEnum,
   pendingCreation: z.boolean(),
   isForked: z.boolean(),
   lastUpdatedById: z.string(),
-  workspaceId: z.string(),
+  workspaceId: WorkspaceSchema.shape.id,
   forkedFromId: z.string().nullable()
 })
 
@@ -28,7 +29,7 @@ export const ProjectSchema = BaseProjectSchema.refine((obj) =>
 
 export const CreateProjectRequestSchema = z.object({
   name: z.string(),
-  workspaceSlug: z.string(),
+  workspaceSlug: WorkspaceSchema.shape.slug,
   description: z.string().optional(),
   storePrivateKey: z.boolean().optional(),
   environments: CreateEnvironmentRequestSchema.array().optional(),
@@ -43,57 +44,56 @@ export const UpdateProjectRequestSchema = CreateProjectRequestSchema.partial()
   })
   .merge(
     z.object({
-      projectSlug: z.string(),
+      projectSlug: BaseProjectSchema.shape.slug,
       regenerateKeyPair: z.boolean().optional(),
-      privateKey: z.string().optional()
+      privateKey: BaseProjectSchema.shape.privateKey.optional()
     })
   )
 
 export const UpdateProjectResponseSchema = ProjectSchema
 
 export const DeleteProjectRequestSchema = z.object({
-  projectSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const DeleteProjectResponseSchema = z.void()
 
 export const GetProjectRequestSchema = z.object({
-  projectSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const GetProjectResponseSchema = ProjectSchema
 
 export const ForkProjectRequestSchema = z.object({
-  projectSlug: z.string(),
-  name: z.string().optional(),
-  workspaceSlug: z.string().optional(),
-  storePrivateKey: z.boolean().optional()
+  projectSlug: BaseProjectSchema.shape.slug,
+  name: BaseProjectSchema.shape.name.optional(),
+  workspaceSlug: WorkspaceSchema.shape.slug.optional(),
+  storePrivateKey: BaseProjectSchema.shape.storePrivateKey.optional()
 })
 
 export const ForkProjectResponseSchema = ProjectSchema
 
 export const SyncProjectRequestSchema = z.object({
-  projectSlug: z.string(),
+  projectSlug: BaseProjectSchema.shape.slug,
   hardSync: z.boolean().optional()
 })
 
 export const SyncProjectResponseSchema = z.void()
 
 export const UnlinkProjectRequestSchema = z.object({
-  projectSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const UnlinkProjectResponseSchema = z.void()
 
 export const GetForkRequestSchema = PageRequestSchema.extend({
-  projectSlug: z.string(),
-  workspaceSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const GetForkResponseSchema = PageResponseSchema(ProjectSchema)
 
 export const GetAllProjectsRequestSchema = PageRequestSchema.extend({
-  workspaceSlug: z.string()
+  workspaceSlug: WorkspaceSchema.shape.slug
 })
 
 export const GetAllProjectsResponseSchema = PageResponseSchema(ProjectSchema)
