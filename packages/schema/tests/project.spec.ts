@@ -88,7 +88,7 @@ describe('Project Schema Tests', () => {
       name: 'Project Test',
       workspaceSlug: 'workspace123',
       accessLevel: projectAccessLevelEnum.Enum.PRIVATE,
-      environments: [{ name: 'Environment 1', projectId: 'project123' }]
+      environments: [{ name: 'Environment 1', projectSlug: 'project123' }]
     })
 
     expect(result.success).toBe(true)

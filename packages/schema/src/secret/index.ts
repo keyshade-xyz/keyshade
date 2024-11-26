@@ -88,7 +88,8 @@ export const RollBackSecretResponseSchema = z.object({
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: BaseProjectSchema.shape.slug
+  projectSlug: BaseProjectSchema.shape.slug,
+  decryptValue: z.boolean().optional()
 })
 
 export const GetAllSecretsOfProjectResponseSchema = PageResponseSchema(
@@ -112,8 +113,8 @@ export const GetAllSecretsOfProjectResponseSchema = PageResponseSchema(
 )
 
 export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
-  projectSlug: z.string(),
-  environmentSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlug: EnvironmentSchema.shape.slug
 })
 
 export const GetAllSecretsOfEnvironmentResponseSchema = z.array(

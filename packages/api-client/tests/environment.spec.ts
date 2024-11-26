@@ -128,7 +128,7 @@ describe('Environments Controller Tests', () => {
     const createEnvironmentResponse = (
       await environmentController.createEnvironment(
         {
-          projectId: projectSlug,
+          projectSlug: projectSlug,
           name: 'Prod'
         },
         {

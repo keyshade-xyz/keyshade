@@ -11,7 +11,6 @@ import {
   GetAllVariablesOfProjectRequestSchema,
   GetAllVariablesOfProjectResponseSchema
 } from '@/variable'
-import { version } from 'os'
 
 describe('Variable Schema Tests', () => {
   // Tests for VariableSchema

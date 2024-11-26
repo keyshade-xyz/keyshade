@@ -48,7 +48,7 @@ export default class RollbackSecret extends BaseCommand {
       await ControllerInstance.getInstance().secretController.rollbackSecret(
         {
           environmentSlug,
-          version,
+          version: Number(version),
           secretSlug
         },
         this.headers

@@ -15,13 +15,13 @@ export const EnvironmentSchema = z.object({
 export const CreateEnvironmentRequestSchema = z.object({
   name: EnvironmentSchema.shape.name,
   description: z.string().optional(),
-  projectId: z.string()
+  projectSlug: z.string()
 })
 
 export const CreateEnvironmentResponseSchema = EnvironmentSchema
 
 export const UpdateEnvironmentRequestSchema =
-  CreateEnvironmentRequestSchema.omit({ projectId: true })
+  CreateEnvironmentRequestSchema.omit({ projectSlug: true })
     .partial()
     .extend({ slug: EnvironmentSchema.shape.slug })
 

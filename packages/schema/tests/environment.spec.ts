@@ -58,7 +58,7 @@ describe('Environment Schema Tests', () => {
     const result = CreateEnvironmentRequestSchema.safeParse({
       name: 'test',
       description: 'test description',
-      projectId: 'project123'
+      projectSlug: 'project123'
     })
     expect(result.success).toBe(true)
   })
@@ -66,7 +66,7 @@ describe('Environment Schema Tests', () => {
   it('should not validate if invalid values are specified for CreateEnvironmentRequestSchema', () => {
     const result = CreateEnvironmentRequestSchema.safeParse({
       name: 123,
-      projectId: 'project123'
+      projectSlug: 'project123'
     })
     expect(result.success).toBe(false)
     expect(result.error?.issues).toHaveLength(1)

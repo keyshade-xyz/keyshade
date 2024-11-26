@@ -196,12 +196,12 @@ describe('Secret Schema Tests', () => {
       updatedVersions: [
         {
           id: 'version123',
-          version: 3,
           environment: {
             id: 'env123',
             slug: 'development'
           },
-          value: 'secret-value'
+          value: 'secret-value',
+          version: 4
         }
       ]
     })
@@ -219,12 +219,12 @@ describe('Secret Schema Tests', () => {
       updatedVersions: [
         {
           id: 'version123',
-          // Missing version
           environment: {
             id: 'env123'
             // Missing slug
           },
           value: 'secret-value'
+          // Missing version
         }
       ]
     })
@@ -301,6 +301,7 @@ describe('Secret Schema Tests', () => {
   it('should validate a valid GetAllSecretsOfProjectRequestSchema', () => {
     const result = GetAllSecretsOfProjectRequestSchema.safeParse({
       projectSlug: 'project-slug',
+      decryptValue: true,
       page: 1,
       limit: 10
     })
@@ -310,11 +311,12 @@ describe('Secret Schema Tests', () => {
   it('should not validate an invalid GetAllSecretsOfProjectRequestSchema', () => {
     const result = GetAllSecretsOfProjectRequestSchema.safeParse({
       projectSlug: 123, // Should be a string
+      decryptValue: 'false', // Should be a boolean
       page: 1,
       limit: 10
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   // Tests for GetAllSecretsOfProjectResponseSchema

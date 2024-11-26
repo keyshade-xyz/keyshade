@@ -47,28 +47,28 @@ export default class SearchWorkspace extends BaseCommand {
 
       Logger.info(`Projects (${data.projects.length})`)
       data.projects.forEach((project) => {
-        Logger.info(`- ${project.name} (${project.id})`)
+        Logger.info(`- ${project.name} (${project.slug})`)
       })
 
       Logger.info('')
 
       Logger.info(`Environments (${data.environments.length})`)
       data.environments.forEach((environment) => {
-        Logger.info(`- ${environment.name} (${environment.id})`)
+        Logger.info(`- ${environment.name} (${environment.slug})`)
       })
 
       Logger.info('')
 
       Logger.info(`Variables (${data.variables.length})`)
       data.variables.forEach((variable) => {
-        Logger.info(`- ${variable.name} (${variable.id})`)
+        Logger.info(`- ${variable.name} (${variable.slug})`)
       })
 
       Logger.info('')
 
       Logger.info(`Secrets (${data.secrets.length})`)
       data.secrets.forEach((secret) => {
-        Logger.info(`- ${secret.name} (${secret.id})`)
+        Logger.info(`- ${secret.name} (${secret.slug})`)
       })
 
       Logger.info('')

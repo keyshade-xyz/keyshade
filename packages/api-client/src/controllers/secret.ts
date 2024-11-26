@@ -86,7 +86,7 @@ export default class SecretController {
       request
     )
     const response = await this.apiClient.get(
-      `${url}&decryptValue=true`,
+      `${url}&decryptValue=${request.decryptValue}`,
       headers
     )
 
