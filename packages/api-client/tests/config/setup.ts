@@ -4,7 +4,7 @@ export default async function teardown() {
   await executeCommand('docker compose down')
   await executeCommand('docker compose -f ../../docker-compose-test.yml up -d')
   await executeCommand('cd ../.. && pnpm build:api')
-  await executeCommand('cd ../.. && sleep 5 && pnpm db:deploy-migrations', {
+  await executeCommand('cd ../.. && pnpm db:deploy-migrations', {
     DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
     PATH: process.env.PATH!
   })

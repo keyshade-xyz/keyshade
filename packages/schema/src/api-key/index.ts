@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { expiresAfterEnum, authorityEnum } from '@/enums'
-import { PageRequestSchema } from '@/pagination'
+import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
 export const ApiKeySchema = z.object({
   id: z.string(),
@@ -39,10 +39,12 @@ export const DeleteApiKeyResponseSchema = z.void()
 
 export const GetApiKeysOfUserRequestSchema = PageRequestSchema
 
-export const GetApiKeysOfUserResponseSchema = ApiKeySchema.omit({
-  value: true,
-  userId: true
-}).array()
+export const GetApiKeysOfUserResponseSchema = PageResponseSchema(
+  ApiKeySchema.omit({
+    value: true,
+    userId: true
+  })
+)
 
 export const GetApiKeyRequestSchema = z.object({
   apiKeySlug: ApiKeySchema.shape.slug

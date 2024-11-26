@@ -218,32 +218,63 @@ describe('API Key Schema Tests', () => {
 
   // Tests for GetApiKeysOfUserResponseSchema
   it('should validate a valid GetApiKeysOfUserResponseSchema', () => {
-    const result = GetApiKeysOfUserResponseSchema.safeParse([
-      {
-        id: 'apikey123',
-        name: 'API Key Name',
-        slug: 'api-key-slug',
-        expiresAt: '2024-10-10T10:00:00Z',
-        createdAt: '2024-10-09T10:00:00Z',
-        updatedAt: '2024-10-09T10:00:00Z',
-        authorities: ['READ_SECRET', 'READ_VARIABLE']
+    const result = GetApiKeysOfUserResponseSchema.safeParse({
+      items: [
+        {
+          id: 'apikey123',
+          name: 'API Key Name',
+          slug: 'api-key-slug',
+          expiresAt: '2024-10-10T10:00:00Z',
+          createdAt: '2024-10-09T10:00:00Z',
+          updatedAt: '2024-10-09T10:00:00Z',
+          authorities: ['READ_SECRET', 'READ_VARIABLE']
+        }
+      ],
+      metadata: {
+        page: 1,
+        perPage: 10,
+        pageCount: 1,
+        totalCount: 1,
+        links: {
+          self: 'http://example.com/page/1',
+          first: 'http://example.com/page/1',
+          previous: null,
+          next: null,
+          last: 'http://example.com/page/1'
+        }
       }
-    ])
+    })
+    console.log(result.error?.issues)
     expect(result.success).toBe(true)
   })
 
   it('should not validate an invalid GetApiKeysOfUserResponseSchema', () => {
-    const result = GetApiKeysOfUserResponseSchema.safeParse([
-      {
-        id: 'apikey123',
-        name: 'API Key Name',
-        slug: 'api-key-slug',
-        expiresAt: 'invalid-date', // Should be a valid date string
-        createdAt: '2024-10-09T10:00:00Z',
-        updatedAt: '2024-10-09T10:00:00Z',
-        authorities: ['INVALID_AUTHORITY'] // Invalid authority
+    const result = GetApiKeysOfUserResponseSchema.safeParse({
+      items: [
+        {
+          id: 'apikey123',
+          name: 'API Key Name',
+          slug: 'api-key-slug',
+          expiresAt: 'invalid-date', // Should be a valid date string
+          createdAt: '2024-10-09T10:00:00Z',
+          updatedAt: '2024-10-09T10:00:00Z',
+          authorities: ['INVALID_AUTHORITY'] // Invalid authority
+        }
+      ],
+      metadata: {
+        page: 1,
+        perPage: 10,
+        pageCount: 1,
+        totalCount: 1,
+        links: {
+          self: 'http://example.com/page/1',
+          first: 'http://example.com/page/1',
+          previous: null,
+          next: null,
+          last: 'http://example.com/page/1'
+        }
       }
-    ])
+    })
     expect(result.success).toBe(false)
     expect(result.error?.issues).toHaveLength(2)
   })

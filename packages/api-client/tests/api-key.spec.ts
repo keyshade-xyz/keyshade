@@ -118,7 +118,21 @@ describe('Api-Key Controller Tests', () => {
     )
 
     expect(response.success).toBe(true)
-    expect(response.data).toHaveLength(1)
+    expect(response.data.items).toHaveLength(1)
+
+    const metadata = response.data.metadata
+    expect(metadata.totalCount).toEqual(1)
+    expect(metadata.links.self).toBe(
+      `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.first).toBe(
+      `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+    )
+    expect(metadata.links.previous).toEqual(null)
+    expect(metadata.links.next).toEqual(null)
+    expect(metadata.links.last).toBe(
+      `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+    )
   })
 
   // Get Api Key
