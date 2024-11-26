@@ -58,6 +58,17 @@ describe('API Key Schema Tests', () => {
     expect(result.success).toBe(true)
   })
 
+  it('should validate if optional fields are specified for CreateApiKeyRequestSchema', () => {
+    const result = CreateApiKeyRequestSchema.safeParse({
+      name: 'test',
+      expiresAfter: '720',
+      authorities: ['UPDATE_PROJECT'],
+      slug: 'test-slug'
+    })
+
+    expect(result.success).toBe(true)
+  })
+
   it('should not validate if invalid values are specified for CreateApiKeyRequestSchema', () => {
     const result = CreateApiKeyRequestSchema.safeParse({
       name: 123,

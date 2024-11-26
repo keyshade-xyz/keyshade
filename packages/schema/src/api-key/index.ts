@@ -14,10 +14,9 @@ export const ApiKeySchema = z.object({
   userId: z.string()
 })
 
-export const CreateApiKeyRequestSchema = z.object({
+export const CreateApiKeyRequestSchema = ApiKeySchema.partial().extend({
   name: ApiKeySchema.shape.name,
-  expiresAfter: expiresAfterEnum.optional(),
-  authorities: ApiKeySchema.shape.authorities.optional()
+  expiresAfter: expiresAfterEnum.optional()
 })
 
 export const CreateApiKeyResponseSchema = ApiKeySchema
