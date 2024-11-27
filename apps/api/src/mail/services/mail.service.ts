@@ -163,12 +163,15 @@ export class MailService implements IMailService {
   async removedFromWorkspace(
     email: string,
     workspaceName: string,
-    removedOn: string
+    removedOn: Date
   ): Promise<void> {
     const subject = `Your access was revoked from ${workspaceName}`
 
     const body = await render(
-      RemovedFromWorkspaceEmail({ removedOn, workspaceName })
+      RemovedFromWorkspaceEmail({
+        removedOn: removedOn.toISOString(),
+        workspaceName
+      })
     )
 
     await this.sendEmail(email, subject, body)

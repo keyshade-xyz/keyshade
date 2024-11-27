@@ -22,6 +22,6 @@ export interface IMailService {
   removedFromWorkspace(
     email: string,
     workspaceName: string,
-    removedOn: string
+    removedOn: Date
   ): Promise<void>
 }

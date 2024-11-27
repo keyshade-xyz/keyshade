@@ -42,10 +42,10 @@ export class MockMailService implements IMailService {
   async removedFromWorkspace(
     email: string,
     workspaceName: string,
-    removedOn: string
+    removedOn: Date
   ): Promise<void> {
     this.log.log(
-      `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn}`
+      `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
     )
   }
 }
