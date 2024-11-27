@@ -45,7 +45,7 @@ export default class UserController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateEmailChangeOTPResponse>> {
     const response = await this.apiClient.post(
-      `./api/user/validate-email-change-otp?otp=${request.otp}`,
+      `/api/user/validate-email-change-otp?otp=${request.otp}`,
       request,
       headers
     )

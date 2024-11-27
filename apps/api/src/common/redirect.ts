@@ -13,7 +13,7 @@ const platformOAuthFailureRedirectUrl = `${platformFrontendUrl}${platformOAuthFa
 export function sendOAuthFailureRedirect(response: Response, reason: string) {
   response
     .status(302)
-    .redirect(`${platformOAuthSuccessRedirectUrl}?reason=${reason}`)
+    .redirect(`${platformOAuthFailureRedirectUrl}?reason=${reason}`)
 }
 
 /* istanbul ignore next */
@@ -21,7 +21,7 @@ export function sendOAuthSuccessRedirect(response: Response, user: User) {
   response
     .status(302)
     .redirect(
-      `${platformOAuthFailureRedirectUrl}?data=${encodeURIComponent(
+      `${platformOAuthSuccessRedirectUrl}?data=${encodeURIComponent(
         JSON.stringify(user)
       )}`
     )

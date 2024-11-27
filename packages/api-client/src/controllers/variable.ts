@@ -17,7 +17,7 @@ import {
   RollBackVariableResponse,
   UpdateVariableRequest,
   UpdateVariableResponse
-} from '@api-client/types/variable.types'
+} from '@keyshade/schema'
 
 export default class VariableController {
   private apiClient: APIClient

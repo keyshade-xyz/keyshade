@@ -55,10 +55,9 @@ export default class RollbackVariable extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Variable ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
+      Logger.info(
+        `Variable rolled back by ${data.count} versions successfully!`
+      )
     } else {
       Logger.error(`Failed to update variable: ${error.message}`)
     }
@@ -66,13 +65,13 @@ export default class RollbackVariable extends BaseCommand {
 
   private async parseInput(options: CommandActionData['options']): Promise<{
     environmentSlug: string
-    version: string
+    version: number
   }> {
     const { environmentSlug, version } = options
 
     return {
       environmentSlug,
-      version
+      version: parseInt(version, 10)
     }
   }
 }
