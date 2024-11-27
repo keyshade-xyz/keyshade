@@ -61,7 +61,7 @@ describe('Pagination Schema Tests', () => {
         pageCount: 1,
         totalCount: 1,
         links: {
-          self: 'http://example.com/page/1',
+          self: 'not-an-url', // should be a URL
           first: 'http://example.com/page/1',
           previous: null,
           next: null,
@@ -71,6 +71,7 @@ describe('Pagination Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should not validate an invalid PageResponseSchema with missing metadata fields', () => {

@@ -88,7 +88,7 @@ describe('Project Schema Tests', () => {
       name: 'Project Test',
       workspaceSlug: 'workspace123',
       accessLevel: projectAccessLevelEnum.Enum.PRIVATE,
-      environments: [{ name: 'Environment 1', projectId: 'project123' }]
+      environments: [{ name: 'Environment 1', projectSlug: 'project123' }]
     })
 
     expect(result.success).toBe(true)
@@ -436,7 +436,6 @@ describe('Project Schema Tests', () => {
   it('should validate a valid GetForkRequestSchema', () => {
     const result = GetForkRequestSchema.safeParse({
       projectSlug: 'project-slug',
-      workspaceSlug: 'workspace-slug',
       page: 1,
       perPage: 10
     })
@@ -447,7 +446,6 @@ describe('Project Schema Tests', () => {
   it('should not validate an invalid GetForkRequestSchema', () => {
     const result = GetForkRequestSchema.safeParse({
       projectSlug: 123, // Should be a string
-      workspaceSlug: 'workspace-slug',
       page: 1,
       perPage: 10
     })

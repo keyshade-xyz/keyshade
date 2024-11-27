@@ -142,7 +142,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -159,7 +159,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(false)
@@ -207,7 +207,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-02T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -224,7 +224,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-02T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(false)
@@ -274,7 +274,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -302,7 +302,7 @@ describe('Workspace Schema Tests', () => {
           updatedAt: '2024-10-01T00:00:00Z',
           ownerId: 'owner-id',
           isDefault: false,
-          lastUpdatedBy: 'user-id'
+          lastUpdatedById: 'user-id'
         }
       ],
       metadata: {
@@ -353,7 +353,7 @@ describe('Workspace Schema Tests', () => {
           description: 'Administrator role',
           colorCode: '#FF0000',
           hasAdminAuthority: true,
-          authorities: ['ALL']
+          authorities: ['CREATE_PROJECT']
         }
       ],
       projects: [
@@ -427,7 +427,6 @@ describe('Workspace Schema Tests', () => {
     const result = GlobalSearchResponseSchema.safeParse({
       projects: [
         {
-          id: 'project-id',
           slug: 'project-slug',
           name: 'Project Name',
           description: 'Project Description'
@@ -435,7 +434,6 @@ describe('Workspace Schema Tests', () => {
       ],
       environments: [
         {
-          id: 'environment-id',
           slug: 'environment-slug',
           name: 'Environment Name',
           description: 'Environment Description'
@@ -443,7 +441,6 @@ describe('Workspace Schema Tests', () => {
       ],
       secrets: [
         {
-          id: 'secret-id',
           slug: 'secret-slug',
           name: 'Secret Name',
           note: 'Secret Note'
@@ -451,7 +448,6 @@ describe('Workspace Schema Tests', () => {
       ],
       variables: [
         {
-          id: 'variable-id',
           slug: 'variable-slug',
           name: 'Variable Name',
           note: 'Variable Note'
@@ -477,6 +473,10 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error?.issues[0]?.path).toEqual(['projects', 0, 'id'])
+    expect(result.error?.issues[0]?.path).toEqual([
+      'projects',
+      0,
+      'description'
+    ])
   })
 })

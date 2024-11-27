@@ -190,8 +190,8 @@ export default class RunCommand extends BaseCommand {
 
     const secretsResponse = await secretController.getAllSecretsOfEnvironment(
       {
-        environmentId: this.environmentSlug,
-        projectId: this.projectSlug
+        environmentSlug: this.environmentSlug,
+        projectSlug: this.projectSlug
       },
       {
         'x-keyshade-token': this.apiKey
@@ -205,8 +205,8 @@ export default class RunCommand extends BaseCommand {
     const variablesResponse =
       await variableController.getAllVariablesOfEnvironment(
         {
-          environmentId: this.environmentSlug,
-          projectId: this.projectSlug
+          environmentSlug: this.environmentSlug,
+          projectSlug: this.projectSlug
         },
         {
           'x-keyshade-token': this.apiKey

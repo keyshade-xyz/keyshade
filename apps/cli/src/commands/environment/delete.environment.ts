@@ -25,10 +25,10 @@ export class DeleteEnvironment extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [environmentId] = args
+    const [environmentSlug] = args
 
-    if (!environmentId) {
-      Logger.error('Environment ID is required')
+    if (!environmentSlug) {
+      Logger.error('Environment Slug is required')
       return
     }
 
@@ -36,7 +36,7 @@ export class DeleteEnvironment extends BaseCommand {
 
     const { success, error } =
       await ControllerInstance.getInstance().environmentController.deleteEnvironment(
-        { id: environmentId },
+        { slug: environmentSlug },
         this.headers
       )
 

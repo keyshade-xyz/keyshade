@@ -301,7 +301,7 @@ describe('Integration Schema Tests', () => {
         updatedAt: '2024-10-01T00:00:00Z',
         ownerId: 'owner123',
         isDefault: false,
-        lastUpdatedBy: 'user123'
+        lastUpdatedById: 'user123'
       }
     })
     expect(result.success).toBe(true)
