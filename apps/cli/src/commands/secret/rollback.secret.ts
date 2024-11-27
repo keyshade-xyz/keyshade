@@ -48,7 +48,7 @@ export default class RollbackSecret extends BaseCommand {
       await ControllerInstance.getInstance().secretController.rollbackSecret(
         {
           environmentSlug,
-          version: Number(version),
+          version,
           secretSlug
         },
         this.headers
@@ -63,13 +63,13 @@ export default class RollbackSecret extends BaseCommand {
 
   private async parseInput(options: CommandActionData['options']): Promise<{
     environmentSlug: string
-    version: string
+    version: number
   }> {
     const { environmentSlug, version } = options
 
     return {
       environmentSlug,
-      version
+      version: parseInt(version, 10)
     }
   }
 }
