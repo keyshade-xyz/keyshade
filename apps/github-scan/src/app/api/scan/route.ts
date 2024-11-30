@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import gitHubScanner from '@/util/github-scanner'
+import { secret_scan } from '@/util/scan_secrets'
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
-    const githubUrl = searchParams.get('github_url')
+    const github_url = searchParams.get('github_url')
 
-    if (!githubUrl) {
+    if (!github_url) {
       return NextResponse.json(
         { error: 'Invalid or missing github_url parameter' },
         { status: 400 }
       )
     }
-    try {
-      const result = await gitHubScanner.scanRepo(githubUrl)
+
+    const result = await secret_scan(github_url)
+    if (result instanceof Array) {
       if (result.length > 0)
         return NextResponse.json(
           { isVulnerable: true, files: result },
@@ -26,23 +27,7 @@ export async function GET(req: NextRequest) {
           },
           { status: 200 }
         )
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Rate limit hit') {
-          return NextResponse.json({ error: 'Rate limit hit' }, { status: 429 })
-        } else if (error.message === 'Invalid GitHub URL') {
-          return NextResponse.json(
-            { error: 'Invalid GitHub URL' },
-            { status: 400 }
-          )
-        } else {
-          return NextResponse.json(
-            { error: 'Internal Server Error' },
-            { status: 500 }
-          )
-        }
-      }
-    }
+    } else return result
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal Server Error' },
