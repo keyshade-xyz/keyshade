@@ -22,7 +22,7 @@ import {
   IsMemberResponse,
   GetMembersRequest,
   GetMembersResponse
-} from '@api-client/types/workspace-membership.types'
+} from '@keyshade/schema'
 import { ClientResponse } from '@keyshade/schema'
 
 export default class WorkspaceMembershipController {
