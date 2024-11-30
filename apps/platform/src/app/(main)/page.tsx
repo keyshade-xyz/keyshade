@@ -102,18 +102,21 @@ export default function Index(): JSX.Element {
     const projectController = new ProjectController(
           process.env.NEXT_PUBLIC_BACKEND_URL
     )
-    
-    projectController.getAllProjects({workspaceSlug: currentWorkspace.slug}, {})
-      .then((data: GetAllProjectsResponse) => {
-        if (data) {
-          //@ts-ignore
-          setProjects(data.data.items)  
-        }
-      })
-      .catch((error) => {
+
+    const getAllProjectsInCurrentWorkspace = async () => {
+      const { success, error, data } = await projectController.getAllProjects({workspaceSlug: currentWorkspace.slug}, {})
+
+      if( success && data ){
+        //@ts-ignore
+        setProjects(data.data.items)
+      }
+      else{
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
-      })
+      }
+    }
+
+    getAllProjectsInCurrentWorkspace();
 
   }, [currentWorkspace.id])
 

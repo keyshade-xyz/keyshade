@@ -135,7 +135,6 @@ export default class ProjectController {
     request: GetAllProjectsRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllProjectsResponse>> {
-    
     const url = parsePaginationUrl(
       `/api/project/all/${request.workspaceSlug}`,
       request
