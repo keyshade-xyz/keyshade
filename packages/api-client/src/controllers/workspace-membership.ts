@@ -62,7 +62,8 @@ export default class WorkspaceMembershipController {
   ): Promise<ClientResponse<RemoveUsersResponse>> {
     const response = await this.apiClient.delete(
       `/api/workspace-membership/${request.workspaceSlug}/remove-users`,
-      headers
+      headers,
+      request.userEmails
     )
     return await parseResponse<RemoveUsersResponse>(response)
   }
