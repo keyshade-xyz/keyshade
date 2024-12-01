@@ -79,6 +79,7 @@ export default function AuthPage(): React.JSX.Element {
         <form className="flex flex-col gap-3">
           <label htmlFor="email">
             <Input
+              disabled={isLoading}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEmail(e.target.value)
               }}
