@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {
   Body,
   Container,
@@ -9,7 +10,10 @@ import {
   Section,
   Text
 } from '@react-email/components'
-import * as React from 'react'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+import dayjs from 'dayjs'
+dayjs.extend(localizedFormat)
+
 interface WorkspaceRemovalEmailProps {
   workspaceName: string
   removedOn: string
@@ -19,6 +23,8 @@ export const RemovedFromWorkspaceEmail = ({
   workspaceName,
   removedOn
 }: WorkspaceRemovalEmailProps) => {
+  const formattedRemovedOnDate = dayjs(removedOn).format('llll')
+
   return (
     <Html>
       <Head />
@@ -37,7 +43,7 @@ export const RemovedFromWorkspaceEmail = ({
                 <strong>Workspace Name:</strong> {workspaceName}
               </Text>
               <Text style={workspaceInfo}>
-                <strong>Removed On:</strong> {removedOn}
+                <strong>Removed On:</strong> {formattedRemovedOnDate}
               </Text>
             </Section>
             <Text style={text}>
