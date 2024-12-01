@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { ScanResponse } from '@/util/types'
 
-function GitInput() {
+function RepoInput() {
   const [url, setUrl] = useState('')
   const [responseData, setResponseData] = useState<ScanResponse | null>(null)
 
@@ -79,4 +79,4 @@ function GitInput() {
   )
 }
 
-export default GitInput
+export default RepoInput
