@@ -11,6 +11,7 @@ import { ApiKey, User } from '@prisma/client'
 import generateEntitySlug from '@/common/slug-generator'
 import { generateApiKey, toSHA256 } from '@/common/cryptography'
 import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import { paginate } from '@/common/paginate'
 
 @Injectable()
 export class ApiKeyService {
@@ -186,7 +187,7 @@ export class ApiKeyService {
     order: string,
     search: string
   ) {
-    return await this.prisma.apiKey.findMany({
+    const items = await this.prisma.apiKey.findMany({
       where: {
         userId: user.id,
         name: {
@@ -200,6 +201,23 @@ export class ApiKeyService {
       },
       select: this.apiKeySelect
     })
+
+    const totalCount = await this.prisma.apiKey.count({
+      where: {
+        userId: user.id,
+        name: {
+          contains: search
+        }
+      }
+    })
+    const metadata = paginate(totalCount, `/api-key`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+    return { items, metadata }
   }
 
   /**

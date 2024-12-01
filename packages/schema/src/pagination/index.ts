@@ -17,11 +17,11 @@ export const PageResponseSchema = <T>(itemSchema: z.ZodType<T>) =>
       pageCount: z.number(),
       totalCount: z.number(),
       links: z.object({
-        self: z.string(),
-        first: z.string(),
-        previous: z.string().nullable(),
-        next: z.string().nullable(),
-        last: z.string()
+        self: z.string().url(),
+        first: z.string().url(),
+        previous: z.string().url().nullable(),
+        next: z.string().url().nullable(),
+        last: z.string().url()
       })
     })
   })
