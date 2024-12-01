@@ -10,9 +10,9 @@ import {
   Section,
   Text
 } from '@react-email/components'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
 import dayjs from 'dayjs'
-dayjs.extend(localizedFormat)
+import LocalizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(LocalizedFormat)
 
 interface WorkspaceRemovalEmailProps {
   workspaceName: string
