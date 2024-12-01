@@ -1,4 +1,4 @@
-//Export all Schemas and types
+//Export all Schemas
 
 export * from './pagination'
 export * from './api-key'
@@ -12,3 +12,5 @@ export * from './user'
 export * from './variable'
 export * from './workspace'
 export * from './workspace-role'
+export * from './event'
+export * from './api-key'

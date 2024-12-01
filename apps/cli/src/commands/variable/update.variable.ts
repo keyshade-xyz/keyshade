@@ -48,7 +48,7 @@ export default class UpdateVariable extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 
-    const { data, error, success } =
+    const { error, success } =
       await ControllerInstance.getInstance().variableController.updateVariable(
         {
           variableSlug,
@@ -58,10 +58,7 @@ export default class UpdateVariable extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Variable ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
+      Logger.info('Variable updated successfully!')
     } else {
       Logger.error(`Failed to update variable: ${error.message}`)
     }

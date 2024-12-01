@@ -285,13 +285,27 @@ describe('Api Key Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()[0].id).toBe(apiKey.id)
-      expect(response.json()[0].name).toBe('Test Key')
-      expect(response.json()[0].slug).toBe(apiKey.slug)
-      expect(response.json()[0].authorities).toEqual([
+      expect(response.json().items[0].id).toBe(apiKey.id)
+      expect(response.json().items[0].name).toBe('Test Key')
+      expect(response.json().items[0].slug).toBe(apiKey.slug)
+      expect(response.json().items[0].authorities).toEqual([
         'READ_API_KEY',
         'CREATE_ENVIRONMENT'
       ])
+
+      const metadata = response.json().metadata
+      expect(metadata.totalCount).toEqual(1)
+      expect(metadata.links.self).toBe(
+        `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.first).toBe(
+        `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.previous).toEqual(null)
+      expect(metadata.links.next).toEqual(null)
+      expect(metadata.links.last).toBe(
+        `/api-key?page=0&limit=10&sort=name&order=asc&search=`
+      )
     })
 
     it('should be able to get all api keys using the API key', async () => {
@@ -304,10 +318,10 @@ describe('Api Key Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()[0].id).toBe(apiKey.id)
-      expect(response.json()[0].name).toBe('Test Key')
-      expect(response.json()[0].slug).toBe(apiKey.slug)
-      expect(response.json()[0].authorities).toEqual([
+      expect(response.json().items[0].id).toBe(apiKey.id)
+      expect(response.json().items[0].name).toBe('Test Key')
+      expect(response.json().items[0].slug).toBe(apiKey.slug)
+      expect(response.json().items[0].authorities).toEqual([
         'READ_API_KEY',
         'CREATE_ENVIRONMENT'
       ])

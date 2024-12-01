@@ -82,7 +82,7 @@ export default class CreateProject extends BaseCommand {
     name: string
     description?: string
     storePrivateKey: boolean
-    accessLevel: string
+    accessLevel: 'PRIVATE' | 'GLOBAL' | 'INTERNAL'
   }> {
     let { name, description } = options
     const { storePrivateKey, accessLevel } = options
