@@ -1,10 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type {
-  Project,
   CreateProjectRequest,
   CreateProjectResponse,
-  GetAllProjectsRequest,
   GetAllProjectsResponse,
   Workspace
 } from '@keyshade/schema'
@@ -30,7 +28,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
@@ -97,8 +94,6 @@ export default function Index(): JSX.Element {
       : (JSON.parse(`{}`) as Workspace)
   
   useEffect( () => {
-
-    console.log("Current workspace slug: ", currentWorkspace.slug);
 
     const projectController = new ProjectController(
           process.env.NEXT_PUBLIC_BACKEND_URL
