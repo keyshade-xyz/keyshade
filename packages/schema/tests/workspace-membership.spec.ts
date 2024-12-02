@@ -122,7 +122,7 @@ describe('Workspace Membership Schema Tests', () => {
   it('should validate a valid RemoveUsersRequestSchema', () => {
     const result = RemoveUsersRequestSchema.safeParse({
       workspaceSlug: 'workspace-slug',
-      userEmails: ['user1@example.com', 'user2@example.com']
+      userEmails: 'user1@example.com,user2@example.com'
     })
     expect(result.success).toBe(true)
   })
@@ -130,10 +130,10 @@ describe('Workspace Membership Schema Tests', () => {
   it('should not validate an invalid RemoveUsersRequestSchema', () => {
     const result = RemoveUsersRequestSchema.safeParse({
       workspaceSlug: 123, // Should be a string
-      userEmails: ['user1@example', 'user2@example'] // Invalid email
+      userEmails: ['user1@example.com', 'user2@example.com'] // Should be a string of comma-separated emails
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(3)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   // Tests for RemoveUsersResponseSchema

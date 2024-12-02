@@ -25,7 +25,7 @@ export const InviteUsersResponseSchema = z.void()
 
 export const RemoveUsersRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug,
-  userEmails: z.array(z.string().email())
+  userEmails: z.string() // comma separated emails
 })
 
 export const RemoveUsersResponseSchema = z.void()

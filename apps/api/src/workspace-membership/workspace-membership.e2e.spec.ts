@@ -524,7 +524,9 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/remove-users`,
-        payload: [user2.id]
+        query: {
+          userEmails: user2.email
+        }
       })
 
       expect(response.statusCode).toBe(200)
@@ -548,7 +550,9 @@ describe('Workspace Membership Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         url: `/workspace-membership/${workspace1.slug}/remove-users`,
-        payload: [user1.email]
+        query: {
+          userEmails: user1.email
+        }
       })
 
       expect(response.statusCode).toBe(400)

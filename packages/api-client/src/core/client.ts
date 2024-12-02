@@ -72,7 +72,6 @@ export class APIClient {
    *
    * @param url - The URL to send the DELETE request to.
    * @param headers - Optional headers to include in the request.
-   * @param data - Optional data to be sent in the request body.
    * @returns A Promise that resolves to the response data.
    */
   delete(
@@ -86,7 +85,6 @@ export class APIClient {
         'Content-Type': 'application/json',
         ...headers
       },
-      body: JSON.stringify(data),
       credentials: 'include'
     })
   }
