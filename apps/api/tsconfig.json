@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "module": "NodeNext",
     "declaration": true,
     "removeComments": true,
@@ -20,6 +21,6 @@
     "moduleResolution": "NodeNext",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
   }
 }
