@@ -47,6 +47,7 @@ export default function Index(): JSX.Element {
   
   type projectItem = GetAllProjectsResponse["items"][number]
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
+  const [isProjectEmpty, setIsProjectEmpty] = useState<boolean>(true)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   const [projects, setProjects] = useState< projectItem[] | []>([])
   const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
@@ -103,6 +104,7 @@ export default function Index(): JSX.Element {
       const { success, error, data } = await projectController.getAllProjects({workspaceSlug: currentWorkspace.slug}, {})
 
       if( success && data ){
+        setIsProjectEmpty(false);
         //@ts-ignore
         setProjects(data.data.items)
       }
