@@ -105,7 +105,7 @@
     "lint:schema": "turbo run lint --filter=@keyshade/schema",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
-    "build:web": "turbo run build --filter=web",
+    "build:web": "pnpm build:api-client && turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=cli",
     "build:api-client": "pnpm build:schema && turbo run --filter=@keyshade/api-client build",
