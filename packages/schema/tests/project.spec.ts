@@ -17,7 +17,8 @@ import {
   GetForkRequestSchema,
   GetForkResponseSchema,
   GetAllProjectsRequestSchema,
-  GetAllProjectsResponseSchema
+  GetAllProjectsResponseSchema,
+  ProjectWithCountSchema
 } from '@/project'
 import { projectAccessLevelEnum } from '@/enums'
 
@@ -80,6 +81,58 @@ describe('Project Schema Tests', () => {
       expect(result.success).toBe(false)
       expect(result.error?.issues).toHaveLength(1)
       expect(result.error?.issues[0].message).toBe('Invalid input')
+    })
+  })
+
+  describe('ProjectWithCountSchema Tests', () => {
+    it('should validate a valid ProjectWithCountSchema', () => {
+      const result = ProjectWithCountSchema.safeParse({
+        id: 'project123',
+        name: 'Project Name',
+        slug: 'project-slug',
+        description: 'Project Description',
+        createdAt: '2024-10-01T00:00:00Z',
+        updatedAt: '2024-10-01T00:00:00Z',
+        publicKey: 'public-key',
+        privateKey: 'private-key',
+        storePrivateKey: true,
+        isDisabled: false,
+        accessLevel: 'INTERNAL',
+        pendingCreation: false,
+        isForked: false,
+        lastUpdatedById: 'user123',
+        workspaceId: 'workspace123',
+        forkedFromId: null,
+        environmentCount: 0,
+        secretCount: 0,
+        variableCount: 0
+      })
+
+      expect(result.success).toBe(true)
+    })
+
+    it('should not validate an invalid ProjectWithCountSchema', () => {
+      const result = ProjectWithCountSchema.safeParse({
+        id: 'project123',
+        name: 'Project Name',
+        slug: 'project-slug',
+        description: 'Project Description',
+        createdAt: '2024-10-01T00:00:00Z',
+        updatedAt: '2024-10-01T00:00:00Z',
+        publicKey: 'public-key',
+        privateKey: 'private-key',
+        storePrivateKey: true,
+        isDisabled: false,
+        accessLevel: 'GLOBAL',
+        pendingCreation: false,
+        isForked: false,
+        lastUpdatedById: 'user123',
+        workspaceId: 'workspace123',
+        forkedFromId: null
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 

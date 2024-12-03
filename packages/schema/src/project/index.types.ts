@@ -18,10 +18,13 @@ import {
   GetForkRequestSchema,
   GetForkResponseSchema,
   GetAllProjectsRequestSchema,
-  GetAllProjectsResponseSchema
+  GetAllProjectsResponseSchema,
+  ProjectWithCountSchema
 } from '.'
 
 export type Project = z.infer<typeof ProjectSchema>
+
+export type ProjectWithCount = z.infer<typeof ProjectWithCountSchema>
 
 export type CreateProjectRequest = z.infer<typeof CreateProjectRequestSchema>
 

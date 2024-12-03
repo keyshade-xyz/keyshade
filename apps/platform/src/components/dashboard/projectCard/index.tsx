@@ -5,7 +5,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
 import { ConfigSVG, EnvironmentSVG, SecretSVG } from '@public/svg/dashboard'
-import type { Project } from '@keyshade/schema'
+import type { ProjectWithCount } from '@keyshade/schema'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/context-menu'
 
 interface ProjectCardProps {
-  project: Project
+  project: ProjectWithCount
   setIsSheetOpen: Dispatch<SetStateAction<boolean>>
 }
 

@@ -33,6 +33,10 @@ export const ProjectSchema = BaseProjectSchema.refine((obj) =>
   obj.isForked ? obj.forkedFromId !== null : obj.forkedFromId === null
 )
 
+export const ProjectWithCountSchema = ProjectSchema.and(
+  EnvironmentSecretAndVariableCountSchema
+)
+
 export const CreateProjectRequestSchema = z.object({
   name: z.string(),
   workspaceSlug: WorkspaceSchema.shape.slug,
@@ -70,9 +74,7 @@ export const GetProjectRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug
 })
 
-export const GetProjectResponseSchema = ProjectSchema.and(
-  EnvironmentSecretAndVariableCountSchema
-)
+export const GetProjectResponseSchema = ProjectWithCountSchema
 
 export const ForkProjectRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
@@ -107,5 +109,5 @@ export const GetAllProjectsRequestSchema = PageRequestSchema.extend({
 })
 
 export const GetAllProjectsResponseSchema = PageResponseSchema(
-  ProjectSchema.and(EnvironmentSecretAndVariableCountSchema)
+  ProjectWithCountSchema
 )

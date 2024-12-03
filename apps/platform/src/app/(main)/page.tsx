@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   CreateProjectRequest,
   GetAllProjectsResponse,
-  Project,
+  ProjectWithCount,
   Workspace
 } from '@keyshade/schema'
 import { ProjectController } from '@keyshade/api-client'
@@ -45,7 +45,7 @@ export default function Index(): JSX.Element {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
   // Projects to be displayed in the dashboard
-  const [projects, setProjects] = useState<Project[]>([])
+  const [projects, setProjects] = useState<ProjectWithCount[]>([])
 
   // Contains the data for the new project
   const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
@@ -117,7 +117,17 @@ export default function Index(): JSX.Element {
       )
 
       if (success && data) {
-        setProjects([...projects, data])
+        setProjects([
+          ...projects,
+          {
+            ...data,
+            environmentCount: newProjectData.environments
+              ? newProjectData.environments.length
+              : 0,
+            secretCount: 0,
+            variableCount: 0
+          }
+        ])
       } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
