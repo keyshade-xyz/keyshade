@@ -71,9 +71,14 @@ export class APIClient {
    * Sends a DELETE request to the specified URL and returns a Promise that resolves to the response data.
    *
    * @param url - The URL to send the DELETE request to.
+   * @param headers - Optional headers to include in the request.
    * @returns A Promise that resolves to the response data.
    */
-  delete(url: string, headers?: Record<string, string>): Promise<Response> {
+  delete(
+    url: string,
+    headers?: Record<string, string>,
+    data?: any
+  ): Promise<Response> {
     return this.request(url, {
       method: 'DELETE',
       headers: {

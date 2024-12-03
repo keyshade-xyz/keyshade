@@ -1,4 +1,5 @@
 import {
+  UserSchema,
   GetSelfResponseSchema,
   UpdateSelfRequestSchema,
   UpdateSelfResponseSchema,
@@ -11,6 +12,66 @@ import {
 } from '@/user'
 
 describe('User Schema Tests', () => {
+  // Tests for UserSchema
+  it('should validate a valid UserSchema', () => {
+    const result = UserSchema.safeParse({
+      id: 'user123',
+      email: 'user@example.com',
+      name: 'User Name',
+      profilePictureUrl: 'http://example.com/profile.jpg',
+      isActive: true,
+      isOnboardingFinished: true,
+      isAdmin: false,
+      authProvider: 'google'
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('should not validate an invalid UserSchema', () => {
+    const result = UserSchema.safeParse({
+      id: 'user123',
+      email: 'user@example', // Invalid email
+      name: 'User Name',
+      profilePictureUrl: 'http://example.com/profile.jpg',
+      isActive: true,
+      isOnboardingFinished: true,
+      isAdmin: false,
+      authProvider: 'google'
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
+  it('should not validate an invalid UserSchema with missing fields', () => {
+    const result = UserSchema.safeParse({
+      id: 'user123',
+      email: 'user@example.com',
+      name: 'User Name',
+      isActive: true,
+      isOnboardingFinished: true,
+      isAdmin: false,
+      authProvider: 'google'
+      // Missing profilePictureUrl
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
+  it('should not validate an invalid UserSchema with incorrect types', () => {
+    const result = UserSchema.safeParse({
+      id: 'user123',
+      email: 'user@example.com',
+      name: 'User Name',
+      profilePictureUrl: 'http://example.com/profile.jpg',
+      isActive: 'true', // Should be a boolean
+      isOnboardingFinished: true,
+      isAdmin: false,
+      authProvider: 'google'
+    })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1) // Adjust the number based on incorrect types
+  })
+
   // Tests for GetSelfResponseSchema
   it('should validate a valid GetSelfResponseSchema', () => {
     const result = GetSelfResponseSchema.safeParse({
@@ -72,7 +133,11 @@ describe('User Schema Tests', () => {
       id: 'user123',
       email: 'jane@example.com',
       name: 'Jane Doe',
-      isActive: true
+      isActive: true,
+      profilePictureUrl: null,
+      isOnboardingFinished: false,
+      isAdmin: false,
+      authProvider: 'email'
     })
     expect(result.success).toBe(true)
   })
@@ -81,9 +146,10 @@ describe('User Schema Tests', () => {
     const result = UpdateSelfResponseSchema.safeParse({
       id: 123, // Should be a string
       email: 'jane@example.com'
+      // Missing required fields
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues.length).toBe(1)
+    expect(result.error?.issues.length).toBe(7)
   })
 
   // Tests for DeleteSelfRequestSchema
