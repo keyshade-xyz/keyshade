@@ -58,7 +58,7 @@ describe('Workspace Membership Controller Tests', () => {
   it('should remove users', async () => {
     const request = {
       workspaceSlug: workspaceSlug!,
-      userEmails: ['invitee@example.com']
+      userEmails: 'invitee@example.com'
     }
     const response = await workspaceMembershipController.removeUsers(request, {
       'x-e2e-user-email': userEmail
