@@ -79,6 +79,7 @@ export default function AuthPage(): React.JSX.Element {
         <form className="flex flex-col gap-3">
           <label htmlFor="email">
             <Input
+              disabled={isLoading}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEmail(e.target.value)
               }}
@@ -97,14 +98,14 @@ export default function AuthPage(): React.JSX.Element {
               void handleGetStarted(email)
             }}
           >
-            {isLoading ? <LoadingSVG className="w-10" /> : 'Get Started'}
+            {isLoading ? <LoadingSVG className="w-10 h-auto" /> : 'Get Started'}
           </Button>
         </form>
         {/* <Button className="w-full" variant="outline">
           Already have an account? Sign In
         </Button> */}
         <div className="text-center text-xs text-[#808080]">
-          By continueing, you acknowledge and agree to our <br />
+          By continuing, you acknowledge and agree to our <br />
           <a
             className="underline"
             href="https://keyshade.xyz/terms_and_condition"
