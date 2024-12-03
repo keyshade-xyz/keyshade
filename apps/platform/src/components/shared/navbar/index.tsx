@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
+import SearchModel from './searchModel'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
 import { zUser, type User } from '@/types'
-import SearchModel from './searchModel'
 
 interface UserNameImage {
   name: string | null
