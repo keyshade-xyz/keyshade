@@ -6,7 +6,7 @@
     "dev": "env-cmd -f ../../.env --silent next dev -p 3025",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --fix"
+    "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",

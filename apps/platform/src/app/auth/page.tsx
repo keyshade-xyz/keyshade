@@ -35,7 +35,6 @@ export default function AuthPage(): React.JSX.Element {
     setInInvalidEmail(false)
 
     try {
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/send-otp/${encodeURIComponent(userEmail)}`,
         {
@@ -99,7 +98,7 @@ export default function AuthPage(): React.JSX.Element {
               void handleGetStarted(email)
             }}
           >
-            {isLoading ? <LoadingSVG className="w-10 h-auto" /> : 'Get Started'}
+            {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
           </Button>
         </form>
         {/* <Button className="w-full" variant="outline">

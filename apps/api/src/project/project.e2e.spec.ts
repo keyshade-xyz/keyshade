@@ -467,6 +467,22 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+
+    it('should fetch correct counts of environments, variables, and secrets for projects in a workspace', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${project1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const project = response.json().items[0]
+      expect(project.environmentCount).toEqual(2)
+      expect(project.variableCount).toEqual(2)
+      expect(project.secretCount).toEqual(2)
+    })
   })
 
   describe('Get All Projects Tests', () => {
@@ -605,9 +621,9 @@ describe('Project Controller Tests', () => {
       expect(response.json().items.length).toEqual(1)
 
       const project = response.json().items[0]
-      expect(project.totalEnvironmentsOfProject).toEqual(2)
-      expect(project.totalVariablesOfProject).toEqual(2)
-      expect(project.totalSecretsOfProject).toEqual(2)
+      expect(project.environmentCount).toEqual(2)
+      expect(project.variableCount).toEqual(2)
+      expect(project.secretCount).toEqual(2)
       // Verify project details
       expect(project.name).toEqual('Project4')
       expect(project.description).toEqual(

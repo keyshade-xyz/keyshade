@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   CreateProjectRequest,
-  CreateProjectResponse,
   GetAllProjectsResponse,
+  Project,
   Workspace
 } from '@keyshade/schema'
 import { ProjectController } from '@keyshade/api-client'
@@ -18,7 +18,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle
-  // SheetTrigger
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -32,7 +31,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-// import type { NewProject, ProjectWithoutKeys } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -40,16 +38,16 @@ import {
   DialogHeader,
   DialogTrigger
 } from '@/components/ui/dialog'
-// import { Projects } from '@/lib/api-functions/projects'
-// import { ProjectWithoutKeys } from '@/types'
 
 export default function Index(): JSX.Element {
-  
-  type projectItem = GetAllProjectsResponse["items"][number]
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
   const [isProjectEmpty, setIsProjectEmpty] = useState<boolean>(true)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-  const [projects, setProjects] = useState< projectItem[] | []>([])
+
+  // Projects to be displayed in the dashboard
+  const [projects, setProjects] = useState<Project[]>([])
+
+  // Contains the data for the new project
   const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
     name: '',
     workspaceSlug: '',
@@ -58,65 +56,80 @@ export default function Index(): JSX.Element {
     environments: [
       {
         name: '',
-        projectId: '',
         description: ''
       }
     ],
     accessLevel: 'GLOBAL'
   })
 
-  // const router = useRouter()
+  // Fetches the currently selected workspace from context
+  const currentWorkspace: Workspace | null = useMemo(
+    () =>
+      typeof localStorage !== 'undefined'
+        ? (JSON.parse(
+            localStorage.getItem('currentWorkspace') ?? '{}'
+          ) as Workspace)
+        : null,
+    []
+  )
 
-  const createNewProject = async ()  => {
+  // If a workspace is selected, we want to fetch all the projects
+  // under that workspace and display it in the dashboard.
+  useEffect(() => {
     const projectController = new ProjectController(
       process.env.NEXT_PUBLIC_BACKEND_URL
     )
 
-    const request: CreateProjectRequest = {
-      name: newProjectData.name,
-      workspaceSlug: currentWorkspace.slug,
-      description: newProjectData.description ?? undefined,
-      environments: newProjectData.environments,
-      accessLevel: newProjectData.accessLevel
+    async function getAllProjects() {
+      if (currentWorkspace) {
+        const { success, error, data } = await projectController.getAllProjects(
+          { workspaceSlug: currentWorkspace.slug },
+          {}
+        )
+
+        if (success && data) {
+          setProjects(data.items)
+        } else {
+          // eslint-disable-next-line no-console -- we need to log the error
+          console.error(error)
+        }
+      }
     }
 
-    const response = await projectController.createProject(request, {})
-    const data = response.data as CreateProjectResponse;
+    getAllProjects()
+  }, [currentWorkspace])
 
-    setIsDialogOpen(false);
+  // Check if the projects array is empty
+  useEffect(() => setIsProjectEmpty(projects.length === 0), [projects])
 
-  }
+  // Function to create a new project
+  const createNewProject = useCallback(async () => {
+    if (currentWorkspace) {
+      const projectController = new ProjectController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
 
-  const currentWorkspace: Workspace =
-    typeof localStorage !== 'undefined'
-      ? (JSON.parse(
-          localStorage.getItem('currentWorkspace') ?? '{}'
-        ) as Workspace)
-      : (JSON.parse(`{}`) as Workspace)
-  
-  useEffect( () => {
+      newProjectData.workspaceSlug = currentWorkspace.slug
 
-    const projectController = new ProjectController(
-          process.env.NEXT_PUBLIC_BACKEND_URL
-    )
+      const { data, error, success } = await projectController.createProject(
+        newProjectData,
+        {}
+      )
 
-    const getAllProjectsInCurrentWorkspace = async () => {
-      const { success, error, data } = await projectController.getAllProjects({workspaceSlug: currentWorkspace.slug}, {})
-
-      if( success && data ){
-        setIsProjectEmpty(false);
-        //@ts-ignore
-        setProjects(data.data.items)
-      }
-      else{
+      if (success && data) {
+        setProjects([...projects, data])
+      } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
+
+      setIsDialogOpen(false)
+    } else {
+      throw new Error('No workspace selected')
     }
+  }, [currentWorkspace, newProjectData, projects])
 
-    getAllProjectsInCurrentWorkspace();
-
-  }, [currentWorkspace.id])
+  const toggleDialog = useCallback(() => setIsDialogOpen((prev) => !prev), [])
 
   return (
     <div className="flex flex-col gap-4">
@@ -125,9 +138,9 @@ export default function Index(): JSX.Element {
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
         )}
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
           <DialogTrigger>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={toggleDialog}>
               {' '}
               <AddSVG /> Create a new Project
             </Button>
@@ -299,18 +312,13 @@ export default function Index(): JSX.Element {
       </div>
 
       {!isProjectEmpty ? (
-        <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project: GetAllProjectsResponse['items'][number]) => {
             return (
               <ProjectCard
-                config={10}
-                description={project.description ?? ''}
-                environment={2}
-                id={project.id}
                 key={project.id}
-                secret={5}
+                project={project}
                 setIsSheetOpen={setIsSheetOpen}
-                title={project.name}
               />
             )
           })}

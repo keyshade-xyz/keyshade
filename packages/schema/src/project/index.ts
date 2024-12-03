@@ -20,7 +20,10 @@ export const BaseProjectSchema = z.object({
   isForked: z.boolean(),
   lastUpdatedById: z.string(),
   workspaceId: WorkspaceSchema.shape.id,
-  forkedFromId: z.string().nullable()
+  forkedFromId: z.string().nullable(),
+  environmentCount: z.number(),
+  variableCount: z.number(),
+  secretCount: z.number()
 })
 
 export const ProjectSchema = BaseProjectSchema.refine((obj) =>
@@ -32,7 +35,9 @@ export const CreateProjectRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug,
   description: z.string().optional(),
   storePrivateKey: z.boolean().optional(),
-  environments: CreateEnvironmentRequestSchema.array().optional(),
+  environments: CreateEnvironmentRequestSchema.omit({ projectSlug: true })
+    .array()
+    .optional(),
   accessLevel: projectAccessLevelEnum
 })
 

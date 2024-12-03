@@ -26,7 +26,7 @@ import {
   setCurrentWorkspace,
   setWorkspace
 } from '@/lib/workspace-storage'
-import type { Workspace } from '@keyshade/schema';
+import type { Workspace } from '@keyshade/schema'
 import { Input } from './input'
 import { Label } from './label'
 import {
@@ -41,37 +41,36 @@ import { Button } from './button'
 import { WorkspaceSchema } from '@keyshade/schema/schemas'
 
 interface WorkspaceResponse {
-  items: Workspace[];
-  "metadata": {
-    page: number;
-    perPage: number,
-    pageCount: number,
-    totalCount: number,
+  items: Workspace[]
+  metadata: {
+    page: number
+    perPage: number
+    pageCount: number
+    totalCount: number
     links: {
-        self: string,
-        first: string,
-        previous: string | null,
-        next: string | null,
-        last: string
+      self: string
+      first: string
+      previous: string | null
+      next: string | null
+      last: string
     }
-}
+  }
 }
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
     const workspaceData: WorkspaceResponse =
       await apiClient.get<WorkspaceResponse>('/workspace')
-    
+
     // TODO: We are getting error here from the success flag, need to see this again
     // const { success, data } = WorkspaceSchema.array().safeParse(workspaceData.items)
     // if (!success) {
     //   throw new Error('Invalid data')
     // }
-    
-    return workspaceData.items;
+
+    return workspaceData.items
     // return data
     // return workspaceData;
-
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
     console.error(error)
@@ -105,18 +104,16 @@ export function Combobox(): React.JSX.Element {
   }
 
   useEffect(() => {
-
     getAllWorkspace()
       .then((data) => {
         if (data) {
           setAllWorkspace(data)
           setWorkspace(data)
-
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
-        console.error("error:", error)
+        console.error('error:', error)
       })
   }, [])
 
