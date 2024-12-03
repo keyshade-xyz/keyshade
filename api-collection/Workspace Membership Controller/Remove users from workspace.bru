@@ -10,6 +10,20 @@ delete {
   auth: none
 }
 
+params:query {
+  userEmails: user1@gmail.com,user2@gmail.com
+}
+
 params:path {
   workspace_slug: workspace-1-cahli
+}
+
+docs {
+  ## Description
+  
+  Remove one or more users from the workspace.
+  
+  ### Request Query Params
+  
+  The endpoint accepts a string of comma separated emails
 }

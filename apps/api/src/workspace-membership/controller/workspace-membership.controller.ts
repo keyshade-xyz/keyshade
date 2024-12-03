@@ -53,12 +53,12 @@ export class WorkspaceMembershipController {
   async removeUsers(
     @CurrentUser() user: User,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
-    @Body() userEmails: User['email'][]
+    @Query('userEmails') userEmails: string = ''
   ) {
     return this.workspaceMembershipService.removeUsersFromWorkspace(
       user,
       workspaceSlug,
-      userEmails
+      userEmails.split(/\s*,\s*/)
     )
   }
 

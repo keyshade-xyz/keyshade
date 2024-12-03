@@ -3,7 +3,7 @@ import WorkspaceRoleController from '@api-client/controllers/workspace-role'
 import {
   CreateWorkspaceRoleRequest,
   GetWorkspaceRolesOfWorkspaceRequest
-} from '@api-client/types/workspace-role.types'
+} from '@keyshade/schema'
 
 describe('Workspace Role Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL

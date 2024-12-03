@@ -1,22 +1,23 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
+import { authorityEnum, projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
+import { EnvironmentSchema } from '@/environment'
 
 export const WorkspaceSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
-  icon: z.string(),
+  icon: z.string().nullable(),
   isFreeTier: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
   ownerId: z.string(),
   isDefault: z.boolean(),
-  lastUpdatedBy: z.string()
+  lastUpdatedById: z.string().nullable()
 })
 
 export const CreateWorkspaceRequestSchema = z.object({
-  name: z.string(),
+  name: WorkspaceSchema.shape.name,
   icon: z.string().optional(),
   isDefault: z.boolean().optional()
 })
@@ -25,27 +26,29 @@ export const CreateWorkspaceResponseSchema = WorkspaceSchema
 
 export const UpdateWorkspaceRequestSchema =
   CreateWorkspaceRequestSchema.partial().extend({
-    workspaceSlug: z.string()
+    workspaceSlug: WorkspaceSchema.shape.slug
   })
 
 export const UpdateWorkspaceResponseSchema = WorkspaceSchema
 
 export const DeleteWorkspaceRequestSchema = z.object({
-  workspaceSlug: z.string()
+  workspaceSlug: WorkspaceSchema.shape.slug
 })
 
 export const DeleteWorkspaceResponseSchema = z.void()
 
 export const GetWorkspaceRequestSchema = z.object({
-  workspaceSlug: z.string()
+  workspaceSlug: WorkspaceSchema.shape.slug
 })
 
-export const InviteMemberSchema = z.object({
+export const GetWorkspaceResponseSchema = WorkspaceSchema
+
+export const InviteMemberRequestSchema = z.object({
   email: z.string().email(),
   roleSlugs: z.array(z.string()).optional()
 })
 
-export const GetWorkspaceResponseSchema = WorkspaceSchema
+export const InviteMemberResponseSchema = z.void()
 
 export const GetAllWorkspacesOfUserRequestSchema = PageRequestSchema
 
@@ -53,7 +56,7 @@ export const GetAllWorkspacesOfUserResponseSchema =
   PageResponseSchema(WorkspaceSchema)
 
 export const ExportDataRequestSchema = z.object({
-  workspaceSlug: z.string()
+  workspaceSlug: WorkspaceSchema.shape.slug
 })
 
 export const ExportDataResponseSchema = z.object({
@@ -65,7 +68,7 @@ export const ExportDataResponseSchema = z.object({
       description: z.string(),
       colorCode: z.string(),
       hasAdminAuthority: z.boolean(),
-      authorities: z.array(z.string())
+      authorities: z.array(authorityEnum)
     })
   ),
   projects: z.array(
@@ -78,8 +81,8 @@ export const ExportDataResponseSchema = z.object({
       accessLevel: projectAccessLevelEnum,
       environments: z.array(
         z.object({
-          name: z.string(),
-          description: z.string()
+          name: EnvironmentSchema.shape.name,
+          description: EnvironmentSchema.shape.description
         })
       ),
       secrets: z.array(
@@ -112,14 +115,13 @@ export const ExportDataResponseSchema = z.object({
 })
 
 export const GlobalSearchRequestSchema = z.object({
-  workspaceSlug: z.string(),
+  workspaceSlug: WorkspaceSchema.shape.slug,
   search: z.string()
 })
 
 export const GlobalSearchResponseSchema = z.object({
   projects: z.array(
     z.object({
-      id: z.string(),
       slug: z.string(),
       name: z.string(),
       description: z.string()
@@ -127,15 +129,13 @@ export const GlobalSearchResponseSchema = z.object({
   ),
   environments: z.array(
     z.object({
-      id: z.string(),
-      slug: z.string(),
-      name: z.string(),
-      description: z.string()
+      slug: EnvironmentSchema.shape.slug,
+      name: EnvironmentSchema.shape.name,
+      description: EnvironmentSchema.shape.description
     })
   ),
   secrets: z.array(
     z.object({
-      id: z.string(),
       slug: z.string(),
       name: z.string(),
       note: z.string()
@@ -143,7 +143,6 @@ export const GlobalSearchResponseSchema = z.object({
   ),
   variables: z.array(
     z.object({
-      id: z.string(),
       slug: z.string(),
       name: z.string(),
       note: z.string()

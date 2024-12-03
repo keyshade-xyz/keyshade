@@ -15,7 +15,7 @@ import {
   GetWorkspaceRolesOfWorkspaceRequest,
   GetWorkspaceRolesOfWorkspaceResponse,
   CheckWorkspaceRoleExistsRequest
-} from '@api-client/types/workspace-role.types'
+} from '@keyshade/schema'
 
 export default class WorkspaceRoleController {
   private apiClient: APIClient

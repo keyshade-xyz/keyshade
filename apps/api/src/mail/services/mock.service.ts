@@ -51,4 +51,14 @@ export class MockMailService implements IMailService {
       `User ${email} has been invited to the project ${projectName} by ${invitedBy} on ${invitedOn} as a ${invitationRole}. Project details can be accessed at ${projectUrl}.`
     )
   }
+
+  async removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: Date
+  ): Promise<void> {
+    this.log.log(
+      `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
+    )
+  }
 }

@@ -1,15 +1,16 @@
 import {
-  InviteMemberSchema,
   CreateWorkspaceRequestSchema,
   UpdateWorkspaceRequestSchema,
   DeleteWorkspaceRequestSchema,
-  GetWorkspaceRequestSchema,
   ExportDataRequestSchema,
   GlobalSearchRequestSchema,
   CreateWorkspaceResponseSchema,
   UpdateWorkspaceResponseSchema,
   DeleteWorkspaceResponseSchema,
+  GetWorkspaceRequestSchema,
   GetWorkspaceResponseSchema,
+  InviteMemberRequestSchema,
+  InviteMemberResponseSchema,
   ExportDataResponseSchema,
   GetAllWorkspacesOfUserResponseSchema,
   GlobalSearchResponseSchema,
@@ -17,8 +18,8 @@ import {
 } from '@/workspace'
 
 describe('Workspace Schema Tests', () => {
-  it('should validate if proper input is specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should validate if proper input is specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'test@example.com',
       roleSlugs: ['role1', 'role2']
     })
@@ -26,16 +27,16 @@ describe('Workspace Schema Tests', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate if only required fields are specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should validate if only required fields are specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'test@example.com'
     })
 
     expect(result.success).toBe(true)
   })
 
-  it('should not validate if required fields are missing for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if required fields are missing for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       roleSlugs: ['role1']
     })
 
@@ -43,8 +44,8 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
-  it('should not validate if invalid email string is specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if invalid email string is specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 'invalid-email'
     })
 
@@ -52,8 +53,8 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(1)
   })
 
-  it('should not validate if invalid types are specified for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if invalid types are specified for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       email: 123,
       roleSlugs: 'invalid_role'
     })
@@ -62,9 +63,24 @@ describe('Workspace Schema Tests', () => {
     expect(result.error?.issues).toHaveLength(2)
   })
 
-  it('should not validate if roleIds are specified instead of roleSlugs for InviteMemberSchema', () => {
-    const result = InviteMemberSchema.safeParse({
+  it('should not validate if roleIds are specified instead of roleSlugs for InviteMemberRequestSchema', () => {
+    const result = InviteMemberRequestSchema.safeParse({
       roleIds: ['role1', 'role2'] //should be roleSlugs
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toHaveLength(1)
+  })
+
+  it('should validate an empty response for InviteMemberResponseSchema', () => {
+    const result = InviteMemberResponseSchema.safeParse(undefined)
+
+    expect(result.success).toBe(true)
+  })
+
+  it('should not validate if unexpected fields are provided for InviteMemberResponseSchema', () => {
+    const result = InviteMemberResponseSchema.safeParse({
+      unexpectedField: 'value'
     })
 
     expect(result.success).toBe(false)
@@ -126,7 +142,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -143,7 +159,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(false)
@@ -191,7 +207,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-02T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -208,7 +224,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-02T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(false)
@@ -258,7 +274,7 @@ describe('Workspace Schema Tests', () => {
       updatedAt: '2024-10-01T00:00:00Z',
       ownerId: 'owner-id',
       isDefault: false,
-      lastUpdatedBy: 'user-id'
+      lastUpdatedById: 'user-id'
     })
 
     expect(result.success).toBe(true)
@@ -286,7 +302,7 @@ describe('Workspace Schema Tests', () => {
           updatedAt: '2024-10-01T00:00:00Z',
           ownerId: 'owner-id',
           isDefault: false,
-          lastUpdatedBy: 'user-id'
+          lastUpdatedById: 'user-id'
         }
       ],
       metadata: {
@@ -337,7 +353,7 @@ describe('Workspace Schema Tests', () => {
           description: 'Administrator role',
           colorCode: '#FF0000',
           hasAdminAuthority: true,
-          authorities: ['ALL']
+          authorities: ['CREATE_PROJECT']
         }
       ],
       projects: [
@@ -411,7 +427,6 @@ describe('Workspace Schema Tests', () => {
     const result = GlobalSearchResponseSchema.safeParse({
       projects: [
         {
-          id: 'project-id',
           slug: 'project-slug',
           name: 'Project Name',
           description: 'Project Description'
@@ -419,7 +434,6 @@ describe('Workspace Schema Tests', () => {
       ],
       environments: [
         {
-          id: 'environment-id',
           slug: 'environment-slug',
           name: 'Environment Name',
           description: 'Environment Description'
@@ -427,7 +441,6 @@ describe('Workspace Schema Tests', () => {
       ],
       secrets: [
         {
-          id: 'secret-id',
           slug: 'secret-slug',
           name: 'Secret Name',
           note: 'Secret Note'
@@ -435,7 +448,6 @@ describe('Workspace Schema Tests', () => {
       ],
       variables: [
         {
-          id: 'variable-id',
           slug: 'variable-slug',
           name: 'Variable Name',
           note: 'Variable Note'
@@ -461,6 +473,10 @@ describe('Workspace Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error?.issues[0]?.path).toEqual(['projects', 0, 'id'])
+    expect(result.error?.issues[0]?.path).toEqual([
+      'projects',
+      0,
+      'description'
+    ])
   })
 })

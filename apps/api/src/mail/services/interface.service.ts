@@ -27,4 +27,10 @@ export interface IMailService {
     invitedOn: string,
     invitationRole: string
   ): Promise<void>
+
+  removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: Date
+  ): Promise<void>
 }

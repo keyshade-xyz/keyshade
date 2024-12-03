@@ -6,29 +6,29 @@ export const EnvironmentSchema = z.object({
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
   lastUpdatedById: z.string(),
   projectId: z.string()
 })
 
 export const CreateEnvironmentRequestSchema = z.object({
-  name: z.string(),
+  name: EnvironmentSchema.shape.name,
   description: z.string().optional(),
-  projectId: z.string()
+  projectSlug: z.string()
 })
 
 export const CreateEnvironmentResponseSchema = EnvironmentSchema
 
 export const UpdateEnvironmentRequestSchema =
-  CreateEnvironmentRequestSchema.omit({ projectId: true })
+  CreateEnvironmentRequestSchema.omit({ projectSlug: true })
     .partial()
-    .extend({ slug: z.string() })
+    .extend({ slug: EnvironmentSchema.shape.slug })
 
 export const UpdateEnvironmentResponseSchema = EnvironmentSchema
 
 export const GetEnvironmentRequestSchema = z.object({
-  slug: z.string()
+  slug: EnvironmentSchema.shape.slug
 })
 
 export const GetEnvironmentResponseSchema = EnvironmentSchema
@@ -43,14 +43,14 @@ export const GetAllEnvironmentsOfProjectResponseSchema = PageResponseSchema(
     lastUpdatedBy: z.object({
       id: z.string(),
       name: z.string(),
-      email: z.string(),
+      email: z.string().email(),
       profilePictureUrl: z.string().nullable()
     })
   })
 )
 
 export const DeleteEnvironmentRequestSchema = z.object({
-  slug: z.string()
+  slug: EnvironmentSchema.shape.slug
 })
 
 export const DeleteEnvironmentResponseSchema = z.void()
