@@ -38,4 +38,14 @@ export class MockMailService implements IMailService {
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
     this.log.log(`Email change OTP for email ${email} is ${otp}`)
   }
+
+  async removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: Date
+  ): Promise<void> {
+    this.log.log(
+      `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
+    )
+  }
 }

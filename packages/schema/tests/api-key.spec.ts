@@ -244,7 +244,6 @@ describe('API Key Schema Tests', () => {
         }
       }
     })
-    console.log(result.error?.issues)
     expect(result.success).toBe(true)
   })
 
