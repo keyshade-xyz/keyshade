@@ -78,11 +78,12 @@ export default class ListProfile extends BaseCommand {
         profileList.push([
           `${defaultProfile === profile ? `${profile} (default)` : profile}`,
           `${profiles[profile].apiKey}`,
-          `${profiles[profile].baseUrl}`
+          `${profiles[profile].baseUrl}`,
+          `${profiles[profile].metrics_enabled ? 'Yes' : 'No'}`
         ])
       })
       table.push(
-        ['Profile', 'API Key', 'Base URL'],
+        ['Profile', 'API Key', 'Base URL', 'Metrics Enabled'],
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         ...profileList
       )

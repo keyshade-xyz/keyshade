@@ -1,0 +1,25 @@
+meta {
+  name: Send OTP
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/auth/send-otp/:email
+  body: none
+  auth: none
+}
+
+params:query {
+  ~: 
+}
+
+params:path {
+  email: rajdip@keyshade.xyz
+}
+
+docs {
+  ## Description
+  
+  This endpoint sends OTPs to an email address. The OTP can then be used to generate valid tokens
+}

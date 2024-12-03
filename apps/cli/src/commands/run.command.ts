@@ -199,7 +199,7 @@ export default class RunCommand extends BaseCommand {
     )
 
     if (!secretsResponse.success) {
-      throw new Error(secretsResponse.error.message as string)
+      throw new Error(secretsResponse.error.message)
     }
 
     const variablesResponse =
@@ -214,7 +214,7 @@ export default class RunCommand extends BaseCommand {
       )
 
     if (!variablesResponse.success) {
-      throw new Error(variablesResponse.error.message as string)
+      throw new Error(variablesResponse.error.message)
     }
 
     // Merge secrets and variables

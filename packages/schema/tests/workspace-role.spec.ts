@@ -34,7 +34,7 @@ describe('Workspace Role Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 
   it('should not validate if invalid types are specified for CreateWorkspaceRoleSchema', () => {
@@ -44,7 +44,7 @@ describe('Workspace Role Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate if all optional fields are provided for CreateWorkspaceRoleSchema', () => {

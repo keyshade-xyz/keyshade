@@ -1,0 +1,23 @@
+meta {
+  name: Delete variable
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{BASE_URL}}/api/variable/:variable_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  variable_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  Delete a variable by its ID
+}

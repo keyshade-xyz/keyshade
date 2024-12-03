@@ -1,3 +1,81 @@
+## [2.7.0](https://github.com/keyshade-xyz/keyshade/compare/v2.6.0...v2.7.0) (2024-11-05)
+
+### 🚀 Features
+
+* **cli:** Add functionality to operate on Variables ([#514](https://github.com/keyshade-xyz/keyshade/issues/514)) ([32d93e6](https://github.com/keyshade-xyz/keyshade/commit/32d93e6146a87175674107319d918157dbcec6d3))
+* **platform:** Create ui link for resend otp ([#489](https://github.com/keyshade-xyz/keyshade/issues/489)) ([46eb5c5](https://github.com/keyshade-xyz/keyshade/commit/46eb5c5aeee76f60015e65174e9cb9ea97f5e771))
+
+### 🐛 Bug Fixes
+
+* **api,api-client:** Add environmentSlug in multiple places across the [secure] module ([#509](https://github.com/keyshade-xyz/keyshade/issues/509)) ([ee58f07](https://github.com/keyshade-xyz/keyshade/commit/ee58f071e30c24f12cd657c11e24e01f8a648a93))
+* **cli:** Removed unnecessary console log in [secure]s ([#515](https://github.com/keyshade-xyz/keyshade/issues/515)) ([9403cc4](https://github.com/keyshade-xyz/keyshade/commit/9403cc4a0147528815244fa425534c70156d5dad))
+
+### 🔧 Miscellaneous Chores
+
+* Fixed lint issues ([835397a](https://github.com/keyshade-xyz/keyshade/commit/835397ad4feb85c112f0e0702cbaba3468d8ccca))
+* Minor housekeeping ([922bf31](https://github.com/keyshade-xyz/keyshade/commit/922bf31839d7ace51958ca991754d38dca9f35e2))
+* Update eslint ([c583718](https://github.com/keyshade-xyz/keyshade/commit/c58371805cddd16503136ee9403da4272dff991c))
+* Update eslint ([7c0c596](https://github.com/keyshade-xyz/keyshade/commit/7c0c5966432d06cff0bf74125f63a5b2021d4139))
+* Update pnpx commands to pnpm dlx ([#511](https://github.com/keyshade-xyz/keyshade/issues/511)) ([534a231](https://github.com/keyshade-xyz/keyshade/commit/534a2315d8fc14caca89e484159523ab37629d63))
+
+## [2.6.0](https://github.com/keyshade-xyz/keyshade/compare/v2.5.0...v2.6.0) (2024-10-24)
+
+### 🚀 Features
+
+* **api:**  Add icon and remove description field from workspace ([#435](https://github.com/keyshade-xyz/keyshade/issues/435)) ([a99c0db](https://github.com/keyshade-xyz/keyshade/commit/a99c0db079f18bd76437c4bf23e08095b0635c41))
+* **api-client:** Added workspace-membership and related tests ([#452](https://github.com/keyshade-xyz/keyshade/issues/452)) ([6a1c091](https://github.com/keyshade-xyz/keyshade/commit/6a1c091ceabe012eabd247eee04fd9a67717ffec))
+* **api-client:** Create controller for User module ([#484](https://github.com/keyshade-xyz/keyshade/issues/484)) ([f9d8e83](https://github.com/keyshade-xyz/keyshade/commit/f9d8e83f14a0f697828a4d11db869f24a9314359))
+* **api:** Add prod env schema in env file ([#436](https://github.com/keyshade-xyz/keyshade/issues/436)) ([21c3004](https://github.com/keyshade-xyz/keyshade/commit/21c30045ce4c013c8ef15e828c3561ad0abfa897))
+* **api:** Add resend otp implementation ([#445](https://github.com/keyshade-xyz/keyshade/issues/445)) ([4dc6aa1](https://github.com/keyshade-xyz/keyshade/commit/4dc6aa169c51869bdda4cd0706b513f9af9716ed))
+* **api:** Fetch total count of environments, [secure]s and variables in project ([#434](https://github.com/keyshade-xyz/keyshade/issues/434)) ([0c9e50a](https://github.com/keyshade-xyz/keyshade/commit/0c9e50aaca91f236aab35570d6d3f4247409593a))
+* **api:** Replace `projectId` with `name` and `slug` in workspace-role response.  ([#432](https://github.com/keyshade-xyz/keyshade/issues/432)) ([af06071](https://github.com/keyshade-xyz/keyshade/commit/af0607143aa59397c0d794bce722a8a65b1f359a))
+* **cli:** Add functionality to operate on Secrets ([#504](https://github.com/keyshade-xyz/keyshade/issues/504)) ([1b4bf2f](https://github.com/keyshade-xyz/keyshade/commit/1b4bf2f6b89fa981e2a008f9b7e508b578c55a95))
+* **cli:** Add project command ([#451](https://github.com/keyshade-xyz/keyshade/issues/451)) ([70448e1](https://github.com/keyshade-xyz/keyshade/commit/70448e1fe9899994fca9b202e6a4ed355af45235))
+* **cli:** Add workspace operations ([#441](https://github.com/keyshade-xyz/keyshade/issues/441)) ([ed38d22](https://github.com/keyshade-xyz/keyshade/commit/ed38d2227020a08972658771d211fe2316f41367))
+* **cli:** implement commands to get, list, update, and delete, workspace roles ([#469](https://github.com/keyshade-xyz/keyshade/issues/469)) ([957ea8d](https://github.com/keyshade-xyz/keyshade/commit/957ea8df4b3e34ece06c3a9c3a15e7aed3b58bfd))
+* **cli:** Implemented pagination support ([#453](https://github.com/keyshade-xyz/keyshade/issues/453)) ([feb1806](https://github.com/keyshade-xyz/keyshade/commit/feb1806e30ee609e06bb0254040414b775f55606))
+* **cli:** Secret scan ([#438](https://github.com/keyshade-xyz/keyshade/issues/438)) ([85cb8ab](https://github.com/keyshade-xyz/keyshade/commit/85cb8ab3e7e8f302c793408bddd24abf6e3b4b6a))
+* **cli:** Update environment command outputs ([f4af874](https://github.com/keyshade-xyz/keyshade/commit/f4af874e4811a5c11bd93ad1645564b24513b5ad))
+* **platform:** Clearing email field after waitlisting the user email ([#481](https://github.com/keyshade-xyz/keyshade/issues/481)) ([256d659](https://github.com/keyshade-xyz/keyshade/commit/256d65974babd17d525ce2a41a5e17136e6ac12e))
+* Remove project IDs from workspace role export data and update tests ([#448](https://github.com/keyshade-xyz/keyshade/issues/448)) ([8fdb328](https://github.com/keyshade-xyz/keyshade/commit/8fdb3286876eaddd1f1a32cd18762827a736589a))
+* **web:** Configured extra check for waitlisted users already in the list and created toast message for them ([#492](https://github.com/keyshade-xyz/keyshade/issues/492)) ([2ddd0ef](https://github.com/keyshade-xyz/keyshade/commit/2ddd0ef59cd1f178059a815d156c73ff6662bd41))
+* **web:** show the toast only when email add successfully ([#490](https://github.com/keyshade-xyz/keyshade/issues/490)) ([783c411](https://github.com/keyshade-xyz/keyshade/commit/783c4119ebddce6b1e934b1e25ae3e667a0519d6))
+
+### 🐛 Bug Fixes
+
+* **api,api-client:** Add environmentSlug in multiple places across the variable module ([#468](https://github.com/keyshade-xyz/keyshade/issues/468)) ([d970aff](https://github.com/keyshade-xyz/keyshade/commit/d970aff1e08a3e4b2bd9bce671c75bafd536a686))
+* **api:** Replace the id with slug in the global-search service ([#455](https://github.com/keyshade-xyz/keyshade/issues/455)) ([74804b1](https://github.com/keyshade-xyz/keyshade/commit/74804b13f33e95af8b69e38fbf4afc9d1f179ebc))
+* **platform:** Fixed duplicate Google Logo UI fix  ([#450](https://github.com/keyshade-xyz/keyshade/issues/450)) ([fb0d6f7](https://github.com/keyshade-xyz/keyshade/commit/fb0d6f7fff7814fb7df8cfbd967e1bf469cd6ee3))
+* resolve footer website name cut-off or overlap issue ([#444](https://github.com/keyshade-xyz/keyshade/issues/444)) ([fe03ba2](https://github.com/keyshade-xyz/keyshade/commit/fe03ba22aa37741646e48738e4ff3117ee5217db))
+* **web:** Horizontal Scrolling issue on the website ([#440](https://github.com/keyshade-xyz/keyshade/issues/440)) ([655177b](https://github.com/keyshade-xyz/keyshade/commit/655177b47bffbc6892db3c701ddafe676e772f3e))
+
+### 📚 Documentation
+
+* Add documentation for environment in CLI ([#462](https://github.com/keyshade-xyz/keyshade/issues/462)) ([dad7394](https://github.com/keyshade-xyz/keyshade/commit/dad7394a16c8f98845c0423be0ff9f6d5560343f))
+* Add documentation for project in CLI ([#466](https://github.com/keyshade-xyz/keyshade/issues/466)) ([341fb32](https://github.com/keyshade-xyz/keyshade/commit/341fb32ada96513e6746e7d9df41892b8e1c7929))
+* Add documentation for scan in CLI ([#461](https://github.com/keyshade-xyz/keyshade/issues/461)) ([72281e6](https://github.com/keyshade-xyz/keyshade/commit/72281e66569b05011a7b79a94ae502eaac0b3a6d))
+* Add documentation for workspace command ([#464](https://github.com/keyshade-xyz/keyshade/issues/464)) ([4aad8a2](https://github.com/keyshade-xyz/keyshade/commit/4aad8a2d69c14dc933cfb6fe96ba506db54baa92))
+* Add instructions for resetting the local Prisma database ([#495](https://github.com/keyshade-xyz/keyshade/issues/495)) ([#501](https://github.com/keyshade-xyz/keyshade/issues/501)) ([b07ea17](https://github.com/keyshade-xyz/keyshade/commit/b07ea178d0835354b8acdc5365f59b9ae782fcc7))
+* Added docker support documentation ([#465](https://github.com/keyshade-xyz/keyshade/issues/465)) ([bc04be4](https://github.com/keyshade-xyz/keyshade/commit/bc04be4de99c0b4e86196a1e5e0fbc14f8d8b499))
+* Added documentation for running the platform ([#473](https://github.com/keyshade-xyz/keyshade/issues/473)) ([8b8386b](https://github.com/keyshade-xyz/keyshade/commit/8b8386bb43b8d08ff2744ccd115b1bf515041600))
+* Added missing mappings to pages ([5de9fd8](https://github.com/keyshade-xyz/keyshade/commit/5de9fd81e4a6c8a9cfa68a6e5f09ecf9c2430130))
+* Fix Documentation Hyperlink and update expired Discord invite link ([#496](https://github.com/keyshade-xyz/keyshade/issues/496)) ([5a10e39](https://github.com/keyshade-xyz/keyshade/commit/5a10e3940562aa80462f71cabe29fdd4de9e12a8))
+* Updated CLI docs ([#460](https://github.com/keyshade-xyz/keyshade/issues/460)) ([c7e0f13](https://github.com/keyshade-xyz/keyshade/commit/c7e0f13debea9ec89c98be415f5076f156985533))
+
+### 🔧 Miscellaneous Chores
+
+* Add more logging to Sentry init ([#470](https://github.com/keyshade-xyz/keyshade/issues/470)) ([de4925d](https://github.com/keyshade-xyz/keyshade/commit/de4925d9691b7bbc5c2322e01ab6787681215cf0))
+* **api:** Optimise API docker image size ([#360](https://github.com/keyshade-xyz/keyshade/issues/360)) ([ea40dc1](https://github.com/keyshade-xyz/keyshade/commit/ea40dc1f7bb8db14dcb20d82a8e106c6e79cf560))
+* **api:** Updated lockfile ([a968e78](https://github.com/keyshade-xyz/keyshade/commit/a968e78198cfe437af4a9b95ecfb47a7452c1678))
+* **CI:** Add [secure] scan validation ([f441262](https://github.com/keyshade-xyz/keyshade/commit/f441262aaaad2c10c0a7ab83d9dd5cf92df6f155))
+* **cli:** Update controller invocation in environment commands ([#477](https://github.com/keyshade-xyz/keyshade/issues/477)) ([596bd1a](https://github.com/keyshade-xyz/keyshade/commit/596bd1a4ecc1088e3fc40dcf0f59b19defc0287a))
+* Minor changes to variables ([fe01ca6](https://github.com/keyshade-xyz/keyshade/commit/fe01ca6f77d1f58e63b4d71e48e38b5d18d6d283))
+* **[secure]-scan:** Failing lint issues ([#507](https://github.com/keyshade-xyz/keyshade/issues/507)) ([48f45df](https://github.com/keyshade-xyz/keyshade/commit/48f45df29c01a7ea9dab1aa1d33661caa2310bec))
+* **[secure]-scan:** Formatted files ([5884833](https://github.com/keyshade-xyz/keyshade/commit/5884833fd7c36e0021ddc7e50d06fe3374e90c15))
+* Update .env.example ([70ad4f7](https://github.com/keyshade-xyz/keyshade/commit/70ad4f7bd9637666e34878cb505782331d38798e))
+* Updated scripts ([9eb76a7](https://github.com/keyshade-xyz/keyshade/commit/9eb76a7b2de92be5bd702e27daa222a26eef38c4))
+* **web:** email validation ([#487](https://github.com/keyshade-xyz/keyshade/issues/487)) ([e8e737a](https://github.com/keyshade-xyz/keyshade/commit/e8e737ae001a7f6f8d1e8879e04453298cbcfe73))
+
 ## [2.5.0](https://github.com/keyshade-xyz/keyshade/compare/v2.4.0...v2.5.0) (2024-09-16)
 
 ### 🚀 Features

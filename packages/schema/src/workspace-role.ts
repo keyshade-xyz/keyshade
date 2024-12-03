@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { authorityEnum } from './enums'
+import { authorityEnum } from '@/enums'
 
 export const CreateWorkspaceRoleSchema = z.object({
   name: z.string(),

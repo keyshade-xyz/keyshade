@@ -1,0 +1,19 @@
+meta {
+  name: Get all variables of project
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{BASE_URL}}/api/variable/:project_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  project_slug: project-1-uzukc
+}
+
+auth:bearer {
+  token: {{JWT}}
+}

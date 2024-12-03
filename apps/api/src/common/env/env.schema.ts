@@ -91,7 +91,9 @@ const devSchema = z.object({
   MINIO_BUCKET_NAME: z.string().optional(),
   MINIO_USE_SSL: z.string().optional(),
 
-  FEEDBACK_FORWARD_EMAIL: z.string().email()
+  FEEDBACK_FORWARD_EMAIL: z.string().email(),
+  THROTTLE_TTL: z.string().transform((val) => parseInt(val, 10)),
+  THROTTLE_LIMIT: z.string().transform((val) => parseInt(val, 10))
 })
 
 const prodSchema = z.object({

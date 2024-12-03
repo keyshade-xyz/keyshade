@@ -7,12 +7,14 @@ const config: Config = {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/schema',
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
-  }
+  },
+  coverageDirectory: '../../coverage/packages/schema',
+  coverageReporters: ['json'],
+  collectCoverage: true
 }
 
 export default config

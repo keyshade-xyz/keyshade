@@ -16,13 +16,13 @@ describe('API Key Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should not validate if required values are not specified', () => {
     const result = CreateApiKeySchema.safeParse({})
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(1)
+    expect(result.error?.issues).toHaveLength(1)
   })
 })

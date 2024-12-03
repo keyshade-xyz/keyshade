@@ -2,10 +2,10 @@
 import type { TestCase } from '@/types'
 
 export default function bittrex(): RegExp[] {
-	return [
-		// Bittrex key regex
-		/bittrex[a-zA-Z0-9]{32}/i
-	]
+  return [
+    // Bittrex key regex
+    /bittrex[a-zA-Z0-9]{32}/i
+  ]
 }
 
 const testcase: TestCase[] = [

@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.5.0",
+  "version": "2.7.0",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -59,10 +59,6 @@
               {
                 "type": "test",
                 "hidden": true
-              },
-              {
-                "type": "postman",
-                "hidden": true
               }
             ]
           }
@@ -105,13 +101,14 @@
     "lint:platform": "turbo run lint --filter=platform",
     "lint:cli": "turbo run lint --filter=cli",
     "lint:api-client": "turbo run lint --filter=api-client",
+    "lint:secret-scan": "turbo run lint --filter=secret-scan",
     "lint:schema": "turbo run lint --filter=schema",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
     "build:web": "turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=cli",
-    "build:api-client": "turbo run --filter=api-client build",
+    "build:api-client": "pnpm build:schema && turbo run --filter=api-client build",
     "build:schema": "turbo run build --filter=schema",
     "build:secret-scan": "turbo run build --filter=secret-scan",
     "start": "turbo run start",
@@ -166,6 +163,7 @@
   },
   "dependencies": {
     "@keyshade/api-client": "workspace:*",
+    "@keyshade/schema": "workspace:*",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",

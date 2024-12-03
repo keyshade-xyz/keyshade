@@ -38,6 +38,7 @@ import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-memb
         abortEarly: true
       }
     }),
+
     ScheduleModule.forRoot(),
     PassportModule,
     AuthModule,

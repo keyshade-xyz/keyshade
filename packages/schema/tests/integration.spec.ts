@@ -31,7 +31,7 @@ describe('Integration Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should not validate if required values are not specified', () => {
@@ -40,7 +40,7 @@ describe('Integration Schema Tests', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error.issues).toHaveLength(2)
+    expect(result.error?.issues).toHaveLength(2)
   })
 
   it('should validate with optional fields omitted', () => {

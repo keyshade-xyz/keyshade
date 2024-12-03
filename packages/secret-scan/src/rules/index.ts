@@ -16,34 +16,34 @@ import artifactory from './artifactory'
 import aws from './aws'
 import algolia from './algolia'
 import alibaba from './alibaba'
-import adafruit from "./adafruit"
-import adobe from "./adobe"
-import age from "./age"
-import airtable from "./airtable"
-import asana from "./asana"
-import atlassian from "./atlassian"
-import authress from "./authress"
-import beamer from "./beamer"
-import bitbucket from "./bitbucket"
-import bittrex from "./bittrex"
+import adafruit from './adafruit'
+import adobe from './adobe'
+import age from './age'
+import airtable from './airtable'
+import asana from './asana'
+import atlassian from './atlassian'
+import authress from './authress'
+import beamer from './beamer'
+import bitbucket from './bitbucket'
+import bittrex from './bittrex'
 import clojars from './clojars'
-import cloudflare from "./cloudflare"
-import codecov from "./codecov"
-import coinbase from "./coinbase"
-import confluent from "./confluent"
-import contentful from "./contentful"
-import databricks from "./databricks"
-import datadog from "./datadog"
-import definednetworking from "./definednetworking"
-import digitalocean from "./digitalocean"
+import cloudflare from './cloudflare'
+import codecov from './codecov'
+import coinbase from './coinbase'
+import confluent from './confluent'
+import contentful from './contentful'
+import databricks from './databricks'
+import datadog from './datadog'
+import definednetworking from './definednetworking'
+import digitalocean from './digitalocean'
 import doppler from './doppler'
 import dropbox from './dropbox'
 import duffel from './duffel'
 import dynatrace from './dynatrace'
 import easypost from './easypost'
-import facebook from "./facebook";
+import facebook from './facebook'
 import flutterwave from './flutterwave'
-import frameio from "./frameio"
+import frameio from './frameio'
 import gitlab from './gitlab'
 import grafana from './grafana'
 import harness from './harness'
@@ -53,7 +53,7 @@ import hubspot from './hubspot'
 import huggingface from './huggingface'
 import infracost from './infracost'
 import intra42 from './intra42'
-//import kubernetes from './kubernetes'
+// import kubernetes from './kubernetes'
 import linear from './linear'
 import lob from './lob'
 import planetscale from './planetscale'
@@ -124,7 +124,7 @@ export {
   huggingface,
   infracost,
   intra42,
-  //kubernetes,
+  // kubernetes,
   linear,
   lob,
   planetscale,

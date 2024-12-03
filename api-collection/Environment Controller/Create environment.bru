@@ -1,0 +1,37 @@
+meta {
+  name: Create environment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/environment/:project_slug
+  body: json
+  auth: bearer
+}
+
+params:path {
+  project_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "Alpha"
+  }
+}
+
+docs {
+  ## Description
+  
+  Creates an environment under a particular project.
+  
+  ### Request Body
+  
+  - `name`: The name of the environment. Should be unique in the project.
+      
+  - `description`: (Optional) An optional description about the environment.
+}

@@ -3,9 +3,12 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { Toaster, toast } from 'sonner'
+import { z } from 'zod'
 import { ColorBGSVG, HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
 import { InputBorderSpotlight } from '../ui/input-spotlight'
+
+const emailSchema = z.string().email()
 
 function Hero(): React.JSX.Element {
   const [email, setEmail] = useState<string>('')
@@ -13,10 +16,30 @@ function Hero(): React.JSX.Element {
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
 
-    if (email === '') {
+    const result = emailSchema.safeParse(email)
+
+    if (!result.success) {
       toast.custom(() => (
-        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#852b2c] p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
-          <p className="text-sm">Please enter an email address </p>
+        <div className="text-brandBlue border-brandBlue/20 bg-errorRed w-[90vw] rounded-lg border p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+          <p className="text-sm">Please enter a valid email address </p>
+        </div>
+      ))
+      return
+    }
+
+    const dataInStorage: string | null = localStorage.getItem('waitlistData')
+    const emailsInWaitlist: string[] = dataInStorage
+      ? (JSON.parse(dataInStorage) as string[])
+      : []
+
+    // actual logic where we are checking if this email is already in waitlisted users or not
+    if (emailsInWaitlist.includes(email)) {
+      toast.custom(() => (
+        <div className="text-brandBlue border-brandBlue/20 bg-errorRed w-[90vw] rounded-lg border p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+          <p className="text-sm">
+            You have been already added to the waitlist. We will notify you once
+            we launch.
+          </p>
         </div>
       ))
       return
@@ -26,21 +49,24 @@ function Hero(): React.JSX.Element {
       'https://xyz.us18.list-manage.com/subscribe/post?u=2e44b940cafe6e54d8b9e0790&amp;id=bd382dd7c5&amp;f_id=00e5c2e1f0'
 
     async function fetchData(): Promise<void> {
-      toast.custom((_t) => (
-        <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-2 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
-          <h1 className="font-semibold">Welcome to Keyshade 🎉</h1>
-          <p className="text-sm">
-            You have been added to the waitlist. We will notify you once we
-            launch
-          </p>
-        </div>
-      ))
       try {
         await fetch(`${url}&EMAIL=${email}`, {
           mode: 'no-cors'
         })
-        setEmail('');
 
+        toast.custom((_t) => (
+          <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-2 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
+            <h1 className="font-semibold">Welcome to Keyshade 🎉</h1>
+            <p className="text-sm">
+              You have been added to the waitlist. We will notify you once we
+              launch
+            </p>
+          </div>
+        ))
+
+        emailsInWaitlist.push(email)
+        localStorage.setItem('waitlistData', JSON.stringify(emailsInWaitlist))
+        setEmail('')
       } catch (error) {
         // eslint-disable-next-line no-console -- chill
         console.error(error)

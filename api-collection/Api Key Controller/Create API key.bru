@@ -1,0 +1,43 @@
+meta {
+  name: Create API key
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/api/api-key
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "My key",
+      "authorities": [
+          "READ_API_KEY",
+          "READ_WORKSPACE",
+          "READ_PROJECT",
+          "READ_ENVIRONMENT",
+          "READ_VARIABLE",
+          "READ_SECRET"
+      ]
+  }
+}
+
+docs {
+  ## Description
+  
+  Allows users to create an API key that allows them to access keyshade API using any REST client.
+  
+  ### Request Body
+  
+  - `name`: The name of the API key
+      
+  - `expiresAfter`: (Optional) The amount of time after which the API key will expire. Defaults to \`never\`. Accepts: `'24' | '168' | '720' | '8760'`. Durations are in hours.
+      
+  - `authorities`: (Optional) An array of authorities that are allowed for this API key. Defaults to \`\[\]\`
+}

@@ -1,0 +1,37 @@
+meta {
+  name: Update environment
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{BASE_URL}}/api/environment/:environment_slug
+  body: json
+  auth: bearer
+}
+
+params:path {
+  environment_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+body:json {
+  {
+      "name": "Beta"
+  }
+}
+
+docs {
+  ## Description
+  
+  Creates an environment under a particular project.
+  
+  ### Request Body
+  
+  - `name`: (Optional) The name of the environment. Should be unique in the project.
+      
+  - `description`: (Optional) An optional description about the environment.
+}

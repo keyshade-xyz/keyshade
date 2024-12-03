@@ -13,6 +13,5 @@
     "test": "cross-env BACKEND_URL=http://localhost:4200 jest --runInBand",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
-  },
-  "dependencies": {}
+  }
 }

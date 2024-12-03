@@ -1,0 +1,17 @@
+meta {
+  name: Get self
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/api/user
+  body: none
+  auth: none
+}
+
+docs {
+  ## Description
+  
+  Gets the details of the currently logged in user.
+}

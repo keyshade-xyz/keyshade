@@ -55,10 +55,8 @@ export class UpdateEnvironment extends BaseCommand {
       success,
       error,
       data: environment
-    } = await ControllerInstance
-    .getInstance().
-    environmentController.updateEnvironment(
-      {name, description, slug: environmentSlug},
+    } = await ControllerInstance.getInstance().environmentController.updateEnvironment(
+      { name, description, slug: environmentSlug },
       this.headers
     )
 
@@ -68,7 +66,9 @@ export class UpdateEnvironment extends BaseCommand {
         `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      Logger.error(`Error updating Environment: ${error}`)
+      Logger.error(
+        `Error updating Environment: ${error.message} (${error.statusCode})`
+      )
     }
   }
 }
