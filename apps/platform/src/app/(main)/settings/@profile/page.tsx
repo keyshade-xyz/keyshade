@@ -1,13 +1,12 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import type { User } from '@keyshade/schema'
+import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import type { User } from '@/types'
-import { zUser } from '@/types'
 import { apiClient } from '@/lib/api-client'
-import InputLoading from './loading'
 
 type UserData = Omit<
   User,
@@ -15,12 +14,7 @@ type UserData = Omit<
 >
 async function getUserDetails(): Promise<User | undefined> {
   try {
-    const userData = await apiClient.get<User>('/user')
-    const { success, data } = zUser.safeParse(userData)
-    if (!success) {
-      throw new Error('Invalid data')
-    }
-    return data
+    return await apiClient.get<User>('/user')
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
     console.error(error)
