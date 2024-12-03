@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  UserSchema,
   GetSelfResponseSchema,
   UpdateSelfRequestSchema,
   UpdateSelfResponseSchema,
@@ -10,6 +11,8 @@ import {
   ResendEmailChangeOTPRequestSchema,
   ResendEmailChangeOTPResponseSchema
 } from '.'
+
+export type User = z.infer<typeof UserSchema>
 
 export type GetSelfResponse = z.infer<typeof GetSelfResponseSchema>
 
