@@ -1,5 +1,6 @@
 ⁸---
 description: API testing using Bruno
+
 ---
 
 # API Testing
@@ -11,13 +12,13 @@ Although we recommend to use Bruno, you can always import the collections into y
 ## Getting started
 
 - For starters, make sure you have Bruno installed on your system. If not, you can download it from [here](https://www.usebruno.com/downloads)
-![Download Bruno](../../../blob/download_bruno.png)
+  ![Download Bruno](../../../blob/download_bruno.png)
 - Once you have Bruno installed, open it up.
-![Open Bruno](../../../blob/open_bruno.png)
+  ![Open Bruno](../../../blob/open_bruno.png)
 - Click on `Import Collection`
-![Import Collection](../../../blob/import_collection.png)
+  ![Import Collection](../../../blob/import_collection.png)
 - Point to the [`api-collection`](../../../api-collection/) folder
-![API Collection](../../../blob/api_collection.png)
+  ![API Collection](../../../blob/api_collection.png)
 - For every collection in the API, the requests hold one or more examples that you can use to test the API. You can also find the schema of the request itself.
 
 ## Making changes to the API
