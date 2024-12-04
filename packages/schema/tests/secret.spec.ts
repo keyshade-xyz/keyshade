@@ -292,14 +292,14 @@ describe('Secret Schema Tests', () => {
   describe('RollBackSecretResponseSchema Tests', () => {
     it('should validate a valid RollBackSecretResponseSchema', () => {
       const result = RollBackSecretResponseSchema.safeParse({
-        count: '1'
+        count: 1
       })
       expect(result.success).toBe(true)
     })
 
     it('should not validate an invalid RollBackSecretResponseSchema', () => {
       const result = RollBackSecretResponseSchema.safeParse({
-        count: 1 // Should be a string
+        count: '1' // Should be a number
       })
       expect(result.success).toBe(false)
       expect(result.error?.issues).toHaveLength(1)

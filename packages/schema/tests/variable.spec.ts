@@ -318,14 +318,14 @@ describe('Variable Schema Tests', () => {
   describe('RollBackVariableResponseSchema Tests', () => {
     it('should validate a valid RollBackVariableResponseSchema', () => {
       const result = RollBackVariableResponseSchema.safeParse({
-        count: '1'
+        count: 1
       })
       expect(result.success).toBe(true)
     })
 
     it('should not validate an invalid RollBackVariableResponseSchema', () => {
       const result = RollBackVariableResponseSchema.safeParse({
-        count: 1 // Should be a string
+        count: '1' // Should be a number
       })
       expect(result.success).toBe(false)
       expect(result.error?.issues).toHaveLength(1)
