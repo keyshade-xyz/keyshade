@@ -84,7 +84,7 @@ export const RollBackVariableRequestSchema = z.object({
 })
 
 export const RollBackVariableResponseSchema = z.object({
-  count: z.string()
+  count: z.number()
 })
 
 export const DeleteVariableRequestSchema = z.object({
