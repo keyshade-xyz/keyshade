@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { AddSVG } from '@public/svg/shared'
+import { FolderSVG } from '@public/svg/dashboard'
 import ProjectCard from '@/components/dashboard/projectCard'
 import {
   Sheet,
@@ -30,6 +31,7 @@ import { Projects } from '@/lib/api-functions/projects'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
+  const [isProjectEmpty, setIsProjectEmpty] = useState(true)
   const [projects, setProjects] = useState<ProjectWithoutKeys[] | []>([])
   const [newProjectData, setNewProjectData] = useState<NewProject>({
     name: '',
@@ -68,6 +70,7 @@ export default function Index(): JSX.Element {
       .then((data: ProjectWithoutKeys[] | [] | undefined) => {
         if (data) {
           setProjects(data)
+          setIsProjectEmpty(data.length === 0)
         }
       })
       .catch((error) => {
@@ -79,15 +82,20 @@ export default function Index(): JSX.Element {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+        {!isProjectEmpty && (
+          <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
+        )}
 
         <Dialog>
-          <DialogTrigger>
-            <Button>
-              {' '}
-              <AddSVG /> Create a new Project
-            </Button>
-          </DialogTrigger>
+          {!isProjectEmpty && (
+            <DialogTrigger>
+              <Button>
+                {' '}
+                <AddSVG /> Create a new Project
+              </Button>
+            </DialogTrigger>
+          )}
+
           <DialogContent>
             <DialogHeader>Create a new project</DialogHeader>
             <DialogDescription>
@@ -155,7 +163,7 @@ export default function Index(): JSX.Element {
         </Dialog>
       </div>
 
-      {projects.length !== 0 ? (
+      {!isProjectEmpty ? (
         <div className="grid h-[70vh] gap-6 overflow-y-auto scroll-smooth p-2 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map((project: ProjectWithoutKeys) => {
             return (
@@ -173,8 +181,13 @@ export default function Index(): JSX.Element {
           })}
         </div>
       ) : (
-        <div className="mt-[10vh] flex justify-center">
-          <div>No projects yet? Get started by creating a new project.</div>
+        <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
+          <FolderSVG width="150" />
+          <div className="text-4xl">Start your First Project</div>
+          <div>
+            Create a file and start setting up your environment and secret keys
+          </div>
+          <Button variant="secondary">Create project</Button>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 import { APIClient } from '@api-client/core/client'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import {
   CreateWorkspaceRoleRequest,
   CreateWorkspaceRoleResponse,
@@ -15,7 +15,7 @@ import {
   GetWorkspaceRolesOfWorkspaceRequest,
   GetWorkspaceRolesOfWorkspaceResponse,
   CheckWorkspaceRoleExistsRequest
-} from '@api-client/types/workspace-role.types'
+} from '@keyshade/schema'
 
 export default class WorkspaceRoleController {
   private apiClient: APIClient

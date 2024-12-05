@@ -1,0 +1,25 @@
+meta {
+  name: Delete workspace
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{BASE_URL}}/api/workspace/:workspace_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  workspace_slug: workspace-1-nr436
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Deletes a workspace. Any associated entities to the workspace also gets deleted.
+}

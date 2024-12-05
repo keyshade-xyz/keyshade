@@ -11,6 +11,20 @@ export const expiresAfterEnum = z.enum(['never', '24', '168', '720', '8760'])
 
 export const rotateAfterEnum = z.enum(['never', '24', '168', '720', '8760'])
 
+export const eventSourceEnum = z.enum([
+  'SECRET',
+  'VARIABLE',
+  'ENVIRONMENT',
+  'PROJECT',
+  'WORKSPACE',
+  'WORKSPACE_ROLE',
+  'INTEGRATION'
+])
+
+export const eventTriggererEnum = z.enum(['USER', 'SYSTEM'])
+
+export const eventSeverityEnum = z.enum(['INFO', 'WARN', 'ERROR'])
+
 export const eventTypeEnum = z.enum([
   'INVITED_TO_WORKSPACE',
   'REMOVED_FROM_WORKSPACE',

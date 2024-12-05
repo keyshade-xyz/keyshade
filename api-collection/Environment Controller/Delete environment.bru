@@ -1,0 +1,19 @@
+meta {
+  name: Delete environment
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{BASE_URL}}/api/environment/:environment_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  environment_slug: 
+}
+
+auth:bearer {
+  token: {{JWT}}
+}

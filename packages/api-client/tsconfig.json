@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig/base.json",
+  "extends": "tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": true,
@@ -7,17 +7,13 @@
       "@api-client/*": ["./src/*"]
     },
     "outDir": "dist",
-    "plugins": [{ "transform": "typescript-transform-paths" }]
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "moduleResolution": "Bundler"
   },
   "tsc-alias": {
     "resolveFullPaths": true,
     "verbose": false
   },
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts",
-    "jest.config.ts",
-    ".eslintrc.cjs"
-  ],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,0 +1,16 @@
+meta {
+  name: Transfer ownership of workspace
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{BASE_URL}}/api/workspace-membership/:workspace_slug/transfer-ownership/:user_email
+  body: none
+  auth: none
+}
+
+params:path {
+  workspace_slug: workspace-1-cahli
+  user_email: agentR47@gmail.com
+}

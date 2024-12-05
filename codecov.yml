@@ -52,3 +52,12 @@ flag_management:
           target: 80%
         - type: patch
           target: 98%
+    - name: secret-scan
+      paths:
+        - packages/secret-scan/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 98%

@@ -1,0 +1,17 @@
+meta {
+  name: Delete self
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{BASE_URL}}/api/user
+  body: none
+  auth: none
+}
+
+docs {
+  ## Description
+  
+  Deletes the account of the currently authenticated user.
+}

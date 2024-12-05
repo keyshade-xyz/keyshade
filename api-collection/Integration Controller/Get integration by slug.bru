@@ -1,0 +1,25 @@
+meta {
+  name: Get integration by slug
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{BASE_URL}}/api/integration/:integrationId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  integrationId: clvvb5k5g000aqq6x0g0e55kb
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Fetches an integration by its ID.
+}

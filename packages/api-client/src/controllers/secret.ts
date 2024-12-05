@@ -1,5 +1,5 @@
 import { APIClient } from '@api-client/core/client'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateSecretRequest,
@@ -16,7 +16,7 @@ import {
   RollBackSecretResponse,
   UpdateSecretRequest,
   UpdateSecretResponse
-} from '@api-client/types/secret.types'
+} from '@keyshade/schema'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
 export default class SecretController {
@@ -86,7 +86,7 @@ export default class SecretController {
       request
     )
     const response = await this.apiClient.get(
-      `${url}&decryptValue=true`,
+      `${url}&decryptValue=${request.decryptValue}`,
       headers
     )
 

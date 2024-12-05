@@ -7,7 +7,7 @@ describe('Workspace Membership Controller Tests', () => {
   const workspaceMembershipController = new WorkspaceMembershipController(
     backendUrl
   )
-  const userEmail = 'testuser@example.com'
+  const userEmail = 'johndoe@example.com'
   let workspaceSlug: string | null
 
   beforeAll(async () => {
@@ -58,7 +58,7 @@ describe('Workspace Membership Controller Tests', () => {
   it('should remove users', async () => {
     const request = {
       workspaceSlug: workspaceSlug!,
-      userEmails: ['invitee@example.com']
+      userEmails: 'invitee@example.com'
     }
     const response = await workspaceMembershipController.removeUsers(request, {
       'x-e2e-user-email': userEmail
@@ -140,7 +140,7 @@ describe('Workspace Membership Controller Tests', () => {
       'x-e2e-user-email': userEmail
     })
 
-    expect(response).toBe(true)
+    expect(response.data).toBe(true)
   })
 
   it('should get a list of members', async () => {

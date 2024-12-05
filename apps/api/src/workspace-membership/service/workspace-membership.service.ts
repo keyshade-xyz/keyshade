@@ -290,6 +290,18 @@ export class WorkspaceMembershipService {
           }
         }
       })
+
+      // Send an email to the removed users
+      const removedOn = new Date()
+      const emailPromises = userEmails.map((userEmail) =>
+        this.mailService.removedFromWorkspace(
+          userEmail,
+          workspace.name,
+          removedOn
+        )
+      )
+
+      await Promise.all(emailPromises)
     }
 
     await createEvent(

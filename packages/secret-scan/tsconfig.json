@@ -21,8 +21,17 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "composite": false
   },
-  "include": ["src/**/*.ts", "src/**/*.test.ts", "tsup.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.test.ts",
+    "tsup.config.ts",
+    "jest.config.js"
+  ],
   "exclude": ["node_modules", "dist"]
 }
