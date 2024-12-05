@@ -899,11 +899,12 @@ export class WorkspaceMembershipService {
       if (memberUser) {
         await this.prisma.$transaction([createMembership])
 
-        this.mailService.workspaceInvitationMailForUsers(
+        this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.slug}/join`,
           currentUser.name,
+          new Date().toISOString(),
           true
         )
 
@@ -925,7 +926,7 @@ export class WorkspaceMembershipService {
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
-        this.mailService.workspaceInvitationMailForUsers(
+        this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${
@@ -934,6 +935,7 @@ export class WorkspaceMembershipService {
             id: userId
           })}`,
           currentUser.name,
+          new Date().toISOString(),
           false
         )
 

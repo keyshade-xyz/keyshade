@@ -5,17 +5,18 @@ import { IMailService } from './interface.service'
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
-  async workspaceInvitationMailForUsers(
+  async invitedToWorkspace(
     email: string,
-    workspace: string,
-    actionUrl: string,
-    invitee: string,
+    projectName: string,
+    projectUrl: string,
+    invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void> {
     this.log.log(
       forRegisteredUser
-        ? `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
-        : `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
+        ? `User ${email} has been invited to the workspace ${projectName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${projectUrl}.`
+        : `User ${email} has been invited to the workspace ${projectName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${projectUrl}.`
     )
   }
 
@@ -37,19 +38,6 @@ export class MockMailService implements IMailService {
 
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
     this.log.log(`Email change OTP for email ${email} is ${otp}`)
-  }
-
-  async userInvitation(
-    email: string,
-    projectName: string,
-    projectUrl: string,
-    invitedBy: string,
-    invitedOn: string,
-    invitationRole: string
-  ): Promise<void> {
-    this.log.log(
-      `User ${email} has been invited to the project ${projectName} by ${invitedBy} on ${invitedOn} as a ${invitationRole}. Project details can be accessed at ${projectUrl}.`
-    )
   }
 
   async removedFromWorkspace(
