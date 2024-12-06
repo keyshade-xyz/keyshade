@@ -40,7 +40,7 @@ export const WorkspaceInvitationEmail = ({
       <Text style={text}>Dear User,</Text>
       <Text style={text}>
         We're excited to inform you that you've been invited to join a
-        project on Keyshade. Here are the details of your invitation:
+        workspace on Keyshade. Here are the details of your invitation:
       </Text>
       <Section style={workspaceDetails}>
         <Text style={workspaceInfo}>
