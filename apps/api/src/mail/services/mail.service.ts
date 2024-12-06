@@ -27,8 +27,8 @@ export class MailService implements IMailService {
   }
   async invitedToWorkspace(
     email: string,
-    projectName: string,
-    projectUrl: string,
+    workspaceName: string,
+    actionUrl: string,
     invitedBy: string,
     invitedOn: string,
     forRegisteredUser: boolean
@@ -39,8 +39,8 @@ export class MailService implements IMailService {
 
     const body = await render(
       WorkspaceInvitationEmail({
-        projectName,
-        projectUrl,
+        workspaceName,
+        actionUrl,
         invitedBy,
         invitedOn,
         forRegisteredUser

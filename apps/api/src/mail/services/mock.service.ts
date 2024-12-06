@@ -7,16 +7,16 @@ export class MockMailService implements IMailService {
 
   async invitedToWorkspace(
     email: string,
-    projectName: string,
-    projectUrl: string,
+    workspaceName: string,
+    actionUrl: string,
     invitedBy: string,
     invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void> {
     this.log.log(
       forRegisteredUser
-        ? `User ${email} has been invited to the workspace ${projectName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${projectUrl}.`
-        : `User ${email} has been invited to the workspace ${projectName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${projectUrl}.`
+        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${actionUrl}.`
+        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
     )
   }
 

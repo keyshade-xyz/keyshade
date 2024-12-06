@@ -7,7 +7,7 @@ export interface IMailService {
 
   invitedToWorkspace(
     email: string,
-    projectName: string,
+    workspaceName: string,
     projectUrl: string,
     invitedBy: string,
     invitedOn: string,

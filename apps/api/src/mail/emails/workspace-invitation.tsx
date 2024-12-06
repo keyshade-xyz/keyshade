@@ -27,16 +27,16 @@ import {
 } from '../styles/common-styles'
 
 interface WorkspaceInvitationEmailProps {
-  projectName: string
-  projectUrl: string
+  workspaceName: string
+  actionUrl: string
   invitedBy: string
   invitedOn: string
   forRegisteredUser: boolean
 }
 
 export const WorkspaceInvitationEmail = ({
-  projectName,
-  projectUrl,
+  workspaceName,
+  actionUrl,
   invitedBy,
   invitedOn,
   forRegisteredUser
@@ -68,7 +68,7 @@ export const WorkspaceInvitationEmail = ({
             </Text>
             <Section style={workspaceDetails}>
               <Text style={workspaceInfo}>
-                <strong>Workspace Name:</strong> {projectName}
+                <strong>Workspace Name:</strong> {workspaceName}
               </Text>
               <Text style={workspaceInfo}>
                 <strong>Invited By:</strong> {invitedBy}
@@ -84,7 +84,7 @@ export const WorkspaceInvitationEmail = ({
               Join the project by clicking the button below - we're excited to
               have you!
             </Text>
-            <Button href={projectUrl} style={ctaButton}>
+            <Button href={actionUrl} style={ctaButton}>
               Get started
             </Button>
             <Text style={text}>
