@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -100,16 +100,16 @@
     "lint:web": "turbo run lint --filter=web",
     "lint:platform": "turbo run lint --filter=platform",
     "lint:cli": "turbo run lint --filter=cli",
-    "lint:api-client": "turbo run lint --filter=api-client",
+    "lint:api-client": "turbo run lint --filter=@keyshade/api-client",
     "lint:secret-scan": "turbo run lint --filter=secret-scan",
-    "lint:schema": "turbo run lint --filter=schema",
+    "lint:schema": "turbo run lint --filter=@keyshade/schema",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
-    "build:web": "turbo run build --filter=web",
+    "build:web": "pnpm build:api-client && turbo run build --filter=web",
     "build:platform": "turbo run build --filter=platform",
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=cli",
-    "build:api-client": "pnpm build:schema && turbo run --filter=api-client build",
-    "build:schema": "turbo run build --filter=schema",
+    "build:api-client": "pnpm build:schema && turbo run --filter=@keyshade/api-client build",
+    "build:schema": "turbo run build --filter=@keyshade/schema",
     "build:secret-scan": "turbo run build --filter=secret-scan",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
@@ -159,7 +159,7 @@
     "ts-jest": "^29.1.0",
     "tsconfig": "workspace:*",
     "tsconfig-paths": "^4.2.0",
-    "turbo": "^1.12.4"
+    "turbo": "^2.3.3"
   },
   "dependencies": {
     "@keyshade/api-client": "workspace:*",

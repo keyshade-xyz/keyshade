@@ -1,3 +1,46 @@
+## [2.8.0](https://github.com/keyshade-xyz/keyshade/compare/v2.7.0...v2.8.0) (2024-12-03)
+
+### 🚀 Features
+
+* **api:** Add workspace removal notification email template ([#476](https://github.com/keyshade-xyz/keyshade/issues/476)) ([40b754f](https://github.com/keyshade-xyz/keyshade/commit/40b754f7d3acd8f49e9e9a070fc744c501c3136e))
+* **cli:** Store `metrics_enabled` key in profile config ([#536](https://github.com/keyshade-xyz/keyshade/issues/536)) ([9283b22](https://github.com/keyshade-xyz/keyshade/commit/9283b22e4387a50ebf3e48ce64a3d6862bb0cc8b))
+* **package, api, cli:** Add api-key schemas and types; Fix schema inconsistencies; Minor fix for CLI build errors  ([#557](https://github.com/keyshade-xyz/keyshade/issues/557)) ([126d024](https://github.com/keyshade-xyz/keyshade/commit/126d0242b2d975c8e5a7a4eed185f090019b31fa))
+* **platform:** Added screen for CREATE NEW PROJECT ([#540](https://github.com/keyshade-xyz/keyshade/issues/540)) ([b644633](https://github.com/keyshade-xyz/keyshade/commit/b64463384d71e7eb246645bbfb6c2a3159baeb50))
+* **platform:** Updated the empty state of dashboard ([#522](https://github.com/keyshade-xyz/keyshade/issues/522)) ([28739d9](https://github.com/keyshade-xyz/keyshade/commit/28739d96c1f5857de0be3a9c6f1d800559d04754))
+* **schema, api-client:** Migrate auth types to @keyshade/schema ([#532](https://github.com/keyshade-xyz/keyshade/issues/532)) ([d880098](https://github.com/keyshade-xyz/keyshade/commit/d8800989185709fd75f6b7a100de248faaf32156))
+* **schema, api-client:** Migrate event schemas and types to @keyshade/schema ([#546](https://github.com/keyshade-xyz/keyshade/issues/546)) ([a3267de](https://github.com/keyshade-xyz/keyshade/commit/a3267dec679d6a76735443ee9332860a0a69196a))
+* **schema, api-client:** Migrate integration schemas and types to @keyshade/schema ([#547](https://github.com/keyshade-xyz/keyshade/issues/547)) ([08868c3](https://github.com/keyshade-xyz/keyshade/commit/08868c3026f7952c8ac6016809e5f7275ec57c07))
+* **schema, api-client:** Migrate project schemas and environment schemas along with their types to @keyshade/schema ([#538](https://github.com/keyshade-xyz/keyshade/issues/538)) ([c468af0](https://github.com/keyshade-xyz/keyshade/commit/c468af00b8b64a10daed5848ce3b200974b1adc3))
+* **schema, api-client:** Migrate [secure] types and schemas to @keyshade/schema ([#539](https://github.com/keyshade-xyz/keyshade/issues/539)) ([bc3100b](https://github.com/keyshade-xyz/keyshade/commit/bc3100b37fb32394d2dba9578993f18e5ba171b4))
+* **schema, api-client:** Migrate user types and schemas to @keyshade/schema ([#535](https://github.com/keyshade-xyz/keyshade/issues/535)) ([c24695e](https://github.com/keyshade-xyz/keyshade/commit/c24695e44ad65405075381628dfcc5f7b4fe0340))
+* **schema, api-client:** Migrate variable schemas and types to @keyshade/schema ([#545](https://github.com/keyshade-xyz/keyshade/issues/545)) ([0ee8f9a](https://github.com/keyshade-xyz/keyshade/commit/0ee8f9a1f8ff1bfc04e9ff7a0eccd0309627159a))
+* **schema, api-client:** Migrate workspace-membership schemas and types to @keyshade/schema ([#569](https://github.com/keyshade-xyz/keyshade/issues/569)) ([4398969](https://github.com/keyshade-xyz/keyshade/commit/4398969a48d4f6863ca872dcc7230048e14b45ac))
+* **schema, api-client:** Migrate workspace-role schemas and types to @keyshade/schema ([#568](https://github.com/keyshade-xyz/keyshade/issues/568)) ([9efbf2d](https://github.com/keyshade-xyz/keyshade/commit/9efbf2d6347670cb2ad1a670384e4b458475ca4c))
+* **schema:** Add User type inference from UserSchema ([#574](https://github.com/keyshade-xyz/keyshade/issues/574)) ([84c1db5](https://github.com/keyshade-xyz/keyshade/commit/84c1db55bf3e20af15221929aea7ac6dff4178b3))
+
+### 🐛 Bug Fixes
+
+* **api:** Incorrect oauth redirect url ([58d96e5](https://github.com/keyshade-xyz/keyshade/commit/58d96e524a6676fe61cd15b5cfe64deff74e6e45))
+* **platform:** Resolve loading SVG blocking input field interaction ([#571](https://github.com/keyshade-xyz/keyshade/issues/571)) ([30f4f65](https://github.com/keyshade-xyz/keyshade/commit/30f4f656eb686b0ca8879cb18560069dbeaad8a6))
+
+### 📚 Documentation
+
+* Add pictures to Bruno setup ([#541](https://github.com/keyshade-xyz/keyshade/issues/541)) ([210c0fd](https://github.com/keyshade-xyz/keyshade/commit/210c0fdbf1ac815a8f7878e98b604c616d6fdd73))
+* Migrate to Bruno ([#525](https://github.com/keyshade-xyz/keyshade/issues/525)) ([1793d92](https://github.com/keyshade-xyz/keyshade/commit/1793d925f248b175ea2115eb8926f4de26d670e5))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Add script to validate schema package ([59e4280](https://github.com/keyshade-xyz/keyshade/commit/59e428002b3b9bb88908da6ffa81605de7d2b3dd))
+* Fixed codecov client version ([a998ae4](https://github.com/keyshade-xyz/keyshade/commit/a998ae4cf02ebdbcab941805c6805ed8ed379919))
+* **package:** Fixed tests and did housekeeping ([#544](https://github.com/keyshade-xyz/keyshade/issues/544)) ([40008e3](https://github.com/keyshade-xyz/keyshade/commit/40008e3168549db00ade4cc6ba3b62519d3b1dcd))
+* Update test coverage settings ([5b27e32](https://github.com/keyshade-xyz/keyshade/commit/5b27e32cc76b24a3f7f4f99ee0917456ecba05ad))
+* Update Turbo to 2.3.1 ([#564](https://github.com/keyshade-xyz/keyshade/issues/564)) ([3a63823](https://github.com/keyshade-xyz/keyshade/commit/3a638239a216a7919254222c04fbac0391c85d43))
+* **web:** Update dockerfile ([10d9cc5](https://github.com/keyshade-xyz/keyshade/commit/10d9cc59ddb55beeb042b7087dd7855166cc356d))
+
+### 🔨 Code Refactoring
+
+* **api-client, schema:** Add workspace's schemas and types in @keyshade/schema ([#520](https://github.com/keyshade-xyz/keyshade/issues/520)) ([7c8ee5d](https://github.com/keyshade-xyz/keyshade/commit/7c8ee5dba4d1e066b4060af1ff74e6dbab20d03a))
+
 ## [2.7.0](https://github.com/keyshade-xyz/keyshade/compare/v2.6.0...v2.7.0) (2024-11-05)
 
 ### 🚀 Features

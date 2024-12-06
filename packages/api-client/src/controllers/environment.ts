@@ -27,7 +27,7 @@ export default class EnvironmentController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<CreateEnvironmentResponse>> {
     const response = await this.apiClient.post(
-      `/api/environment/${request.projectId}`,
+      `/api/environment/${request.projectSlug}`,
       request,
       headers
     )

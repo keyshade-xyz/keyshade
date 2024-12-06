@@ -55,7 +55,7 @@ export default class UpdateSecret extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
 
-    const { data, error, success } =
+    const { error, success } =
       await ControllerInstance.getInstance().secretController.updateSecret(
         {
           secretSlug,
@@ -65,11 +65,7 @@ export default class UpdateSecret extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Secret ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
-      Logger.info(`rotateAfter: ${data.rotateAfter}`)
+      Logger.info('Secret updated successfully')
     } else {
       Logger.error(`Failed to update secret: ${error.message}`)
     }

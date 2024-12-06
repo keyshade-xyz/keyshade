@@ -1,39 +1,41 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
+import { EnvironmentSchema } from '@/environment'
+import { BaseProjectSchema } from '@/project'
+import { WorkspaceSchema } from '@/workspace'
 
 export const VariableSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
   note: z.string().nullable(),
   lastUpdatedById: z.string(),
-  projectId: z.string(),
+  projectId: BaseProjectSchema.shape.id,
   project: z.object({
-    workspaceId: z.string()
+    workspaceId: WorkspaceSchema.shape.id
   }),
   versions: z.array(
     z.object({
       value: z.string(),
-      environmentId: z.string(),
       environment: z.object({
-        id: z.string(),
-        slug: z.string()
+        id: EnvironmentSchema.shape.id,
+        slug: EnvironmentSchema.shape.slug
       })
     })
   )
 })
 
 export const CreateVariableRequestSchema = z.object({
-  projectSlug: z.string(),
-  name: z.string(),
+  projectSlug: BaseProjectSchema.shape.slug,
+  name: VariableSchema.shape.name,
   note: z.string().optional(),
   entries: z
     .array(
       z.object({
         value: z.string(),
-        environmentSlug: z.string()
+        environmentSlug: EnvironmentSchema.shape.slug
       })
     )
     .optional()
@@ -42,14 +44,14 @@ export const CreateVariableRequestSchema = z.object({
 export const CreateVariableResponseSchema = VariableSchema
 
 export const UpdateVariableRequestSchema = z.object({
-  variableSlug: z.string(),
-  name: z.string().optional(),
+  variableSlug: VariableSchema.shape.slug,
+  name: VariableSchema.shape.name.optional(),
   note: z.string().optional(),
   entries: z
     .array(
       z.object({
         value: z.string(),
-        environmentSlug: z.string()
+        environmentSlug: EnvironmentSchema.shape.slug
       })
     )
     .optional()
@@ -64,34 +66,35 @@ export const UpdateVariableResponseSchema = z.object({
   }),
   updatedVersions: z.array(
     z.object({
+      id: z.string(),
       value: z.string(),
-      environmentId: z.string(),
+      version: z.number(),
       environment: z.object({
-        id: z.string(),
-        slug: z.string()
+        id: EnvironmentSchema.shape.id,
+        slug: EnvironmentSchema.shape.slug
       })
     })
   )
 })
 
 export const RollBackVariableRequestSchema = z.object({
-  variableSlug: z.string(),
+  variableSlug: VariableSchema.shape.slug,
   version: z.number(),
-  environmentSlug: z.string()
+  environmentSlug: EnvironmentSchema.shape.slug
 })
 
 export const RollBackVariableResponseSchema = z.object({
-  count: z.string()
+  count: z.number()
 })
 
 export const DeleteVariableRequestSchema = z.object({
-  variableSlug: z.string()
+  variableSlug: VariableSchema.shape.slug
 })
 
 export const DeleteVariableResponseSchema = z.void()
 
 export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
@@ -105,9 +108,9 @@ export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
     values: z.array(
       z.object({
         environment: z.object({
-          id: z.string(),
-          name: z.string(),
-          slug: z.string()
+          id: EnvironmentSchema.shape.id,
+          name: EnvironmentSchema.shape.name,
+          slug: EnvironmentSchema.shape.slug
         }),
         value: z.string(),
         version: z.number()
@@ -117,8 +120,8 @@ export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
 )
 
 export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
-  projectSlug: z.string(),
-  environmentSlug: z.string()
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlug: EnvironmentSchema.shape.slug
 })
 
 export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
@@ -131,8 +134,8 @@ export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
 
 export const GetRevisionsOfVariableRequestSchema =
   PageRequestSchema.partial().extend({
-    variableSlug: z.string(),
-    environmentSlug: z.string()
+    variableSlug: VariableSchema.shape.slug,
+    environmentSlug: EnvironmentSchema.shape.slug
   })
 
 export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
@@ -140,9 +143,9 @@ export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
     id: z.string(),
     value: z.string(),
     version: z.number(),
-    variableId: z.string(),
-    createdOn: z.string(),
+    variableId: VariableSchema.shape.id,
+    createdOn: z.string().datetime(),
     createdById: z.string(),
-    environmentId: z.string()
+    environmentId: EnvironmentSchema.shape.id
   })
 )

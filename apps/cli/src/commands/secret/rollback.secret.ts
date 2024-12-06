@@ -55,11 +55,7 @@ export default class RollbackSecret extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Secret ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
-      Logger.info(`rotateAfter: ${data.rotateAfter}`)
+      Logger.info(`Secret rolled back by ${data.count} versions successfully.`)
     } else {
       Logger.error(`Failed to update secret: ${error.message}`)
     }
@@ -67,13 +63,13 @@ export default class RollbackSecret extends BaseCommand {
 
   private async parseInput(options: CommandActionData['options']): Promise<{
     environmentSlug: string
-    version: string
+    version: number
   }> {
     const { environmentSlug, version } = options
 
     return {
       environmentSlug,
-      version
+      version: parseInt(version, 10)
     }
   }
 }

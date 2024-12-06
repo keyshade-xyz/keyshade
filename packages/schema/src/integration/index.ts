@@ -10,13 +10,13 @@ export const IntegrationSchema = z.object({
   name: z.string(),
   slug: z.string(),
   metadata: z.record(z.string()),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
   type: integrationTypeEnum,
   notifyOn: z.array(eventTypeEnum),
   workspaceId: WorkspaceSchema.shape.id,
-  projectId: BaseProjectSchema.shape.id,
-  environmentId: EnvironmentSchema.shape.id
+  projectId: BaseProjectSchema.shape.id.nullable(),
+  environmentId: EnvironmentSchema.shape.id.nullable()
 })
 
 export const CreateIntegrationRequestSchema = z.object({

@@ -31,7 +31,7 @@ function executeCommand(
 
 function startAPI(): Promise<void> {
   return new Promise((resolve) => {
-    const apiProcess = exec('cd ../../ && pnpm run start:api', {
+    const apiProcess = exec('pnpm run --filter=api start', {
       env: {
         PATH: process.env.PATH,
         DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',

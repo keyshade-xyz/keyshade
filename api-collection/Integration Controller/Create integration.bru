@@ -38,9 +38,14 @@ docs {
   ### Request Body
   
   - `name`: The name of the integration
+
   - `type`: Integration type. Refer to prisma schema to get the valid types
+
   - `metadata`: Additional key value pairs that the integration might need. This varies with the integration types.
+
   - `notifyOn`: (Optional) Array of events that should trigger this integration. Refer to prisma schema to get the valid types.
-  - `environmentId`: (Optional) If the integration should be triggered when an event in a specific environment. Can only be specified when `projectId` is specified
-  - `projectId`: (Optional) If the integration should be triggered when an event occured in a specific project.
+
+  - `environmentSlug`: (Optional) If the integration should be triggered when an event in a specific environment. Can only be specified when `projectSlug` is specified
+  
+  - `projectSlug`: (Optional) If the integration should be triggered when an event occured in a specific project.
 }
