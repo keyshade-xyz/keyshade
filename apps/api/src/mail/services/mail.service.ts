@@ -8,6 +8,7 @@ import { Transporter, createTransport } from 'nodemailer'
 import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
 import { render } from '@react-email/render'
 import WorkspaceInvitationEmail from '../emails/workspace-invitation'
+import OTPEmailTemplate from '../emails/otp-email-template'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -50,25 +51,14 @@ export class MailService implements IMailService {
   }
 
   async sendOtp(email: string, otp: string): Promise<void> {
-    const subject = 'Your Login OTP'
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>OTP Verification</title>
-        </head>
-        <body>
-           <h1>Welcome to keyshade!</h1>
-           <p>Hello there!</p>
-           <p>We have sent you this email to verify your account.</p>
-           <p>Your One Time Password (OTP) is: <strong>${otp}</strong></p>
-           <p>This OTP will expire in <strong>5 minutes</strong>.</p>
-           <p>Please enter this OTP in the application to verify your account.</p>
-           <p>Thank you for choosing us.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>
-        `
+    const subject = 'Your One Time Password (OTP) for Keyshade'
+
+    const body = await render(
+      OTPEmailTemplate({
+        otp
+      })
+    )
+
     await this.sendEmail(email, subject, body)
   }
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
