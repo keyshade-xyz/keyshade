@@ -208,7 +208,6 @@ export class AuthController {
     }
   }
 
-  /* istanbul ignore next */
   @Post('logout')
   async logout(@Res() res: Response): Promise<void> {
     await this.authService.logout(res)
