@@ -5,11 +5,12 @@ export interface IMailService {
 
   sendEmailChangedOtp(email: string, otp: string): Promise<void>
 
-  workspaceInvitationMailForUsers(
+  invitedToWorkspace(
     email: string,
-    workspace: string,
-    actionUrl: string,
+    workspaceName: string,
+    projectUrl: string,
     invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void>
 
