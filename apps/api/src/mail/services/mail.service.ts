@@ -7,6 +7,7 @@ import { IMailService } from './interface.service'
 import { Transporter, createTransport } from 'nodemailer'
 import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
 import { render } from '@react-email/render'
+import WorkspaceInvitationEmail from '../emails/workspace-invitation'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -24,33 +25,27 @@ export class MailService implements IMailService {
       }
     })
   }
-  async workspaceInvitationMailForUsers(
+  async invitedToWorkspace(
     email: string,
-    workspace: string,
+    workspaceName: string,
     actionUrl: string,
-    invitee: string,
+    invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void> {
-    const subject = `You have been invited to a ${workspace}`
-    const intro = forRegisteredUser
-      ? `Hello again! You've been invited to join a new workspace.`
-      : `Hello there! We're excited to welcome you to Keyshade.`
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>Workspace Invitation</title>
-        </head>
-        <body>
-           <h1>Welcome to keyshade!</h1>
-           <p>${intro}</p>
-           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong>.</p>
-           <p>Please click on the link below to accept the invitation.</p>
-           <p><a href="${actionUrl}">Accept Invitation</a></p>
-           <p>Thank you for choosing us.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>`
+    const subject = forRegisteredUser
+      ? 'Welcome Back! Join Your Workspace'
+      : 'You are Invited to Join the Workspace'
+
+    const body = await render(
+      WorkspaceInvitationEmail({
+        workspaceName,
+        actionUrl,
+        invitedBy,
+        invitedOn,
+        forRegisteredUser
+      })
+    )
     await this.sendEmail(email, subject, body)
   }
 
