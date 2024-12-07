@@ -17,6 +17,7 @@ import { CacheService } from '@/cache/cache.service'
 import { generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
+import { Response } from 'express'
 
 @Injectable()
 export class AuthService {
@@ -218,5 +219,16 @@ export class AuthService {
 
   private async generateToken(id: string) {
     return await this.jwt.signAsync({ id })
+  }
+
+  /**
+   * Clears the token cookie on logout
+   * @param res The response object
+   */
+  async logout(res: Response): Promise<void> {
+    res.clearCookie('token', {
+      domain: process.env.DOMAIN ?? 'localhost'
+    })
+    this.logger.log('User logged out and token cookie cleared.')
   }
 }

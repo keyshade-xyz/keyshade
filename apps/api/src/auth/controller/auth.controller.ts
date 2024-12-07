@@ -207,4 +207,11 @@ export class AuthController {
       )
     }
   }
+
+  /* istanbul ignore next */
+  @Post('logout')
+  async logout(@Res() res: Response): Promise<void> {
+    await this.authService.logout(res)
+    res.status(HttpStatus.OK).send({ message: 'Logged out successfully' })
+  }
 }
