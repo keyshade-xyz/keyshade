@@ -44,17 +44,17 @@ function SecretPage(): React.JSX.Element {
       process.env.NEXT_PUBLIC_BACKEND_URL
     )
 
-    async function getAllSecretsByProjectSlug(){
-      const {success, error, data} = await secretController.getAllSecretsOfProject(
-        {projectSlug: pathname.split('/'[2])},
-        {}
-      )
+    async function getAllSecretsByProjectSlug() {
+      const { success, error, data } =
+        await secretController.getAllSecretsOfProject(
+          { projectSlug: pathname.split('/')[2] },
+          {}
+        )
 
-      if( success && data ){
+      if (success && data) {
         //@ts-ignore
         setAllSecrets(data)
-      }
-      else{
+      } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
@@ -63,7 +63,6 @@ function SecretPage(): React.JSX.Element {
     getAllSecretsByProjectSlug()
 
     setIsLoading(false)
-
   }, [pathname])
 
   if (isLoading) {
@@ -95,9 +94,7 @@ function SecretPage(): React.JSX.Element {
                 rightChildren={
                   <div className="text-xs text-white/50">
                     {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
-                    <span className="text-white">
-                      {secret.lastUpdatedById}
-                    </span>
+                    <span className="text-white">{secret.lastUpdatedById}</span>
                   </div>
                 }
               >
