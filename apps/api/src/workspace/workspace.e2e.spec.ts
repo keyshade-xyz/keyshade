@@ -35,6 +35,8 @@ import { SecretService } from '@/secret/service/secret.service'
 import { VariableService } from '@/variable/service/variable.service'
 import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
 
 const createMembership = async (
@@ -71,6 +73,7 @@ describe('Workspace Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
+  let workspaceMembershipService: WorkspaceMembershipService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
@@ -87,7 +90,8 @@ describe('Workspace Controller Tests', () => {
         EnvironmentModule,
         SecretModule,
         VariableModule,
-        WorkspaceRoleModule
+        WorkspaceRoleModule,
+        WorkspaceMembershipModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -106,6 +110,7 @@ describe('Workspace Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -179,6 +184,7 @@ describe('Workspace Controller Tests', () => {
     expect(secretService).toBeDefined()
     expect(variableService).toBeDefined()
     expect(workspaceRoleService).toBeDefined()
+    expect(workspaceMembershipService).toBeDefined()
   })
 
   describe('Create Workspace Tests', () => {
@@ -477,6 +483,73 @@ describe('Workspace Controller Tests', () => {
       expect(metadata.links.next).toBeNull()
       expect(metadata.links.last).toEqual(
         `/workspace?page=1&limit=1&sort=name&order=asc&search=`
+      )
+    })
+  })
+
+  describe('Get All Workspace Invitations Tests', () => {
+    it('should be able to fetch all the workspace invitations of the user', async () => {
+      //invite user2 to workspace1
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/invitations`
+      })
+
+      const body = response.json()
+
+      expect(body.items).toHaveLength(1)
+      expect(body.items[0].workspace.id).toBe(workspace1.id)
+      expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
+      expect(body.metadata.totalCount).toBe(1)
+      expect(body.metadata.links.self).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.first).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.previous).toBeNull()
+      expect(body.metadata.links.next).toBeNull()
+      expect(body.metadata.links.last).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+    })
+
+    it('should be able to fetch all the workspace invitations of the user that are accepted', async () => {
+      //invite user2 to workspace1
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+      // accept the invitation for user2 to workspace1
+      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/invitations?isAccepted=true`
+      })
+
+      const body = response.json()
+
+      expect(body.items).toHaveLength(1)
+      expect(body.items[0].workspace.id).toBe(workspace1.id)
+      expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
+      expect(body.metadata.totalCount).toBe(1)
+      expect(body.metadata.links.self).toEqual(
+        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.first).toEqual(
+        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.previous).toBeNull()
+      expect(body.metadata.links.next).toBeNull()
+      expect(body.metadata.links.last).toEqual(
+        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
       )
     })
   })
