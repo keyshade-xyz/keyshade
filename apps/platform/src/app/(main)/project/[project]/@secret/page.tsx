@@ -19,8 +19,8 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { Secrets } from '@/lib/api-functions/secrets'
-import type { Secret } from '@/types'
+import type { Secret } from '@keyshade/schema'
+import { SecretController } from '@keyshade/api-client'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Tooltip,
@@ -39,17 +39,31 @@ function SecretPage(): React.JSX.Element {
 
   useEffect(() => {
     setIsLoading(true)
-    Secrets.getAllSecretbyProjectId(pathname.split('/')[2])
-      .then((data) => {
+
+    const secretController = new SecretController(
+      process.env.NEXT_PUBLIC_BACKEND_URL
+    )
+
+    async function getAllSecretsByProjectSlug(){
+      const {success, error, data} = await secretController.getAllSecretsOfProject(
+        {projectSlug: pathname.split('/'[2])},
+        {}
+      )
+
+      if( success && data ){
+        //@ts-ignore
         setAllSecrets(data)
-      })
-      .catch((error) => {
+      }
+      else{
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+      }
+    }
+
+    getAllSecretsByProjectSlug()
+
+    setIsLoading(false)
+
   }, [pathname])
 
   if (isLoading) {
@@ -73,16 +87,16 @@ function SecretPage(): React.JSX.Element {
           return (
             <AccordionItem
               className="rounded-xl bg-white/5 px-5"
-              key={secret.secret.id}
-              value={secret.secret.id}
+              key={secret.id}
+              value={secret.id}
             >
               <AccordionTrigger
                 className="hover:no-underline"
                 rightChildren={
                   <div className="text-xs text-white/50">
-                    {dayjs(secret.secret.updatedAt).toNow(true)} ago by{' '}
+                    {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
                     <span className="text-white">
-                      {secret.secret.lastUpdatedBy.name}
+                      {secret.lastUpdatedById}
                     </span>
                   </div>
                 }
@@ -90,16 +104,16 @@ function SecretPage(): React.JSX.Element {
                 <div className="flex gap-x-5">
                   <div className="flex items-center gap-x-4">
                     {/* <SecretLogoSVG /> */}
-                    {secret.secret.name}
+                    {secret.name}
                   </div>
-                  {secret.secret.note ? (
+                  {secret.note ? (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
                           <NoteIconSVG className="w-7" />
                         </TooltipTrigger>
                         <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                          <p>{secret.secret.note}</p>
+                          <p>{secret.note}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -115,10 +129,10 @@ function SecretPage(): React.JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {secret.values.map((value) => {
+                    {secret.versions.map((value) => {
                       return (
                         <TableRow key={value.environment.id}>
-                          <TableCell>{value.environment.name}</TableCell>
+                          <TableCell>{value.environment.slug}</TableCell>
                           <TableCell className="max-w-40 overflow-auto">
                             {value.value}
                           </TableCell>

@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { Project } from '@/types'
-import { Projects } from '@/lib/api-functions/projects'
+import { ProjectController } from '@keyshade/api-client'
+import type { Project } from '@keyshade/schema'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -38,14 +38,29 @@ function DetailedProjectPage({
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
   useEffect(() => {
-    Projects.getProjectbyID(params.project)
-      .then((project) => {
-        setCurrentProject(project)
-      })
-      .catch((error) => {
+
+    const projectController = new ProjectController(
+      process.env.NEXT_PUBLIC_BACKEND_URL
+    )
+
+    async function getProjectBySlug(){
+      const {success, error, data} = await projectController.getProject(
+        {projectSlug: params.project},
+        {}
+      )
+
+      if( success && data ){
+        //@ts-ignore
+        setCurrentProject(data)
+      }
+      else{
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
-      })
+      }
+    }
+
+    getProjectBySlug()
+
   }, [params.project])
 
   return (
