@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
+import type { User } from '@keyshade/schema'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -16,7 +17,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
-import { zUser, type User } from '@/types'
 
 interface UserNameImage {
   name: string | null
@@ -32,11 +32,7 @@ async function fetchNameImage(): Promise<UserNameImage | undefined> {
         credentials: 'include'
       }
     )
-    const userData: User = (await response.json()) as User
-    const { success, data } = zUser.safeParse(userData)
-    if (!success) {
-      throw new Error('Invalid data')
-    }
+    const data: User = (await response.json()) as User
     return {
       name: data.name?.split(' ')[0] ?? data.email.split('@')[0],
       image: data.profilePictureUrl
