@@ -35,10 +35,11 @@ export const text: CSSProperties = {
 
 export const workspaceDetails: CSSProperties = {
   width: '100%',
-  backgroundColor: '#fafafa',
   borderRadius: '5px',
   margin: '20px 0px',
-  padding: '10px 20px'
+  padding: '10px 20px',
+  border: '1px solid #eee',
+  backgroundColor: '#fafafa'
 }
 
 export const workspaceInfo: CSSProperties = {
@@ -58,6 +59,13 @@ export const ctaButton: CSSProperties = {
   textDecoration: 'none',
   padding: '10px 22px',
   borderRadius: '5px'
+}
+
+export const otpStyle: CSSProperties = {
+  ...workspaceInfo,
+  fontSize: '26px',
+  textAlign: 'center',
+  letterSpacing: '8px'
 }
 
 export const footer: CSSProperties = {
