@@ -396,7 +396,7 @@ export class WorkspaceService {
    * @param isAccepted The invitation status to filter by
    * @returns The workspace invitations of the user, paginated, with metadata
    */
-  async getInvitationsOfUser(
+  async getAllWorkspaceInvitations(
     user: User,
     page: number,
     limit: number,

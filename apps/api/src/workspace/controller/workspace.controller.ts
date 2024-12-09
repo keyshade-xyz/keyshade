@@ -55,7 +55,7 @@ export class WorkspaceController {
     @Query('search') search: string = '',
     @Query('isAccepted') isAccepted: 'true' | 'false' | undefined = undefined
   ) {
-    return this.workspaceService.getInvitationsOfUser(
+    return this.workspaceService.getAllWorkspaceInvitations(
       user,
       page,
       limit,
