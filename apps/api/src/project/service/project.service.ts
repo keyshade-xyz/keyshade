@@ -1221,11 +1221,14 @@ export class ProjectService {
         await this.authorityCheckerService.checkAuthorityOverEnvironment({
           userId: user.id,
           entity: { slug: env.slug },
-          authorities: [
-            Authority.READ_ENVIRONMENT,
-            Authority.READ_SECRET,
-            Authority.READ_VARIABLE
-          ],
+          authorities:
+            project.accessLevel == ProjectAccessLevel.GLOBAL
+              ? []
+              : [
+                  Authority.READ_ENVIRONMENT,
+                  Authority.READ_SECRET,
+                  Authority.READ_VARIABLE
+                ],
           prisma: this.prisma
         })
       if (hasRequiredPermission) {

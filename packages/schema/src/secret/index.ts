@@ -84,7 +84,7 @@ export const RollBackSecretRequestSchema = z.object({
 })
 
 export const RollBackSecretResponseSchema = z.object({
-  count: z.string()
+  count: z.number()
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
