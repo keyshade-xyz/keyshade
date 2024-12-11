@@ -506,7 +506,7 @@ describe('Workspace Controller Tests', () => {
       expect(body.items).toHaveLength(1)
       expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
       expect(body.items[0]).toEqual({
-        invitedOn: expect.any(Date.toString()),
+        invitedOn: expect.any(String),
         workspace: {
           icon: workspace1.icon,
           id: workspace1.id,
