@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AddSVG } from '@public/svg/shared'
@@ -13,8 +14,19 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ProjectController } from '@keyshade/api-client'
-import type { Project } from '@keyshade/schema'
+import {
+  ProjectController,
+  EnvironmentController,
+  VariableController
+} from '@keyshade/api-client'
+import {
+  ClientResponse,
+  CreateVariableRequest,
+  Environment,
+  GetAllEnvironmentsOfProjectResponse,
+  Project
+} from '@keyshade/schema'
+import VariablePage from './@variable/page'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -31,96 +43,99 @@ function DetailedProjectPage({
   const [key, setKey] = useState<string>('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
   const [value, setValue] = useState<string>('')
-
   const [currentProject, setCurrentProject] = useState<Project>()
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
   useEffect(() => {
+    const getCurrentProject = async () => {
+      const projectController = new ProjectController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
 
-    const projectController = new ProjectController(
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    )
-
-    async function getProjectBySlug(){
-      const {success, error, data} = await projectController.getProject(
-        {projectSlug: params.project},
+      const { success, error, data } = await projectController.getProject(
+        { projectSlug: params.project },
         {}
       )
 
-      if( success && data ){
-        //@ts-ignore
-        setCurrentProject(data)
-      }
-      else{
+      if (success && data) {
+        setCurrentProject(data as Project)
+      } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
     }
 
-    getProjectBySlug()
-
+    getCurrentProject()
   }, [params.project])
 
   return (
     <main className="flex flex-col gap-4">
       <div className="flex justify-between ">
         <div className="text-3xl">{currentProject?.name}</div>
-        <Dialog>
-          <DialogTrigger>
-            <Button>
-              {' '}
-              <AddSVG /> Add Key
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a new secret</DialogTitle>
-              <DialogDescription>
-                Add a new secret to the project. This secret will be encrypted
-                and stored securely.
-              </DialogDescription>
-            </DialogHeader>
-            <div>
-              <div className="flex flex-col gap-y-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Key
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="username"
-                    onChange={(e) => {
-                      setKey(e.target.value)
-                    }}
-                    placeholder="Enter the name of the secret"
-                  />
+        {tab === 'secret' && (
+          <Dialog>
+            <DialogTrigger>
+              <Button>
+                {' '}
+                <AddSVG /> Add Secret
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add a new secret</DialogTitle>
+                <DialogDescription>
+                  Add a new secret to the project. This secret will be encrypted
+                  and stored securely.
+                </DialogDescription>
+              </DialogHeader>
+              <div>
+                <div className="flex flex-col gap-y-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right" htmlFor="username">
+                      Key
+                    </Label>
+                    <Input
+                      className="col-span-3"
+                      id="username"
+                      onChange={(e) => {
+                        setKey(e.target.value)
+                      }}
+                      placeholder="Enter the name of the secret"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right" htmlFor="username">
+                      Value
+                    </Label>
+                    <Input
+                      className="col-span-3"
+                      id="username"
+                      onChange={(e) => {
+                        setValue(e.target.value)
+                      }}
+                      placeholder="Enter the value of the secret"
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Value
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="username"
-                    onChange={(e) => {
-                      setValue(e.target.value)
-                    }}
-                    placeholder="Enter the value of the secret"
-                  />
+                <div className="mt-4 flex justify-end">
+                  <Button variant="secondary">Add Key</Button>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
-                <Button variant="secondary">Add Key</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )} 
+        
+        { tab === 'variable' && (
+          <VariablePage 
+            currentProject={currentProject}
+          />
+        )}
       </div>
       <div>
         {tab === 'secret' && secret}
-        {tab === 'variable' && variable}
+        {/* {tab === 'variable' && variable */}
       </div>
     </main>
   )
