@@ -879,11 +879,14 @@ export class WorkspaceMembershipService {
         roleSet.add(role)
       }
 
+      const invitedOn = new Date()
+
       // Create the workspace membership
       const createMembership = this.prisma.workspaceMember.create({
         data: {
           workspaceId: workspace.id,
           userId,
+          createdOn: invitedOn,
           roles: {
             create: Array.from(roleSet).map((role) => ({
               role: {
@@ -904,7 +907,7 @@ export class WorkspaceMembershipService {
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.slug}/join`,
           currentUser.name,
-          new Date().toISOString(),
+          invitedOn.toISOString(),
           true
         )
 

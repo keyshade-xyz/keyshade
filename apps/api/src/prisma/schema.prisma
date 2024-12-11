@@ -339,6 +339,7 @@ model WorkspaceMember {
   workspaceId        String
   invitationAccepted Boolean                          @default(false)
   roles              WorkspaceMemberRoleAssociation[]
+  createdOn          DateTime                         @default(now())
 
   @@unique([workspaceId, userId])
 }

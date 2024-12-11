@@ -446,7 +446,8 @@ export class WorkspaceService {
               }
             }
           }
-        }
+        },
+        createdOn: true
       }
     })
 
@@ -479,7 +480,14 @@ export class WorkspaceService {
       search
     })
 
-    return { items, metadata }
+    return {
+      items: items.map((item) => ({
+        ...item,
+        invitedOn: item.createdOn,
+        createdOn: undefined
+      })),
+      metadata
+    }
   }
 
   /**

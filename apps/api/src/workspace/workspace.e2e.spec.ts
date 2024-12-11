@@ -311,7 +311,8 @@ describe('Workspace Controller Tests', () => {
         id: expect.any(String),
         userId: user1.id,
         workspaceId: workspace1.id,
-        invitationAccepted: true
+        invitationAccepted: true,
+        createdOn: expect.any(Date)
       })
     })
   })
@@ -503,8 +504,24 @@ describe('Workspace Controller Tests', () => {
       const body = response.json()
 
       expect(body.items).toHaveLength(1)
-      expect(body.items[0].workspace.id).toBe(workspace1.id)
       expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
+      expect(body.items[0]).toEqual({
+        invitedOn: expect.any(Date.toString()),
+        workspace: {
+          icon: workspace1.icon,
+          id: workspace1.id,
+          name: workspace1.name,
+          slug: workspace1.slug
+        },
+        roles: [
+          {
+            role: {
+              name: memberRole.name,
+              colorCode: memberRole.colorCode
+            }
+          }
+        ]
+      })
       expect(body.metadata.totalCount).toBe(1)
       expect(body.metadata.links.self).toEqual(
         `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
@@ -567,7 +584,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       const body = response.json()
-      console.log(body)
       expect(body.items).toHaveLength(0)
       expect(body.metadata).toEqual({})
     })
