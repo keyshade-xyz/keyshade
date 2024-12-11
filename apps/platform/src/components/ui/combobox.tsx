@@ -19,8 +19,6 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { apiClient } from '@/lib/api-client'
-// import type { Workspace } from '@/types'
-import { zWorkspace } from '@/types'
 import {
   getCurrentWorkspace,
   setCurrentWorkspace,
@@ -38,7 +36,6 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { WorkspaceSchema } from '@keyshade/schema/schemas'
 
 interface WorkspaceResponse {
   items: Workspace[]
