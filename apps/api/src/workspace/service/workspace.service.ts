@@ -386,14 +386,13 @@ export class WorkspaceService {
   }
 
   /**
-   * Gets all workspaces of a user, paginated.
+   * Gets all the invitations a user has to various workspaces, paginated.
    * @param user The user to get the workspaces for
    * @param page The page number to get
    * @param limit The number of items per page to get
    * @param sort The field to sort by
    * @param order The order to sort in
    * @param search The search string to filter by
-   * @param isAccepted The invitation status to filter by
    * @returns The workspace invitations of the user, paginated, with metadata
    */
   async getAllWorkspaceInvitations(
@@ -402,8 +401,7 @@ export class WorkspaceService {
     limit: number,
     sort: string,
     order: string,
-    search: string,
-    isAccepted: boolean | undefined
+    search: string
   ) {
     // fetch all workspaces of user where they are not admin
     const items = await this.prisma.workspaceMember.findMany({
@@ -416,13 +414,16 @@ export class WorkspaceService {
       },
       where: {
         userId: user.id,
-        invitationAccepted: isAccepted,
+        invitationAccepted: false,
+        workspace: {
+          name: {
+            contains: search
+          }
+        },
         roles: {
           none: {
             role: {
-              authorities: {
-                has: Authority.WORKSPACE_ADMIN
-              }
+              hasAdminAuthority: true
             }
           }
         }
@@ -440,7 +441,8 @@ export class WorkspaceService {
           select: {
             role: {
               select: {
-                name: true
+                name: true,
+                colorCode: true
               }
             }
           }
@@ -452,13 +454,16 @@ export class WorkspaceService {
     const totalCount = await this.prisma.workspaceMember.count({
       where: {
         userId: user.id,
-        invitationAccepted: isAccepted,
+        invitationAccepted: false,
+        workspace: {
+          name: {
+            contains: search
+          }
+        },
         roles: {
           none: {
             role: {
-              authorities: {
-                has: Authority.WORKSPACE_ADMIN
-              }
+              hasAdminAuthority: true
             }
           }
         }
@@ -466,18 +471,13 @@ export class WorkspaceService {
     })
 
     //calculate metadata for pagination
-    const metadata = paginate(
-      totalCount,
-      `/workspace/invitations`,
-      {
-        page,
-        limit: limitMaxItemsPerPage(limit),
-        sort,
-        order,
-        search
-      },
-      isAccepted !== undefined ? { isAccepted } : undefined
-    )
+    const metadata = paginate(totalCount, `/workspace/invitations`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
 
     return { items, metadata }
   }

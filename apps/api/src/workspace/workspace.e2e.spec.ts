@@ -488,7 +488,7 @@ describe('Workspace Controller Tests', () => {
   })
 
   describe('Get All Workspace Invitations Tests', () => {
-    it('should be able to fetch all the workspace invitations of the user', async () => {
+    it('should be able to fetch all the non accepted invitations of the user', async () => {
       //invite user2 to workspace1
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
 
@@ -519,7 +519,7 @@ describe('Workspace Controller Tests', () => {
       )
     })
 
-    it('should be able to fetch all the workspace invitations of the user that are accepted', async () => {
+    it('should be able to fetch empty list of workspace invitations for the user once all invitations are accepted', async () => {
       //invite user2 to workspace1
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
 
@@ -531,26 +531,45 @@ describe('Workspace Controller Tests', () => {
         headers: {
           'x-e2e-user-email': user2.email
         },
-        url: `/workspace/invitations?isAccepted=true`
+        url: `/workspace/invitations`
       })
 
       const body = response.json()
+      expect(body.items).toHaveLength(0)
+      expect(body.metadata).toEqual({})
+    })
 
-      expect(body.items).toHaveLength(1)
-      expect(body.items[0].workspace.id).toBe(workspace1.id)
-      expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
-      expect(body.metadata.totalCount).toBe(1)
-      expect(body.metadata.links.self).toEqual(
-        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
+    it('should be able to fetch empty list of workspace invitations for the user if ownership is transferred', async () => {
+      //create a new workspace for user 1
+      const workspace3 = await workspaceService.createWorkspace(user1, {
+        name: 'Workspace 3'
+      })
+
+      //invite user2 to workspace3
+      await createMembership(memberRole.id, user2.id, workspace3.id, prisma)
+
+      //accept the invitation for user2 to workspace3
+      await workspaceMembershipService.acceptInvitation(user2, workspace3.slug)
+
+      //transfer ownership of workspace1 to user2
+      await workspaceMembershipService.transferOwnership(
+        user1,
+        workspace3.slug,
+        user2.email
       )
-      expect(body.metadata.links.first).toEqual(
-        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
-      )
-      expect(body.metadata.links.previous).toBeNull()
-      expect(body.metadata.links.next).toBeNull()
-      expect(body.metadata.links.last).toEqual(
-        `/workspace/invitations?isAccepted=true&page=0&limit=10&sort=name&order=asc&search=`
-      )
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/invitations`
+      })
+
+      const body = response.json()
+      console.log(body)
+      expect(body.items).toHaveLength(0)
+      expect(body.metadata).toEqual({})
     })
   })
 

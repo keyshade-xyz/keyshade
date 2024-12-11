@@ -52,8 +52,7 @@ export class WorkspaceController {
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
-    @Query('search') search: string = '',
-    @Query('isAccepted') isAccepted: 'true' | 'false' | undefined = undefined
+    @Query('search') search: string = ''
   ) {
     return this.workspaceService.getAllWorkspaceInvitations(
       user,
@@ -61,8 +60,7 @@ export class WorkspaceController {
       limit,
       sort,
       order,
-      search,
-      isAccepted ? isAccepted === 'true' : undefined
+      search
     )
   }
 
