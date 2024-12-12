@@ -184,7 +184,7 @@ describe('Environment Controller Tests', () => {
           'x-e2e-user-email': user1.email
         }
       })
-    
+
       expect(response.statusCode).toBe(400)
       expect(response.json().message).toContain('name should not be empty')
     })

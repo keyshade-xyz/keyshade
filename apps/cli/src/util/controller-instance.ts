@@ -6,7 +6,8 @@ import {
   SecretController,
   VariableController,
   WorkspaceController,
-  WorkspaceRoleController
+  WorkspaceRoleController,
+  WorkspaceMembershipController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
@@ -84,6 +85,16 @@ export default class ControllerInstance {
     return this._workspaceRoleController
   }
 
+  private _workspaceMembershipController: WorkspaceMembershipController | null =
+    null
+
+  get workspaceMembershipController(): WorkspaceMembershipController {
+    if (!this._workspaceMembershipController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._workspaceMembershipController
+  }
+
   static initialize(baseUrl: string) {
     if (!ControllerInstance.instance) {
       const instance = new ControllerInstance()
@@ -96,6 +107,8 @@ export default class ControllerInstance {
       instance._variableController = new VariableController(baseUrl)
       instance._workspaceController = new WorkspaceController(baseUrl)
       instance._workspaceRoleController = new WorkspaceRoleController(baseUrl)
+      instance._workspaceMembershipController =
+        new WorkspaceMembershipController(baseUrl)
 
       ControllerInstance.instance = instance
     }

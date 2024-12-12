@@ -44,12 +44,12 @@ export default class UpdateRoleCommand extends BaseCommand {
       },
       {
         short: '-a',
-        long: '--authorities <comma seperated list>',
+        long: '--authorities <comma separated list>',
         description: 'Authorities of the workspace role.'
       },
       {
         short: '-p',
-        long: '--project-slugs <comma seperated list>',
+        long: '--project-slugs <comma separated list>',
         description: 'Project slugs of the workspace role.'
       }
     ]
