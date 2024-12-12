@@ -26,7 +26,7 @@ export default class InviteUserCommand extends BaseCommand {
         description: 'Email of the user to invite.'
       },
       {
-        name: '<Role Slugs>',
+        name: '<Role Slugs...>',
         description: 'Space-separated list of role slugs to assign to the user.'
       }
     ]
@@ -36,8 +36,8 @@ export default class InviteUserCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, email, ...roleSlugs] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [workspaceSlug, email, roleSlugs] = args
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.inviteUsers(
@@ -46,7 +46,7 @@ export default class InviteUserCommand extends BaseCommand {
           members: [
             {
               email,
-              roleSlugs
+              roleSlugs: roleSlugs.split(',')
             }
           ]
         },
@@ -57,7 +57,7 @@ export default class InviteUserCommand extends BaseCommand {
       Logger.info('Invited to workspace successfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
       Logger.info(`Invitee: ${email}`)
-      Logger.info(`Roles: ${roleSlugs.join(', ')}`)
+      Logger.info(`Roles: ${roleSlugs}`)
     } else {
       Logger.error(`Failed to invite user: ${error.message}`)
     }

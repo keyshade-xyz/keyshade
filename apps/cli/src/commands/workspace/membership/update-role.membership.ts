@@ -26,7 +26,7 @@ export default class UpdateRolesCommand extends BaseCommand {
         description: 'Email of the workspace member.'
       },
       {
-        name: '<Role Slugs>',
+        name: '<Role Slugs...>',
         description: 'Space-separated list of role slugs to assign to the user.'
       }
     ]
@@ -37,14 +37,14 @@ export default class UpdateRolesCommand extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, userEmail, ...roleSlugs] = args
+    const [workspaceSlug, userEmail, roleSlugs] = args
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.updateMemberRoles(
         {
           workspaceSlug,
           userEmail,
-          roleSlugs
+          roleSlugs: roleSlugs.split(',')
         },
         this.headers
       )
@@ -53,7 +53,7 @@ export default class UpdateRolesCommand extends BaseCommand {
       Logger.info('Updated the roles of user!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
       Logger.info(`Member Email: ${userEmail}`)
-      Logger.info(`New Roles: ${roleSlugs.join(', ')}`)
+      Logger.info(`New Roles: ${roleSlugs}`)
     } else {
       Logger.error(`Failed to update roles: ${error.message}`)
     }
