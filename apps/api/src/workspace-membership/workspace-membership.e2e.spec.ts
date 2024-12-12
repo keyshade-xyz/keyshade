@@ -425,7 +425,8 @@ describe('Workspace Membership Controller Tests', () => {
         id: expect.any(String),
         userId: user2.id,
         workspaceId: workspace1.id,
-        invitationAccepted: false
+        invitationAccepted: false,
+        createdOn: expect.any(Date)
       })
     })
 
@@ -909,7 +910,8 @@ describe('Workspace Membership Controller Tests', () => {
         id: expect.any(String),
         userId: user2.id,
         workspaceId: workspace1.id,
-        invitationAccepted: true
+        invitationAccepted: true,
+        createdOn: expect.any(Date)
       })
     })
 

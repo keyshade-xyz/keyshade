@@ -44,6 +44,26 @@ export class WorkspaceController {
     return this.workspaceService.deleteWorkspace(user, workspaceSlug)
   }
 
+  @Get('invitations')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
+  async getAllInvitationsOfUser(
+    @CurrentUser() user: User,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+    @Query('sort') sort: string = 'name',
+    @Query('order') order: string = 'asc',
+    @Query('search') search: string = ''
+  ) {
+    return this.workspaceService.getAllWorkspaceInvitations(
+      user,
+      page,
+      limit,
+      sort,
+      order,
+      search
+    )
+  }
+
   @Get(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getWorkspace(
