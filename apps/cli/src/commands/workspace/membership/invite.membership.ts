@@ -36,7 +36,7 @@ export default class InviteUserCommand extends BaseCommand {
     return true
   }
 
-  async action({ args, options }: CommandActionData): Promise<void> {
+  async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug, email, roleSlugs] = args
 
     const { error, success } =

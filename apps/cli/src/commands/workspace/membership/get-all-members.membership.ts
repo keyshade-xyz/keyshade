@@ -14,7 +14,7 @@ export default class GetAllMembersOfWorkspaceCommand extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'List all roles of a workspace'
+    return 'List all members of a workspace'
   }
 
   getArguments(): CommandArgument[] {
