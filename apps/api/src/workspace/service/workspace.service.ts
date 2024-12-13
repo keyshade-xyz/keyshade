@@ -386,6 +386,111 @@ export class WorkspaceService {
   }
 
   /**
+   * Gets all the invitations a user has to various workspaces, paginated.
+   * @param user The user to get the workspaces for
+   * @param page The page number to get
+   * @param limit The number of items per page to get
+   * @param sort The field to sort by
+   * @param order The order to sort in
+   * @param search The search string to filter by
+   * @returns The workspace invitations of the user, paginated, with metadata
+   */
+  async getAllWorkspaceInvitations(
+    user: User,
+    page: number,
+    limit: number,
+    sort: string,
+    order: string,
+    search: string
+  ) {
+    // fetch all workspaces of user where they are not admin
+    const items = await this.prisma.workspaceMember.findMany({
+      skip: page * limit,
+      take: limitMaxItemsPerPage(Number(limit)),
+      orderBy: {
+        workspace: {
+          [sort]: order
+        }
+      },
+      where: {
+        userId: user.id,
+        invitationAccepted: false,
+        workspace: {
+          name: {
+            contains: search
+          }
+        },
+        roles: {
+          none: {
+            role: {
+              hasAdminAuthority: true
+            }
+          }
+        }
+      },
+      select: {
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true
+          }
+        },
+        roles: {
+          select: {
+            role: {
+              select: {
+                name: true,
+                colorCode: true
+              }
+            }
+          }
+        },
+        createdOn: true
+      }
+    })
+
+    // get total count of workspaces of the user
+    const totalCount = await this.prisma.workspaceMember.count({
+      where: {
+        userId: user.id,
+        invitationAccepted: false,
+        workspace: {
+          name: {
+            contains: search
+          }
+        },
+        roles: {
+          none: {
+            role: {
+              hasAdminAuthority: true
+            }
+          }
+        }
+      }
+    })
+
+    //calculate metadata for pagination
+    const metadata = paginate(totalCount, `/workspace/invitations`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
+
+    return {
+      items: items.map((item) => ({
+        ...item,
+        invitedOn: item.createdOn,
+        createdOn: undefined
+      })),
+      metadata
+    }
+  }
+
+  /**
    * Gets a list of project IDs that the user has access to READ.
    * The user has access to a project if the project is global or if the user has the READ_PROJECT authority.
    * @param userId The ID of the user to get the accessible project IDs for
