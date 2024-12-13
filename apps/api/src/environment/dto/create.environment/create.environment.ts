@@ -1,7 +1,8 @@
-import { IsOptional, IsString } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator'
 
 export class CreateEnvironment {
   @IsString()
+  @IsNotEmpty()
   name: string
 
   @IsString()

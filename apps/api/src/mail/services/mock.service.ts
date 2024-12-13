@@ -5,17 +5,18 @@ import { IMailService } from './interface.service'
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
-  async workspaceInvitationMailForUsers(
+  async invitedToWorkspace(
     email: string,
-    workspace: string,
+    workspaceName: string,
     actionUrl: string,
-    invitee: string,
+    invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void> {
     this.log.log(
       forRegisteredUser
-        ? `Workspace Invitation Mail for Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
-        : `Workspace Invitation Mail for Non Registered User: ${email}, ${workspace}, ${actionUrl}, ${invitee}`
+        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${actionUrl}.`
+        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
     )
   }
 

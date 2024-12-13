@@ -28,6 +28,7 @@ import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/service/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -65,7 +66,7 @@ describe('Environment Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -170,6 +171,23 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(environmentFromDb).toBeDefined()
+    })
+
+    it('should not be able to create an environment with an empty name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: '',
+          description: 'Empty name test'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toContain('name should not be empty')
     })
 
     it('should not be able to create an environment in a project that does not exist', async () => {
