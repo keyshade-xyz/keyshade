@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "WorkspaceMember" ADD COLUMN     "createdOn" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
