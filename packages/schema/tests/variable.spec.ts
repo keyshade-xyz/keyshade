@@ -389,19 +389,27 @@ describe('Variable Schema Tests', () => {
       const result = GetAllVariablesOfProjectResponseSchema.safeParse({
         items: [
           {
-            id: 'variable123',
-            name: 'Variable Name',
-            slug: 'variable-slug',
-            createdAt: '2024-10-01T00:00:00Z',
-            updatedAt: '2024-10-01T00:00:00Z',
-            note: 'This is a note',
-            lastUpdatedById: 'user123',
-            projectId: 'project123',
             variable: {
+              id: 'variable123',
+              name: 'Variable Name',
+              slug: 'variable-slug',
+              createdAt: '2024-10-01T00:00:00Z',
+              updatedAt: '2024-10-01T00:00:00Z',
+              note: 'This is a note',
+              lastUpdatedById: 'user123',
+              projectId: 'project123',
               lastUpdatedBy: {
                 id: 'user123',
                 name: 'John Doe'
-              }
+              },
+              versions: [
+                {
+                  environment: {
+                    id: 'env123',
+                    slug: 'development'
+                  }
+                }
+              ]
             },
             values: [
               {

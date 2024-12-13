@@ -16,6 +16,7 @@ import {
   GetRevisionsOfSecretResponseSchema
 } from '@/secret'
 import { rotateAfterEnum } from '@/enums'
+import { env, versions } from 'process'
 
 describe('Secret Schema Tests', () => {
   describe('SecretSchema Tests', () => {
@@ -347,7 +348,16 @@ describe('Secret Schema Tests', () => {
               lastUpdatedBy: {
                 id: 'user123',
                 name: 'John Doe'
-              }
+              },
+              versions: [
+                {
+                  environment: {
+                    id: 'env123',
+                    slug: 'development',
+                    name: 'Development'
+                  }
+                }
+              ]
             },
             values: {
               environment: {
