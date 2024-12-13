@@ -28,6 +28,7 @@ import { UserModule } from '@/user/user.module'
 import { UserService } from '@/user/service/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -65,7 +66,7 @@ describe('Environment Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
