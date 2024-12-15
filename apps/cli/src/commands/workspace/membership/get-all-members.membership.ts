@@ -31,7 +31,7 @@ export default class GetAllMembersOfWorkspaceCommand extends BaseCommand {
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
-    Logger.info("Fetching workspace's roles...")
+    Logger.info("Fetching workspace's memebrs...")
 
     const [workspaceSlug] = args
 
