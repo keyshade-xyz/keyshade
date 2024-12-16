@@ -619,15 +619,92 @@ describe('Secret Controller Tests', () => {
       expect(response.json().items.length).toBe(1)
 
       const { secret, values } = response.json().items[0]
-      expect(secret.id).toBeDefined()
-      expect(secret.name).toBeDefined()
-      expect(secret.note).toBeDefined()
-      expect(secret.projectId).toBeDefined()
+      expect(secret).toStrictEqual({
+        id: secret1.id,
+        name: secret1.name,
+        slug: secret1.slug,
+        note: secret1.note,
+        projectId: project1.id,
+        lastUpdatedById: secret1.lastUpdatedById,
+        lastUpdatedBy: {
+          id: user1.id,
+          name: user1.name
+        },
+        createdAt: secret1.createdAt.toISOString(),
+        updatedAt: secret1.updatedAt.toISOString(),
+        rotateAt: secret1.rotateAt.toISOString()
+      })
       expect(values.length).toBe(1)
 
       const value = values[0]
-      expect(value.environment).toBeDefined()
+      expect(value.version).toBe(1)
+      expect(value.environment.id).toBe(environment1.id)
+      expect(value.environment.slug).toBe(environment1.slug)
+      expect(value.environment.name).toBe(environment1.name)
       expect(value.value).not.toEqual('Secret 1 value')
+
+      //check metadata
+      const metadata = response.json().metadata
+      expect(metadata.totalCount).toEqual(1)
+      expect(metadata.links.self).toEqual(
+        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.first).toEqual(
+        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.previous).toBeNull()
+      expect(metadata.links.next).toBeNull()
+      expect(metadata.links.last).toEqual(
+        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+      )
+    })
+
+    it('should be able to fetch only new versions of secrets', async () => {
+      // Update secret1
+      await secretService.updateSecret(user1, secret1.slug, {
+        entries: [
+          {
+            value: 'Secret new 1 value',
+            environmentSlug: environment1.slug
+          }
+        ]
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${project1.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().items.length).toBe(1)
+
+      const { secret, values } = response.json().items[0]
+      expect(secret).toStrictEqual({
+        id: secret1.id,
+        name: secret1.name,
+        slug: secret1.slug,
+        note: secret1.note,
+        projectId: project1.id,
+        lastUpdatedById: secret1.lastUpdatedById,
+        lastUpdatedBy: {
+          id: user1.id,
+          name: user1.name
+        },
+        createdAt: secret1.createdAt.toISOString(),
+        updatedAt: expect.any(String),
+        rotateAt: secret1.rotateAt.toISOString()
+      })
+      expect(values.length).toBe(1)
+
+      const value = values[0]
+      expect(value.version).toBe(2)
+      expect(value.environment.id).toBe(environment1.id)
+      expect(value.environment.slug).toBe(environment1.slug)
+      expect(value.environment.name).toBe(environment1.name)
+      expect(value.value).not.toEqual('Secret 1 new value')
 
       //check metadata
       const metadata = response.json().metadata
@@ -658,14 +735,28 @@ describe('Secret Controller Tests', () => {
       expect(response.json().items.length).toBe(1)
 
       const { secret, values } = response.json().items[0]
-      expect(secret.id).toBeDefined()
-      expect(secret.name).toBeDefined()
-      expect(secret.note).toBeDefined()
-      expect(secret.projectId).toBeDefined()
+      expect(secret).toStrictEqual({
+        id: secret1.id,
+        name: secret1.name,
+        slug: secret1.slug,
+        note: secret1.note,
+        projectId: project1.id,
+        lastUpdatedById: secret1.lastUpdatedById,
+        lastUpdatedBy: {
+          id: user1.id,
+          name: user1.name
+        },
+        createdAt: secret1.createdAt.toISOString(),
+        updatedAt: secret1.updatedAt.toISOString(),
+        rotateAt: secret1.rotateAt.toISOString()
+      })
       expect(values.length).toBe(1)
 
       const value = values[0]
-      expect(value.environment).toBeDefined()
+      expect(value.version).toBe(1)
+      expect(value.environment.id).toBe(environment1.id)
+      expect(value.environment.slug).toBe(environment1.slug)
+      expect(value.environment.name).toBe(environment1.name)
       expect(value.value).toEqual('Secret 1 value')
 
       //check metadata

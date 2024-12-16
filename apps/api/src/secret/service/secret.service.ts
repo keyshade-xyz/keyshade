@@ -669,6 +669,8 @@ export class SecretService {
         },
         versions: {
           select: {
+            value: true,
+            version: true,
             environment: {
               select: {
                 name: true,
@@ -687,93 +689,72 @@ export class SecretService {
       }
     })
 
-    const secretsWithEnvironmentalValues = new Map<
-      Secret['id'],
-      {
-        secret: Secret
-        values: {
-          environment: {
-            name: Environment['name']
-            id: Environment['id']
-          }
-          value: SecretVersion['value']
-          version: SecretVersion['version']
-        }[]
-      }
-    >()
-
-    // Find all the environments for this project
-    const environments = await this.prisma.environment.findMany({
-      where: {
-        projectId
-      }
-    })
-    const environmentIds = new Map(
-      environments.map((env) => [env.id, env.name])
-    )
+    const secretsWithEnvironmentalValues = new Set<{
+      secret: Partial<Secret>
+      values: {
+        environment: {
+          name: Environment['name']
+          id: Environment['id']
+          slug: Environment['slug']
+        }
+        value: SecretVersion['value']
+        version: SecretVersion['version']
+      }[]
+    }>()
 
     for (const secret of secrets) {
-      // Make a copy of the environment IDs
-      const envIds = new Map(environmentIds)
-      let iterations = envIds.size
-
-      // Find the latest version for each environment
-      while (iterations--) {
-        const latestVersion = await this.prisma.secretVersion.findFirst({
-          where: {
-            secretId: secret.id,
-            environmentId: {
-              in: Array.from(envIds.keys())
-            }
-          },
-          orderBy: {
-            version: 'desc'
-          },
-          include: {
-            environment: {
-              select: {
-                id: true,
-                slug: true
-              }
-            }
+      // Logic to update the map:
+      // 1. If the environment ID is not present in the key, insert the environment ID and the secret version
+      // 2. If the environment ID is already present, check if the existing secret version is lesser than the new secret version.
+      //    If it is, update the secret version
+      const envIdToSecretVersionMap = new Map<
+        Environment['id'],
+        Partial<SecretVersion> & {
+          environment: {
+            id: Environment['id']
+            slug: Environment['slug']
+            name: Environment['name']
           }
-        })
-
-        if (!latestVersion) continue
-
-        if (secretsWithEnvironmentalValues.has(secret.id)) {
-          secretsWithEnvironmentalValues.get(secret.id).values.push({
-            environment: {
-              id: latestVersion.environmentId,
-              name: envIds.get(latestVersion.environmentId)
-            },
-            value: decryptValue
-              ? await decrypt(project.privateKey, latestVersion.value)
-              : latestVersion.value,
-            version: latestVersion.version
-          })
-        } else {
-          secretsWithEnvironmentalValues.set(secret.id, {
-            secret,
-            values: [
-              {
-                environment: {
-                  id: latestVersion.environmentId,
-                  name: envIds.get(latestVersion.environmentId)
-                },
-                value: decryptValue
-                  ? await decrypt(project.privateKey, latestVersion.value)
-                  : latestVersion.value,
-                version: latestVersion.version
-              }
-            ]
-          })
         }
+      >()
 
-        envIds.delete(latestVersion.environmentId)
+      for (const secretVersion of secret.versions) {
+        const environmentId = secretVersion.environment.id
+        const existingSecretVersion = envIdToSecretVersionMap.get(environmentId)
+
+        if (!existingSecretVersion) {
+          envIdToSecretVersionMap.set(environmentId, secretVersion)
+        } else {
+          if (existingSecretVersion.version < secretVersion.version) {
+            envIdToSecretVersionMap.set(environmentId, secretVersion)
+          }
+        }
       }
+
+      delete secret.versions
+
+      // Add the secret to the map
+      secretsWithEnvironmentalValues.add({
+        secret,
+        values: await Promise.all(
+          Array.from(envIdToSecretVersionMap.values()).map(
+            async (secretVersion) => ({
+              environment: {
+                id: secretVersion.environment.id,
+                name: secretVersion.environment.name,
+                slug: secretVersion.environment.slug
+              },
+              value: decryptValue
+                ? await decrypt(project.privateKey, secretVersion.value)
+                : secretVersion.value,
+              version: secretVersion.version
+            })
+          )
+        )
+      })
     }
 
+    // console.log(secretsWithEnvironmentalValues)
     const items = Array.from(secretsWithEnvironmentalValues.values())
 
     // Calculate pagination metadata

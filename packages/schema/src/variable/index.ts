@@ -98,8 +98,8 @@ export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
 })
 
 export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
-  VariableSchema.omit({ project: true, versions: true }).extend({
-    variable: z.object({
+  z.object({
+    variable: VariableSchema.omit({ project: true, versions: true }).extend({
       lastUpdatedBy: z.object({
         id: z.string(),
         name: z.string()
