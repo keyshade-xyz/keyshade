@@ -33,14 +33,11 @@ export const WorkspaceInvitationEmail = ({
     : 'You are Invited to Join the Workspace'
 
   return (
-    <BaseEmailTemplate
-      previewText={previewText}
-      heading={previewText}
-    >
+    <BaseEmailTemplate previewText={previewText} heading={previewText}>
       <Text style={text}>Dear User,</Text>
       <Text style={text}>
-        We're excited to inform you that you've been invited to join a
-        workspace on Keyshade. Here are the details of your invitation:
+        We're excited to inform you that you've been invited to join a workspace
+        on Keyshade. Here are the details of your invitation:
       </Text>
       <Section style={workspaceDetails}>
         <Text style={workspaceInfo}>
@@ -54,8 +51,8 @@ export const WorkspaceInvitationEmail = ({
         </Text>
       </Section>
       <Text style={text}>
-        Join the project by clicking the button below - we're excited to
-        have you!
+        Join the project by clicking the button below - we're excited to have
+        you!
       </Text>
       <Button href={actionUrl} style={ctaButton}>
         Get started

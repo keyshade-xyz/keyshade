@@ -42,13 +42,13 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
             <Heading style={h1}>{heading}</Heading>
             {children}
             <Text style={text}>
-                If you believe this action was taken in error or have any
-                questions regarding this change, please contact your project
-                administrator or our support team.
+              If you believe this action was taken in error or have any
+              questions regarding this change, please contact your project
+              administrator or our support team.
             </Text>
             <Text style={text}>
-                We appreciate your understanding and thank you for your
-                contributions to the project.
+              We appreciate your understanding and thank you for your
+              contributions to the project.
             </Text>
             <Text style={text}>
               Cheers,
