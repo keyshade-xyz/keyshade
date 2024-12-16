@@ -110,7 +110,7 @@
     "build:cli": "pnpm build:secret-scan && pnpm build:api-client && turbo run build --filter=cli",
     "build:api-client": "pnpm build:schema && turbo run --filter=@keyshade/api-client build",
     "build:schema": "turbo run build --filter=@keyshade/schema",
-    "build:secret-scan": "turbo run build --filter=secret-scan",
+    "build:secret-scan": "turbo run build --filter=@keyshade/secret-scan",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=api",
     "start:web": "turbo run start --filter=web",

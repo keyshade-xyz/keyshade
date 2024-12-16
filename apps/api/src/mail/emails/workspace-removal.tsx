@@ -24,8 +24,8 @@ export const RemovedFromWorkspaceEmail = ({
     >
       <Text style={text}>Dear User,</Text>
       <Text style={text}>
-        We hope this email finds you well. We are writing to inform you
-        that your access to the following workspace has been removed:
+        We hope this email finds you well. We are writing to inform you that
+        your access to the following workspace has been removed:
       </Text>
       <Section style={workspaceDetails}>
         <Text style={workspaceInfo}>
