@@ -100,14 +100,6 @@ export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
 export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
   z.object({
     variable: VariableSchema.omit({ project: true, versions: true }).extend({
-      versions: z.array(
-        z.object({
-          environment: z.object({
-            id: EnvironmentSchema.shape.id,
-            slug: EnvironmentSchema.shape.slug
-          })
-        })
-      ),
       lastUpdatedBy: z.object({
         id: z.string(),
         name: z.string()

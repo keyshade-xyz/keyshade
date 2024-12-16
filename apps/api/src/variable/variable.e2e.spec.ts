@@ -597,13 +597,92 @@ describe('Variable Controller Tests', () => {
 
       const { variable, values } = response.json().items[0]
       expect(variable).toBeDefined()
+      expect(variable.versions).toBeUndefined()
       expect(values).toBeDefined()
       expect(values.length).toBe(1)
       expect(values[0].value).toBe('Variable 1 value')
+      expect(values[0].version).toBe(1)
       expect(values[0].environment.id).toBe(environment1.id)
       expect(values[0].environment.slug).toBe(environment1.slug)
-      expect(variable.id).toBe(variable1.id)
-      expect(variable.name).toBe('Variable 1')
+      expect(values[0].environment.name).toBe(environment1.name)
+      expect(variable).toStrictEqual({
+        id: variable1.id,
+        name: variable1.name,
+        slug: variable1.slug,
+        note: variable1.note,
+        projectId: project1.id,
+        lastUpdatedById: variable1.lastUpdatedById,
+        lastUpdatedBy: {
+          id: user1.id,
+          name: user1.name
+        },
+        createdAt: variable1.createdAt.toISOString(),
+        updatedAt: variable1.updatedAt.toISOString()
+      })
+
+      //check metadata
+      const metadata = response.json().metadata
+      expect(metadata.totalCount).toEqual(1)
+      expect(metadata.links.self).toEqual(
+        `/variable/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.first).toEqual(
+        `/variable/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.previous).toBeNull()
+      expect(metadata.links.next).toBeNull()
+      expect(metadata.links.last).toEqual(
+        `/variable/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+    })
+
+    it('should be able to fetch only new versions of variable', async () => {
+      // update variable1
+      await variableService.updateVariable(user1, variable1.slug, {
+        entries: [
+          {
+            environmentSlug: environment1.slug,
+            value: 'Variable 1 new value'
+          }
+        ]
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${project1.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().items.length).toBe(1)
+
+      const { variable, values } = response.json().items[0]
+      expect(variable).toBeDefined()
+      expect(variable.versions).toBeUndefined()
+      expect(values).toBeDefined()
+      expect(values.length).toBe(1)
+      expect(values[0].value).toBe('Variable 1 new value')
+      expect(values[0].version).toBe(2)
+      expect(values[0].environment.id).toBe(environment1.id)
+      expect(values[0].environment.slug).toBe(environment1.slug)
+      expect(values[0].environment.name).toBe(environment1.name)
+
+      expect(variable).toStrictEqual({
+        id: variable1.id,
+        name: variable1.name,
+        slug: variable1.slug,
+        note: variable1.note,
+        projectId: project1.id,
+        lastUpdatedById: variable1.lastUpdatedById,
+        lastUpdatedBy: {
+          id: user1.id,
+          name: user1.name
+        },
+        createdAt: variable1.createdAt.toISOString(),
+        updatedAt: expect.any(String)
+      })
 
       //check metadata
       const metadata = response.json().metadata

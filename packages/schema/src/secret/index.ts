@@ -98,16 +98,7 @@ export const GetAllSecretsOfProjectResponseSchema = PageResponseSchema(
       lastUpdatedBy: z.object({
         id: z.string(),
         name: z.string()
-      }),
-      versions: z.array(
-        z.object({
-          environment: z.object({
-            id: EnvironmentSchema.shape.id,
-            slug: EnvironmentSchema.shape.slug,
-            name: EnvironmentSchema.shape.name
-          })
-        })
-      )
+      })
     }),
     values: z.object({
       environment: z.object({

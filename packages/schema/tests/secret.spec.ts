@@ -348,16 +348,7 @@ describe('Secret Schema Tests', () => {
               lastUpdatedBy: {
                 id: 'user123',
                 name: 'John Doe'
-              },
-              versions: [
-                {
-                  environment: {
-                    id: 'env123',
-                    slug: 'development',
-                    name: 'Development'
-                  }
-                }
-              ]
+              }
             },
             values: {
               environment: {
