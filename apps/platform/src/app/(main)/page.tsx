@@ -6,7 +6,6 @@ import type {
   ProjectWithCount,
   Workspace
 } from '@keyshade/schema'
-import { ProjectController } from '@keyshade/api-client'
 import { AddSVG } from '@public/svg/shared'
 import { FolderSVG } from '@public/svg/dashboard'
 import ProjectCard from '@/components/dashboard/projectCard'
@@ -38,6 +37,7 @@ import {
   DialogHeader,
   DialogTrigger
 } from '@/components/ui/dialog'
+import ControllerInstance from '@/lib/controller-instance'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -76,16 +76,13 @@ export default function Index(): JSX.Element {
   // If a workspace is selected, we want to fetch all the projects
   // under that workspace and display it in the dashboard.
   useEffect(() => {
-    const projectController = new ProjectController(
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    )
-
     async function getAllProjects() {
       if (currentWorkspace) {
-        const { success, error, data } = await projectController.getAllProjects(
-          { workspaceSlug: currentWorkspace.slug },
-          {}
-        )
+        const { success, error, data } =
+          await ControllerInstance.getInstance().projectController.getAllProjects(
+            { workspaceSlug: currentWorkspace.slug },
+            {}
+          )
 
         if (success && data) {
           setProjects(data.items)
@@ -105,16 +102,13 @@ export default function Index(): JSX.Element {
   // Function to create a new project
   const createNewProject = useCallback(async () => {
     if (currentWorkspace) {
-      const projectController = new ProjectController(
-        process.env.NEXT_PUBLIC_BACKEND_URL
-      )
-
       newProjectData.workspaceSlug = currentWorkspace.slug
 
-      const { data, error, success } = await projectController.createProject(
-        newProjectData,
-        {}
-      )
+      const { data, error, success } =
+        await ControllerInstance.getInstance().projectController.createProject(
+          newProjectData,
+          {}
+        )
 
       if (success && data) {
         setProjects([

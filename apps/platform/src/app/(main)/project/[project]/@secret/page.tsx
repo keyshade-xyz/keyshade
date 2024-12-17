@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import dayjs, { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { NoteIconSVG } from '@public/svg/secret'
+import type { GetAllSecretsOfProjectResponse } from '@keyshade/schema'
 import {
   Accordion,
   AccordionContent,
@@ -19,8 +20,6 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import type { Secret } from '@keyshade/schema'
-import { SecretController } from '@keyshade/api-client'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Tooltip,
@@ -29,31 +28,28 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
+import ControllerInstance from '@/lib/controller-instance'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
-  const [allSecrets, setAllSecrets] = useState<Secret[]>()
+  const [allSecrets, setAllSecrets] =
+    useState<GetAllSecretsOfProjectResponse['items']>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const pathname = usePathname()
 
   useEffect(() => {
     setIsLoading(true)
 
-    const secretController = new SecretController(
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    )
-
     async function getAllSecretsByProjectSlug() {
       const { success, error, data } =
-        await secretController.getAllSecretsOfProject(
+        await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
           { projectSlug: pathname.split('/')[2] },
           {}
         )
 
       if (success && data) {
-        //@ts-ignore
-        setAllSecrets(data)
+        setAllSecrets(data.items)
       } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
@@ -68,9 +64,9 @@ function SecretPage(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <SerectLoader />
-        <SerectLoader />
-        <SerectLoader />
+        <SecretLoader />
+        <SecretLoader />
+        <SecretLoader />
       </div>
     )
   }
@@ -82,7 +78,7 @@ function SecretPage(): React.JSX.Element {
         collapsible
         type="single"
       >
-        {allSecrets?.map((secret) => {
+        {allSecrets?.map(({ secret, values }) => {
           return (
             <AccordionItem
               className="rounded-xl bg-white/5 px-5"
@@ -126,7 +122,7 @@ function SecretPage(): React.JSX.Element {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {secret.versions.map((value) => {
+                    {values.map((value) => {
                       return (
                         <TableRow key={value.environment.id}>
                           <TableCell>{value.environment.slug}</TableCell>
@@ -147,7 +143,7 @@ function SecretPage(): React.JSX.Element {
   )
 }
 
-function SerectLoader(): React.JSX.Element {
+function SecretLoader(): React.JSX.Element {
   return (
     <div className=" rounded-xl bg-white/5 p-4">
       <div className="flex justify-between">

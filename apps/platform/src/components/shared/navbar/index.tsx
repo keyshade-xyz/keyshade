@@ -34,7 +34,7 @@ async function fetchNameImage(): Promise<UserNameImage | undefined> {
     )
     const data: User = (await response.json()) as User
     return {
-      name: data.name?.split(' ')[0] ?? data.email.split('@')[0],
+      name: data.name.split(' ')[0] ?? data.email.split('@')[0],
       image: data.profilePictureUrl
     }
   } catch (error) {

@@ -5,27 +5,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import { cn } from '@/lib/utils'
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
-import { apiClient } from '@/lib/api-client'
-// import type { Workspace } from '@/types'
-import { zWorkspace } from '@/types'
-import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  setWorkspace
-} from '@/lib/workspace-storage'
 import type { Workspace } from '@keyshade/schema'
 import { Input } from './input'
 import { Label } from './label'
@@ -38,39 +17,43 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { WorkspaceSchema } from '@keyshade/schema/schemas'
-
-interface WorkspaceResponse {
-  items: Workspace[]
-  metadata: {
-    page: number
-    perPage: number
-    pageCount: number
-    totalCount: number
-    links: {
-      self: string
-      first: string
-      previous: string | null
-      next: string | null
-      last: string
-    }
-  }
-}
+import {
+  getCurrentWorkspace,
+  setCurrentWorkspace,
+  setWorkspace
+} from '@/lib/workspace-storage'
+import { cn } from '@/lib/utils'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command'
+import ControllerInstance from '@/lib/controller-instance'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
-    const workspaceData: WorkspaceResponse =
-      await apiClient.get<WorkspaceResponse>('/workspace')
+    const { data, success, error } =
+      await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+        {},
+        {}
+      )
 
-    // TODO: We are getting error here from the success flag, need to see this again
-    // const { success, data } = WorkspaceSchema.array().safeParse(workspaceData.items)
-    // if (!success) {
-    //   throw new Error('Invalid data')
-    // }
+    if (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+      return undefined
+    }
 
-    return workspaceData.items
-    // return data
-    // return workspaceData;
+    if (success && data) {
+      return data.items
+    }
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
     console.error(error)
@@ -92,11 +75,25 @@ export function Combobox(): React.JSX.Element {
     }
     setIsNameEmpty(false)
     try {
-      const response = await apiClient.post<Workspace>('/workspace', {
-        name
-      })
-      setCurrentWorkspace(response)
-      setOpen(false)
+      const { data, error, success } =
+        await ControllerInstance.getInstance().workspaceController.createWorkspace(
+          {
+            name
+          },
+          {}
+        )
+
+      if (error) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+        return
+      }
+
+      if (success && data) {
+        toast.success('Workspace created successfully')
+        setCurrentWorkspace(data)
+        setOpen(false)
+      }
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)

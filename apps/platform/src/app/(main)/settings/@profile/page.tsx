@@ -1,54 +1,52 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import type { User } from '@keyshade/schema'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
-import { apiClient } from '@/lib/api-client'
-
-type UserData = Omit<
-  User,
-  'id' | 'isActive' | 'isOnboardingFinished' | 'isAdmin' | 'authProvider'
->
-async function getUserDetails(): Promise<User | undefined> {
-  try {
-    return await apiClient.get<User>('/user')
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
-
-async function updateUserDetails(userData: UserData): Promise<void> {
-  try {
-    await apiClient.put<User>('/user', userData)
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
 
 function ProfilePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [userData, setUserData] = useState<UserData>({
+  const [userData, setUserData] = useState({
     email: '',
     name: '',
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
 
+  const updateSelf = useCallback(async () => {
+    try {
+      await ControllerInstance.getInstance().userController.updateSelf(
+        {
+          name: userData.name,
+          email: userData.email
+        },
+        {}
+      )
+      toast.success('Profile updated successfully')
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+    }
+    setIsModified(false)
+  }, [userData])
+
   useEffect(() => {
-    getUserDetails()
-      .then((data) => {
-        if (data) {
+    ControllerInstance.getInstance()
+      .userController.getSelf()
+      .then(({ data, success, error }) => {
+        if (success && data) {
           setUserData({
             email: data.email,
-            name: data.name ?? '',
-            profilePictureUrl: data.profilePictureUrl
+            name: data.name,
+            profilePictureUrl: data.profilePictureUrl || ''
           })
           setIsLoading(false)
+        } else {
+          // eslint-disable-next-line no-console -- we need to log the error
+          console.error(error)
         }
       })
       .catch((error) => {
@@ -67,7 +65,7 @@ function ProfilePage(): React.JSX.Element {
             Upload a picture to change your avatar across Keyshade.
           </span>
         </div>
-        <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />{' '}
+        <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />
         {/* //! This is will be replaced by an image tag */}
       </div>
       {/* Name */}
@@ -87,7 +85,7 @@ function ProfilePage(): React.JSX.Element {
               setUserData((prev) => ({ ...prev, name: e.target.value }))
             }}
             placeholder="name"
-            value={userData.name ?? ''}
+            value={userData.name || ''}
           />
         )}
       </div>
@@ -114,20 +112,7 @@ function ProfilePage(): React.JSX.Element {
         )}
       </div>
       <div>
-        <Button
-          disabled={!isModified}
-          onClick={() => {
-            updateUserDetails(userData)
-              .then(() => {
-                toast.success('User details updated successfully')
-              })
-              .catch(() => {
-                toast.error('Failed to update user details')
-              })
-            setIsModified(false)
-          }}
-          variant="secondary"
-        >
+        <Button disabled={!isModified} onClick={updateSelf} variant="secondary">
           Save Changes
         </Button>
       </div>
