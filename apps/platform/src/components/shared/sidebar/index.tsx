@@ -6,8 +6,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import { Combobox } from '@/components/ui/combobox'
 import SidebarTab from './sidebarTab'
+import { Combobox } from '@/components/ui/combobox'
 
 function Sidebar(): JSX.Element {
   const sidebarTabData = [
