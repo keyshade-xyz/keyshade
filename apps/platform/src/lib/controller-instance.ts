@@ -1,30 +1,90 @@
-import { AuthController } from '@keyshade/api-client'
+import {
+  AuthController,
+  EnvironmentController,
+  ProjectController,
+  SecretController,
+  UserController,
+  VariableController,
+  WorkspaceController,
+  WorkspaceMembershipController,
+  WorkspaceRoleController
+} from '@keyshade/api-client'
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
 
-  private _authController: AuthController | null = null
+  private _authController: AuthController
+  private _userController: UserController
+  private _workspaceController: WorkspaceController
+  private _workspaceMembershipController: WorkspaceMembershipController
+  private _workspaceRoleController: WorkspaceRoleController
+  private _projectController: ProjectController
+  private _environmentController: EnvironmentController
+  private _secretController: SecretController
+  private _variableController: VariableController
 
   get authController(): AuthController {
-    if (!this._authController) {
-      throw new Error('ControllerInstance not initialized')
-    }
     return this._authController
   }
 
-  static initialize(baseUrl: string): void {
-    if (!ControllerInstance.instance) {
-      const instance = new ControllerInstance()
+  get workspaceController(): WorkspaceController {
+    return this._workspaceController
+  }
 
-      instance._authController = new AuthController(baseUrl)
+  get workspaceMembershipController(): WorkspaceMembershipController {
+    return this._workspaceMembershipController
+  }
 
-      ControllerInstance.instance = instance
-    }
+  get workspaceRoleController(): WorkspaceRoleController {
+    return this._workspaceRoleController
+  }
+
+  get projectController(): ProjectController {
+    return this._projectController
+  }
+
+  get environmentController(): EnvironmentController {
+    return this._environmentController
+  }
+
+  get secretController(): SecretController {
+    return this._secretController
+  }
+
+  get variableController(): VariableController {
+    return this._variableController
+  }
+
+  get userController(): UserController {
+    return this._userController
   }
 
   static getInstance(): ControllerInstance {
     if (!ControllerInstance.instance) {
-      throw new Error('ControllerInstance not initialized')
+      ControllerInstance.instance = new ControllerInstance()
+      ControllerInstance.instance._authController = new AuthController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._userController = new UserController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._workspaceController =
+        new WorkspaceController(process.env.NEXT_PUBLIC_BACKEND_URL)
+      ControllerInstance.instance._workspaceMembershipController =
+        new WorkspaceMembershipController(process.env.NEXT_PUBLIC_BACKEND_URL)
+      ControllerInstance.instance._workspaceRoleController =
+        new WorkspaceRoleController(process.env.NEXT_PUBLIC_BACKEND_URL)
+      ControllerInstance.instance._projectController = new ProjectController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._environmentController =
+        new EnvironmentController(process.env.NEXT_PUBLIC_BACKEND_URL)
+      ControllerInstance.instance._secretController = new SecretController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._variableController = new VariableController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
     }
     return ControllerInstance.instance
   }

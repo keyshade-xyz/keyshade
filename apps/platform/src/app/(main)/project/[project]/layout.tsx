@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AddSVG } from '@public/svg/shared'
+import type { Project } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,8 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { Project } from '@/types'
-import { Projects } from '@/lib/api-functions/projects'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -38,14 +38,22 @@ function DetailedProjectPage({
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
   useEffect(() => {
-    Projects.getProjectbyID(params.project)
-      .then((project) => {
-        setCurrentProject(project)
-      })
-      .catch((error) => {
+    async function getProjectBySlug() {
+      const { success, error, data } =
+        await ControllerInstance.getInstance().projectController.getProject(
+          { projectSlug: params.project },
+          {}
+        )
+
+      if (success && data) {
+        setCurrentProject(data)
+      } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
-      })
+      }
+    }
+
+    getProjectBySlug()
   }, [params.project])
 
   return (
