@@ -5,9 +5,9 @@ on:
     branches:
       - '!develop'
       - '!main'
-    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
+    paths: ['apps/api/**', '.github/workflows/validate-api.yaml']
   pull_request:
-    paths: ['apps/api/**', '.github/workflows/validate-api.yml']
+    paths: ['apps/api/**', '.github/workflows/validate-api.yaml']
 
 jobs:
   validate:
