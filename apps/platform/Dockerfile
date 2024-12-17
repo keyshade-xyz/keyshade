@@ -1,6 +1,5 @@
 FROM node:20-alpine AS base
 
-
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
 RUN apk update && apk upgrade
@@ -27,8 +26,7 @@ RUN pnpm install --no-cache --ignore-scripts
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-
-RUN pnpm turbo build --filter=platform...
+RUN pnpm build:platform
 
 FROM base AS runner
 WORKDIR /app
