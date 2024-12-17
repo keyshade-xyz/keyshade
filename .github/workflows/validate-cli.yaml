@@ -7,6 +7,8 @@ on:
       - '!main'
     paths:
       [
+        'packages/api-client/**',
+        'packages/secret-scan/**',
         'apps/cli/**',
         '.github/workflows/validate-cli.yml',
         '.github/workflows/deploy-cli.yml'
@@ -14,6 +16,8 @@ on:
   pull_request:
     paths:
       [
+        'packages/api-client/**',
+        'packages/secret-scan/**',
         'apps/cli/**',
         '.github/workflows/deploy-cli.yml',
         '.github/workflows/validate-cli.yml'
