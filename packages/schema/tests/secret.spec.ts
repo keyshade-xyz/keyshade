@@ -350,15 +350,17 @@ describe('Secret Schema Tests', () => {
                 name: 'John Doe'
               }
             },
-            values: {
-              environment: {
-                id: 'env123',
-                name: 'Development',
-                slug: 'development'
-              },
-              value: 'secret-value',
-              version: 1
-            }
+            values: [
+              {
+                environment: {
+                  id: 'env123',
+                  name: 'Development',
+                  slug: 'development'
+                },
+                value: 'secret-value',
+                version: 1
+              }
+            ]
           }
         ],
         metadata: {
