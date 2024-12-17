@@ -16,7 +16,6 @@ import {
   GetRevisionsOfSecretResponseSchema
 } from '@/secret'
 import { rotateAfterEnum } from '@/enums'
-import { env, versions } from 'process'
 
 describe('Secret Schema Tests', () => {
   describe('SecretSchema Tests', () => {
