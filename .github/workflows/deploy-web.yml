@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'beta' || 'staging' }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'beta' || 'stage' }}
     name: Build and push Web docker image for release
 
     steps:
