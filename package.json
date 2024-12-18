@@ -101,7 +101,7 @@
     "lint:platform": "turbo run lint --filter=platform",
     "lint:cli": "turbo run lint --filter=cli",
     "lint:api-client": "turbo run lint --filter=@keyshade/api-client",
-    "lint:secret-scan": "turbo run lint --filter=secret-scan",
+    "lint:secret-scan": "turbo run lint --filter=@keyshade/secret-scan",
     "lint:schema": "turbo run lint --filter=@keyshade/schema",
     "build": "turbo run build",
     "build:api": "pnpm db:generate-types && turbo run build --filter=api",
