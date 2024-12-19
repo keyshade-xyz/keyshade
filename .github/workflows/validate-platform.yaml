@@ -7,16 +7,18 @@ on:
       - '!main'
     paths:
       [
+        'packages/api-client/**',
         'apps/platform/**',
-        '.github/workflows/validate-platform.yml',
-        '.github/workflows/deploy-platform.yml'
+        '.github/workflows/validate-platform.yaml',
+        '.github/workflows/deploy-platform.yaml'
       ]
   pull_request:
     paths:
       [
+        'packages/api-client/**',
         'apps/platform/**',
-        '.github/workflows/deploy-platform.yml',
-        '.github/workflows/validate-platform.yml'
+        '.github/workflows/deploy-platform.yaml',
+        '.github/workflows/validate-platform.yaml'
       ]
 
 jobs:
