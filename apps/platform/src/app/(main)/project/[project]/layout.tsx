@@ -68,8 +68,8 @@ function DetailedProjectPage({
     }
 
     const request: CreateVariableRequest = {
-      name: newVariableData.variableName,
-      projectSlug: currentProject.slug,
+      name: newVariableData.variableName.toUpperCase(),
+      projectSlug: currentProject?.slug as string,
       entries: newVariableData.environmentValue
         ? [
             {
@@ -81,7 +81,7 @@ function DetailedProjectPage({
       note: newVariableData.note
     }
 
-    const { error } =
+    const { success, error, data } =
       await ControllerInstance.getInstance().variableController.createVariable(
         request,
         {}
@@ -116,17 +116,13 @@ function DetailedProjectPage({
 
   useEffect(() => {
     const getAllEnvironments = async () => {
-      if (!currentProject) {
-        throw new Error("Current project doesn't exist")
-      }
-
       const {
         success,
         error,
         data
       }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
         await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: currentProject.slug },
+          { projectSlug: currentProject!.slug },
           {}
         )
 
@@ -201,8 +197,8 @@ function DetailedProjectPage({
           <Dialog onOpenChange={setIsOpen} open={isOpen}>
             <DialogTrigger asChild>
               <Button
-                className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
                 variant="outline"
+                className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
               >
                 <AddSVG /> Add Variable
               </Button>
