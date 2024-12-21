@@ -10,6 +10,7 @@ import type {
   GetAllEnvironmentsOfProjectResponse,
   Project
 } from '@keyshade/schema'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -69,7 +70,7 @@ function DetailedProjectPage({
 
     const request: CreateVariableRequest = {
       name: newVariableData.variableName,
-      projectSlug: currentProject?.slug as string,
+      projectSlug: currentProject.slug,
       entries: newVariableData.environmentValue
         ? [
             {
@@ -81,15 +82,37 @@ function DetailedProjectPage({
       note: newVariableData.note
     }
 
-    const { success, error, data } =
+    const { success, error } =
       await ControllerInstance.getInstance().variableController.createVariable(
         request,
         {}
       )
 
+    if (success) {
+      toast.success('Variable added successfully', {
+        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
+        description: () => (
+          <p className="text-xs text-emerald-300">
+            The variable has been added to the project
+          </p>
+        )
+      })
+    }
+
     if (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
+      if (error.statusCode === 409) {
+        toast.error('Variable name already exists', {
+          // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
+          description: () => (
+            <p className="text-xs text-red-300">
+              Variable name is already there, kindly use different one.
+            </p>
+          )
+        })
+      } else {
+        // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
+        console.error(error)
+      }
     }
 
     setIsOpen(false)
@@ -116,13 +139,17 @@ function DetailedProjectPage({
 
   useEffect(() => {
     const getAllEnvironments = async () => {
+      if (!currentProject) {
+        return
+      }
+
       const {
         success,
         error,
         data
       }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
         await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: currentProject!.slug },
+          { projectSlug: currentProject.slug },
           {}
         )
 
@@ -197,8 +224,8 @@ function DetailedProjectPage({
           <Dialog onOpenChange={setIsOpen} open={isOpen}>
             <DialogTrigger asChild>
               <Button
-                variant="outline"
                 className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+                variant="outline"
               >
                 <AddSVG /> Add Variable
               </Button>
@@ -206,19 +233,15 @@ function DetailedProjectPage({
             <DialogContent className="h-[23.313rem] w-[31.625rem] border-gray-800 bg-[#1a1a1a] text-white ">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold">
-                  <div className="flex h-[2.813rem] w-[28.313rem] flex-col justify-start gap-y-2 ">
-                    <p className="h-[1.25rem] w-[9.375rem] text-base">
-                      Add a new variable
-                    </p>
-                    <p className="h-[1.063rem] w-[28.313rem] text-sm font-[400] text-white text-opacity-60">
-                      Add a new variable to the project
-                    </p>
-                  </div>
+                  Add a new variable
                 </DialogTitle>
+                <DialogDescription>
+                  Add a new variable to the project
+                </DialogDescription>
               </DialogHeader>
 
               <div className=" text-white">
-                <form className="space-y-4">
+                <div className="space-y-4">
                   <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
                     <label
                       className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
@@ -316,13 +339,12 @@ function DetailedProjectPage({
                   <div className="flex justify-end pt-4">
                     <Button
                       className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                      onClick={() => addVariable}
-                      type="submit"
+                      onClick={addVariable}
                     >
                       Add Variable
                     </Button>
                   </div>
-                </form>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
