@@ -68,7 +68,7 @@ function DetailedProjectPage({
     }
 
     const request: CreateVariableRequest = {
-      name: newVariableData.variableName.toUpperCase(),
+      name: newVariableData.variableName,
       projectSlug: currentProject?.slug as string,
       entries: newVariableData.environmentValue
         ? [
