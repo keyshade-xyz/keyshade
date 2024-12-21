@@ -38,6 +38,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import ControllerInstance from '@/lib/controller-instance'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
@@ -192,8 +193,8 @@ export default function Index(): JSX.Element {
                   >
                     Description
                   </Label>
-                  <Input
-                    className="col-span-3 h-[5.625rem] w-[20rem] gap-[0.25rem]"
+                  <Textarea
+                    className="col-span-3 h-[5.625rem] w-[20rem] resize-none gap-[0.25rem]"
                     id="name"
                     onChange={(e) => {
                       setNewProjectData((prev) => ({
@@ -219,7 +220,10 @@ export default function Index(): JSX.Element {
                     onChange={(e) => {
                       setNewProjectData((prev) => ({
                         ...prev,
-                        envName: e.target.value
+                        environments: (prev.environments || []).map(
+                          (env, index) =>
+                            index === 0 ? { ...env, name: e.target.value } : env
+                        )
                       }))
                     }}
                     placeholder="Your project default environment name"
@@ -234,13 +238,18 @@ export default function Index(): JSX.Element {
                   >
                     Env. Description
                   </Label>
-                  <Input
-                    className="col-span-3 h-[4.875rem] w-[20rem] "
+                  <Textarea
+                    className="col-span-3 h-[4.875rem] w-[20rem] resize-none"
                     id="envDescription"
                     onChange={(e) => {
                       setNewProjectData((prev) => ({
                         ...prev,
-                        envDescription: e.target.value
+                        environments: (prev.environments || []).map(
+                          (env, index) =>
+                            index === 0
+                              ? { ...env, description: e.target.value }
+                              : env
+                        )
                       }))
                     }}
                     placeholder="Detailed description about your environment"
@@ -267,7 +276,7 @@ export default function Index(): JSX.Element {
                       }))
                     }}
                   >
-                    <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 focus:border-[#3b82f6]">
+                    <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
