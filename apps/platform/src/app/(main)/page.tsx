@@ -144,10 +144,12 @@ export default function Index(): JSX.Element {
 
         <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
           <DialogTrigger>
-            <Button onClick={toggleDialog}>
-              {' '}
-              <AddSVG /> Create a new Project
-            </Button>
+            {isProjectEmpty ? null : (
+              <Button onClick={toggleDialog}>
+                {' '}
+                <AddSVG /> Create a new Project
+              </Button>
+            )}
           </DialogTrigger>
           <DialogContent className="h-[39.5rem] w-[28.625rem] rounded-[12px] border bg-[#1E1E1F] ">
             <div className="flex h-[3.125rem] w-[25.625rem] flex-col items-start justify-center">
@@ -334,7 +336,9 @@ export default function Index(): JSX.Element {
           <div>
             Create a file and start setting up your environment and secret keys
           </div>
-          <Button variant="secondary">Create project</Button>
+          <Button onClick={toggleDialog} variant="secondary">
+            Create project
+          </Button>
         </div>
       )}
 
