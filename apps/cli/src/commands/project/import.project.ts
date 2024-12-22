@@ -82,6 +82,9 @@ export default class ImportEnvs extends BaseCommand {
         `Importing secrets and variables to project: ${projectSlug} and environment: ${environmentSlug} with default settings`
       )
 
+      let noOfSecrets = 0
+      let noOfVariables = 0
+      const errors: string[] = []
       for (const [key, value] of secretsAndVariables.secrets) {
         const { data, error, success } =
           await ControllerInstance.getInstance().secretController.createSecret(
@@ -99,12 +102,11 @@ export default class ImportEnvs extends BaseCommand {
           )
 
         if (success) {
-          Logger.info(`Secret ${data.name} created with slug ${data.slug}!`)
+          ++noOfSecrets
         } else {
-          Logger.error(
-            `Failed to create secret for ${key} : ${error.message}.\nAborting!`
+          errors.push(
+            `Failed to create secret for ${key}. Error: ${error.message}.`
           )
-          throw Error('Error while creating secret')
         }
       }
 
@@ -125,15 +127,17 @@ export default class ImportEnvs extends BaseCommand {
           )
 
         if (success) {
-          Logger.info(`Variable ${data.name} created with slug ${data.slug}!`)
+          ++noOfVariables
         } else {
-          Logger.error(
-            `Failed to create variable for ${key} : ${error.message}.\nAborting!`
+          errors.push(
+            `Failed to create variable for ${key}. Error: ${error.message}.`
           )
-          throw Error('Error while creating variable')
         }
       }
-      Logger.info('Import completed!')
+      Logger.info(
+        `Imported ${noOfSecrets} secrets and ${noOfVariables} variables.`
+      )
+      if (errors.length) Logger.error(errors.join('\n'))
     } catch (error) {
       const errorMessage = (error as Error)?.message
       Logger.error(
