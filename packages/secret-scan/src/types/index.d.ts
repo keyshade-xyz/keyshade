@@ -9,6 +9,6 @@ export interface SecretResult {
 }
 
 export interface ScanObjectResult {
-  secrets: Array<string[]> // string[] -> [key, value]
-  variables: Array<string[]> // string[] -> [key, value]
+  secrets: string[][] // string[] -> [key, value]
+  variables: string[][] // string[] -> [key, value]
 }
