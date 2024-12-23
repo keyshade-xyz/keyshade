@@ -3,7 +3,7 @@ import CreateProject from './project/create.project'
 import DeleteProject from './project/delete.project'
 import ForkProject from './project/fork.project'
 import GetProject from './project/get.project'
-import ImportEnvs from './project/import.project'
+import ImportFromEnv from './project/import.project'
 import ListProjectForks from './project/list-forks.project'
 import ListProject from './project/list.project'
 import SyncProject from './project/sync.project'
@@ -30,7 +30,7 @@ export default class ProjectCommand extends BaseCommand {
       new SyncProject(),
       new UnlinkProject(),
       new UpdateProject(),
-      new ImportEnvs()
+      new ImportFromEnv()
     ]
   }
 }

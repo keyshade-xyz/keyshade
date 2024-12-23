@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '../base.command'
 import { confirm, text } from '@clack/prompts'
@@ -11,7 +12,7 @@ import path from 'node:path'
 import dotenv from 'dotenv'
 import secretDetector from '@keyshade/secret-scan'
 
-export default class ImportEnvs extends BaseCommand {
+export default class ImportFromEnv extends BaseCommand {
   getName(): string {
     return 'import'
   }
@@ -25,9 +26,15 @@ export default class ImportEnvs extends BaseCommand {
       {
         name: '<Project Slug>',
         description: 'Slug of the project where envs will be imported.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<.env file path>',
+        short: '-f',
+        long: '--env-file <string>',
         description: 'Path to the .env file'
       }
     ]
@@ -37,29 +44,38 @@ export default class ImportEnvs extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [projectSlug, dotEnvPath] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [projectSlug] = args
+    const { envFile } = options
 
     try {
-      const envFileContent = await fs.readFile(
-        path.resolve(dotEnvPath),
-        'utf-8'
-      )
+      const resolvedPath = path.resolve(envFile)
+      const exists = await fs
+        .access(resolvedPath)
+        .then(() => true)
+        .catch(() => false)
+      if (!exists) {
+        throw new Error(`The .env file does not exist at path: ${resolvedPath}`)
+      }
+      const envFileContent = await fs.readFile(resolvedPath, 'utf-8')
 
       const envVariables = dotenv.parse(envFileContent)
+      if (Object.keys(envVariables).length === 0) {
+        throw new Error('No environment variables found in the provided file')
+      }
 
-      const secretsAndVariables = secretDetector.detectObject(envVariables)
+      const secretsAndVariables = secretDetector.detectJsObject(envVariables)
 
       Logger.info(
         'Detected secrets:\n' +
-          secretsAndVariables.secrets
-            .map((secret) => secret[0] + ' = ' + secret[1])
+          Object.entries(secretsAndVariables.secrets)
+            .map(([key, value]) => key + ' = ' + value)
             .join('\n')
       )
       Logger.info(
         'Detected variables:\n' +
-          secretsAndVariables.variables
-            .map((variable) => variable[0] + ' = ' + variable[1])
+          Object.entries(secretsAndVariables.variables)
+            .map(([key, value]) => key + ' = ' + value)
             .join('\n')
       )
 
@@ -85,8 +101,8 @@ export default class ImportEnvs extends BaseCommand {
       let noOfSecrets = 0
       let noOfVariables = 0
       const errors: string[] = []
-      for (const [key, value] of secretsAndVariables.secrets) {
-        const { data, error, success } =
+      for (const [key, value] of Object.entries(secretsAndVariables.secrets)) {
+        const { error, success } =
           await ControllerInstance.getInstance().secretController.createSecret(
             {
               projectSlug,
@@ -110,8 +126,10 @@ export default class ImportEnvs extends BaseCommand {
         }
       }
 
-      for (const [key, value] of secretsAndVariables.variables) {
-        const { data, error, success } =
+      for (const [key, value] of Object.entries(
+        secretsAndVariables.variables
+      )) {
+        const { error, success } =
           await ControllerInstance.getInstance().variableController.createVariable(
             {
               projectSlug,

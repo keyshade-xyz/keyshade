@@ -1,5 +1,5 @@
 import denylist from '@/denylist'
-import type { SecretResult, ScanObjectResult } from '@/types'
+import type { SecretResult, ScanJsObjectResult } from '@/types'
 
 export type SecretConfig = Record<string, RegExp[]>
 
@@ -23,17 +23,22 @@ class SecretDetector {
     return { found: false }
   }
 
-  detectObject(input: Record<string, string>): ScanObjectResult {
-    const result = {
-      secrets: [],
-      variables: []
+  /**
+   * Detects if a given js object contains any secret patterns.
+   * @param input - The object to scan for secret patterns.
+   * @returns A `ScanJsObjectResult` object containing the secrets and variables found in the object.
+   */
+  detectJsObject(input: Record<string, string>): ScanJsObjectResult {
+    const result: ScanJsObjectResult = {
+      secrets: {},
+      variables: {}
     }
     for (const [key, value] of Object.entries(input)) {
       const secretResult = this.detect(value)
       if (secretResult.found) {
-        result.secrets.push([key, value])
+        result.secrets[key] = value
       } else {
-        result.variables.push([key, value])
+        result.variables[key] = value
       }
     }
 
