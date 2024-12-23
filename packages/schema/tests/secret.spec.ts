@@ -16,7 +16,6 @@ import {
   GetRevisionsOfSecretResponseSchema
 } from '@/secret'
 import { rotateAfterEnum } from '@/enums'
-import { env, versions } from 'process'
 
 describe('Secret Schema Tests', () => {
   describe('SecretSchema Tests', () => {
@@ -350,15 +349,17 @@ describe('Secret Schema Tests', () => {
                 name: 'John Doe'
               }
             },
-            values: {
-              environment: {
-                id: 'env123',
-                name: 'Development',
-                slug: 'development'
-              },
-              value: 'secret-value',
-              version: 1
-            }
+            values: [
+              {
+                environment: {
+                  id: 'env123',
+                  name: 'Development',
+                  slug: 'development'
+                },
+                value: 'secret-value',
+                version: 1
+              }
+            ]
           }
         ],
         metadata: {

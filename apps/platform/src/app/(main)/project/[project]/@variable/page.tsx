@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { VariableController } from '@keyshade/api-client'
 import {
   ClientResponse,
   GetAllVariablesOfProjectResponse,
@@ -10,7 +9,7 @@ import {
 } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
 import { MessageSVG } from '@public/svg/shared'
-import { ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
@@ -21,22 +20,22 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface VariablePageProps {
   currentProject: Project | undefined
-  // availableEnvironments: Environment[]
 }
 
 
 function VariablePage({
   currentProject
-  // availableEnvironments
 }: VariablePageProps): React.JSX.Element {
 
   const [allVariables, setAllVariables] = useState<GetAllVariablesOfProjectResponse['items']>([])
   // Holds the currently open section ID
   const [openSections, setOpenSections] = useState<Set<string>>(new Set())
 
+  //Environments table toggle logic
   const toggleSection = (id: string) => {
     setOpenSections((prev) => {
       const newSet = new Set(prev)
@@ -50,18 +49,16 @@ function VariablePage({
   }
 
   useEffect(() => {
-    const variableController = new VariableController(
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    )
 
-    const getVariables = async () => {
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllVariablesOfProjectResponse> =
-        await variableController.getAllVariablesOfProject(
-          { projectSlug: currentProject?.slug },
+    const getAllVariables = async () => {
+
+      if (!currentProject) {
+        return
+      }
+
+      const { success, error, data }: ClientResponse<GetAllVariablesOfProjectResponse> = 
+      await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+          { projectSlug: currentProject.slug },
           {}
         )
 
@@ -73,11 +70,12 @@ function VariablePage({
       }
     }
 
-    getVariables()
+    getAllVariables()
   }, [currentProject])
 
   return (
     <div className="flex h-full w-full justify-center  ">
+
       {/* Showing this when there are no variables present */}
       {allVariables.length === 0 ? (
         <div className="flex h-[23.75rem] w-[30.25rem] flex-col items-center justify-center gap-y-8">
@@ -97,6 +95,7 @@ function VariablePage({
           </Button>
         </div>
       ) : (
+        // Showing this when variables are present
         <div className="flex h-full w-full flex-col items-center justify-start gap-y-8 text-white p-3">
           {allVariables.map((variable) => (
             <Collapsible
@@ -158,9 +157,7 @@ function VariablePage({
                     </TableBody>
                   </Table>
                 ) : (
-                  <p className="text-zinc-400">
-                    No content available for this section.
-                  </p>
+                  <></>
                 )}
               </CollapsibleContent>
             </Collapsible>

@@ -1,8 +1,16 @@
 'use client'
-
+import type { MouseEvent, MouseEventHandler } from 'react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { AddSVG, ErrorSVG, VectorSVG } from '@public/svg/shared'
+import { AddSVG } from '@public/svg/shared'
+import type {
+  ClientResponse,
+  CreateVariableRequest,
+  Environment,
+  GetAllEnvironmentsOfProjectResponse,
+  Project
+} from '@keyshade/schema'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,6 +20,9 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import ControllerInstance from '@/lib/controller-instance'
 import {
   Select,
   SelectContent,
@@ -19,22 +30,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  ProjectController,
-  EnvironmentController,
-  VariableController
-} from '@keyshade/api-client'
-import {
-  ClientResponse,
-  CreateVariableRequest,
-  Environment,
-  GetAllEnvironmentsOfProjectResponse,
-  Project
-} from '@keyshade/schema'
 import VariablePage from './@variable/page'
-import { toast } from "sonner"
 import { Toaster } from '@/components/ui/sonner'
 
 interface DetailedProjectPageProps {
@@ -53,34 +49,6 @@ function DetailedProjectPage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
   const [value, setValue] = useState<string>('')
   const [currentProject, setCurrentProject] = useState<Project>()
-
-  const searchParams = useSearchParams()
-  const tab = searchParams.get('tab') ?? 'rollup-details'
-
-  useEffect(() => {
-    const getCurrentProject = async () => {
-      const projectController = new ProjectController(
-        process.env.NEXT_PUBLIC_BACKEND_URL
-      )
-
-      const { success, error, data } = await projectController.getProject(
-        { projectSlug: params.project },
-        {}
-      )
-
-      if (success && data) {
-        setCurrentProject(data as Project)
-      } else {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    getCurrentProject()
-  }, [params.project])
-
-
-  //VARIABLES PART
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [newVariableData, setNewVariableData] = useState({
     variableName: '',
@@ -88,22 +56,21 @@ function DetailedProjectPage({
     environmentName: '',
     environmentValue: ''
   })
-  const [availableEnvironments, setAvailableEnvironments] = useState<
-    Environment[]
-  >([])
+  const [availableEnvironments, setAvailableEnvironments] = useState<Environment[]>([])
 
+  const searchParams = useSearchParams()
+  const tab = searchParams.get('tab') ?? 'rollup-details'
 
-  const addVariable = async (e: any) => {
-
+  const addVariable = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
 
-    const variableController = new VariableController(
-      process.env.NEXT_PUBLIC_BACKEND_URL
-    )
+    if (!currentProject) {
+      throw new Error("Current project doesn't exist")
+    }
 
     const request: CreateVariableRequest = {
       name: newVariableData.variableName,
-      projectSlug: currentProject?.slug as string,
+      projectSlug: currentProject.slug,
       entries: newVariableData.environmentValue
         ? [
             {
@@ -115,63 +82,74 @@ function DetailedProjectPage({
       note: newVariableData.note
     }
 
-    const { success, error, data } = await variableController.createVariable(
-      request,
-      {}
-    )
+    const { success, error } =
+      await ControllerInstance.getInstance().variableController.createVariable(
+        request,
+        {}
+      )
 
-    if( success ){
-      toast( 
-        <div className='flex flex-col justify-center items-start h-[4.5rem] w-[23.438rem] rounded-md bg-[#022C22] text-[#6EE7B7]'> 
-          <div className='flex justify-center items-center gap-x-4'> 
-            <VectorSVG /> 
-            <div className='flex flex-col justify-center '>
-              <p className='text-sm font-semibold'>Variable created successfully</p> 
-              <p className='text-xs font-normal'>You created new variable</p>
-            </div>
-          </div> 
-        </div>, {
-        style: { height: '4.5rem', width: '23.438rem', borderRadius: '0.375rem', backgroundColor: '#022C22', color: '#6EE7B7', overflow: 'hidden' }
-      })
-    }
-    if( error ){
-      toast( 
-        <div className='flex flex-col justify-center items-start h-[4.5rem] w-[23.438rem] rounded-md bg-[#450A0A] text-[#E92D1F]'> 
-          <div className='flex justify-center items-center gap-x-4'> 
-            <ErrorSVG /> 
-            <div className='flex flex-col justify-center '>
-              <p className='text-sm font-semibold'>Variable name already exists</p> 
-              <p className='text-xs font-normal'>Variable name is already there, kindly use different one</p>
-            </div>
-          </div> 
-        </div>, {
-        style: { height: '4.5rem', width: '23.438rem', borderRadius: '0.375rem', backgroundColor: '#450A0A', color: '#E92D1F', overflow: 'hidden' }
+    if (success) {
+      toast.success('Variable added successfully', {
+        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
+        description: () => (
+          <p className="text-xs text-emerald-300">
+            The variable has been added to the project
+          </p>
+        )
       })
     }
 
-    setNewVariableData({
-      variableName: '',
-      note: '',
-      environmentName: '',
-      environmentValue: ''
-    })
+    if (error) {
+      if (error.statusCode === 409) {
+        toast.error('Variable name already exists', {
+          // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
+          description: () => (
+            <p className="text-xs text-red-300">
+              Variable name is already there, kindly use different one.
+            </p>
+          )
+        })
+      } else {
+        // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
+        console.error(error)
+      }
+    }
 
     setIsOpen(false)
   }
 
   useEffect(() => {
+    async function getProjectBySlug() {
+      const { success, error, data } =
+        await ControllerInstance.getInstance().projectController.getProject(
+          { projectSlug: params.project },
+          {}
+        )
+
+      if (success && data) {
+        setCurrentProject(data)
+      } else {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
+    }
+
+    getProjectBySlug()
+  }, [params.project])
+
+  useEffect(() => {
     const getAllEnvironments = async () => {
-      const environmentController = new EnvironmentController(
-        process.env.NEXT_PUBLIC_BACKEND_URL
-      )
+      if (!currentProject) {
+        return
+      }
 
       const {
         success,
         error,
         data
       }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
-        await environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: currentProject!.slug },
+        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+          { projectSlug: currentProject.slug },
           {}
         )
 
@@ -185,10 +163,6 @@ function DetailedProjectPage({
 
     getAllEnvironments()
   }, [currentProject])
-
-  useEffect(() => {
-    console.log('Value inside the env state: ', availableEnvironments)
-  }, [availableEnvironments])
 
   return (
     <main className="flex flex-col gap-4">
@@ -246,132 +220,133 @@ function DetailedProjectPage({
             </DialogContent>
           </Dialog>
         )}
+        {tab === 'variable' && (
+          <Dialog onOpenChange={setIsOpen} open={isOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+                variant="outline"
+              >
+                <AddSVG /> Add Variable
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="h-[23.313rem] w-[31.625rem] border-gray-800 bg-[#1a1a1a] text-white ">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-semibold">
+                  Add a new variable
+                </DialogTitle>
+                <DialogDescription>
+                  Add a new variable to the project
+                </DialogDescription>
+              </DialogHeader>
 
-        {/* {tab === 'variable' && <VariablePage currentProject={currentProject} />} */}
-        { tab === 'variable' && (
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add Variable</Button>
-          </DialogTrigger>
-          <DialogContent className="h-[23.313rem] w-[31.625rem] border-gray-800 bg-[#1a1a1a] text-white ">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-semibold">
-                <div className="flex h-[2.813rem] w-[28.313rem] flex-col justify-start gap-y-2 ">
-                  <p className="h-[1.25rem] w-[9.375rem] text-base">
-                    Add a new variable
-                  </p>
-                  <p className="h-[1.063rem] w-[28.313rem] text-sm font-[400] text-white text-opacity-60">
-                    Add a new variable to the project
-                  </p>
-                </div>
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className=" text-white">
-              <form className="space-y-4">
-                <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
-                  <label
-                    htmlFor="variable-name"
-                    className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
-                  >
-                    Variable Name
-                  </label>
-                  <Input
-                    id="variable-name"
-                    placeholder="Enter the key of the variable"
-                    value={newVariableData.variableName}
-                    onChange={(e) =>
-                      setNewVariableData({
-                        ...newVariableData,
-                        variableName: e.target.value
-                      })
-                    }
-                    className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
-                  />
-                </div>
-
-                <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
-                  <label
-                    htmlFor="variable-name"
-                    className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
-                  >
-                    Extra Note
-                  </label>
-                  <Input
-                    id="variable-name"
-                    placeholder="Enter the note of the secret"
-                    value={newVariableData.note}
-                    onChange={(e) =>
-                      setNewVariableData({
-                        ...newVariableData,
-                        note: e.target.value
-                      })
-                    }
-                    className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
-                  />
-                </div>
-
-                <div className="grid h-[4.5rem] w-[28.125rem] grid-cols-2 gap-4">
-                  <div className="h-[4.5rem] w-[13.5rem] space-y-2">
-                    <label className="h-[1.25rem] w-[9.75rem] text-base font-semibold">
-                      Environment Name
-                    </label>
-                    <Select
-                      defaultValue="development"
-                      onValueChange={(value) =>
-                        setNewVariableData({
-                          ...newVariableData,
-                          environmentName: value
-                        })
-                      }
-                    >
-                      <SelectTrigger className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
-                        <SelectValue placeholder="Select environment" />
-                      </SelectTrigger>
-                      <SelectContent className=" w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
-                        {availableEnvironments.map((env) => (
-                          <SelectItem key={env.id} value={env.slug}>
-                            {env.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="h-[4.5rem] w-[13.375rem] space-y-2">
+              <div className=" text-white">
+                <div className="space-y-4">
+                  <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
                     <label
-                      htmlFor="env-value"
-                      className="h-[1.25rem] w-[9.75rem] text-base font-semibold"
+                      className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                      htmlFor="variable-name"
                     >
-                      Environment Value
+                      Variable Name
                     </label>
                     <Input
-                      id="env-value"
-                      placeholder="Environment Value"
-                      value={newVariableData.environmentValue}
+                      className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                      id="variable-name"
                       onChange={(e) =>
                         setNewVariableData({
                           ...newVariableData,
-                          environmentValue: e.target.value
+                          variableName: e.target.value
                         })
                       }
-                      className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                      placeholder="Enter the key of the variable"
+                      value={newVariableData.variableName}
                     />
                   </div>
-                </div>
 
-                <div className="flex justify-end pt-4">
-                  <Button
-                    type="submit"
-                    className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                    onClick={addVariable}
-                  >
-                    Add Variable
-                  </Button>
+                  <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
+                    <label
+                      className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                      htmlFor="variable-name"
+                    >
+                      Extra Note
+                    </label>
+                    <Input
+                      className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                      id="variable-name"
+                      onChange={(e) =>
+                        setNewVariableData({
+                          ...newVariableData,
+                          note: e.target.value
+                        })
+                      }
+                      placeholder="Enter the note of the secret"
+                      value={newVariableData.note}
+                    />
+                  </div>
+
+                  <div className="grid h-[4.5rem] w-[28.125rem] grid-cols-2 gap-4">
+                    <div className="h-[4.5rem] w-[13.5rem] space-y-2">
+                      <label
+                        className="h-[1.25rem] w-[9.75rem] text-base font-semibold"
+                        htmlFor="envName"
+                      >
+                        Environment Name
+                      </label>
+                      <Select
+                        defaultValue="development"
+                        onValueChange={(val) =>
+                          setNewVariableData({
+                            ...newVariableData,
+                            environmentName: val
+                          })
+                        }
+                      >
+                        <SelectTrigger className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
+                          <SelectValue placeholder="Select environment" />
+                        </SelectTrigger>
+                        <SelectContent className=" w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
+                          {availableEnvironments.map((env) => (
+                            <SelectItem key={env.id} value={env.slug}>
+                              {env.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="h-[4.5rem] w-[13.375rem] space-y-2">
+                      <label
+                        className="h-[1.25rem] w-[9.75rem] text-base font-semibold"
+                        htmlFor="env-value"
+                      >
+                        Environment Value
+                      </label>
+                      <Input
+                        className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                        id="env-value"
+                        onChange={(e) =>
+                          setNewVariableData({
+                            ...newVariableData,
+                            environmentValue: e.target.value
+                          })
+                        }
+                        placeholder="Environment Value"
+                        value={newVariableData.environmentValue}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                      onClick={addVariable}
+                    >
+                      Add Variable
+                    </Button>
+                  </div>
                 </div>
-              </form>
-            </div>
-          </DialogContent>
+              </div>
+            </DialogContent>
           </Dialog>
         )}
       </div>
@@ -387,4 +362,3 @@ function DetailedProjectPage({
 }
 
 export default DetailedProjectPage
-
