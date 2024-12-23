@@ -69,13 +69,13 @@ export default class ImportFromEnv extends BaseCommand {
       Logger.info(
         'Detected secrets:\n' +
           Object.entries(secretsAndVariables.secrets)
-            .map(([key, value]) => key + ' = ' + value)
+            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
             .join('\n')
       )
       Logger.info(
         'Detected variables:\n' +
           Object.entries(secretsAndVariables.variables)
-            .map(([key, value]) => key + ' = ' + value)
+            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
             .join('\n')
       )
 
