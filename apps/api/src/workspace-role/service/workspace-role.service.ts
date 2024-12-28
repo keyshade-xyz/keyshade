@@ -83,7 +83,11 @@ export class WorkspaceRoleService {
         data: {
           id: workspaceRoleId,
           name: dto.name,
-          slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
+          slug: await generateEntitySlug(
+            dto.name,
+            'WORKSPACE_ROLE',
+            this.prisma
+          ),
           description: dto.description,
           colorCode: dto.colorCode,
           authorities: dto.authorities ?? [],
@@ -94,10 +98,54 @@ export class WorkspaceRoleService {
             }
           }
         },
+        select: {
+          id: true
+        }
+      })
+    )
+
+    if (dto.projectEnvironments) {
+      // Create the project associations
+      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
+      )
+
+      for (const pe of dto.projectEnvironments) {
+        const projectId = projectSlugToIdMap.get(pe.projectSlug)
+        if (projectId) {
+          // Create the project workspace role association with the environments accessible on the project
+          op.push(
+            this.prisma.projectWorkspaceRoleAssociation.create({
+              data: {
+                roleId: workspaceRoleId,
+                projectId: projectId,
+                environments: {
+                  connect: pe.environmentSlugs.map((slug) => ({ slug }))
+                }
+              }
+            })
+          )
+        }
+      }
+    }
+
+    // Fetch the new workspace role
+    op.push(
+      this.prisma.workspaceRole.findFirst({
+        where: {
+          id: workspaceRoleId
+        },
         include: {
           projects: {
             select: {
               project: {
+                select: {
+                  id: true,
+                  slug: true,
+                  name: true
+                }
+              },
+              environments: {
                 select: {
                   id: true,
                   slug: true,
@@ -110,25 +158,7 @@ export class WorkspaceRoleService {
       })
     )
 
-    if (dto.projectSlugs) {
-      // Create the project associations
-      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectSlugs
-      )
-
-      if (dto.projectSlugs && dto.projectSlugs.length > 0) {
-        op.push(
-          this.prisma.projectWorkspaceRoleAssociation.createMany({
-            data: dto.projectSlugs.map((projectSlug) => ({
-              roleId: workspaceRoleId,
-              projectId: projectSlugToIdMap.get(projectSlug)
-            }))
-          })
-        )
-      }
-    }
-
-    const workspaceRole = (await this.prisma.$transaction(op))[0]
+    const workspaceRole = (await this.prisma.$transaction(op)).pop()
 
     await createEvent(
       {
@@ -204,7 +234,7 @@ export class WorkspaceRoleService {
       )
     }
 
-    if (dto.projectSlugs) {
+    if (dto.projectEnvironments) {
       await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
         where: {
           roleId: workspaceRoleId
@@ -212,15 +242,36 @@ export class WorkspaceRoleService {
       })
 
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectSlugs
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
       )
 
-      await this.prisma.projectWorkspaceRoleAssociation.createMany({
-        data: dto.projectSlugs.map((projectSlug) => ({
-          roleId: workspaceRoleId,
-          projectId: projectSlugToIdMap.get(projectSlug)
-        }))
-      })
+      for (const pe of dto.projectEnvironments) {
+        const projectId = projectSlugToIdMap.get(pe.projectSlug)
+        if (projectId) {
+          // Create or Update the project workspace role association with the environments accessible on the project
+          await this.prisma.projectWorkspaceRoleAssociation.upsert({
+            where: {
+              roleId_projectId: {
+                roleId: workspaceRoleId,
+                projectId: projectId
+              }
+            },
+            update: {
+              environments: {
+                set: [],
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            },
+            create: {
+              roleId: workspaceRoleId,
+              projectId: projectId,
+              environments: {
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            }
+          })
+        }
+      }
     }
 
     const updatedWorkspaceRole = await this.prisma.workspaceRole.update({
@@ -229,6 +280,9 @@ export class WorkspaceRoleService {
       },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'WORKSPACE_ROLE', this.prisma)
+          : undefined,
         description: dto.description,
         colorCode: dto.colorCode,
         authorities: dto.authorities
@@ -242,12 +296,18 @@ export class WorkspaceRoleService {
                 slug: true,
                 name: true
               }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
             }
           }
         }
       }
     })
-
     await createEvent(
       {
         triggeredBy: user,

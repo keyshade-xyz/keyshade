@@ -366,6 +366,62 @@ describe('Workspace Role Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+
+    it('should be able to create workspace role with environment only access for projects', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'development',
+          slug: 'development',
+          projectId: projects[0].id
+        }
+      })
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['development']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(201)
+      expect(response.json()).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          workspaceId: workspaceAlice.id,
+          projects: [
+            {
+              project: {
+                id: projects[0].id,
+                name: projects[0].name,
+                slug: projects[0].slug
+              },
+              environments: [
+                {
+                  id: devEnvironment.id,
+                  name: 'development',
+                  slug: 'development'
+                }
+              ]
+            }
+          ]
+        })
+      )
+    })
   })
 
   it('should be able to read workspace role with READ_WORKSPACE_ROLE authority', async () => {
@@ -588,12 +644,36 @@ describe('Workspace Role Controller Tests', () => {
       })
     })
 
-    it('should be able to add projects to the role', async () => {
+    it('should be able to add environment access for projects to the role', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'dev',
+          slug: 'dev',
+          projectId: projects[0].id
+        }
+      })
+      const stageEnvironment = await prisma.environment.create({
+        data: {
+          name: 'stage',
+          slug: 'stage',
+          projectId: projects[1].id
+        }
+      })
+
       const response = await app.inject({
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          projectSlugs: projects.map((project) => project.slug)
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            },
+            {
+              projectSlug: projects[1].slug,
+              environmentSlugs: ['stage']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': alice.email
@@ -611,20 +691,48 @@ describe('Workspace Role Controller Tests', () => {
               id: projects[0].id,
               name: projects[0].name,
               slug: projects[0].slug
-            }
+            },
+            environments: [
+              {
+                id: devEnvironment.id,
+                name: 'dev',
+                slug: 'dev'
+              }
+            ]
           },
           {
             project: {
               id: projects[1].id,
               name: projects[1].name,
               slug: projects[1].slug
-            }
+            },
+            environments: [
+              {
+                id: stageEnvironment.id,
+                name: 'stage',
+                slug: 'stage'
+              }
+            ]
           }
         ])
       })
     })
 
-    it('should be able to add projects to the role with UPDATE_WORKSPACE_ROLE and READ_PROJECT authorities', async () => {
+    it('should be able to add environment access for projects to the role with UPDATE_WORKSPACE_ROLE and READ_PROJECT authorities', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'dev',
+          slug: 'dev',
+          projectId: projects[0].id
+        }
+      })
+      const stageEnvironment = await prisma.environment.create({
+        data: {
+          name: 'stage',
+          slug: 'stage',
+          projectId: projects[1].id
+        }
+      })
       await prisma.workspaceRole.update({
         where: {
           workspaceId_name: {
@@ -647,7 +755,16 @@ describe('Workspace Role Controller Tests', () => {
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          projectSlugs: projects.map((project) => project.slug)
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            },
+            {
+              projectSlug: projects[1].slug,
+              environmentSlugs: ['stage']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': charlie.email
@@ -666,14 +783,28 @@ describe('Workspace Role Controller Tests', () => {
               id: projects[0].id,
               name: projects[0].name,
               slug: projects[0].slug
-            }
+            },
+            environments: [
+              {
+                id: devEnvironment.id,
+                name: 'dev',
+                slug: 'dev'
+              }
+            ]
           },
           {
             project: {
               id: projects[1].id,
               name: projects[1].name,
               slug: projects[1].slug
-            }
+            },
+            environments: [
+              {
+                id: stageEnvironment.id,
+                name: 'stage',
+                slug: 'stage'
+              }
+            ]
           }
         ])
       })

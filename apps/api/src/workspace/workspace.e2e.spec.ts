@@ -756,7 +756,9 @@ describe('Workspace Controller Tests', () => {
           Authority.READ_VARIABLE,
           Authority.READ_WORKSPACE
         ],
-        projectSlugs: [project2Response.slug]
+        projectEnvironments: [
+          { projectSlug: project2Response.slug, environmentSlugs: [] }
+        ]
       })
 
       const project1DevEnv = await prisma.environment.findUnique({
