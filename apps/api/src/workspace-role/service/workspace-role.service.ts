@@ -107,7 +107,9 @@ export class WorkspaceRoleService {
     if (dto.projectEnvironments) {
       // Create the project associations
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments.map((pe) => pe.projectSlug)
+        dto.projectEnvironments
+          .map((pe) => pe.projectSlug)
+          .filter((slug) => slug)
       )
 
       for (const pe of dto.projectEnvironments) {
@@ -242,7 +244,9 @@ export class WorkspaceRoleService {
       })
 
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments.map((pe) => pe.projectSlug)
+        dto.projectEnvironments
+          .map((pe) => pe.projectSlug)
+          .filter((slug) => slug)
       )
 
       for (const pe of dto.projectEnvironments) {
@@ -525,6 +529,13 @@ export class WorkspaceRoleService {
                 slug: true,
                 name: true
               }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
             }
           }
         }
@@ -563,13 +574,15 @@ export class WorkspaceRoleService {
    * @returns a Map of project slug to id
    */
   private async getProjectSlugToIdMap(projectSlugs: string[]) {
-    const projects = await this.prisma.project.findMany({
-      where: {
-        slug: {
-          in: projectSlugs
-        }
-      }
-    })
+    const projects = projectSlugs.length
+      ? await this.prisma.project.findMany({
+          where: {
+            slug: {
+              in: projectSlugs
+            }
+          }
+        })
+      : []
 
     return new Map(projects.map((project) => [project.slug, project.id]))
   }

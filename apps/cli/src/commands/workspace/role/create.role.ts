@@ -9,11 +9,11 @@ import ControllerInstance from '@/util/controller-instance'
 
 export default class UpdateRoleCommand extends BaseCommand {
   getName() {
-    return 'update'
+    return 'create'
   }
 
   getDescription(): string {
-    return 'Update workspace role'
+    return 'Create workspace role'
   }
 
   getArguments(): CommandArgument[] {
@@ -109,7 +109,7 @@ export default class UpdateRoleCommand extends BaseCommand {
       )
 
     if (success) {
-      Logger.info('Workspace role updated successfully:')
+      Logger.info('Workspace role created successfully:')
       Logger.info(`Workspace role: ${data.name} (${data.slug})`)
       Logger.info(`Description: ${data.description || 'N/A'}`)
       Logger.info(`Created at ${data.createdAt}`)
@@ -124,7 +124,7 @@ export default class UpdateRoleCommand extends BaseCommand {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }
     } else {
-      Logger.error(`Failed updating workspace role: ${error.message}`)
+      Logger.error(`Failed creating workspace role: ${error.message}`)
     }
   }
 }

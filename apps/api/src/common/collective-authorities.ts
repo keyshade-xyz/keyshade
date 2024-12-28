@@ -101,7 +101,7 @@ export const getCollectiveProjectAuthorities = async (
  * roles that the user has in the workspace, adding an extra layer of filtering
  * by the project and the environment.
  * @param userId The id of the user
- * @param environemnt The environment with the project
+ * @param environment The environment with the project
  * @param prisma The prisma client
  * @returns
  */
