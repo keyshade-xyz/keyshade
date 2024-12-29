@@ -10,6 +10,7 @@ import LoadingSVG from './loading.svg'
 import MessageSVG from './message.svg'
 import VectorSVG from './vector.svg'
 import ErrorSVG from './Error.svg'
+import TrashSVG from './trash.svg'
 
 export {
   DropdownSVG,
@@ -23,5 +24,6 @@ export {
   LoadingSVG,
   MessageSVG,
   VectorSVG,
-  ErrorSVG
+  ErrorSVG,
+  TrashSVG,
 }
