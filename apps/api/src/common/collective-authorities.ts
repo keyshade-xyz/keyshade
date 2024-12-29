@@ -107,7 +107,7 @@ export const getCollectiveProjectAuthorities = async (
  */
 export const getCollectiveEnvironmentAuthorities = async (
   userId: User['id'],
-  environemnt: EnvironmentWithProject,
+  environment: EnvironmentWithProject,
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
   const authorities = new Set<Authority>()
@@ -117,7 +117,7 @@ export const getCollectiveEnvironmentAuthorities = async (
       where: {
         workspaceMember: {
           userId,
-          workspaceId: environemnt.project.workspaceId
+          workspaceId: environment.project.workspaceId
         }
       },
       select: {
@@ -136,10 +136,10 @@ export const getCollectiveEnvironmentAuthorities = async (
   const environmentRoleAssociations =
     await prisma.projectWorkspaceRoleAssociation.findMany({
       where: {
-        projectId: environemnt.project.id,
+        projectId: environment.project.id,
         environments: {
           some: {
-            id: environemnt.id
+            id: environment.id
           }
         }
       },
