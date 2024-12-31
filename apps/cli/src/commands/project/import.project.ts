@@ -46,22 +46,17 @@ export default class ImportFromEnv extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
-    const { envFile } = options
 
     try {
-      const resolvedPath = path.resolve(envFile)
-      const exists = await fs
-        .access(resolvedPath)
-        .then(() => true)
-        .catch(() => false)
-      if (!exists) {
-        throw new Error(`The .env file does not exist at path: ${resolvedPath}`)
-      }
-      const envFileContent = await fs.readFile(resolvedPath, 'utf-8')
+      const { envFilePath } = await this.parseOptions(options)
+      if (!envFilePath) return
+      const envFileContent = await fs.readFile(envFilePath, 'utf-8')
+      // Logger.info('File contents:\n' + envFileContent)
 
       const envVariables = dotenv.parse(envFileContent)
       if (Object.keys(envVariables).length === 0) {
-        throw new Error('No environment variables found in the provided file')
+        Logger.warn('No environment variables found in the provided file')
+        return
       }
 
       const secretsAndVariables = secretDetector.detectJsObject(envVariables)
@@ -162,5 +157,26 @@ export default class ImportFromEnv extends BaseCommand {
         `Failed to import secrets and variables.${errorMessage ? '\n' + errorMessage : ''}`
       )
     }
+  }
+
+  private async parseOptions(options: CommandActionData['options']): Promise<{
+    envFilePath: string | undefined
+  }> {
+    const { envFile } = options
+    if (!envFile) {
+      Logger.error('No .env file path provided.')
+      return { envFilePath: undefined }
+    }
+    const resolvedPath = path.resolve(envFile)
+    const exists = await fs
+      .access(resolvedPath)
+      .then(() => true)
+      .catch(() => false)
+    if (!exists) {
+      Logger.error(`The .env file does not exist at path: ${resolvedPath}`)
+      return { envFilePath: undefined }
+    }
+
+    return { envFilePath: resolvedPath }
   }
 }
