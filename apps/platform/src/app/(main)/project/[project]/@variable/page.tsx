@@ -32,6 +32,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
+import EditVariableDialog from '@/components/ui/edit-variable-dialog'
 
 interface VariablePageProps {
   currentProject: Project | undefined
@@ -46,6 +47,7 @@ function VariablePage({
   // Holds the currently open section ID
   const [openSections, setOpenSections] = useState<Set<string>>(new Set())
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [selectedVariableSlug, setSelectedVariableSlug] = useState<string | null>(null)
 
   //Environments table toggle logic
@@ -61,15 +63,26 @@ function VariablePage({
     })
   }
 
-  const openDeleteDialog = (variableSlug: string) => {
-    setIsDeleteDialogOpen(true)
-    setSelectedVariableSlug(variableSlug)
+  const toggleDeleteDialog = (variableSlug: string) => {
+    setIsDeleteDialogOpen(!isDeleteDialogOpen)
+    if( selectedVariableSlug === null ){
+      setSelectedVariableSlug(variableSlug)
+    }
+    else{
+      setSelectedVariableSlug(null)
+    }
   }
 
-  const closeDeleteDialog = () => {
-    setIsDeleteDialogOpen(false)
-    setSelectedVariableSlug(null)
+  const toggleEditDialog = (variableSlug: string) => {
+    setIsEditDialogOpen(!isEditDialogOpen)
+    if( selectedVariableSlug === null ){
+      setSelectedVariableSlug(variableSlug)
+    }
+    else{
+      setSelectedVariableSlug(null)
+    }
   }
+
 
   useEffect(() => {
     const getAllVariables = async () => {
@@ -99,7 +112,9 @@ function VariablePage({
   }, [currentProject, allVariables])
 
   return (
-    <div className={` flex h-full w-full justify-center ${isDeleteDialogOpen ? "inert" : "" } `}>
+    <div
+      className={` flex h-full w-full justify-center ${isDeleteDialogOpen ? 'inert' : ''} `}
+    >
       {/* Showing this when there are no variables present */}
       {allVariables.length === 0 ? (
         <div className="flex h-[23.75rem] w-[30.25rem] flex-col items-center justify-center gap-y-8">
@@ -120,7 +135,9 @@ function VariablePage({
         </div>
       ) : (
         // Showing this when variables are present
-        <div className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteDialogOpen ? "inert" : "" } `}>
+        <div
+          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteDialogOpen ? 'inert' : ''} `}
+        >
           {allVariables.map((variable) => (
             <ContextMenu key={variable.variable.id}>
               <ContextMenuTrigger className="w-full">
@@ -220,13 +237,13 @@ function VariablePage({
                   Show Version History
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onSelect={() => console.log('Edit variable')}
+                  onSelect={() => toggleEditDialog(variable.variable.slug)}
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
                 >
                   Edit
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onSelect={() => openDeleteDialog(variable.variable.slug)}
+                  onSelect={() => toggleDeleteDialog(variable.variable.slug)}
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
                 >
                   Delete
@@ -234,15 +251,27 @@ function VariablePage({
               </ContextMenuContent>
             </ContextMenu>
           ))}
-          
+
           {/* Delete variable alert dialog */}
           {isDeleteDialogOpen && (
             <ConfirmDelete
               isOpen={isDeleteDialogOpen}
-              onClose={closeDeleteDialog}
+              //Passing an empty string just to bypass the error -- we don't need the variableSlug while closing the dialog
+              onClose={() => toggleDeleteDialog('')}
               variableSlug={selectedVariableSlug}
             />
           )}
+
+          {/* Edit variable dialog */}
+          {isEditDialogOpen && (
+            <EditVariableDialog 
+              isOpen={isEditDialogOpen}
+              //Passing an empty string just to bypass the error -- we don't need the variableSlug while closing the dialog
+              onClose={() => toggleEditDialog('')}
+              variableSlug={selectedVariableSlug}
+            />
+          )}
+
         </div>
       )}
     </div>
