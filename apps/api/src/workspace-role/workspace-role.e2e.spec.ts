@@ -422,6 +422,29 @@ describe('Workspace Role Controller Tests', () => {
         })
       )
     })
+
+    it('should not be able to create workspace role where environments do not belong to the project', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['production']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
   })
 
   it('should be able to read workspace role with READ_WORKSPACE_ROLE authority', async () => {
@@ -837,6 +860,26 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to update the workspace role with environments that do not belong to the project', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['production']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
   })
 

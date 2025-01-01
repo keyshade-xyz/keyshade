@@ -115,6 +115,26 @@ export class WorkspaceRoleService {
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
+          //Check if all environments are part of the project
+          const project = await this.prisma.project.findFirst({
+            where: {
+              id: projectId,
+              AND: pe.environmentSlugs.map((slug) => ({
+                environments: {
+                  some: {
+                    slug: slug
+                  }
+                }
+              }))
+            }
+          })
+
+          if (!project) {
+            throw new BadRequestException(
+              `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+            )
+          }
+
           // Create the project workspace role association with the environments accessible on the project
           op.push(
             this.prisma.projectWorkspaceRoleAssociation.create({
@@ -252,6 +272,26 @@ export class WorkspaceRoleService {
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
+          //Check if all environments are part of the project
+          const project = await this.prisma.project.findFirst({
+            where: {
+              id: projectId,
+              AND: pe.environmentSlugs.map((slug) => ({
+                environments: {
+                  some: {
+                    slug: slug
+                  }
+                }
+              }))
+            }
+          })
+
+          if (!project) {
+            throw new BadRequestException(
+              `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+            )
+          }
+
           // Create or Update the project workspace role association with the environments accessible on the project
           await this.prisma.projectWorkspaceRoleAssociation.upsert({
             where: {
