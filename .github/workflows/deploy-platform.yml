@@ -16,7 +16,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'beta' || 'stage' }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
     name: Build and push Platform docker image for release
 
     steps:
@@ -44,26 +44,23 @@ jobs:
           echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
 
   # deploy:
-  #   needs: build
   #   runs-on: ubuntu-latest
-  #   environment: alpha
-  #   name: Deploy Platform docker image for release
-
+  #   environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+  #   name: Restart Platform container app
+  #   needs: build
   #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
+  #     - name: Azure Login action
+  #       uses: azure/login@v2
   #       with:
-  #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-  #         aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-  #         aws-region: ap-south-1
+  #         creds: ${{ secrets.CONTAINER_APP_SP_CREDENTIALS }}
+  #         enable-AzPSSession: true
 
-  #     - name: Force re-deploy task in service
-  #       id: force-redeploy
+  #     - name: Azure CLI script
+  #       uses: azure/cli@v2
   #       env:
-  #         ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-  #         ECS_SERVICE: ${{ vars.ECS_PLATFORM_SERVICE }}
-  #       run: |
-  #         aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+  #         PLATFORM_CONTAINER: ${{ vars.PLATFORM_CONTAINER }}
+  #         PLATFORM_CONTAINER_RG: ${{ vars.PLATFORM_CONTAINER_RG }}
+  #       with:
+  #         azcliversion: latest
+  #         inlineScript: |
+  #           az containerapp restart --name $PLATFORM_CONTAINER --resource-group $PLATFORM_CONTAINER_RG
