@@ -58,4 +58,4 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az containerapp restart --name $API_CONTAINER --resource-group $API_CONTAINER_RG
+            az container restart --name $API_CONTAINER --resource-group $API_CONTAINER_RG

@@ -63,4 +63,4 @@ jobs:
   #       with:
   #         azcliversion: latest
   #         inlineScript: |
-  #           az containerapp restart --name $PLATFORM_CONTAINER --resource-group $PLATFORM_CONTAINER_RG
+  #           az container restart --name $PLATFORM_CONTAINER --resource-group $PLATFORM_CONTAINER_RG
