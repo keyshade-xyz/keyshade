@@ -33,9 +33,15 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import EditVariableDialog from '@/components/ui/edit-variable-dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface VariablePageProps {
   currentProject: Project | undefined
+}
+
+interface EditVariableDetails {
+  variableName: string;
+  variableNote: string;
 }
 
 function VariablePage({
@@ -49,6 +55,10 @@ function VariablePage({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
   const [selectedVariableSlug, setSelectedVariableSlug] = useState<string | null>(null)
+  const [editVariableDetails, setEditVariableDetails] = useState<EditVariableDetails>({
+    variableName: '',
+    variableNote: '',
+  })
 
   //Environments table toggle logic
   const toggleSection = (id: string) => {
@@ -65,24 +75,23 @@ function VariablePage({
 
   const toggleDeleteDialog = (variableSlug: string) => {
     setIsDeleteDialogOpen(!isDeleteDialogOpen)
-    if( selectedVariableSlug === null ){
+    if (selectedVariableSlug === null) {
       setSelectedVariableSlug(variableSlug)
-    }
-    else{
+    } else {
       setSelectedVariableSlug(null)
     }
   }
 
-  const toggleEditDialog = (variableSlug: string) => {
+  const toggleEditDialog = (variableSlug: string, variableName: string, variableNote: string | null) => {
     setIsEditDialogOpen(!isEditDialogOpen)
-    if( selectedVariableSlug === null ){
+    if (selectedVariableSlug === null) {
       setSelectedVariableSlug(variableSlug)
-    }
-    else{
+      setEditVariableDetails({ variableName, variableNote: variableNote ?? '' })
+    } else {
       setSelectedVariableSlug(null)
+      setEditVariableDetails({variableName: '', variableNote: ''})
     }
   }
-
 
   useEffect(() => {
     const getAllVariables = async () => {
@@ -154,7 +163,18 @@ function VariablePage({
                       <span className="h-[2.375rem] text-2xl font-normal text-zinc-100">
                         {variable.variable.name}
                       </span>
-                      <MessageSVG height="40" width="40" />
+                      {variable.variable.note ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <MessageSVG height="40" width="40" />
+                            </TooltipTrigger>
+                            <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                              <p>{variable.variable.note}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : null}
                     </div>
                     <div className="flex h-[6.5rem] w-[18.188rem] items-center justify-center gap-x-[3.125rem]">
                       <div className="flex h-[2.063rem] w-[13.563rem] items-center justify-center gap-x-3">
@@ -237,7 +257,7 @@ function VariablePage({
                   Show Version History
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onSelect={() => toggleEditDialog(variable.variable.slug)}
+                  onSelect={() => toggleEditDialog(variable.variable.slug, variable.variable.name, variable.variable.note)}
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
                 >
                   Edit
@@ -264,14 +284,15 @@ function VariablePage({
 
           {/* Edit variable dialog */}
           {isEditDialogOpen && (
-            <EditVariableDialog 
+            <EditVariableDialog
               isOpen={isEditDialogOpen}
-              //Passing an empty string just to bypass the error -- we don't need the variableSlug while closing the dialog
-              onClose={() => toggleEditDialog('')}
+              //Passing empty strings just to bypass the error -- we don't need the arguments while closing the dialog
+              onClose={() => toggleEditDialog('', '', '')}
               variableSlug={selectedVariableSlug}
+              variableName={editVariableDetails.variableName}
+              variableNote={editVariableDetails.variableNote}
             />
           )}
-
         </div>
       )}
     </div>
