@@ -55,7 +55,12 @@ jobs:
         env:
           WEB_CONTAINER: ${{ vars.WEB_CONTAINER }}
           WEB_CONTAINER_RG: ${{ vars.WEB_CONTAINER_RG }}
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: web
         with:
           azcliversion: latest
           inlineScript: |
-            az container restart --name $WEB_CONTAINER --resource-group $WEB_CONTAINER_RG
+            az containerapp update \
+              --name $WEB_CONTAINER \
+              --resource-group $WEB_CONTAINER_RG \
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest
