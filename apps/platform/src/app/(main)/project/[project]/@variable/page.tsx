@@ -175,8 +175,7 @@ function VariablePage({
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="h-full w-full gap-y-24 rounded-b-lg bg-[#232424] p-4">
-                    {variable.values ? (
-                      <Table className="h-full w-full">
+                    {variable.values ? <Table className="h-full w-full">
                         <TableHeader className="h-[3.125rem] w-full">
                           <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
                             <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
@@ -202,10 +201,7 @@ function VariablePage({
                             </TableRow>
                           ))}
                         </TableBody>
-                      </Table>
-                    ) : (
-                      <></>
-                    )}
+                      </Table> : null}
                   </CollapsibleContent>
                 </Collapsible>
               </ContextMenuTrigger>
