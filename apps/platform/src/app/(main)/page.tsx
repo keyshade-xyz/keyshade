@@ -39,11 +39,13 @@ import {
 } from '@/components/ui/dialog'
 import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
+import ProjectScreenLoader from '@/components/ui/project-screen-loader'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
   const [isProjectEmpty, setIsProjectEmpty] = useState<boolean>(true)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   // Projects to be displayed in the dashboard
   const [projects, setProjects] = useState<ProjectWithCount[]>([])
@@ -77,7 +79,11 @@ export default function Index(): JSX.Element {
   // If a workspace is selected, we want to fetch all the projects
   // under that workspace and display it in the dashboard.
   useEffect(() => {
+
     async function getAllProjects() {
+
+      setLoading(true)
+
       if (currentWorkspace) {
         const { success, error, data } =
           await ControllerInstance.getInstance().projectController.getAllProjects(
@@ -92,9 +98,12 @@ export default function Index(): JSX.Element {
           console.error(error)
         }
       }
+
+      setLoading(false)
     }
 
     getAllProjects()
+
   }, [currentWorkspace])
 
   // Check if the projects array is empty
@@ -326,29 +335,33 @@ export default function Index(): JSX.Element {
         </Dialog>
       </div>
 
-      {!isProjectEmpty ? (
-        <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project: GetAllProjectsResponse['items'][number]) => {
-            return (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                setIsSheetOpen={setIsSheetOpen}
-              />
-            )
-          })}
-        </div>
+      { loading ? (
+        <ProjectScreenLoader />
       ) : (
-        <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
-          <FolderSVG width="150" />
-          <div className="text-4xl">Start your First Project</div>
-          <div>
-            Create a file and start setting up your environment and secret keys
+        !isProjectEmpty ? (
+          <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
+            {projects.map((project: GetAllProjectsResponse['items'][number]) => {
+              return (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  setIsSheetOpen={setIsSheetOpen}
+                />
+              )
+            })}
           </div>
-          <Button onClick={toggleDialog} variant="secondary">
-            Create project
-          </Button>
-        </div>
+        ) : (
+          <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
+            <FolderSVG width="150" />
+            <div className="text-4xl">Start your First Project</div>
+            <div>
+              Create a file and start setting up your environment and secret keys
+            </div>
+            <Button onClick={toggleDialog} variant="secondary">
+              Create project
+            </Button>
+          </div>
+        )
       )}
 
       <Sheet

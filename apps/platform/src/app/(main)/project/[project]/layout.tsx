@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select'
 import VariablePage from './@variable/page'
 import { Toaster } from '@/components/ui/sonner'
+import AddSecretDialog from '@/components/ui/add-secret-dialog'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -39,15 +40,12 @@ interface DetailedProjectPageProps {
   variable: React.ReactNode
 }
 
+
 function DetailedProjectPage({
   params,
   secret,
   variable
 }: DetailedProjectPageProps): JSX.Element {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
-  const [key, setKey] = useState<string>('')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
-  const [value, setValue] = useState<string>('')
   const [currentProject, setCurrentProject] = useState<Project>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [newVariableData, setNewVariableData] = useState({
@@ -56,7 +54,15 @@ function DetailedProjectPage({
     environmentName: '',
     environmentValue: ''
   })
-  const [availableEnvironments, setAvailableEnvironments] = useState<Environment[]>([])
+  const [newSecretData, setNewSecretData] = useState({
+    secretName: '',
+    secretNote: '',
+    environmentName: '',
+    environmentValue: '',
+  })
+  const [availableEnvironments, setAvailableEnvironments] = useState<
+    Environment[]
+  >([])
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
@@ -166,59 +172,17 @@ function DetailedProjectPage({
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="h-[3.625rem] w-full p-3 flex justify-between ">
+      <div className="flex h-[3.625rem] w-full justify-between p-3 ">
         <div className="text-3xl">{currentProject?.name}</div>
         {tab === 'secret' && (
-          <Dialog>
-            <DialogTrigger>
-              <Button>
-                {' '}
-                <AddSVG /> Add Secret
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add a new secret</DialogTitle>
-                <DialogDescription>
-                  Add a new secret to the project. This secret will be encrypted
-                  and stored securely.
-                </DialogDescription>
-              </DialogHeader>
-              <div>
-                <div className="flex flex-col gap-y-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right" htmlFor="username">
-                      Key
-                    </Label>
-                    <Input
-                      className="col-span-3"
-                      id="username"
-                      onChange={(e) => {
-                        setKey(e.target.value)
-                      }}
-                      placeholder="Enter the name of the secret"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right" htmlFor="username">
-                      Value
-                    </Label>
-                    <Input
-                      className="col-span-3"
-                      id="username"
-                      onChange={(e) => {
-                        setValue(e.target.value)
-                      }}
-                      placeholder="Enter the value of the secret"
-                    />
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button variant="secondary">Add Key</Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AddSecretDialog 
+            setIsOpen={setIsOpen}
+            isOpen={isOpen}
+            newSecretData={newSecretData}
+            setNewSecretData={setNewSecretData}
+            availableEnvironments={availableEnvironments}
+            currentProjectSlug={currentProject?.slug ?? ''}
+          />
         )}
         {tab === 'variable' && (
           <Dialog onOpenChange={setIsOpen} open={isOpen}>
@@ -230,7 +194,7 @@ function DetailedProjectPage({
                 <AddSVG /> Add Variable
               </Button>
             </DialogTrigger>
-            <DialogContent className="h-[23.313rem] w-[31.625rem] border-gray-800 bg-[#1a1a1a] text-white ">
+            <DialogContent className="h-[25rem] w-[31.625rem] bg-[#18181B] text-white ">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold">
                   Add a new variable
@@ -250,7 +214,7 @@ function DetailedProjectPage({
                       Variable Name
                     </label>
                     <Input
-                      className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                      className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                       id="variable-name"
                       onChange={(e) =>
                         setNewVariableData({
@@ -271,7 +235,7 @@ function DetailedProjectPage({
                       Extra Note
                     </label>
                     <Input
-                      className="h-[2.75rem] w-[20rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                      className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                       id="variable-name"
                       onChange={(e) =>
                         setNewVariableData({
@@ -279,7 +243,7 @@ function DetailedProjectPage({
                           note: e.target.value
                         })
                       }
-                      placeholder="Enter the note of the secret"
+                      placeholder="Enter the note of the variable"
                       value={newVariableData.note}
                     />
                   </div>
@@ -301,10 +265,10 @@ function DetailedProjectPage({
                           })
                         }
                       >
-                        <SelectTrigger className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
+                        <SelectTrigger className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300">
                           <SelectValue placeholder="Select environment" />
                         </SelectTrigger>
-                        <SelectContent className=" w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300">
+                        <SelectContent className=" w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300">
                           {availableEnvironments.map((env) => (
                             <SelectItem key={env.id} value={env.slug}>
                               {env.name}
@@ -322,7 +286,7 @@ function DetailedProjectPage({
                         Environment Value
                       </label>
                       <Input
-                        className="h-[2.75rem] w-[13.5rem] border-0 bg-[#2a2a2a] text-gray-300 placeholder:text-gray-500"
+                        className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
                         id="env-value"
                         onChange={(e) =>
                           setNewVariableData({
@@ -351,7 +315,7 @@ function DetailedProjectPage({
         )}
       </div>
 
-      <div className='h-full w-full overflow-y-scroll'>
+      <div className="h-full w-full overflow-y-scroll">
         {tab === 'secret' && secret}
         {tab === 'variable' && <VariablePage currentProject={currentProject} />}
         {/* {tab === 'variable' && variable} */}
