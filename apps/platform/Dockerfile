@@ -44,9 +44,9 @@ COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/.next ./apps/pla
 COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/public ./apps/platform/public
 
 
-ENV PORT=3025
+ENV PORT=3000
 ENV NEXT_SHARP_PATH=/app/apps/platform/.next/sharp
-EXPOSE 3025
+EXPOSE 3000
 # keyshade-ignore
 ENV HOSTNAME "0.0.0.0"
 
