@@ -11,7 +11,7 @@ describe('Dectect Secrets and Variables from Object', () => {
       GOOGLE_ANALYTICS: 'UA-123456789-1',
       API_PORT: '3000'
     }
-    const result = secretDetector.detectJsObject(input)
+    const result = secretDetector.scanJsObject(input)
     expect(result.secrets).toEqual({
       GITHUB_KEY: input.GITHUB_KEY,
       AWS_KEY: input.AWS_KEY,
@@ -26,7 +26,7 @@ describe('Dectect Secrets and Variables from Object', () => {
 
   it('should return empty objects for secrets and variables when input is empty', () => {
     const input = {}
-    const result = secretDetector.detectJsObject(input)
+    const result = secretDetector.scanJsObject(input)
     expect(result.secrets).toEqual({})
     expect(result.variables).toEqual({})
   })
@@ -37,7 +37,7 @@ describe('Dectect Secrets and Variables from Object', () => {
       GOOGLE_ANALYTICS: 'UA-123456789-1',
       API_PORT: '3000'
     }
-    const result = secretDetector.detectJsObject(input)
+    const result = secretDetector.scanJsObject(input)
     expect(result.secrets).toEqual({})
     expect(result.variables).toEqual({
       NEXT_PUBLIC_API_KEY: input.NEXT_PUBLIC_API_KEY,
@@ -52,7 +52,7 @@ describe('Dectect Secrets and Variables from Object', () => {
       AWS_KEY: aws.testcases[0].input,
       OPENAI_KEY: openAI.testcases[0].input
     }
-    const result = secretDetector.detectJsObject(input)
+    const result = secretDetector.scanJsObject(input)
     expect(result.secrets).toEqual({
       GITHUB_KEY: input.GITHUB_KEY,
       AWS_KEY: input.AWS_KEY,

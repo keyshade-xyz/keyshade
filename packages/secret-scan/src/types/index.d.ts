@@ -8,7 +8,7 @@ export interface SecretResult {
   regex?: RegExp
 }
 
-export interface ScanJsObjectResult {
+export interface JsObjectScanResult {
   secrets: Record<string, string>
   variables: Record<string, string>
 }

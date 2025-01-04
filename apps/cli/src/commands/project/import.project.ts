@@ -48,10 +48,12 @@ export default class ImportFromEnv extends BaseCommand {
     const [projectSlug] = args
 
     try {
-      const { envFilePath } = await this.parseOptions(options)
-      if (!envFilePath) return
-      const envFileContent = await fs.readFile(envFilePath, 'utf-8')
-      // Logger.info('File contents:\n' + envFileContent)
+      const parsedOptions = await this.parseOptions(options)
+      if (!parsedOptions) return
+      const envFileContent = await fs.readFile(
+        parsedOptions.envFilePath,
+        'utf-8'
+      )
 
       const envVariables = dotenv.parse(envFileContent)
       if (Object.keys(envVariables).length === 0) {
@@ -59,13 +61,14 @@ export default class ImportFromEnv extends BaseCommand {
         return
       }
 
-      const secretsAndVariables = secretDetector.detectJsObject(envVariables)
+      const secretsAndVariables = secretDetector.scanJsObject(envVariables)
 
       Logger.info(
         'Detected secrets:\n' +
           Object.entries(secretsAndVariables.secrets)
             .map(([key, value]) => key + ' = ' + JSON.stringify(value))
-            .join('\n')
+            .join('\n') +
+          '\n'
       )
       Logger.info(
         'Detected variables:\n' +
@@ -160,12 +163,12 @@ export default class ImportFromEnv extends BaseCommand {
   }
 
   private async parseOptions(options: CommandActionData['options']): Promise<{
-    envFilePath: string | undefined
-  }> {
+    envFilePath: string
+  } | null> {
     const { envFile } = options
     if (!envFile) {
       Logger.error('No .env file path provided.')
-      return { envFilePath: undefined }
+      return null
     }
     const resolvedPath = path.resolve(envFile)
     const exists = await fs
@@ -174,9 +177,8 @@ export default class ImportFromEnv extends BaseCommand {
       .catch(() => false)
     if (!exists) {
       Logger.error(`The .env file does not exist at path: ${resolvedPath}`)
-      return { envFilePath: undefined }
+      return null
     }
-
     return { envFilePath: resolvedPath }
   }
 }
