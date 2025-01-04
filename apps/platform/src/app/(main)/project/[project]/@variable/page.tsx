@@ -1,13 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type {
   ClientResponse,
   GetAllVariablesOfProjectResponse,
   Project
 } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
-import { MessageSVG, TrashSVG } from '@public/svg/shared'
+import { MessageSVG } from '@public/svg/shared'
 import { ChevronDown } from 'lucide-react'
 import dayjs from 'dayjs'
 import { Button } from '@/components/ui/button'
