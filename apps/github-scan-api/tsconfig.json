@@ -1,0 +1,13 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["ES2015"],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext"
+  },
+  "exclude": ["node_modules"],
+  "include": ["src"]
+}

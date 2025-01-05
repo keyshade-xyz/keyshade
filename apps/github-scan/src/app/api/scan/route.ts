@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import gitHubScanner from '@/util/github-scanner'
+import { ScanResult } from '@/util/types'
+
+const GITHUB_SCAN_API = process.env.GITHUB_SCAN_API
+const username = process.env.GITHUB_SCAN_API_USERNAME
+const password = process.env.GITHUB_SCAN_API_PASSWORD
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,37 +16,18 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       )
     }
-    try {
-      const result = await gitHubScanner.scanRepo(githubUrl)
-      if (result.length > 0)
-        return NextResponse.json(
-          { isVulnerable: true, files: result },
-          { status: 200 }
-        )
-      else
-        return NextResponse.json(
-          {
-            isVulnerable: false
-          },
-          { status: 200 }
-        )
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Rate limit hit') {
-          return NextResponse.json({ error: 'Rate limit hit' }, { status: 429 })
-        } else if (error.message === 'Invalid GitHub URL') {
-          return NextResponse.json(
-            { error: 'Invalid GitHub URL' },
-            { status: 400 }
-          )
-        } else {
-          return NextResponse.json(
-            { error: 'Internal Server Error' },
-            { status: 500 }
-          )
-        }
-      }
+    const respone = await fetch(GITHUB_SCAN_API + '/scan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password, githubUrl: githubUrl })
+    })
+    const data: { files: ScanResult[] } = await respone.json()
+    if (data.files.length === 0) {
+      return NextResponse.json({ isVulnerable: false })
     }
+    return NextResponse.json({ isVulnerable: true, files: data.files })
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal Server Error' },

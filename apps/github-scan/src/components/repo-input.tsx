@@ -11,14 +11,13 @@ function RepoInput() {
     setResponseData({ loading: true })
     try {
       const response = await fetch('/api/scan?github_url=' + url)
+      if (!response.ok) throw new Error('Internal Server Error')
       const data = (await response.json()) as ScanResponse['data']
-      console.log(data)
       setResponseData({ data: data, loading: false })
     } catch {
       setResponseData({ error: 'Internal Server Error', loading: false })
     }
   }
-
   return (
     <>
       <form
@@ -64,9 +63,9 @@ function RepoInput() {
           )}
 
           {responseData.data.files?.map((file) => (
-            <div key={file.name} className="grid gap-1 overflow-auto text-sm">
+            <div key={file.file} className="grid gap-1 overflow-auto text-sm">
               <p className="flex flex-wrap justify-center text-center text-sky-500">
-                {file.name}:{file.line}
+                {file.file}:{file.line}
               </p>
               <p className="flex flex-wrap justify-center text-center">
                 {file.content}

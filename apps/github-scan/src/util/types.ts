@@ -1,5 +1,5 @@
-interface VulnerableFile {
-  name: string
+interface ScanResult {
+  file: string
   line: number
   content: string
 }
@@ -7,10 +7,10 @@ interface VulnerableFile {
 interface ScanResponse {
   data?: {
     isVulnerable: boolean
-    files?: VulnerableFile[]
+    files?: ScanResult[]
   }
   error?: string
   loading?: boolean
 }
 
-export type { VulnerableFile, ScanResponse }
+export type { ScanResult, ScanResponse }
