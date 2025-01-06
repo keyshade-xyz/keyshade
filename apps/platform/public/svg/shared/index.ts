@@ -8,7 +8,7 @@ import ThreeDotOptionSVG from './3dotOption.svg'
 import AddSVG from './add.svg'
 import LoadingSVG from './loading.svg'
 import MessageSVG from './message.svg'
-import VectorSVG from './vector.svg'
+import VectorSVG from './Vector.svg'
 import ErrorSVG from './Error.svg'
 
 export {
