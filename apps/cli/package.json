@@ -17,16 +17,17 @@
   "dependencies": {
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
+    "@keyshade/secret-scan": "workspace:*",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",
     "fs": "0.0.1-security",
     "glob": "^11.0.0",
     "nodemon": "^3.1.4",
-    "@keyshade/secret-scan": "workspace:*",
     "socket.io-client": "^4.7.5",
     "typescript": "^5.5.2"
   },
@@ -34,8 +35,8 @@
     "@swc/cli": "^0.4.0",
     "@swc/core": "^1.6.13",
     "@types/cli-table": "^0.3.4",
-    "@types/figlet": "^1.5.8",
     "@types/eccrypto": "^1.1.6",
+    "@types/figlet": "^1.5.8",
     "@types/node": "^20.14.10",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "tsup": "^8.1.2"
