@@ -126,21 +126,17 @@ export const getCollectiveEnvironmentAuthorities = async (
                 some: {
                   projectId: environment.project.id,
                   environments: {
-                    none: {}
-                  }
-                }
-              }
-            },
-            {
-              projects: {
-                some: {
-                  projectId: environment.project.id,
-                  environments: {
                     some: {
                       id: environment.id
                     }
                   }
                 }
+              }
+            },
+            // Check if the user has the WORKSPACE_ADMIN authority
+            {
+              authorities: {
+                has: Authority.WORKSPACE_ADMIN
               }
             }
           ]

@@ -19,8 +19,8 @@ export default class UpdateRoleCommand extends BaseCommand {
   getArguments(): CommandArgument[] {
     return [
       {
-        name: '<Workspace Role Slug>',
-        description: 'Slug of the workspace role you want to fetch.'
+        name: '<Workspace Slug>',
+        description: 'Slug of the workspace to associate this role.'
       }
     ]
   }
@@ -62,7 +62,7 @@ export default class UpdateRoleCommand extends BaseCommand {
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
-    const [workspaceRoleSlug] = args
+    const [workspaceSlug] = args
     const {
       name,
       description,
@@ -76,28 +76,32 @@ export default class UpdateRoleCommand extends BaseCommand {
     const projectSlugsArray = projectSlugs?.split(',')
     const environmentSlugsArray = environmentSlugs?.split(',')
 
-    if (projectSlugsArray?.length !== environmentSlugsArray?.length) {
+    if (
+      projectSlugsArray &&
+      environmentSlugsArray &&
+      projectSlugsArray?.length !== environmentSlugsArray?.length
+    ) {
       Logger.error('Number of projects and environments should be equal')
       return
     }
 
     const projectEnvironments: Array<{
       projectSlug: string
-      environmentSlugs: string[]
+      environmentSlugs?: string[]
     }> = []
 
     const len = projectSlugsArray.length
     for (let i = 0; i < len; i++) {
       projectEnvironments.push({
         projectSlug: projectSlugsArray[i],
-        environmentSlugs: environmentSlugsArray[i].split(':')
+        environmentSlugs: environmentSlugsArray?.[i].split(':')
       })
     }
 
     const { data, error, success } =
-      await ControllerInstance.getInstance().workspaceRoleController.updateWorkspaceRole(
+      await ControllerInstance.getInstance().workspaceRoleController.createWorkspaceRole(
         {
-          workspaceRoleSlug,
+          workspaceSlug,
           name,
           description,
           colorCode,

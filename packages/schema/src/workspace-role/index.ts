@@ -44,7 +44,7 @@ export const CreateWorkspaceRoleRequestSchema = z.object({
     .array(
       z.object({
         projectSlug: BaseProjectSchema.shape.slug,
-        environmentSlugs: z.array(EnvironmentSchema.shape.slug)
+        environmentSlugs: z.array(EnvironmentSchema.shape.slug).optional()
       })
     )
     .optional()

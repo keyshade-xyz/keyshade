@@ -107,45 +107,72 @@ export class WorkspaceRoleService {
     if (dto.projectEnvironments) {
       // Create the project associations
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments
-          .map((pe) => pe.projectSlug)
-          .filter((slug) => slug)
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
       )
 
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
-          //Check if all environments are part of the project
-          const project = await this.prisma.project.findFirst({
-            where: {
-              id: projectId,
-              AND: pe.environmentSlugs.map((slug) => ({
-                environments: {
-                  some: {
-                    slug: slug
-                  }
-                }
-              }))
-            }
-          })
-
-          if (!project) {
+          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
             )
-          }
+          if (pe.environmentSlugs) {
+            //Check if all environments are part of the project
+            const project = await this.prisma.project.findFirst({
+              where: {
+                id: projectId,
+                AND: pe.environmentSlugs.map((slug) => ({
+                  environments: {
+                    some: {
+                      slug: slug
+                    }
+                  }
+                }))
+              }
+            })
 
+            if (!project) {
+              throw new BadRequestException(
+                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              )
+            }
+
+            // Check if the user has read authority over all the environments
+            for (const environmentSlug of pe.environmentSlugs) {
+              try {
+                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                  {
+                    userId: user.id,
+                    entity: {
+                      slug: environmentSlug
+                    },
+                    authorities: [Authority.READ_ENVIRONMENT],
+                    prisma: this.prisma
+                  }
+                )
+              } catch {
+                throw new UnauthorizedException(
+                  `User does not have read authority over environment ${environmentSlug}`
+                )
+              }
+            }
+          }
           // Create the project workspace role association with the environments accessible on the project
           op.push(
             this.prisma.projectWorkspaceRoleAssociation.create({
               data: {
                 roleId: workspaceRoleId,
                 projectId: projectId,
-                environments: {
+                environments: pe.environmentSlugs && {
                   connect: pe.environmentSlugs.map((slug) => ({ slug }))
                 }
               }
             })
+          )
+        } else {
+          throw new NotFoundException(
+            `Project with slug ${pe.projectSlug} not found`
           )
         }
       }
@@ -264,34 +291,57 @@ export class WorkspaceRoleService {
       })
 
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments
-          .map((pe) => pe.projectSlug)
-          .filter((slug) => slug)
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
       )
 
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
-          //Check if all environments are part of the project
-          const project = await this.prisma.project.findFirst({
-            where: {
-              id: projectId,
-              AND: pe.environmentSlugs.map((slug) => ({
-                environments: {
-                  some: {
-                    slug: slug
-                  }
-                }
-              }))
-            }
-          })
-
-          if (!project) {
+          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
             )
-          }
+          if (pe.environmentSlugs) {
+            //Check if all environments are part of the project
+            const project = await this.prisma.project.findFirst({
+              where: {
+                id: projectId,
+                AND: pe.environmentSlugs.map((slug) => ({
+                  environments: {
+                    some: {
+                      slug: slug
+                    }
+                  }
+                }))
+              }
+            })
 
+            if (!project) {
+              throw new BadRequestException(
+                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              )
+            }
+
+            // Check if the user has read authority over all the environments
+            for (const environmentSlug of pe.environmentSlugs) {
+              try {
+                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                  {
+                    userId: user.id,
+                    entity: {
+                      slug: environmentSlug
+                    },
+                    authorities: [Authority.READ_ENVIRONMENT],
+                    prisma: this.prisma
+                  }
+                )
+              } catch {
+                throw new UnauthorizedException(
+                  `User does not have update authority over environment ${environmentSlug}`
+                )
+              }
+            }
+          }
           // Create or Update the project workspace role association with the environments accessible on the project
           await this.prisma.projectWorkspaceRoleAssociation.upsert({
             where: {
@@ -301,7 +351,7 @@ export class WorkspaceRoleService {
               }
             },
             update: {
-              environments: {
+              environments: pe.environmentSlugs && {
                 set: [],
                 connect: pe.environmentSlugs.map((slug) => ({ slug }))
               }
@@ -309,11 +359,15 @@ export class WorkspaceRoleService {
             create: {
               roleId: workspaceRoleId,
               projectId: projectId,
-              environments: {
+              environments: pe.environmentSlugs && {
                 connect: pe.environmentSlugs.map((slug) => ({ slug }))
               }
             }
           })
+        } else {
+          throw new NotFoundException(
+            `Project with slug ${pe.projectSlug} not found`
+          )
         }
       }
     }

@@ -6,6 +6,18 @@ import {
   IsString,
   ValidateNested
 } from 'class-validator'
+import { Type } from 'class-transformer'
+
+class ProjectEnvironments {
+  @IsString()
+  @IsNotEmpty()
+  readonly projectSlug: string
+
+  @IsArray()
+  @IsOptional()
+  @IsNotEmpty({ each: true })
+  readonly environmentSlugs?: string[]
+}
 
 export class CreateWorkspaceRole {
   @IsString()
@@ -26,15 +38,6 @@ export class CreateWorkspaceRole {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
+  @Type(() => ProjectEnvironments)
   readonly projectEnvironments?: ProjectEnvironments[]
-}
-
-class ProjectEnvironments {
-  @IsString()
-  @IsNotEmpty()
-  readonly projectSlug: string
-
-  @IsArray()
-  @IsNotEmpty({ each: true })
-  readonly environmentSlugs: string[]
 }

@@ -64,7 +64,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role for developers',
       colorCode: '#FF0000',
       authorities: ['READ_WORKSPACE', 'READ_PROJECT'],
-      projectEnvironments: [{ projectSlug, environmentSlugs: [] }]
+      projectEnvironments: [{ projectSlug }]
     }
 
     const createWorkspaceRoleResponse = (
@@ -199,7 +199,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role with project access',
       colorCode: '#0000FF',
       authorities: ['READ_WORKSPACE'],
-      projectEnvironments: [{ projectSlug, environmentSlugs: [] }]
+      projectEnvironments: [{ projectSlug }]
     }
 
     const createRoleResponse = (

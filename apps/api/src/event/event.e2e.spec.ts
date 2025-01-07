@@ -438,9 +438,7 @@ describe('Event Controller Tests', () => {
         description: 'Some description',
         colorCode: '#000000',
         authorities: [],
-        projectEnvironments: [
-          { projectSlug: project.slug, environmentSlugs: [] }
-        ]
+        projectEnvironments: [{ projectSlug: project.slug }]
       }
     )
 
