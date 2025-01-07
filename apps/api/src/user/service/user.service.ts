@@ -50,7 +50,7 @@ export class UserService {
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
     }
-    if (dto?.email&&user.email!==dto?.email) {
+    if (dto?.email) {
       const userExists =
         (await this.prisma.user.count({
           where: {
@@ -104,12 +104,8 @@ export class UserService {
       isActive: dto.isActive,
       isOnboardingFinished: dto.isOnboardingFinished
     }
-    const user=await this.getUserById(userId)
-    if(!user){
-      throw new NotFoundException('User not found');
-    }
 
-    if (dto.email&&user.email!==dto.email) {
+    if (dto.email) {
       const userExists =
         (await this.prisma.user.count({
           where: {
