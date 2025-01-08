@@ -1,5 +1,5 @@
 {
-  "name": "cli",
+  "name": "@keyshade/cli",
   "version": "2.0.0",
   "description": "CLI for keyshade",
   "main": "dist/src/index.js",
