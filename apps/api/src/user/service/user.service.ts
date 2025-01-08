@@ -4,7 +4,6 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
-  NotFoundException
 } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User, Workspace } from '@prisma/client'
@@ -45,7 +44,7 @@ export class UserService {
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
-    const data = {
+    let data : any = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
@@ -78,6 +77,7 @@ export class UserService {
       })
 
       await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
+      data.email = dto.email
     }
 
     const updatedUser = await this.prisma.user.update({
