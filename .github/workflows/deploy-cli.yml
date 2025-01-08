@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@keyshade'
 
       - name: Install pnpm
         run: npm i -g pnpm
