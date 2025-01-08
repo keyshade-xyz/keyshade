@@ -15,7 +15,7 @@ function ProfilePage(): React.JSX.Element {
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
-  const [email, setEmail] = useState<string>("")
+  const [email, setEmail] = useState<string>('')
 
   const updateSelf = useCallback(async () => {
     try {
@@ -32,7 +32,7 @@ function ProfilePage(): React.JSX.Element {
       console.error(error)
     }
     setIsModified(false)
-  }, [userData,email])
+  }, [userData, email])
 
   useEffect(() => {
     ControllerInstance.getInstance()

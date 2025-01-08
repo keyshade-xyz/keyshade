@@ -2,8 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  Logger,
-  UnauthorizedException,
+  Logger
 } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User, Workspace } from '@prisma/client'
@@ -15,7 +14,7 @@ import { generateOtp, limitMaxItemsPerPage } from '@/common/util'
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from '../user.types'
-
+import { UpdateSelfRequest } from '@keyshade/schema'
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
@@ -44,7 +43,7 @@ export class UserService {
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
-    let data : any = {
+    let data: UpdateSelfRequest = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
