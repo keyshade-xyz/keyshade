@@ -38,6 +38,23 @@ jobs:
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}
           echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
 
+  migration:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+    name: Run database migrations
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pnpm i
+          pnpm db:generate-types
+          pnpm db:deploy-migrations
+
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
