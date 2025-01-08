@@ -1,6 +1,6 @@
 {
   "name": "cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "CLI for keyshade",
   "main": "dist/src/index.js",
   "private": false,
@@ -9,7 +9,8 @@
     "build": "tsc && tsc-alias",
     "start": "node dist/src/index.js",
     "dev": "pnpm build && node dist/src/index.js",
-    "lint": "eslint \"src/**/*.ts\" --fix"
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "publish": "pnpm build && pnpm publish --access public --provenance"
   },
   "keywords": [],
   "author": "",
