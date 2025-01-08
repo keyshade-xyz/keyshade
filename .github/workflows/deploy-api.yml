@@ -38,7 +38,7 @@ jobs:
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}
           echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
 
-  migration:
+  migrate:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
     name: Run database migrations
@@ -51,7 +51,13 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          # Install pnpm
+          npm i -g pnpm
+
+          # Install dependencies
           pnpm i
+
+          # Run migrations
           pnpm db:generate-types
           pnpm db:deploy-migrations
 
@@ -59,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
     name: Restart API container app
-    needs: build
+    needs: migrate
     steps:
       - name: Azure Login action
         uses: azure/login@v2
