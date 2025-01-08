@@ -366,6 +366,115 @@ describe('Workspace Role Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+
+    it('should be able to create workspace role with environment only access for projects', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'development',
+          slug: 'development',
+          projectId: projects[0].id
+        }
+      })
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['development']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(201)
+      expect(response.json()).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          workspaceId: workspaceAlice.id,
+          projects: [
+            {
+              project: {
+                id: projects[0].id,
+                name: projects[0].name,
+                slug: projects[0].slug
+              },
+              environments: [
+                {
+                  id: devEnvironment.id,
+                  name: 'development',
+                  slug: 'development'
+                }
+              ]
+            }
+          ]
+        })
+      )
+    })
+
+    it('should not be able to create workspace role where environments do not belong to the project', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['production']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+    })
+
+    it("should not be able to add environments that the user doesn't have read access to", async () => {
+      await prisma.environment.create({
+        data: {
+          name: 'development',
+          slug: 'development',
+          projectId: projects[0].id
+        }
+      })
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role 2',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_ENVIRONMENT, Authority.READ_VARIABLE],
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['development']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': charlie.email
+        }
+      })
+      expect(response.statusCode).toBe(401)
+    })
   })
 
   it('should be able to read workspace role with READ_WORKSPACE_ROLE authority', async () => {
@@ -588,12 +697,36 @@ describe('Workspace Role Controller Tests', () => {
       })
     })
 
-    it('should be able to add projects to the role', async () => {
+    it('should be able to add environment access for projects to the role', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'dev',
+          slug: 'dev',
+          projectId: projects[0].id
+        }
+      })
+      const stageEnvironment = await prisma.environment.create({
+        data: {
+          name: 'stage',
+          slug: 'stage',
+          projectId: projects[1].id
+        }
+      })
+
       const response = await app.inject({
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          projectSlugs: projects.map((project) => project.slug)
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            },
+            {
+              projectSlug: projects[1].slug,
+              environmentSlugs: ['stage']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': alice.email
@@ -611,20 +744,49 @@ describe('Workspace Role Controller Tests', () => {
               id: projects[0].id,
               name: projects[0].name,
               slug: projects[0].slug
-            }
+            },
+            environments: [
+              {
+                id: devEnvironment.id,
+                name: 'dev',
+                slug: 'dev'
+              }
+            ]
           },
           {
             project: {
               id: projects[1].id,
               name: projects[1].name,
               slug: projects[1].slug
-            }
+            },
+            environments: [
+              {
+                id: stageEnvironment.id,
+                name: 'stage',
+                slug: 'stage'
+              }
+            ]
           }
         ])
       })
     })
 
-    it('should be able to add projects to the role with UPDATE_WORKSPACE_ROLE and READ_PROJECT authorities', async () => {
+    it('should be able to add environment access for projects to the role with READ_WORKSPACE, UPDATE_WORKSPACE_ROLE, READ_PROJECT, READ_ENVIRONMENT authorities', async () => {
+      const devEnvironment = await prisma.environment.create({
+        data: {
+          name: 'dev',
+          slug: 'dev',
+          projectId: projects[0].id
+        }
+      })
+      const stageEnvironment = await prisma.environment.create({
+        data: {
+          name: 'stage',
+          slug: 'stage',
+          projectId: projects[1].id
+        }
+      })
+      // update the workspace member role with the required authorities
       await prisma.workspaceRole.update({
         where: {
           workspaceId_name: {
@@ -637,7 +799,34 @@ describe('Workspace Role Controller Tests', () => {
             set: [
               Authority.UPDATE_WORKSPACE_ROLE,
               Authority.READ_PROJECT,
-              Authority.READ_WORKSPACE_ROLE
+              Authority.READ_WORKSPACE_ROLE,
+              Authority.READ_ENVIRONMENT
+            ]
+          },
+          projects: {
+            create: [
+              {
+                project: {
+                  connect: {
+                    id: projects[0].id
+                  }
+                },
+                environments: {
+                  connect: {
+                    id: devEnvironment.id
+                  }
+                }
+              },
+              {
+                project: {
+                  connect: {
+                    id: projects[1].id
+                  }
+                },
+                environments: {
+                  connect: { id: stageEnvironment.id }
+                }
+              }
             ]
           }
         }
@@ -647,13 +836,21 @@ describe('Workspace Role Controller Tests', () => {
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          projectSlugs: projects.map((project) => project.slug)
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            },
+            {
+              projectSlug: projects[1].slug,
+              environmentSlugs: ['stage']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': charlie.email
         }
       })
-
       expect(response.statusCode).toBe(200)
       expect(response.json()).toEqual({
         ...adminRole1,
@@ -666,14 +863,28 @@ describe('Workspace Role Controller Tests', () => {
               id: projects[0].id,
               name: projects[0].name,
               slug: projects[0].slug
-            }
+            },
+            environments: [
+              {
+                id: devEnvironment.id,
+                name: 'dev',
+                slug: 'dev'
+              }
+            ]
           },
           {
             project: {
               id: projects[1].id,
               name: projects[1].name,
               slug: projects[1].slug
-            }
+            },
+            environments: [
+              {
+                id: stageEnvironment.id,
+                name: 'stage',
+                slug: 'stage'
+              }
+            ]
           }
         ])
       })
@@ -699,6 +910,53 @@ describe('Workspace Role Controller Tests', () => {
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
           projectIds: projects.map((project) => project.id)
+        },
+        headers: {
+          'x-e2e-user-email': charlie.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to update the workspace role with environments that do not belong to the project', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['production']
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should not be able to update the workspace role with environments that the user does not have read access to', async () => {
+      await prisma.environment.create({
+        data: {
+          name: 'dev',
+          slug: 'dev',
+          projectId: projects[0].id
+        }
+      })
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          projectEnvironments: [
+            {
+              projectSlug: projects[0].slug,
+              environmentSlugs: ['dev']
+            }
+          ]
         },
         headers: {
           'x-e2e-user-email': charlie.email

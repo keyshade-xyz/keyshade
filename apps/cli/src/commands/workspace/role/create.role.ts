@@ -9,18 +9,18 @@ import ControllerInstance from '@/util/controller-instance'
 
 export default class UpdateRoleCommand extends BaseCommand {
   getName() {
-    return 'update'
+    return 'create'
   }
 
   getDescription(): string {
-    return 'Update workspace role'
+    return 'Create workspace role'
   }
 
   getArguments(): CommandArgument[] {
     return [
       {
-        name: '<Workspace Role Slug>',
-        description: 'Slug of the workspace role you want to fetch.'
+        name: '<Workspace Slug>',
+        description: 'Slug of the workspace to associate this role.'
       }
     ]
   }
@@ -62,7 +62,7 @@ export default class UpdateRoleCommand extends BaseCommand {
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
-    const [workspaceRoleSlug] = args
+    const [workspaceSlug] = args
     const {
       name,
       description,
@@ -76,28 +76,32 @@ export default class UpdateRoleCommand extends BaseCommand {
     const projectSlugsArray = projectSlugs?.split(',')
     const environmentSlugsArray = environmentSlugs?.split(',')
 
-    if (projectSlugsArray?.length !== environmentSlugsArray?.length) {
+    if (
+      projectSlugsArray &&
+      environmentSlugsArray &&
+      projectSlugsArray?.length !== environmentSlugsArray?.length
+    ) {
       Logger.error('Number of projects and environments should be equal')
       return
     }
 
     const projectEnvironments: Array<{
       projectSlug: string
-      environmentSlugs: string[]
+      environmentSlugs?: string[]
     }> = []
 
     const len = projectSlugsArray.length
     for (let i = 0; i < len; i++) {
       projectEnvironments.push({
         projectSlug: projectSlugsArray[i],
-        environmentSlugs: environmentSlugsArray[i].split(':')
+        environmentSlugs: environmentSlugsArray?.[i].split(':')
       })
     }
 
     const { data, error, success } =
-      await ControllerInstance.getInstance().workspaceRoleController.updateWorkspaceRole(
+      await ControllerInstance.getInstance().workspaceRoleController.createWorkspaceRole(
         {
-          workspaceRoleSlug,
+          workspaceSlug,
           name,
           description,
           colorCode,
@@ -109,7 +113,7 @@ export default class UpdateRoleCommand extends BaseCommand {
       )
 
     if (success) {
-      Logger.info('Workspace role updated successfully:')
+      Logger.info('Workspace role created successfully:')
       Logger.info(`Workspace role: ${data.name} (${data.slug})`)
       Logger.info(`Description: ${data.description || 'N/A'}`)
       Logger.info(`Created at ${data.createdAt}`)
@@ -124,7 +128,7 @@ export default class UpdateRoleCommand extends BaseCommand {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }
     } else {
-      Logger.error(`Failed updating workspace role: ${error.message}`)
+      Logger.error(`Failed creating workspace role: ${error.message}`)
     }
   }
 }

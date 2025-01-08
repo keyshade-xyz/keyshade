@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { CreateWorkspaceRole } from './create-workspace-role'
 
 describe('CreateWorkspaceRole', () => {
