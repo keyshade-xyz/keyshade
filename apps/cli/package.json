@@ -4,6 +4,10 @@
   "description": "CLI for keyshade",
   "main": "dist/src/index.js",
   "private": false,
+  "repository": {
+    "url": "https://github.com/keyshade-xyz/keyshade",
+    "type": "git"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
@@ -13,8 +17,8 @@
     "publish": "pnpm build && pnpm publish --access public --provenance"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "keyshade",
+  "license": "MPL-2.0",
   "dependencies": {
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
