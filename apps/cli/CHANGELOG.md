@@ -23,3 +23,9 @@
 ### Minor Changes
 
 - Updated build scripts
+
+## 2.0.4
+
+### Minor Changes
+
+- Fixed binary path in package.json
