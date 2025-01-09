@@ -14,6 +14,20 @@ The CLI has the following commands:
 - [init](./init.md): This command is used to initialize your project to tap into the live updates from our platform.
 - [run](./run.md): This command is used to run your application.
 
+## Installing the CLI
+
+To install the CLI, simply run:
+
+```bash
+npm install -g @keyshade/cli
+```
+
+Verify the installation using:
+
+```bash
+keyshade --help
+```
+
 ## Global flags
 
 Global flags work with any command in the CLI. The following are the global flags:
