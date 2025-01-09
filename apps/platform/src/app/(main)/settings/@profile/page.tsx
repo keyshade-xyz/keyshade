@@ -15,13 +15,14 @@ function ProfilePage(): React.JSX.Element {
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>('')
 
   const updateSelf = useCallback(async () => {
     try {
       await ControllerInstance.getInstance().userController.updateSelf(
         {
           name: userData.name,
-          email: userData.email
+          email: userData.email === email ? null : email
         },
         {}
       )
@@ -31,7 +32,7 @@ function ProfilePage(): React.JSX.Element {
       console.error(error)
     }
     setIsModified(false)
-  }, [userData])
+  }, [userData, email])
 
   useEffect(() => {
     ControllerInstance.getInstance()
@@ -43,6 +44,7 @@ function ProfilePage(): React.JSX.Element {
             name: data.name,
             profilePictureUrl: data.profilePictureUrl || ''
           })
+          setEmail(data.email)
           setIsLoading(false)
         } else {
           // eslint-disable-next-line no-console -- we need to log the error
@@ -104,10 +106,10 @@ function ProfilePage(): React.JSX.Element {
             disabled
             // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             //   setIsModified(true)
-            //   setUserData((prev) => ({ ...prev, email: e.target.value }))
+            //   setEmail(e.target.value)
             // }}
             placeholder="email"
-            value={userData.email}
+            value={email}
           />
         )}
       </div>
