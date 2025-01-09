@@ -14,7 +14,9 @@ import {
   ExportDataResponseSchema,
   GetAllWorkspacesOfUserResponseSchema,
   GlobalSearchResponseSchema,
-  GetAllWorkspacesOfUserRequestSchema
+  GetAllWorkspacesOfUserRequestSchema,
+  GetWorkspaceInvitationsRequest,
+  GetWorkspaceInvitationsResponse
 } from '@/workspace'
 
 describe('Workspace Schema Tests', () => {
@@ -509,6 +511,71 @@ describe('Workspace Schema Tests', () => {
         0,
         'description'
       ])
+    })
+  })
+
+  describe('GetInvitationRequestSchema Tests', () => {
+    it('should validate when correct page and limit are provided for GetInvitationRequestSchema', () => {
+      const result = GetWorkspaceInvitationsRequest.safeParse({
+        page: 1,
+        limit: 10
+      })
+
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('GetInvitationResponseSchema Tests', () => {
+    it('should validate with proper input for GetInvitationResponseSchema', () => {
+      const result = GetWorkspaceInvitationsResponse.safeParse({
+        items: [
+          {
+            workspace: {
+              id: 'workspace-id',
+              name: 'Workspace Name',
+              slug: 'workspace-slug',
+              icon: null
+            },
+            roles: [
+              {
+                role: {
+                  name: 'Admin',
+                  colorCode: '#FFFFFF'
+                }
+              }
+            ],
+            invitedOn: '2023-12-01T12:00:00Z'
+          }
+        ],
+        metadata: {
+          page: 1,
+          perPage: 10,
+          pageCount: 1,
+          totalCount: 1,
+          links: {
+            self: 'https://example.com/self',
+            first: 'https://example.com/first',
+            previous: null,
+            next: null,
+            last: 'https://example.com/last'
+          }
+        }
+      })
+
+      expect(result.success).toBe(true)
+    })
+
+    it('should not validate if items are not an array in GetInvitationResponseSchema', () => {
+      const result = GetWorkspaceInvitationsResponse.safeParse({
+        items: 'not-an-array',
+        metadata: {
+          page: 1,
+          perPage: 10
+        }
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error?.issues[0].path).toEqual(['items'])
     })
   })
 })
