@@ -1,19 +1,20 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "CLI for keyshade",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "private": false,
   "repository": {
     "url": "https://github.com/keyshade-xyz/keyshade",
     "type": "git"
   },
   "bin": {
-    "keyshade": "dist/index.js"
+    "keyshade": "dist/index.cjs"
   },
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outdir=dist",
+    "build": "esbuild src/index.ts --bundle --platform=node --outdir=dist --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outdir=dist --format=cjs --banner:js='#!/usr/bin/env node'",
     "start": "node dist/index.js",
     "dev": "pnpm build && node dist/index.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
