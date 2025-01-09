@@ -1,12 +1,15 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "CLI for keyshade",
   "main": "dist/src/index.js",
   "private": false,
   "repository": {
     "url": "https://github.com/keyshade-xyz/keyshade",
     "type": "git"
+  },
+  "bin": {
+    "keyshade": "dist/src/index.js"
   },
   "type": "module",
   "scripts": {

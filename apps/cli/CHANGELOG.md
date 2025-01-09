@@ -11,3 +11,7 @@
 ### Minor Changes
 
 - Fixed invalid import issue
+
+## 2.0.2
+
+- Added `keyshade` command
