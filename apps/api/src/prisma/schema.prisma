@@ -106,6 +106,9 @@ enum Authority {
   READ_SELF
   UPDATE_SELF
   READ_EVENT
+
+  // Master authority
+  ADMIN
 }
 
 enum NotificationType {

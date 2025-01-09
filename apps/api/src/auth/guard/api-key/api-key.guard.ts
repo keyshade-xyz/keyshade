@@ -77,6 +77,10 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException('The API key has no authorities.')
     }
 
+    if (user.apiKeyAuthorities.has(Authority.ADMIN)) {
+      return true
+    }
+
     for (const requiredAuthority of requiredAuthorities) {
       if (!user.apiKeyAuthorities.has(requiredAuthority)) {
         throw new UnauthorizedException(
