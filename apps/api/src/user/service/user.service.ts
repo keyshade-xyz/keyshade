@@ -2,7 +2,8 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  Logger
+  Logger,
+  UnauthorizedException
 } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
 import { AuthProvider, User, Workspace } from '@prisma/client'
@@ -15,6 +16,7 @@ import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from '../user.types'
 import { UpdateSelfRequest } from '@keyshade/schema'
+
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
@@ -43,7 +45,7 @@ export class UserService {
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
-    let data: UpdateSelfRequest = {
+    const data: UpdateSelfRequest = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
@@ -76,7 +78,6 @@ export class UserService {
       })
 
       await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
-      data.email = dto.email
     }
 
     const updatedUser = await this.prisma.user.update({
