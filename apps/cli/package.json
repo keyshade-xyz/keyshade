@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "CLI for keyshade",
   "main": "dist/src/index.js",
   "private": false,
@@ -13,7 +13,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "esbuild src/index.ts --bundle --platform=node --outdir=dist",
     "start": "node dist/src/index.js",
     "dev": "pnpm build && node dist/src/index.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
@@ -45,6 +45,7 @@
     "@types/eccrypto": "^1.1.6",
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.14.10",
+    "esbuild": "^0.24.2",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "tsup": "^8.1.2"
   }

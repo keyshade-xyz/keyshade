@@ -14,4 +14,12 @@
 
 ## 2.0.2
 
+### Minor Changes
+
 - Added `keyshade` command
+
+## 2.0.3
+
+### Minor Changes
+
+- Updated build scripts
