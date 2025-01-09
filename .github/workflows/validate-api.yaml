@@ -50,6 +50,11 @@ jobs:
         run: |
           pnpm run lint:api
 
+      - name: Build deps
+        run: |
+          pnpm run db:generate-types
+          pnpm run build:schema
+
       - name: Unit tests
         run: |
           pnpm run db:generate-types
