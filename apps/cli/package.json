@@ -14,7 +14,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outdir=dist --outfile=index.esm.js --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outdir=dist --outfile=index.cjs --format=cjs --banner:js='#!/usr/bin/env node'",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.esm.js --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs --banner:js='#!/usr/bin/env node'",
     "start": "node dist/index.js",
     "dev": "pnpm build && node dist/index.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
