@@ -7,7 +7,7 @@ import {
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
 
-export default class UpdateRoleCommand extends BaseCommand {
+export default class CreateRoleCommand extends BaseCommand {
   getName() {
     return 'create'
   }
@@ -39,7 +39,7 @@ export default class UpdateRoleCommand extends BaseCommand {
       },
       {
         short: '-c',
-        long: '--color-code <hexcode>',
+        long: '--color-code <string>',
         description: 'Color code of the workspace role.'
       },
       {
@@ -49,12 +49,12 @@ export default class UpdateRoleCommand extends BaseCommand {
       },
       {
         short: '-p',
-        long: '--project-slugs <comma separated list>',
+        long: '--projects <comma separated list>',
         description: 'Project slugs of the workspace role.'
       },
       {
         short: '-e',
-        long: '--environment-slugs <comma separated list>',
+        long: '--environments <comma separated list>',
         description:
           'Environment slugs to be associated for projects. Separate list of environments with colon(:) for each project. And comma(,) to separate each project.'
       }
@@ -68,13 +68,13 @@ export default class UpdateRoleCommand extends BaseCommand {
       description,
       colorCode,
       authorities,
-      projectSlugs,
-      environmentSlugs
+      projects,
+      environments
     } = options
 
     const authoritiesArray = authorities?.split(',')
-    const projectSlugsArray = projectSlugs?.split(',')
-    const environmentSlugsArray = environmentSlugs?.split(',')
+    const projectSlugsArray = projects?.split(',')
+    const environmentSlugsArray = environments?.split(',')
 
     if (
       projectSlugsArray &&

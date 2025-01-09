@@ -34,7 +34,7 @@ export default class RollbackSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--environmentSlug <string>',
+        long: '--environment <string>',
         description:
           'Slug of the environment of the secret to which you want to rollback'
       }
@@ -43,11 +43,12 @@ export default class RollbackSecret extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
-    const { environmentSlug, version } = await this.parseInput(options)
+    const { environment, version } = await this.parseInput(options)
+
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.rollbackSecret(
         {
-          environmentSlug,
+          environmentSlug: environment,
           version,
           secretSlug
         },
@@ -62,13 +63,13 @@ export default class RollbackSecret extends BaseCommand {
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    environmentSlug: string
+    environment: string
     version: number
   }> {
-    const { environmentSlug, version } = options
+    const { environment, version } = options
 
     return {
-      environmentSlug,
+      environment,
       version: parseInt(version, 10)
     }
   }
