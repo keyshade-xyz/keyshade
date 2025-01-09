@@ -15,8 +15,8 @@ import {
   GetAllWorkspacesOfUserResponseSchema,
   GlobalSearchResponseSchema,
   GetAllWorkspacesOfUserRequestSchema,
-  GetInvitationRequestSchema,
-  GetInvitationResponseSchema
+  GetWorkspaceInvitationsRequest,
+  GetWorkspaceInvitationsResponse
 } from '@/workspace'
 
 describe('Workspace Schema Tests', () => {
@@ -516,7 +516,7 @@ describe('Workspace Schema Tests', () => {
 
   describe('GetInvitationRequestSchema Tests', () => {
     it('should validate when correct page and limit are provided for GetInvitationRequestSchema', () => {
-      const result = GetInvitationRequestSchema.safeParse({
+      const result = GetWorkspaceInvitationsRequest.safeParse({
         page: 1,
         limit: 10
       })
@@ -527,7 +527,7 @@ describe('Workspace Schema Tests', () => {
 
   describe('GetInvitationResponseSchema Tests', () => {
     it('should validate with proper input for GetInvitationResponseSchema', () => {
-      const result = GetInvitationResponseSchema.safeParse({
+      const result = GetWorkspaceInvitationsResponse.safeParse({
         items: [
           {
             workspace: {
@@ -566,7 +566,7 @@ describe('Workspace Schema Tests', () => {
     })
 
     it('should not validate if items are not an array in GetInvitationResponseSchema', () => {
-      const result = GetInvitationResponseSchema.safeParse({
+      const result = GetWorkspaceInvitationsResponse.safeParse({
         items: 'not-an-array',
         metadata: {
           page: 1,

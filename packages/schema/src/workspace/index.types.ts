@@ -16,8 +16,8 @@ import {
   ExportDataResponseSchema,
   GlobalSearchRequestSchema,
   GlobalSearchResponseSchema,
-  GetInvitationRequestSchema,
-  GetInvitationResponseSchema
+  GetWorkspaceInvitationsRequest,
+  GetWorkspaceInvitationsResponse
 } from '.'
 import { PageRequestSchema } from '..'
 
@@ -69,6 +69,10 @@ export type GlobalSearchRequest = z.infer<typeof GlobalSearchRequestSchema>
 
 export type GlobalSearchResponse = z.infer<typeof GlobalSearchResponseSchema>
 
-export type GetInvitationRequest = z.infer<typeof GetInvitationRequestSchema>
+export type GetInvitationRequest = z.infer<
+  typeof GetWorkspaceInvitationsRequest
+>
 
-export type GetInvitationResponse = z.infer<typeof GetInvitationResponseSchema>
+export type GetInvitationResponse = z.infer<
+  typeof GetWorkspaceInvitationsResponse
+>
