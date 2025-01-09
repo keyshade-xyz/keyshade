@@ -69,10 +69,10 @@ export type GlobalSearchRequest = z.infer<typeof GlobalSearchRequestSchema>
 
 export type GlobalSearchResponse = z.infer<typeof GlobalSearchResponseSchema>
 
-export type GetInvitationRequest = z.infer<
+export type GetWorkspaceInvitationsRequest = z.infer<
   typeof GetWorkspaceInvitationsRequest
 >
 
-export type GetInvitationResponse = z.infer<
+export type GetWorkspaceInvitationsResponse = z.infer<
   typeof GetWorkspaceInvitationsResponse
 >
