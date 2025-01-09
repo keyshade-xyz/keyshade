@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander'
 import type BaseCommand from './commands/base.command'
 import InitCommand from './commands/init.command'
