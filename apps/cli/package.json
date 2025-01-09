@@ -1,18 +1,22 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.0.1",
+  "version": "2.0.7",
   "description": "CLI for keyshade",
-  "main": "dist/src/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.esm.js",
   "private": false,
   "repository": {
     "url": "https://github.com/keyshade-xyz/keyshade",
     "type": "git"
   },
+  "bin": {
+    "keyshade": "dist/index.cjs"
+  },
   "type": "module",
   "scripts": {
-    "build": "tsc && tsc-alias",
-    "start": "node dist/src/index.js",
-    "dev": "pnpm build && node dist/src/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.esm.js --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs --banner:js='#!/usr/bin/env node'",
+    "start": "node dist/index.js",
+    "dev": "pnpm build && node dist/index.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "publish": "pnpm build && pnpm publish --access public --provenance"
   },
@@ -42,6 +46,7 @@
     "@types/eccrypto": "^1.1.6",
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.14.10",
+    "esbuild": "^0.24.2",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "tsup": "^8.1.2"
   }
