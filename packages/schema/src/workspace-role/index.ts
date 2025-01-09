@@ -1,4 +1,5 @@
 import { authorityEnum } from '@/enums'
+import { EnvironmentSchema } from '@/environment'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { BaseProjectSchema } from '@/project'
 import { WorkspaceSchema } from '@/workspace'
@@ -21,7 +22,14 @@ export const WorkspaceRoleSchema = z.object({
         id: BaseProjectSchema.shape.id,
         name: BaseProjectSchema.shape.name,
         slug: BaseProjectSchema.shape.slug
-      })
+      }),
+      environments: z.array(
+        z.object({
+          id: EnvironmentSchema.shape.id,
+          name: EnvironmentSchema.shape.name,
+          slug: EnvironmentSchema.shape.slug
+        })
+      )
     })
   )
 })
@@ -32,7 +40,14 @@ export const CreateWorkspaceRoleRequestSchema = z.object({
   description: z.string().optional(),
   colorCode: z.string().optional(),
   authorities: z.array(authorityEnum).optional(),
-  projectSlugs: z.array(BaseProjectSchema.shape.slug).optional()
+  projectEnvironments: z
+    .array(
+      z.object({
+        projectSlug: BaseProjectSchema.shape.slug,
+        environmentSlugs: z.array(EnvironmentSchema.shape.slug).optional()
+      })
+    )
+    .optional()
 })
 
 export const CreateWorkspaceRoleResponseSchema = WorkspaceRoleSchema

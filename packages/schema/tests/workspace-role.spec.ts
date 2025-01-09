@@ -34,7 +34,14 @@ describe('WorkspaceRoleSchema Tests', () => {
             id: 'project123',
             name: 'Project Name',
             slug: 'project-slug'
-          }
+          },
+          environments: [
+            {
+              id: 'env123',
+              name: 'Environment Name',
+              slug: 'env-slug'
+            }
+          ]
         }
       ]
     })
@@ -59,7 +66,8 @@ describe('WorkspaceRoleSchema Tests', () => {
             id: 'project123',
             name: 'Project Name',
             slug: 'project-slug'
-          }
+          },
+          environments: []
         }
       ]
     })
@@ -85,11 +93,12 @@ describe('WorkspaceRoleSchema Tests', () => {
             name: 'Project Name',
             slug: 'project-slug'
           }
+          // missing environments
         }
       ]
     })
     expect(result.success).toBe(false)
-    expect(result.error?.issues).toHaveLength(3)
+    expect(result.error?.issues).toHaveLength(4)
   })
 
   describe('CreateWorkspaceRoleRequestSchema Tests', () => {
@@ -98,7 +107,12 @@ describe('WorkspaceRoleSchema Tests', () => {
         workspaceSlug: 'workspace-1',
         name: 'Admin Role',
         authorities: [authorityEnum.enum['CREATE_PROJECT']],
-        projectIds: ['project1', 'project2']
+        projectEnvironments: [
+          {
+            projectSlug: 'project-1',
+            environmentSlugs: ['env-1', 'env-2']
+          }
+        ]
       })
 
       expect(result.success).toBe(true)
@@ -113,10 +127,11 @@ describe('WorkspaceRoleSchema Tests', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should validate if optional fields are omitted for CreateWorkspaceRoleRequestSchema', () => {
+    it('should validate if some optional fields are omitted for CreateWorkspaceRoleRequestSchema', () => {
       const result = CreateWorkspaceRoleRequestSchema.safeParse({
         workspaceSlug: 'workspace-1',
-        name: 'Manager Role'
+        name: 'Manager Role',
+        colorCode: '#FF5733'
       })
 
       expect(result.success).toBe(true)
@@ -154,7 +169,12 @@ describe('WorkspaceRoleSchema Tests', () => {
           authorityEnum.enum['CREATE_PROJECT'],
           authorityEnum.enum['READ_USERS']
         ],
-        projectIds: ['project1', 'project2']
+        projectEnvironments: [
+          {
+            projectSlug: 'project-1',
+            environmentSlugs: ['env-1', 'env-2']
+          }
+        ]
       })
 
       expect(result.success).toBe(true)
@@ -180,7 +200,14 @@ describe('WorkspaceRoleSchema Tests', () => {
               id: 'project123',
               name: 'Project Name',
               slug: 'project-slug'
-            }
+            },
+            environments: [
+              {
+                id: 'env123',
+                name: 'Environment Name',
+                slug: 'env-slug'
+              }
+            ]
           }
         ]
       })
@@ -205,7 +232,14 @@ describe('WorkspaceRoleSchema Tests', () => {
               id: 'project123',
               name: 'Project Name',
               slug: 'project-slug'
-            }
+            },
+            environments: [
+              {
+                id: 'env123',
+                name: 'Environment Name',
+                slug: 'env-slug'
+              }
+            ]
           }
         ]
       })
@@ -220,7 +254,13 @@ describe('WorkspaceRoleSchema Tests', () => {
         workspaceRoleSlug: 'admin-role',
         name: 'Updated Admin Role',
         description: 'Updated role with admin privileges',
-        colorCode: '#FF5733'
+        colorCode: '#FF5733',
+        projectEnvironments: [
+          {
+            projectSlug: 'project-1',
+            environmentSlugs: ['env-1', 'env-2']
+          }
+        ]
       })
       expect(result.success).toBe(true)
     })
@@ -232,10 +272,10 @@ describe('WorkspaceRoleSchema Tests', () => {
         description: 'Updated role with admin privileges',
         colorCode: '#FF5733',
         authorities: ['INVALID_AUTHORITY'], // Invalid authority
-        projectSlugs: ['project-slug']
+        projectEnvironments: ['project-slug'] // Should be object
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
@@ -258,7 +298,14 @@ describe('WorkspaceRoleSchema Tests', () => {
               id: 'project123',
               name: 'Project Name',
               slug: 'project-slug'
-            }
+            },
+            environments: [
+              {
+                id: 'env123',
+                name: 'Environment Name',
+                slug: 'env-slug'
+              }
+            ]
           }
         ]
       })
@@ -284,11 +331,12 @@ describe('WorkspaceRoleSchema Tests', () => {
               name: 'Project Name',
               slug: 'project-slug'
             }
+            // missing environments
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
@@ -395,7 +443,14 @@ describe('WorkspaceRoleSchema Tests', () => {
               id: 'project123',
               name: 'Project Name',
               slug: 'project-slug'
-            }
+            },
+            environments: [
+              {
+                id: 'env123',
+                name: 'Environment Name',
+                slug: 'env-slug'
+              }
+            ]
           }
         ]
       })
@@ -421,11 +476,12 @@ describe('WorkspaceRoleSchema Tests', () => {
               name: 'Project Name'
               // Missing slug
             }
+            // missing environments
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 
