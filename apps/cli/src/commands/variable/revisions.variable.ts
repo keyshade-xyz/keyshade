@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -29,14 +30,26 @@ export default class FetchVariableRevisions extends BaseCommand {
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [variableSlug, environmentSlug] = args
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--environment <string>',
+        description:
+          'Environment slug of the variable whose revisions you want.'
+      }
+    ]
+  }
+
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [variableSlug] = args
+    const { environment } = options
 
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.getRevisionsOfVariable(
         {
           variableSlug,
-          environmentSlug
+          environmentSlug: environment
         },
         this.headers
       )

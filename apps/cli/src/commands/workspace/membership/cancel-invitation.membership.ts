@@ -1,7 +1,8 @@
 import BaseCommand from '@/commands/base.command'
-import {
-  type CommandActionData,
-  type CommandArgument
+import type {
+  CommandOption,
+  CommandActionData,
+  CommandArgument
 } from '@/types/command/command.types'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
@@ -20,9 +21,15 @@ export default class CancelInvitationCommand extends BaseCommand {
       {
         name: '<Workspace Slug>',
         description: 'Slug of the workspace which you want to fetch.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<Invitee Email>',
+        short: '-e',
+        long: '--email <string>',
         description: 'Email of the user that was invited.'
       }
     ]
@@ -32,14 +39,15 @@ export default class CancelInvitationCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, userEmail] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [workspaceSlug] = args
+    const { email } = options
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.cancelInvitation(
         {
           workspaceSlug,
-          userEmail
+          userEmail: email
         },
         this.headers
       )
@@ -47,7 +55,7 @@ export default class CancelInvitationCommand extends BaseCommand {
     if (success) {
       Logger.info('Cancelled an invitation for workspace successfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
-      Logger.info(`Invitee: ${userEmail}`)
+      Logger.info(`Invitee: ${email}`)
     } else {
       Logger.error(`Failed to cancel invitation: ${error.message}`)
     }

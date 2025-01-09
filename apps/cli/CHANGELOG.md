@@ -29,3 +29,9 @@
 ### Minor Changes
 
 - Fixed binary path in package.json
+
+## 2.1.0
+
+### Major Changes
+
+- Modified a lot of commands to use more options rather than arguments
