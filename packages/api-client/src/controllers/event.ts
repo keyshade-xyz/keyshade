@@ -1,9 +1,6 @@
-import {
-  GetEventsRequest,
-  GetEventsResponse
-} from '@api-client/types/event.types'
+import { GetEventsRequest, GetEventsResponse } from '@keyshade/schema'
 import { APIClient } from '../core/client'
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 
 export default class EventController {

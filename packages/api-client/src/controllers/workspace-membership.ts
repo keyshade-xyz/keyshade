@@ -22,8 +22,8 @@ import {
   IsMemberResponse,
   GetMembersRequest,
   GetMembersResponse
-} from '@api-client/types/workspace-membership.types'
-import { ClientResponse } from '@api-client/types/index.types'
+} from '@keyshade/schema'
+import { ClientResponse } from '@keyshade/schema'
 
 export default class WorkspaceMembershipController {
   private apiClient: APIClient
@@ -61,7 +61,7 @@ export default class WorkspaceMembershipController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<RemoveUsersResponse>> {
     const response = await this.apiClient.delete(
-      `/api/workspace-membership/${request.workspaceSlug}/remove-users`,
+      `/api/workspace-membership/${request.workspaceSlug}/remove-users?userEmails=${request.userEmails}`,
       headers
     )
     return await parseResponse<RemoveUsersResponse>(response)

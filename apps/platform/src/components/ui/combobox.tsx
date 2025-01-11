@@ -5,27 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import { cn } from '@/lib/utils'
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
-import { apiClient } from '@/lib/api-client'
-import type { Workspace } from '@/types'
-import { zWorkspace } from '@/types'
-import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  setWorkspace
-} from '@/lib/workspace-storage'
+import type { Workspace } from '@keyshade/schema'
 import { Input } from './input'
 import { Label } from './label'
 import {
@@ -37,19 +17,43 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
+import {
+  getCurrentWorkspace,
+  setCurrentWorkspace,
+  setWorkspace
+} from '@/lib/workspace-storage'
+import { cn } from '@/lib/utils'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command'
+import ControllerInstance from '@/lib/controller-instance'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
-    const workspaceData: Workspace[] =
-      await apiClient.get<Workspace[]>('/workspace')
+    const { data, success, error } =
+      await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+        {},
+        {}
+      )
 
-    const { success, data } = zWorkspace.array().safeParse(workspaceData)
-
-    if (!success) {
-      throw new Error('Invalid data')
+    if (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+      return undefined
     }
 
-    return data
+    if (success && data) {
+      return data.items
+    }
   } catch (error) {
     // eslint-disable-next-line no-console -- we need to log the error
     console.error(error)
@@ -71,11 +75,25 @@ export function Combobox(): React.JSX.Element {
     }
     setIsNameEmpty(false)
     try {
-      const response = await apiClient.post<Workspace>('/workspace', {
-        name
-      })
-      setCurrentWorkspace(response)
-      setOpen(false)
+      const { data, error, success } =
+        await ControllerInstance.getInstance().workspaceController.createWorkspace(
+          {
+            name
+          },
+          {}
+        )
+
+      if (error) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+        return
+      }
+
+      if (success && data) {
+        toast.success('Workspace created successfully')
+        setCurrentWorkspace(data)
+        setOpen(false)
+      }
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
@@ -92,7 +110,7 @@ export function Combobox(): React.JSX.Element {
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        console.error('error:', error)
       })
   }, [])
 

@@ -31,6 +31,8 @@ USER node
 
 FROM node:20-alpine AS prod
 
+RUN apk add --no-cache openssl
+
 # Don't run production as root
 USER node
 
@@ -42,6 +44,6 @@ COPY --chown=root:root --chmod=755 --from=build /app/node_modules /app/node_modu
 COPY --chown=root:root --chmod=755 --from=build /app/apps/api/node_modules /app/apps/api/node_modules
 COPY --chown=root:root --chmod=755 --from=build /app/apps/api/dist /app/apps/api/dist
 
-EXPOSE ${API_PORT}
+EXPOSE 4200
 
 ENTRYPOINT ["node", "/app/apps/api/dist/main.js"]

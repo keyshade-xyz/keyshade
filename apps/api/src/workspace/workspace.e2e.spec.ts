@@ -35,6 +35,8 @@ import { SecretService } from '@/secret/service/secret.service'
 import { VariableService } from '@/variable/service/variable.service'
 import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
 
 const createMembership = async (
@@ -71,6 +73,7 @@ describe('Workspace Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
+  let workspaceMembershipService: WorkspaceMembershipService
 
   let user1: User, user2: User
   let workspace1: Workspace, workspace2: Workspace
@@ -87,7 +90,8 @@ describe('Workspace Controller Tests', () => {
         EnvironmentModule,
         SecretModule,
         VariableModule,
-        WorkspaceRoleModule
+        WorkspaceRoleModule,
+        WorkspaceMembershipModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -106,6 +110,7 @@ describe('Workspace Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -179,6 +184,7 @@ describe('Workspace Controller Tests', () => {
     expect(secretService).toBeDefined()
     expect(variableService).toBeDefined()
     expect(workspaceRoleService).toBeDefined()
+    expect(workspaceMembershipService).toBeDefined()
   })
 
   describe('Create Workspace Tests', () => {
@@ -305,7 +311,8 @@ describe('Workspace Controller Tests', () => {
         id: expect.any(String),
         userId: user1.id,
         workspaceId: workspace1.id,
-        invitationAccepted: true
+        invitationAccepted: true,
+        createdOn: expect.any(Date)
       })
     })
   })
@@ -481,6 +488,107 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
+  describe('Get All Workspace Invitations Tests', () => {
+    it('should be able to fetch all the non accepted invitations of the user', async () => {
+      //invite user2 to workspace1
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/invitations`
+      })
+
+      const body = response.json()
+
+      expect(body.items).toHaveLength(1)
+      expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
+      expect(body.items[0]).toEqual({
+        invitedOn: expect.any(String),
+        workspace: {
+          icon: workspace1.icon,
+          id: workspace1.id,
+          name: workspace1.name,
+          slug: workspace1.slug
+        },
+        roles: [
+          {
+            role: {
+              name: memberRole.name,
+              colorCode: memberRole.colorCode
+            }
+          }
+        ]
+      })
+      expect(body.metadata.totalCount).toBe(1)
+      expect(body.metadata.links.self).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.first).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(body.metadata.links.previous).toBeNull()
+      expect(body.metadata.links.next).toBeNull()
+      expect(body.metadata.links.last).toEqual(
+        `/workspace/invitations?page=0&limit=10&sort=name&order=asc&search=`
+      )
+    })
+
+    it('should be able to fetch empty list of workspace invitations for the user once all invitations are accepted', async () => {
+      //invite user2 to workspace1
+      await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
+      // accept the invitation for user2 to workspace1
+      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/invitations`
+      })
+
+      const body = response.json()
+      expect(body.items).toHaveLength(0)
+      expect(body.metadata).toEqual({})
+    })
+
+    it('should be able to fetch empty list of workspace invitations for the user if ownership is transferred', async () => {
+      //create a new workspace for user 1
+      const workspace3 = await workspaceService.createWorkspace(user1, {
+        name: 'Workspace 3'
+      })
+
+      //invite user2 to workspace3
+      await createMembership(memberRole.id, user2.id, workspace3.id, prisma)
+
+      //accept the invitation for user2 to workspace3
+      await workspaceMembershipService.acceptInvitation(user2, workspace3.slug)
+
+      //transfer ownership of workspace1 to user2
+      await workspaceMembershipService.transferOwnership(
+        user1,
+        workspace3.slug,
+        user2.email
+      )
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/invitations`
+      })
+
+      const body = response.json()
+      expect(body.items).toHaveLength(0)
+      expect(body.metadata).toEqual({})
+    })
+  })
+
   describe('Export Data Tests', () => {
     it('should not be able to export data of a non-existing workspace', async () => {
       const response = await app.inject({
@@ -648,7 +756,7 @@ describe('Workspace Controller Tests', () => {
           Authority.READ_VARIABLE,
           Authority.READ_WORKSPACE
         ],
-        projectSlugs: [project2Response.slug]
+        projectEnvironments: [{ projectSlug: project2Response.slug }]
       })
 
       const project1DevEnv = await prisma.environment.findUnique({

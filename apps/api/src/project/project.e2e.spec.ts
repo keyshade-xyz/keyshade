@@ -435,7 +435,10 @@ describe('Project Controller Tests', () => {
         ...project1,
         lastUpdatedById: user1.id,
         createdAt: expect.any(String),
-        updatedAt: expect.any(String)
+        updatedAt: expect.any(String),
+        environmentCount: 1,
+        secretCount: 0,
+        variableCount: 0
       })
     })
 
@@ -466,6 +469,22 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+
+    it('should fetch correct counts of environments, variables, and secrets for projects in a workspace', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${project1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const project = response.json()
+      expect(project.environmentCount).toEqual(1)
+      expect(project.variableCount).toEqual(0)
+      expect(project.secretCount).toEqual(0)
     })
   })
 
@@ -605,9 +624,9 @@ describe('Project Controller Tests', () => {
       expect(response.json().items.length).toEqual(1)
 
       const project = response.json().items[0]
-      expect(project.totalEnvironmentsOfProject).toEqual(2)
-      expect(project.totalVariablesOfProject).toEqual(2)
-      expect(project.totalSecretsOfProject).toEqual(2)
+      expect(project.environmentCount).toEqual(2)
+      expect(project.variableCount).toEqual(2)
+      expect(project.secretCount).toEqual(2)
       // Verify project details
       expect(project.name).toEqual('Project4')
       expect(project.description).toEqual(
@@ -861,6 +880,9 @@ describe('Project Controller Tests', () => {
       expect(response.json()).toEqual({
         ...globalProject,
         lastUpdatedById: user1.id,
+        environmentCount: 1,
+        secretCount: 0,
+        variableCount: 0,
         createdAt: expect.any(String),
         updatedAt: expect.any(String)
       })
@@ -880,7 +902,10 @@ describe('Project Controller Tests', () => {
         ...internalProject,
         lastUpdatedById: user1.id,
         createdAt: expect.any(String),
-        updatedAt: expect.any(String)
+        updatedAt: expect.any(String),
+        environmentCount: 1,
+        secretCount: 0,
+        variableCount: 0
       })
     })
 
@@ -1093,7 +1118,10 @@ describe('Project Controller Tests', () => {
       ...privateProject,
       lastUpdatedById: user1.id,
       createdAt: expect.any(String),
-      updatedAt: expect.any(String)
+      updatedAt: expect.any(String),
+      environmentCount: 1,
+      secretCount: 0,
+      variableCount: 0
     })
   })
 

@@ -1,4 +1,4 @@
-import { ClientResponse } from '@api-client/types/index.types'
+import { ClientResponse } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import {
   CreateProjectRequest,
@@ -19,7 +19,7 @@ import {
   UnlinkProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse
-} from '@api-client/types/project.types'
+} from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 
@@ -32,7 +32,7 @@ export default class ProjectController {
 
   async createProject(
     request: CreateProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<CreateProjectResponse>> {
     const response = await this.apiClient.post(
       `/api/project/${request.workspaceSlug}`,
@@ -45,7 +45,7 @@ export default class ProjectController {
 
   async updateProject(
     request: UpdateProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateProjectResponse>> {
     const response = await this.apiClient.put(
       `/api/project/${request.projectSlug}`,
@@ -58,7 +58,7 @@ export default class ProjectController {
 
   async deleteProject(
     request: DeleteProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteProjectResponse>> {
     const response = await this.apiClient.delete(
       `/api/project/${request.projectSlug}`,
@@ -70,7 +70,7 @@ export default class ProjectController {
 
   async getProject(
     request: GetProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<GetProjectResponse>> {
     const response = await this.apiClient.get(
       `/api/project/${request.projectSlug}`,
@@ -82,7 +82,7 @@ export default class ProjectController {
 
   async forkProject(
     request: ForkProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<ForkProjectResponse>> {
     const response = await this.apiClient.post(
       `/api/project/${request.projectSlug}/fork`,
@@ -95,7 +95,7 @@ export default class ProjectController {
 
   async syncFork(
     request: SyncProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<SyncProjectResponse>> {
     const response = await this.apiClient.put(
       `/api/project/${request.projectSlug}/fork?hardSync=${request.hardSync}`,
@@ -108,7 +108,7 @@ export default class ProjectController {
 
   async unlinkFork(
     request: UnlinkProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<UnlinkProjectResponse>> {
     const response = await this.apiClient.delete(
       `/api/project/${request.projectSlug}/fork`,
@@ -120,7 +120,7 @@ export default class ProjectController {
 
   async getForks(
     request: GetForkRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<GetForkResponse>> {
     const url = parsePaginationUrl(
       `/api/project/${request.projectSlug}/forks`,
@@ -133,7 +133,7 @@ export default class ProjectController {
 
   async getAllProjects(
     request: GetAllProjectsRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllProjectsResponse>> {
     const url = parsePaginationUrl(
       `/api/project/all/${request.workspaceSlug}`,

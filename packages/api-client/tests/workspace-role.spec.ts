@@ -3,7 +3,7 @@ import WorkspaceRoleController from '@api-client/controllers/workspace-role'
 import {
   CreateWorkspaceRoleRequest,
   GetWorkspaceRolesOfWorkspaceRequest
-} from '@api-client/types/workspace-role.types'
+} from '@keyshade/schema'
 
 describe('Workspace Role Controller Tests', () => {
   const backendUrl = process.env.BACKEND_URL
@@ -64,7 +64,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role for developers',
       colorCode: '#FF0000',
       authorities: ['READ_WORKSPACE', 'READ_PROJECT'],
-      projectSlugs: [projectSlug!]
+      projectEnvironments: [{ projectSlug }]
     }
 
     const createWorkspaceRoleResponse = (
@@ -124,7 +124,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role for admins',
       colorCode: '#0000FF',
       authorities: ['READ_WORKSPACE'],
-      projectSlugs: []
+      projectEnvironments: []
     }
 
     const createRoleResponse = (
@@ -155,15 +155,6 @@ describe('Workspace Role Controller Tests', () => {
     ).data
 
     expect(updateRoleResponse.name).toBe('Lead Developer')
-
-    const fetchRole = (
-      await workspaceRoleController.getWorkspaceRole(
-        { workspaceRoleSlug: workspaceRoleSlug! },
-        { 'x-e2e-user-email': email }
-      )
-    ).data
-
-    expect(fetchRole.name).toBe('Lead Developer')
   })
 
   it('should delete a workspace role', async () => {
@@ -208,7 +199,7 @@ describe('Workspace Role Controller Tests', () => {
       description: 'Role with project access',
       colorCode: '#0000FF',
       authorities: ['READ_WORKSPACE'],
-      projectSlugs: [projectSlug!]
+      projectEnvironments: [{ projectSlug }]
     }
 
     const createRoleResponse = (

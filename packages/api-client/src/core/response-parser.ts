@@ -1,4 +1,4 @@
-import { ClientResponse, ResponseError } from '@api-client/types/index.types'
+import { ClientResponse, ResponseError } from '@keyshade/schema'
 
 /**
  * Takes a Response object and parses its contents into a ClientResponse object.
@@ -17,7 +17,7 @@ export async function parseResponse<T>(
       success: false,
       data: null,
       error
-    } as ClientResponse<T>
+    } as unknown as ClientResponse<T>
   }
 
   let data: any = null
@@ -30,5 +30,5 @@ export async function parseResponse<T>(
     success: true,
     data,
     error: null
-  } as ClientResponse<T>
+  } as unknown as ClientResponse<T>
 }

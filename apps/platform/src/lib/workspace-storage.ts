@@ -1,4 +1,4 @@
-import type { Workspace } from '@/types'
+import type { Workspace } from '@keyshade/schema'
 
 export function setWorkspace(workspaceData: Workspace[]): void {
   const defaultWorkspace =

@@ -34,7 +34,7 @@ export default class RollbackVariable extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--environmentSlug <string>',
+        long: '--environment <string>',
         description:
           'Slug of the environment of the variable to which you want to rollback'
       }
@@ -43,11 +43,11 @@ export default class RollbackVariable extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
-    const { environmentSlug, version } = await this.parseInput(options)
+    const { environment, version } = await this.parseInput(options)
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.rollbackVariable(
         {
-          environmentSlug,
+          environmentSlug: environment,
           version,
           variableSlug
         },
@@ -55,24 +55,23 @@ export default class RollbackVariable extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Variable ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
+      Logger.info(
+        `Variable rolled back by ${data.count} versions successfully!`
+      )
     } else {
       Logger.error(`Failed to update variable: ${error.message}`)
     }
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    environmentSlug: string
-    version: string
+    environment: string
+    version: number
   }> {
-    const { environmentSlug, version } = options
+    const { environment, version } = options
 
     return {
-      environmentSlug,
-      version
+      environment,
+      version: parseInt(version, 10)
     }
   }
 }

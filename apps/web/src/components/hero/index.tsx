@@ -88,9 +88,9 @@ function Hero(): React.JSX.Element {
             Unleash <span className="font-semibold">Security</span>, Embrace
             <span className="font-semibold"> Simplicity</span>
           </h1>
-          <span className="text-brandBlue/80 flex w-[20rem] text-center text-sm md:w-[35rem] md:text-xl md:leading-[3rem]">
-            Your Go-To, Secure, and Easy-to-Use Configuration Management Tool
-            for the Developers, and by the Developers.
+          <span className="text-brandBlue/80 flex w-[20rem] flex-col justify-center text-center text-sm md:w-[35rem] md:text-xl md:leading-[3rem]">
+            <p>The better .env file replacement</p>
+            <p>Built for developers, by developers</p>
           </span>
 
           <form onSubmit={onSubmit}>

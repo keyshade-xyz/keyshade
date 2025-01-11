@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -20,21 +21,29 @@ export default class ListSecret extends BaseCommand {
       {
         name: '<Project Slug>',
         description: 'Slug of the project whose secrets you want.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<Environment Slug>',
+        short: '-e',
+        long: '--environment <string>',
         description: 'Slug of the environment whose secrets you want.'
       }
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [projectSlug, environmentSlug] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [projectSlug] = args
+    const { environment } = options
+
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getAllSecretsOfEnvironment(
         {
           projectSlug,
-          environmentSlug
+          environmentSlug: environment
         },
         this.headers
       )

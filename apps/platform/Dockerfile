@@ -1,6 +1,5 @@
 FROM node:20-alpine AS base
 
-
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
 RUN apk update && apk upgrade
@@ -27,8 +26,7 @@ RUN pnpm install --no-cache --ignore-scripts
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-
-RUN pnpm turbo build --filter=platform...
+RUN pnpm build:platform
 
 FROM base AS runner
 WORKDIR /app
@@ -38,19 +36,17 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001  nextjs
 USER nextjs
 
-COPY --from=installer /app/apps/platform/next.config.mjs .
 COPY --from=installer /app/apps/platform/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/.next/standalone ./
-COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/.next/static ./apps/platform/.next/static
+COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/.next ./apps/platform/.next
 COPY --from=installer  --chown=nextjs:nodejs /app/apps/platform/public ./apps/platform/public
 
 
-ENV PORT=3025
+ENV PORT=3000
 ENV NEXT_SHARP_PATH=/app/apps/platform/.next/sharp
-EXPOSE 3025
+EXPOSE 3000
 # keyshade-ignore
 ENV HOSTNAME "0.0.0.0"
 

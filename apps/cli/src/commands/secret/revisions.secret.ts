@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -20,22 +21,29 @@ export default class FetchSecretRevisions extends BaseCommand {
       {
         name: '<Secret Slug>',
         description: 'Slug of the secret whose revisions you want.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<Environment Slug>',
+        short: '-e',
+        long: '--environment <string>',
         description: 'Environment slug of the secret whose revisions you want.'
       }
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [secretSlug, environmentSlug] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [secretSlug] = args
+    const { environment } = options
 
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getRevisionsOfSecret(
         {
           secretSlug,
-          environmentSlug
+          environmentSlug: environment
         },
         this.headers
       )

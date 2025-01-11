@@ -1,11 +1,15 @@
 {
   "name": "@keyshade/schema",
   "version": "1.0.0",
-  "main": "dist/src/index.js",
+  "main": "dist/src/index.types.js",
   "description": "This package holds the schemas that other applications can use to validate the input data.",
   "private": true,
   "exports": {
     ".": {
+      "types": "./dist/src/index.types.d.ts",
+      "default": "./dist/src/index.types.js"
+    },
+    "./schemas": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     }

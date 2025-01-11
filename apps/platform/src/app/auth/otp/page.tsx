@@ -8,6 +8,7 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import type { User } from '@keyshade/schema'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,8 +18,6 @@ import {
   InputOTPSlot
 } from '@/components/ui/input-otp'
 import { authEmailAtom } from '@/store'
-import type { User } from '@/types'
-import { zUser } from '@/types'
 import ControllerInstance from '@/lib/controller-instance'
 
 export default function AuthOTPPage(): React.JSX.Element {
@@ -69,8 +68,7 @@ export default function AuthOTPPage(): React.JSX.Element {
         )
         setIsLoading(false)
       }
-      const data: User = (await response.json()) as User
-      const user = zUser.parse(data)
+      const user: User = (await response.json()) as User
 
       if (user.isOnboardingFinished) {
         Cookies.set('isOnboardingFinished', 'true')

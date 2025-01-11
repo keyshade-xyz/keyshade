@@ -6,10 +6,18 @@ on:
       - '!develop'
       - '!main'
     paths:
-      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
+      [
+        'packages/schema/**',
+        'packages/api-client/**',
+        '.github/workflows/validate-api-client.yaml'
+      ]
   pull_request:
     paths:
-      ['packages/api-client/**', '.github/workflows/validate-api-client.yml']
+      [
+        'packages/schema/**',
+        'packages/api-client/**',
+        '.github/workflows/validate-api-client.yaml'
+      ]
 
 jobs:
   validate:

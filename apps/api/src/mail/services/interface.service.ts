@@ -5,11 +5,12 @@ export interface IMailService {
 
   sendEmailChangedOtp(email: string, otp: string): Promise<void>
 
-  workspaceInvitationMailForUsers(
+  invitedToWorkspace(
     email: string,
-    workspace: string,
-    actionUrl: string,
+    workspaceName: string,
+    projectUrl: string,
     invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void>
 
@@ -18,4 +19,10 @@ export interface IMailService {
   adminUserCreateEmail(email: string): Promise<void>
 
   feedbackEmail(email: string, feedback: string): Promise<void>
+
+  removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: Date
+  ): Promise<void>
 }

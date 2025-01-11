@@ -44,23 +44,55 @@ export default class UpdateRoleCommand extends BaseCommand {
       },
       {
         short: '-a',
-        long: '--authorities <comma seperated list>',
+        long: '--authorities <comma separated list>',
         description: 'Authorities of the workspace role.'
       },
       {
         short: '-p',
-        long: '--project-slugs <comma seperated list>',
+        long: '--projects <comma separated list>',
         description: 'Project slugs of the workspace role.'
+      },
+      {
+        short: '-e',
+        long: '--environments <comma separated list>',
+        description:
+          'Environment slugs to be associated for projects. Separate list of environments with colon(:) for each project. And comma(,) to separate each project.'
       }
     ]
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceRoleSlug] = args
-    const { name, description, colorCode, authorities, projectSlugs } = options
+    const {
+      name,
+      description,
+      colorCode,
+      authorities,
+      projects,
+      environments
+    } = options
 
     const authoritiesArray = authorities?.split(',')
-    const projectSlugsArray = projectSlugs?.split(',')
+    const projectSlugsArray = projects?.split(',')
+    const environmentSlugsArray = environments?.split(',')
+
+    if (projectSlugsArray?.length !== environmentSlugsArray?.length) {
+      Logger.error('Number of projects and environments should be equal')
+      return
+    }
+
+    const projectEnvironments: Array<{
+      projectSlug: string
+      environmentSlugs: string[]
+    }> = []
+
+    const len = projectSlugsArray.length
+    for (let i = 0; i < len; i++) {
+      projectEnvironments.push({
+        projectSlug: projectSlugsArray[i],
+        environmentSlugs: environmentSlugsArray[i].split(':')
+      })
+    }
 
     const { data, error, success } =
       await ControllerInstance.getInstance().workspaceRoleController.updateWorkspaceRole(
@@ -70,7 +102,8 @@ export default class UpdateRoleCommand extends BaseCommand {
           description,
           colorCode,
           authorities: authoritiesArray,
-          projectSlugs: projectSlugsArray
+          projectEnvironments:
+            projectEnvironments.length > 0 ? projectEnvironments : undefined
         },
         this.headers
       )

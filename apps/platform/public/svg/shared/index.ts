@@ -7,6 +7,10 @@ import SettingsSVG from './settings.svg'
 import ThreeDotOptionSVG from './3dotOption.svg'
 import AddSVG from './add.svg'
 import LoadingSVG from './loading.svg'
+import MessageSVG from './message.svg'
+import VectorSVG from './vector.svg'
+import ErrorSVG from './Error.svg'
+import TrashSVG from './trash.svg'
 
 export {
   DropdownSVG,
@@ -17,5 +21,9 @@ export {
   SettingsSVG,
   ThreeDotOptionSVG,
   AddSVG,
-  LoadingSVG
+  LoadingSVG,
+  MessageSVG,
+  VectorSVG,
+  ErrorSVG,
+  TrashSVG
 }

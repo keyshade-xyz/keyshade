@@ -36,8 +36,8 @@ export default class ListVariable extends BaseCommand {
 
     if (success) {
       const variables = data
-      if (variables.length > 0) {
-        data.forEach((variable: any) => {
+      if (variables.items.length > 0) {
+        variables.items.forEach((variable: any) => {
           Logger.info(`- ${variable.name} (${variable.value})`)
         })
       } else {

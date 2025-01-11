@@ -290,6 +290,18 @@ export class WorkspaceMembershipService {
           }
         }
       })
+
+      // Send an email to the removed users
+      const removedOn = new Date()
+      const emailPromises = userEmails.map((userEmail) =>
+        this.mailService.removedFromWorkspace(
+          userEmail,
+          workspace.name,
+          removedOn
+        )
+      )
+
+      await Promise.all(emailPromises)
     }
 
     await createEvent(
@@ -867,11 +879,14 @@ export class WorkspaceMembershipService {
         roleSet.add(role)
       }
 
+      const invitedOn = new Date()
+
       // Create the workspace membership
       const createMembership = this.prisma.workspaceMember.create({
         data: {
           workspaceId: workspace.id,
           userId,
+          createdOn: invitedOn,
           roles: {
             create: Array.from(roleSet).map((role) => ({
               role: {
@@ -887,11 +902,12 @@ export class WorkspaceMembershipService {
       if (memberUser) {
         await this.prisma.$transaction([createMembership])
 
-        this.mailService.workspaceInvitationMailForUsers(
+        this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.slug}/join`,
           currentUser.name,
+          invitedOn.toISOString(),
           true
         )
 
@@ -913,7 +929,7 @@ export class WorkspaceMembershipService {
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
-        this.mailService.workspaceInvitationMailForUsers(
+        this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
           `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${
@@ -922,6 +938,7 @@ export class WorkspaceMembershipService {
             id: userId
           })}`,
           currentUser.name,
+          new Date().toISOString(),
           false
         )
 

@@ -34,7 +34,7 @@ export default class RollbackSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--environmentSlug <string>',
+        long: '--environment <string>',
         description:
           'Slug of the environment of the secret to which you want to rollback'
       }
@@ -43,11 +43,12 @@ export default class RollbackSecret extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
-    const { environmentSlug, version } = await this.parseInput(options)
+    const { environment, version } = await this.parseInput(options)
+
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.rollbackSecret(
         {
-          environmentSlug,
+          environmentSlug: environment,
           version,
           secretSlug
         },
@@ -55,25 +56,21 @@ export default class RollbackSecret extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Secret ${data.name} (${data.slug}) updated successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
-      Logger.info(`Note: ${data.note}`)
-      Logger.info(`rotateAfter: ${data.rotateAfter}`)
+      Logger.info(`Secret rolled back by ${data.count} versions successfully.`)
     } else {
       Logger.error(`Failed to update secret: ${error.message}`)
     }
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    environmentSlug: string
-    version: string
+    environment: string
+    version: number
   }> {
-    const { environmentSlug, version } = options
+    const { environment, version } = options
 
     return {
-      environmentSlug,
-      version
+      environment,
+      version: parseInt(version, 10)
     }
   }
 }

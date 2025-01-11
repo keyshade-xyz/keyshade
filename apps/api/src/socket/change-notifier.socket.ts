@@ -94,25 +94,26 @@ export default class ChangeNotifier
   )
   @UseGuards(AuthGuard, ApiKeyGuard)
   @SubscribeMessage('register-client-app')
-  /**
-   * This event is emitted from the CLI to register
-   * itself with our services so that it can receive live updates.
-   *
-   * The CLI will send a `ChangeNotifierRegistration` object
-   * as the message body, containing the workspace slug, project slug,
-   * and environment slug that the client app wants to receive updates for.
-   *
-   * We will then check if the user has access to the workspace,
-   * project, and environment, and if so, add the client to the
-   * list of connected clients for that environment.
-   *
-   * Finally, we will send an ACK to the client with a status code of 200.
-   */
   async handleRegister(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChangeNotifierRegistration,
     @CurrentUser() user: User
   ) {
+    /**
+     * This event is emitted from the CLI to register
+     * itself with our services so that it can receive live updates.
+     *
+     * The CLI will send a `ChangeNotifierRegistration` object
+     * as the message body, containing the workspace slug, project slug,
+     * and environment slug that the client app wants to receive updates for.
+     *
+     * We will then check if the user has access to the workspace,
+     * project, and environment, and if so, add the client to the
+     * list of connected clients for that environment.
+     *
+     * Finally, we will send an ACK to the client with a status code of 200.
+     */
+
     try {
       // Check if the user has access to the workspace
       await this.authorityCheckerService.checkAuthorityOverWorkspace({

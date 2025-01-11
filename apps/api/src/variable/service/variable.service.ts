@@ -590,8 +590,11 @@ export class VariableService {
         },
         versions: {
           select: {
+            value: true,
+            version: true,
             environment: {
               select: {
+                name: true,
                 id: true,
                 slug: true
               }
@@ -606,85 +609,68 @@ export class VariableService {
       }
     })
 
-    const variablesWithEnvironmentalValues = new Map<
-      Variable['id'],
-      {
-        variable: Variable
-        values: {
-          environment: {
-            name: Environment['name']
-            id: Environment['id']
-            slug: Environment['slug']
-          }
-          value: VariableVersion['value']
-          version: VariableVersion['version']
-        }[]
-      }
-    >()
-
-    // Find all the environments for this project
-    const environments = await this.prisma.environment.findMany({
-      where: {
-        projectId
-      }
-    })
-    const environmentIds = new Map(
-      environments.map((env) => [env.id, env.name])
-    )
+    const variablesWithEnvironmentalValues = new Set<{
+      variable: Partial<Variable>
+      values: {
+        environment: {
+          name: Environment['name']
+          id: Environment['id']
+          slug: Environment['slug']
+        }
+        value: VariableVersion['value']
+        version: VariableVersion['version']
+      }[]
+    }>()
 
     for (const variable of variables) {
-      // Make a copy of the environment IDs
-      const envIds = new Map(environmentIds)
-      let iterations = envIds.size
-
-      // Find the latest version for each environment
-      while (iterations--) {
-        const latestVersion = await this.prisma.variableVersion.findFirst({
-          where: {
-            variableId: variable.id,
-            environmentId: {
-              in: Array.from(envIds.keys())
-            }
-          },
-          orderBy: {
-            version: 'desc'
-          },
-          include: {
-            environment: true
+      // Logic to update the map:
+      // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
+      // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
+      //    If it is, update the variable version
+      const envIdToVariableVersionMap = new Map<
+        Environment['id'],
+        Partial<VariableVersion> & {
+          environment: {
+            id: Environment['id']
+            slug: Environment['slug']
+            name: Environment['name']
           }
-        })
-
-        if (!latestVersion) continue
-
-        if (variablesWithEnvironmentalValues.has(variable.id)) {
-          variablesWithEnvironmentalValues.get(variable.id).values.push({
-            environment: {
-              id: latestVersion.environmentId,
-              name: envIds.get(latestVersion.environmentId),
-              slug: latestVersion.environment.slug
-            },
-            value: latestVersion.value,
-            version: latestVersion.version
-          })
-        } else {
-          variablesWithEnvironmentalValues.set(variable.id, {
-            variable,
-            values: [
-              {
-                environment: {
-                  id: latestVersion.environmentId,
-                  name: envIds.get(latestVersion.environmentId),
-                  slug: latestVersion.environment.slug
-                },
-                value: latestVersion.value,
-                version: latestVersion.version
-              }
-            ]
-          })
         }
+      >()
 
-        envIds.delete(latestVersion.environmentId)
+      for (const variableVersion of variable.versions) {
+        const environmentId = variableVersion.environment.id
+        const existingVariableVersion =
+          envIdToVariableVersionMap.get(environmentId)
+
+        if (!existingVariableVersion) {
+          envIdToVariableVersionMap.set(environmentId, variableVersion)
+        } else {
+          if (existingVariableVersion.version < variableVersion.version) {
+            envIdToVariableVersionMap.set(environmentId, variableVersion)
+          }
+        }
       }
+
+      delete variable.versions
+
+      // Add the variable to the map
+      variablesWithEnvironmentalValues.add({
+        variable,
+        values: await Promise.all(
+          Array.from(envIdToVariableVersionMap.values()).map(
+            async (variableVersion) => ({
+              environment: {
+                id: variableVersion.environment.id,
+                name: variableVersion.environment.name,
+                slug: variableVersion.environment.slug
+              },
+              value: variableVersion.value,
+              version: variableVersion.version
+            })
+          )
+        )
+      })
     }
 
     const items = Array.from(variablesWithEnvironmentalValues.values())

@@ -1,60 +1,54 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
-import type { User } from '@/types'
-import { zUser } from '@/types'
-import { apiClient } from '@/lib/api-client'
-import InputLoading from './loading'
-
-type UserData = Omit<
-  User,
-  'id' | 'isActive' | 'isOnboardingFinished' | 'isAdmin' | 'authProvider'
->
-async function getUserDetails(): Promise<User | undefined> {
-  try {
-    const userData = await apiClient.get<User>('/user')
-    const { success, data } = zUser.safeParse(userData)
-    if (!success) {
-      throw new Error('Invalid data')
-    }
-    return data
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
-
-async function updateUserDetails(userData: UserData): Promise<void> {
-  try {
-    await apiClient.put<User>('/user', userData)
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
 
 function ProfilePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [userData, setUserData] = useState<UserData>({
+  const [userData, setUserData] = useState({
     email: '',
     name: '',
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>('')
+
+  const updateSelf = useCallback(async () => {
+    try {
+      await ControllerInstance.getInstance().userController.updateSelf(
+        {
+          name: userData.name,
+          email: userData.email === email ? null : email
+        },
+        {}
+      )
+      toast.success('Profile updated successfully')
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+    }
+    setIsModified(false)
+  }, [userData, email])
 
   useEffect(() => {
-    getUserDetails()
-      .then((data) => {
-        if (data) {
+    ControllerInstance.getInstance()
+      .userController.getSelf()
+      .then(({ data, success, error }) => {
+        if (success && data) {
           setUserData({
             email: data.email,
-            name: data.name ?? '',
-            profilePictureUrl: data.profilePictureUrl
+            name: data.name,
+            profilePictureUrl: data.profilePictureUrl || ''
           })
+          setEmail(data.email)
           setIsLoading(false)
+        } else {
+          // eslint-disable-next-line no-console -- we need to log the error
+          console.error(error)
         }
       })
       .catch((error) => {
@@ -73,7 +67,7 @@ function ProfilePage(): React.JSX.Element {
             Upload a picture to change your avatar across Keyshade.
           </span>
         </div>
-        <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />{' '}
+        <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />
         {/* //! This is will be replaced by an image tag */}
       </div>
       {/* Name */}
@@ -93,7 +87,7 @@ function ProfilePage(): React.JSX.Element {
               setUserData((prev) => ({ ...prev, name: e.target.value }))
             }}
             placeholder="name"
-            value={userData.name ?? ''}
+            value={userData.name || ''}
           />
         )}
       </div>
@@ -112,28 +106,15 @@ function ProfilePage(): React.JSX.Element {
             disabled
             // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             //   setIsModified(true)
-            //   setUserData((prev) => ({ ...prev, email: e.target.value }))
+            //   setEmail(e.target.value)
             // }}
             placeholder="email"
-            value={userData.email}
+            value={email}
           />
         )}
       </div>
       <div>
-        <Button
-          disabled={!isModified}
-          onClick={() => {
-            updateUserDetails(userData)
-              .then(() => {
-                toast.success('User details updated successfully')
-              })
-              .catch(() => {
-                toast.error('Failed to update user details')
-              })
-            setIsModified(false)
-          }}
-          variant="secondary"
-        >
+        <Button disabled={!isModified} onClick={updateSelf} variant="secondary">
           Save Changes
         </Button>
       </div>

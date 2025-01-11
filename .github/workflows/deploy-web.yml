@@ -5,64 +5,62 @@ on:
   push:
     branches:
       - main
+      - develop
     paths: ['apps/web/**', '.github/workflows/deploy-web.yml', 'package.json']
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: alpha
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
     name: Build and push Web docker image for release
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Docker Login
+        uses: azure/docker-login@v2
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build Docker image
         id: build
         env:
-          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ vars.ECR_WEB_REPOSITORY }}
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: web
         run: |
-          # Build a docker container and push it to ECR 
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f ./apps/web/Dockerfile .
-          echo "Pushing image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::6}
-          echo "name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+          # Build a docker container and push it to ACR
+          docker build -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest -f ./apps/web/Dockerfile .
+          echo "Pushing image to ACR..."
+          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest
+          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}
+          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
 
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    environment: alpha
-    name: Deploy Web docker image for release
-
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+    name: Restart Web container app
+    needs: build
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Azure Login action
+        uses: azure/login@v2
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
+          creds: ${{ secrets.CONTAINER_APP_SP_CREDENTIALS }}
+          enable-AzPSSession: true
 
-      - name: Force re-deploy task in service
-        id: force-redeploy
+      - name: Azure CLI script
+        uses: azure/cli@v2
         env:
-          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_WEB_SERVICE }}
-        run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+          WEB_CONTAINER: ${{ vars.WEB_CONTAINER }}
+          WEB_CONTAINER_RG: ${{ vars.WEB_CONTAINER_RG }}
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: web
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --name $WEB_CONTAINER \
+              --resource-group $WEB_CONTAINER_RG \
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest

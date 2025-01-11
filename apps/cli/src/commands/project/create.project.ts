@@ -73,6 +73,9 @@ export default class CreateProject extends BaseCommand {
       Logger.info(`Project ${data.name} (${data.slug}) created successfully!`)
       Logger.info(`Created at ${data.createdAt}`)
       Logger.info(`Updated at ${data.updatedAt}`)
+      Logger.info(`Public key: ${data.publicKey}`)
+      Logger.info(`Private key: ${data.privateKey}`)
+      Logger.info(`Access level: ${data.accessLevel}`)
     } else {
       Logger.error(`Failed to create project: ${error.message}`)
     }
@@ -82,7 +85,7 @@ export default class CreateProject extends BaseCommand {
     name: string
     description?: string
     storePrivateKey: boolean
-    accessLevel: string
+    accessLevel: 'PRIVATE' | 'GLOBAL' | 'INTERNAL'
   }> {
     let { name, description } = options
     const { storePrivateKey, accessLevel } = options

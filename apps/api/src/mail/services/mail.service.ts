@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common'
 import { IMailService } from './interface.service'
 import { Transporter, createTransport } from 'nodemailer'
+import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
+import { render } from '@react-email/render'
+import WorkspaceInvitationEmail from '../emails/workspace-invitation'
+import OTPEmailTemplate from '../emails/otp-email-template'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -22,78 +26,50 @@ export class MailService implements IMailService {
       }
     })
   }
-  async workspaceInvitationMailForUsers(
+  async invitedToWorkspace(
     email: string,
-    workspace: string,
+    workspaceName: string,
     actionUrl: string,
-    invitee: string,
+    invitedBy: string,
+    invitedOn: string,
     forRegisteredUser: boolean
   ): Promise<void> {
-    const subject = `You have been invited to a ${workspace}`
-    const intro = forRegisteredUser
-      ? `Hello again! You've been invited to join a new workspace.`
-      : `Hello there! We're excited to welcome you to Keyshade.`
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>Workspace Invitation</title>
-        </head>
-        <body>
-           <h1>Welcome to keyshade!</h1>
-           <p>${intro}</p>
-           <p>You have been invited to join the workspace <strong>${workspace}</strong> by <strong>${invitee}</strong>.</p>
-           <p>Please click on the link below to accept the invitation.</p>
-           <p><a href="${actionUrl}">Accept Invitation</a></p>
-           <p>Thank you for choosing us.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>`
+    const subject = forRegisteredUser
+      ? 'Welcome Back! Join Your Workspace'
+      : 'You are Invited to Join the Workspace'
+
+    const body = await render(
+      WorkspaceInvitationEmail({
+        workspaceName,
+        actionUrl,
+        invitedBy,
+        invitedOn,
+        forRegisteredUser
+      })
+    )
     await this.sendEmail(email, subject, body)
   }
 
   async sendOtp(email: string, otp: string): Promise<void> {
-    const subject = 'Your Login OTP'
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>OTP Verification</title>
-        </head>
-        <body>
-           <h1>Welcome to keyshade!</h1>
-           <p>Hello there!</p>
-           <p>We have sent you this email to verify your account.</p>
-           <p>Your One Time Password (OTP) is: <strong>${otp}</strong></p>
-           <p>This OTP will expire in <strong>5 minutes</strong>.</p>
-           <p>Please enter this OTP in the application to verify your account.</p>
-           <p>Thank you for choosing us.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>
-        `
+    const subject = 'Your One Time Password (OTP) for Keyshade'
+
+    const body = await render(
+      OTPEmailTemplate({
+        otp
+      })
+    )
+
     await this.sendEmail(email, subject, body)
   }
   async sendEmailChangedOtp(email: string, otp: string): Promise<void> {
-    const subject = 'Your OTP for Email Change'
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>OTP Verification</title>
-        </head>
-        <body>
-           <h1>Are you trying to change your email?</h1>
-           <p>Hello there!</p>
-           <p>We have sent you this email to verify your new email.</p>
-           <p>Your One Time Password (OTP) is: <strong>${otp}</strong></p>
-           <p>This OTP will expire in <strong>5 minutes</strong>.</p>
-           <p>Please enter this OTP in the application to verify your new email.</p>
-           <p>Thank you.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>
-        `
+    const subject = 'Your Keyshade Email Change One Time Password (OTP)'
+
+    const body = await render(
+      OTPEmailTemplate({
+        otp
+      })
+    )
+
     await this.sendEmail(email, subject, body)
   }
   async accountLoginEmail(email: string): Promise<void> {
@@ -133,7 +109,7 @@ export class MailService implements IMailService {
            <p>keyshade Team</p>
         </body>
         `
-    await this.sendEmail(process.env.ADMIN_EMAIL, subject, body)
+    await this.sendEmail(process.env.ADMIN_EMAIL!, subject, body)
   }
 
   async feedbackEmail(email: string, feedback: string): Promise<void> {
@@ -155,6 +131,23 @@ export class MailService implements IMailService {
     </body>
     </html>
     `
+    await this.sendEmail(email, subject, body)
+  }
+
+  async removedFromWorkspace(
+    email: string,
+    workspaceName: string,
+    removedOn: Date
+  ): Promise<void> {
+    const subject = `Your access was revoked from ${workspaceName}`
+
+    const body = await render(
+      RemovedFromWorkspaceEmail({
+        removedOn: removedOn.toISOString(),
+        workspaceName
+      })
+    )
+
     await this.sendEmail(email, subject, body)
   }
 
