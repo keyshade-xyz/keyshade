@@ -26,7 +26,7 @@ function PriceCard({
   miscFeatures,
   PricingType
 }: Readonly<PriceCardPropsType>): React.JSX.Element {
-  const returnButtonLabel = () => {
+  const returnButtonLabel = (): string => {
     if (price === 0) {
       return 'Get Started'
     }

@@ -36,5 +36,5 @@ docs {
   - `description`: (Optional) A description about the role
   - `colorCode`: (Optional) A hex color code for the role
   - `authorities`: (Optional) An array of allowed `Authorities`. Refer prisma schema.
-  - `projectIds`: (Optional) An array of project IDs to associate to this role. Associating projects to a role will apply all the authorities in the role to the project aswell.
+  - `projectEnvironments`: (Optional) An array of record containing projectSlug and environmentSlugs array to associate to this role. Associating project with particular environments to a role will allow access to only provided environments for the project.
 }

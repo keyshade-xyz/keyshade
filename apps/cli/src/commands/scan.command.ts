@@ -10,6 +10,44 @@ import path from 'path'
 import secretDetector from '@keyshade/secret-scan'
 import { Logger } from '@/util/logger'
 
+const ignoredExtensions = [
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'svg',
+  'ico',
+  'woff',
+  'woff2',
+  'ttf',
+  'eot',
+  'pdf',
+  'mp4',
+  'mp3',
+  'wav',
+  'avi',
+  'mov',
+  'webm',
+  'zip',
+  'tar',
+  'gz',
+  '7z',
+  'rar',
+  'iso',
+  'bin',
+  'exe',
+  'dll',
+  'so',
+  'a',
+  'o',
+  'dylib',
+  'lib',
+  'obj',
+  'jar',
+  'war',
+  'ear'
+]
+
 export default class ScanCommand extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
@@ -65,6 +103,8 @@ export default class ScanCommand extends BaseCommand {
     for (const file of allFiles) {
       const stats = statSync(file)
       if (stats.isFile()) {
+        // Skip the file if it has an ignored extension like images, videos, etc.
+        if (ignoredExtensions.includes(file.split('.').pop())) continue
         const content = readFileSync(file, 'utf8').split(/\r?\n/)
 
         // Skip the file if ignore comment is found in the first line

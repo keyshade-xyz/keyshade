@@ -88,7 +88,7 @@ function Hero(): React.JSX.Element {
             Unleash <span className="font-semibold">Security</span>, Embrace
             <span className="font-semibold"> Simplicity</span>
           </h1>
-          <span className="text-brandBlue/80 flex flex-col justify-center w-[20rem] text-center text-sm md:w-[35rem] md:text-xl md:leading-[3rem]">
+          <span className="text-brandBlue/80 flex w-[20rem] flex-col justify-center text-center text-sm md:w-[35rem] md:text-xl md:leading-[3rem]">
             <p>The better .env file replacement</p>
             <p>Built for developers, by developers</p>
           </span>

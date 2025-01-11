@@ -106,6 +106,9 @@ enum Authority {
   READ_SELF
   UPDATE_SELF
   READ_EVENT
+
+  // Master authority
+  ADMIN
 }
 
 enum NotificationType {
@@ -253,6 +256,8 @@ model Environment {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
 
+  projectWorkspaceRoleAssociations ProjectWorkspaceRoleAssociation[]
+
   @@unique([projectId, name])
   @@index([name])
 }
@@ -295,6 +300,8 @@ model ProjectWorkspaceRoleAssociation {
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
+
+  environments Environment[]
 
   @@unique([roleId, projectId])
 }
