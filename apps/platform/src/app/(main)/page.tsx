@@ -39,11 +39,13 @@ import {
 } from '@/components/ui/dialog'
 import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
+import ProjectScreenLoader from '@/components/ui/project-screen-loader'
 
 export default function Index(): JSX.Element {
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false)
   const [isProjectEmpty, setIsProjectEmpty] = useState<boolean>(true)
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   // Projects to be displayed in the dashboard
   const [projects, setProjects] = useState<ProjectWithCount[]>([])
@@ -78,6 +80,8 @@ export default function Index(): JSX.Element {
   // under that workspace and display it in the dashboard.
   useEffect(() => {
     async function getAllProjects() {
+      setLoading(true)
+
       if (currentWorkspace) {
         const { success, error, data } =
           await ControllerInstance.getInstance().projectController.getAllProjects(
@@ -92,6 +96,8 @@ export default function Index(): JSX.Element {
           console.error(error)
         }
       }
+
+      setLoading(false)
     }
 
     getAllProjects()
@@ -326,7 +332,9 @@ export default function Index(): JSX.Element {
         </Dialog>
       </div>
 
-      {!isProjectEmpty ? (
+      {loading ? (
+        <ProjectScreenLoader />
+      ) : !isProjectEmpty ? (
         <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project: GetAllProjectsResponse['items'][number]) => {
             return (
