@@ -159,30 +159,30 @@ function VariablePage({
         <div
           className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteDialogOpen ? 'inert' : ''} `}
         >
-          {allVariables.map((variable) => (
-            <ContextMenu key={variable.variable.id}>
+          {allVariables.map(({ variable, values }) => (
+            <ContextMenu key={variable.id}>
               <ContextMenuTrigger className="w-full">
                 <Collapsible
                   className="w-full"
-                  key={variable.variable.id}
-                  onOpenChange={() => toggleSection(variable.variable.id)}
-                  open={openSections.has(variable.variable.id)}
+                  key={variable.id}
+                  onOpenChange={() => toggleSection(variable.id)}
+                  open={openSections.has(variable.id)}
                 >
                   <CollapsibleTrigger
-                    className={`flex h-[6.75rem] w-full items-center justify-between gap-24 ${openSections.has(variable.variable.id) ? 'rounded-t-xl' : 'rounded-xl'} bg-[#232424] px-4 py-2 text-left`}
+                    className={`flex h-[6.75rem] w-full items-center justify-between gap-24 ${openSections.has(variable.id) ? 'rounded-t-xl' : 'rounded-xl'} bg-[#232424] px-4 py-2 text-left`}
                   >
                     <div className="flex h-[2.375rem] items-center justify-center gap-4">
                       <span className="h-[2.375rem] text-2xl font-normal text-zinc-100">
-                        {variable.variable.name}
+                        {variable.name}
                       </span>
-                      {variable.variable.note ? (
+                      {variable.note ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
                               <MessageSVG height="40" width="40" />
                             </TooltipTrigger>
                             <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                              <p>{variable.variable.note}</p>
+                              <p>{variable.note}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -195,9 +195,7 @@ function VariablePage({
                             const days = Math.ceil(
                               Math.abs(
                                 new Date().getTime() -
-                                  new Date(
-                                    variable.variable.createdAt
-                                  ).getTime()
+                                  new Date(variable.createdAt).getTime()
                               ) /
                                 (1000 * 60 * 60 * 24)
                             )
@@ -206,15 +204,15 @@ function VariablePage({
                         </div>
                         <div className="flex h-[2.063rem] w-[5.375rem] items-center justify-center gap-x-[0.375rem]">
                           <div className="flex h-[2.063rem] w-[3.5rem] items-center justify-center text-base font-medium text-white">
-                            {variable.variable.lastUpdatedBy.name.split(' ')[0]}
+                            {variable.lastUpdatedBy.name.split(' ')[0]}
                           </div>
                           <Avatar className="h-6 w-6">
                             <AvatarImage />
                             <AvatarFallback>
-                              {variable.variable.lastUpdatedBy.name
+                              {variable.lastUpdatedBy.name
                                 .charAt(0)
                                 .toUpperCase() +
-                                variable.variable.lastUpdatedBy.name
+                                variable.lastUpdatedBy.name
                                   .slice(1, 2)
                                   .toLowerCase()}
                             </AvatarFallback>
@@ -222,7 +220,7 @@ function VariablePage({
                         </div>
                       </div>
                       <ChevronDown
-                        className={`h-[1.5rem] w-[1.5rem] text-zinc-400 transition-transform ${openSections.has(variable.variable.id) ? 'rotate-180' : ''}`}
+                        className={`h-[1.5rem] w-[1.5rem] text-zinc-400 transition-transform ${openSections.has(variable.id) ? 'rotate-180' : ''}`}
                       />
                     </div>
                   </CollapsibleTrigger>
@@ -239,7 +237,7 @@ function VariablePage({
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {variable.values.map((env) => (
+                        {values.map((env) => (
                           <TableRow
                             className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
                             key={env.environment.id}
@@ -265,9 +263,9 @@ function VariablePage({
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
                   onSelect={() =>
                     toggleEditDialog(
-                      variable.variable.slug,
-                      variable.variable.name,
-                      variable.variable.note
+                      variable.slug,
+                      variable.name,
+                      variable.note
                     )
                   }
                 >
@@ -275,7 +273,7 @@ function VariablePage({
                 </ContextMenuItem>
                 <ContextMenuItem
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-                  onSelect={() => toggleDeleteDialog(variable.variable.slug)}
+                  onSelect={() => toggleDeleteDialog(variable.slug)}
                 >
                   Delete
                 </ContextMenuItem>
