@@ -21,7 +21,7 @@ function EditVariableDialog({
   onClose,
   variableSlug,
   variableName,
-  variableNote,
+  variableNote
 }: {
   isOpen: boolean
   onClose: () => void

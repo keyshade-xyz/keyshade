@@ -44,9 +44,8 @@ function AddSecretDialog({
   currentProjectSlug: string
 }) {
   const addSecret = async () => {
-
     if (currentProjectSlug === '') {
-        throw new Error("Current project doesn't exist")
+      throw new Error("Current project doesn't exist")
     }
 
     const request: CreateSecretRequest = {
@@ -94,10 +93,10 @@ function AddSecretDialog({
     }
 
     setNewSecretData({
-        secretName: '',
-        secretNote: '',
-        environmentName: '',
-        environmentValue: ''
+      secretName: '',
+      secretNote: '',
+      environmentName: '',
+      environmentValue: ''
     })
     setIsOpen(false)
   }

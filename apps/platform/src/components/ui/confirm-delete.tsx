@@ -9,7 +9,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { TrashSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
@@ -20,22 +20,21 @@ function ConfirmDelete({
   onClose,
   variableSlug
 }: {
-  isOpen: boolean;
-  onClose: () => void;
-  variableSlug: string | null;
+  isOpen: boolean
+  onClose: () => void
+  variableSlug: string | null
 }) {
-
   const deleteVariable = async () => {
-
-    if( variableSlug === null ){
+    if (variableSlug === null) {
       return
     }
 
-    const { success, error } = await ControllerInstance.getInstance().variableController.deleteVariable(
-      {variableSlug: variableSlug},
-      {}
-    )
-    
+    const { success, error } =
+      await ControllerInstance.getInstance().variableController.deleteVariable(
+        { variableSlug: variableSlug },
+        {}
+      )
+
     if (success) {
       toast.success('Variable deleted successfully', {
         // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
@@ -46,12 +45,11 @@ function ConfirmDelete({
         )
       })
     }
-    if( error ){
+    if (error) {
       console.error(error)
     }
 
     onClose()
-
   }
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
@@ -69,29 +67,30 @@ function ConfirmDelete({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose} aria-hidden={!isOpen}>
-      <AlertDialogContent className='bg-[#18181B] border border-white/25 rounded-lg '>
-        <AlertDialogHeader >
-            <div className='flex items-center gap-x-3'>
-              <TrashSVG />
-              <AlertDialogTitle className='text-lg font-semibold'>
-                  Do you really want to delete this variable?
-              </AlertDialogTitle>
-            </div>
-          <AlertDialogDescription className='text-sm font-normal leading-5 text-[#71717A]'>
-            This action cannot be undone. This will permanently delete your variable and remove your variable data from our servers.
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
+        <AlertDialogHeader>
+          <div className="flex items-center gap-x-3">
+            <TrashSVG />
+            <AlertDialogTitle className="text-lg font-semibold">
+              Do you really want to delete this variable?
+            </AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
+            This action cannot be undone. This will permanently delete your
+            variable and remove your variable data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel 
-            className='bg-[#F4F4F5] text-black rounded-md hover:bg-[#F4F4F5]/80 hover:text-black'
+          <AlertDialogCancel
+            className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
             onClick={() => onClose()}
-            >
+          >
             Cancel
-            </AlertDialogCancel>
-          <AlertDialogAction 
-            className='bg-[#DC2626] text-white rounded-md hover:bg-[#DC2626]/80'
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
             onClick={deleteVariable}
-            >
+          >
             Yes, delete the variable
           </AlertDialogAction>
         </AlertDialogFooter>
