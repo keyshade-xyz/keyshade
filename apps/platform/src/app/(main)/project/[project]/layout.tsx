@@ -1,5 +1,5 @@
 'use client'
-import type { MouseEvent, MouseEventHandler } from 'react'
+import type { MouseEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AddSVG } from '@public/svg/shared'
@@ -11,6 +11,7 @@ import type {
   Project
 } from '@keyshade/schema'
 import { toast } from 'sonner'
+import VariablePage from './@variable/page'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,7 +22,6 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   Select,
@@ -30,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import VariablePage from './@variable/page'
 import { Toaster } from '@/components/ui/sonner'
 import AddSecretDialog from '@/components/ui/add-secret-dialog'
 
@@ -40,11 +39,9 @@ interface DetailedProjectPageProps {
   variable: React.ReactNode
 }
 
-
 function DetailedProjectPage({
   params,
-  secret,
-  variable
+  secret
 }: DetailedProjectPageProps): JSX.Element {
   const [currentProject, setCurrentProject] = useState<Project>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -58,7 +55,7 @@ function DetailedProjectPage({
     secretName: '',
     secretNote: '',
     environmentName: '',
-    environmentValue: '',
+    environmentValue: ''
   })
   const [availableEnvironments, setAvailableEnvironments] = useState<
     Environment[]
@@ -96,8 +93,7 @@ function DetailedProjectPage({
 
     if (success) {
       toast.success('Variable added successfully', {
-        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-        description: () => (
+        description: (
           <p className="text-xs text-emerald-300">
             The variable has been added to the project
           </p>
@@ -108,8 +104,7 @@ function DetailedProjectPage({
     if (error) {
       if (error.statusCode === 409) {
         toast.error('Variable name already exists', {
-          // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-          description: () => (
+          description: (
             <p className="text-xs text-red-300">
               Variable name is already there, kindly use different one.
             </p>
@@ -170,18 +165,45 @@ function DetailedProjectPage({
     getAllEnvironments()
   }, [currentProject])
 
+  useEffect(() => {
+    const getAllEnvironments = async () => {
+      if (!currentProject) {
+        return
+      }
+
+      const {
+        success,
+        error,
+        data
+      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
+        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+          { projectSlug: currentProject.slug },
+          {}
+        )
+
+      if (success && data) {
+        setAvailableEnvironments(data.items)
+      } else {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
+    }
+
+    getAllEnvironments()
+  }, [currentProject])
+
   return (
     <main className="flex flex-col gap-4">
       <div className="flex h-[3.625rem] w-full justify-between p-3 ">
         <div className="text-3xl">{currentProject?.name}</div>
         {tab === 'secret' && (
-          <AddSecretDialog 
-            setIsOpen={setIsOpen}
-            isOpen={isOpen}
-            newSecretData={newSecretData}
-            setNewSecretData={setNewSecretData}
+          <AddSecretDialog
             availableEnvironments={availableEnvironments}
             currentProjectSlug={currentProject?.slug ?? ''}
+            isOpen={isOpen}
+            newSecretData={newSecretData}
+            setIsOpen={setIsOpen}
+            setNewSecretData={setNewSecretData}
           />
         )}
         {tab === 'variable' && (
@@ -319,7 +341,10 @@ function DetailedProjectPage({
         {tab === 'secret' && secret}
         {tab === 'variable' && <VariablePage currentProject={currentProject} />}
         {/* {tab === 'variable' && variable} */}
+        {tab === 'variable' && <VariablePage currentProject={currentProject} />}
+        {/* {tab === 'variable' && variable} */}
       </div>
+      <Toaster />
       <Toaster />
     </main>
   )

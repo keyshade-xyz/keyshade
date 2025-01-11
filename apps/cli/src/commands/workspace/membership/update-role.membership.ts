@@ -1,7 +1,8 @@
 import BaseCommand from '@/commands/base.command'
-import {
-  type CommandActionData,
-  type CommandArgument
+import type {
+  CommandOption,
+  CommandActionData,
+  CommandArgument
 } from '@/types/command/command.types'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
@@ -32,19 +33,35 @@ export default class UpdateRolesCommand extends BaseCommand {
     ]
   }
 
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--email <string>',
+        description: 'Email of the user to update.'
+      },
+      {
+        short: '-r',
+        long: '--roles <string>',
+        description: 'Comma-separated list of role slugs to assign to the user.'
+      }
+    ]
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, userEmail, roleSlugs] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [workspaceSlug] = args
+    const { email, roles } = options
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.updateMemberRoles(
         {
           workspaceSlug,
-          userEmail,
-          roleSlugs: roleSlugs.split(',')
+          userEmail: email,
+          roleSlugs: roles.split(',')
         },
         this.headers
       )
@@ -52,8 +69,8 @@ export default class UpdateRolesCommand extends BaseCommand {
     if (success) {
       Logger.info('Updated the roles of user!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
-      Logger.info(`Member Email: ${userEmail}`)
-      Logger.info(`New Roles: ${roleSlugs}`)
+      Logger.info(`Member Email: ${email}`)
+      Logger.info(`New Roles: ${roles}`)
     } else {
       Logger.error(`Failed to update roles: ${error.message}`)
     }

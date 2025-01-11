@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'beta' || 'stage' }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
     name: Build and push API docker image for release
 
     steps:
@@ -32,59 +32,58 @@ jobs:
           REPOSITORY_NAME: api
         run: |
           # Build a docker container and push it to ACR
-          docker build -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest -f ./apps/web/Dockerfile .
+          docker build -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest -f ./apps/api/Dockerfile .
           echo "Pushing image to ACR..."
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}
           echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
 
-  # setup-database:
-  #   needs: build
-  #   name: Setup Database
-  #   runs-on: ubuntu-latest
-  #   environment: alpha
+  migrate:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+    name: Run database migrations
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Install pnpm
+          npm i -g pnpm
 
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+          # Install dependencies
+          pnpm i
 
-  #     - name: Install pnpm
-  #       uses: pnpm/action-setup@v4
-  #       with:
-  #         version: 9.2.0
-  #         run_install: false
+          # Run migrations
+          pnpm db:generate-types
+          pnpm db:deploy-migrations
 
-  #     - name: Deploy migrations
-  #       env:
-  #         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  #       run: pnpm db:deploy-migrations
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+    name: Restart API container app
+    needs: migrate
+    steps:
+      - name: Azure Login action
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CONTAINER_APP_SP_CREDENTIALS }}
+          enable-AzPSSession: true
 
-  # deploy:
-  #   needs: [build, setup-database]
-  #   runs-on: ubuntu-latest
-  #   environment: alpha
-  #   name: Deploy API docker image for release
-
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-  #         aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-  #         aws-region: ap-south-1
-
-  #     - name: Force re-deploy task in service
-  #       id: force-redeploy
-  #       env:
-  #         ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-  #         ECS_SERVICE: ${{ vars.ECS_API_SERVICE }}
-  #       run: |
-  #         aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        env:
+          API_CONTAINER: ${{ vars.API_CONTAINER }}
+          API_CONTAINER_RG: ${{ vars.API_CONTAINER_RG }}
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: api
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --name $API_CONTAINER \
+              --resource-group $API_CONTAINER_RG \
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest

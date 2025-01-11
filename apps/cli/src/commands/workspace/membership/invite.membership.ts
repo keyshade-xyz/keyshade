@@ -1,7 +1,8 @@
 import BaseCommand from '@/commands/base.command'
-import {
-  type CommandActionData,
-  type CommandArgument
+import type {
+  CommandOption,
+  CommandActionData,
+  CommandArgument
 } from '@/types/command/command.types'
 import { Logger } from '@/util/logger'
 import ControllerInstance from '@/util/controller-instance'
@@ -20,14 +21,21 @@ export default class InviteUserCommand extends BaseCommand {
       {
         name: '<Workspace Slug>',
         description: 'Slug of the workspace which you want to fetch.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<Invitee Email>',
+        short: '-e',
+        long: '--email <string>',
         description: 'Email of the user to invite.'
       },
       {
-        name: '<Role Slugs...>',
-        description: 'Space-separated list of role slugs to assign to the user.'
+        short: '-r',
+        long: '--roles <string>',
+        description: 'Comma-separated list of role slugs to assign to the user.'
       }
     ]
   }
@@ -36,8 +44,9 @@ export default class InviteUserCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, email, roleSlugs] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [workspaceSlug] = args
+    const { email, roles } = options
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.inviteUsers(
@@ -46,18 +55,17 @@ export default class InviteUserCommand extends BaseCommand {
           members: [
             {
               email,
-              roleSlugs: roleSlugs.split(',')
+              roleSlugs: roles.split(',')
             }
           ]
         },
         this.headers
       )
-
     if (success) {
       Logger.info('Invited to workspace successfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
       Logger.info(`Invitee: ${email}`)
-      Logger.info(`Roles: ${roleSlugs}`)
+      Logger.info(`Roles: ${roles}`)
     } else {
       Logger.error(`Failed to invite user: ${error.message}`)
     }

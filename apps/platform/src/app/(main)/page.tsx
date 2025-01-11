@@ -79,9 +79,7 @@ export default function Index(): JSX.Element {
   // If a workspace is selected, we want to fetch all the projects
   // under that workspace and display it in the dashboard.
   useEffect(() => {
-
     async function getAllProjects() {
-
       setLoading(true)
 
       if (currentWorkspace) {
@@ -103,7 +101,6 @@ export default function Index(): JSX.Element {
     }
 
     getAllProjects()
-
   }, [currentWorkspace])
 
   // Check if the projects array is empty
@@ -335,33 +332,31 @@ export default function Index(): JSX.Element {
         </Dialog>
       </div>
 
-      { loading ? (
+      {loading ? (
         <ProjectScreenLoader />
+      ) : !isProjectEmpty ? (
+        <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
+          {projects.map((project: GetAllProjectsResponse['items'][number]) => {
+            return (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                setIsSheetOpen={setIsSheetOpen}
+              />
+            )
+          })}
+        </div>
       ) : (
-        !isProjectEmpty ? (
-          <div className="grid grid-cols-1 gap-5 overflow-y-scroll scroll-smooth p-2 md:grid-cols-2 xl:grid-cols-3">
-            {projects.map((project: GetAllProjectsResponse['items'][number]) => {
-              return (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  setIsSheetOpen={setIsSheetOpen}
-                />
-              )
-            })}
+        <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
+          <FolderSVG width="150" />
+          <div className="text-4xl">Start your First Project</div>
+          <div>
+            Create a file and start setting up your environment and secret keys
           </div>
-        ) : (
-          <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
-            <FolderSVG width="150" />
-            <div className="text-4xl">Start your First Project</div>
-            <div>
-              Create a file and start setting up your environment and secret keys
-            </div>
-            <Button onClick={toggleDialog} variant="secondary">
-              Create project
-            </Button>
-          </div>
-        )
+          <Button onClick={toggleDialog} variant="secondary">
+            Create project
+          </Button>
+        </div>
       )}
 
       <Sheet

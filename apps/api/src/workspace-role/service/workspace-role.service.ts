@@ -83,7 +83,11 @@ export class WorkspaceRoleService {
         data: {
           id: workspaceRoleId,
           name: dto.name,
-          slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
+          slug: await generateEntitySlug(
+            dto.name,
+            'WORKSPACE_ROLE',
+            this.prisma
+          ),
           description: dto.description,
           colorCode: dto.colorCode,
           authorities: dto.authorities ?? [],
@@ -94,10 +98,103 @@ export class WorkspaceRoleService {
             }
           }
         },
+        select: {
+          id: true
+        }
+      })
+    )
+
+    if (dto.projectEnvironments) {
+      // Create the project associations
+      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
+      )
+
+      for (const pe of dto.projectEnvironments) {
+        const projectId = projectSlugToIdMap.get(pe.projectSlug)
+        if (projectId) {
+          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
+            throw new BadRequestException(
+              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+            )
+          if (pe.environmentSlugs) {
+            //Check if all environments are part of the project
+            const project = await this.prisma.project.findFirst({
+              where: {
+                id: projectId,
+                AND: pe.environmentSlugs.map((slug) => ({
+                  environments: {
+                    some: {
+                      slug: slug
+                    }
+                  }
+                }))
+              }
+            })
+
+            if (!project) {
+              throw new BadRequestException(
+                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              )
+            }
+
+            // Check if the user has read authority over all the environments
+            for (const environmentSlug of pe.environmentSlugs) {
+              try {
+                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                  {
+                    userId: user.id,
+                    entity: {
+                      slug: environmentSlug
+                    },
+                    authorities: [Authority.READ_ENVIRONMENT],
+                    prisma: this.prisma
+                  }
+                )
+              } catch {
+                throw new UnauthorizedException(
+                  `User does not have read authority over environment ${environmentSlug}`
+                )
+              }
+            }
+          }
+          // Create the project workspace role association with the environments accessible on the project
+          op.push(
+            this.prisma.projectWorkspaceRoleAssociation.create({
+              data: {
+                roleId: workspaceRoleId,
+                projectId: projectId,
+                environments: pe.environmentSlugs && {
+                  connect: pe.environmentSlugs.map((slug) => ({ slug }))
+                }
+              }
+            })
+          )
+        } else {
+          throw new NotFoundException(
+            `Project with slug ${pe.projectSlug} not found`
+          )
+        }
+      }
+    }
+
+    // Fetch the new workspace role
+    op.push(
+      this.prisma.workspaceRole.findFirst({
+        where: {
+          id: workspaceRoleId
+        },
         include: {
           projects: {
             select: {
               project: {
+                select: {
+                  id: true,
+                  slug: true,
+                  name: true
+                }
+              },
+              environments: {
                 select: {
                   id: true,
                   slug: true,
@@ -110,25 +207,7 @@ export class WorkspaceRoleService {
       })
     )
 
-    if (dto.projectSlugs) {
-      // Create the project associations
-      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectSlugs
-      )
-
-      if (dto.projectSlugs && dto.projectSlugs.length > 0) {
-        op.push(
-          this.prisma.projectWorkspaceRoleAssociation.createMany({
-            data: dto.projectSlugs.map((projectSlug) => ({
-              roleId: workspaceRoleId,
-              projectId: projectSlugToIdMap.get(projectSlug)
-            }))
-          })
-        )
-      }
-    }
-
-    const workspaceRole = (await this.prisma.$transaction(op))[0]
+    const workspaceRole = (await this.prisma.$transaction(op)).pop()
 
     await createEvent(
       {
@@ -204,7 +283,7 @@ export class WorkspaceRoleService {
       )
     }
 
-    if (dto.projectSlugs) {
+    if (dto.projectEnvironments) {
       await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
         where: {
           roleId: workspaceRoleId
@@ -212,15 +291,85 @@ export class WorkspaceRoleService {
       })
 
       const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectSlugs
+        dto.projectEnvironments.map((pe) => pe.projectSlug)
       )
 
-      await this.prisma.projectWorkspaceRoleAssociation.createMany({
-        data: dto.projectSlugs.map((projectSlug) => ({
-          roleId: workspaceRoleId,
-          projectId: projectSlugToIdMap.get(projectSlug)
-        }))
-      })
+      for (const pe of dto.projectEnvironments) {
+        const projectId = projectSlugToIdMap.get(pe.projectSlug)
+        if (projectId) {
+          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
+            throw new BadRequestException(
+              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+            )
+          if (pe.environmentSlugs) {
+            //Check if all environments are part of the project
+            const project = await this.prisma.project.findFirst({
+              where: {
+                id: projectId,
+                AND: pe.environmentSlugs.map((slug) => ({
+                  environments: {
+                    some: {
+                      slug: slug
+                    }
+                  }
+                }))
+              }
+            })
+
+            if (!project) {
+              throw new BadRequestException(
+                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+              )
+            }
+
+            // Check if the user has read authority over all the environments
+            for (const environmentSlug of pe.environmentSlugs) {
+              try {
+                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                  {
+                    userId: user.id,
+                    entity: {
+                      slug: environmentSlug
+                    },
+                    authorities: [Authority.READ_ENVIRONMENT],
+                    prisma: this.prisma
+                  }
+                )
+              } catch {
+                throw new UnauthorizedException(
+                  `User does not have update authority over environment ${environmentSlug}`
+                )
+              }
+            }
+          }
+          // Create or Update the project workspace role association with the environments accessible on the project
+          await this.prisma.projectWorkspaceRoleAssociation.upsert({
+            where: {
+              roleId_projectId: {
+                roleId: workspaceRoleId,
+                projectId: projectId
+              }
+            },
+            update: {
+              environments: pe.environmentSlugs && {
+                set: [],
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            },
+            create: {
+              roleId: workspaceRoleId,
+              projectId: projectId,
+              environments: pe.environmentSlugs && {
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            }
+          })
+        } else {
+          throw new NotFoundException(
+            `Project with slug ${pe.projectSlug} not found`
+          )
+        }
+      }
     }
 
     const updatedWorkspaceRole = await this.prisma.workspaceRole.update({
@@ -229,6 +378,9 @@ export class WorkspaceRoleService {
       },
       data: {
         name: dto.name,
+        slug: dto.name
+          ? await generateEntitySlug(dto.name, 'WORKSPACE_ROLE', this.prisma)
+          : undefined,
         description: dto.description,
         colorCode: dto.colorCode,
         authorities: dto.authorities
@@ -242,12 +394,18 @@ export class WorkspaceRoleService {
                 slug: true,
                 name: true
               }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
             }
           }
         }
       }
     })
-
     await createEvent(
       {
         triggeredBy: user,
@@ -465,6 +623,13 @@ export class WorkspaceRoleService {
                 slug: true,
                 name: true
               }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
             }
           }
         }
@@ -503,13 +668,15 @@ export class WorkspaceRoleService {
    * @returns a Map of project slug to id
    */
   private async getProjectSlugToIdMap(projectSlugs: string[]) {
-    const projects = await this.prisma.project.findMany({
-      where: {
-        slug: {
-          in: projectSlugs
-        }
-      }
-    })
+    const projects = projectSlugs.length
+      ? await this.prisma.project.findMany({
+          where: {
+            slug: {
+              in: projectSlugs
+            }
+          }
+        })
+      : []
 
     return new Map(projects.map((project) => [project.slug, project.id]))
   }
