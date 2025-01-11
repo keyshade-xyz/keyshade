@@ -15,6 +15,7 @@ import { generateOtp, limitMaxItemsPerPage } from '@/common/util'
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from '../user.types'
+import { UpdateSelfRequest } from '@keyshade/schema'
 
 @Injectable()
 export class UserService {
@@ -44,7 +45,7 @@ export class UserService {
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
-    const data = {
+    const data: UpdateSelfRequest = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished

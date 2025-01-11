@@ -25,5 +25,5 @@ export {
   MessageSVG,
   VectorSVG,
   ErrorSVG,
-  TrashSVG,
+  TrashSVG
 }

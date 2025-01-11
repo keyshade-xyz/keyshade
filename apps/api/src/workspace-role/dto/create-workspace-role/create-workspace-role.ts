@@ -1,5 +1,23 @@
 import { Authority } from '@prisma/client'
-import { IsArray, IsOptional, IsString } from 'class-validator'
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested
+} from 'class-validator'
+import { Type } from 'class-transformer'
+
+class ProjectEnvironments {
+  @IsString()
+  @IsNotEmpty()
+  readonly projectSlug: string
+
+  @IsArray()
+  @IsOptional()
+  @IsNotEmpty({ each: true })
+  readonly environmentSlugs?: string[]
+}
 
 export class CreateWorkspaceRole {
   @IsString()
@@ -19,5 +37,7 @@ export class CreateWorkspaceRole {
 
   @IsArray()
   @IsOptional()
-  readonly projectSlugs?: string[]
+  @ValidateNested({ each: true })
+  @Type(() => ProjectEnvironments)
+  readonly projectEnvironments?: ProjectEnvironments[]
 }

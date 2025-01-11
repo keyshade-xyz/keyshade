@@ -149,3 +149,25 @@ export const GlobalSearchResponseSchema = z.object({
     })
   )
 })
+
+export const GetWorkspaceInvitationsRequest = PageRequestSchema
+
+export const GetWorkspaceInvitationsResponse = PageResponseSchema(
+  z.object({
+    workspace: z.object({
+      id: z.string(),
+      name: z.string(),
+      slug: z.string(),
+      icon: z.string().nullable()
+    }),
+    roles: z.array(
+      z.object({
+        role: z.object({
+          name: z.string(),
+          colorCode: z.string().nullable()
+        })
+      })
+    ),
+    invitedOn: z.string().datetime()
+  })
+)

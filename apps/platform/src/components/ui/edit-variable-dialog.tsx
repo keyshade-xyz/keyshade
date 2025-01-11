@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
+import type { UpdateVariableRequest } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,16 +14,14 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog'
-import { UpdateVariableRequest } from '@keyshade/schema'
 import ControllerInstance from '@/lib/controller-instance'
-import { toast } from 'sonner'
 
 function EditVariableDialog({
   isOpen,
   onClose,
   variableSlug,
   variableName,
-  variableNote,
+  variableNote
 }: {
   isOpen: boolean
   onClose: () => void
@@ -52,8 +52,7 @@ function EditVariableDialog({
 
     if (success) {
       toast.success('Variable edited successfully', {
-        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-        description: () => (
+        description: (
           <p className="text-xs text-emerald-300">
             You successfully edited the variable
           </p>
@@ -70,7 +69,7 @@ function EditVariableDialog({
 
   return (
     <div className="p-4">
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog onOpenChange={onClose} open={isOpen}>
         <DialogContent className="bg-[#18181B] p-6 text-white sm:max-w-[506px]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-white">
@@ -89,10 +88,10 @@ function EditVariableDialog({
                 Variable Name
               </Label>
               <Input
-                id="variable-name"
-                value={newVariableName}
-                onChange={(e) => setNewVariableName(e.target.value)}
                 className="w-[20rem] bg-[#262626] text-base font-normal text-white"
+                id="variable-name"
+                onChange={(e) => setNewVariableName(e.target.value)}
+                value={newVariableName}
               />
             </div>
             <div className="flex w-full items-center justify-between gap-6">
@@ -103,17 +102,17 @@ function EditVariableDialog({
                 Extra Note
               </Label>
               <Textarea
-                id="extra-note"
-                value={extraNote}
-                onChange={(e) => setExtraNote(e.target.value)}
                 className="w-[20rem] bg-[#262626] text-base font-normal text-white"
+                id="extra-note"
+                onChange={(e) => setExtraNote(e.target.value)}
+                value={extraNote}
               />
             </div>
             <div className="flex justify-end">
               <Button
+                className="rounded-lg border-white/10 bg-[#E0E0E0] text-xs font-semibold text-black hover:bg-gray-200"
                 onClick={updateVariable}
                 variant="secondary"
-                className="rounded-lg border-white/10 bg-[#E0E0E0] text-xs font-semibold text-black hover:bg-gray-200"
               >
                 Save Variable
               </Button>

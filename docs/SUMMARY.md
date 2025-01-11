@@ -6,12 +6,12 @@
 
 - [Introduction](cli/introduction.md)
 - [Profile](cli/profile.md)
+- [Init](cli/init.md)
+- [Workspace](cli/workspace.md)
 - [Project](cli/project.md)
 - [Environment](cli/environment.md)
-- [Workspace](cli/workspace.md)
-- [Scan](cli/scan.md)
-- [Init](cli/init.md)
 - [Run](cli/run.md)
+- [Scan](cli/scan.md)
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
 

@@ -1,15 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import {
+import { useEffect, useState } from 'react'
+import type {
   ClientResponse,
   GetAllVariablesOfProjectResponse,
   Project
 } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
-import { MessageSVG, TrashSVG } from '@public/svg/shared'
+import { MessageSVG } from '@public/svg/shared'
 import { ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Collapsible,
@@ -33,15 +33,20 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import EditVariableDialog from '@/components/ui/edit-variable-dialog'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 interface VariablePageProps {
   currentProject: Project | undefined
 }
 
 interface EditVariableDetails {
-  variableName: string;
-  variableNote: string;
+  variableName: string
+  variableNote: string
 }
 
 function VariablePage({
@@ -54,11 +59,14 @@ function VariablePage({
   const [openSections, setOpenSections] = useState<Set<string>>(new Set())
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
-  const [selectedVariableSlug, setSelectedVariableSlug] = useState<string | null>(null)
-  const [editVariableDetails, setEditVariableDetails] = useState<EditVariableDetails>({
-    variableName: '',
-    variableNote: '',
-  })
+  const [selectedVariableSlug, setSelectedVariableSlug] = useState<
+    string | null
+  >(null)
+  const [editVariableDetails, setEditVariableDetails] =
+    useState<EditVariableDetails>({
+      variableName: '',
+      variableNote: ''
+    })
 
   //Environments table toggle logic
   const toggleSection = (id: string) => {
@@ -82,14 +90,18 @@ function VariablePage({
     }
   }
 
-  const toggleEditDialog = (variableSlug: string, variableName: string, variableNote: string | null) => {
+  const toggleEditDialog = (
+    variableSlug: string,
+    variableName: string,
+    variableNote: string | null
+  ) => {
     setIsEditDialogOpen(!isEditDialogOpen)
     if (selectedVariableSlug === null) {
       setSelectedVariableSlug(variableSlug)
       setEditVariableDetails({ variableName, variableNote: variableNote ?? '' })
     } else {
       setSelectedVariableSlug(null)
-      setEditVariableDetails({variableName: '', variableNote: ''})
+      setEditVariableDetails({ variableName: '', variableNote: '' })
     }
   }
 
@@ -118,7 +130,7 @@ function VariablePage({
     }
 
     getAllVariables()
-  }, [currentProject, allVariables])
+  }, [currentProject])
 
   return (
     <div
@@ -151,10 +163,10 @@ function VariablePage({
             <ContextMenu key={variable.variable.id}>
               <ContextMenuTrigger className="w-full">
                 <Collapsible
-                  key={variable.variable.id}
-                  open={openSections.has(variable.variable.id)}
-                  onOpenChange={() => toggleSection(variable.variable.id)}
                   className="w-full"
+                  key={variable.variable.id}
+                  onOpenChange={() => toggleSection(variable.variable.id)}
+                  open={openSections.has(variable.variable.id)}
                 >
                   <CollapsibleTrigger
                     className={`flex h-[6.75rem] w-full items-center justify-between gap-24 ${openSections.has(variable.variable.id) ? 'rounded-t-xl' : 'rounded-xl'} bg-[#232424] px-4 py-2 text-left`}
@@ -215,56 +227,55 @@ function VariablePage({
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="h-full w-full gap-y-24 rounded-b-lg bg-[#232424] p-4">
-                    {variable.values ? (
-                      <Table className="h-full w-full">
-                        <TableHeader className="h-[3.125rem] w-full">
-                          <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
-                            <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
-                              Environment
-                            </TableHead>
-                            <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
-                              Value
-                            </TableHead>
+                    <Table className="h-full w-full">
+                      <TableHeader className="h-[3.125rem] w-full">
+                        <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
+                          <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                            Environment
+                          </TableHead>
+                          <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
+                            Value
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {variable.values.map((env) => (
+                          <TableRow
+                            className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
+                            key={env.environment.id}
+                          >
+                            <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                              {env.environment.name}
+                            </TableCell>
+                            <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
+                              {env.value}
+                            </TableCell>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {variable.values.map((env) => (
-                            <TableRow
-                              key={env.environment.id}
-                              className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
-                            >
-                              <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
-                                {env.environment.name}
-                              </TableCell>
-                              <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
-                                {env.value}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      <></>
-                    )}
+                        ))}
+                      </TableBody>
+                    </Table>
                   </CollapsibleContent>
                 </Collapsible>
               </ContextMenuTrigger>
               <ContextMenuContent className="flex h-[6.375rem] w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-                <ContextMenuItem
-                  onSelect={() => console.log('Show version history')}
-                  className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
-                >
+                <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
                   Show Version History
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onSelect={() => toggleEditDialog(variable.variable.slug, variable.variable.name, variable.variable.note)}
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+                  onSelect={() =>
+                    toggleEditDialog(
+                      variable.variable.slug,
+                      variable.variable.name,
+                      variable.variable.note
+                    )
+                  }
                 >
                   Edit
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onSelect={() => toggleDeleteDialog(variable.variable.slug)}
                   className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+                  onSelect={() => toggleDeleteDialog(variable.variable.slug)}
                 >
                   Delete
                 </ContextMenuItem>
@@ -273,26 +284,25 @@ function VariablePage({
           ))}
 
           {/* Delete variable alert dialog */}
-          {isDeleteDialogOpen && (
+          {isDeleteDialogOpen ? (
             <ConfirmDelete
               isOpen={isDeleteDialogOpen}
               //Passing an empty string just to bypass the error -- we don't need the variableSlug while closing the dialog
               onClose={() => toggleDeleteDialog('')}
               variableSlug={selectedVariableSlug}
             />
-          )}
+          ) : null}
 
           {/* Edit variable dialog */}
-          {isEditDialogOpen && (
+          {isEditDialogOpen ? (
             <EditVariableDialog
               isOpen={isEditDialogOpen}
-              //Passing empty strings just to bypass the error -- we don't need the arguments while closing the dialog
               onClose={() => toggleEditDialog('', '', '')}
-              variableSlug={selectedVariableSlug}
               variableName={editVariableDetails.variableName}
               variableNote={editVariableDetails.variableNote}
+              variableSlug={selectedVariableSlug}
             />
-          )}
+          ) : null}
         </div>
       )}
     </div>
