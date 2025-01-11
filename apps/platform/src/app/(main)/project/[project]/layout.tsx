@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import ControllerInstance from '@/lib/controller-instance'
+import AddSecretDialog from '@/components/ui/add-secret-dialog'
 import {
   Select,
   SelectContent,
@@ -31,7 +32,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Toaster } from '@/components/ui/sonner'
-import AddSecretDialog from '@/components/ui/add-secret-dialog'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -341,7 +341,6 @@ function DetailedProjectPage({
         {tab === 'secret' && secret}
         {tab === 'variable' && <VariablePage currentProject={currentProject} />}
       </div>
-      <Toaster />
       <Toaster />
     </main>
   )
