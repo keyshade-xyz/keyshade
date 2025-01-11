@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useCallback, useEffect } from 'react'
+import { TrashSVG } from '@public/svg/shared'
+import { toast } from 'sonner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { TrashSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
-import { toast } from 'sonner'
 
 function ConfirmDelete({
   isOpen,
@@ -31,14 +31,13 @@ function ConfirmDelete({
 
     const { success, error } =
       await ControllerInstance.getInstance().variableController.deleteVariable(
-        { variableSlug: variableSlug },
+        { variableSlug },
         {}
       )
 
     if (success) {
       toast.success('Variable deleted successfully', {
-        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-        description: () => (
+        description: (
           <p className="text-xs text-emerald-300">
             The variable has been deleted.
           </p>
@@ -46,6 +45,7 @@ function ConfirmDelete({
       })
     }
     if (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
     }
 
@@ -59,14 +59,14 @@ function ConfirmDelete({
   }, [])
 
   useEffect(() => {
-    if (!open) {
+    if (!isOpen) {
       cleanup()
     }
     return () => cleanup()
-  }, [open, cleanup])
+  }, [isOpen, cleanup])
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose} aria-hidden={!isOpen}>
+    <AlertDialog aria-hidden={!isOpen} onOpenChange={onClose} open={isOpen}>
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
         <AlertDialogHeader>
           <div className="flex items-center gap-x-3">

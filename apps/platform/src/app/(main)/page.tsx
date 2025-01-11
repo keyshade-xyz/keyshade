@@ -153,7 +153,6 @@ export default function Index(): JSX.Element {
           <DialogTrigger>
             {isProjectEmpty ? null : (
               <Button onClick={toggleDialog}>
-                {' '}
                 <AddSVG /> Create a new Project
               </Button>
             )}
