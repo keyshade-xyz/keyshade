@@ -130,7 +130,7 @@ function VariablePage({
     }
 
     getAllVariables()
-  }, [currentProject, allVariables])
+  }, [currentProject])
 
   return (
     <div

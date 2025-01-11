@@ -340,9 +340,6 @@ function DetailedProjectPage({
       <div className="h-full w-full overflow-y-scroll">
         {tab === 'secret' && secret}
         {tab === 'variable' && <VariablePage currentProject={currentProject} />}
-        {/* {tab === 'variable' && variable} */}
-        {tab === 'variable' && <VariablePage currentProject={currentProject} />}
-        {/* {tab === 'variable' && variable} */}
       </div>
       <Toaster />
       <Toaster />

@@ -1,4 +1,7 @@
 import React from 'react'
+import { AddSVG } from '@public/svg/shared'
+import type { CreateSecretRequest, Environment } from '@keyshade/schema'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -8,7 +11,6 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { AddSVG } from '@public/svg/shared'
 import { Input } from './input'
 import {
   Select,
@@ -17,9 +19,7 @@ import {
   SelectTrigger,
   SelectValue
 } from './select'
-import { CreateSecretRequest, Environment } from '@keyshade/schema'
 import ControllerInstance from '@/lib/controller-instance'
-import { toast } from 'sonner'
 
 interface NewSecretData {
   secretName: string
@@ -70,8 +70,7 @@ function AddSecretDialog({
 
     if (success && data) {
       toast.success('Secret added successfully', {
-        // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-        description: () => (
+        description: (
           <p className="text-xs text-emerald-300">You created a new secret</p>
         )
       })
@@ -79,10 +78,9 @@ function AddSecretDialog({
     if (error) {
       if (error.statusCode === 409) {
         toast.error('Secret name already exists', {
-          // eslint-disable-next-line react/no-unstable-nested-components -- we need to nest the description
-          description: () => (
+          description: (
             <p className="text-xs text-red-300">
-              Secret name is already there, kindly use different one.
+              Secret name already exists. Please use a different one.
             </p>
           )
         })
