@@ -16,7 +16,9 @@ import {
   GlobalSearchRequest,
   GlobalSearchResponse,
   UpdateWorkspaceRequest,
-  UpdateWorkspaceResponse
+  UpdateWorkspaceResponse,
+  GetWorkspaceInvitationsRequest,
+  GetWorkspaceInvitationsResponse
 } from '@keyshade/schema'
 
 export default class WorkspaceController {
@@ -108,5 +110,15 @@ export default class WorkspaceController {
     )
 
     return await parseResponse<GlobalSearchResponse>(response)
+  }
+
+  async getWorkspaceInvitations(
+    request: GetWorkspaceInvitationsRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetWorkspaceInvitationsResponse>> {
+    const url = parsePaginationUrl('/api/workspace/invitations', headers)
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetWorkspaceInvitationsResponse>(response)
   }
 }

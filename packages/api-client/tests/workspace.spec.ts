@@ -34,6 +34,27 @@ describe('Workspaces Controller Tests', () => {
     })
   })
 
+  it('should return list of invitations of the workshop', async () => {
+    const invitations = (
+      await workspaceController.getWorkspaceInvitations(
+        {
+          page: 0,
+          limit: 10
+        },
+        {
+          'x-e2e-user-email': email
+        }
+      )
+    ).data
+
+    expect(invitations.items).toHaveLength(0)
+
+    expect(invitations.metadata.totalCount).toEqual(0)
+    expect(invitations.metadata.links.self).toBe(
+      `/workspace/invitation?page=0&limit=10&sort=name&order=asc&search=`
+    )
+  })
+
   it('should return a list of workspaces for the user', async () => {
     const workspaces = (
       await workspaceController.getWorkspacesOfUser(
