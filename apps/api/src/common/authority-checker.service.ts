@@ -16,6 +16,7 @@ import { ProjectWithSecrets } from '@/project/project.types'
 import { SecretWithProjectAndVersion } from '@/secret/secret.types'
 import { CustomLoggerService } from './logger.service'
 import {
+  getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from './collective-authorities'
@@ -221,9 +222,9 @@ export class AuthorityCheckerService {
       throw new NotFoundException(`Environment ${entity.slug} not found`)
     }
 
-    const permittedAuthorities = await getCollectiveProjectAuthorities(
+    const permittedAuthorities = await getCollectiveEnvironmentAuthorities(
       userId,
-      environment.project,
+      environment,
       prisma
     )
 

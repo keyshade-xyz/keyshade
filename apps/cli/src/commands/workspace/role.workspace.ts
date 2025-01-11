@@ -1,4 +1,5 @@
 import BaseCommand from '../base.command'
+import CreateRoleCommand from './role/create.role'
 import DeleteRoleCommand from './role/delete.role'
 import GetRoleCommand from './role/get.role'
 import ListRoleCommand from './role/list.role'
@@ -15,6 +16,7 @@ export default class WorkspaceRoleCommand extends BaseCommand {
 
   getSubCommands(): BaseCommand[] {
     return [
+      new CreateRoleCommand(),
       new ListRoleCommand(),
       new GetRoleCommand(),
       new DeleteRoleCommand(),
