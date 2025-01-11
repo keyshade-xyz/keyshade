@@ -20,8 +20,8 @@ export default class IntegrationFactory {
     switch (integrationType) {
       case IntegrationType.DISCORD:
         return new DiscordIntegration()
-        case IntegrationType.SLACK:
-          return new SlackIntegration()
+      case IntegrationType.SLACK:
+        return new SlackIntegration()
       default:
         throw new InternalServerErrorException('Integration type not found')
     }

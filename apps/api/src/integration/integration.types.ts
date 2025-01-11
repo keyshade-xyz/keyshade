@@ -44,9 +44,9 @@ export interface DiscordIntegrationMetadata extends IntegrationMetadata {
 }
 
 export interface SlackIntegrationMetadata extends IntegrationMetadata {
-  botToken: string;
-  signingSecret: string;
-  channelId: string;
+  botToken: string
+  signingSecret: string
+  channelId: string
 }
 
 export interface IntegrationWithWorkspace extends Integration {
