@@ -116,24 +116,7 @@ export default class WorkspaceController {
     request: GetWorkspaceInvitationsRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetWorkspaceInvitationsResponse>> {
-    const queryParams = new URLSearchParams({
-      page: request.page?.toString() || '0',
-      limit: request.limit?.toString() || '10',
-      sort: request.sort || '',
-      order: request.order || '',
-      search: request.search || ''
-    })
-
-    ;[...queryParams.keys()].forEach((key) => {
-      if (!queryParams.get(key)) {
-        queryParams.delete(key)
-      }
-    })
-
-    const url = parsePaginationUrl(
-      `/api/workspace/invitations?${queryParams.toString()}`,
-      headers
-    )
+    const url = parsePaginationUrl('/api/workspace/invitations', headers)
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetWorkspaceInvitationsResponse>(response)
