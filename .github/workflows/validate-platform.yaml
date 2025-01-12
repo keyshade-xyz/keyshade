@@ -61,3 +61,7 @@ jobs:
       - name: Lint
         run: |
           pnpm run lint:platform
+
+      - name: Build
+        run: |
+          pnpm run build:platform
