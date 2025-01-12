@@ -78,7 +78,7 @@ describe('Get Variable Tests', () => {
       }
     )
 
-    variableSlug = variable.data.slug
+    variableSlug = variable.data.variable.slug
   })
 
   afterEach(async () => {
@@ -106,16 +106,16 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(variable.data.name).toBe('Variable 2')
-    expect(variable.data.versions.length).toBe(1)
-    expect(variable.data.versions[0].value).toBe('Variable 2 value')
-    expect(variable.data.versions[0].environment.id).toBe(environment.id)
-    expect(variable.data.versions[0].environment.slug).toBe(environment.slug)
+    expect(variable.data.variable.name).toBe('Variable 2')
+    expect(variable.data.values.length).toBe(1)
+    expect(variable.data.values[0].value).toBe('Variable 2 value')
+    expect(variable.data.values[0].environment.id).toBe(environment.id)
+    expect(variable.data.values[0].environment.slug).toBe(environment.slug)
 
     // Delete the variable
     const deleteVariable = await variableController.deleteVariable(
       {
-        variableSlug: variable.data.slug
+        variableSlug: variable.data.variable.slug
       },
       {
         'x-e2e-user-email': email
