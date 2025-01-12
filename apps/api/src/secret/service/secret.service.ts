@@ -33,6 +33,7 @@ import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import { getSecretWithValues, SecretWithValues } from '@/common/secret-response'
 
 @Injectable()
 export class SecretService {
@@ -61,7 +62,7 @@ export class SecretService {
     user: User,
     dto: CreateSecret,
     projectSlug: Project['slug']
-  ) {
+  ): Promise<SecretWithValues> {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -89,7 +90,7 @@ export class SecretService {
       : new Map<string, string>()
 
     // Create the secret
-    const secret = await this.prisma.secret.create({
+    const secretData = await this.prisma.secret.create({
       data: {
         name: dto.name,
         slug: await generateEntitySlug(dto.name, 'SECRET', this.prisma),
@@ -119,9 +120,10 @@ export class SecretService {
         }
       },
       include: {
-        project: {
+        lastUpdatedBy: {
           select: {
-            workspaceId: true
+            id: true,
+            name: true
           }
         },
         versions: {
@@ -129,25 +131,29 @@ export class SecretService {
             environment: {
               select: {
                 id: true,
+                name: true,
                 slug: true
               }
             },
-            value: true
+            value: true,
+            version: true
           }
         }
       }
     })
 
+    const secret = getSecretWithValues(secretData)
+
     await createEvent(
       {
         triggeredBy: user,
-        entity: secret,
+        entity: secret.secret,
         type: EventType.SECRET_ADDED,
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
+          secretId: secret.secret.id,
+          name: secret.secret.name,
           projectId,
           projectName: project.name
         },
@@ -156,7 +162,7 @@ export class SecretService {
       this.prisma
     )
 
-    this.logger.log(`User ${user.id} created secret ${secret.id}`)
+    this.logger.log(`User ${user.id} created secret ${secret.secret.id}`)
 
     return secret
   }
