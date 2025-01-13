@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-// import { SecretLogoSVG } from '@public/svg/secret'
 import { usePathname } from 'next/navigation'
 import dayjs, { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

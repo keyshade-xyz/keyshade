@@ -1,11 +1,10 @@
 'use client'
-// import { ThreeDotOptionSVG } from '@public/svg/shared'
 import Link from 'next/link'
-import type { Dispatch, SetStateAction } from 'react'
 import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
 import { ConfigSVG, EnvironmentSVG, SecretSVG } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
+import { useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,16 +12,13 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
+import { editProjectSheetOpen } from '@/store'
 
 interface ProjectCardProps {
   project: ProjectWithCount
-  setIsSheetOpen: Dispatch<SetStateAction<boolean>>
 }
 
-function ProjectCard({
-  project,
-  setIsSheetOpen
-}: ProjectCardProps): JSX.Element {
+function ProjectCard({ project }: ProjectCardProps): JSX.Element {
   const {
     id,
     slug,
@@ -32,6 +28,8 @@ function ProjectCard({
     secretCount,
     variableCount
   } = project
+
+  const setIsEditProjectSheetOpen = useSetAtom(editProjectSheetOpen)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -121,7 +119,7 @@ function ProjectCard({
         <ContextMenuItem
           inset
           onClick={() => {
-            setIsSheetOpen(true)
+            setIsEditProjectSheetOpen(true)
           }}
         >
           Edit
