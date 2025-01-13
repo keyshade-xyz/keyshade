@@ -24,6 +24,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "zod": "^3.23.6"
+    "jest": "^29.7.0",
+    "zod": "^3.23.6",
+    "tsc-alias": "^1.8.10"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "eslint-plugin-prettier": "^5.0.0"
   }
 }

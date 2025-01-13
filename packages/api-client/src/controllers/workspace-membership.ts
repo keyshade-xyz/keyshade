@@ -50,7 +50,9 @@ export default class WorkspaceMembershipController {
   ): Promise<ClientResponse<InviteUsersResponse>> {
     const response = await this.apiClient.post(
       `/api/workspace-membership/${request.workspaceSlug}/invite-users`,
-      request,
+     {
+      members: request.members
+     },
       headers
     )
     return await parseResponse<InviteUsersResponse>(response)

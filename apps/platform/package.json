@@ -9,6 +9,7 @@
     "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs"
   },
   "dependencies": {
+    "@keyshade/schema": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-avatar": "^1.0.4",

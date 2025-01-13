@@ -13,5 +13,14 @@
     "test": "cross-env BACKEND_URL=http://localhost:4200 jest --runInBand",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "dependencies": {
+    "@keyshade/schema": "workspace:*",
+    "@types/node": "^20.14.10",
+    "jest": "^29.7.0",
+    "tsc-alias": "^1.8.10"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.2"
   }
 }

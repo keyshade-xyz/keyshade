@@ -42,7 +42,6 @@ function Sidebar(): JSX.Element {
       <div className="grid gap-y-[1.88rem]">
         <div className="mt-5 flex items-center justify-between">
           <div className=" flex gap-2 text-xl">
-            {' '}
             <KeyshadeLogoSVG /> Keyshade
           </div>
           <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">

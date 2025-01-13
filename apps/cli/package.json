@@ -14,7 +14,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.esm.js --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs --banner:js='#!/usr/bin/env node'",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs --banner:js=\"#!/usr/bin/env node\" && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.esm.js --format=esm --banner:js=\"#!/usr/bin/env node\"",
     "start": "node dist/index.cjs",
     "dev": "pnpm build && node dist/index.cjs",
     "lint": "eslint \"src/**/*.ts\" --fix",
@@ -26,6 +26,8 @@
   "dependencies": {
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
+    "@keyshade/api-client": "workspace:*",
+    "@keyshade/secret-scan": "workspace:*",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
