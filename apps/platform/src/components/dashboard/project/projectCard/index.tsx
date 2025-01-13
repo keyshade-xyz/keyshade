@@ -12,13 +12,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { editProjectSheetOpen } from '@/store'
+import { editProjectOpenAtom } from '@/store'
 
 interface ProjectCardProps {
   project: ProjectWithCount
 }
 
-function ProjectCard({ project }: ProjectCardProps): JSX.Element {
+export default function ProjectCard({
+  project
+}: ProjectCardProps): JSX.Element {
   const {
     id,
     slug,
@@ -29,7 +31,7 @@ function ProjectCard({ project }: ProjectCardProps): JSX.Element {
     variableCount
   } = project
 
-  const setIsEditProjectSheetOpen = useSetAtom(editProjectSheetOpen)
+  const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -129,5 +131,3 @@ function ProjectCard({ project }: ProjectCardProps): JSX.Element {
     </ContextMenu>
   )
 }
-
-export default ProjectCard

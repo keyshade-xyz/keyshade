@@ -281,21 +281,23 @@ describe('Event Controller Tests', () => {
       project.slug
     )
 
-    const secret = await secretService.createSecret(
-      user,
-      {
-        name: 'My secret',
-        entries: [
-          {
-            value: 'My value',
-            environmentSlug: environment.slug
-          }
-        ],
-        note: 'Some note',
-        rotateAfter: '720'
-      },
-      project.slug
-    )
+    const secret = (
+      await secretService.createSecret(
+        user,
+        {
+          name: 'My secret',
+          entries: [
+            {
+              value: 'My value',
+              environmentSlug: environment.slug
+            }
+          ],
+          note: 'Some note',
+          rotateAfter: '720'
+        },
+        project.slug
+      )
+    ).secret
 
     expect(secret).toBeDefined()
 
@@ -360,20 +362,22 @@ describe('Event Controller Tests', () => {
       project.slug
     )
 
-    const variable = (await variableService.createVariable(
-      user,
-      {
-        name: 'My variable',
-        entries: [
-          {
-            value: 'My value',
-            environmentSlug: environment.slug
-          }
-        ],
-        note: 'Some note'
-      },
-      project.slug
-    )) as Variable
+    const variable = (
+      await variableService.createVariable(
+        user,
+        {
+          name: 'My variable',
+          entries: [
+            {
+              value: 'My value',
+              environmentSlug: environment.slug
+            }
+          ],
+          note: 'Some note'
+        },
+        project.slug
+      )
+    ).variable as Variable
 
     expect(variable).toBeDefined()
 

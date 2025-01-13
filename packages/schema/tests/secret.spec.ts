@@ -21,23 +21,28 @@ describe('Secret Schema Tests', () => {
   describe('SecretSchema Tests', () => {
     it('should validate a valid SecretSchema', () => {
       const result = SecretSchema.safeParse({
-        id: 'secret123',
-        name: 'Secret Name',
-        slug: 'secret-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        rotateAt: null,
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        secret: {
+          id: 'secret123',
+          name: 'Secret Name',
+          slug: 'secret-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          rotateAt: null,
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'secret-value',
+            version: 1,
             environment: {
               id: 'env123',
+              name: 'Development',
               slug: 'development'
             }
           }
@@ -48,30 +53,35 @@ describe('Secret Schema Tests', () => {
 
     it('should not validate an invalid SecretSchema', () => {
       const result = SecretSchema.safeParse({
-        id: 'secret123',
-        name: 'Secret Name',
-        slug: 'secret-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        rotateAt: null,
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        secret: {
+          id: 'secret123',
+          name: 'Secret Name',
+          slug: 'secret-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          rotateAt: null,
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'secret-value',
+            // Missing version
             environment: {
               id: 'env123'
               // Missing slug
+              // Missing name
             }
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
@@ -113,23 +123,28 @@ describe('Secret Schema Tests', () => {
   describe('CreateSecretResponseSchema Tests', () => {
     it('should validate a valid CreateSecretResponseSchema', () => {
       const result = CreateSecretResponseSchema.safeParse({
-        id: 'secret123',
-        name: 'Secret Name',
-        slug: 'secret-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        rotateAt: null,
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        secret: {
+          id: 'secret123',
+          name: 'Secret Name',
+          slug: 'secret-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          rotateAt: null,
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'secret-value',
+            version: 1,
             environment: {
               id: 'env123',
+              name: 'Development',
               slug: 'development'
             }
           }
@@ -140,30 +155,35 @@ describe('Secret Schema Tests', () => {
 
     it('should not validate an invalid CreateSecretResponseSchema', () => {
       const result = CreateSecretResponseSchema.safeParse({
-        id: 'secret123',
-        name: 'Secret Name',
-        slug: 'secret-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        rotateAt: null,
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        secret: {
+          id: 'secret123',
+          name: 'Secret Name',
+          slug: 'secret-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          rotateAt: null,
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'secret-value',
+            // Missing version
             environment: {
               id: 'env123'
               // Missing slug
+              // Missing name
             }
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 

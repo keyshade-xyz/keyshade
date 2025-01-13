@@ -6,24 +6,27 @@ export function setWorkspace(workspaceData: Workspace[]): void {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
 
-    if (getCurrentWorkspace() === null) {
-      localStorage.setItem('currentWorkspace', JSON.stringify(defaultWorkspace))
+    if (getselectedWorkspace() === null) {
+      localStorage.setItem(
+        'selectedWorkspace',
+        JSON.stringify(defaultWorkspace)
+      )
     }
   }
 }
 
-export function getCurrentWorkspace(): Workspace | null {
-  const currentWorkspace =
+export function getselectedWorkspace(): Workspace | null {
+  const selectedWorkspace =
     typeof localStorage !== 'undefined'
-      ? localStorage.getItem('currentWorkspace')
+      ? localStorage.getItem('selectedWorkspace')
       : `{}`
 
-  if (currentWorkspace) {
-    return JSON.parse(currentWorkspace) as Workspace
+  if (selectedWorkspace) {
+    return JSON.parse(selectedWorkspace) as Workspace
   }
   return null
 }
 
-export function setCurrentWorkspace(workspace: Workspace): void {
-  localStorage.setItem('currentWorkspace', JSON.stringify(workspace))
+export function setselectedWorkspace(workspace: Workspace): void {
+  localStorage.setItem('selectedWorkspace', JSON.stringify(workspace))
 }

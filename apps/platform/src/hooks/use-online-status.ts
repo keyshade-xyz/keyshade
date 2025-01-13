@@ -16,7 +16,7 @@ export const useOnlineStatus = () => {
           window.location.reload()
         }, 1000)
       } else {
-        toast.error('You are offline')
+        toast.error('You are offline. Please check your internet connection.')
       }
     }, 1000)
   }

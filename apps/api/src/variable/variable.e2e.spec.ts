@@ -142,19 +142,21 @@ describe('Variable Controller Tests', () => {
       }
     })
 
-    variable1 = (await variableService.createVariable(
-      user1,
-      {
-        name: 'Variable 1',
-        entries: [
-          {
-            environmentSlug: environment1.slug,
-            value: 'Variable 1 value'
-          }
-        ]
-      },
-      project1.slug
-    )) as Variable
+    variable1 = (
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'Variable 1',
+          entries: [
+            {
+              environmentSlug: environment1.slug,
+              value: 'Variable 1 value'
+            }
+          ]
+        },
+        project1.slug
+      )
+    ).variable as Variable
   })
 
   afterEach(async () => {
@@ -198,16 +200,16 @@ describe('Variable Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.name).toBe('Variable 3')
-      expect(body.slug).toBeDefined()
-      expect(body.note).toBe('Variable 3 note')
-      expect(body.projectId).toBe(project1.id)
-      expect(body.versions.length).toBe(1)
-      expect(body.versions[0].value).toBe('Variable 3 value')
+      expect(body.variable.name).toBe('Variable 3')
+      expect(body.variable.slug).toBeDefined()
+      expect(body.variable.note).toBe('Variable 3 note')
+      expect(body.variable.projectId).toBe(project1.id)
+      expect(body.values.length).toBe(1)
+      expect(body.values[0].value).toBe('Variable 3 value')
 
       const variable = await prisma.variable.findUnique({
         where: {
-          id: body.id
+          id: body.variable.id
         }
       })
 
@@ -302,14 +304,16 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not create a variable version entity if value-environmentSlug is not provided during creation', async () => {
-      const variable = await variableService.createVariable(
-        user1,
-        {
-          name: 'Var 3',
-          note: 'Var 3 note'
-        },
-        project1.slug
-      )
+      const variable = (
+        await variableService.createVariable(
+          user1,
+          {
+            name: 'Var 3',
+            note: 'Var 3 note'
+          },
+          project1.slug
+        )
+      ).variable
 
       const variableVersions = await prisma.variableVersion.findMany({
         where: {
