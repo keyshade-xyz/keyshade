@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { AddSVG } from '@public/svg/shared'
 import type { CreateSecretRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,8 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
-  environmentsOfProjectAtom
+  environmentsOfProjectAtom,
+  secretsOfProjectAtom
 } from '@/store'
 
 export default function AddSecretDialog() {
@@ -32,15 +33,16 @@ export default function AddSecretDialog() {
     useAtom(createSecretOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const environments = useAtomValue(environmentsOfProjectAtom)
+  const setSecrets = useSetAtom(secretsOfProjectAtom)
 
   const [newSecretData, setNewSecretData] = useState({
     secretName: '',
     secretNote: '',
-    environmentSlug: '',
+    environmentSlug: environments[0]?.slug,
     environmentValue: ''
   })
 
-  const addSecret = async () => {
+  const handleAddSecret = useCallback(async () => {
     if (selectedProject === null) {
       toast.error('No project selected', {
         description: (
@@ -78,6 +80,8 @@ export default function AddSecretDialog() {
           <p className="text-xs text-emerald-300">You created a new secret</p>
         )
       })
+      // Add the new secret to the list of secrets
+      setSecrets((prev) => [...prev, data])
     }
     if (error) {
       if (error.statusCode === 409) {
@@ -90,6 +94,14 @@ export default function AddSecretDialog() {
           )
         })
       } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while adding the secret. Check the console
+              for more details.
+            </p>
+          )
+        })
         // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
         console.error(error)
       }
@@ -102,7 +114,7 @@ export default function AddSecretDialog() {
       environmentValue: ''
     })
     setIsCreateSecretOpen(false)
-  }
+  }, [selectedProject, newSecretData, setIsCreateSecretOpen, setSecrets])
 
   return (
     <Dialog
@@ -181,7 +193,7 @@ export default function AddSecretDialog() {
                   Environment Name
                 </label>
                 <Select
-                  defaultValue={environments[0].slug}
+                  defaultValue={newSecretData.environmentSlug}
                   onValueChange={(val) =>
                     setNewSecretData({
                       ...newSecretData,
@@ -227,7 +239,7 @@ export default function AddSecretDialog() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                onClick={addSecret}
+                onClick={handleAddSecret}
               >
                 Add Secret
               </Button>

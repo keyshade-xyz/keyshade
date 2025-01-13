@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import type {
   ClientResponse,
-  GetAllVariablesOfProjectResponse,
-  Project,
-  Variable
+  GetAllVariablesOfProjectResponse
 } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -15,7 +13,8 @@ import {
   selectedProjectAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedVariableAtom
+  selectedVariableAtom,
+  variablesOfProjectAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDelete from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -28,9 +27,7 @@ function VariablePage(): React.JSX.Element {
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
   const selectedVariable = useAtomValue(selectedVariableAtom)
-  const [variables, setVariables] = useState<
-    GetAllVariablesOfProjectResponse['items']
-  >([])
+  const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
   useEffect(() => {
@@ -65,7 +62,7 @@ function VariablePage(): React.JSX.Element {
     }
 
     getAllVariables()
-  }, [selectedProject])
+  }, [selectedProject, setVariables])
 
   return (
     <div

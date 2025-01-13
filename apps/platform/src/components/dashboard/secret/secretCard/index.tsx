@@ -1,4 +1,4 @@
-import type { GetAllSecretsOfProjectResponse } from '@keyshade/schema'
+import type { Secret } from '@keyshade/schema'
 import { NoteIconSVG } from '@public/svg/secret'
 import dayjs from 'dayjs'
 import {
@@ -21,10 +21,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 
-export default function SecretCard({
-  secret,
-  values
-}: GetAllSecretsOfProjectResponse['items'][number]) {
+export default function SecretCard({ secret, values }: Secret) {
   return (
     <AccordionItem
       className="rounded-xl bg-white/5 px-5"

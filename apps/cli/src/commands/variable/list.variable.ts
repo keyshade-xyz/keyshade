@@ -35,10 +35,15 @@ export default class ListVariable extends BaseCommand {
       )
 
     if (success) {
-      const variables = data
-      if (variables.items.length > 0) {
-        variables.items.forEach((variable: any) => {
-          Logger.info(`- ${variable.name} (${variable.value})`)
+      const variables = data.items
+      if (variables.length > 0) {
+        variables.forEach(({ variable, values }) => {
+          Logger.info(`- ${variable.name} (${variable.slug})`)
+          values.forEach(({ environment, value }) => {
+            Logger.info(
+              `  |_ ${environment.name} (${environment.slug}): ${value}`
+            )
+          })
         })
       } else {
         Logger.info('No variables found')

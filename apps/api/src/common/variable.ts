@@ -18,9 +18,11 @@ export function getVariableWithValues(
     versions: VariableWithValues['values']
   }
 ): VariableWithValues {
-  const { versions, ...variable } = variableWithVersion
+  const values = variableWithVersion.versions
+  delete variableWithVersion.versions
+  const variable = variableWithVersion
   return {
     variable,
-    values: versions
+    values
   }
 }

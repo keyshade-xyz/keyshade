@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import type { UpdateVariableRequest } from '@keyshade/schema'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,21 +16,29 @@ import {
   DialogDescription
 } from '@/components/ui/dialog'
 import ControllerInstance from '@/lib/controller-instance'
-import { useAtom, useAtomValue } from 'jotai'
-import { editVariableOpenAtom, selectedVariableAtom } from '@/store'
+import {
+  editVariableOpenAtom,
+  selectedVariableAtom,
+  variablesOfProjectAtom
+} from '@/store'
 
 export default function EditVariableDialog() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
     useAtom(editVariableOpenAtom)
-  const selectedVariable = useAtomValue(selectedVariableAtom)
+  const selectedVariableData = useAtomValue(selectedVariableAtom)
+  const setVariables = useSetAtom(variablesOfProjectAtom)
 
   const [requestData, setRequestData] = useState<{
     name: string | undefined
     note: string | undefined
   }>({
-    name: selectedVariable?.name,
-    note: selectedVariable?.note || ''
+    name: selectedVariableData?.variable.name,
+    note: selectedVariableData?.variable.note || ''
   })
+
+  const handleClose = useCallback(() => {
+    setIsEditVariableOpen(false)
+  }, [setIsEditVariableOpen])
 
   const updateRequestData = useCallback((key: string, value: string) => {
     setRequestData((prev) => ({
@@ -38,8 +47,8 @@ export default function EditVariableDialog() {
     }))
   }, [])
 
-  const updateVariable = async () => {
-    if (!selectedVariable) {
+  const updateVariable = useCallback(async () => {
+    if (!selectedVariableData) {
       toast.error('No variable selected', {
         description: (
           <p className="text-xs text-red-300">
@@ -50,29 +59,47 @@ export default function EditVariableDialog() {
       return
     }
 
+    const { variable } = selectedVariableData
+
     const request: UpdateVariableRequest = {
-      variableSlug: selectedVariable.slug,
-      name:
-        requestData.name === selectedVariable.name
-          ? undefined
-          : requestData.name,
+      variableSlug: variable.slug,
+      name: requestData.name === variable.name ? undefined : requestData.name,
       note: requestData.note === '' ? undefined : requestData.note,
       entries: undefined
     }
 
-    const { success, error } =
+    const { success, error, data } =
       await ControllerInstance.getInstance().variableController.updateVariable(
         request,
         {}
       )
 
-    if (success) {
+    if (success && data) {
       toast.success('Variable edited successfully', {
         description: (
           <p className="text-xs text-emerald-300">
             You successfully edited the variable
           </p>
         )
+      })
+
+      // Update the variable in the store
+      setVariables((prev) => {
+        const newVariables = prev.map((v) => {
+          if (v.variable.slug === variable.slug) {
+            return {
+              ...v,
+              variable: {
+                ...v.variable,
+                name: requestData.name || v.variable.name,
+                note: requestData.note || v.variable.note,
+                slug: data.variable.slug
+              }
+            }
+          }
+          return v
+        })
+        return newVariables
       })
     }
     if (error) {
@@ -88,12 +115,12 @@ export default function EditVariableDialog() {
       console.error('Error while updating variable: ', error)
     }
 
-    onClose()
-  }
+    handleClose()
+  }, [selectedVariableData, requestData, handleClose, setVariables])
 
   return (
     <div className="p-4">
-      <Dialog onOpenChange={onClose} open={isEditVariableOpen}>
+      <Dialog onOpenChange={handleClose} open={isEditVariableOpen}>
         <DialogContent className="bg-[#18181B] p-6 text-white sm:max-w-[506px]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-white">

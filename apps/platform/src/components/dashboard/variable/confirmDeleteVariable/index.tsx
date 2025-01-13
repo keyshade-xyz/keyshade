@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,21 +15,36 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import ControllerInstance from '@/lib/controller-instance'
-import { Variable } from '@keyshade/schema'
+import {
+  deleteVariableOpenAtom,
+  selectedVariableAtom,
+  variablesOfProjectAtom
+} from '@/store'
 
-export default function ConfirmDeleteVariable({
-  isOpen,
-  onClose,
-  variable
-}: {
-  isOpen: boolean
-  onClose: () => void
-  variable: Variable
-}) {
-  const deleteVariable = async () => {
-    if (variableSlug === null) {
+export default function ConfirmDeleteVariable() {
+  const selectedVariable = useAtomValue(selectedVariableAtom)
+  const [isDeleteVariableOpen, setIsDeleteVariableOpen] = useAtom(
+    deleteVariableOpenAtom
+  )
+  const setVariables = useSetAtom(variablesOfProjectAtom)
+
+  const handleClose = useCallback(() => {
+    setIsDeleteVariableOpen(false)
+  }, [setIsDeleteVariableOpen])
+
+  const deleteVariable = useCallback(async () => {
+    if (selectedVariable === null) {
+      toast.error('No variable selected', {
+        description: (
+          <p className="text-xs text-red-300">
+            No variable selected. Please select a variable.
+          </p>
+        )
+      })
       return
     }
+
+    const variableSlug = selectedVariable.variable.slug
 
     const { success, error } =
       await ControllerInstance.getInstance().variableController.deleteVariable(
@@ -44,14 +60,27 @@ export default function ConfirmDeleteVariable({
           </p>
         )
       })
+
+      // Remove the variable from the store
+      setVariables((prevVariables) =>
+        prevVariables.filter(({ variable }) => variable.slug !== variableSlug)
+      )
     }
     if (error) {
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while deleting the variable. Check console for
+            more info.
+          </p>
+        )
+      })
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
     }
 
-    onClose()
-  }
+    handleClose()
+  }, [setVariables, selectedVariable, handleClose])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {
@@ -60,14 +89,18 @@ export default function ConfirmDeleteVariable({
   }, [])
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isDeleteVariableOpen) {
       cleanup()
     }
     return () => cleanup()
-  }, [isOpen, cleanup])
+  }, [isDeleteVariableOpen, cleanup])
 
   return (
-    <AlertDialog aria-hidden={!isOpen} onOpenChange={onClose} open={isOpen}>
+    <AlertDialog
+      aria-hidden={!isDeleteVariableOpen}
+      onOpenChange={handleClose}
+      open={isDeleteVariableOpen}
+    >
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
         <AlertDialogHeader>
           <div className="flex items-center gap-x-3">
@@ -84,7 +117,7 @@ export default function ConfirmDeleteVariable({
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
-            onClick={() => onClose()}
+            onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>

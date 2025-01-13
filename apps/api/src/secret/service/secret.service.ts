@@ -33,7 +33,7 @@ import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
-import { getSecretWithValues, SecretWithValues } from '@/common/secret-response'
+import { getSecretWithValues, SecretWithValues } from '@/common/secret'
 
 @Injectable()
 export class SecretService {

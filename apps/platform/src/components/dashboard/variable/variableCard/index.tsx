@@ -35,21 +35,22 @@ import {
   selectedVariableAtom
 } from '@/store'
 
-export default function VariableCard({
-  variable,
-  values
-}: GetAllVariablesOfProjectResponse['items'][number]) {
+export default function VariableCard(
+  variableData: GetAllVariablesOfProjectResponse['items'][number]
+) {
   const setSelectedVariable = useSetAtom(selectedVariableAtom)
   const setIsEditVariableOpen = useSetAtom(editVariableOpenAtom)
   const setIsDeleteVariableOpen = useSetAtom(deleteVariableOpenAtom)
 
+  const { variable, values } = variableData
+
   const handleEditClick = () => {
-    setSelectedVariable(variable)
+    setSelectedVariable(variableData)
     setIsEditVariableOpen(true)
   }
 
   const handleDeleteClick = () => {
-    setSelectedVariable(variable)
+    setSelectedVariable(variableData)
     setIsDeleteVariableOpen(true)
   }
 

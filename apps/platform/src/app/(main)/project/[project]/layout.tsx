@@ -17,8 +17,6 @@ import AddVariableDialogue from '@/components/dashboard/variable/addVariableDial
 
 interface DetailedProjectPageProps {
   params: { project: string }
-  secret: React.ReactNode
-  variable: React.ReactNode
 }
 
 function DetailedProjectPage({

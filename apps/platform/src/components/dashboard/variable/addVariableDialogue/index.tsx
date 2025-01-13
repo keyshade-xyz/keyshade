@@ -1,8 +1,8 @@
 import type { CreateVariableRequest } from '@keyshade/schema'
 import { AddSVG } from '@public/svg/shared'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import type { MouseEvent } from 'react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,7 +25,8 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
-  environmentsOfProjectAtom
+  environmentsOfProjectAtom,
+  variablesOfProjectAtom
 } from '@/store'
 
 export default function AddVariableDialogue() {
@@ -34,84 +35,91 @@ export default function AddVariableDialogue() {
   )
   const environments = useAtomValue(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setVariables = useSetAtom(variablesOfProjectAtom)
 
   const [newVariableData, setNewVariableData] = useState({
     variableName: '',
     note: '',
-    environmentSlug: '',
+    environmentSlug: environments[0]?.slug,
     environmentValue: ''
   })
 
-  const addVariable = async (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+  const handleAddVariable = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
 
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      throw new Error("Current project doesn't exist")
-    }
-
-    const request: CreateVariableRequest = {
-      name: newVariableData.variableName,
-      projectSlug: selectedProject.slug,
-      entries: newVariableData.environmentValue
-        ? [
-            {
-              value: newVariableData.environmentValue,
-              environmentSlug: newVariableData.environmentSlug
-            }
-          ]
-        : undefined,
-      note: newVariableData.note
-    }
-
-    const { success, error } =
-      await ControllerInstance.getInstance().variableController.createVariable(
-        request,
-        {}
-      )
-
-    if (success) {
-      toast.success('Variable added successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The variable has been added to the project
-          </p>
-        )
-      })
-    }
-
-    if (error) {
-      if (error.statusCode === 409) {
-        toast.error('Variable already exists', {
+      if (!selectedProject) {
+        toast.error('No project selected', {
           description: (
             <p className="text-xs text-red-300">
-              Variable with the same name already exists. Please use different
-              one.
+              No project selected. Please select a project.
             </p>
           )
         })
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong adding the variable. Check console for more
-              info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
-        console.error(error)
+        throw new Error("Current project doesn't exist")
       }
-    }
 
-    setIsCreateVariableOpen(false)
-  }
+      const request: CreateVariableRequest = {
+        name: newVariableData.variableName,
+        projectSlug: selectedProject.slug,
+        entries: newVariableData.environmentValue
+          ? [
+              {
+                value: newVariableData.environmentValue,
+                environmentSlug: newVariableData.environmentSlug
+              }
+            ]
+          : undefined,
+        note: newVariableData.note
+      }
+
+      const { success, error, data } =
+        await ControllerInstance.getInstance().variableController.createVariable(
+          request,
+          {}
+        )
+
+      if (success && data) {
+        toast.success('Variable added successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              The variable has been added to the project
+            </p>
+          )
+        })
+
+        // Add the variable to the store
+        setVariables((prev) => [...prev, data])
+      }
+
+      if (error) {
+        if (error.statusCode === 409) {
+          toast.error('Variable already exists', {
+            description: (
+              <p className="text-xs text-red-300">
+                Variable with the same name already exists. Please use different
+                one.
+              </p>
+            )
+          })
+        } else {
+          toast.error('Something went wrong!', {
+            description: (
+              <p className="text-xs text-red-300">
+                Something went wrong adding the variable. Check console for more
+                info.
+              </p>
+            )
+          })
+          // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
+          console.error(error)
+        }
+      }
+
+      setIsCreateVariableOpen(false)
+    },
+    [selectedProject, newVariableData, setIsCreateVariableOpen, setVariables]
+  )
 
   return (
     <Dialog
@@ -189,7 +197,7 @@ export default function AddVariableDialogue() {
                   Environment Name
                 </label>
                 <Select
-                  defaultValue={environments[0].slug}
+                  defaultValue={newVariableData.environmentSlug}
                   onValueChange={(val) =>
                     setNewVariableData({
                       ...newVariableData,
@@ -235,7 +243,7 @@ export default function AddVariableDialogue() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                onClick={addVariable}
+                onClick={handleAddVariable}
               >
                 Add Variable
               </Button>

@@ -41,3 +41,10 @@
 ### Minor Changes
 
 - `project create` command now outputs public key, private key and access level upon success.
+
+## 2.3.0
+
+### Minor Changes
+
+- Listing of environments and secrets made better
+- Fixed incorrect error message while listing projects

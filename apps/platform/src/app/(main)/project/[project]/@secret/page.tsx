@@ -3,24 +3,25 @@ import React, { useEffect, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { SecretLogoSVG } from '@public/svg/secret'
-import type { GetAllSecretsOfProjectResponse } from '@keyshade/schema'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { Accordion } from '@/components/ui/accordion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
 import { Button } from '@/components/ui/button'
-import { createSecretOpenAtom, selectedProjectAtom } from '@/store'
+import {
+  createSecretOpenAtom,
+  secretsOfProjectAtom,
+  selectedProjectAtom
+} from '@/store'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
-  const [secrets, setSecrets] = useState<
-    GetAllSecretsOfProjectResponse['items']
-  >([])
+  const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
@@ -41,7 +42,7 @@ function SecretPage(): React.JSX.Element {
 
       const { success, error, data } =
         await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
-          { projectSlug: selectedProject.name },
+          { projectSlug: selectedProject.slug },
           {}
         )
 
@@ -56,7 +57,7 @@ function SecretPage(): React.JSX.Element {
     getAllSecretsByProjectSlug()
 
     setIsLoading(false)
-  }, [selectedProject])
+  }, [selectedProject, setSecrets])
 
   if (isLoading) {
     return (
@@ -91,9 +92,9 @@ function SecretPage(): React.JSX.Element {
           </Button>
         </div>
       ) : (
-        <ScrollArea className=" mb-4 h-[50rem]">
+        <ScrollArea className=" mb-4 h-[50rem] w-full">
           <Accordion
-            className="flex h-[50rem] flex-col gap-4"
+            className="flex h-[50rem] w-full flex-col gap-4"
             collapsible
             type="single"
           >

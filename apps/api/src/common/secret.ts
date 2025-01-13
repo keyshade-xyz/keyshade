@@ -18,9 +18,11 @@ export function getSecretWithValues(
     versions: SecretWithValues['values']
   }
 ): SecretWithValues {
-  const { versions, ...secret } = secretWithVersion
+  const values = secretWithVersion.versions
+  delete secretWithVersion.versions
+  const secret = secretWithVersion
   return {
     secret,
-    values: versions
+    values
   }
 }

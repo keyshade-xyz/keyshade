@@ -31,10 +31,7 @@ import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { limitMaxItemsPerPage } from '@/common/util'
-import {
-  getVariableWithValues,
-  VariableWithValues
-} from '@/common/variable-response'
+import { getVariableWithValues, VariableWithValues } from '@/common/variable'
 
 @Injectable()
 export class VariableService {
