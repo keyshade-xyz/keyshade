@@ -17,11 +17,6 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  setWorkspace
-} from '@/lib/workspace-storage'
 import { cn } from '@/lib/utils'
 import {
   Popover,
@@ -36,6 +31,8 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
+import { useAtom } from 'jotai'
+import { currentWorkspaceAtom } from '@/store'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
@@ -62,9 +59,11 @@ async function getAllWorkspace(): Promise<Workspace[] | undefined> {
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspace, setAllWorkspace] = useState<Workspace[]>([])
+  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+
+  const [currentWorkspace, setCurrentWorkspace] = useAtom(currentWorkspaceAtom)
 
   const router = useRouter()
 
@@ -104,15 +103,15 @@ export function Combobox(): React.JSX.Element {
     getAllWorkspace()
       .then((data) => {
         if (data) {
-          setAllWorkspace(data)
-          setWorkspace(data)
+          setAllWorkspaces(data)
+          setCurrentWorkspace(data[0])
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error('error:', error)
       })
-  }, [])
+  }, [setCurrentWorkspace])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -130,7 +129,7 @@ export function Combobox(): React.JSX.Element {
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
-                {getCurrentWorkspace()?.name ?? 'No workspace'}
+                {currentWorkspace?.name ?? 'No workspace'}
               </div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
@@ -145,7 +144,7 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspace.map((workspace) => {
+              {allWorkspaces.map((workspace) => {
                 return (
                   <CommandItem
                     key={workspace.id}
@@ -159,7 +158,7 @@ export function Combobox(): React.JSX.Element {
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        getCurrentWorkspace()?.name === workspace.name
+                        currentWorkspace?.name === workspace.name
                           ? 'opacity-100'
                           : 'opacity-0'
                       )}
