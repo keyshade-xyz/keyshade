@@ -43,7 +43,7 @@ export default class ListProject extends BaseCommand {
           Logger.info(`- ${project.name} (${project.slug})`)
         })
       } else {
-        Logger.info('No forks found')
+        Logger.info('No projects found')
       }
     } else {
       Logger.error(`Failed fetching projects: ${error.message}`)
