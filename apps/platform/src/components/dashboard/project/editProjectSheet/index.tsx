@@ -12,11 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { editProjectSheetOpen } from '@/store'
+import { editProjectOpenAtom } from '@/store'
 
 export default function EditProjectSheet(): JSX.Element {
   const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] =
-    useAtom(editProjectSheetOpen)
+    useAtom(editProjectOpenAtom)
 
   return (
     <Sheet

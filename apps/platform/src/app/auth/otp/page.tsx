@@ -108,7 +108,13 @@ export default function AuthOTPPage(): React.JSX.Element {
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(`Failed to send OTP: ${error}`)
-      toast.error("Couldn't send OTP .")
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong sending the OTP. Check console for more info.
+          </p>
+        )
+      })
       setIsLoadingRefresh(false)
     }
   }
