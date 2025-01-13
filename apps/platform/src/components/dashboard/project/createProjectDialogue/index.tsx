@@ -263,7 +263,16 @@ export default function CreateProjectDialogue(): JSX.Element {
               </div>
 
               <div className="p-[0.125rem]">
-                <Switch className="h-[1.25rem] w-[2.25rem] " />
+                <Switch
+                  checked={newProjectData.storePrivateKey}
+                  className="h-[1.25rem] w-[2.25rem]"
+                  onCheckedChange={(checked) => {
+                    setNewProjectData((prev) => ({
+                      ...prev,
+                      storePrivateKey: checked
+                    }))
+                  }}
+                />
               </div>
             </div>
           </div>
