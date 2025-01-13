@@ -146,21 +146,23 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    secret1 = (await secretService.createSecret(
-      user1,
-      {
-        name: 'Secret 1',
-        rotateAfter: '24',
-        note: 'Secret 1 note',
-        entries: [
-          {
-            environmentSlug: environment1.slug,
-            value: 'Secret 1 value'
-          }
-        ]
-      },
-      project1.slug
-    )) as Secret
+    secret1 = (
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret 1',
+          rotateAfter: '24',
+          note: 'Secret 1 note',
+          entries: [
+            {
+              environmentSlug: environment1.slug,
+              value: 'Secret 1 value'
+            }
+          ]
+        },
+        project1.slug
+      )
+    ).secret as Secret
   })
 
   afterEach(async () => {
@@ -204,13 +206,13 @@ describe('Secret Controller Tests', () => {
       const body = response.json()
 
       expect(body).toBeDefined()
-      expect(body.name).toBe('Secret 2')
-      expect(body.note).toBe('Secret 2 note')
-      expect(body.projectId).toBe(project1.id)
-      expect(body.versions.length).toBe(1)
-      expect(body.versions[0].value).not.toBe('Secret 2 value')
-      expect(body.versions[0].environment.id).toBe(environment1.id)
-      expect(body.versions[0].environment.slug).toBe(environment1.slug)
+      expect(body.secret.name).toBe('Secret 2')
+      expect(body.secret.note).toBe('Secret 2 note')
+      expect(body.secret.projectId).toBe(project1.id)
+      expect(body.values.length).toBe(1)
+      expect(body.values[0].value).not.toBe('Secret 2 value')
+      expect(body.values[0].environment.id).toBe(environment1.id)
+      expect(body.values[0].environment.slug).toBe(environment1.slug)
     })
 
     it('should have created a secret version', async () => {
@@ -496,15 +498,17 @@ describe('Secret Controller Tests', () => {
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
-      const secret = await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 4',
-          note: 'Secret 4 note',
-          rotateAfter: '24'
-        },
-        project1.slug
-      )
+      const secret = (
+        await secretService.createSecret(
+          user1,
+          {
+            name: 'Secret 4',
+            note: 'Secret 4 note',
+            rotateAfter: '24'
+          },
+          project1.slug
+        )
+      ).secret
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {

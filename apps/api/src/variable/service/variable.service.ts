@@ -31,6 +31,10 @@ import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { limitMaxItemsPerPage } from '@/common/util'
+import {
+  getVariableWithValues,
+  VariableWithValues
+} from '@/common/variable-response'
 
 @Injectable()
 export class VariableService {
@@ -59,7 +63,7 @@ export class VariableService {
     user: User,
     dto: CreateVariable,
     projectSlug: Project['slug']
-  ) {
+  ): Promise<VariableWithValues> {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -87,7 +91,7 @@ export class VariableService {
       : new Map<string, string>()
 
     // Create the variable
-    const variable = await this.prisma.variable.create({
+    const variableData = await this.prisma.variable.create({
       data: {
         name: dto.name,
         slug: await generateEntitySlug(dto.name, 'VARIABLE', this.prisma),
@@ -113,9 +117,10 @@ export class VariableService {
         }
       },
       include: {
-        project: {
+        lastUpdatedBy: {
           select: {
-            workspaceId: true
+            id: true,
+            name: true
           }
         },
         versions: {
@@ -123,25 +128,29 @@ export class VariableService {
             environment: {
               select: {
                 id: true,
+                name: true,
                 slug: true
               }
             },
+            version: true,
             value: true
           }
         }
       }
     })
 
+    const variable = getVariableWithValues(variableData)
+
     await createEvent(
       {
         triggeredBy: user,
-        entity: variable,
+        entity: variable.variable,
         type: EventType.VARIABLE_ADDED,
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          variableId: variable.id,
-          name: variable.name,
+          variableId: variable.variable.id,
+          name: variable.variable.name,
           projectId,
           projectName: project.name
         },
@@ -150,7 +159,7 @@ export class VariableService {
       this.prisma
     )
 
-    this.logger.log(`User ${user.id} created variable ${variable.id}`)
+    this.logger.log(`User ${user.id} created variable ${variable.variable.id}`)
 
     return variable
   }

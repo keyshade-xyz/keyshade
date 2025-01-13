@@ -30,9 +30,9 @@ export const GetEventsResponseSchema = PageResponseSchema(
       name: z.string(),
       projectName: BaseProjectSchema.shape.name,
       projectId: BaseProjectSchema.shape.id.optional(),
-      variableId: VariableSchema.shape.id.optional(),
+      variableId: VariableSchema.shape.variable.shape.id.optional(),
       environmentId: EnvironmentSchema.shape.id.optional(),
-      secretId: SecretSchema.shape.id.optional(),
+      secretId: SecretSchema.shape.secret.shape.id.optional(),
       workspaceId: WorkspaceSchema.shape.id.optional(),
       workspaceName: WorkspaceSchema.shape.name.optional()
     }),

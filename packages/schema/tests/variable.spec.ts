@@ -16,48 +16,59 @@ describe('Variable Schema Tests', () => {
   describe('VariableSchema Tests', () => {
     it('should validate a valid VariableSchema', () => {
       const result = VariableSchema.safeParse({
-        id: 'variable123',
-        name: 'Variable Name',
-        slug: 'variable-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        variable: {
+          id: 'variable123',
+          name: 'Variable Name',
+          slug: 'variable-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'variable-value',
+            version: 1,
             environment: {
               id: 'env123',
+              name: 'Development',
               slug: 'development'
             }
           }
         ]
       })
+      console.log(result.error)
       expect(result.success).toBe(true)
     })
 
-    it('should validate a valid VariableSchema with no note', () => {
+    it('should validate a valid VariableSchema with note as null', () => {
       const result = VariableSchema.safeParse({
-        id: 'variable123',
-        name: 'Variable Name',
-        slug: 'variable-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        note: null,
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        variable: {
+          id: 'variable123',
+          name: 'Variable Name',
+          slug: 'variable-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          note: null,
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'variable-value',
+            version: 1,
             environment: {
               id: 'env123',
+              name: 'Development',
               slug: 'development'
             }
           }
@@ -68,30 +79,34 @@ describe('Variable Schema Tests', () => {
 
     it('should not validate an invalid VariableSchema', () => {
       const result = VariableSchema.safeParse({
-        id: 'variable123',
-        name: 'Variable Name',
-        slug: 'variable-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        variable: {
+          id: 'variable123',
+          name: 'Variable Name',
+          slug: 'variable-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123'
+            // Missing name
+          }
         },
-        versions: [
+        values: [
           {
             value: 'variable-value',
-            environmentId: 'env123',
+            // Missing version
             environment: {
               id: 'env123'
               // Missing slug
+              //Missing name
             }
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 
@@ -160,22 +175,27 @@ describe('Variable Schema Tests', () => {
   describe('CreateVariableResponseSchema Tests', () => {
     it('should validate a valid CreateVariableResponseSchema', () => {
       const result = CreateVariableResponseSchema.safeParse({
-        id: 'variable123',
-        name: 'Variable Name',
-        slug: 'variable-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        variable: {
+          id: 'variable123',
+          name: 'Variable Name',
+          slug: 'variable-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'variable-value',
+            version: 1,
             environment: {
               id: 'env123',
+              name: 'Development',
               slug: 'development'
             }
           }
@@ -186,29 +206,34 @@ describe('Variable Schema Tests', () => {
 
     it('should not validate an invalid CreateVariableResponseSchema', () => {
       const result = CreateVariableResponseSchema.safeParse({
-        id: 'variable123',
-        name: 'Variable Name',
-        slug: 'variable-slug',
-        createdAt: '2024-10-01T00:00:00Z',
-        updatedAt: '2024-10-01T00:00:00Z',
-        note: 'This is a note',
-        lastUpdatedById: 'user123',
-        projectId: 'project123',
-        project: {
-          workspaceId: 'workspace123'
+        variable: {
+          id: 'variable123',
+          name: 'Variable Name',
+          slug: 'variable-slug',
+          createdAt: '2024-10-01T00:00:00Z',
+          updatedAt: '2024-10-01T00:00:00Z',
+          note: 'This is a note',
+          lastUpdatedById: 'user123',
+          projectId: 'project123',
+          lastUpdatedBy: {
+            id: 'user123',
+            name: 'John Doe'
+          }
         },
-        versions: [
+        values: [
           {
             value: 'variable-value',
+            // Missing version
             environment: {
               id: 'env123'
               // Missing slug
+              // Missing name
             }
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
