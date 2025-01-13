@@ -22,7 +22,7 @@ function ProfilePage(): React.JSX.Element {
       await ControllerInstance.getInstance().userController.updateSelf(
         {
           name: userData.name,
-          email: userData.email === email ? null : email
+          email: userData.email === email ? undefined : email
         },
         {}
       )
