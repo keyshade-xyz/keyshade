@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
 import { useAtom } from 'jotai'
-import { currentWorkspaceAtom } from '@/store'
+import { selectedWorkspaceAtom } from '@/store'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
@@ -63,7 +63,9 @@ export function Combobox(): React.JSX.Element {
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
 
-  const [currentWorkspace, setCurrentWorkspace] = useAtom(currentWorkspaceAtom)
+  const [selectedWorkspace, setselectedWorkspace] = useAtom(
+    selectedWorkspaceAtom
+  )
 
   const router = useRouter()
 
@@ -90,7 +92,7 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setCurrentWorkspace(data)
+        setselectedWorkspace(data)
         setOpen(false)
       }
     } catch (error) {
@@ -104,14 +106,14 @@ export function Combobox(): React.JSX.Element {
       .then((data) => {
         if (data) {
           setAllWorkspaces(data)
-          setCurrentWorkspace(data[0])
+          setselectedWorkspace(data[0])
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error('error:', error)
       })
-  }, [setCurrentWorkspace])
+  }, [setselectedWorkspace])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -129,7 +131,7 @@ export function Combobox(): React.JSX.Element {
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
-                {currentWorkspace?.name ?? 'No workspace'}
+                {selectedWorkspace?.name ?? 'No workspace'}
               </div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
@@ -149,7 +151,7 @@ export function Combobox(): React.JSX.Element {
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setCurrentWorkspace(workspace)
+                      setselectedWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}
@@ -158,7 +160,7 @@ export function Combobox(): React.JSX.Element {
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        currentWorkspace?.name === workspace.name
+                        selectedWorkspace?.name === workspace.name
                           ? 'opacity-100'
                           : 'opacity-0'
                       )}
@@ -213,7 +215,14 @@ export function Combobox(): React.JSX.Element {
                           router.refresh()
                         })
                         .catch(() => {
-                          toast.error('Failed to update user details')
+                          toast.error('Something went wrong!', {
+                            description: (
+                              <p className="text-xs text-red-300">
+                                Failed to update the user details. Check console
+                                for more info.
+                              </p>
+                            )
+                          })
                         })
                     }}
                     variant="secondary"

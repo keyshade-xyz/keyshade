@@ -1,7 +1,7 @@
 import { AddSVG } from '@public/svg/shared'
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,19 +25,19 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import ControllerInstance from '@/lib/controller-instance'
 import {
-  createProjectDialogOpenAtom,
-  currentWorkspaceAtom,
+  createProjectOpenAtom,
+  selectedWorkspaceAtom,
   projectsOfWorkspaceAtom
 } from '@/store'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
-    createProjectDialogOpenAtom
+    createProjectOpenAtom
   )
-  const currentWorkspace = useAtomValue(currentWorkspaceAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
-  const isProjectsEmpty = projects.length === 0
+  const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
 
   // Contains the data for the new project
   const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
@@ -56,8 +56,8 @@ export default function CreateProjectDialogue(): JSX.Element {
 
   // Function to create a new project
   const createNewProject = useCallback(async () => {
-    if (currentWorkspace) {
-      newProjectData.workspaceSlug = currentWorkspace.slug
+    if (selectedWorkspace) {
+      newProjectData.workspaceSlug = selectedWorkspace.slug
 
       const { data, error, success } =
         await ControllerInstance.getInstance().projectController.createProject(
@@ -78,9 +78,14 @@ export default function CreateProjectDialogue(): JSX.Element {
           }
         ])
       } else {
-        toast.error(
-          'Something went wrong while creating project. Check console for more info.'
-        )
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while creating the project. Check console for
+              more info.
+            </p>
+          )
+        })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
@@ -90,7 +95,7 @@ export default function CreateProjectDialogue(): JSX.Element {
       toast.error('No workspace selected')
     }
   }, [
-    currentWorkspace,
+    selectedWorkspace,
     newProjectData,
     projects,
     setIsCreateProjectDialogOpen,

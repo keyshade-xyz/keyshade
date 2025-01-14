@@ -17,8 +17,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <JotaiProvider>
-          <OnlineStatusHandler />
-          {children}
+          <>
+            <OnlineStatusHandler />
+            {children}
+          </>
         </JotaiProvider>
       </body>
       <Toaster richColors />

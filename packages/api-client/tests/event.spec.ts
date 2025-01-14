@@ -115,7 +115,9 @@ describe('Event Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('SECRET')
-    expect(events.data.items[0].metadata.secretId).toBe(secretResponse.id)
+    expect(events.data.items[0].metadata.secretId).toBe(
+      secretResponse.secret.id
+    )
     expect(events.data.items[0].metadata.name).toBe('My secret')
   })
 
@@ -143,7 +145,9 @@ describe('Event Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('VARIABLE')
-    expect(events.data.items[0].metadata.variableId).toBe(variableResponse.id)
+    expect(events.data.items[0].metadata.variableId).toBe(
+      variableResponse.variable.id
+    )
     expect(events.data.items[0].metadata.name).toBe('My variable')
   })
 })

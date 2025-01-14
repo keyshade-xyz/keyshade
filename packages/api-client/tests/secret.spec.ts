@@ -84,7 +84,7 @@ describe('Secret Controller Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    secretSlug = createSecretResponse.data.slug
+    secretSlug = createSecretResponse.data.secret.slug
   })
 
   afterEach(async () => {
@@ -112,15 +112,15 @@ describe('Secret Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
 
-    expect(secret.data.name).toBe('Secret 2')
-    expect(secret.data.slug).toBeDefined()
-    expect(secret.data.versions.length).toBe(1)
-    expect(secret.data.versions[0].environment.slug).toBe(environmentSlug)
+    expect(secret.data.secret.name).toBe('Secret 2')
+    expect(secret.data.secret.slug).toBeDefined()
+    expect(secret.data.values.length).toBe(1)
+    expect(secret.data.values[0].environment.slug).toBe(environmentSlug)
     expect(secret.error).toBe(null)
 
     // Delete the secret
     await secretController.deleteSecret(
-      { secretSlug: secret.data.slug },
+      { secretSlug: secret.data.secret.slug },
       { 'x-e2e-user-email': email }
     )
   })

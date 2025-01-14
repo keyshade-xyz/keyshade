@@ -1,7 +1,6 @@
 import type {
   CommandActionData,
-  CommandArgument,
-  CommandOption
+  CommandArgument
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -25,40 +24,31 @@ export default class ListSecret extends BaseCommand {
     ]
   }
 
-  getOptions(): CommandOption[] {
-    return [
-      {
-        short: '-e',
-        long: '--environment <string>',
-        description: 'Slug of the environment whose secrets you want.'
-      }
-    ]
-  }
-
-  async action({ args, options }: CommandActionData): Promise<void> {
+  async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
-    const { environment } = options
 
     const { data, error, success } =
-      await ControllerInstance.getInstance().secretController.getAllSecretsOfEnvironment(
+      await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
-          projectSlug,
-          environmentSlug: environment
+          projectSlug
         },
         this.headers
       )
 
     if (success) {
-      const secrets = data
+      const secrets = data.items
       if (secrets.length > 0) {
-        data.forEach((secret: any) => {
-          Logger.info(`- ${secret.name} (${secret.value})`)
+        secrets.forEach(({ secret, values }) => {
+          Logger.info(`- ${secret.name} (${secret.slug})`)
+          values.forEach(({ environment, value }) => {
+            Logger.info(
+              `  |_ ${environment.name} (${environment.slug}): ${value}`
+            )
+          })
         })
       } else {
-        Logger.info('No secrets found')
+        Logger.error(`Failed fetching secrets: ${error.message}`)
       }
-    } else {
-      Logger.error(`Failed fetching secrets: ${error.message}`)
     }
   }
 }
