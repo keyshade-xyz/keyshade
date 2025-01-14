@@ -9,7 +9,7 @@ import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListInvitations extends BaseCommand {
   getName(): string {
-    return 'list'
+    return 'list-invitations'
   }
 
   getDescription(): string {
@@ -31,11 +31,13 @@ export default class ListInvitations extends BaseCommand {
         this.headers
       )
 
-    if (success) {
-      const invitations = data.items.workspace
+    if (success && data) {
+      const invitations = data.items
       if (invitations.length > 0) {
         data.items.forEach((invitation: any) => {
-          Logger.info(`- ${invitation.name} (${invitation.slug})`)
+          Logger.info(
+            `- ${invitation.workspace.name} (${invitation.workspace.slug}) (${invitation.invitedOn})`
+          )
         })
       } else {
         Logger.info('No invitations found')
