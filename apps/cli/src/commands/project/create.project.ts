@@ -51,6 +51,11 @@ export default class CreateProject extends BaseCommand {
         description: 'Access level of the project. Defaults to PRIVATE.',
         defaultValue: 'PRIVATE',
         choices: ['GLOBAL', 'PRIVATE', 'INTERNAL']
+      },
+      {
+        short: '-e',
+        long: '--environment <string...>',
+        description: 'Environment name(s) of the project. Default to Default'
       }
     ]
   }
@@ -86,9 +91,12 @@ export default class CreateProject extends BaseCommand {
     description?: string
     storePrivateKey: boolean
     accessLevel: 'PRIVATE' | 'GLOBAL' | 'INTERNAL'
+    environments?: { name: string; description?: string }[]
   }> {
     let { name, description } = options
-    const { storePrivateKey, accessLevel } = options
+    const { storePrivateKey, accessLevel, environment } = options
+
+    let environments: { name: string; description?: string }[]
 
     if (!name) {
       name = await text({
@@ -101,6 +109,16 @@ export default class CreateProject extends BaseCommand {
       description = name
     }
 
-    return { name, description, storePrivateKey, accessLevel }
+    if (environment) {
+      environments = environment.map((env: string) => {
+        const split = env.split(':')
+        return {
+          name: split[0],
+          description: split[1]
+        }
+      })
+    }
+
+    return { name, description, storePrivateKey, accessLevel, environments }
   }
 }
