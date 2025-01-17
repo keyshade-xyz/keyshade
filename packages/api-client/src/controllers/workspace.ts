@@ -116,7 +116,7 @@ export default class WorkspaceController {
     request: GetWorkspaceInvitationsRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetWorkspaceInvitationsResponse>> {
-    const url = parsePaginationUrl('/api/workspace/invitations', headers)
+    const url = parsePaginationUrl('/api/workspace/invitations', request)
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetWorkspaceInvitationsResponse>(response)

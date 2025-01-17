@@ -5,7 +5,7 @@ export function setWorkspace(workspaceData: Workspace[]): void {
     workspaceData.find((workspace) => workspace.isDefault) || null
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
-
+    
     if (getCurrentWorkspace() === null) {
       localStorage.setItem('currentWorkspace', JSON.stringify(defaultWorkspace))
     }

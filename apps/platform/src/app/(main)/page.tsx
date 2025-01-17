@@ -32,10 +32,10 @@ export default function Index(): JSX.Element {
     async function getAllProjects() {
       setLoading(true)
 
-      if (currentWorkspace) {
+      if (selectedWorkspace) {
         const { success, error, data } =
           await ControllerInstance.getInstance().projectController.getAllProjects(
-            { workspaceSlug: currentWorkspace.slug },
+            { workspaceSlug: selectedWorkspace.slug },
             {}
           )
 

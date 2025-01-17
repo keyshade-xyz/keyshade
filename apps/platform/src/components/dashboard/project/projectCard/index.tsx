@@ -129,5 +129,4 @@ function ProjectCard({ project }: ProjectCardProps): JSX.Element {
     </ContextMenu>
   )
 }
-
 export default ProjectCard

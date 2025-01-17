@@ -63,7 +63,7 @@ export function Combobox(): React.JSX.Element {
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
 
-  const [currentWorkspace, setCurrentWorkspace] = useAtom(currentWorkspaceAtom)
+  const [currentWorkspace, setCurrentWorkspace] = useAtom(currentWorkspaceAtom
 
   const router = useRouter()
 
@@ -90,7 +90,7 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setCurrentWorkspace(data)
+        setselectedWorkspace(data)
         setOpen(false)
       }
     } catch (error) {
@@ -149,7 +149,7 @@ export function Combobox(): React.JSX.Element {
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setCurrentWorkspace(workspace)
+                      setselectedWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}
@@ -213,7 +213,14 @@ export function Combobox(): React.JSX.Element {
                           router.refresh()
                         })
                         .catch(() => {
-                          toast.error('Failed to update user details')
+                          toast.error('Something went wrong!', {
+                            description: (
+                              <p className="text-xs text-red-300">
+                                Failed to update the user details. Check console
+                                for more info.
+                              </p>
+                            )
+                          })
                         })
                     }}
                     variant="secondary"

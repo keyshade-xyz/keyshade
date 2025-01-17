@@ -7,3 +7,4 @@ export const currentWorkspaceAtom = atom<Workspace | null>(null)
 export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
 export const createProjectDialogOpenAtom = atom<boolean>(false)
 export const editProjectSheetOpen = atom<boolean>(false)
+
