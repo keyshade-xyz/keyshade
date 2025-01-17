@@ -91,12 +91,12 @@ export default class CreateProject extends BaseCommand {
     description?: string
     storePrivateKey: boolean
     accessLevel: 'PRIVATE' | 'GLOBAL' | 'INTERNAL'
-    environments?: { name: string; description?: string }[]
+    environments: Array<{ name: string; description?: string }> | undefined
   }> {
     let { name, description } = options
     const { storePrivateKey, accessLevel, environment } = options
 
-    let environments: { name: string; description?: string }[]
+    let environments: Array<{ name: string; description?: string }> | undefined
 
     if (!name) {
       name = await text({
@@ -113,8 +113,8 @@ export default class CreateProject extends BaseCommand {
       environments = environment.map((env: string) => {
         const split = env.split(':')
         return {
-          name: split[0],
-          description: split[1]
+          name: split[0].trim(),
+          description: split[1]?.trim() ?? null
         }
       })
     }
