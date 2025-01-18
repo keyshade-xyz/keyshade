@@ -51,6 +51,25 @@ export default class CreateProject extends BaseCommand {
         description: 'Access level of the project. Defaults to PRIVATE.',
         defaultValue: 'PRIVATE',
         choices: ['GLOBAL', 'PRIVATE', 'INTERNAL']
+      },
+      {
+        short: '-e',
+        long: '--environment <string...>',
+        description: `Should be in the format <name(mandatory)>[:<description>(optional)]
+
+Examples:
+ $ keyshade [...]
+ -> { name: "Default", description: ". . ." }
+
+ $ keyshade [...] -e "dev"
+ -> { name: "dev", description: NULL }
+
+ $ keyshade [...] -e "dev:sample env"
+ -> { name: "dev", description: "sample env" }
+
+ $ keyshade [...] -e " dev : surrounding blank spaces  "
+ -> { name: "dev", description: "surrounding blank spaces" }
+`
       }
     ]
   }
@@ -86,9 +105,12 @@ export default class CreateProject extends BaseCommand {
     description?: string
     storePrivateKey: boolean
     accessLevel: 'PRIVATE' | 'GLOBAL' | 'INTERNAL'
+    environments: Array<{ name: string; description?: string }> | undefined
   }> {
     let { name, description } = options
-    const { storePrivateKey, accessLevel } = options
+    const { storePrivateKey, accessLevel, environment } = options
+
+    let environments: Array<{ name: string; description?: string }> | undefined
 
     if (!name) {
       name = await text({
@@ -101,6 +123,16 @@ export default class CreateProject extends BaseCommand {
       description = name
     }
 
-    return { name, description, storePrivateKey, accessLevel }
+    if (environment) {
+      environments = environment.map((env: string) => {
+        const split = env.split(':')
+        return {
+          name: split[0].trim(),
+          description: split[1]?.trim() ?? null
+        }
+      })
+    }
+
+    return { name, description, storePrivateKey, accessLevel, environments }
   }
 }
