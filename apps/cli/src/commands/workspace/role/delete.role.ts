@@ -39,6 +39,11 @@ export default class DeleteRoleCommand extends BaseCommand {
       Logger.info(`Workspace role ${workspaceRoleSlug} deleted successfully!`)
     } else {
       Logger.error(`Failed deleting workspace role: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed deleting workspace role.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

@@ -125,6 +125,11 @@ export default class UpdateRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed updating workspace role: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed updating workspace role.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

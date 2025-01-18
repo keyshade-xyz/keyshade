@@ -129,6 +129,11 @@ export default class CreateRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed creating workspace role: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed creating workspace role.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

@@ -65,6 +65,9 @@ export default class FetchSecretRevisions extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching revisions: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching revisions.\n' + JSON.stringify(error))
+      }
     }
   }
 }

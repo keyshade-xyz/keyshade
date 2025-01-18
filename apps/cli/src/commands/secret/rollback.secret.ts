@@ -58,7 +58,10 @@ export default class RollbackSecret extends BaseCommand {
     if (success) {
       Logger.info(`Secret rolled back by ${data.count} versions successfully.`)
     } else {
-      Logger.error(`Failed to update secret: ${error.message}`)
+      Logger.error(`Failed to rollback secret: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to rollback secret.\n' + JSON.stringify(error))
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import chalk from 'chalk'
 import moment from 'moment'
+import { SentryInstance } from './sentry'
 
 export namespace Logger {
   export function log(message: string) {
@@ -33,5 +34,9 @@ export namespace Logger {
         moment().format('YYYY-MM-DD HH:mm:ss')
       )} - ${message}`
     )
+  }
+
+  export function report(message: string) {
+    SentryInstance.captureException(new Error(message))
   }
 }

@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -12,7 +13,7 @@ export default class ListSecret extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'List all secrets under a project and environment'
+    return 'List all secrets under a project'
   }
 
   getArguments(): CommandArgument[] {
@@ -24,13 +25,25 @@ export default class ListSecret extends BaseCommand {
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [projectSlug] = args
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-d',
+        long: '--decrypt-value',
+        description:
+          'Set this to true if the project contains the private key. If set to true, the values of the secret will be in plaintext format'
+      }
+    ]
+  }
 
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [projectSlug] = args
+    const { decryptValue } = await this.parseInput(options)
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
-          projectSlug
+          projectSlug,
+          decryptValue
         },
         this.headers
       )
@@ -47,8 +60,24 @@ export default class ListSecret extends BaseCommand {
           })
         })
       } else {
-        Logger.error(`Failed fetching secrets: ${error.message}`)
+        Logger.info('No secrets found')
       }
+    } else {
+      Logger.error(`Failed fetching secrets: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching secrets for project.\n' + JSON.stringify(error)
+        )
+      }
+    }
+  }
+
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    decryptValue: boolean
+  }> {
+    const { decryptValue = false } = options // defaults to false
+    return {
+      decryptValue
     }
   }
 }

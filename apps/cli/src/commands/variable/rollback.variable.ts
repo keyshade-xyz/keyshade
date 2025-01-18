@@ -60,6 +60,9 @@ export default class RollbackVariable extends BaseCommand {
       )
     } else {
       Logger.error(`Failed to update variable: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to rollback variable.\n' + JSON.stringify(error))
+      }
     }
   }
 

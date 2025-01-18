@@ -53,6 +53,9 @@ export default class SyncProject extends BaseCommand {
       Logger.info(`Project ${projectSlug} synced successfully!`)
     } else {
       Logger.error(`Failed to sync project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to sync project.\n' + JSON.stringify(error))
+      }
     }
   }
 }

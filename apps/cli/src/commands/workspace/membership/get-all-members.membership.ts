@@ -59,6 +59,9 @@ export default class GetAllMembersOfWorkspaceCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching members: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching members.\n' + JSON.stringify(error))
+      }
     }
   }
 }

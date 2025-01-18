@@ -56,6 +56,11 @@ export default class ListRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching roles: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching workspace roles.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

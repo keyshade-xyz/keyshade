@@ -40,6 +40,9 @@ export default class UnlinkProject extends BaseCommand {
       Logger.info(`Project ${projectSlug} unlinked successfully!`)
     } else {
       Logger.error(`Failed to unlink project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to unlink project.\n' + JSON.stringify(error))
+      }
     }
   }
 }

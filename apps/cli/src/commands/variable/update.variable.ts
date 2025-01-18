@@ -61,6 +61,9 @@ export default class UpdateVariable extends BaseCommand {
       Logger.info('Variable updated successfully!')
     } else {
       Logger.error(`Failed to update variable: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to update variable.\n' + JSON.stringify(error))
+      }
     }
   }
 }

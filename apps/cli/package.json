@@ -14,11 +14,12 @@
   },
   "type": "module",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.esm.js --format=esm --banner:js='#!/usr/bin/env node' && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --format=cjs --banner:js='#!/usr/bin/env node'",
+    "build": "node esbuild.config.js",
     "start": "node dist/index.cjs",
     "dev": "pnpm build && node dist/index.cjs",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "publish": "pnpm build && pnpm publish --access public --provenance"
+    "publish": "pnpm build && pnpm publish --access public --provenance",
+    "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'"
   },
   "keywords": [],
   "author": "keyshade",
@@ -26,6 +27,8 @@
   "dependencies": {
     "@clack/core": "^0.3.4",
     "@clack/prompts": "^0.7.0",
+    "@sentry/node": "^7.102.0",
+    "@sentry/profiling-node": "^7.102.0",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
@@ -47,6 +50,7 @@
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.14.10",
     "esbuild": "^0.24.2",
+    "esbuild-plugin-env": "^1.1.1",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "tsup": "^8.1.2"
   }

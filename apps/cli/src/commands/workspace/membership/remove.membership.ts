@@ -58,6 +58,9 @@ export default class RemoveUserCommand extends BaseCommand {
       Logger.info(`Email: ${emails}`)
     } else {
       Logger.error(`Failed to remove users: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to remove users.\n' + JSON.stringify(error))
+      }
     }
   }
 }
