@@ -55,7 +55,21 @@ export default class CreateProject extends BaseCommand {
       {
         short: '-e',
         long: '--environment <string...>',
-        description: 'Environment name(s) of the project. Default to Default'
+        description: `Should be in the format <name(mandatory)>[:<description>(optional)]
+
+Examples:
+ $ keyshade [...]
+ -> { name: "Default", description: ". . ." }
+
+ $ keyshade [...] -e "dev"
+ -> { name: "dev", description: NULL }
+
+ $ keyshade [...] -e "dev:sample env"
+ -> { name: "dev", description: "sample env" }
+
+ $ keyshade [...] -e " dev : surrounding blank spaces  "
+ -> { name: "dev", description: "surrounding blank spaces" }
+`
       }
     ]
   }
