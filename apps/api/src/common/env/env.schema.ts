@@ -47,7 +47,11 @@ const devSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GITHUB_CALLBACK_URL: z.string().optional(),
 
-  API_PORT: z.string().optional(),
+  API_PORT: z
+    .string()
+    .default('4200')
+    .transform((val) => parseInt(val, 10)),
+  DOMAIN: z.string().default('localhost'),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -57,15 +61,17 @@ const devSchema = z.object({
   GITLAB_CLIENT_SECRET: z.string().optional(),
   GITLAB_CALLBACK_URL: z.string().optional(),
 
-  SENTRY_DSN: z
+  SENTRY_API_DSN: z
     .string()
     .url({ message: 'SENTRY_DSN must be a valid URL' })
     .optional(),
-  SENTRY_ORG: z.string().optional(),
-  SENTRY_PROJECT: z.string().optional(),
-  SENTRY_TRACES_SAMPLE_RATE: sampleRateSchema('SENTRY_TRACES_SAMPLE_RATE'),
-  SENTRY_PROFILES_SAMPLE_RATE: sampleRateSchema('SENTRY_PROFILES_SAMPLE_RATE'),
-  SENTRY_ENV: z.string().optional(),
+  SENTRY_API_TRACES_SAMPLE_RATE: sampleRateSchema(
+    'SENTRY_API_TRACES_SAMPLE_RATE'
+  ),
+  SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
+    'SENTRY_API_PROFILES_SAMPLE_RATE'
+  ),
+  SENTRY_ENVIRONMENT: z.string().optional(),
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
@@ -108,7 +114,11 @@ const prodSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().min(1),
   GITHUB_CALLBACK_URL: z.string().min(1),
 
-  API_PORT: z.string().min(1),
+  API_PORT: z
+    .string()
+    .default('4200')
+    .transform((val) => parseInt(val, 10)),
+  DOMAIN: z.string().default('localhost'),
 
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
@@ -118,15 +128,17 @@ const prodSchema = z.object({
   GITLAB_CLIENT_SECRET: z.string().min(1),
   GITLAB_CALLBACK_URL: z.string().min(1),
 
-  SENTRY_DSN: z
+  SENTRY_API_DSN: z
     .string()
     .url({ message: 'SENTRY_DSN must be a valid URL' })
     .min(1),
-  SENTRY_ORG: z.string().min(1),
-  SENTRY_PROJECT: z.string().min(1),
-  SENTRY_TRACES_SAMPLE_RATE: sampleRateSchema('SENTRY_TRACES_SAMPLE_RATE'),
-  SENTRY_PROFILES_SAMPLE_RATE: sampleRateSchema('SENTRY_PROFILES_SAMPLE_RATE'),
-  SENTRY_ENV: z.string().min(1),
+  SENTRY_API_TRACES_SAMPLE_RATE: sampleRateSchema(
+    'SENTRY_API_TRACES_SAMPLE_RATE'
+  ),
+  SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
+    'SENTRY_API_PROFILES_SAMPLE_RATE'
+  ),
+  SENTRY_ENVIRONMENT: z.string().min(1),
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.string().min(1),

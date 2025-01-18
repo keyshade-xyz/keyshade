@@ -30,13 +30,24 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_API_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
         run: |
           # Build a docker container and push it to ACR
-          docker build -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest -f ./apps/api/Dockerfile .
+          docker build \
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} \
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest \
+            --build-arg SENTRY_ORG=$SENTRY_ORG \
+            --build-arg SENTRY_PROJECT=$SENTRY_PROJECT \
+            --build-arg SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN \
+            --build-arg SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
+            -f ./apps/api/Dockerfile .
           echo "Pushing image to ACR..."
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}
-          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:latest" >> $GITHUB_OUTPUT
+          echo "name=image::$ACR_REGISTRY_URL/$REPO`SITORY_NAME:latest" >> $GITHUB_OUTPUT
 
   migrate:
     runs-on: ubuntu-latest

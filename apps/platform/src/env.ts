@@ -1,7 +1,10 @@
 import { type TypeOf, z } from 'zod'
 
 const zodEnv = z.object({
-  NEXT_PUBLIC_BACKEND_URL: z.string().url()
+  NEXT_PUBLIC_BACKEND_URL: z.string().url(),
+  NEXT_PUBLIC_SENTRY_PLATFORM_DSN: z.string().url().optional(),
+  NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: z.number().optional(),
+  NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: z.number().optional()
 })
 
 declare global {

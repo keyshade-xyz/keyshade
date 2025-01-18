@@ -137,7 +137,6 @@
     "sourcemaps:web": "turbo run sourcemaps --filter=@keyshade/web",
     "sourcemaps:platform": "turbo run sourcemaps --filter=@keyshade/platform",
     "sourcemaps:cli": "turbo run sourcemaps --filter=@keyshade/cli",
-    "sourcemaps:packages": "turbo run sourcemaps --filter=@keyshade/api-client --filter=@keyshade/secret-scan --filter=@keyshade/schema",
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
     "docker:build:web": "docker build -t ks-web -f apps/web/Dockerfile .",
     "docker:run:api": "docker run --env-file .env --name ks-api --rm -p 4200:4200 ks-api",

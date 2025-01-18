@@ -52,13 +52,12 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
         run: |
-          # API, Platform, Web, Packages
+          # API, Platform, Web
           VERSION=`jq -r '.version' package.json`
           sentry-cli releases new \ 
             -p keysahde-api \ 
             -p keyshade-platform \
-            -p keyshade-web \
-            -p keyshade-packages \
+            -p keyshade-web 
             $VERSION
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e production
