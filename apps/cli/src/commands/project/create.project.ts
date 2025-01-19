@@ -42,7 +42,7 @@ export default class CreateProject extends BaseCommand {
       {
         short: '-k',
         long: '--store-private-key',
-        description: 'Store the private key in the project. Defaults to true'
+        description: 'Store the private key in the project.'
       },
       {
         short: '-a',
