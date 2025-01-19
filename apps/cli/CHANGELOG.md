@@ -48,3 +48,9 @@
 
 - Listing of environments and secrets made better
 - Fixed incorrect error message while listing projects
+
+## 2.4.0-stage
+
+### Minor Changes
+
+- Profile name creation now supports \_ and - characters
