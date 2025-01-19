@@ -14,17 +14,19 @@
 
 <div align = "center">
 
-[![keyshade.xyz Discord](https://dcbadge.vercel.app/api/server/m6TcpWBSdt)](https://discord.gg/acfN4k6dxU)
+<a href="https://discord.gg/acfN4k6dxU"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white" /></a>
 <a href="https://twitter.com/keyshade_xyz"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
 <a href="https://www.linkedin.com/company/keyshade-xyz/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
 
 </div>
 
-<p align="center>
+<div align="center>
+    
+<a href="https://www.producthunt.com/posts/keyshade?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-keyshade" target="_blank">
+<img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=436664&theme=light" alt="keyshade - Manage&#0032;all&#0032;your&#0032;secrets&#0032;securely | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+</a>
 
-<a href="https://www.producthunt.com/posts/keyshade?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-keyshade" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=436664&theme=light" alt="keyshade - Manage&#0032;all&#0032;your&#0032;secrets&#0032;securely | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-
-</p>
+</div>
 
 ---
 
