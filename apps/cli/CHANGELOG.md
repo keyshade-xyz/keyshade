@@ -48,3 +48,15 @@
 
 - Listing of environments and secrets made better
 - Fixed incorrect error message while listing projects
+
+## 2.4.0-stage
+
+### Minor Changes
+
+- Profile name creation now supports \_ and - characters
+- Polished the README file
+- Support to specify environment name and description while creating a project
+
+## Patches
+
+- Fixed error when the CLI won't create `.keyshade` folder while initializing profiles on new devices

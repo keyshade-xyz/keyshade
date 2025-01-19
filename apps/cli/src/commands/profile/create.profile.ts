@@ -106,8 +106,8 @@ export default class CreateProfile extends BaseCommand {
       name: z
         .string()
         .regex(
-          /^[a-zA-Z0-9]+$/,
-          'Name must contain only letters and numbers without spaces.'
+          /^[a-zA-Z0-9_-]+$/,
+          'Name must contain only letters, numbers, hyphens, and underscores without spaces.'
         ),
       apiKey: z
         .string()
