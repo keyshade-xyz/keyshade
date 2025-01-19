@@ -60,3 +60,4 @@
 ## Patches
 
 - Fixed error when the CLI won't create `.keyshade` folder while initializing profiles on new devices
+- Projects always had `--store-private-key` set to true despite providing a false value. Fixed this.
