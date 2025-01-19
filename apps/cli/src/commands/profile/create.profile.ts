@@ -82,7 +82,13 @@ export default class CreateProfile extends BaseCommand {
   }> {
     let { name, apiKey, baseUrl, setDefault, enableMetrics } = options
 
-    if (!name && !apiKey && !baseUrl && setDefault === undefined && enableMetrics === undefined) {
+    if (
+      !name &&
+      !apiKey &&
+      !baseUrl &&
+      setDefault === undefined &&
+      enableMetrics === undefined
+    ) {
       name = await text({
         message: 'Enter the name of the profile',
         placeholder: 'work'
@@ -93,10 +99,11 @@ export default class CreateProfile extends BaseCommand {
         placeholder: 'ks_************'
       })
 
-      baseUrl = await text({
-        message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
-        placeholder: API_BASE_URL
-      }) || API_BASE_URL
+      baseUrl =
+        (await text({
+          message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
+          placeholder: API_BASE_URL
+        })) || API_BASE_URL
 
       setDefault = await confirm({
         message: 'Set the profile as the default profile?',
@@ -123,10 +130,11 @@ export default class CreateProfile extends BaseCommand {
       }
 
       if (baseUrl === undefined) {
-        baseUrl = await text({
-          message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
-          placeholder: API_BASE_URL
-        }) || API_BASE_URL
+        baseUrl =
+          (await text({
+            message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
+            placeholder: API_BASE_URL
+          })) || API_BASE_URL
       }
 
       if (setDefault === undefined) {
@@ -138,7 +146,8 @@ export default class CreateProfile extends BaseCommand {
 
       if (enableMetrics === undefined) {
         enableMetrics = await confirm({
-          message: 'Should keyshade collect anonymous metrics for development? (Default: No)',
+          message:
+            'Should keyshade collect anonymous metrics for development? (Default: No)',
           initialValue: false
         })
       }
