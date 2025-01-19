@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://keyshade.xyz/">
-    <img src="https://github.com/user-attachments/assets/c99365d8-780d-4e47-8ecf-fd81305d63ee">
+    <img src="https://github.com/user-attachments/assets/a40b8d80-f55f-43d1-bc12-3363f320dabc" />
   </a>
 </div>
 
@@ -25,7 +25,28 @@
 
 </div>
 
+---
+
+> ⚠️ Warning: This is a closed alpha version and is not intended for public use at this time.
+
+---
+
 # Keyshade Command Line Inteface
 
 Keyshade CLI is a powerful command-line tool for managing secrets and configuration in your projects. Designed for developers, it helps you detect secret sprawl, securely manage sensitive information, and integrate seamlessly into your development workflow.
 
+## Features
+- **Secret Sprawl Detection**: Identify and prevent sensitive data leaks.
+- **Live Secret Update**: Instantly propagate secret changes across your applications without redeployment.
+- **Secrets Management**: Securely store, retrieve, and rotate secrets.
+- **Full Platform Parity**: Perform almost everything with the CLI that you can do with the Keyshade platform.
+
+## Installation
+Install Keyshade CLI using npm:
+```sh
+npm install -g @keyshade/cli
+```
+Verify the installation using:
+```sh
+keyshade --help
+```
