@@ -61,7 +61,10 @@ export default function CreateProjectDialogue(): JSX.Element {
       const projectData = {
         ...newProjectData,
         workspaceSlug: selectedWorkspace.slug,
-        environments: newProjectData.environments?.filter(env => env.name.trim() !== '') || []
+        environments:
+          newProjectData.environments?.filter(
+            (env) => env.name.trim() !== ''
+          ) || []
       }
 
       const { data, error, success } =
