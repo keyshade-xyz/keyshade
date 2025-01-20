@@ -171,12 +171,13 @@ export class WorkspaceService {
     user: User,
     workspaceSlug: Workspace['slug']
   ): Promise<Workspace> {
-    const workspace = await this.authorityCheckerService.checkAuthorityOverWorkspace({
-      userId: user.id,
-      entity: { slug: workspaceSlug },
-      authorities: [Authority.READ_USERS],
-      prisma: this.prisma
-    })
+    const workspace =
+      await this.authorityCheckerService.checkAuthorityOverWorkspace({
+        userId: user.id,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_USERS],
+        prisma: this.prisma
+      })
 
     return {
       ...workspace,
