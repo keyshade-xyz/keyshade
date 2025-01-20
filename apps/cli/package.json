@@ -20,7 +20,22 @@
     "lint": "eslint \"src/**/*.ts\" --fix",
     "publish": "pnpm build && pnpm publish --access public --provenance"
   },
-  "keywords": [],
+  "keywords": [
+    "keyshade",
+    "keyshade cli",
+    "secret",
+    "secrets",
+    "secret management",
+    "secret manager",
+    "config management",
+    "config manager",
+    "secret management tool",
+    "config management tool",
+    "configuration",
+    "devsecops",
+    "secret scanning",
+    "secret detection"
+  ],
   "author": "keyshade",
   "license": "MPL-2.0",
   "dependencies": {
