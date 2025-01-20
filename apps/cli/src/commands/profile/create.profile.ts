@@ -128,29 +128,6 @@ export default class CreateProfile extends BaseCommand {
           placeholder: 'ks_************'
         })
       }
-
-      if (baseUrl === undefined) {
-        baseUrl =
-          (await text({
-            message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
-            placeholder: API_BASE_URL
-          })) || API_BASE_URL
-      }
-
-      if (setDefault === undefined) {
-        setDefault = await confirm({
-          message: 'Set the profile as the default profile? (Default: No)',
-          initialValue: false
-        })
-      }
-
-      if (enableMetrics === undefined) {
-        enableMetrics = await confirm({
-          message:
-            'Should keyshade collect anonymous metrics for development? (Default: No)',
-          initialValue: false
-        })
-      }
     }
 
     const inputSchema = z.object({
