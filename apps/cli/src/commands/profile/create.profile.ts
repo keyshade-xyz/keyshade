@@ -82,7 +82,13 @@ export default class CreateProfile extends BaseCommand {
   }> {
     let { name, apiKey, baseUrl, setDefault, enableMetrics } = options
 
-    if (!name && !apiKey && !baseUrl && setDefault == null && enableMetrics == null) {
+    if (
+      !name &&
+      !apiKey &&
+      !baseUrl &&
+      setDefault == null &&
+      enableMetrics == null
+    ) {
       name = await text({
         message: 'Enter the name of the profile',
         placeholder: 'work'
