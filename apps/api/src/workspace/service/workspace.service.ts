@@ -171,12 +171,17 @@ export class WorkspaceService {
     user: User,
     workspaceSlug: Workspace['slug']
   ): Promise<Workspace> {
-    return await this.authorityCheckerService.checkAuthorityOverWorkspace({
+    const workspace = await this.authorityCheckerService.checkAuthorityOverWorkspace({
       userId: user.id,
       entity: { slug: workspaceSlug },
       authorities: [Authority.READ_USERS],
       prisma: this.prisma
     })
+
+    return {
+      ...workspace,
+      isDefault: workspace.isDefault && workspace.ownerId == user.id
+    }
   }
 
   /**
@@ -241,7 +246,13 @@ export class WorkspaceService {
       search
     })
 
-    return { items, metadata }
+    return {
+      items: items.map((item) => ({
+        ...item,
+        isDefault: item.isDefault && item.ownerId == user.id
+      })),
+      metadata
+    }
   }
 
   /**
