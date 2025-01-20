@@ -49,10 +49,13 @@ export default abstract class BaseCommand {
             }
 
             try {
-              await ControllerInstance.getInstance().appController.health(this.headers)
-            }
-            catch {
-              throw new Error(`Could not connect to the server: ${this.baseUrl}.`)
+              await ControllerInstance.getInstance().appController.health(
+                this.headers
+              )
+            } catch {
+              throw new Error(
+                `Could not connect to the server: ${this.baseUrl}.`
+              )
             }
           }
 

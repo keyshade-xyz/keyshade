@@ -20,6 +20,10 @@ export default class ListWorkspace extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options }: CommandActionData): Promise<void> {
     Logger.info('Fetching all workspaces...')
 

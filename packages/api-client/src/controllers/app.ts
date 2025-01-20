@@ -7,9 +7,7 @@ export default class AppController {
     this.apiClient = new APIClient(this.backendURL)
   }
 
-  async health(
-    headers?: Record<string, string>
-  ): Promise<string> {
+  async health(headers?: Record<string, string>): Promise<string> {
     const response = await this.apiClient.get(`/api/health`, headers)
     return response.text()
   }
