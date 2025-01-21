@@ -833,4 +833,38 @@ export class SecretService {
       )
     }
   }
+
+  /**
+   * Generates a random value for the secret
+   * @returns a random value
+   */
+  private generateValue(): string {
+    const minLength = 20;
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const digits = "0123456789";
+    const specialChars = "!@#$%^&*";
+    const allChars = lowercase + uppercase + digits + specialChars;
+
+    // Ensure at least one character from each required set is included
+    let result = [
+        lowercase[Math.floor(Math.random() * lowercase.length)],
+        uppercase[Math.floor(Math.random() * uppercase.length)],
+        digits[Math.floor(Math.random() * digits.length)],
+        specialChars[Math.floor(Math.random() * specialChars.length)],
+    ];
+
+    // Fill the rest of the string to meet the minimum length
+    while (result.length < minLength) {
+        result.push(allChars[Math.floor(Math.random() * allChars.length)]);
+    }
+
+    // Shuffle the result to randomize the order
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+
+    return result.join('');
+  }
 }
