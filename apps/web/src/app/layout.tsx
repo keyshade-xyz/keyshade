@@ -87,9 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>{children}</body>
-      <GoogleAnalytics
-        gaId={gaId}
-      />
+      <GoogleAnalytics gaId={gaId} />
     </html>
   )
 }
