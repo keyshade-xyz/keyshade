@@ -31,6 +31,10 @@ export default class CreateWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options }: CommandActionData): Promise<void> {
     const { name, icon } = await this.parseInput(options)
 

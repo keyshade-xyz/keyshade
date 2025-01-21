@@ -57,6 +57,7 @@
 - Polished the README file
 - Support to specify environment name and description while creating a project
 - Profile creation prompts users for all values if no option is set and shows default values
+- Commands invoking API endpoints first check if the backend is reachable before executing the command
 
 ## Patches
 
