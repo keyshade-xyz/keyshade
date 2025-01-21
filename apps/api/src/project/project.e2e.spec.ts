@@ -1416,7 +1416,7 @@ describe('Project Controller Tests', () => {
       expect(devEnvironment.name).toBe(environment.name)
 
       expect(defaultEnvironment).toBeDefined()
-      expect(defaultEnvironment.name).toBe('Default')
+      expect(defaultEnvironment.name).toBe('default')
     })
 
     it('should only copy new environments, secrets and variables if sync is not hard', async () => {
