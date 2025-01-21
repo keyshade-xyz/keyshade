@@ -49,7 +49,7 @@
 - Listing of environments and secrets made better
 - Fixed incorrect error message while listing projects
 
-## 2.4.0-stage
+## 2.4.0
 
 ### Minor Changes
 
