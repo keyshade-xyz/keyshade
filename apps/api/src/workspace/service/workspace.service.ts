@@ -181,7 +181,7 @@ export class WorkspaceService {
 
     return {
       ...workspace,
-      isDefault: workspace.isDefault && workspace.ownerId == user.id
+      isDefault: workspace.isDefault && workspace.ownerId === user.id
     }
   }
 
@@ -250,7 +250,7 @@ export class WorkspaceService {
     return {
       items: items.map((item) => ({
         ...item,
-        isDefault: item.isDefault && item.ownerId == user.id
+        isDefault: item.isDefault && item.ownerId === user.id
       })),
       metadata
     }
