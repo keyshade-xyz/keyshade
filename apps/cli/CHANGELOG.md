@@ -56,6 +56,7 @@
 - Profile name creation now supports \_ and - characters
 - Polished the README file
 - Support to specify environment name and description while creating a project
+- Profile creation prompts users for all values if no option is set and shows default values
 
 ## Patches
 

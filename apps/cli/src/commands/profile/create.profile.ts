@@ -82,24 +82,52 @@ export default class CreateProfile extends BaseCommand {
   }> {
     let { name, apiKey, baseUrl, setDefault, enableMetrics } = options
 
-    if (!name) {
+    if (
+      !name &&
+      !apiKey &&
+      !baseUrl &&
+      setDefault == null &&
+      enableMetrics == null
+    ) {
       name = await text({
         message: 'Enter the name of the profile',
         placeholder: 'work'
       })
-    }
 
-    if (!apiKey) {
       apiKey = await text({
         message: 'Enter the API key for the profile',
         placeholder: 'ks_************'
       })
-    }
 
-    if (!enableMetrics === undefined) {
-      enableMetrics = await confirm({
-        message: 'Should keyshade collect anonymous metrics for development?'
+      baseUrl =
+        (await text({
+          message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
+          placeholder: API_BASE_URL
+        })) || API_BASE_URL
+
+      setDefault = await confirm({
+        message: 'Set the profile as the default profile?',
+        initialValue: false
       })
+
+      enableMetrics = await confirm({
+        message: 'Should keyshade collect anonymous metrics for development?',
+        initialValue: false
+      })
+    } else {
+      if (!name) {
+        name = await text({
+          message: 'Enter the name of the profile',
+          placeholder: 'work'
+        })
+      }
+
+      if (!apiKey) {
+        apiKey = await text({
+          message: 'Enter the API key for the profile',
+          placeholder: 'ks_************'
+        })
+      }
     }
 
     const inputSchema = z.object({
