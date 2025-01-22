@@ -57,11 +57,19 @@ export default function CreateProjectDialogue(): JSX.Element {
   // Function to create a new project
   const createNewProject = useCallback(async () => {
     if (selectedWorkspace) {
-      newProjectData.workspaceSlug = selectedWorkspace.slug
+      // Filter out environments with empty names
+      const projectData = {
+        ...newProjectData,
+        workspaceSlug: selectedWorkspace.slug,
+        environments:
+          newProjectData.environments?.filter(
+            (env) => env.name.trim() !== ''
+          ) || []
+      }
 
       const { data, error, success } =
         await ControllerInstance.getInstance().projectController.createProject(
-          newProjectData,
+          projectData,
           {}
         )
 

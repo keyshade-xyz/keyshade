@@ -41,6 +41,10 @@ export default class RollbackVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
     const { environment, version } = await this.parseInput(options)

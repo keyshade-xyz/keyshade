@@ -29,6 +29,7 @@ export const fetchProfileConfig = async (): Promise<ProfileConfig> => {
   const path = getProfileConfigurationFilePath()
 
   if (!existsSync(path)) {
+    await ensureDirectoryExists(path)
     await writeFile(path, '{}', 'utf8')
   }
 

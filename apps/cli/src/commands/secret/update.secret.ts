@@ -52,6 +52,10 @@ export default class UpdateSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
 

@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["NEXT_PUBLIC_BACKEND_URL"]
+      "env": ["NEXT_PUBLIC_BACKEND_URL", "NEXT_RUNTIME"]
     },
     "build#cli": {
       "dependsOn": ["build#api-client"]
