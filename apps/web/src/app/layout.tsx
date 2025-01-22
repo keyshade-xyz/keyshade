@@ -78,16 +78,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }): React.JSX.Element {
-  const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID
-
-  if (!gaId || gaId === '') {
-    throw new Error("Missing 'NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID'")
-  }
 
   return (
     <html lang="en">
       <body>{children}</body>
-      <GoogleAnalytics gaId={gaId} />
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID} />
     </html>
   )
 }
