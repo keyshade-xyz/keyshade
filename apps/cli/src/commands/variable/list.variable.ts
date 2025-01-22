@@ -24,6 +24,10 @@ export default class ListVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { data, error, success } =

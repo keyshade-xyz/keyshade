@@ -1,3 +1,4 @@
+import AppController from '@api-client/controllers/app'
 import EnvironmentController from '@api-client/controllers/environment'
 import SecretController from '@api-client/controllers/secret'
 import EventController from '@api-client/controllers/event'
@@ -10,6 +11,7 @@ import WorkspaceMembershipController from '@api-client/controllers/workspace-mem
 import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
 export {
+  AppController,
   EnvironmentController,
   SecretController,
   EventController,

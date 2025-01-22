@@ -49,7 +49,7 @@
 - Listing of environments and secrets made better
 - Fixed incorrect error message while listing projects
 
-## 2.4.0-stage
+## 2.4.0
 
 ### Minor Changes
 
@@ -57,6 +57,7 @@
 - Polished the README file
 - Support to specify environment name and description while creating a project
 - Profile creation prompts users for all values if no option is set and shows default values
+- Commands invoking API endpoints first check if the backend is reachable before executing the command
 
 ## Patches
 

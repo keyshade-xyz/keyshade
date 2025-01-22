@@ -40,6 +40,10 @@ export default class UpdateWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
     const { name, icon } = options

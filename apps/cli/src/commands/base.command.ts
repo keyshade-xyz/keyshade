@@ -41,10 +41,22 @@ export default abstract class BaseCommand {
           const globalOptions = program.optsWithGlobals()
           await this.setGlobalContextFields(globalOptions)
 
-          if (this.canMakeHttpRequests() && !this.apiKey) {
-            throw new Error(
-              'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
-            )
+          if (this.canMakeHttpRequests()) {
+            if (!this.apiKey) {
+              throw new Error(
+                'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
+              )
+            }
+
+            try {
+              await ControllerInstance.getInstance().appController.health(
+                this.headers
+              )
+            } catch {
+              throw new Error(
+                `Could not connect to the server: ${this.baseUrl}.`
+              )
+            }
           }
 
           const commandOptions = data[argsCount]
