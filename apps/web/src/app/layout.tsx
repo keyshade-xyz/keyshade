@@ -78,11 +78,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }): React.JSX.Element {
-
   return (
     <html lang="en">
       <body>{children}</body>
-      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID} />
+      <GoogleAnalytics
+        gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID}
+      />
     </html>
   )
 }
