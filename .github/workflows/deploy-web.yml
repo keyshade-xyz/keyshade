@@ -30,9 +30,14 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
+          NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID }}
         run: |
           # Build a docker container and push it to ACR
-          docker build -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest -f ./apps/web/Dockerfile .
+          docker build \ 
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6} \
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest \
+            --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=$NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID \
+            -f ./apps/web/Dockerfile .
           echo "Pushing image to ACR..."
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:latest
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:${GITHUB_SHA::6}

@@ -13,6 +13,7 @@ The environmental variables are split into two parts: Required and Optional vari
 Here's the description of the environment variables used in the project. You can find the values for these variables in \`.env.example\`.
 
 ### Required
+
 - **DATABASE_URL**: The URL of the PSQL database to connect to. This is used by the [Prisma Client](https://www.prisma.io/docs/orm/prisma-client) to connect to the database.
 - **SMTP_HOST**: This is used to send out emails from the backend.&#x20;
 - **SMTP_PORT:** The SMTP port as specified by your SMTP provider.
@@ -27,7 +28,6 @@ Here's the description of the environment variables used in the project. You can
 - **FROM_EMAIL**: The display of the email sender title.
 
 ### Optional
-
 
 - **GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your GitHub account's developer section. Please note that it's not mandatory, until and unless you want to support GitHub OAuth.
 - **GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your Google account's cloud platform. Please note that it's not mandatory, until and unless you want to support Google OAuth.
@@ -44,4 +44,4 @@ Here's the description of the environment variables used in the project. You can
 - **MINIO_SECRET_KEY**: The secret key to the Minio server.
 - **MINIO_USE_SSL**: Whether to use SSL for the Minio connection or not.
 - **MINIO_BUCKET_NAME**: The name of the bucket in the Minio server where the files are stored.
-
+- **NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID**: The measurement ID of the Google Analytics account.
