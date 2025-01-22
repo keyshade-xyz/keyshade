@@ -65,7 +65,7 @@ export default function Page() {
 
         <p>
           Next, look for the error on the{" "}
-          <a href="https://keyshade.sentry.io/issues/?project=4508642331262976">Issues Page</a>.
+          <a href="https://keyshade.sentry.io/issues/?project=4508670151032832">Issues Page</a>.
         </p>
         <p style={{ marginTop: "24px" }}>
           For more information, see{" "}

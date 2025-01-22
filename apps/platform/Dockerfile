@@ -23,10 +23,16 @@ COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --no-cache --ignore-scripts
 
 # Build the project
+ARG SENTRY_ORG=${SENTRY_ORG}
+ARG SENTRY_PROJECT=${SENTRY_PROJECT}
+ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN pnpm build:platform
+RUN pnpm build:platform && \
+	pnpm sourcemaps:platform
 
 FROM base AS runner
 WORKDIR /app
@@ -49,6 +55,5 @@ ENV NEXT_SHARP_PATH=/app/apps/platform/.next/sharp
 EXPOSE 3000
 # keyshade-ignore
 ENV HOSTNAME "0.0.0.0"
-
 
 CMD node apps/platform/server.js

@@ -116,7 +116,8 @@ export default class CreateSecret extends BaseCommand {
       }
       entry.split(' ').forEach((pair) => {
         const [key, value] = pair.split('=')
-        entryObj[key] = value
+        entryObj.environmentSlug = value
+        entryObj.value = key
       })
       return entryObj
     })
