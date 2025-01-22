@@ -61,6 +61,10 @@ export default class CreateRoleCommand extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
     const {

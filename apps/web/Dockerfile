@@ -1,5 +1,6 @@
-FROM node:20-alpine AS base
+ARG NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID
 
+FROM node:20-alpine AS base
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat

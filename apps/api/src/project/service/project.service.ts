@@ -162,9 +162,9 @@ export class ProjectService {
       createEnvironmentOps.push(
         this.prisma.environment.create({
           data: {
-            name: 'Default',
+            name: 'default',
             slug: await generateEntitySlug(
-              'Default',
+              'default',
               'ENVIRONMENT',
               this.prisma
             ),

@@ -36,6 +36,10 @@ export default class GetSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { decryptValue } = await this.parseInput(options)
