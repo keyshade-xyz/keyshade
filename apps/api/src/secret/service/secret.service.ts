@@ -787,7 +787,7 @@ export class SecretService {
     )
 
     return { items, metadata }
-  }
+  }  
 
   /**
    * Checks if a secret with a given name already exists in the project
@@ -839,7 +839,7 @@ export class SecretService {
    * @returns a random value
    */
   private generateValue(): string {
-    const minLength = 20;
+    const length = 20;
     const lowercase = "abcdefghijklmnopqrstuvwxyz";
     const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const digits = "0123456789";
@@ -855,7 +855,7 @@ export class SecretService {
     ];
 
     // Fill the rest of the string to meet the minimum length
-    while (result.length < minLength) {
+    while (result.length < length) {
         result.push(allChars[Math.floor(Math.random() * allChars.length)]);
     }
 
