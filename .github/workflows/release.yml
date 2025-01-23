@@ -400,6 +400,7 @@ jobs:
     name: Sentry CLI
     needs: [release, publish-cli]
     runs-on: ubuntu-latest
+    if: ${{ needs.publish-cli.outputs.skip_publish != 'true' }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
