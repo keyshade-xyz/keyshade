@@ -6,8 +6,7 @@
     "dev": "env-cmd -f ../../.env --silent next dev -p 6969",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs",
-    "sourcemaps": "sentry-cli sourcemaps inject ./.next && sentry-cli sourcemaps upload ./.next  || echo 'Failed to upload source maps to Sentry'"
+    "lint": "eslint \"src/**/*.ts\" --fix --config .eslintrc.cjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",

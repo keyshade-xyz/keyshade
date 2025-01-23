@@ -18,8 +18,7 @@
     "start": "node dist/index.cjs",
     "dev": "pnpm build && node dist/index.cjs",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "publish": "pnpm build && pnpm publish --access public --provenance",
-    "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'"
+    "publish": "pnpm build && pnpm publish --access public --provenance"
   },
   "keywords": [
     "keyshade",
