@@ -13,6 +13,7 @@ jobs:
     outputs:
       environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
       latestTag: ${{ github.ref == 'refs/heads/main' && 'latest' || 'experimental' }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,7 +67,9 @@ jobs:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          testVersion: ${{ needs.release.outputs.version }}
         run: |
+          echo $testVersion
           VERSION=`jq -r '.version' package.json`
           # Build a docker container and push it to ACR
           docker build \
