@@ -1,4 +1,4 @@
-name: Semantic Release
+name: Release and deploy
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     outputs:
       environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
       latestTag: ${{ github.ref == 'refs/heads/main' && 'latest' || 'experimental' }}
-      version: $((jq -r '.version' package.json))
+      version: ${{ steps.release.outputs.new_release_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,6 +33,7 @@ jobs:
         run: pnpm i
 
       - name: Release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           GITHUB_CLIENT_ID: dummy
@@ -122,7 +123,7 @@ jobs:
           pnpm db:deploy-migrations
 
   release-sentry-api:
-    name: Release Sentry
+    name: Sentry API
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     needs: [deploy-api, release]
@@ -214,6 +215,7 @@ jobs:
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
   release-sentry-platform:
+    name: Sentry Platform
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     needs: [deploy-api, deploy-web, deploy-platform, release]
@@ -224,7 +226,7 @@ jobs:
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
 
-      - name: Release Sentry
+      - name: Sentry Release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
@@ -243,7 +245,7 @@ jobs:
   deploy-web:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
-    name: Build and push Web docker image for release
+    name: Deploy Web
     needs: release
 
     steps:
@@ -307,7 +309,7 @@ jobs:
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
   sentry-release-web:
-    name: Sentry Release
+    name: Sentry Web
     needs: [release, deploy-web]
     runs-on: ubuntu-latest
     steps:
@@ -355,7 +357,7 @@ jobs:
       - name: Check versions
         id: check-versions
         run: |
-          current_version=${{ needs.release.outputs.version }}
+          current_version=$(jq -r '.version' apps/cli/package.json)
           published_version=$(npm show @keyshade/cli version)
 
           if [ "$current_version" == "$published_version" ]; then
@@ -390,7 +392,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  sentry-release:
+  sentry-release-cli:
+    name: Sentry CLI
     needs: release
     runs-on: ubuntu-latest
     steps:
