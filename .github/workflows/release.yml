@@ -67,10 +67,9 @@ jobs:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
-          testVersion: ${{ needs.release.outputs.version }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          echo $testVersion
-          VERSION=`jq -r '.version' package.json`
+          echo "VERSION: $VERSION" >> $testVersion
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -149,12 +148,12 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_API_PROJECT }}
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          RELEASE=`jq -r '.version' package.json`
-          sentry-cli releases new $RELEASE
-          sentry-cli releases set-commits --auto $RELEASE
-          sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
-          sentry-cli releases files $RELEASE upload-sourcemaps apps/api/.dist \
+          sentry-cli releases new $VERSION
+          sentry-cli releases set-commits --auto $VERSION
+          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+          sentry-cli releases files $VERSION upload-sourcemaps apps/api/.dist \
             --validate \
             --rewrite
 
@@ -182,13 +181,13 @@ jobs:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: platform
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          VERSION: ${{ needs.release.outputs.version }}
           NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_SENTRY_PLATFORM_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_PLATFORM_DSN }}
           NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
-          VERSION=`jq -r '.version' package.json`
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -239,12 +238,12 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PLATFORM_PROJECT }}
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          RELEASE=`jq -r '.version' package.json`
-          sentry-cli releases new $RELEASE
-          sentry-cli releases set-commits --auto $RELEASE
-          sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
-          sentry-cli releases files $RELEASE upload-sourcemaps apps/platform/.next/static \
+          sentry-cli releases new $VERSION
+          sentry-cli releases set-commits --auto $VERSION
+          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
@@ -273,13 +272,13 @@ jobs:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          VERSION: ${{ needs.release.outputs.version }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID }}
           NEXT_PUBLIC_SENTRY_WEB_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_WEB_DSN }}
           NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
-          VERSION=`jq -r '.version' package.json`
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -333,12 +332,12 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_WEB_PROJECT }}
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          RELEASE=`jq -r '.version' package.json`
-          sentry-cli releases new $RELEASE
-          sentry-cli releases set-commits --auto $RELEASE
-          sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
-          sentry-cli releases files $RELEASE upload-sourcemaps apps/web/.next/static \
+          sentry-cli releases new $VERSION
+          sentry-cli releases set-commits --auto $VERSION
+          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+          sentry-cli releases files $VERSION upload-sourcemaps apps/web/.next/static \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
