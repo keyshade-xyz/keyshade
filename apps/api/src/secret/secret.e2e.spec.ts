@@ -636,6 +636,7 @@ describe('Secret Controller Tests', () => {
         },
         createdAt: secret1.createdAt.toISOString(),
         updatedAt: secret1.updatedAt.toISOString(),
+        rotateAfter: secret1.rotateAfter,
         rotateAt: secret1.rotateAt.toISOString()
       })
       expect(values.length).toBe(1)
@@ -686,6 +687,7 @@ describe('Secret Controller Tests', () => {
       expect(response.json().items.length).toBe(1)
 
       const { secret, values } = response.json().items[0]
+
       expect(secret).toStrictEqual({
         id: secret1.id,
         name: secret1.name,
@@ -699,6 +701,7 @@ describe('Secret Controller Tests', () => {
         },
         createdAt: secret1.createdAt.toISOString(),
         updatedAt: expect.any(String),
+        rotateAfter: secret1.rotateAfter,
         rotateAt: secret1.rotateAt.toISOString()
       })
       expect(values.length).toBe(1)
@@ -752,6 +755,7 @@ describe('Secret Controller Tests', () => {
         },
         createdAt: secret1.createdAt.toISOString(),
         updatedAt: secret1.updatedAt.toISOString(),
+        rotateAfter: secret1.rotateAfter,
         rotateAt: secret1.rotateAt.toISOString()
       })
       expect(values.length).toBe(1)
@@ -1112,6 +1116,112 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+  })
+
+  describe('Rotate Secrets Tests', () => {
+    it('should have not created a new secret version when there is no rotation defined', async () => {
+      const secretWithoutRotation = (
+        await secretService.createSecret(
+          user1,
+          {
+            name: 'Secret',
+            note: 'Secret note',
+            rotateAfter: 'never',
+            entries: [
+              {
+                environmentSlug: environment1.slug,
+                value: 'Secret value'
+              }
+            ]
+          },
+          project1.slug
+        )
+      ).secret as Secret
+
+      await secretService.rotateSecrets()
+
+      const secretVersion = await prisma.secretVersion.findFirst({
+        where: {
+          secretId: secretWithoutRotation.id,
+          environmentId: environment1.id
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      expect(secretVersion).toBeDefined()
+      expect(secretVersion.version).toBe(1)
+      expect(secretVersion.environmentId).toBe(environment1.id)
+    })
+
+    it('should have not created a new secret version when rotation is not due', async () => {
+      await secretService.rotateSecrets()
+
+      const secretVersion = await prisma.secretVersion.findFirst({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      expect(secretVersion).toBeDefined()
+      expect(secretVersion.version).toBe(1)
+      expect(secretVersion.environmentId).toBe(environment1.id)
+    })
+
+    it('should have created a new secret version when rotation is due', async () => {
+      const currentTime = new Date()
+
+      currentTime.setHours(currentTime.getHours() + secret1.rotateAfter)
+
+      await secretService.rotateSecrets(currentTime)
+
+      const secretVersion = await prisma.secretVersion.findFirst({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        orderBy: {
+          version: 'desc'
+        },
+        take: 1
+      })
+
+      expect(secretVersion).toBeDefined()
+      expect(secretVersion.version).toBe(2)
+      expect(secretVersion.environmentId).toBe(environment1.id)
+    })
+
+    it('should have created a SECRET_UPDATED event when rotation is due', async () => {
+      const currentTime = new Date()
+
+      currentTime.setHours(currentTime.getHours() + secret1.rotateAfter)
+
+      await secretService.rotateSecrets(currentTime)
+
+      const events = await fetchEvents(
+        eventService,
+        user1,
+        workspace1.slug,
+        EventSource.SECRET
+      )
+
+      const event = events.items[0]
+
+      expect(event.source).toBe(EventSource.SECRET)
+      expect(event.triggerer).toBe(EventTriggerer.SYSTEM)
+      expect(event.severity).toBe(EventSeverity.INFO)
+      expect(event.type).toBe(EventType.SECRET_UPDATED)
+      expect(event.workspaceId).toBe(workspace1.id)
+      expect(event.itemId).toBe(secret1.id)
+      expect(event.title).toBe('Secret rotated')
     })
   })
 })

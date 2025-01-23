@@ -10,6 +10,7 @@ import {
   Authority,
   Environment,
   EventSource,
+  EventTriggerer,
   EventType,
   Project,
   Secret,
@@ -33,7 +34,11 @@ import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
-import { getSecretWithValues, SecretWithValues } from '@/common/secret'
+import {
+  getSecretWithValues,
+  generateSecretValue,
+  SecretWithValues
+} from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SecretWithProject } from '../secret.types'
 
@@ -221,8 +226,12 @@ export class SecretService {
             ? await generateEntitySlug(dto.name, 'SECRET', this.prisma)
             : undefined,
           note: dto.note,
-          rotateAt: addHoursToDate(dto.rotateAfter),
-          rotateAfter: +dto.rotateAfter,
+          ...(dto.rotateAfter
+            ? {
+                rotateAt: addHoursToDate(dto.rotateAfter),
+                rotateAfter: +dto.rotateAfter
+              }
+            : {}),
           lastUpdatedById: user.id
         },
         select: {
@@ -793,11 +802,13 @@ export class SecretService {
 
   /**
    * Rotate values of secrets that have reached their rotation time
+   * @param currentTime the current time
    */
   @Cron(CronExpression.EVERY_HOUR)
-  async rotateSecretsValues() {
+  async rotateSecrets(currentTime?: Date): Promise<void> {
     // Fetch all secrets that have reached their rotation time
-    const currentTime = new Date()
+    currentTime = currentTime ?? new Date()
+
     const secrets = await this.prisma.secret.findMany({
       where: {
         rotateAt: {
@@ -810,12 +821,12 @@ export class SecretService {
     })
 
     // Rotate secrets
-    await Promise.all(secrets.map((secret) => this.rotateSecretValues(secret)))
+    await Promise.all(secrets.map((secret) => this.rotateSecret(secret)))
 
     this.logger.log('Secrets rotated')
   }
 
-  private async rotateSecretValues(secret: SecretWithProject): Promise<void> {
+  private async rotateSecret(secret: SecretWithProject): Promise<void> {
     const op = []
 
     // Update the secret
@@ -825,7 +836,7 @@ export class SecretService {
           id: secret.id
         },
         data: {
-          rotateAt: addHoursToDate(secret.rotateAfter),
+          rotateAt: addHoursToDate(secret.rotateAfter)
         },
         select: {
           name: true
@@ -846,14 +857,14 @@ export class SecretService {
 
     // Create new versions for all environments
     for (const latestEnvironmentVersion of latestEnvironmentVersions) {
-      // Generate secret value
-      const secretValue = this.generateSecretValue()
-
       // Create the new version
       op.push(
         this.prisma.secretVersion.create({
           data: {
-            value: await encrypt(secret.project.publicKey, secretValue),
+            value: await encrypt(
+              secret.project.publicKey,
+              generateSecretValue()
+            ),
             version: latestEnvironmentVersion._max.version + 1,
             environmentId: latestEnvironmentVersion.environmentId,
             secretId: secret.id
@@ -895,10 +906,11 @@ export class SecretService {
 
     await createEvent(
       {
+        triggerer: EventTriggerer.SYSTEM,
         entity: secret,
         type: EventType.SECRET_UPDATED,
         source: EventSource.SECRET,
-        title: `Secret updated`,
+        title: `Secret rotated`,
         metadata: {
           secretId: secret.id,
           name: secret.name,
@@ -956,39 +968,5 @@ export class SecretService {
         `Cannot decrypt secret values as the project does not have a private key`
       )
     }
-  }
-
-  /**
-   * Generates a random value for the secret
-   * @returns a random value
-   */
-  private generateSecretValue(): string {
-    const length = 20;
-    const lowercase = "abcdefghijklmnopqrstuvwxyz";
-    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const digits = "0123456789";
-    const specialChars = "!@#$%^&*";
-    const allChars = lowercase + uppercase + digits + specialChars;
-
-    // Ensure at least one character from each required set is included
-    let result = [
-        lowercase[Math.floor(Math.random() * lowercase.length)],
-        uppercase[Math.floor(Math.random() * uppercase.length)],
-        digits[Math.floor(Math.random() * digits.length)],
-        specialChars[Math.floor(Math.random() * specialChars.length)],
-    ];
-
-    // Fill the rest of the string to meet the minimum length
-    while (result.length < length) {
-        result.push(allChars[Math.floor(Math.random() * allChars.length)]);
-    }
-
-    // Shuffle the result to randomize the order
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-    }
-
-    return result.join('');
   }
 }
