@@ -7,6 +7,7 @@ import {
 } from 'src/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
     return 'create'
@@ -71,6 +72,9 @@ export class CreateEnvironment extends BaseCommand {
       )
     } else {
       Logger.error(`Failed to create environment: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create environment.\n' + JSON.stringify(error))
+      }
     }
   }
 

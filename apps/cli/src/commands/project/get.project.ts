@@ -49,6 +49,9 @@ export default class GetProject extends BaseCommand {
       Logger.info(`Access Level: ${data.accessLevel}`)
     } else {
       Logger.error(`Failed fetching project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching projectt.\n' + JSON.stringify(error))
+      }
     }
   }
 }

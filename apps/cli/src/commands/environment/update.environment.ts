@@ -73,6 +73,9 @@ export class UpdateEnvironment extends BaseCommand {
       Logger.error(
         `Error updating Environment: ${error.message} (${error.statusCode})`
       )
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Error updating environment.\n' + JSON.stringify(error))
+      }
     }
   }
 }

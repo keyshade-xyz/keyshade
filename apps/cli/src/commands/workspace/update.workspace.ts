@@ -69,6 +69,9 @@ export default class UpdateWorkspace extends BaseCommand {
         Logger.info(`Is default workspace: ${data.isDefault}`)
       } else {
         Logger.error(`Failed updating workspace: ${error.message}`)
+        if (this.metricsEnabled && error?.statusCode === 500) {
+          Logger.report('Failed updating workspace.\n' + JSON.stringify(error))
+        }
       }
     } else {
       Logger.info('No data provided. Skipping update.')

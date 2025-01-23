@@ -14,7 +14,10 @@ const nextConfig = {
     return config
   },
   reactStrictMode: true,
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  eslint: {
+    ignoreDuringBuilds: true
+  }
 }
 
 module.exports = nextConfig

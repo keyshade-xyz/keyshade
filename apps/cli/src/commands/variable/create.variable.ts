@@ -80,6 +80,9 @@ export default class CreateVariable extends BaseCommand {
       Logger.info(`Updated at ${data.variable.updatedAt}`)
     } else {
       Logger.error(`Failed to create variable: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create variable.\n' + JSON.stringify(error))
+      }
     }
   }
 

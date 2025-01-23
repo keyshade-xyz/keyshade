@@ -23,7 +23,9 @@
       "dependsOn": ["build"],
       "inputs": ["dist/**"]
     },
-    "lint": {},
+    "lint": {
+      "env": ["NEXT_RUNTIME"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

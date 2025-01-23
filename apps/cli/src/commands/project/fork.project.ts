@@ -70,6 +70,9 @@ export default class ForkProject extends BaseCommand {
       Logger.info(`Updated at ${data.updatedAt}`)
     } else {
       Logger.error(`Failed to fork project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to fork project.\n' + JSON.stringify(error))
+      }
     }
   }
 }

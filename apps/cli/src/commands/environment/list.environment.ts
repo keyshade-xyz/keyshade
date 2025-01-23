@@ -60,6 +60,9 @@ export class ListEnvironment extends BaseCommand {
       })
     } else {
       Logger.error(`Failed to fetch environments: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to fetch environments.\n' + JSON.stringify(error))
+      }
     }
   }
 }

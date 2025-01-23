@@ -58,6 +58,9 @@ export default class CancelInvitationCommand extends BaseCommand {
       Logger.info(`Invitee: ${email}`)
     } else {
       Logger.error(`Failed to cancel invitation: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to cancel invitation.\n' + JSON.stringify(error))
+      }
     }
   }
 }

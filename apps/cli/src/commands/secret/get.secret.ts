@@ -13,7 +13,7 @@ export default class GetSecret extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Get all secrets under a project'
+    return 'get all secrets under a project and environment'
   }
 
   getArguments(): CommandArgument[] {
@@ -65,6 +65,11 @@ export default class GetSecret extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching secrets: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching secrets for project.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 
