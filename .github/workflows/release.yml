@@ -67,8 +67,6 @@ jobs:
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
         run: |
           VERSION=`jq -r '.version' package.json`
-          echo $VERSION
-          echo $LATEST_TAG
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -175,7 +173,6 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: platform
-          VERSION: ${{ needs.release.outputs.version }}
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_SENTRY_PLATFORM_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_PLATFORM_DSN }}
@@ -183,6 +180,7 @@ jobs:
           NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
+          VERSION=`jq -r '.version' package.json`
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -265,7 +263,6 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
-          VERSION: ${{ needs.release.outputs.version }}
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID }}
           NEXT_PUBLIC_SENTRY_WEB_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_WEB_DSN }}
@@ -273,6 +270,7 @@ jobs:
           NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
+          VERSION=`jq -r '.version' package.json`
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
