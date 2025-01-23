@@ -96,6 +96,7 @@ export class SecretService {
         slug: await generateEntitySlug(dto.name, 'SECRET', this.prisma),
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
+        rotateAfter: +dto.rotateAfter,
         versions: shouldCreateRevisions && {
           createMany: {
             data: await Promise.all(
@@ -218,9 +219,8 @@ export class SecretService {
             ? await generateEntitySlug(dto.name, 'SECRET', this.prisma)
             : undefined,
           note: dto.note,
-          rotateAt: dto.rotateAfter
-            ? addHoursToDate(dto.rotateAfter)
-            : undefined,
+          rotateAt: addHoursToDate(dto.rotateAfter),
+          rotateAfter: +dto.rotateAfter,
           lastUpdatedById: user.id
         },
         select: {

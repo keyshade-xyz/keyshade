@@ -371,14 +371,15 @@ model SecretVersion {
 }
 
 model Secret {
-  id        String          @id @default(cuid())
-  name      String
-  slug      String          @unique
-  versions  SecretVersion[] // Stores the versions of the secret
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  rotateAt  DateTime?
-  note      String?
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  versions    SecretVersion[] // Stores the versions of the secret
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  rotateAt    DateTime?
+  rotateAfter Int?
+  note        String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
