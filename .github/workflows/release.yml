@@ -136,6 +136,9 @@ jobs:
       - name: Install
         run: pnpm i
 
+      - name: Install Sentry CLI
+        run: npm i -g @sentry/cli
+
       - name: Sentry Release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
