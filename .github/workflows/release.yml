@@ -49,9 +49,9 @@ jobs:
         id: fetch-tag
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
-            version=`gh release list -L 1 --exclude-pre-releases --json tagName --jq ".[0].tagName"`
+            version=`gh release list -L 1 --exclude-pre-releases --json tagName --jq ".[0].tagName" | sed 's/^v//'`
           else
-            version=`gh release list -L 1 --json tagName --jq ".[0].tagName"`
+            version=`gh release list --json tagName --jq ".[].tagName" | grep "stage" | head -n 1 | sed 's/^v//'`
           fi
           echo "Working with version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
