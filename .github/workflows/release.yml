@@ -13,7 +13,7 @@ jobs:
     outputs:
       environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
       latestTag: ${{ github.ref == 'refs/heads/main' && 'latest' || 'experimental' }}
-      version: ${{ steps.release.outputs.version }}
+      version: ${{ steps.fetch-tag.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
