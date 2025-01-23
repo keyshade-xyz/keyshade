@@ -64,9 +64,11 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
-          VERSION: ${{ needs.release.outputs.version }}
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
         run: |
+          VERSION=`jq -r '.version' package.json`
+          echo $VERSION
+          echo $LATEST_TAG
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -144,8 +146,6 @@ jobs:
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
           RELEASE=`jq -r '.version' package.json`
-          echo "RELEASE: $RELEASE"
-          echo "ENVIRONMENT: $ENVIRONMENT"
           sentry-cli releases new $RELEASE
           sentry-cli releases set-commits --auto $RELEASE
           sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
