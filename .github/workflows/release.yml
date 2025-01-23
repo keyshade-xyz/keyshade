@@ -7,7 +7,6 @@ on:
       - develop
 
 jobs:
-  # ------------------------------ Release ------------------------------ #
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -43,8 +42,6 @@ jobs:
           JWT_SECRET: secret
         run: pnpm dlx semantic-release
 
-  # ------------------------------ API Deployment ------------------------------ #
-  ## --------------------------- Azure Deployment --------------------------- #
   deploy-api:
     needs: release
     runs-on: ubuntu-latest
@@ -101,7 +98,6 @@ jobs:
               --resource-group $API_CONTAINER_RG \
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
-  ## --------------------------- API Database Migrations --------------------------- ##
   migrate-api:
     name: Apply Database Migrations
     runs-on: ubuntu-latest
@@ -125,7 +121,6 @@ jobs:
           pnpm db:generate-types
           pnpm db:deploy-migrations
 
-  ## --------------------------- Sentry Release --------------------------- ##
   release-sentry-api:
     name: Release Sentry
     runs-on: ubuntu-latest
@@ -156,10 +151,6 @@ jobs:
             --validate \
             --rewrite
 
-  # ------------------------------- END API Deployment ------------------------------- #
-
-  # --------------------------- START Platform Deployment --------------------------- #
-  ## --------------------------- Azure Deployment --------------------------- #
   deploy-platform:
     needs: release
     runs-on: ubuntu-latest
@@ -222,8 +213,6 @@ jobs:
               --resource-group $PLATFORM_CONTAINER_RG \
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
-  ## --------------------------- Sentry Release --------------------------- ##
-
   release-sentry-platform:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
@@ -251,10 +240,6 @@ jobs:
             --validate \
             --rewrite
 
-  # ------------------------------- END Platform Deployment ------------------------------- #
-
-  # ------------------------------- START Web Deployment ------------------------------- #
-  ## ------------------------------ Azure Deployment ------------------------------ ##
   deploy-web:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
@@ -321,7 +306,6 @@ jobs:
               --resource-group $WEB_CONTAINER_RG \
               --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
-  ## ------------------------------ Sentry Release ------------------------------ ##
   sentry-release-web:
     name: Sentry Release
     needs: [release, deploy-web]
@@ -349,10 +333,6 @@ jobs:
             --validate \
             --rewrite
 
-  # ----------------------------- END Web Deployment ----------------------------- #
-
-  # --------------------------- CLI Deployment --------------------------- #
-  ## --------------------------- NPM Publish ---------------------------- ##
   publish-cli:
     needs: release
     name: Publish CLI
@@ -410,7 +390,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  ## --------------------------- Sentry Release --------------------------- ##
   sentry-release:
     needs: release
     runs-on: ubuntu-latest
