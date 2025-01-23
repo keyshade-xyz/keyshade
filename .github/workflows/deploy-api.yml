@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      # - main
       - develop
     paths: ['apps/api/**', '.github/workflows/deploy-api.yml', 'package.json']
 
