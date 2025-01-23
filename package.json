@@ -8,7 +8,10 @@
   "release": {
     "branches": [
       "main",
-      "develop",
+      {
+        "name": "develop",
+        "prerelease": "stage"
+      },
       {
         "name": "stage",
         "prerelease": true
