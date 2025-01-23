@@ -43,6 +43,16 @@ jobs:
           JWT_SECRET: secret
         run: pnpm dlx semantic-release
 
+      - name: Fetch latest tag
+        id: fetch-tag
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            version=`gh release list -L 1 --exclude-pre-releases --json tagName --jq ".[0].tagName"`
+          else
+            version=`gh release list -L 1 --json tagName --jq ".[0].tagName`
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+
   deploy-api:
     needs: release
     runs-on: ubuntu-latest
@@ -69,7 +79,7 @@ jobs:
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
-          echo "VERSION: $VERSION" >> $testVersion
+          echo "VERSION: $VERSION"
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
