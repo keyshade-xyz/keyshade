@@ -348,16 +348,21 @@ jobs:
 
       - name: Check branch
         run: |
-          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
-            echo "Skipping publish for non-main branch."
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "Push on main branch, continuing..."
+          else
+            echo "Not on main branch, skipping..."
             exit 0
           fi
 
       - name: Check versions
         id: check-versions
         run: |
-          current_version=$(jq -r '.version' apps/cli/package.json)
-          published_version=$(npm show @keyshade/cli version)
+          current_version=`jq -r '.version' apps/cli/package.json`
+          published_version=`npm show @keyshade/cli version`
+
+          echo "Current version: $current_version"
+          echo "Published version: $published_version"
 
           if [ "$current_version" == "$published_version" ]; then
             echo "Published version of @keyshade/cli is same as the current version: $current_version. Skipping publish."

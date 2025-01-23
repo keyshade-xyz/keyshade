@@ -7,7 +7,7 @@ RUN apk update && apk upgrade
 WORKDIR /app
 RUN npm install --ignore-scripts -g turbo
 COPY . .
-RUN turbo prune platform --docker
+RUN turbo prune @keyshade/platform --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
