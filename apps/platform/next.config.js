@@ -1,6 +1,8 @@
 const path = require('node:path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
+  pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/,
