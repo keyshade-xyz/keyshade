@@ -1,47 +1,34 @@
-import {
-  generateSecretValue,
-  digits,
-  lowercaseChars,
-  uppercaseChars,
-  specialChars,
-  allChars
-} from './secret'
+import { generateSecretValue } from './secret'
 
 describe('generateSecretValue', () => {
-  test('should include at least one digit', () => {
-    const secret = generateSecretValue()
-    expect(secret.split('').some((char) => digits.includes(char))).toBe(true)
-  })
-
   test('should generate a string of exactly 20 characters', () => {
     const secret = generateSecretValue()
     expect(secret).toHaveLength(20)
   })
 
+  test('should include at least one digit', () => {
+    const secret = generateSecretValue()
+    expect(secret).toMatch(/\d/)
+  })
+
   test('should include at least one lowercase letter', () => {
     const secret = generateSecretValue()
-    expect(secret.split('').some((char) => lowercaseChars.includes(char))).toBe(
-      true
-    )
+    expect(secret).toMatch(/[a-z]/)
   })
 
   test('should include at least one uppercase letter', () => {
     const secret = generateSecretValue()
-    expect(secret.split('').some((char) => uppercaseChars.includes(char))).toBe(
-      true
-    )
+    expect(secret).toMatch(/[A-Z]/)
   })
 
   test('should include at least one special character', () => {
     const secret = generateSecretValue()
-    expect(secret.split('').some((char) => specialChars.includes(char))).toBe(
-      true
-    )
+    expect(secret).toMatch(/[!@#$%^&*]/)
   })
 
   test('should only include allowed characters', () => {
     const secret = generateSecretValue()
-    expect(secret.split('').every((char) => allChars.includes(char))).toBe(true)
+    expect(secret).toMatch(/^[0-9a-zA-Z!@#$%^&*]{20}$/)
   })
 
   test('should generate different values for consecutive calls', () => {
