@@ -144,6 +144,8 @@ jobs:
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
           RELEASE=`jq -r '.version' package.json`
+          echo "RELEASE: $RELEASE"
+          echo "ENVIRONMENT: $ENVIRONMENT"
           sentry-cli releases new $RELEASE
           sentry-cli releases set-commits --auto $RELEASE
           sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
