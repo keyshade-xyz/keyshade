@@ -1,3 +1,27 @@
+## [2.9.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.0...v2.9.1) (2025-01-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Update CORS settings ([4597eea](https://github.com/keyshade-xyz/keyshade/commit/4597eea04998619f95d96a591f1e8206be5fa64b))
+
+### 🔧 Miscellaneous Chores
+
+* Added back disabled platform CI ([912b02a](https://github.com/keyshade-xyz/keyshade/commit/912b02a782bfe5a74f9ad607928d568f09ba86f0))
+* **ci:** Enhanced tag fetching ([41f22b0](https://github.com/keyshade-xyz/keyshade/commit/41f22b09848b07416d101342c6cb5de522a9f09a))
+* **ci:** Skip CLI publish instead of exiting ([18786d5](https://github.com/keyshade-xyz/keyshade/commit/18786d576fc5bf71809f84b5d63ebf288dd7a9cc))
+* **ci:** Skip CLI publish instead of exiting ([ee92ef9](https://github.com/keyshade-xyz/keyshade/commit/ee92ef91067a41b5f283ec82b841623e7eee9cad))
+* **ci:** Skip CLI publish instead of exiting ([8da74a2](https://github.com/keyshade-xyz/keyshade/commit/8da74a2328c2cec8ce60132ec8e853cf24f31a52))
+* **ci:** Update conditions ([70cb84b](https://github.com/keyshade-xyz/keyshade/commit/70cb84b0be7c112dc76058bb72ce8c47a09ca1af))
+* **ci:** Update Sentry Platform dependencies ([14eb51b](https://github.com/keyshade-xyz/keyshade/commit/14eb51b7a21181f72be03631f67cf6e368e0987e))
+* **ci:** Update sourcemap dir for web and platform ([a6ecc41](https://github.com/keyshade-xyz/keyshade/commit/a6ecc41e1cf3d1fb62b6f0e63145a97eb7fd40c2))
+* Fix platform dockerfile; Fix CLI CI ([73c374c](https://github.com/keyshade-xyz/keyshade/commit/73c374c1c4a97f1ed3f32d3d4a0ec6833978fedf))
+* Fix sentry API job ([dec0926](https://github.com/keyshade-xyz/keyshade/commit/dec09269abc7fc82dbd7ee76701382f272a15d0c))
+* Fix version commands ([22784bb](https://github.com/keyshade-xyz/keyshade/commit/22784bba671810ab50524fb0c86255490086617f))
+* Fixed package names in docker ([fc3b804](https://github.com/keyshade-xyz/keyshade/commit/fc3b8046f71efc5f7332542ab81f2fbd1b35dd87))
+* **release:** 2.9.1-stage.1 [skip ci] ([27ad882](https://github.com/keyshade-xyz/keyshade/commit/27ad8827e473a8a27c829f2396415c17107a4297))
+* Update prerelease ([54e7c3e](https://github.com/keyshade-xyz/keyshade/commit/54e7c3ee081dc9c0188ca3d9a77f5ea1f8506420))
+* Update version fetching ([00db659](https://github.com/keyshade-xyz/keyshade/commit/00db6596f143d6c5cab7ac70438c0c5eb0a8e87a))
+
 ## [2.9.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.0...v2.9.1-stage.1) (2025-01-23)
 
 ### 🐛 Bug Fixes
