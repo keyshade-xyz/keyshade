@@ -49,8 +49,9 @@ jobs:
           if [ "${{ github.ref_name }}" == "main" ]; then
             version=`gh release list -L 1 --exclude-pre-releases --json tagName --jq ".[0].tagName"`
           else
-            version=`gh release list -L 1 --json tagName --jq ".[0].tagName`
+            version=`gh release list -L 1 --json tagName --jq ".[0].tagName"`
           fi
+          echo "Working with version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
 
   deploy-api:
