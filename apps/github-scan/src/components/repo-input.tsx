@@ -5,19 +5,42 @@ import { ScanResponse } from '@/util/types'
 function RepoInput() {
   const [url, setUrl] = useState('')
   const [responseData, setResponseData] = useState<ScanResponse | null>(null)
+  const [streamData, setStreamData] = useState<string[]>([])
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setResponseData({ loading: true })
+    setStreamData([]) // Clear previous stream data
+
     try {
       const response = await fetch('/api/scan?github_url=' + url)
-      if (!response.ok) throw new Error('Internal Server Error')
-      const data = (await response.json()) as ScanResponse['data']
-      setResponseData({ data: data, loading: false })
+      if (!response.ok) {
+        const data = await response.json()
+        setResponseData({ error: data.error, loading: false })
+        return
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let done = false
+
+      while (!done) {
+        const { value, done: readerDone } = await reader?.read()!
+        done = readerDone
+        const chunk = decoder
+          .decode(value, { stream: true })
+          .split('<%keyshade-delim%>')
+          .filter((s) => s.length > 0)
+        console.log(chunk, streamData)
+        setStreamData((prev) => [...prev, ...chunk])
+      }
+
+      setResponseData({ loading: false })
     } catch {
-      setResponseData({ error: 'Internal Server Error', loading: false })
+      setResponseData({ error: 'Internal Error', loading: false })
     }
   }
+
   return (
     <>
       <form
@@ -54,24 +77,22 @@ function RepoInput() {
       {responseData?.error && (
         <p className="text-center text-red-500">{responseData.error}</p>
       )}
-      {responseData?.data && (
+      {streamData.length > 0 && (
         <div className="mt-4 grid gap-4">
-          {responseData.data.isVulnerable ? (
-            <p className="text-center text-red-400">Vulnerable</p>
-          ) : (
-            <p className="text-center text-emerald-400">Not Vulnerable</p>
-          )}
-
-          {responseData.data.files?.map((file) => (
-            <div key={file.file} className="grid gap-1 overflow-auto text-sm">
-              <p className="flex flex-wrap justify-center text-center text-sky-500">
-                {file.file}:{file.line}
-              </p>
-              <p className="flex flex-wrap justify-center text-center">
-                {file.content}
-              </p>
-            </div>
-          ))}
+          {streamData.map((chunk, index) => {
+            console.log('>>' + chunk + '<<')
+            const { secret: file } = JSON.parse(chunk)
+            return (
+              <div key={index} className="grid gap-1 overflow-auto text-sm">
+                <p className="flex flex-wrap justify-center text-center text-sky-500">
+                  {file.file}:{file.line}
+                </p>
+                <p className="flex flex-wrap justify-center text-center">
+                  {file.content}
+                </p>
+              </div>
+            )
+          })}
         </div>
       )}
     </>

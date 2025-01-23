@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ScanResult } from '@/util/types'
-
-const GITHUB_SCAN_API = process.env.GITHUB_SCAN_API
-const username = process.env.GITHUB_SCAN_API_USERNAME
-const password = process.env.GITHUB_SCAN_API_PASSWORD
+import { scanRepo } from '@/util/scan-repo'
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,19 +12,38 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       )
     }
-    const respone = await fetch(GITHUB_SCAN_API + '/scan', {
-      method: 'POST',
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          await scanRepo(githubUrl, {
+            write: (chunk) => controller.enqueue(chunk),
+            close: () => controller.close()
+          })
+        } catch (error) {
+          // if (error instanceof Error) {
+          //   console.error('Failed to scan repository:', error)
+          //   controller.enqueue(JSON.stringify({ error: error.message }))
+          // } else {
+          //   controller.enqueue(
+          //     JSON.stringify({ error: 'Internal Server Error' })
+          //   )
+          // }
+          controller.close()
+        }
+      }
+    })
+
+    return new Response(stream, {
       headers: {
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, password, githubUrl: githubUrl })
+      }
     })
-    const data: { files: ScanResult[] } = await respone.json()
-    if (data.files.length === 0) {
-      return NextResponse.json({ isVulnerable: false })
-    }
-    return NextResponse.json({ isVulnerable: true, files: data.files })
   } catch (error) {
+    if (error instanceof Error) {
+      console.error('Failed to scan repository:')
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import simpleGit from 'simple-git'
-import path from 'path'
+import path from 'node:path'
 import { readFileSync, statSync, unlinkSync, rmSync } from 'node:fs'
 import { globSync } from 'glob'
 import secretDetector from '@keyshade/secret-scan'
@@ -11,7 +11,7 @@ interface ScanResult {
 }
 
 const git = simpleGit()
-const CLONING_DIR = process.env.CLONING_DIR
+const CLONING_DIR = process.env.CLONING_DIR ?? '/home/mun/Desktop'
 
 const ignoredExtensions = [
   'png',
@@ -50,7 +50,10 @@ const ignoredExtensions = [
   'war',
   'ear'
 ]
-
+async function sleep(ms: number) {
+  const delay = new Promise((resolve) => setTimeout(resolve, ms))
+  await delay
+}
 function getAllFiles(localPath: string): string[] {
   const currentWorkDir = localPath
   let gitIgnorePatterns: string[] = []
@@ -83,77 +86,84 @@ function getAllFiles(localPath: string): string[] {
   })
 }
 
-function scanSecrets(localPath: string): ScanResult[] {
-  const foundSecrets = []
+async function scanSecrets(
+  localPath: string,
+  writer: any
+): Promise<ScanResult[]> {
+  const foundSecrets: ScanResult[] = []
   let skipNextLine = false
   const allFiles = getAllFiles(localPath)
   for (const file of allFiles) {
     const stats = statSync(file)
     if (stats.isFile()) {
-      // Skip the file if it has an ignored extension like images, videos, etc.
-      if (ignoredExtensions.includes(file.split('.').pop())) {
-        // Delete the file
+      if (ignoredExtensions.includes(file.split('.').pop()!)) {
         try {
           unlinkSync(file)
         } catch (err) {
-          console.error(`Failed to delete file ${file}:`, err)
+          console.error(`Failed to delete file ${file}`)
         }
         continue
       }
 
       const content = readFileSync(file, 'utf8').split(/\r?\n/)
 
-      // Delete the file after reading
       try {
         unlinkSync(file)
       } catch (err) {
-        console.error(`Failed to delete file ${file}:`, err)
+        console.error(`Failed to delete file ${file}`)
       }
 
-      // Skip the file if ignore comment is found in the first line
       if (content[0].includes('keyshade-ignore-all')) {
         continue
       }
 
-      content.forEach((line, index) => {
-        // Skip the next line if ignore comment is found in the previous line
+      for (let index = 0; index < content.length; index++) {
         if (skipNextLine) {
           skipNextLine = false
-          return
+          continue
         }
 
-        if (line.includes('keyshade-ignore')) {
+        if (content[index].includes('keyshade-ignore')) {
           skipNextLine = true
-          return
+          content
         }
-        const { found, regex } = secretDetector.detect(line) as {
+        const { found, regex } = secretDetector.detect(content[index]) as {
           found: boolean
           regex: RegExp
         }
         if (found) {
-          const matched = line.match(regex)
-          const highlightedLine = line.replace(regex, matched[0]).trim()
-          foundSecrets.push({
+          const matched = content[index].match(regex)
+          const highlightedLine = content[index]
+            .replace(regex, matched![0])
+            .trim()
+          const secret = {
             file: file.split(localPath)[1],
             line: index + 1,
             content: highlightedLine
-          })
+          }
+          foundSecrets.push(secret)
+          writer.write(
+            JSON.stringify({ status: 'found', secret }) + '<%keyshade-delim%>'
+          )
+          // writer.write(new Date().toISOString() + '<%keyshade-delim%>')
+          // Add delay between writes
+
+          await sleep(0)
         }
-      })
+      }
     }
   }
 
-  // Delete the directory after scanning
   try {
     rmSync(localPath, { recursive: true })
   } catch (err) {
-    console.error(`Failed to delete directory ${localPath}:`, err)
+    console.error(`Failed to delete directory ${localPath}`)
   }
 
   return foundSecrets
 }
 
-export async function scanRepo(githubUrl: string) {
+export async function scanRepo(githubUrl: string, writer: any) {
   let repoName = githubUrl.split('https://github.com/')[1]
   if (repoName.endsWith('.git')) {
     repoName = repoName.slice(0, -4)
@@ -163,8 +173,12 @@ export async function scanRepo(githubUrl: string) {
 
   try {
     await git.clone(githubUrl, localPath)
-    return scanSecrets(localPath)
   } catch (error) {
     console.error('Failed to clone repository:', error)
+    throw new Error('Failed to clone repository')
   }
+
+  const foundSecrets = await scanSecrets(localPath, writer)
+  // writer.write(JSON.stringify({ status: 'completed', foundSecrets }))
+  writer.close()
 }

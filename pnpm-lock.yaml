@@ -380,6 +380,9 @@ importers:
       '@keyshade/secret-scan':
         specifier: workspace:*
         version: link:../../packages/secret-scan
+      glob:
+        specifier: ^11.0.0
+        version: 11.0.0
       next:
         specifier: 14.2.18
         version: 14.2.18(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -389,6 +392,9 @@ importers:
       react-dom:
         specifier: ^18
         version: 18.3.1(react@18.3.1)
+      simple-git:
+        specifier: ^3.27.0
+        version: 3.27.0
     devDependencies:
       '@types/node':
         specifier: ^20
