@@ -69,3 +69,4 @@
 ### Minor Changes
 
 - Add `keyshade workspace list-invitations` command to list all the invitations the user has to workspaces
+- Added version flag (`keyshade -v` or `keyshade --version`) to display the current CLI version

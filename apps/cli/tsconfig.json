@@ -6,7 +6,9 @@
       "@/*": ["./src/*"]
     },
     "outDir": "dist",
-    "plugins": [{ "transform": "typescript-transform-paths" }]
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "tsc-alias": {
     "resolveFullPaths": true,
