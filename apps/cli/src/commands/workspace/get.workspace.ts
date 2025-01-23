@@ -24,6 +24,10 @@ export default class GetWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
 

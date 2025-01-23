@@ -35,6 +35,10 @@ export default class FetchSecretRevisions extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
     const { environment } = options

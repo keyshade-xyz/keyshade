@@ -50,7 +50,7 @@ jobs:
       - name: Make release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
         run: |
           # API, Platform, Web
           VERSION=`jq -r '.version' package.json`

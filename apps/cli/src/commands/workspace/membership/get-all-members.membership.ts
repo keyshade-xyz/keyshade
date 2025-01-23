@@ -30,6 +30,10 @@ export default class GetAllMembersOfWorkspaceCommand extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     Logger.info("Fetching workspace's members...")
 

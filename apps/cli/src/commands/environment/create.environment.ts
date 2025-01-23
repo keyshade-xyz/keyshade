@@ -42,6 +42,10 @@ export class CreateEnvironment extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options, args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { name, description } = await this.parseInput(options)

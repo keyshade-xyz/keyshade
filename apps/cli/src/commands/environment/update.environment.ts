@@ -40,6 +40,10 @@ export class UpdateEnvironment extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options, args }: CommandActionData): Promise<void> {
     const [environmentSlug] = args
     const { name, description } = options

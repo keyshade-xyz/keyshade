@@ -45,6 +45,10 @@ export default class UpdateVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 

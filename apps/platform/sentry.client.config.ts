@@ -5,5 +5,5 @@ Sentry.init({
   tracesSampleRate: process.env.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE,
   profilesSampleRate:
     process.env.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE,
-  debug: false
+  environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT
 })

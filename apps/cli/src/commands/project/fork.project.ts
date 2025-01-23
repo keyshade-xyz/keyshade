@@ -46,6 +46,10 @@ export default class ForkProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options, args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 

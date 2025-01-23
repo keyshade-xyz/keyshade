@@ -24,6 +24,10 @@ export class GetEnvironment extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [environmentSlug] = args
 

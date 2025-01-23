@@ -24,6 +24,10 @@ export default class DeleteVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 

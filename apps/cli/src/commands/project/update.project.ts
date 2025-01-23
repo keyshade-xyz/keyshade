@@ -53,6 +53,10 @@ export default class UpdateProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 

@@ -53,6 +53,10 @@ export default class CreateSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const { name, note, rotateAfter, entries } = await this.parseInput(options)
     const [projectSlug] = args
@@ -119,7 +123,8 @@ export default class CreateSecret extends BaseCommand {
       }
       entry.split(' ').forEach((pair) => {
         const [key, value] = pair.split('=')
-        entryObj[key] = value
+        entryObj.environmentSlug = value
+        entryObj.value = key
       })
       return entryObj
     })

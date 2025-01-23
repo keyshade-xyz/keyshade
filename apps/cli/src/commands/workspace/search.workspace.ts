@@ -28,6 +28,10 @@ export default class SearchWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug, searchTerm] = args
 

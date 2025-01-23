@@ -7,7 +7,8 @@ import ListWorkspace from '@/commands/workspace/list.workspace'
 import SearchWorkspace from '@/commands/workspace/search.workspace'
 import UpdateWorkspace from '@/commands/workspace/update.workspace'
 import WorkspaceRoleCommand from '@/commands/workspace/role.workspace'
-import WorkspaceMembershipCommand from './workspace/membership.workspace'
+import WorkspaceMembershipCommand from '@/commands/workspace/membership.workspace'
+import ListInvitations from '@/commands/workspace/list-invitations.workspace'
 
 export default class WorkspaceCommand extends BaseCommand {
   getName(): string {
@@ -28,7 +29,8 @@ export default class WorkspaceCommand extends BaseCommand {
       new SearchWorkspace(),
       new UpdateWorkspace(),
       new WorkspaceRoleCommand(),
-      new WorkspaceMembershipCommand()
+      new WorkspaceMembershipCommand(),
+      new ListInvitations()
     ]
   }
 }

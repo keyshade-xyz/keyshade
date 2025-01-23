@@ -25,6 +25,10 @@ export default class UnlinkProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 

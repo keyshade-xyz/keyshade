@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - develop
     paths: ['apps/cli/**', '.github/workflows/deploy-cli.yml', 'package.json']
 
 jobs:
@@ -24,6 +23,21 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@keyshade'
+
+      - name: Check versions
+        id: check-versions
+        run: |
+          current_version=$(jq -r '.version' apps/cli/package.json)
+          published_version=$(npm show @keyshade/cli version)
+
+          if [ "$current_version" == "$published_version" ]; then
+            echo "Published version of @keyshade/cli is same as the current version: $current_version. Skipping publish."
+            exit 0
+          fi
+
+      - name: Get published version
+        id: published_version
+        run: echo "published_version=$(npm show @keyshade/cli version)" >> $GITHUB_ENV
 
       - name: Install pnpm
         run: npm i -g pnpm

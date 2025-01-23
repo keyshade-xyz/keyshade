@@ -25,6 +25,10 @@ export default class ListSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   getOptions(): CommandOption[] {
     return [
       {
@@ -36,14 +40,13 @@ export default class ListSecret extends BaseCommand {
     ]
   }
 
-  async action({ args, options }: CommandActionData): Promise<void> {
+  async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
-    const { decryptValue } = await this.parseInput(options)
+
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
-          projectSlug,
-          decryptValue
+          projectSlug
         },
         this.headers
       )
@@ -60,14 +63,12 @@ export default class ListSecret extends BaseCommand {
           })
         })
       } else {
-        Logger.info('No secrets found')
-      }
-    } else {
-      Logger.error(`Failed fetching secrets: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching secrets for project.\n' + JSON.stringify(error)
-        )
+        Logger.error(`Failed fetching secrets: ${error.message}`)
+        if (this.metricsEnabled && error?.statusCode === 500) {
+          Logger.report(
+            'Failed fetching secrets for project.\n' + JSON.stringify(error)
+          )
+        }
       }
     }
   }

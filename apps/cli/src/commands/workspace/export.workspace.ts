@@ -36,6 +36,10 @@ export default class ExportWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
     const { saveToFile } = options as { saveToFile: string }

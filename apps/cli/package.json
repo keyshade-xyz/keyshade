@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
@@ -21,7 +21,22 @@
     "publish": "pnpm build && pnpm publish --access public --provenance",
     "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'"
   },
-  "keywords": [],
+  "keywords": [
+    "keyshade",
+    "keyshade cli",
+    "secret",
+    "secrets",
+    "secret management",
+    "secret manager",
+    "config management",
+    "config manager",
+    "secret management tool",
+    "config management tool",
+    "configuration",
+    "devsecops",
+    "secret scanning",
+    "secret detection"
+  ],
   "author": "keyshade",
   "license": "MPL-2.0",
   "dependencies": {

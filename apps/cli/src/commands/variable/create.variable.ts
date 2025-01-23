@@ -48,6 +48,10 @@ export default class CreateVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const { name, note, entries } = await this.parseInput(options)
     const [projectSlug] = args

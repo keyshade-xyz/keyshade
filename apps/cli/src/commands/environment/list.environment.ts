@@ -30,6 +30,10 @@ export class ListEnvironment extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
