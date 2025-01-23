@@ -222,7 +222,7 @@ jobs:
     name: Sentry Platform
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
-    needs: [deploy-api, deploy-web, deploy-platform, release]
+    needs: [deploy-platform, release]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
