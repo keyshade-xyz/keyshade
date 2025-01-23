@@ -341,6 +341,7 @@ jobs:
     needs: release
     name: Publish CLI
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     permissions:
       contents: read
@@ -348,15 +349,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check branch
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "Push on main branch, continuing..."
-          else
-            echo "Not on main branch, skipping..."
-            exit 0
-          fi
 
       - name: Check versions
         id: check-versions
@@ -369,7 +361,7 @@ jobs:
 
           if [ "$current_version" = "$published_version" ]; then
             echo "Published version of @keyshade/cli is same as the current version: $current_version. Skipping publish."
-            exit 0
+            exit 78
           fi
 
       - uses: actions/setup-node@v4

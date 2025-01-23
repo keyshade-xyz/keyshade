@@ -1,4 +1,7 @@
-const path = require('node:path')
+import path, { dirname } from 'path'
+import { withSentryConfig } from '@sentry/nextjs'
+import { fileURLToPath } from 'url'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -9,26 +12,22 @@ const nextConfig = {
       use: ['@svgr/webpack']
     })
 
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = dirname(__filename)
+
     if (!isServer) {
       config.resolve.alias['@public'] = path.join(__dirname, 'public')
     }
 
     return config
   },
-  reactStrictMode: true,
   transpilePackages: ['geist'],
   eslint: {
     ignoreDuringBuilds: true
   }
 }
 
-module.exports = nextConfig
-
-// Injected content via Sentry wizard below
-
-const { withSentryConfig } = require('@sentry/nextjs')
-
-module.exports = withSentryConfig(module.exports, {
+export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
