@@ -364,28 +364,34 @@ jobs:
 
           if [ "$current_version" = "$published_version" ]; then
             echo "Published version of @keyshade/cli is same as the current version: $current_version. Skipping publish."
-            exit 78
+          echo "skip_publish=true" >> $GITHUB_OUTPUT
           fi
 
       - uses: actions/setup-node@v4
+        if: steps.check-versions.outputs.skip_publish != 'true'
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@keyshade'
 
       - name: Install pnpm
+        if: steps.check-versions.outputs.skip_publish != 'true'
         run: npm i -g pnpm
 
       - name: Install dependencies
+        if: steps.check-versions.outputs.skip_publish != 'true'
         run: pnpm install
 
       - name: Build
+        if: steps.check-versions.outputs.skip_publish != 'true'
         run: pnpm build:cli
 
       - name: Authenticate with npm
+        if: steps.check-versions.outputs.skip_publish != 'true'
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish
+        if: steps.check-versions.outputs.skip_publish != 'true'
         run: cd apps/cli && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
