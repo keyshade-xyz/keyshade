@@ -239,7 +239,7 @@ jobs:
           sentry-cli releases -o $SENTRY_ORG new -p $SENTRY_PROJECT $VERSION
           sentry-cli releases set-commits --auto $VERSION  
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next \
+          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
@@ -332,7 +332,7 @@ jobs:
           sentry-cli releases new $RELEASE
           sentry-cli releases set-commits --auto $RELEASE
           sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
-          sentry-cli releases files $RELEASE upload-sourcemaps apps/web/.next \
+          sentry-cli releases files $RELEASE upload-sourcemaps apps/web/.next/static \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
