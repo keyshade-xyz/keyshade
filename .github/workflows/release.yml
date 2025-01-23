@@ -47,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy API
+    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -159,6 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Platform
+    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -236,10 +238,10 @@ jobs:
           ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
           RELEASE=`jq -r '.version' package.json`
-          sentry-cli releases -o $SENTRY_ORG new -p $SENTRY_PROJECT $VERSION
-          sentry-cli releases set-commits --auto $VERSION  
-          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static \
+          sentry-cli releases new $RELEASE
+          sentry-cli releases set-commits --auto $RELEASE
+          sentry-cli releases deploys $RELEASE new -e $ENVIRONMENT
+          sentry-cli releases files $RELEASE upload-sourcemaps apps/platform/.next/static \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
@@ -249,6 +251,7 @@ jobs:
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Web
     needs: release
+    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
