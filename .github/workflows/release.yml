@@ -82,7 +82,6 @@ jobs:
           LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
-          echo "VERSION: $VERSION"
           # Build a docker container and push it to ACR
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
@@ -106,6 +105,7 @@ jobs:
           API_CONTAINER_RG: ${{ vars.API_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
+          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
         with:
           azcliversion: latest
           inlineScript: |
@@ -225,6 +225,7 @@ jobs:
           PLATFORM_CONTAINER_RG: ${{ vars.PLATFORM_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: platform
+          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
         with:
           azcliversion: latest
           inlineScript: |
@@ -320,6 +321,7 @@ jobs:
           WEB_CONTAINER_RG: ${{ vars.WEB_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
+          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
         with:
           azcliversion: latest
           inlineScript: |
