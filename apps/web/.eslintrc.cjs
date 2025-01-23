@@ -6,7 +6,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    '@typescript-esline/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
     'turbo/no-undeclared-env-vars': 'off'
   }
 }

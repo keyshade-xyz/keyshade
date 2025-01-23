@@ -1,5 +1,3 @@
-ARG NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID
-
 FROM node:20-alpine AS base
 
 FROM base AS builder
@@ -28,7 +26,14 @@ RUN pnpm install --no-cache --ignore-scripts
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN pnpm build:web
+ARG SENTRY_ORG=${SENTRY_ORG}
+ARG SENTRY_PROJECT=${SENTRY_PROJECT}
+ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+ARG NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=${NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID}
+
+RUN pnpm build:web && \
+    pnpm sourcemaps:web
 
 FROM base AS runner
 WORKDIR /app
