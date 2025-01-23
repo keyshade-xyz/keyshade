@@ -7,9 +7,10 @@ export class SentryInstance extends Sentry.Scope {
   private static init(): typeof Sentry | null {
     try {
       Sentry.init({
-        dsn: process.env.SENTRY_DSN,
-        tracesSampleRate: 1.0,
-        environment: 'CLI',
+        dsn: process.env.SENTRY_CLI_DSN,
+        tracesSampleRate: process.env.SENTRY_CLI_TRACES_SAMPLE_RATE,
+        profilesSampleRate: process.env.SENTRY_CLI_PROFILE_SAMPLE_RATE,
+        environment: process.env.SENTRY_ENVIRONMENT,
         integrations: [nodeProfilingIntegration()],
         beforeSend(event) {
           if (event.exception) {

@@ -50,7 +50,7 @@ export default class GetProject extends BaseCommand {
     } else {
       Logger.error(`Failed fetching project: ${error.message}`)
       if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching projectt.\n' + JSON.stringify(error))
+        Logger.report('Failed fetching project.\n' + JSON.stringify(error))
       }
     }
   }

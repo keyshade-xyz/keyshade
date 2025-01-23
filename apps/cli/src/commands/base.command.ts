@@ -46,10 +46,6 @@ export default abstract class BaseCommand {
             SentryInstance.getInstance()
           }
 
-          if (this.metricsEnabled) {
-            SentryInstance.getInstance()
-          }
-
           if (this.canMakeHttpRequests()) {
             if (!this.apiKey) {
               throw new Error(

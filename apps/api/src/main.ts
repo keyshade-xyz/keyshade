@@ -25,8 +25,6 @@ async function initializeSentry() {
   }
 
   const enabled = sentryEnv !== 'test' && sentryEnv !== 'e2e'
-  const debug = sentryEnv === 'stage'
-
   try {
     Sentry.init({
       dsn: process.env.SENTRY_API_DSN,
@@ -35,7 +33,7 @@ async function initializeSentry() {
       tracesSampleRate: process.env.SENTRY_API_TRACES_SAMPLE_RATE,
       profilesSampleRate: process.env.SENTRY_API_PROFILES_SAMPLE_RATE,
       integrations: [nodeProfilingIntegration()],
-      debug
+      debug: false
     })
 
     logger.log('Sentry initialized with the following configuration:')
@@ -46,7 +44,6 @@ async function initializeSentry() {
     logger.log(
       `Sentry Profiles Sample Rate: ${process.env.SENTRY_PROFILES_SAMPLE_RATE}`
     )
-    logger.log(`Sentry Debug Mode: ${debug}`)
   } catch (error) {
     logger.error(`Failed to initialize Sentry: ${error.message}`)
     Sentry.captureException(error)

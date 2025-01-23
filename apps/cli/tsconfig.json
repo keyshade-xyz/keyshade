@@ -21,6 +21,11 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts", ".eslintrc.cjs", "tsup.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    ".eslintrc.cjs",
+    "tsup.config.ts",
+    "esbuild.config.js"
+  ],
   "exclude": ["node_modules"]
 }
