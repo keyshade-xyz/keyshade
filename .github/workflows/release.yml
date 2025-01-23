@@ -44,6 +44,8 @@ jobs:
         run: pnpm dlx semantic-release
 
       - name: Fetch latest tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         id: fetch-tag
         run: |
           if [ "${{ github.ref_name }}" == "main" ]; then
