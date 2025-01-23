@@ -153,7 +153,6 @@ export default class ImportFromEnv extends BaseCommand {
       Logger.info(
         `Imported ${noOfSecrets} secrets and ${noOfVariables} variables.`
       )
-      if (errors.length) Logger.error(errors.join('\n'))
     } catch (error) {
       const errorMessage = (error as Error)?.message
       Logger.error(

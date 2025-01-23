@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
 import type { Workspace } from '@keyshade/schema'
+import { useAtom } from 'jotai'
 import { Input } from './input'
 import { Label } from './label'
 import {
@@ -31,7 +32,6 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { useAtom } from 'jotai'
 import { selectedWorkspaceAtom } from '@/store'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {

@@ -86,6 +86,9 @@ export default class CreateSecret extends BaseCommand {
       Logger.info(`Updated at ${data.secret.updatedAt}`)
     } else {
       Logger.error(`Failed to create secret: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create secret.\n' + JSON.stringify(error))
+      }
     }
   }
 
@@ -120,7 +123,8 @@ export default class CreateSecret extends BaseCommand {
       }
       entry.split(' ').forEach((pair) => {
         const [key, value] = pair.split('=')
-        entryObj[key] = value
+        entryObj.environmentSlug = value
+        entryObj.value = key
       })
       return entryObj
     })

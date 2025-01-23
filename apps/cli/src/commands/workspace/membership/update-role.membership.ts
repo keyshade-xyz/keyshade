@@ -73,6 +73,9 @@ export default class UpdateRolesCommand extends BaseCommand {
       Logger.info(`New Roles: ${roles}`)
     } else {
       Logger.error(`Failed to update roles: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to update roles.\n' + JSON.stringify(error))
+      }
     }
   }
 }

@@ -46,6 +46,9 @@ export default class ListWorkspace extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching workspaces: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching workspaces.\n' + JSON.stringify(error))
+      }
     }
   }
 }

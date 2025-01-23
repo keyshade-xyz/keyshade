@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@keyshade/api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,7 +15,6 @@
     "db:validate": "pnpm dlx dotenv-cli -e ../../.env -- pnpm dlx prisma validate --schema=src/prisma/schema.prisma",
     "db:format": "pnpm dlx prisma format --schema=src/prisma/schema.prisma",
     "db:reset": "pnpm dlx dotenv-cli -e ../../.env -- pnpm dlx prisma migrate reset --force --schema=src/prisma/schema.prisma",
-    "sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist  || echo 'Failed to upload source maps to Sentry'",
     "e2e:prepare": "cd ../../ && docker compose down && docker compose -f docker-compose-test.yml up -d && sleep 3 && cd apps/api && pnpm db:generate-types && cross-env NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' pnpm run db:deploy-migrations",
     "e2e": "pnpm run e2e:prepare && cross-env NODE_ENV='e2e' DATABASE_URL='postgresql://prisma:prisma@localhost:5432/tests' jest --runInBand --config=jest.e2e-config.ts && pnpm run e2e:teardown",
     "e2e:teardown": "cd ../../ && docker compose -f docker-compose-test.yml down",

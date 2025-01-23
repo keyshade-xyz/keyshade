@@ -51,6 +51,9 @@ export default class ListProject extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching projects: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching projects.\n' + JSON.stringify(error))
+      }
     }
   }
 }

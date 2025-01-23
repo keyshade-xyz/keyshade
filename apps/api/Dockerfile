@@ -2,12 +2,6 @@ FROM node:20.0.0-alpine AS build
 
 WORKDIR /app
 
-ARG SENTRY_ORG=${SENTRY_ORG}
-ARG SENTRY_PROJECT=${SENTRY_PROJECT}
-ARG SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
-ARG SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
-ARG DATABASE_URL=${DATABASE_URL}
-
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
@@ -24,8 +18,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY --chown=root:root --chmod=755 apps/api/src apps/api/src
 
 RUN pnpm db:generate-types && \
-	pnpm build:api && \
-	pnpm sourcemaps:api
+	pnpm build:api
 
 USER node
 

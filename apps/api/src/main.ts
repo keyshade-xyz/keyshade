@@ -19,32 +19,24 @@ export const sentryEnv = process.env.SENTRY_ENV || 'production'
 async function initializeSentry() {
   const logger = new CustomLoggerService()
 
-  if (
-    !process.env.SENTRY_DSN ||
-    !process.env.SENTRY_ORG ||
-    !process.env.SENTRY_PROJECT ||
-    !process.env.SENTRY_AUTH_TOKEN
-  ) {
-    logger.warn(
-      'Missing one or more Sentry environment variables. Skipping initialization...'
-    )
+  if (!process.env.SENTRY_API_DSN) {
+    logger.warn('Missing Sentry DSN. Skipping initialization...')
     return
   }
 
+  const enabled = sentryEnv !== 'test' && sentryEnv !== 'e2e'
   try {
     Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-      enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
+      dsn: process.env.SENTRY_API_DSN,
+      enabled,
       environment: sentryEnv,
-      tracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
-      profilesSampleRate: process.env.SENTRY_PROFILES_SAMPLE_RATE,
+      tracesSampleRate: process.env.SENTRY_API_TRACES_SAMPLE_RATE,
+      profilesSampleRate: process.env.SENTRY_API_PROFILES_SAMPLE_RATE,
       integrations: [nodeProfilingIntegration()],
-      debug: sentryEnv.startsWith('dev')
+      debug: false
     })
 
     logger.log('Sentry initialized with the following configuration:')
-    logger.log(`Sentry Organization: ${process.env.SENTRY_ORG}`)
-    logger.log(`Sentry Project: ${process.env.SENTRY_PROJECT}`)
     logger.log(`Sentry Environment: ${sentryEnv}`)
     logger.log(
       `Sentry Traces Sample Rate: ${process.env.SENTRY_TRACES_SAMPLE_RATE}`
@@ -52,7 +44,6 @@ async function initializeSentry() {
     logger.log(
       `Sentry Profiles Sample Rate: ${process.env.SENTRY_PROFILES_SAMPLE_RATE}`
     )
-    logger.log(`Sentry Debug Mode: ${sentryEnv.startsWith('dev')}`)
   } catch (error) {
     logger.error(`Failed to initialize Sentry: ${error.message}`)
     Sentry.captureException(error)
@@ -85,15 +76,18 @@ async function initializeNestApp() {
     origin: [
       'http://localhost:3025',
       'https://keyshade.xyz',
-      'https://platform.keyshade.xyz'
+      'https://platform.keyshade.xyz',
+      'https://stage.platform.keyshade.xyz'
     ]
   })
   app.use(cookieParser())
-  const port = process.env.API_PORT || 4200
+  const port = process.env.API_PORT
+  const domain = process.env.DOMAIN
+  const isHttp = domain.includes('localhost')
   app.use(Sentry.Handlers.errorHandler())
   await app.listen(port)
   logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: ${isHttp}://${domain}:${port}/${globalPrefix}`
   )
 }
 
