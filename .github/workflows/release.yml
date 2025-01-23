@@ -154,95 +154,95 @@ jobs:
             --validate \
             --rewrite
 
-  # deploy-platform:
-  #   needs: release
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ needs.release.outputs.environment }}
-  #   name: Deploy Platform
+  deploy-platform:
+    needs: release
+    runs-on: ubuntu-latest
+    environment: ${{ needs.release.outputs.environment }}
+    name: Deploy Platform
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Docker Login
-  #       uses: azure/docker-login@v2
-  #       with:
-  #         login-server: ${{ vars.ACR_REGISTRY_URL }}
-  #         username: ${{ secrets.ACR_USERNAME }}
-  #         password: ${{ secrets.ACR_PASSWORD }}
+      - name: Docker Login
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-  #     - name: Build and push docker image
-  #       id: build
-  #       env:
-  #         ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
-  #         REPOSITORY_NAME: platform
-  #         LATEST_TAG: ${{ needs.release.outputs.latestTag }}
-  #         NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
-  #         NEXT_PUBLIC_SENTRY_PLATFORM_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_PLATFORM_DSN }}
-  #         NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE }}
-  #         NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
-  #         NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
-  #       run: |
-  #         VERSION=`jq -r '.version' package.json`
-  #         # Build a docker container and push it to ACR
-  #         docker build \
-  #           -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
-  #           -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG \
-  #           --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
-  #           -f ./apps/platform/Dockerfile .
-  #         echo "Pushing image to ACR..."
-  #         docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
-  #         docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
-  #         echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG" >> $GITHUB_OUTPUT
+      - name: Build and push docker image
+        id: build
+        env:
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: platform
+          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_SENTRY_PLATFORM_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_PLATFORM_DSN }}
+          NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE }}
+          NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
+        run: |
+          VERSION=`jq -r '.version' package.json`
+          # Build a docker container and push it to ACR
+          docker build \
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
+            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG \
+            --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+            -f ./apps/platform/Dockerfile .
+          echo "Pushing image to ACR..."
+          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
+          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
+          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG" >> $GITHUB_OUTPUT
 
-  #     - name: Azure Login action
-  #       uses: azure/login@v2
-  #       with:
-  #         creds: ${{ secrets.CONTAINER_APP_SP_CREDENTIALS }}
-  #         enable-AzPSSession: true
+      - name: Azure Login action
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CONTAINER_APP_SP_CREDENTIALS }}
+          enable-AzPSSession: true
 
-  #     - name: Update Azure Container App
-  #       uses: azure/cli@v2
-  #       env:
-  #         PLATFORM_CONTAINER: ${{ vars.PLATFORM_CONTAINER }}
-  #         PLATFORM_CONTAINER_RG: ${{ vars.PLATFORM_CONTAINER_RG }}
-  #         ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
-  #         REPOSITORY_NAME: platform
-  #       with:
-  #         azcliversion: latest
-  #         inlineScript: |
-  #           az containerapp update \
-  #             --name $PLATFORM_CONTAINER \
-  #             --resource-group $PLATFORM_CONTAINER_RG \
-  #             --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
+      - name: Update Azure Container App
+        uses: azure/cli@v2
+        env:
+          PLATFORM_CONTAINER: ${{ vars.PLATFORM_CONTAINER }}
+          PLATFORM_CONTAINER_RG: ${{ vars.PLATFORM_CONTAINER_RG }}
+          ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+          REPOSITORY_NAME: platform
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --name $PLATFORM_CONTAINER \
+              --resource-group $PLATFORM_CONTAINER_RG \
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
 
-  # release-sentry-platform:
-  #   name: Sentry Platform
-  #   runs-on: ubuntu-latest
-  #   environment: ${{ needs.release.outputs.environment }}
-  #   needs: [deploy-api, deploy-web, deploy-platform, release]
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  release-sentry-platform:
+    name: Sentry Platform
+    runs-on: ubuntu-latest
+    environment: ${{ needs.release.outputs.environment }}
+    needs: [deploy-api, deploy-web, deploy-platform, release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Install Sentry CLI
-  #       run: npm i -g @sentry/cli
+      - name: Install Sentry CLI
+        run: npm i -g @sentry/cli
 
-  #     - name: Sentry Release
-  #       env:
-  #         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  #         SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-  #         SENTRY_PROJECT: ${{ vars.SENTRY_PLATFORM_PROJECT }}
-  #         ENVIRONMENT: ${{ needs.release.outputs.environment }}
-  #       run: |
-  #         RELEASE=`jq -r '.version' package.json`
-  #         sentry-cli releases -o $SENTRY_ORG new -p $SENTRY_PROJECT $VERSION
-  #         sentry-cli releases set-commits --auto $VERSION
-  #         sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-  #         sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next \
-  #           --url-prefix '~/_next' \
-  #           --validate \
-  #           --rewrite
+      - name: Sentry Release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PLATFORM_PROJECT }}
+          ENVIRONMENT: ${{ needs.release.outputs.environment }}
+        run: |
+          RELEASE=`jq -r '.version' package.json`
+          sentry-cli releases -o $SENTRY_ORG new -p $SENTRY_PROJECT $VERSION
+          sentry-cli releases set-commits --auto $VERSION  
+          sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next \
+            --url-prefix '~/_next' \
+            --validate \
+            --rewrite
 
   deploy-web:
     runs-on: ubuntu-latest
