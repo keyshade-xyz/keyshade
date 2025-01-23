@@ -44,8 +44,9 @@ jobs:
 
       - name: Set version to github env
         run: |
-          echo "New Version: ${{ steps.release.outputs.version }}"
-          echo "::set-output name=version::${{ steps.release.outputs.version }}"
+          version=`jq -r '.version' package.json`
+          echo "New Version: $version"
+          echo "version=$version" >> $GITHUB_ENV
 
   deploy-api:
     needs: release
