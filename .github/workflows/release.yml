@@ -346,6 +346,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
+    outputs:
+      skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
+
     permissions:
       contents: read
       id-token: write
