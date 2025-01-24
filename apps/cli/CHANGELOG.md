@@ -64,9 +64,10 @@
 - Fixed error when the CLI won't create `.keyshade` folder while initializing profiles on new devices
 - Projects always had `--store-private-key` set to true despite providing a false value. Fixed this
 
-## 2.5.0-stage
+## 2.5.0
 
 ### Minor Changes
 
 - Add `keyshade workspace list-invitations` command to list all the invitations the user has to workspaces
 - Added version flag (`keyshade -v` or `keyshade --version`) to display the current CLI version
+- Error reports get sent to Sentry if metrics is enabled
