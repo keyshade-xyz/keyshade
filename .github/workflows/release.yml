@@ -169,7 +169,8 @@ jobs:
           sentry-cli releases new $VERSION
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/api/.dist \
+          sentry-cli releases files $VERSION upload-sourcemaps apps/api/dist \
+            --url-prefix "apps/api/dist" \
             --validate \
             --rewrite
 
@@ -269,10 +270,8 @@ jobs:
           sentry-cli releases new $VERSION
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/platform/.next/static \
-            --url-prefix '~/_next' \
-            --validate \
-            --rewrite
+          sentry-cli sourcemaps inject dist
+          sentry-cli sourcemaps upload --release $VERSION -p $PROJECT dist
 
   deploy-web:
     runs-on: ubuntu-latest
@@ -373,7 +372,7 @@ jobs:
           sentry-cli releases new $VERSION
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/web/.next/static \
+          sentry-cli releases files $VERSION upload-sourcemaps apps/web/.next/static/chunks \
             --url-prefix '~/_next' \
             --validate \
             --rewrite
@@ -479,6 +478,6 @@ jobs:
           sentry-cli releases new -p $SENTRY_PROJECT $VERSION
           sentry-cli releases set-commits --auto $VERSION 
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli releases files $VERSION upload-sourcemaps apps/cli/.dist \
+          sentry-cli releases files $VERSION upload-sourcemaps apps/cli/dist \
             --validate \
             --rewrite
