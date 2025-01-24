@@ -1,3 +1,13 @@
+## [2.10.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.1...v2.10.0-stage.2) (2025-01-24)
+
+### 🐛 Bug Fixes
+
+* **api:** Only user's default workspace returns isDefault: true ([#647](https://github.com/keyshade-xyz/keyshade/issues/647)) ([870b4dc](https://github.com/keyshade-xyz/keyshade/commit/870b4dc7b68f57fbd09a51099f701a57fb0c998d))
+
+### 🔧 Miscellaneous Chores
+
+* Fix prerelease branch config ([7e84021](https://github.com/keyshade-xyz/keyshade/commit/7e8402140e4cefe021fd9269829d38643aa94404))
+
 ## [2.10.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.2-stage.1...v2.10.0-stage.1) (2025-01-24)
 
 ### 🚀 Features
