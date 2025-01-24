@@ -6,7 +6,7 @@ import {
   UnauthorizedException
 } from '@nestjs/common'
 import { UpdateUserDto } from '../dto/update.user/update.user'
-import { AuthProvider, User, Workspace } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
@@ -33,15 +33,7 @@ export class UserService {
   }
 
   async getSelf(user: UserWithWorkspace) {
-    const defaultWorkspace: Workspace | null =
-      await this.prisma.workspace.findFirst({
-        where: {
-          ownerId: user.id,
-          isDefault: true
-        }
-      })
-
-    return { ...user, defaultWorkspace }
+    return user
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
