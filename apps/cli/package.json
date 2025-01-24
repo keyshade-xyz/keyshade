@@ -1,6 +1,6 @@
 {
   "name": "@keyshade/cli",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "CLI for keyshade",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
@@ -17,8 +17,7 @@
     "build": "node esbuild.config.js",
     "start": "node dist/index.cjs",
     "dev": "pnpm build && node dist/index.cjs",
-    "lint": "eslint \"src/**/*.ts\" --fix",
-    "publish": "pnpm build && pnpm publish --access public --provenance"
+    "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "keywords": [
     "keyshade",

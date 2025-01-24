@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.9.1",
+  "version": "2.10.0-stage.1",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -11,10 +11,6 @@
       {
         "name": "develop",
         "prerelease": "stage"
-      },
-      {
-        "name": "stage",
-        "prerelease": true
       }
     ],
     "plugins": [
@@ -141,10 +137,6 @@
     "db:reset": "pnpm run --filter=@keyshade/api db:reset",
     "format": "prettier apps/**/*.{ts,tsx} packages/**/*.ts --write",
     "prepare": "husky",
-    "sourcemaps:api": "turbo run sourcemaps --filter=@keyshade/api",
-    "sourcemaps:web": "turbo run sourcemaps --filter=@keyshade/web",
-    "sourcemaps:platform": "turbo run sourcemaps --filter=@keyshade/platform",
-    "sourcemaps:cli": "turbo run sourcemaps --filter=@keyshade/cli",
     "docker:run:web": "docker run --env-file .env --name ks-web --rm -p 3000:3000 ks-web",
     "docker:build:web": "docker build -t ks-web -f apps/web/Dockerfile .",
     "docker:run:api": "docker run --env-file .env --name ks-api --rm -p 4200:4200 ks-api",

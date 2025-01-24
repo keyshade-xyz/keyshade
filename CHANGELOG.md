@@ -1,3 +1,22 @@
+## [2.10.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.2-stage.1...v2.10.0-stage.1) (2025-01-24)
+
+### 🚀 Features
+
+* **api:** Secret rotation ([#652](https://github.com/keyshade-xyz/keyshade/issues/652)) ([ad9a808](https://github.com/keyshade-xyz/keyshade/commit/ad9a808ac6819c34b67ee77a1c86cb87b962d411))
+
+## [2.9.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.1...v2.9.2-stage.1) (2025-01-24)
+
+### 🐛 Bug Fixes
+
+* Added lockfile ([856eb3c](https://github.com/keyshade-xyz/keyshade/commit/856eb3c1446752b3312854e3b63b60cff223140c))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Add missing LATEST_TAG variable ([a2ea2ed](https://github.com/keyshade-xyz/keyshade/commit/a2ea2edc08583ff6a89fed5bb935d3bf12f91c3c))
+* **ci:** Fixed scripts ([374f7ed](https://github.com/keyshade-xyz/keyshade/commit/374f7ed31d85d3481af9ccc2ccdb920eee1d463b))
+* **ci:** Update sourcemap upload commands ([c7e8e45](https://github.com/keyshade-xyz/keyshade/commit/c7e8e45fdcc1b9bad1785618ff43bf3bf5785783))
+* **cli:** Bumped CLI version to 2.5.0 ([7b772f8](https://github.com/keyshade-xyz/keyshade/commit/7b772f83cda360eeff9b69f5f2a76458e5bcd406))
+
 ## [2.9.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.0...v2.9.1) (2025-01-23)
 
 ### 🐛 Bug Fixes
