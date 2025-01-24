@@ -1,3 +1,9 @@
+## [2.10.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.2-stage.1...v2.10.0-stage.1) (2025-01-24)
+
+### 🚀 Features
+
+* **api:** Secret rotation ([#652](https://github.com/keyshade-xyz/keyshade/issues/652)) ([ad9a808](https://github.com/keyshade-xyz/keyshade/commit/ad9a808ac6819c34b67ee77a1c86cb87b962d411))
+
 ## [2.9.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.9.1...v2.9.2-stage.1) (2025-01-24)
 
 ### 🐛 Bug Fixes
