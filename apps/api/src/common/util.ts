@@ -97,7 +97,7 @@ export const excludeFields = <T, K extends keyof T>(
  * @param hours The number of hours to add to the current date
  * @returns The new date with the given number of hours added, or undefined if the hours is 'never'
  */
-export const addHoursToDate = (hours?: string): Date | undefined => {
+export const addHoursToDate = (hours?: string | number): Date | undefined => {
   if (!hours || hours === 'never') return undefined
 
   const date = new Date()
