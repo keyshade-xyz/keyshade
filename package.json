@@ -11,10 +11,6 @@
       {
         "name": "develop",
         "prerelease": "stage"
-      },
-      {
-        "name": "stage",
-        "prerelease": true
       }
     ],
     "plugins": [
