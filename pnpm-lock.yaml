@@ -189,6 +189,9 @@ importers:
       '@react-email/render':
         specifier: ^1.0.1
         version: 1.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@sentry/cli':
+        specifier: ^2.28.6
+        version: 2.39.1
       '@slack/bolt':
         specifier: ^3.22.0
         version: 3.22.0
@@ -14274,7 +14277,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.2
       '@sentry/babel-plugin-component-annotate': 2.22.4
-      '@sentry/cli': 2.36.1
+      '@sentry/cli': 2.39.1
       dotenv: 16.4.7
       find-up: 5.0.0
       glob: 9.3.5
