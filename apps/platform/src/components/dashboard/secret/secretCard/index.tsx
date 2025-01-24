@@ -21,7 +21,17 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 
-export default function SecretCard({ secret, values }: Secret) {
+interface SecretCardProps {
+  secretData: Secret
+  isDecrypted: boolean
+}
+
+export default function SecretCard({
+  secretData,
+  isDecrypted
+}: SecretCardProps) {
+  const { secret, values } = secretData
+
   return (
     <AccordionItem
       className="rounded-xl bg-white/5 px-5"
@@ -33,7 +43,7 @@ export default function SecretCard({ secret, values }: Secret) {
         rightChildren={
           <div className="text-xs text-white/50">
             {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
-            <span className="text-white">{secret.lastUpdatedById}</span>
+            <span className="text-white">{secret.lastUpdatedBy.name}</span>
           </div>
         }
       >
@@ -61,16 +71,18 @@ export default function SecretCard({ secret, values }: Secret) {
           <TableHeader>
             <TableRow>
               <TableHead>Environment</TableHead>
-              <TableHead>Secret</TableHead>
+              <TableHead>Value</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {values.map((value) => {
               return (
                 <TableRow key={value.environment.id}>
-                  <TableCell>{value.environment.slug}</TableCell>
+                  <TableCell>
+                    {value.environment.name} ({value.environment.slug})
+                  </TableCell>
                   <TableCell className="max-w-40 overflow-auto">
-                    {value.value}
+                    {isDecrypted ? value.value : 'Hidden'}
                   </TableCell>
                 </TableRow>
               )

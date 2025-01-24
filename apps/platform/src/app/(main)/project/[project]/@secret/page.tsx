@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { SecretLogoSVG } from '@public/svg/secret'
@@ -24,6 +24,10 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const isDecrypted = useMemo(
+    () => selectedProject?.storePrivateKey === true || false,
+    [selectedProject]
+  )
 
   useEffect(() => {
     setIsLoading(true)
@@ -42,7 +46,7 @@ function SecretPage(): React.JSX.Element {
 
       const { success, error, data } =
         await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
-          { projectSlug: selectedProject.slug },
+          { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
           {}
         )
 
@@ -57,7 +61,7 @@ function SecretPage(): React.JSX.Element {
     getAllSecretsByProjectSlug()
 
     setIsLoading(false)
-  }, [selectedProject, setSecrets])
+  }, [isDecrypted, selectedProject, setSecrets])
 
   if (isLoading) {
     return (
@@ -98,8 +102,12 @@ function SecretPage(): React.JSX.Element {
             collapsible
             type="single"
           >
-            {secrets.map(({ secret, values }) => (
-              <SecretCard key={secret.id} {...{ secret, values }} />
+            {secrets.map((secret) => (
+              <SecretCard
+                isDecrypted={isDecrypted}
+                key={secret.secret.id}
+                secretData={secret}
+              />
             ))}
           </Accordion>
         </ScrollArea>
