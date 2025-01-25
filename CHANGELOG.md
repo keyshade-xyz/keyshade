@@ -1,3 +1,9 @@
+## [2.10.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.4...v2.10.0-stage.5) (2025-01-25)
+
+### 🐛 Bug Fixes
+
+* **platform:** Refactor layout structure to improve Navbar positioning & child component ([#661](https://github.com/keyshade-xyz/keyshade/issues/661)) ([31067f3](https://github.com/keyshade-xyz/keyshade/commit/31067f309914fc8cd4ac2c1b854e4d8039af5494))
+
 ## [2.10.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.3...v2.10.0-stage.4) (2025-01-25)
 
 ### 🐛 Bug Fixes
