@@ -58,7 +58,7 @@ function ProfilePage(): React.JSX.Element {
   }, [])
 
   return (
-    <main className="flex h-[78vh] flex-col gap-y-10 overflow-y-auto">
+    <main className="flex flex-col gap-y-10">
       {/* Avatar */}
       <div className="flex gap-[5vw]">
         <div className="flex flex-col gap-2">
