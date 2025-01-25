@@ -21,7 +21,17 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 
-export default function SecretCard({ secret, values }: Secret) {
+interface SecretCardProps {
+  secretData: Secret
+  isDecrypted: boolean
+}
+
+export default function SecretCard({
+  secretData,
+  isDecrypted
+}: SecretCardProps) {
+  const { secret, values } = secretData
+
   return (
     <AccordionItem
       className="rounded-xl bg-white/5 px-5"
@@ -33,7 +43,7 @@ export default function SecretCard({ secret, values }: Secret) {
         rightChildren={
           <div className="text-xs text-white/50">
             {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
-            <span className="text-white">{secret.lastUpdatedById}</span>
+            <span className="text-white">{secret.lastUpdatedBy.name}</span>
           </div>
         }
       >
@@ -57,20 +67,31 @@ export default function SecretCard({ secret, values }: Secret) {
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Environment</TableHead>
-              <TableHead>Secret</TableHead>
+        <Table className="h-full w-full">
+          <TableHeader className="h-[3.125rem] w-full">
+            <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
+              <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                Environment
+              </TableHead>
+              <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
+                Value
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {values.map((value) => {
               return (
-                <TableRow key={value.environment.id}>
-                  <TableCell>{value.environment.slug}</TableCell>
-                  <TableCell className="max-w-40 overflow-auto">
-                    {value.value}
+                <TableRow
+                  className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
+                  key={value.environment.id}
+                >
+                  <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                    {value.environment.name}
+                  </TableCell>
+                  <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
+                    {isDecrypted
+                      ? value.value
+                      : value.value.replace(/./g, '*').substring(0, 20)}
                   </TableCell>
                 </TableRow>
               )
