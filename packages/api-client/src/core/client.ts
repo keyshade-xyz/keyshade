@@ -2,7 +2,22 @@ export class APIClient {
   constructor(private readonly baseUrl: string) {}
 
   async request(url: string, options: RequestInit): Promise<Response> {
-    return await fetch(`${this.baseUrl}${url}`, options)
+    const response = await fetch(`${this.baseUrl}${url}`, options);
+
+    if (response.status === 403) {
+      // Clear local data and cookies
+      localStorage.clear();
+      document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+      });
+
+      // Redirect to /auth
+      window.location.href = "/auth";
+      return Promise.reject(new Error("User is not authenticated. Redirecting to /auth."));
+    }
+
+    return response;
   }
 
   /**
