@@ -1,3 +1,9 @@
+## [2.10.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.3...v2.10.0-stage.4) (2025-01-25)
+
+### 🐛 Bug Fixes
+
+* **cli:** Workspace membership API client payload fixed ([#614](https://github.com/keyshade-xyz/keyshade/issues/614)) ([#648](https://github.com/keyshade-xyz/keyshade/issues/648)) ([e23057b](https://github.com/keyshade-xyz/keyshade/commit/e23057b382f0f0d407a9d457876868b9cc39dda1))
+
 ## [2.10.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.2...v2.10.0-stage.3) (2025-01-25)
 
 ### 🚀 Features
