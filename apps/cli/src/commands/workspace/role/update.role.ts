@@ -49,18 +49,54 @@ export default class UpdateRoleCommand extends BaseCommand {
       },
       {
         short: '-p',
-        long: '--project-slugs <comma separated list>',
+        long: '--projects <comma separated list>',
         description: 'Project slugs of the workspace role.'
+      },
+      {
+        short: '-e',
+        long: '--environments <comma separated list>',
+        description:
+          'Environment slugs to be associated for projects. Separate list of environments with colon(:) for each project. And comma(,) to separate each project.'
       }
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceRoleSlug] = args
-    const { name, description, colorCode, authorities, projectSlugs } = options
+    const {
+      name,
+      description,
+      colorCode,
+      authorities,
+      projects,
+      environments
+    } = options
 
     const authoritiesArray = authorities?.split(',')
-    const projectSlugsArray = projectSlugs?.split(',')
+    const projectSlugsArray = projects?.split(',')
+    const environmentSlugsArray = environments?.split(',')
+
+    if (projectSlugsArray?.length !== environmentSlugsArray?.length) {
+      Logger.error('Number of projects and environments should be equal')
+      return
+    }
+
+    const projectEnvironments: Array<{
+      projectSlug: string
+      environmentSlugs: string[]
+    }> = []
+
+    const len = projectSlugsArray.length
+    for (let i = 0; i < len; i++) {
+      projectEnvironments.push({
+        projectSlug: projectSlugsArray[i],
+        environmentSlugs: environmentSlugsArray[i].split(':')
+      })
+    }
 
     const { data, error, success } =
       await ControllerInstance.getInstance().workspaceRoleController.updateWorkspaceRole(
@@ -70,7 +106,8 @@ export default class UpdateRoleCommand extends BaseCommand {
           description,
           colorCode,
           authorities: authoritiesArray,
-          projectSlugs: projectSlugsArray
+          projectEnvironments:
+            projectEnvironments.length > 0 ? projectEnvironments : undefined
         },
         this.headers
       )
@@ -92,6 +129,11 @@ export default class UpdateRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed updating workspace role: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed updating workspace role.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

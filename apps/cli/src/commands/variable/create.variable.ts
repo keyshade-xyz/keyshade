@@ -48,6 +48,10 @@ export default class CreateVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const { name, note, entries } = await this.parseInput(options)
     const [projectSlug] = args
@@ -69,11 +73,16 @@ export default class CreateVariable extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Variable ${data.name} (${data.slug}) created successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
+      Logger.info(
+        `Variable ${data.variable.name} (${data.variable.slug}) created successfully!`
+      )
+      Logger.info(`Created at ${data.variable.createdAt}`)
+      Logger.info(`Updated at ${data.variable.updatedAt}`)
     } else {
       Logger.error(`Failed to create variable: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create variable.\n' + JSON.stringify(error))
+      }
     }
   }
 

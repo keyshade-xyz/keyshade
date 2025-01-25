@@ -1,6 +1,7 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
@@ -12,7 +13,7 @@ export default class ListSecret extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'List all secrets under a project and environment'
+    return 'List all secrets under a project'
   }
 
   getArguments(): CommandArgument[] {
@@ -20,36 +21,64 @@ export default class ListSecret extends BaseCommand {
       {
         name: '<Project Slug>',
         description: 'Slug of the project whose secrets you want.'
-      },
+      }
+    ]
+  }
+
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<Environment Slug>',
-        description: 'Slug of the environment whose secrets you want.'
+        short: '-d',
+        long: '--decrypt-value',
+        description:
+          'Set this to true if the project contains the private key. If set to true, the values of the secret will be in plaintext format'
       }
     ]
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    const [projectSlug, environmentSlug] = args
+    const [projectSlug] = args
+
     const { data, error, success } =
-      await ControllerInstance.getInstance().secretController.getAllSecretsOfEnvironment(
+      await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
-          projectSlug,
-          environmentSlug
+          projectSlug
         },
         this.headers
       )
 
     if (success) {
-      const secrets = data
+      const secrets = data.items
       if (secrets.length > 0) {
-        data.forEach((secret: any) => {
-          Logger.info(`- ${secret.name} (${secret.value})`)
+        secrets.forEach(({ secret, values }) => {
+          Logger.info(`- ${secret.name} (${secret.slug})`)
+          values.forEach(({ environment, value }) => {
+            Logger.info(
+              `  |_ ${environment.name} (${environment.slug}): ${value}`
+            )
+          })
         })
       } else {
-        Logger.info('No secrets found')
+        Logger.error(`Failed fetching secrets: ${error.message}`)
+        if (this.metricsEnabled && error?.statusCode === 500) {
+          Logger.report(
+            'Failed fetching secrets for project.\n' + JSON.stringify(error)
+          )
+        }
       }
-    } else {
-      Logger.error(`Failed fetching secrets: ${error.message}`)
+    }
+  }
+
+  private async parseInput(options: CommandActionData['options']): Promise<{
+    decryptValue: boolean
+  }> {
+    const { decryptValue = false } = options // defaults to false
+    return {
+      decryptValue
     }
   }
 }

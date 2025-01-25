@@ -1,38 +1,29 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { AddSVG } from '@public/svg/shared'
-import type { Project } from '@keyshade/schema'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import type {
+  ClientResponse,
+  GetAllEnvironmentsOfProjectResponse
+} from '@keyshade/schema'
+import { toast } from 'sonner'
+import { useAtom, useSetAtom } from 'jotai'
+import VariablePage from './@variable/page'
+import SecretPage from './@secret/page'
 import ControllerInstance from '@/lib/controller-instance'
+import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
+import { Toaster } from '@/components/ui/sonner'
+import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
+import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 
 interface DetailedProjectPageProps {
   params: { project: string }
-  secret: React.ReactNode
-  variable: React.ReactNode
 }
 
 function DetailedProjectPage({
-  params,
-  secret,
-  variable
+  params
 }: DetailedProjectPageProps): JSX.Element {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
-  const [key, setKey] = useState<string>('')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used later
-  const [value, setValue] = useState<string>('')
-
-  const [currentProject, setCurrentProject] = useState<Project>()
+  const [selectedProject, setselectedProject] = useAtom(selectedProjectAtom)
+  const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
@@ -46,75 +37,72 @@ function DetailedProjectPage({
         )
 
       if (success && data) {
-        setCurrentProject(data)
+        setselectedProject(data)
       } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching the project. Check console for
+              more info.
+            </p>
+          )
+        })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
     }
 
     getProjectBySlug()
-  }, [params.project])
+  }, [params.project, setselectedProject])
+
+  useEffect(() => {
+    const getAllEnvironments = async () => {
+      if (!selectedProject) {
+        return
+      }
+
+      const {
+        success,
+        error,
+        data
+      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
+        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+          { projectSlug: selectedProject.slug },
+          {}
+        )
+
+      if (success && data) {
+        setEnvironments(data.items)
+      } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching environments. Check console
+              for more info.
+            </p>
+          )
+        })
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
+    }
+
+    getAllEnvironments()
+  }, [selectedProject, setEnvironments])
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="flex justify-between ">
-        <div className="text-3xl">{currentProject?.name}</div>
-        <Dialog>
-          <DialogTrigger>
-            <Button>
-              {' '}
-              <AddSVG /> Add Key
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a new secret</DialogTitle>
-              <DialogDescription>
-                Add a new secret to the project. This secret will be encrypted
-                and stored securely.
-              </DialogDescription>
-            </DialogHeader>
-            <div>
-              <div className="flex flex-col gap-y-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Key
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="username"
-                    onChange={(e) => {
-                      setKey(e.target.value)
-                    }}
-                    placeholder="Enter the name of the secret"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Value
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="username"
-                    onChange={(e) => {
-                      setValue(e.target.value)
-                    }}
-                    placeholder="Enter the value of the secret"
-                  />
-                </div>
-              </div>
-              <div className="mt-4 flex justify-end">
-                <Button variant="secondary">Add Key</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+      <div className="flex h-[3.625rem] w-full justify-between p-3 ">
+        <div className="text-3xl">{selectedProject?.name}</div>
+        {tab === 'secret' && <AddSecretDialog />}
+        {tab === 'variable' && <AddVariableDialogue />}
       </div>
-      <div>
-        {tab === 'secret' && secret}
-        {tab === 'variable' && variable}
+
+      <div className="h-full w-full overflow-y-scroll">
+        {tab === 'secret' && <SecretPage />}
+        {tab === 'variable' && <VariablePage />}
       </div>
+      <Toaster />
     </main>
   )
 }

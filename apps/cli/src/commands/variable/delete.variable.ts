@@ -24,6 +24,10 @@ export default class DeleteVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [variableSlug] = args
 
@@ -39,6 +43,9 @@ export default class DeleteVariable extends BaseCommand {
       Logger.info(`Variable ${variableSlug} deleted successfully!`)
     } else {
       Logger.error(`Failed to delete variable: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to delete variable.\n' + JSON.stringify(error))
+      }
     }
   }
 }

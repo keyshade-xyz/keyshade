@@ -24,6 +24,10 @@ export default class DeleteSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [secretSlug] = args
 
@@ -39,6 +43,9 @@ export default class DeleteSecret extends BaseCommand {
       Logger.info(`Secret ${secretSlug} deleted successfully!`)
     } else {
       Logger.error(`Failed to delete secret: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to delete secret.\n' + JSON.stringify(error))
+      }
     }
   }
 }

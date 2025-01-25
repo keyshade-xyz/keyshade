@@ -24,6 +24,10 @@ export default class DeleteProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
@@ -39,6 +43,9 @@ export default class DeleteProject extends BaseCommand {
       Logger.info(`Project ${projectSlug} deleted successfully!`)
     } else {
       Logger.error(`Failed to delete project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to delete project.\n' + JSON.stringify(error))
+      }
     }
   }
 }

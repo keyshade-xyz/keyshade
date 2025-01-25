@@ -53,6 +53,10 @@ export default class CreateSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const { name, note, rotateAfter, entries } = await this.parseInput(options)
     const [projectSlug] = args
@@ -75,11 +79,16 @@ export default class CreateSecret extends BaseCommand {
       )
 
     if (success) {
-      Logger.info(`Secret ${data.name} (${data.slug}) created successfully!`)
-      Logger.info(`Created at ${data.createdAt}`)
-      Logger.info(`Updated at ${data.updatedAt}`)
+      Logger.info(
+        `Secret ${data.secret.name} (${data.secret.slug}) created successfully!`
+      )
+      Logger.info(`Created at ${data.secret.createdAt}`)
+      Logger.info(`Updated at ${data.secret.updatedAt}`)
     } else {
       Logger.error(`Failed to create secret: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create secret.\n' + JSON.stringify(error))
+      }
     }
   }
 
@@ -114,7 +123,8 @@ export default class CreateSecret extends BaseCommand {
       }
       entry.split(' ').forEach((pair) => {
         const [key, value] = pair.split('=')
-        entryObj[key] = value
+        entryObj.environmentSlug = value
+        entryObj.value = key
       })
       return entryObj
     })

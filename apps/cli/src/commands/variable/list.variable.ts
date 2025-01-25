@@ -24,6 +24,10 @@ export default class ListVariable extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { data, error, success } =
@@ -35,16 +39,26 @@ export default class ListVariable extends BaseCommand {
       )
 
     if (success) {
-      const variables = data
-      if (variables.items.length > 0) {
-        variables.items.forEach((variable: any) => {
-          Logger.info(`- ${variable.name} (${variable.value})`)
+      const variables = data.items
+      if (variables.length > 0) {
+        variables.forEach(({ variable, values }) => {
+          Logger.info(`- ${variable.name} (${variable.slug})`)
+          values.forEach(({ environment, value }) => {
+            Logger.info(
+              `  |_ ${environment.name} (${environment.slug}): ${value}`
+            )
+          })
         })
       } else {
         Logger.info('No variables found')
       }
     } else {
       Logger.error(`Failed fetching variables: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching variables for project.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

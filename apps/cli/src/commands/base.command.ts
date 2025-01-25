@@ -8,6 +8,7 @@ import { Logger } from '@/util/logger'
 import { getDefaultProfile } from '@/util/profile'
 import { Option, type Command } from 'commander'
 import ControllerInstance from '@/util/controller-instance'
+import { SentryInstance } from '@/util/sentry'
 
 /**
  * The base class for all commands. All commands should extend this class.
@@ -41,18 +42,35 @@ export default abstract class BaseCommand {
           const globalOptions = program.optsWithGlobals()
           await this.setGlobalContextFields(globalOptions)
 
-          if (this.canMakeHttpRequests() && !this.apiKey) {
-            throw new Error(
-              'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
-            )
+          if (this.metricsEnabled) {
+            SentryInstance.getInstance()
+          }
+
+          if (this.canMakeHttpRequests()) {
+            if (!this.apiKey) {
+              throw new Error(
+                'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
+              )
+            }
+
+            try {
+              await ControllerInstance.getInstance().appController.health(
+                this.headers
+              )
+            } catch {
+              throw new Error(
+                `Could not connect to the server: ${this.baseUrl}.`
+              )
+            }
           }
 
           const commandOptions = data[argsCount]
           const args: string[] = data.slice(0, argsCount)
           await this.action({ args, options: commandOptions })
         } catch (error) {
-          Logger.error(`${error as string}`)
-          process.exit(1)
+          const errorInfo = error as string
+          Logger.error(errorInfo)
+          if (this.metricsEnabled) Logger.report(errorInfo)
         }
       })
 

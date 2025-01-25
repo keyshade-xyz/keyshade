@@ -20,6 +20,10 @@ export default class ListWorkspace extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options }: CommandActionData): Promise<void> {
     Logger.info('Fetching all workspaces...')
 
@@ -42,6 +46,9 @@ export default class ListWorkspace extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching workspaces: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching workspaces.\n' + JSON.stringify(error))
+      }
     }
   }
 }

@@ -30,6 +30,10 @@ export default class ListRoleCommand extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     Logger.info("Fetching workspace's roles...")
 
@@ -56,6 +60,11 @@ export default class ListRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching roles: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching workspace roles.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

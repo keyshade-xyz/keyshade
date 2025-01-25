@@ -1,7 +1,8 @@
 import BaseCommand from '@/commands/base.command'
-import {
-  type CommandActionData,
-  type CommandArgument
+import type {
+  CommandOption,
+  CommandActionData,
+  CommandArgument
 } from '@/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
@@ -20,10 +21,16 @@ export default class RemoveUserCommand extends BaseCommand {
       {
         name: '<Workspace Slug>',
         description: 'Slug of the workspace which you want to fetch.'
-      },
+      }
+    ]
+  }
+
+  getOptions(): CommandOption[] {
+    return [
       {
-        name: '<User Email>',
-        description: 'Email of the user to remove.'
+        short: '-e',
+        long: '--emails <string>',
+        description: 'Comma separated list of emails of the users to remove.'
       }
     ]
   }
@@ -32,14 +39,15 @@ export default class RemoveUserCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
-    const [workspaceSlug, email] = args
+  async action({ args, options }: CommandActionData): Promise<void> {
+    const [workspaceSlug] = args
+    const { emails } = options
 
     const { error, success } =
       await ControllerInstance.getInstance().workspaceMembershipController.removeUsers(
         {
           workspaceSlug,
-          userEmails: email
+          userEmails: emails.split(',')
         },
         this.headers
       )
@@ -47,9 +55,12 @@ export default class RemoveUserCommand extends BaseCommand {
     if (success) {
       Logger.info('Removed user from workspace successfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
-      Logger.info(`User email: ${email}`)
+      Logger.info(`Email: ${emails}`)
     } else {
-      Logger.error(`Failed to remove user: ${error.message}`)
+      Logger.error(`Failed to remove users: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to remove users.\n' + JSON.stringify(error))
+      }
     }
   }
 }

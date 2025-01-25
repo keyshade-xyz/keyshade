@@ -6,7 +6,9 @@
       "@/*": ["./src/*"]
     },
     "outDir": "dist",
-    "plugins": [{ "transform": "typescript-transform-paths" }]
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "tsc-alias": {
     "resolveFullPaths": true,
@@ -21,6 +23,11 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts", ".eslintrc.cjs", "tsup.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    ".eslintrc.cjs",
+    "tsup.config.ts",
+    "esbuild.config.js"
+  ],
   "exclude": ["node_modules"]
 }

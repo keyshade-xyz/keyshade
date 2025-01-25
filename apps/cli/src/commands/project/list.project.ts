@@ -24,6 +24,10 @@ export default class ListProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
 
@@ -43,10 +47,13 @@ export default class ListProject extends BaseCommand {
           Logger.info(`- ${project.name} (${project.slug})`)
         })
       } else {
-        Logger.info('No forks found')
+        Logger.info('No projects found')
       }
     } else {
       Logger.error(`Failed fetching projects: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching projects.\n' + JSON.stringify(error))
+      }
     }
   }
 }

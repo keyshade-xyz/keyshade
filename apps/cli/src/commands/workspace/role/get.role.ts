@@ -24,6 +24,10 @@ export default class GetRoleCommand extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceRoleSlug] = args
 
@@ -51,6 +55,11 @@ export default class GetRoleCommand extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching workspace role: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching workspace role.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

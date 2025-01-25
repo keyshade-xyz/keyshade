@@ -15,6 +15,24 @@ function ProfilePage(): React.JSX.Element {
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>('')
+
+  const updateSelf = useCallback(async () => {
+    try {
+      await ControllerInstance.getInstance().userController.updateSelf(
+        {
+          name: userData.name,
+          email: userData.email === email ? undefined : email
+        },
+        {}
+      )
+      toast.success('Profile updated successfully')
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+    }
+    setIsModified(false)
+  }, [userData, email])
 
   const updateSelf = useCallback(async () => {
     try {
@@ -43,6 +61,7 @@ function ProfilePage(): React.JSX.Element {
             name: data.name,
             profilePictureUrl: data.profilePictureUrl || ''
           })
+          setEmail(data.email)
           setIsLoading(false)
         } else {
           // eslint-disable-next-line no-console -- we need to log the error
@@ -56,7 +75,7 @@ function ProfilePage(): React.JSX.Element {
   }, [])
 
   return (
-    <main className="flex h-[78vh] flex-col gap-y-10 overflow-y-auto">
+    <main className="flex flex-col gap-y-10">
       {/* Avatar */}
       <div className="flex gap-[5vw]">
         <div className="flex flex-col gap-2">
@@ -104,10 +123,10 @@ function ProfilePage(): React.JSX.Element {
             disabled
             // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             //   setIsModified(true)
-            //   setUserData((prev) => ({ ...prev, email: e.target.value }))
+            //   setEmail(e.target.value)
             // }}
             placeholder="email"
-            value={userData.email}
+            value={email}
           />
         )}
       </div>

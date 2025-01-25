@@ -24,6 +24,10 @@ export class DeleteEnvironment extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [environmentSlug] = args
 
@@ -44,6 +48,9 @@ export class DeleteEnvironment extends BaseCommand {
       Logger.info('Environment deleted successfully')
     } else {
       Logger.error(`Error deleting environment: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Error deleting environment.\n' + JSON.stringify(error))
+      }
     }
   }
 }

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
 import type { Workspace } from '@keyshade/schema'
+import { useAtom } from 'jotai'
 import { Input } from './input'
 import { Label } from './label'
 import {
@@ -17,11 +18,6 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import {
-  getCurrentWorkspace,
-  setCurrentWorkspace,
-  setWorkspace
-} from '@/lib/workspace-storage'
 import { cn } from '@/lib/utils'
 import {
   Popover,
@@ -36,6 +32,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
+import { selectedWorkspaceAtom } from '@/store'
 
 async function getAllWorkspace(): Promise<Workspace[] | undefined> {
   try {
@@ -62,9 +59,13 @@ async function getAllWorkspace(): Promise<Workspace[] | undefined> {
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspace, setAllWorkspace] = useState<Workspace[]>([])
+  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+
+  const [selectedWorkspace, setselectedWorkspace] = useAtom(
+    selectedWorkspaceAtom
+  )
 
   const router = useRouter()
 
@@ -91,7 +92,7 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setCurrentWorkspace(data)
+        setselectedWorkspace(data)
         setOpen(false)
       }
     } catch (error) {
@@ -104,15 +105,15 @@ export function Combobox(): React.JSX.Element {
     getAllWorkspace()
       .then((data) => {
         if (data) {
-          setAllWorkspace(data)
-          setWorkspace(data)
+          setAllWorkspaces(data)
+          setselectedWorkspace(data[0])
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error('error:', error)
       })
-  }, [])
+  }, [setselectedWorkspace])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -130,7 +131,7 @@ export function Combobox(): React.JSX.Element {
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
-                {getCurrentWorkspace()?.name ?? 'No workspace'}
+                {selectedWorkspace?.name ?? 'No workspace'}
               </div>
               <span className="text-xs text-white/55">100+ projects</span>
             </div>
@@ -145,12 +146,12 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspace.map((workspace) => {
+              {allWorkspaces.map((workspace) => {
                 return (
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setCurrentWorkspace(workspace)
+                      setselectedWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}
@@ -159,7 +160,7 @@ export function Combobox(): React.JSX.Element {
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        getCurrentWorkspace()?.name === workspace.name
+                        selectedWorkspace?.name === workspace.name
                           ? 'opacity-100'
                           : 'opacity-0'
                       )}
@@ -214,7 +215,14 @@ export function Combobox(): React.JSX.Element {
                           router.refresh()
                         })
                         .catch(() => {
-                          toast.error('Failed to update user details')
+                          toast.error('Something went wrong!', {
+                            description: (
+                              <p className="text-xs text-red-300">
+                                Failed to update the user details. Check console
+                                for more info.
+                              </p>
+                            )
+                          })
                         })
                     }}
                     variant="secondary"

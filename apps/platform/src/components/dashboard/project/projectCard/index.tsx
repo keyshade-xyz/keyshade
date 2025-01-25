@@ -1,11 +1,10 @@
 'use client'
-// import { ThreeDotOptionSVG } from '@public/svg/shared'
 import Link from 'next/link'
-import type { Dispatch, SetStateAction } from 'react'
 import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
 import { ConfigSVG, EnvironmentSVG, SecretSVG } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
+import { useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,24 +12,26 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
+import { editProjectOpenAtom } from '@/store'
 
 interface ProjectCardProps {
   project: ProjectWithCount
-  setIsSheetOpen: Dispatch<SetStateAction<boolean>>
 }
 
-function ProjectCard({
-  project,
-  setIsSheetOpen
+export default function ProjectCard({
+  project
 }: ProjectCardProps): JSX.Element {
   const {
     id,
+    slug,
     name,
     description,
     environmentCount,
     secretCount,
     variableCount
   } = project
+
+  const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -69,7 +70,7 @@ function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`/project/${id}?tab=Secret`}
+          href={`/project/${slug}?tab=Secret`}
           key={id}
         >
           <div className="flex items-center gap-x-5">
@@ -120,7 +121,7 @@ function ProjectCard({
         <ContextMenuItem
           inset
           onClick={() => {
-            setIsSheetOpen(true)
+            setIsEditProjectSheetOpen(true)
           }}
         >
           Edit
@@ -130,5 +131,3 @@ function ProjectCard({
     </ContextMenu>
   )
 }
-
-export default ProjectCard

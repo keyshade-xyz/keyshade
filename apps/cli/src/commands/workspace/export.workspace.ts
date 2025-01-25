@@ -36,6 +36,10 @@ export default class ExportWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
     const { saveToFile } = options as { saveToFile: string }
@@ -63,6 +67,9 @@ export default class ExportWorkspace extends BaseCommand {
       }
     } else {
       Logger.error(`Failed exporting workspace: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed exporting workspace.\n' + JSON.stringify(error))
+      }
     }
   }
 }

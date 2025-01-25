@@ -31,6 +31,10 @@ export default class CreateWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ options }: CommandActionData): Promise<void> {
     const { name, icon } = await this.parseInput(options)
 
@@ -49,6 +53,9 @@ export default class CreateWorkspace extends BaseCommand {
       Logger.info(`Updated at ${data.updatedAt}`)
     } else {
       Logger.error(`Failed to create workspace: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to create workspace.\n' + JSON.stringify(error))
+      }
     }
   }
 

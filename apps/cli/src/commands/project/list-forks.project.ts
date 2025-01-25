@@ -24,6 +24,10 @@ export default class ListProjectForks extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
@@ -44,6 +48,11 @@ export default class ListProjectForks extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching forks: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching project forks.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

@@ -24,6 +24,10 @@ export default class GetWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
 
@@ -45,6 +49,9 @@ export default class GetWorkspace extends BaseCommand {
       Logger.info(`Is default workspace: ${data.isDefault}`)
     } else {
       Logger.error(`Failed fetching workspace: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed fetching workspace.\n' + JSON.stringify(error))
+      }
     }
   }
 }

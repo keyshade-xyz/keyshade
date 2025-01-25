@@ -30,6 +30,10 @@ export class ListEnvironment extends BaseCommand {
     return PAGINATION_OPTION
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
@@ -56,6 +60,9 @@ export class ListEnvironment extends BaseCommand {
       })
     } else {
       Logger.error(`Failed to fetch environments: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to fetch environments.\n' + JSON.stringify(error))
+      }
     }
   }
 }

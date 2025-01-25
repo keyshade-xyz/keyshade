@@ -10,6 +10,7 @@ import {
   Authority,
   Environment,
   EventSource,
+  EventTriggerer,
   EventType,
   Project,
   Secret,
@@ -33,6 +34,13 @@ import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
+import {
+  getSecretWithValues,
+  generateSecretValue,
+  SecretWithValues
+} from '@/common/secret'
+import { Cron, CronExpression } from '@nestjs/schedule'
+import { SecretWithProject } from '../secret.types'
 
 @Injectable()
 export class SecretService {
@@ -61,7 +69,7 @@ export class SecretService {
     user: User,
     dto: CreateSecret,
     projectSlug: Project['slug']
-  ) {
+  ): Promise<SecretWithValues> {
     // Fetch the project
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject({
@@ -89,12 +97,13 @@ export class SecretService {
       : new Map<string, string>()
 
     // Create the secret
-    const secret = await this.prisma.secret.create({
+    const secretData = await this.prisma.secret.create({
       data: {
         name: dto.name,
         slug: await generateEntitySlug(dto.name, 'SECRET', this.prisma),
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
+        rotateAfter: +dto.rotateAfter,
         versions: shouldCreateRevisions && {
           createMany: {
             data: await Promise.all(
@@ -119,9 +128,10 @@ export class SecretService {
         }
       },
       include: {
-        project: {
+        lastUpdatedBy: {
           select: {
-            workspaceId: true
+            id: true,
+            name: true
           }
         },
         versions: {
@@ -129,25 +139,29 @@ export class SecretService {
             environment: {
               select: {
                 id: true,
+                name: true,
                 slug: true
               }
             },
-            value: true
+            value: true,
+            version: true
           }
         }
       }
     })
 
+    const secret = getSecretWithValues(secretData)
+
     await createEvent(
       {
         triggeredBy: user,
-        entity: secret,
+        entity: secret.secret,
         type: EventType.SECRET_ADDED,
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
+          secretId: secret.secret.id,
+          name: secret.secret.name,
           projectId,
           projectName: project.name
         },
@@ -156,7 +170,7 @@ export class SecretService {
       this.prisma
     )
 
-    this.logger.log(`User ${user.id} created secret ${secret.id}`)
+    this.logger.log(`User ${user.id} created secret ${secret.secret.id}`)
 
     return secret
   }
@@ -212,9 +226,12 @@ export class SecretService {
             ? await generateEntitySlug(dto.name, 'SECRET', this.prisma)
             : undefined,
           note: dto.note,
-          rotateAt: dto.rotateAfter
-            ? addHoursToDate(dto.rotateAfter)
-            : undefined,
+          ...(dto.rotateAfter
+            ? {
+                rotateAt: addHoursToDate(dto.rotateAfter),
+                rotateAfter: +dto.rotateAfter
+              }
+            : {}),
           lastUpdatedById: user.id
         },
         select: {
@@ -781,6 +798,131 @@ export class SecretService {
     )
 
     return { items, metadata }
+  }
+
+  /**
+   * Rotate values of secrets that have reached their rotation time
+   * @param currentTime the current time
+   */
+  @Cron(CronExpression.EVERY_HOUR)
+  async rotateSecrets(currentTime?: Date): Promise<void> {
+    // Fetch all secrets that have reached their rotation time
+    currentTime = currentTime ?? new Date()
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        rotateAt: {
+          lt: currentTime
+        }
+      },
+      include: {
+        project: true
+      }
+    })
+
+    // Rotate secrets
+    await Promise.all(secrets.map((secret) => this.rotateSecret(secret)))
+
+    this.logger.log('Secrets rotated')
+  }
+
+  private async rotateSecret(secret: SecretWithProject): Promise<void> {
+    const op = []
+
+    // Update the secret
+    op.push(
+      this.prisma.secret.update({
+        where: {
+          id: secret.id
+        },
+        data: {
+          rotateAt: addHoursToDate(secret.rotateAfter)
+        },
+        select: {
+          name: true
+        }
+      })
+    )
+
+    // Fetch the latest version of the secret for all environments
+    const latestEnvironmentVersions = await this.prisma.secretVersion.groupBy({
+      where: {
+        secretId: secret.id
+      },
+      by: ['environmentId'],
+      _max: {
+        version: true
+      }
+    })
+
+    // Create new versions for all environments
+    for (const latestEnvironmentVersion of latestEnvironmentVersions) {
+      // Create the new version
+      op.push(
+        this.prisma.secretVersion.create({
+          data: {
+            value: await encrypt(
+              secret.project.publicKey,
+              generateSecretValue()
+            ),
+            version: latestEnvironmentVersion._max.version + 1,
+            environmentId: latestEnvironmentVersion.environmentId,
+            secretId: secret.id
+          },
+          select: {
+            environment: {
+              select: {
+                id: true
+              }
+            },
+            value: true
+          }
+        })
+      )
+    }
+
+    // Make the transaction
+    const tx = await this.prisma.$transaction(op)
+
+    const updatedSecret = tx[0]
+    const updatedVersions = tx.slice(1)
+
+    // Notify the new secret version through Redis
+    for (const updatedVersion of updatedVersions) {
+      try {
+        await this.redis.publish(
+          CHANGE_NOTIFIER_RSC,
+          JSON.stringify({
+            environmentId: updatedVersion.environment.id,
+            name: updatedSecret.name,
+            value: updatedVersion.value,
+            isPlaintext: true
+          } as ChangeNotificationEvent)
+        )
+      } catch (error) {
+        this.logger.error(`Error publishing secret update to Redis: ${error}`)
+      }
+    }
+
+    await createEvent(
+      {
+        triggerer: EventTriggerer.SYSTEM,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret rotated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        },
+        workspaceId: secret.project.workspaceId
+      },
+      this.prisma
+    )
+
+    this.logger.log(`Secret ${secret.id} rotated`)
   }
 
   /**

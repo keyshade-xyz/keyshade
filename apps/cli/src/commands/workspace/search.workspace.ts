@@ -28,6 +28,10 @@ export default class SearchWorkspace extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug, searchTerm] = args
 
@@ -74,6 +78,11 @@ export default class SearchWorkspace extends BaseCommand {
       Logger.info('')
     } else {
       Logger.error(`Failed searching in workspace: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed searching in workspace.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 }

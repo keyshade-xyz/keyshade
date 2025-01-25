@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
@@ -105,6 +106,9 @@ enum Authority {
   READ_SELF
   UPDATE_SELF
   READ_EVENT
+
+  // Master authority
+  ADMIN
 }
 
 enum NotificationType {
@@ -252,6 +256,8 @@ model Environment {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
 
+  projectWorkspaceRoleAssociations ProjectWorkspaceRoleAssociation[]
+
   @@unique([projectId, name])
   @@index([name])
 }
@@ -294,6 +300,8 @@ model ProjectWorkspaceRoleAssociation {
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId String
+
+  environments Environment[]
 
   @@unique([roleId, projectId])
 }
@@ -363,14 +371,15 @@ model SecretVersion {
 }
 
 model Secret {
-  id        String          @id @default(cuid())
-  name      String
-  slug      String          @unique
-  versions  SecretVersion[] // Stores the versions of the secret
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  rotateAt  DateTime?
-  note      String?
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  versions    SecretVersion[] // Stores the versions of the secret
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  rotateAt    DateTime?
+  rotateAfter Int?
+  note        String?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

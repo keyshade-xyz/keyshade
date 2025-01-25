@@ -13,7 +13,7 @@ export default class GetSecret extends BaseCommand {
   }
 
   getDescription(): string {
-    return 'Get all secrets under a project'
+    return 'get all secrets under a project and environment'
   }
 
   getArguments(): CommandArgument[] {
@@ -34,6 +34,10 @@ export default class GetSecret extends BaseCommand {
           'Set this to true if the project contains the private key. If set to true, the values of the secret will be in plaintext format'
       }
     ]
+  }
+
+  canMakeHttpRequests(): boolean {
+    return true
   }
 
   async action({ args, options }: CommandActionData): Promise<void> {
@@ -61,6 +65,11 @@ export default class GetSecret extends BaseCommand {
       }
     } else {
       Logger.error(`Failed fetching secrets: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching secrets for project.\n' + JSON.stringify(error)
+        )
+      }
     }
   }
 

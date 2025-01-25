@@ -1,4 +1,5 @@
 import {
+  AppController,
   EnvironmentController,
   EventController,
   IntegrationController,
@@ -12,6 +13,15 @@ import {
 
 export default class ControllerInstance {
   private static instance: ControllerInstance | null
+
+  private _appController: AppController | null = null
+
+  get appController(): AppController {
+    if (!this._appController) {
+      throw new Error('ControllerInstance not initialized')
+    }
+    return this._appController
+  }
 
   private _environmentController: EnvironmentController | null = null
 
@@ -99,6 +109,7 @@ export default class ControllerInstance {
     if (!ControllerInstance.instance) {
       const instance = new ControllerInstance()
 
+      instance._appController = new AppController(baseUrl)
       instance._environmentController = new EnvironmentController(baseUrl)
       instance._eventController = new EventController(baseUrl)
       instance._integrationController = new IntegrationController(baseUrl)

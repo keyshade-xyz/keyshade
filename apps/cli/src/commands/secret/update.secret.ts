@@ -52,6 +52,10 @@ export default class UpdateSecret extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
 
@@ -68,6 +72,9 @@ export default class UpdateSecret extends BaseCommand {
       Logger.info('Secret updated successfully')
     } else {
       Logger.error(`Failed to update secret: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to update secret.\n' + JSON.stringify(error))
+      }
     }
   }
 }

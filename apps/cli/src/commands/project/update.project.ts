@@ -53,6 +53,10 @@ export default class UpdateProject extends BaseCommand {
     ]
   }
 
+  canMakeHttpRequests(): boolean {
+    return true
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
@@ -71,6 +75,9 @@ export default class UpdateProject extends BaseCommand {
       Logger.info(`Updated at ${data.updatedAt}`)
     } else {
       Logger.error(`Failed to update project: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report('Failed to update project.\n' + JSON.stringify(error))
+      }
     }
   }
 }

@@ -557,60 +557,68 @@ describe('Project Controller Tests', () => {
       )) as Environment
 
       // Add two secrets
-      ;(await secretService.createSecret(
-        user2,
-        {
-          name: 'API_KEY',
-          entries: [
-            {
-              value: 'some_key',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project4.slug
-      )) as Secret
-      ;(await secretService.createSecret(
-        user2,
-        {
-          name: 'DB_PASSWORD',
-          entries: [
-            {
-              value: 'password',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project4.slug
-      )) as Secret
+      ;(
+        await secretService.createSecret(
+          user2,
+          {
+            name: 'API_KEY',
+            entries: [
+              {
+                value: 'some_key',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project4.slug
+        )
+      ).secret as Secret
+      ;(
+        await secretService.createSecret(
+          user2,
+          {
+            name: 'DB_PASSWORD',
+            entries: [
+              {
+                value: 'password',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project4.slug
+        )
+      ).secret as Secret
 
       // Add two variables
-      ;(await variableService.createVariable(
-        user2,
-        {
-          name: 'PORT',
-          entries: [
-            {
-              value: '8080',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project4.slug
-      )) as Variable
-      ;(await variableService.createVariable(
-        user2,
-        {
-          name: 'EXPIRY',
-          entries: [
-            {
-              value: '3600',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project4.slug
-      )) as Variable
+      ;(
+        await variableService.createVariable(
+          user2,
+          {
+            name: 'PORT',
+            entries: [
+              {
+                value: '8080',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project4.slug
+        )
+      ).variable as Variable
+      ;(
+        await variableService.createVariable(
+          user2,
+          {
+            name: 'EXPIRY',
+            entries: [
+              {
+                value: '3600',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project4.slug
+        )
+      ).variable as Variable
 
       const response = await app.inject({
         method: 'GET',
@@ -1287,62 +1295,70 @@ describe('Project Controller Tests', () => {
       )) as Environment
 
       // Add two secrets
-      const secret1 = (await secretService.createSecret(
-        user1,
-        {
-          name: 'API_KEY',
-          entries: [
-            {
-              value: 'some_key',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project3.slug
-      )) as Secret
+      const secret1 = (
+        await secretService.createSecret(
+          user1,
+          {
+            name: 'API_KEY',
+            entries: [
+              {
+                value: 'some_key',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project3.slug
+        )
+      ).secret as Secret
 
-      const secret2 = (await secretService.createSecret(
-        user1,
-        {
-          name: 'DB_PASSWORD',
-          entries: [
-            {
-              value: 'password',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project3.slug
-      )) as Secret
+      const secret2 = (
+        await secretService.createSecret(
+          user1,
+          {
+            name: 'DB_PASSWORD',
+            entries: [
+              {
+                value: 'password',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project3.slug
+        )
+      ).secret as Secret
 
       // Add two variables
-      const variable1 = (await variableService.createVariable(
-        user1,
-        {
-          name: 'PORT',
-          entries: [
-            {
-              value: '8080',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project3.slug
-      )) as Variable
+      const variable1 = (
+        await variableService.createVariable(
+          user1,
+          {
+            name: 'PORT',
+            entries: [
+              {
+                value: '8080',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project3.slug
+        )
+      ).variable as Variable
 
-      const variable2 = (await variableService.createVariable(
-        user1,
-        {
-          name: 'EXPIRY',
-          entries: [
-            {
-              value: '3600',
-              environmentSlug: environment.slug
-            }
-          ]
-        },
-        project3.slug
-      )) as Variable
+      const variable2 = (
+        await variableService.createVariable(
+          user1,
+          {
+            name: 'EXPIRY',
+            entries: [
+              {
+                value: '3600',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project3.slug
+        )
+      ).variable as Variable
 
       // Try forking the project
       const forkedProject = await projectService.forkProject(
@@ -1400,7 +1416,7 @@ describe('Project Controller Tests', () => {
       expect(devEnvironment.name).toBe(environment.name)
 
       expect(defaultEnvironment).toBeDefined()
-      expect(defaultEnvironment.name).toBe('Default')
+      expect(defaultEnvironment.name).toBe('default')
     })
 
     it('should only copy new environments, secrets and variables if sync is not hard', async () => {

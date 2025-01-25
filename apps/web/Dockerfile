@@ -1,6 +1,5 @@
 FROM node:20-alpine AS base
 
-
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
 RUN apk update && apk upgrade
@@ -8,7 +7,7 @@ RUN apk update && apk upgrade
 WORKDIR /app
 RUN npm install --ignore-scripts -g turbo
 COPY . .
-RUN turbo prune web --docker
+RUN turbo prune @keyshade/web --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
@@ -26,6 +25,12 @@ RUN pnpm install --no-cache --ignore-scripts
 # Build the project
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
+
+ARG NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=${NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID}
+ARG NEXT_PUBLIC_SENTRY_WEB_DSN=${NEXT_PUBLIC_SENTRY_WEB_DSN}
+ARG NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE=${NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE}
+ARG NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE=${NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE}
+ARG NEXT_PUBLIC_SENTRY_ENVIRONMENT=${NEXT_PUBLIC_SENTRY_ENVIRONMENT}
 
 RUN pnpm build:web
 
