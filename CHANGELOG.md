@@ -1,3 +1,17 @@
+## [2.10.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.2...v2.10.0-stage.3) (2025-01-25)
+
+### 🚀 Features
+
+* **platform:** Improved UI of [secure] listing ([#655](https://github.com/keyshade-xyz/keyshade/issues/655)) ([b19de47](https://github.com/keyshade-xyz/keyshade/commit/b19de47bdbe5c098fd2c256d4d9b65989498786c))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Fixed misplaced sentry sourcemaps commands ([fbd6f3b](https://github.com/keyshade-xyz/keyshade/commit/fbd6f3be5924c32c0df49177131acd39a3249076))
+
+### 🔨 Code Refactoring
+
+* **api:** Update getSelf function ([fe752ce](https://github.com/keyshade-xyz/keyshade/commit/fe752ce1f19582da2c5be9c48b0d7ef1a6332284))
+
 ## [2.10.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.1...v2.10.0-stage.2) (2025-01-24)
 
 ### 🐛 Bug Fixes
