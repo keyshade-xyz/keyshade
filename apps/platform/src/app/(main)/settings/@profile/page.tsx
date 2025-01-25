@@ -34,23 +34,6 @@ function ProfilePage(): React.JSX.Element {
     setIsModified(false)
   }, [userData, email])
 
-  const updateSelf = useCallback(async () => {
-    try {
-      await ControllerInstance.getInstance().userController.updateSelf(
-        {
-          name: userData.name,
-          email: userData.email
-        },
-        {}
-      )
-      toast.success('Profile updated successfully')
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-    setIsModified(false)
-  }, [userData])
-
   useEffect(() => {
     ControllerInstance.getInstance()
       .userController.getSelf()
