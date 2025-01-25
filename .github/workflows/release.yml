@@ -169,8 +169,8 @@ jobs:
           sentry-cli releases new $VERSION
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
-          sentry-cli sourcemaps inject dist
-          sentry-cli sourcemaps upload --release $VERSION -p $PROJECT dist
+          sentry-cli sourcemaps inject apps/api/dist
+          sentry-cli sourcemaps upload --release $VERSION -p $PROJECT apps/api/dist
 
   deploy-platform:
     needs: release
