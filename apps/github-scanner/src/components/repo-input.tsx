@@ -1,11 +1,11 @@
 'use client'
 import React, { useState } from 'react'
-import { ScanResponse } from '@/util/types'
+import { ScanResponse, ScanResult } from '@/util/types'
 
 function RepoInput() {
   const [url, setUrl] = useState('')
   const [responseData, setResponseData] = useState<ScanResponse | null>(null)
-  const [streamData, setStreamData] = useState<string[]>([])
+  const [streamData, setStreamData] = useState<ScanResult[]>([])
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -13,30 +13,39 @@ function RepoInput() {
     setStreamData([]) // Clear previous stream data
 
     try {
-      const response = await fetch('/api/scan?github_url=' + url)
-      if (!response.ok) {
-        const data = await response.json()
-        setResponseData({ error: data.error, loading: false })
-        return
-      }
+      const response = await fetch(`/api/scan?github_url=${url}`)
 
       const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('Failed to get reader from response body')
+      }
+
       const decoder = new TextDecoder()
       let done = false
 
       while (!done) {
-        const { value, done: readerDone } = await reader?.read()!
+        const { value, done: readerDone } = await reader.read()
         done = readerDone
-        const chunk = decoder
+        const chunks = decoder
           .decode(value, { stream: true })
           .split('<%keyshade-delim%>')
           .filter((s) => s.length > 0)
-        console.log(chunk, streamData)
-        setStreamData((prev) => [...prev, ...chunk])
+        const res: ScanResult[] = []
+        for (const chunk of chunks) {
+          const parsed = JSON.parse(chunk)
+          if (parsed.error) {
+            setStreamData([])
+            setResponseData({ error: parsed.error, loading: false })
+            return
+          }
+          res.push(parsed.secret)
+        }
+        setStreamData((prev) => [...prev, ...res])
       }
 
       setResponseData({ loading: false })
     } catch {
+      setStreamData([])
       setResponseData({ error: 'Internal Error', loading: false })
     }
   }
@@ -79,16 +88,14 @@ function RepoInput() {
       )}
       {streamData.length > 0 && (
         <div className="mt-4 grid gap-4">
-          {streamData.map((chunk, index) => {
-            console.log('>>' + chunk + '<<')
-            const { secret: file } = JSON.parse(chunk)
+          {streamData.map((item, index) => {
             return (
               <div key={index} className="grid gap-1 overflow-auto text-sm">
                 <p className="flex flex-wrap justify-center text-center text-sky-500">
-                  {file.file}:{file.line}
+                  {item.file}:{item.line}
                 </p>
                 <p className="flex flex-wrap justify-center text-center">
-                  {file.content}
+                  {item.content}
                 </p>
               </div>
             )

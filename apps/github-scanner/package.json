@@ -1,12 +1,12 @@
 {
-  "name": "github-scan",
+  "name": "github-scanner",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 5173",
     "build": "next build",
     "start": "next start -p 5173",
-    "lint": ""
+    "lint": "next lint --fix"
   },
   "dependencies": {
     "@keyshade/secret-scan": "workspace:*",
