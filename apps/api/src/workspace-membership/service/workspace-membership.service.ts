@@ -516,7 +516,8 @@ export class WorkspaceMembershipService {
               }
             }
           }
-        }
+        },
+        invitationAccepted: true
       }
     })
 
