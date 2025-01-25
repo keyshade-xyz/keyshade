@@ -6,11 +6,15 @@ export class APIClient {
 
     if (response.status === 403) {
       // Clear local data and cookies
-      localStorage.clear();
-      document.cookie.split(";").forEach((cookie) => {
-        const name = cookie.split("=")[0].trim();
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
-      });
+      if (typeof localStorage !== 'undefined') {
+        localStorage.clear();
+      }
+      if (typeof document !== 'undefined' && typeof document.cookie !== 'undefined') {
+        document.cookie.split(";").forEach((cookie) => {
+          const name = cookie.split("=")[0].trim();
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+        });
+      }
 
       // Redirect to /auth
       window.location.href = "/auth";
