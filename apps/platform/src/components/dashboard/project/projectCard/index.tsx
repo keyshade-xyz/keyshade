@@ -5,6 +5,7 @@ import Avvvatars from 'avvvatars-react'
 import { ConfigSVG, EnvironmentSVG, SecretSVG } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
+import DeleteProjectDialogue from '../deleteProjectDialogue'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,7 +13,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { editProjectOpenAtom } from '@/store'
+import { editProjectOpenAtom, deleteProjectOpenAtom, projectToDeleteAtom } from '@/store'
 
 interface ProjectCardProps {
   project: ProjectWithCount
@@ -32,6 +33,8 @@ export default function ProjectCard({
   } = project
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
+  const setIsDeleteProjectDialogOpen = useSetAtom(deleteProjectOpenAtom)
+  const setProjectToDelete = useSetAtom(projectToDeleteAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -65,69 +68,83 @@ export default function ProjectCard({
     }
   }
 
+  const handleDeleteClick = () => {
+    setProjectToDelete(project)
+    setIsDeleteProjectDialogOpen(true)
+  }
+
   return (
-    <ContextMenu>
-      <ContextMenuTrigger className="flex h-[7rem]">
-        <Link
-          className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`/project/${slug}?tab=Secret`}
-          key={id}
-        >
-          <div className="flex items-center gap-x-5">
-            {/* <div className="aspect-square h-14 w-14 rounded-full bg-white/35" /> */}
-            <Avvvatars size={56} style="shape" value={id} />
-            <div>
-              <div className="font-semibold">{name}</div>
-              <span className="text-xs font-semibold text-white/60">
-                {description}
-              </span>
-            </div>
-          </div>
-          <div className="flex h-full flex-col items-end justify-end">
-            <div className="grid grid-cols-3 gap-x-3">
-              <div className="flex items-center gap-x-1">
-                <EnvironmentSVG />
-                {environmentCount}
-              </div>
-              <div className="flex items-center gap-x-1">
-                <ConfigSVG />
-                {variableCount}
-              </div>
-              <div className="flex items-center gap-x-1">
-                <SecretSVG />
-                {secretCount}
+    <>
+      <ContextMenu>
+        <ContextMenuTrigger className="flex h-[7rem]">
+          <Link
+            className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
+            href={`/project/${slug}?tab=Secret`}
+            key={id}
+          >
+            <div className="flex items-center gap-x-5">
+              {/* <div className="aspect-square h-14 w-14 rounded-full bg-white/35" /> */}
+              <Avvvatars size={56} style="shape" value={id} />
+              <div>
+                <div className="font-semibold">{name}</div>
+                <span className="text-xs font-semibold text-white/60">
+                  {description}
+                </span>
               </div>
             </div>
-          </div>
-        </Link>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <Link href={`/project/${name}`}>
-          <ContextMenuItem inset>Open</ContextMenuItem>
-        </Link>
-        <a href={`/project/${name}`} rel="noopener noreferrer" target="_blank">
-          <ContextMenuItem inset>Open in new tab</ContextMenuItem>
-        </a>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            copyToClipboard()
-          }}
-        >
-          Copy link
-        </ContextMenuItem>
-        <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            setIsEditProjectSheetOpen(true)
-          }}
-        >
-          Edit
-        </ContextMenuItem>
-        <ContextMenuItem inset>Delete</ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+            <div className="flex h-full flex-col items-end justify-end">
+              <div className="grid grid-cols-3 gap-x-3">
+                <div className="flex items-center gap-x-1">
+                  <EnvironmentSVG />
+                  {environmentCount}
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <ConfigSVG />
+                  {variableCount}
+                </div>
+                <div className="flex items-center gap-x-1">
+                  <SecretSVG />
+                  {secretCount}
+                </div>
+              </div>
+            </div>
+          </Link>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-64">
+          <Link href={`/project/${name}`}>
+            <ContextMenuItem inset>Open</ContextMenuItem>
+          </Link>
+          <a href={`/project/${name}`} rel="noopener noreferrer" target="_blank">
+            <ContextMenuItem inset>Open in new tab</ContextMenuItem>
+          </a>
+          <ContextMenuSeparator className="bg-white/15" />
+          <ContextMenuItem
+            inset
+            onClick={() => {
+              copyToClipboard()
+            }}
+          >
+            Copy link
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-white/15" />
+          <ContextMenuItem
+            inset
+            onClick={() => {
+              setIsEditProjectSheetOpen(true)
+            }}
+          >
+            Edit
+          </ContextMenuItem>
+          <ContextMenuItem
+            className="text-red-500 focus:text-red-500"
+            inset
+            onClick={handleDeleteClick}
+          >
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+      <DeleteProjectDialogue />
+    </>
   )
 }

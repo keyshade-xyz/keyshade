@@ -22,6 +22,7 @@ export const secretsOfProjectAtom = atom<Secret[]>([])
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
 export const deleteProjectOpenAtom = atom<boolean>(false)
+export const projectToDeleteAtom = atom<ProjectWithCount | null>(null)
 
 export const createVariableOpenAtom = atom<boolean>(false)
 export const editVariableOpenAtom = atom<boolean>(false)

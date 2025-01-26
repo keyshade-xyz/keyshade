@@ -15,6 +15,7 @@ import {
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
+import DeleteProjectDialogue from '@/components/dashboard/project/deleteProjectDialogue'
 
 export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
@@ -95,6 +96,7 @@ export default function Index(): JSX.Element {
       )}
 
       <EditProjectSheet />
+      <DeleteProjectDialogue />
     </div>
   )
 }
