@@ -1,3 +1,9 @@
+## [2.10.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.6...v2.10.0-stage.7) (2025-01-28)
+
+### 🚀 Features
+
+* **platform:** Implement delete project ([#671](https://github.com/keyshade-xyz/keyshade/issues/671)) ([d243c89](https://github.com/keyshade-xyz/keyshade/commit/d243c89be2358f104ad893b5c955d814835aa8e8))
+
 ## [2.10.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.5...v2.10.0-stage.6) (2025-01-26)
 
 ### 🐛 Bug Fixes
