@@ -12,7 +12,11 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { editProjectOpenAtom } from '@/store'
+import {
+  deleteProjectOpenAtom,
+  editProjectOpenAtom,
+  selectedProjectAtom
+} from '@/store'
 
 interface ProjectCardProps {
   project: ProjectWithCount
@@ -32,12 +36,14 @@ export default function ProjectCard({
   } = project
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
+  const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
+  const setSelectedVariable = useSetAtom(selectedProjectAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
     if (navigator.clipboard) {
       navigator.clipboard
-        .writeText(`${window.location.origin}/project/${name}`)
+        .writeText(`${window.location.origin}/project/${slug}`)
         .then(() => {
           toast.success('Link has been copied to clipboard.')
         })
@@ -51,7 +57,7 @@ export default function ProjectCard({
       console.log('Clipboard API not supported')
 
       const textarea = document.createElement('textarea')
-      textarea.value = `${window.location.origin}/project/${name}`
+      textarea.value = `${window.location.origin}/project/${slug}`
       document.body.appendChild(textarea)
       textarea.select()
       try {
@@ -63,6 +69,11 @@ export default function ProjectCard({
       }
       document.body.removeChild(textarea)
     }
+  }
+
+  const handleDeleteProject = () => {
+    setSelectedVariable(project)
+    setIsDeleteProjectOpen(true)
   }
 
   return (
@@ -105,7 +116,7 @@ export default function ProjectCard({
         <Link href={`/project/${name}`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
-        <a href={`/project/${name}`} rel="noopener noreferrer" target="_blank">
+        <a href={`/project/${slug}`} rel="noopener noreferrer" target="_blank">
           <ContextMenuItem inset>Open in new tab</ContextMenuItem>
         </a>
         <ContextMenuSeparator className="bg-white/15" />
@@ -126,7 +137,9 @@ export default function ProjectCard({
         >
           Edit
         </ContextMenuItem>
-        <ContextMenuItem inset>Delete</ContextMenuItem>
+        <ContextMenuItem inset onClick={handleDeleteProject}>
+          Delete
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   )
