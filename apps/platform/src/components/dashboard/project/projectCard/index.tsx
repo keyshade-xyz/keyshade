@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
-import { ConfigSVG, EnvironmentSVG, SecretSVG } from '@public/svg/dashboard'
+import { SecretSVG, EnvironmentSVG, VariableSVG } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
 import {
@@ -97,15 +97,15 @@ export default function ProjectCard({
           <div className="flex h-full flex-col items-end justify-end">
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
-                <EnvironmentSVG />
+                <EnvironmentSVG width={16} />
                 {environmentCount}
               </div>
               <div className="flex items-center gap-x-1">
-                <ConfigSVG />
+                <VariableSVG width={16} />
                 {variableCount}
               </div>
               <div className="flex items-center gap-x-1">
-                <SecretSVG />
+                <SecretSVG width={16} />
                 {secretCount}
               </div>
             </div>

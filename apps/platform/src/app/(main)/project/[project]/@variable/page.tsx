@@ -5,7 +5,7 @@ import type {
   ClientResponse,
   GetAllVariablesOfProjectResponse
 } from '@keyshade/schema'
-import { FolderSVG } from '@public/svg/dashboard'
+import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import {
@@ -17,7 +17,7 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
-import ConfirmDelete from '@/components/dashboard/variable/confirmDeleteVariable'
+import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
 import EditVariableDialog from '@/components/dashboard/variable/editVariableDialogue'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
@@ -56,6 +56,14 @@ function VariablePage(): React.JSX.Element {
       if (success && data) {
         setVariables(data.items)
       } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching variables. Check console for
+              more info.
+            </p>
+          )
+        })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
@@ -66,12 +74,12 @@ function VariablePage(): React.JSX.Element {
 
   return (
     <div
-      className={` flex h-full w-full justify-center ${isDeleteVariableOpen ? 'inert' : ''} `}
+      className={` flex h-full w-full ${isDeleteVariableOpen ? 'inert' : ''} `}
     >
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
-        <div className="flex h-[23.75rem] w-[30.25rem] flex-col items-center justify-center gap-y-8">
-          <FolderSVG width="150" />
+        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
+          <VariableSVG width="100" />
 
           <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
             <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
@@ -83,7 +91,7 @@ function VariablePage(): React.JSX.Element {
           </div>
 
           <Button
-            className="h-[2.25rem] w-[8rem] rounded-md bg-white text-black hover:bg-gray-300"
+            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
             onClick={() => setIsCreateVariableOpen(true)}
           >
             Create variable
@@ -103,7 +111,9 @@ function VariablePage(): React.JSX.Element {
           ))}
 
           {/* Delete variable alert dialog */}
-          {isDeleteVariableOpen && selectedVariable ? <ConfirmDelete /> : null}
+          {isDeleteVariableOpen && selectedVariable ? (
+            <ConfirmDeleteVariable />
+          ) : null}
 
           {/* Edit variable dialog */}
           {isEditVariableOpen && selectedVariable ? (
