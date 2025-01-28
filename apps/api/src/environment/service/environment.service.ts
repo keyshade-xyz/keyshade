@@ -325,8 +325,12 @@ export class EnvironmentService {
 
     // Parse the secret and variable counts for each environment
     for (const environment of items) {
-      environment['secrets'] = await this.getSecretCount(environment.id)
-      environment['variables'] = await this.getVariableCount(environment.id)
+      const [secrets, variables] = await Promise.all([
+        this.getSecretCount(environment.id),
+        this.getVariableCount(environment.id)
+      ])
+      environment['secrets'] = secrets
+      environment['variables'] = variables
     }
 
     // Calculate metadata for pagination

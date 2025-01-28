@@ -45,6 +45,17 @@ export default function AddEnvironmentDialogue() {
       throw new Error('No project selected')
     }
 
+    if (newEnvironmentData.environmentName === '') {
+      toast.error('Environment name is required', {
+        description: (
+          <p className="text-xs text-red-300">
+            Please provide a name for the environment.
+          </p>
+        )
+      })
+      return
+    }
+
     const request: CreateEnvironmentRequest = {
       name: newEnvironmentData.environmentName,
       description: newEnvironmentData.environmentDescription,
