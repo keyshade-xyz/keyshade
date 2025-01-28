@@ -1,3 +1,9 @@
+## [2.10.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.7...v2.10.0-stage.8) (2025-01-28)
+
+### 🚀 Features
+
+* **platform:** Operate on environments ([#670](https://github.com/keyshade-xyz/keyshade/issues/670)) ([f45c5fa](https://github.com/keyshade-xyz/keyshade/commit/f45c5fa81728832f6ff74c5c26d52e00e32fb546))
+
 ## [2.10.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.6...v2.10.0-stage.7) (2025-01-28)
 
 ### 🚀 Features
