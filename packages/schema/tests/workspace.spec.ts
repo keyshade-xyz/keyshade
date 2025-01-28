@@ -327,7 +327,8 @@ describe('Workspace Schema Tests', () => {
             updatedAt: '2024-10-01T00:00:00Z',
             ownerId: 'owner-id',
             isDefault: false,
-            lastUpdatedById: 'user-id'
+            lastUpdatedById: 'user-id',
+            projects: 1
           }
         ],
         metadata: {

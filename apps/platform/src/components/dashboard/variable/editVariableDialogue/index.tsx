@@ -63,7 +63,10 @@ export default function EditVariableDialog() {
 
     const request: UpdateVariableRequest = {
       variableSlug: variable.slug,
-      name: requestData.name === variable.name ? undefined : requestData.name,
+      name:
+        requestData.name === variable.name || requestData.name === ''
+          ? undefined
+          : requestData.name,
       note: requestData.note === '' ? undefined : requestData.note,
       entries: undefined
     }

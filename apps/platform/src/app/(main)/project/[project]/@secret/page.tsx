@@ -2,9 +2,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { SecretLogoSVG } from '@public/svg/secret'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
+import { SecretSVG } from '@public/svg/dashboard'
 import { Accordion } from '@/components/ui/accordion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ControllerInstance from '@/lib/controller-instance'
@@ -53,6 +53,14 @@ function SecretPage(): React.JSX.Element {
       if (success && data) {
         setSecrets(data.items)
       } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching secrets. Check console for
+              more info.
+            </p>
+          )
+        })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
       }
@@ -74,10 +82,10 @@ function SecretPage(): React.JSX.Element {
   }
 
   return (
-    <div className={` flex h-full w-full justify-center `}>
+    <div className={`flex h-full w-full justify-center `}>
       {secrets.length === 0 ? (
-        <div className="flex h-[23.75rem] w-[30.25rem] flex-col items-center justify-center gap-y-8">
-          <SecretLogoSVG />
+        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
+          <SecretSVG width={100} />
 
           <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
             <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
@@ -89,16 +97,16 @@ function SecretPage(): React.JSX.Element {
           </div>
 
           <Button
-            className="h-[2.25rem] w-[8rem] rounded-md bg-white text-black hover:bg-gray-300"
+            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
             onClick={() => setIsCreateSecretOpen(true)}
           >
             Create secret
           </Button>
         </div>
       ) : (
-        <ScrollArea className=" mb-4 h-[50rem] w-full">
+        <ScrollArea className="mb-4 h-fit w-full">
           <Accordion
-            className="flex h-[50rem] w-full flex-col gap-4"
+            className="flex h-fit w-full flex-col gap-4"
             collapsible
             type="single"
           >

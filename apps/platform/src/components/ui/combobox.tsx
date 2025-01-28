@@ -5,7 +5,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import type { Workspace } from '@keyshade/schema'
+import type {
+  GetAllWorkspacesOfUserResponse,
+  Workspace
+} from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { Input } from './input'
 import { Label } from './label'
@@ -34,7 +37,9 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
 
-async function getAllWorkspace(): Promise<Workspace[] | undefined> {
+async function getAllWorkspace(): Promise<
+  GetAllWorkspacesOfUserResponse['items'] | undefined
+> {
   try {
     const { data, success, error } =
       await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
@@ -43,9 +48,16 @@ async function getAllWorkspace(): Promise<Workspace[] | undefined> {
       )
 
     if (error) {
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while fetching workspaces. Check console for
+            more info.
+          </p>
+        )
+      })
       // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-      return undefined
+      throw error
     }
 
     if (success && data) {
@@ -92,7 +104,7 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setselectedWorkspace(data)
+        setselectedWorkspace({ ...data, projects: 0 })
         setOpen(false)
       }
     } catch (error) {
@@ -133,7 +145,10 @@ export function Combobox(): React.JSX.Element {
               <div className="text-lg text-white">
                 {selectedWorkspace?.name ?? 'No workspace'}
               </div>
-              <span className="text-xs text-white/55">100+ projects</span>
+              <span className="text-xs text-white/55">
+                {selectedWorkspace?.projects}{' '}
+                {selectedWorkspace?.projects === 1 ? 'project' : 'projects'}
+              </span>
             </div>
           </div>
 

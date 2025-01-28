@@ -93,6 +93,16 @@ export class EnvironmentService {
             id: user.id
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true,
+            email: true
+          }
+        }
       }
     })
 
@@ -312,6 +322,17 @@ export class EnvironmentService {
         [sort]: order
       }
     })
+
+    // Parse the secret and variable counts for each environment
+    for (const environment of items) {
+      const [secrets, variables] = await Promise.all([
+        this.getSecretCount(environment.id),
+        this.getVariableCount(environment.id)
+      ])
+      environment['secrets'] = secrets
+      environment['variables'] = variables
+    }
+
     // Calculate metadata for pagination
     const totalCount = await this.prisma.environment.count({
       where: {
@@ -421,5 +442,43 @@ export class EnvironmentService {
         `Environment with name ${name} already exists in project ${slug}`
       )
     }
+  }
+
+  /**
+   * Counts the number of unique secrets in an environment.
+   * @param environmentId The ID of the environment to count secrets for.
+   * @returns The number of unique secrets in the environment.
+   * @private
+   */
+  private async getSecretCount(
+    environmentId: Environment['id']
+  ): Promise<number> {
+    const secrets = await this.prisma.secretVersion.findMany({
+      distinct: ['secretId'],
+      where: {
+        environmentId
+      }
+    })
+
+    return secrets.length
+  }
+
+  /**
+   * Counts the number of unique variables in an environment.
+   * @param environmentId The ID of the environment to count variables for.
+   * @returns The number of unique variables in the environment.
+   * @private
+   */
+  private async getVariableCount(
+    environmentId: Environment['id']
+  ): Promise<number> {
+    const variables = await this.prisma.variableVersion.findMany({
+      distinct: ['variableId'],
+      where: {
+        environmentId
+      }
+    })
+
+    return variables.length
   }
 }

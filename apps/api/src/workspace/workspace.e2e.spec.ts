@@ -456,6 +456,30 @@ describe('Workspace Controller Tests', () => {
       )
     })
 
+    it('should be able to fetch the number of projects accessible by the user', async () => {
+      // Create a project accessible to the user
+      await projectService.createProject(user1, workspace1.slug, {
+        name: 'Project 1',
+        description: 'Description 1',
+        accessLevel: ProjectAccessLevel.GLOBAL
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: '/workspace'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const workspaceOfProject = response
+        .json()
+        .items.find((workspace: any) => workspace.slug === workspace1.slug)
+
+      expect(workspaceOfProject.projects).toBe(1)
+    })
+
     it('should be able to fetch the 2nd page of the workspaces the user is a member of', async () => {
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
       const response = await app.inject({
