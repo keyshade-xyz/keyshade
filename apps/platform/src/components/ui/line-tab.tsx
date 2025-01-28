@@ -50,11 +50,7 @@ function Tab({
       type="button"
     >
       <span className="relative z-10 flex items-center gap-2">
-        {icon && (
-          <span className={"w-4 h-4"}>
-            {icon}
-          </span>
-        )}
+        {icon && <span className={'h-4 w-4'}>{icon}</span>}
         {text}
       </span>
       {selected ? (
@@ -82,7 +78,6 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
   const pathname = usePathname()
 
   const getIcon = (tab: string): React.ReactNode => {
-    
     if (pathname.split('/')[1] !== 'project') return null
 
     switch (tab.toLowerCase()) {
