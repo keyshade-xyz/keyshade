@@ -92,7 +92,13 @@ describe('Environment Schema Tests', () => {
         createdAt: '2024-10-01T00:00:00Z',
         updatedAt: '2024-10-01T00:00:00Z',
         lastUpdatedById: 'user123',
-        projectId: 'project123'
+        projectId: 'project123',
+        lastUpdatedBy: {
+          id: 'user123',
+          name: 'John Doe',
+          email: 'johndoe@example.com',
+          profilePictureUrl: 'http://example.com/profile.jpg'
+        }
       })
       expect(result.success).toBe(true)
     })
@@ -109,7 +115,7 @@ describe('Environment Schema Tests', () => {
         projectId: true // Should be a string
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 

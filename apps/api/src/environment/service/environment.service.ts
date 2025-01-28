@@ -93,6 +93,16 @@ export class EnvironmentService {
             id: user.id
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true,
+            email: true
+          }
+        }
       }
     })
 

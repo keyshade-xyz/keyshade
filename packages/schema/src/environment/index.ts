@@ -18,7 +18,14 @@ export const CreateEnvironmentRequestSchema = z.object({
   projectSlug: z.string()
 })
 
-export const CreateEnvironmentResponseSchema = EnvironmentSchema
+export const CreateEnvironmentResponseSchema = EnvironmentSchema.extend({
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    profilePictureUrl: z.string().nullable()
+  })
+})
 
 export const UpdateEnvironmentRequestSchema =
   CreateEnvironmentRequestSchema.omit({ projectSlug: true })

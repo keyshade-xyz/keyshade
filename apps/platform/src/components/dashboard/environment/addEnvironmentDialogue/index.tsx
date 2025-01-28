@@ -65,7 +65,21 @@ export default function AddEnvironmentDialogue() {
           </p>
         )
       })
-      setEnvironments((prev) => [...prev, data])
+
+      // Add the new environment to the list
+      setEnvironments((prev) => [
+        ...prev,
+        { ...data, secrets: 0, variables: 0 }
+      ])
+
+      // Reset the form
+      setNewEnvironmentData({
+        environmentName: '',
+        environmentDescription: ''
+      })
+
+      // Close the dialog
+      setIsCreateEnvironmentOpen(false)
     }
 
     if (error) {
@@ -92,7 +106,8 @@ export default function AddEnvironmentDialogue() {
     newEnvironmentData.environmentDescription,
     newEnvironmentData.environmentName,
     selectedProject,
-    setEnvironments
+    setEnvironments,
+    setIsCreateEnvironmentOpen
   ])
 
   return (
@@ -165,7 +180,7 @@ export default function AddEnvironmentDialogue() {
 
             <div className="flex justify-end pt-4">
               <Button
-                className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                className="h-[2.625rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 onClick={handleAddEnvironment}
               >
                 Add Environment

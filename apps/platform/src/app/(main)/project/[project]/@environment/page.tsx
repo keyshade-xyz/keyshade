@@ -100,7 +100,7 @@ function EnvironmentPage(): React.JSX.Element {
       ) : (
         // Showing this when environments are present
         <div
-          className={`grid h-full w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
+          className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
         >
           {environments.map((environment) => (
             <EnvironmentCard environment={environment} key={environment.id} />
