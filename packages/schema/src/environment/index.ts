@@ -8,8 +8,8 @@ export const EnvironmentSchema = z.object({
   description: z.string().nullable(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
-  lastUpdatedById: z.string(),
-  projectId: z.string()
+  projectId: z.string(),
+  lastUpdatedById: z.string()
 })
 
 export const CreateEnvironmentRequestSchema = z.object({
@@ -39,13 +39,15 @@ export const GetAllEnvironmentsOfProjectRequestSchema =
   })
 
 export const GetAllEnvironmentsOfProjectResponseSchema = PageResponseSchema(
-  EnvironmentSchema.extend({
+  EnvironmentSchema.omit({ projectId: true, lastUpdatedById: true }).extend({
     lastUpdatedBy: z.object({
       id: z.string(),
       name: z.string(),
       email: z.string().email(),
       profilePictureUrl: z.string().nullable()
-    })
+    }),
+    secrets: z.number(),
+    variables: z.number()
   })
 )
 

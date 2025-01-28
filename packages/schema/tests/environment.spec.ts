@@ -244,13 +244,14 @@ describe('Environment Schema Tests', () => {
             createdAt: '2024-10-01T00:00:00Z',
             updatedAt: '2024-10-01T00:00:00Z',
             lastUpdatedById: 'user123',
-            projectId: 'project123',
             lastUpdatedBy: {
               id: 'user123',
               name: 'John Doe',
               email: 'john.doe@example.com',
               profilePictureUrl: 'http://example.com/profile.jpg'
-            }
+            },
+            secrets: 1,
+            variables: 1
           }
         ],
         metadata: {
@@ -280,8 +281,6 @@ describe('Environment Schema Tests', () => {
             description: 'Development environment',
             createdAt: '2024-10-01T00:00:00Z',
             updatedAt: '2024-10-01T00:00:00Z',
-            lastUpdatedById: 'user123',
-            projectId: 'project123',
             lastUpdatedBy: {
               id: 'user123',
               name: 'John Doe',
@@ -305,7 +304,7 @@ describe('Environment Schema Tests', () => {
         }
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
