@@ -3,6 +3,7 @@ import { MessageSVG } from '@public/svg/shared'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { useSetAtom } from 'jotai'
+import dayjs from 'dayjs'
 import {
   Collapsible,
   CollapsibleContent,
@@ -102,16 +103,7 @@ export default function VariableCard(
             <div className="flex h-[6.5rem] w-[18.188rem] items-center justify-center gap-x-[3.125rem]">
               <div className="flex h-[2.063rem] w-[13.563rem] items-center justify-center gap-x-3">
                 <div className="flex h-[2.063rem] w-[7.438rem] items-center justify-center text-base font-normal text-white text-opacity-50">
-                  {(() => {
-                    const days = Math.ceil(
-                      Math.abs(
-                        new Date().getTime() -
-                          new Date(variable.createdAt).getTime()
-                      ) /
-                        (1000 * 60 * 60 * 24)
-                    )
-                    return `${days} ${days === 1 ? 'day' : 'days'} ago by`
-                  })()}
+                  {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
                 </div>
                 <div className="flex h-[2.063rem] w-[5.375rem] items-center justify-center gap-x-[0.375rem]">
                   <div className="flex h-[2.063rem] w-[3.5rem] items-center justify-center text-base font-medium text-white">

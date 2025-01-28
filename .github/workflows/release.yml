@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
-      latestTag: ${{ github.ref == 'refs/heads/main' && 'latest' || 'experimental' }}
       version: ${{ steps.fetch-tag.outputs.version }}
     steps:
       - name: Checkout
@@ -79,18 +78,17 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
           # Build a docker container and push it to ACR
+          echo "Building image..."
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
-            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG \
-            -f ./apps/api/Dockerfile .
+            -f apps/api/Dockerfile .
+
+          # Push the image
           echo "Pushing image to ACR..."
-          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
-          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - name: Azure Login action
         uses: azure/login@v2
@@ -105,14 +103,14 @@ jobs:
           API_CONTAINER_RG: ${{ vars.API_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: api
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          VERSION: ${{ needs.release.outputs.version }}
         with:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
               --name $API_CONTAINER \
               --resource-group $API_CONTAINER_RG \
-              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
 
   migrate-api:
     name: Apply Database Migrations
@@ -170,7 +168,7 @@ jobs:
           sentry-cli releases set-commits --auto $VERSION
           sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
           sentry-cli sourcemaps inject apps/api/dist
-          sentry-cli sourcemaps upload --release $VERSION -p $PROJECT apps/api/dist
+          sentry-cli sourcemaps upload --release $VERSION -p $SENTRY_PROJECT apps/api/dist
 
   deploy-platform:
     needs: release
@@ -195,7 +193,6 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: platform
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           VERSION: ${{ needs.release.outputs.version }}
           NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_SENTRY_PLATFORM_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_PLATFORM_DSN }}
@@ -204,15 +201,15 @@ jobs:
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
           # Build a docker container and push it to ACR
+          echo "Building image..."
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
-            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG \
             --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
-            -f ./apps/platform/Dockerfile .
+            -f apps/platform/Dockerfile .
+
+          # Push the image
           echo "Pushing image to ACR..."
-          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
-          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - name: Azure Login action
         uses: azure/login@v2
@@ -227,14 +224,14 @@ jobs:
           PLATFORM_CONTAINER_RG: ${{ vars.PLATFORM_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: platform
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          VERSION: ${{ needs.release.outputs.version }}
         with:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
               --name $PLATFORM_CONTAINER \
               --resource-group $PLATFORM_CONTAINER_RG \
-              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
 
   release-sentry-platform:
     name: Sentry Platform
@@ -296,7 +293,6 @@ jobs:
         env:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
           VERSION: ${{ needs.release.outputs.version }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID }}
           NEXT_PUBLIC_SENTRY_WEB_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_WEB_DSN }}
@@ -305,19 +301,18 @@ jobs:
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
         run: |
           # Build a docker container and push it to ACR
+          echo "Building image..."
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
-            -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG \
             --build-arg NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID=$NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID \
             --build-arg NEXT_PUBLIC_SENTRY_WEB_DSN=$NEXT_PUBLIC_SENTRY_WEB_DSN \
             --build-arg NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE=$NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE \
             --build-arg NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE=$NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE \
             --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
             -f ./apps/web/Dockerfile .
+
           echo "Pushing image to ACR..."
-          docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
           docker push $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
-          echo "name=image::$ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG" >> $GITHUB_OUTPUT
 
       - name: Azure Login action
         uses: azure/login@v2
@@ -332,14 +327,14 @@ jobs:
           WEB_CONTAINER_RG: ${{ vars.WEB_CONTAINER_RG }}
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
-          LATEST_TAG: ${{ needs.release.outputs.latestTag }}
+          VERSION: ${{ needs.release.outputs.version }}
         with:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
               --name $WEB_CONTAINER \
               --resource-group $WEB_CONTAINER_RG \
-              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$LATEST_TAG
+              --image $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION
 
   sentry-release-web:
     name: Sentry Web

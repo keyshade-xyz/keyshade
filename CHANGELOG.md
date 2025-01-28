@@ -1,3 +1,20 @@
+## [2.10.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.6...v2.10.0-stage.7) (2025-01-28)
+
+### 🚀 Features
+
+* **platform:** Implement delete project ([#671](https://github.com/keyshade-xyz/keyshade/issues/671)) ([d243c89](https://github.com/keyshade-xyz/keyshade/commit/d243c89be2358f104ad893b5c955d814835aa8e8))
+
+## [2.10.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.5...v2.10.0-stage.6) (2025-01-26)
+
+### 🐛 Bug Fixes
+
+* **Platfrom:** Replace manual date calculation with dayjs to improve better calculation ([#668](https://github.com/keyshade-xyz/keyshade/issues/668)) ([990eb86](https://github.com/keyshade-xyz/keyshade/commit/990eb86aa5bdeb911c3907df6ea7b52c510e64ad))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Update API sentry dist folder ([2bc9afb](https://github.com/keyshade-xyz/keyshade/commit/2bc9afb3e790035e7e3ceec6a568eeab6165be9a))
+* **CI:** Update pipeline ([fd63b70](https://github.com/keyshade-xyz/keyshade/commit/fd63b7085f2802b440a9c9628cfe8c0fd609bba9))
+
 ## [2.10.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0-stage.4...v2.10.0-stage.5) (2025-01-25)
 
 ### 🐛 Bug Fixes
