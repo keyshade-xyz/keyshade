@@ -113,7 +113,7 @@ export default function ProjectCard({
         </Link>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <Link href={`/project/${name}`}>
+        <Link href={`/project/${slug}`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
         <a href={`/project/${slug}`} rel="noopener noreferrer" target="_blank">
