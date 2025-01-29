@@ -12,15 +12,20 @@ import SecretLoader from '@/components/dashboard/secret/secretLoader'
 import { Button } from '@/components/ui/button'
 import {
   createSecretOpenAtom,
+  deleteSecretOpenAtom,
   secretsOfProjectAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  selectedSecretAtom
 } from '@/store'
+import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
+  const isDeleteSecretOpen = useAtomValue(deleteSecretOpenAtom)
+  const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -104,21 +109,30 @@ function SecretPage(): React.JSX.Element {
           </Button>
         </div>
       ) : (
-        <ScrollArea className="mb-4 h-fit w-full">
-          <Accordion
-            className="flex h-fit w-full flex-col gap-4"
-            collapsible
-            type="single"
-          >
-            {secrets.map((secret) => (
-              <SecretCard
-                isDecrypted={isDecrypted}
-                key={secret.secret.id}
-                secretData={secret}
-              />
-            ))}
-          </Accordion>
-        </ScrollArea>
+        <div
+          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteSecretOpen ? 'inert' : ''} `}
+        >
+          <ScrollArea className="mb-4 h-fit w-full">
+            <Accordion
+              className="flex h-fit w-full flex-col gap-4"
+              collapsible
+              type="single"
+            >
+              {secrets.map((secret) => (
+                <SecretCard
+                  isDecrypted={isDecrypted}
+                  key={secret.id}
+                  secretData={secret}
+                />
+              ))}
+            </Accordion>
+          </ScrollArea>
+
+          {/* Delete secret alert dialog */}
+          {isDeleteSecretOpen && selectedSecret ? (
+            <ConfirmDeleteSecret />
+          ) : null}
+        </div>
       )}
     </div>
   )
