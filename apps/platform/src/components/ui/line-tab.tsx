@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import React, { useCallback } from 'react'
 import type { ReadonlyURLSearchParams } from 'next/navigation'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import { cn } from '@/lib/utils'
 
 interface TabProps {
@@ -59,38 +58,27 @@ function Tab({
           layoutId={`${customID}linetab`}
           transition={{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }}
         >
-          <span className="z-0 h-[3px] w-[70%] rounded-t-full bg-white" />
+          <span className="z-0 h-[3px] w-full rounded-t-full bg-white" />
         </motion.div>
       ) : null}
     </button>
   )
 }
 
+interface TabConfig {
+  id: string
+  label: string
+  icon?: React.ReactNode
+}
+
 interface LineTabsProps {
   customID: string
-  tabs: string[]
+  tabs: TabConfig[]
 }
 
 function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
-  // const [selected, setSelected] = useState(tabs[0])
   const searchParams = useSearchParams()
   const search = searchParams.get('tab')
-  const pathname = usePathname()
-
-  const getIcon = (tab: string): React.ReactNode => {
-    if (pathname.split('/')[1] !== 'project') return null
-
-    switch (tab.toLowerCase()) {
-      case 'secret':
-        return <SecretSVG />
-      case 'variable':
-        return <VariableSVG />
-      case 'environment':
-        return <EnvironmentSVG />
-      default:
-        return null
-    }
-  }
 
   return (
     <div
@@ -99,11 +87,11 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
       {tabs.map((tab) => (
         <Tab
           customID={customID}
-          icon={getIcon(tab)}
-          key={tab}
+          icon={tab.icon}
+          key={tab.id}
           searchParams={searchParams}
-          selected={search?.toLocaleLowerCase() === tab.toLocaleLowerCase()}
-          text={tab}
+          selected={search?.toLocaleLowerCase() === tab.id.toLocaleLowerCase()}
+          text={tab.label}
         />
       ))}
     </div>
