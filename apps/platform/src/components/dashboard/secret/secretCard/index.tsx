@@ -97,7 +97,7 @@ export default function SecretCard({
                       ? value.value
                       : value.value.replace(/./g, '*').substring(0, 20)}
                   </TableCell>
-                  <TableCell className="h-full text-base py-4 px-8">
+                  <TableCell className="h-full px-8 py-4 text-base">
                     {value.version}
                   </TableCell>
                 </TableRow>
