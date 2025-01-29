@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Fragment } from 'react'
 
 interface SecretCardProps {
   secretData: Secret
@@ -68,13 +69,16 @@ export default function SecretCard({
       </AccordionTrigger>
       <AccordionContent>
         <Table className="h-full w-full">
-          <TableHeader className="h-[3.125rem] w-full">
-            <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
-              <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+          <TableHeader className="h-[3.125rem] w-full ">
+            <TableRow className="h-full w-full bg-white/10 ">
+              <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-bold text-white/50">
                 Environment
               </TableHead>
-              <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
+              <TableHead className="h-full  text-base font-normal text-white/50">
                 Value
+              </TableHead>
+              <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                Version
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -82,16 +86,19 @@ export default function SecretCard({
             {values.map((value) => {
               return (
                 <TableRow
-                  className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
+                  className="h-[3.125rem] w-full hover:bg-white/5"
                   key={value.environment.id}
                 >
-                  <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                  <TableCell className="h-full w-[10.25rem] text-base">
                     {value.environment.name}
                   </TableCell>
-                  <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
+                  <TableCell className="h-full text-base">
                     {isDecrypted
                       ? value.value
                       : value.value.replace(/./g, '*').substring(0, 20)}
+                  </TableCell>
+                  <TableCell className="h-full text-base py-4 px-8">
+                    {value.version}
                   </TableCell>
                 </TableRow>
               )

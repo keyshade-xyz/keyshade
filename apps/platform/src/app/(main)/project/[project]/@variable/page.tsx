@@ -21,6 +21,7 @@ import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDelete
 import EditVariableDialog from '@/components/dashboard/variable/editVariableDialogue'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { Accordion } from '@/components/ui/accordion'
 
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
@@ -102,14 +103,19 @@ function VariablePage(): React.JSX.Element {
         <div
           className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteVariableOpen ? 'inert' : ''} `}
         >
-          {variables.map(({ variable, values }) => (
-            <VariableCard
-              key={variable.id}
-              values={values}
-              variable={variable}
-            />
-          ))}
-
+          <Accordion
+            className="flex h-fit w-full flex-col gap-4"
+            collapsible
+            type="single"
+          >
+            {variables.map(({ variable, values }) => (
+              <VariableCard
+                key={variable.id}
+                values={values}
+                variable={variable}
+              />
+            ))}
+          </Accordion>
           {/* Delete variable alert dialog */}
           {isDeleteVariableOpen && selectedVariable ? (
             <ConfirmDeleteVariable />
