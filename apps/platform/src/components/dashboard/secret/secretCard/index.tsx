@@ -20,7 +20,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { Fragment } from 'react'
 
 interface SecretCardProps {
   secretData: Secret
