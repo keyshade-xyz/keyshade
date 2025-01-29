@@ -1,4 +1,5 @@
-// eslint-disable-next-line camelcase -- this is a font import
+import { CopySVG } from '@public/svg/shared'
+// eslint-disable-next-line camelcase -- we need to import the font
 import { Roboto_Mono } from 'next/font/google'
 import { toast } from 'sonner'
 
@@ -22,11 +23,11 @@ export default function Slug({ text }: SlugProps): React.JSX.Element {
 
   return (
     <button
-      className={`${roboto.className} rounded-lg bg-white/[10%] px-3 py-2 font-mono text-sm text-white/50`}
+      className={`${roboto.className} flex cursor-copy gap-2 rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
       onClick={copyToClipboard}
       type="button"
     >
-      {text}
+      {text} <CopySVG className="w-[20px]" />
     </button>
   )
 }
