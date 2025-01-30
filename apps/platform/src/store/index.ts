@@ -1,17 +1,17 @@
 import { atom } from 'jotai'
 import type {
   GetAllEnvironmentsOfProjectResponse,
+  GetAllWorkspacesOfUserResponse,
   Project,
   ProjectWithCount,
   Secret,
   Variable,
-  Workspace
 } from '@keyshade/schema'
 
 export const authEmailAtom = atom<string>('')
 
 export const selectedWorkspaceAtom = atom<
-  (Workspace & { projects: number }) | null
+  GetAllWorkspacesOfUserResponse['items'][number] | null
 >(null)
 export const selectedProjectAtom = atom<Project | null>(null)
 export const selectedVariableAtom = atom<Variable | null>(null)
@@ -19,6 +19,8 @@ export const selectedSecretAtom = atom<Secret | null>(null)
 export const selectedEnvironmentAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items'][number] | null
 >(null)
+
+export const workspacesAtom = atom<GetAllWorkspacesOfUserResponse['items']>([])
 export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
 export const environmentsOfProjectAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items']

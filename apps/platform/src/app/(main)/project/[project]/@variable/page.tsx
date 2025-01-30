@@ -8,6 +8,7 @@ import type {
 import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
@@ -22,6 +23,7 @@ import EditVariableDialog from '@/components/dashboard/variable/editVariableDial
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
@@ -30,6 +32,8 @@ function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+
+  const router = useRouter()
 
   useEffect(() => {
     const getAllVariables = async () => {
@@ -67,11 +71,14 @@ function VariablePage(): React.JSX.Element {
         })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
+        clearAuthCookies()
+
+        router.push('/auth')
       }
     }
 
     getAllVariables()
-  }, [selectedProject, setVariables])
+  }, [router, selectedProject, setVariables])
 
   return (
     <div
