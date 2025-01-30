@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
+import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
 import type { User } from '@keyshade/schema'
 import SearchModel from './searchModel'
 import {
@@ -53,8 +54,29 @@ function Navbar(): React.JSX.Element {
 
   const pathname = usePathname()
 
-  const settingsTabs = ['Workspace', 'Profile', 'Billing']
-  const projectTabs = ['Secret', 'Variable', 'Environment']
+  const settingsTabs = [
+    { id: 'workspace', label: 'Workspace' },
+    { id: 'profile', label: 'Profile' },
+    { id: 'billing', label: 'Billing' }
+  ]
+
+  const projectTabs = [
+    {
+      id: 'secret',
+      label: 'Secret',
+      icon: <SecretSVG />
+    },
+    {
+      id: 'variable',
+      label: 'Variable',
+      icon: <VariableSVG />
+    },
+    {
+      id: 'environment',
+      label: 'Environment',
+      icon: <EnvironmentSVG />
+    }
+  ]
 
   useEffect(() => {
     const down = (e: KeyboardEvent): void => {
