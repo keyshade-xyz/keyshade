@@ -2,7 +2,14 @@
 import Link from 'next/link'
 import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
-import { SecretSVG, EnvironmentSVG, VariableSVG } from '@public/svg/dashboard'
+import {
+  SecretSVG,
+  EnvironmentSVG,
+  VariableSVG,
+  GlobalSVG,
+  PrivateSVG,
+  InternalSVG
+} from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
 import {
@@ -32,7 +39,8 @@ export default function ProjectCard({
     description,
     environmentCount,
     secretCount,
-    variableCount
+    variableCount,
+    accessLevel
   } = project
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
@@ -76,6 +84,19 @@ export default function ProjectCard({
     setIsDeleteProjectOpen(true)
   }
 
+  const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
+    switch (accessLvl) {
+      case 'GLOBAL':
+        return <GlobalSVG width={16} />
+      case 'PRIVATE':
+        return <PrivateSVG width={16} />
+      case 'INTERNAL':
+        return <InternalSVG width={16} />
+      default:
+        return null
+    }
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger className="flex h-[7rem]">
@@ -85,7 +106,6 @@ export default function ProjectCard({
           key={id}
         >
           <div className="flex items-center gap-x-5">
-            {/* <div className="aspect-square h-14 w-14 rounded-full bg-white/35" /> */}
             <Avvvatars size={56} style="shape" value={id} />
             <div>
               <div className="font-semibold">{name}</div>
@@ -94,7 +114,11 @@ export default function ProjectCard({
               </span>
             </div>
           </div>
-          <div className="flex h-full flex-col items-end justify-end">
+          <div className="flex h-full flex-col items-end justify-between">
+            <div className="flex items-center gap-1 rounded-md border border-white/70 px-2 py-1 capitalize">
+              {accessLevelToSVG(accessLevel)}
+              {accessLevel.toLowerCase()}
+            </div>
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
                 <EnvironmentSVG width={16} />
