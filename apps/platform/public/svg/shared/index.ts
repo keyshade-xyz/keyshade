@@ -11,6 +11,7 @@ import MessageSVG from './message.svg'
 import VectorSVG from './vector.svg'
 import ErrorSVG from './Error.svg'
 import TrashSVG from './trash.svg'
+import CopySVG from './copy.svg'
 
 export {
   DropdownSVG,
@@ -25,5 +26,6 @@ export {
   MessageSVG,
   VectorSVG,
   ErrorSVG,
-  TrashSVG
+  TrashSVG,
+  CopySVG
 }
