@@ -43,7 +43,6 @@ function ConfirmDeleteSecret() {
     }
 
     const secretSlug = selectedSecret.secret.slug
-    console.log('secretSlug:', secretSlug)
 
     const { success, error } =
       await ControllerInstance.getInstance().secretController.deleteSecret(
