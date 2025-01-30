@@ -106,7 +106,6 @@ export default function ProjectCard({
           key={id}
         >
           <div className="flex items-center gap-x-5">
-            {/* <div className="aspect-square h-14 w-14 rounded-full bg-white/35" /> */}
             <Avvvatars size={56} style="shape" value={id} />
             <div>
               <div className="font-semibold">{name}</div>
