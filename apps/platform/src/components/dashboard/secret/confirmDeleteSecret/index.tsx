@@ -21,6 +21,7 @@ import ControllerInstance from '@/lib/controller-instance'
 
 function ConfirmDeleteSecret() {
   const selectedSecret = useAtomValue(selectedSecretAtom)
+  const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const [isDeleteSecretOpen, setIsDeleteSecretOpen] =
     useAtom(deleteSecretOpenAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
@@ -63,6 +64,8 @@ function ConfirmDeleteSecret() {
       setSecrets((prevSecrets) =>
         prevSecrets.filter(({ secret }) => secret.slug !== secretSlug)
       )
+
+      setSelectedSecret(null)
     }
     if (error) {
       toast.error('Something went wrong!', {
