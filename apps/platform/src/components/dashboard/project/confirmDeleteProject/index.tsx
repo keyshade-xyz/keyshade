@@ -2,7 +2,11 @@ import { TrashSVG } from '@public/svg/shared'
 import { useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { deleteProjectOpenAtom, projectsOfWorkspaceAtom, selectedProjectAtom } from '@/store'
+import {
+  deleteProjectOpenAtom,
+  projectsOfWorkspaceAtom,
+  selectedProjectAtom
+} from '@/store'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +18,6 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import ControllerInstance from '@/lib/controller-instance'
-
-
 
 function ConfirmDeleteProject(): React.JSX.Element {
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
@@ -57,7 +59,6 @@ function ConfirmDeleteProject(): React.JSX.Element {
           </p>
         )
       })
-      
 
       // Remove the project from the projects list
       setProjects((prevProjects) =>

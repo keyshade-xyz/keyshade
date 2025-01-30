@@ -22,7 +22,9 @@ import {
 } from '@/store'
 
 export default function ConfirmDeleteEnvironment(): React.JSX.Element {
-  const [selectedEnvironment, setSelectedEnvironment] = useAtom(selectedEnvironmentAtom)
+  const [selectedEnvironment, setSelectedEnvironment] = useAtom(
+    selectedEnvironmentAtom
+  )
   const [isDeleteEnvironmentOpen, setIsDeleteEnvironmentOpen] = useAtom(
     deleteEnvironmentOpenAtom
   )
@@ -85,7 +87,12 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
     }
 
     handleClose()
-  }, [selectedEnvironment, handleClose, setEnvironments, setSelectedEnvironment])
+  }, [
+    selectedEnvironment,
+    handleClose,
+    setEnvironments,
+    setSelectedEnvironment
+  ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {

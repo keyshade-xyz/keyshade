@@ -61,7 +61,9 @@ function Navbar(): React.JSX.Element {
     }
   ]
 
-  const fetchNameImage = useCallback(async (): Promise<UserNameImage | undefined> => {
+  const fetchNameImage = useCallback(async (): Promise<
+    UserNameImage | undefined
+  > => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
