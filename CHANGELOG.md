@@ -1,3 +1,15 @@
+## [2.11.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.2...v2.11.0-stage.3) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add CopySVG icon to the Slug component and update imports ([#677](https://github.com/keyshade-xyz/keyshade/issues/677)) ([2ad93ba](https://github.com/keyshade-xyz/keyshade/commit/2ad93baa24e256aafdbeed9d0ee9b268d4781aa4))
+
+## [2.11.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.1...v2.11.0-stage.2) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add SVGs to projectTabs ([#673](https://github.com/keyshade-xyz/keyshade/issues/673)) ([37bfddf](https://github.com/keyshade-xyz/keyshade/commit/37bfddfc993aa76b4688ac1b8693d0bad25809a4))
+
 ## [2.11.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0...v2.11.0-stage.1) (2025-01-29)
 
 ### 🚀 Features

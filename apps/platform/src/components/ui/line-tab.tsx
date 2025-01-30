@@ -11,6 +11,7 @@ interface TabProps {
   // setSelected: React.Dispatch<React.SetStateAction<string>>
   searchParams: ReadonlyURLSearchParams
   customID: string
+  icon?: React.ReactNode
 }
 
 function Tab({
@@ -18,7 +19,8 @@ function Tab({
   selected,
   // setSelected,
   searchParams,
-  customID
+  customID,
+  icon
 }: TabProps): React.JSX.Element {
   const router = useRouter()
   const pathname = usePathname()
@@ -46,27 +48,35 @@ function Tab({
       }}
       type="button"
     >
-      <span className="relative z-10">{text}</span>
+      <span className="relative z-10 flex items-center gap-2">
+        {icon && <span className={'h-4 w-4'}>{icon}</span>}
+        {text}
+      </span>
       {selected ? (
         <motion.div
           className="absolute left-0 top-0 flex size-full items-end justify-center"
           layoutId={`${customID}linetab`}
           transition={{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }}
         >
-          <span className="z-0 h-[3px] w-[60%] rounded-t-full bg-white" />
+          <span className="z-0 h-[3px] w-full rounded-t-full bg-white" />
         </motion.div>
       ) : null}
     </button>
   )
 }
 
+interface TabConfig {
+  id: string
+  label: string
+  icon?: React.ReactNode
+}
+
 interface LineTabsProps {
   customID: string
-  tabs: string[]
+  tabs: TabConfig[]
 }
 
 function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
-  // const [selected, setSelected] = useState(tabs[0])
   const searchParams = useSearchParams()
   const search = searchParams.get('tab')
 
@@ -77,10 +87,11 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
       {tabs.map((tab) => (
         <Tab
           customID={customID}
-          key={tab}
+          icon={tab.icon}
+          key={tab.id}
           searchParams={searchParams}
-          selected={search?.toLocaleLowerCase() === tab.toLocaleLowerCase()}
-          text={tab}
+          selected={search?.toLocaleLowerCase() === tab.id.toLocaleLowerCase()}
+          text={tab.label}
         />
       ))}
     </div>
