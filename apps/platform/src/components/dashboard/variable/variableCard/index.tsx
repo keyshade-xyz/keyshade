@@ -93,6 +93,9 @@ export default function VariableCard(
                 <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
                   Value
                 </TableHead>
+                <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                  Version
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,6 +110,9 @@ export default function VariableCard(
                     </TableCell>
                     <TableCell className="h-full text-base">
                       {value.value}
+                    </TableCell>
+                    <TableCell className="h-full px-8 py-4 text-base">
+                      {value.version}
                     </TableCell>
                   </TableRow>
                 )
