@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 import type {
-  Environment,
+  GetAllEnvironmentsOfProjectResponse,
   Project,
   ProjectWithCount,
   Secret,
@@ -10,12 +10,19 @@ import type {
 
 export const authEmailAtom = atom<string>('')
 
-export const selectedWorkspaceAtom = atom<Workspace | null>(null)
+export const selectedWorkspaceAtom = atom<
+  (Workspace & { projects: number }) | null
+>(null)
 export const selectedProjectAtom = atom<Project | null>(null)
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedSecretAtom = atom<Secret | null>(null)
+export const selectedEnvironmentAtom = atom<
+  GetAllEnvironmentsOfProjectResponse['items'][number] | null
+>(null)
 export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
-export const environmentsOfProjectAtom = atom<Environment[]>([])
+export const environmentsOfProjectAtom = atom<
+  GetAllEnvironmentsOfProjectResponse['items']
+>([])
 export const variablesOfProjectAtom = atom<Variable[]>([])
 export const secretsOfProjectAtom = atom<Secret[]>([])
 
@@ -30,3 +37,7 @@ export const deleteVariableOpenAtom = atom<boolean>(false)
 export const createSecretOpenAtom = atom<boolean>(false)
 export const editSecretOpenAtom = atom<boolean>(false)
 export const deleteSecretOpenAtom = atom<boolean>(false)
+
+export const createEnvironmentOpenAtom = atom<boolean>(false)
+export const editEnvironmentOpenAtom = atom<boolean>(false)
+export const deleteEnvironmentOpenAtom = atom<boolean>(false)

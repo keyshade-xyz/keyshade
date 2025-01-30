@@ -52,8 +52,11 @@ export const InviteMemberResponseSchema = z.void()
 
 export const GetAllWorkspacesOfUserRequestSchema = PageRequestSchema
 
-export const GetAllWorkspacesOfUserResponseSchema =
-  PageResponseSchema(WorkspaceSchema)
+export const GetAllWorkspacesOfUserResponseSchema = PageResponseSchema(
+  WorkspaceSchema.extend({
+    projects: z.number()
+  })
+)
 
 export const ExportDataRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug

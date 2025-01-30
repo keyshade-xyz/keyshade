@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
 import { toast } from 'sonner'
@@ -11,55 +11,58 @@ import CreateProjectDialogue from '@/components/dashboard/project/createProjectD
 import {
   createProjectOpenAtom,
   selectedWorkspaceAtom,
-  projectsOfWorkspaceAtom
+  projectsOfWorkspaceAtom,
+  deleteProjectOpenAtom,
+  selectedProjectAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
+import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 
 export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
 
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   // Projects to be displayed in the dashboard
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
 
-  // If a workspace is selected, we want to fetch all the projects
-  // under that workspace and display it in the dashboard.
-  useEffect(() => {
-    async function getAllProjects() {
-      setLoading(true)
+  const getAllProjects = useCallback(async () => {
+    setLoading(true)
 
-      if (selectedWorkspace) {
-        const { success, error, data } =
-          await ControllerInstance.getInstance().projectController.getAllProjects(
-            { workspaceSlug: selectedWorkspace.slug },
-            {}
+    if (selectedWorkspace) {
+      const { success, error, data } =
+        await ControllerInstance.getInstance().projectController.getAllProjects(
+          { workspaceSlug: selectedWorkspace.slug },
+          {}
+        )
+
+      if (success && data) {
+        setProjects(data.items)
+      } else {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching projects. Check console for
+              more info.
+            </p>
           )
-
-        if (success && data) {
-          setProjects(data.items)
-        } else {
-          toast.error('Something went wrong!', {
-            description: (
-              <p className="text-xs text-red-300">
-                Something went wrong while fetching projects. Check console for
-                more info.
-              </p>
-            )
-          })
-          // eslint-disable-next-line no-console -- we need to log the error
-          console.error(error)
-        }
+        })
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
       }
-
-      setLoading(false)
     }
 
-    getAllProjects()
+    setLoading(false)
   }, [selectedWorkspace, setProjects])
+
+  useEffect(() => {
+    getAllProjects()
+  }, [getAllProjects, selectedWorkspace, setProjects])
 
   return (
     <div className="flex flex-col gap-4">
@@ -93,6 +96,10 @@ export default function Index(): JSX.Element {
           </Button>
         </div>
       )}
+
+      {isDeleteProjectOpen && selectedProject ? (
+        <ConfirmDeleteProject reCallGetAllProjects={getAllProjects} />
+      ) : null}
 
       <EditProjectSheet />
     </div>

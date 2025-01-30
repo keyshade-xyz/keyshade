@@ -9,11 +9,13 @@ import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
 import SecretPage from './@secret/page'
+import EnvironmentPage from './@environment/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import { Toaster } from '@/components/ui/sonner'
 import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
+import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -91,16 +93,18 @@ function DetailedProjectPage({
   }, [selectedProject, setEnvironments])
 
   return (
-    <main className="flex flex-col gap-4">
+    <main className="flex h-full flex-col gap-4">
       <div className="flex h-[3.625rem] w-full justify-between p-3 ">
         <div className="text-3xl">{selectedProject?.name}</div>
         {tab === 'secret' && <AddSecretDialog />}
         {tab === 'variable' && <AddVariableDialogue />}
+        {tab === 'environment' && <AddEnvironmentDialogue />}
       </div>
 
       <div className="h-full w-full overflow-y-scroll">
         {tab === 'secret' && <SecretPage />}
         {tab === 'variable' && <VariablePage />}
+        {tab === 'environment' && <EnvironmentPage />}
       </div>
       <Toaster />
     </main>

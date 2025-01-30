@@ -93,11 +93,7 @@ export class APIClient {
    * @param headers - Optional headers to include in the request.
    * @returns A Promise that resolves to the response data.
    */
-  delete(
-    url: string,
-    headers?: Record<string, string>,
-    data?: any
-  ): Promise<Response> {
+  delete(url: string, headers?: Record<string, string>): Promise<Response> {
     return this.request(url, {
       method: 'DELETE',
       headers: {

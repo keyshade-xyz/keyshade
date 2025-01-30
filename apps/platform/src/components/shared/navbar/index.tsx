@@ -54,7 +54,7 @@ function Navbar(): React.JSX.Element {
   const pathname = usePathname()
 
   const settingsTabs = ['Workspace', 'Profile', 'Billing']
-  const projectTabs = ['Secret', 'Variable']
+  const projectTabs = ['Secret', 'Variable', 'Environment']
 
   useEffect(() => {
     const down = (e: KeyboardEvent): void => {

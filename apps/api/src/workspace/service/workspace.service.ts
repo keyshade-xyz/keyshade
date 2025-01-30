@@ -203,7 +203,7 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    //get all workspaces of user for page with limit
+    // Get all workspaces of user for page with limit
     const items = await this.prisma.workspace.findMany({
       skip: page * limit,
       take: Number(limit),
@@ -222,6 +222,13 @@ export class WorkspaceService {
         }
       }
     })
+
+    for (const workspace of items) {
+      workspace['projects'] = await this.getProjectsOfWorkspace(
+        workspace.id,
+        user.id
+      )
+    }
 
     // get total count of workspaces of the user
     const totalCount = await this.prisma.workspace.count({
@@ -658,5 +665,42 @@ export class WorkspaceService {
         }
       })) > 0
     )
+  }
+
+  /**
+   * Retrieves the count of projects within a workspace that a user has permission to access.
+   *
+   * @param workspaceId The ID of the workspace to retrieve projects from.
+   * @param userId The ID of the user whose access permissions are being checked.
+   * @returns The number of projects the user has authority to access within the specified workspace.
+   * @private
+   */
+
+  private async getProjectsOfWorkspace(
+    workspaceId: Workspace['id'],
+    userId: User['id']
+  ) {
+    const projects = await this.prisma.project.findMany({
+      where: {
+        workspaceId
+      }
+    })
+
+    let accessibleProjectCount = 0
+
+    for (const project of projects) {
+      const hasAuthority =
+        await this.authorityCheckerService.checkAuthorityOverProject({
+          userId,
+          entity: { slug: project.slug },
+          authorities: [Authority.READ_PROJECT],
+          prisma: this.prisma
+        })
+
+      if (hasAuthority) {
+        accessibleProjectCount++
+      }
+    }
+    return accessibleProjectCount
   }
 }
