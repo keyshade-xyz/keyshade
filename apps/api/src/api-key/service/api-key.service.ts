@@ -22,6 +22,7 @@ export class ApiKeyService {
   private apiKeySelect = {
     id: true,
     expiresAt: true,
+    preview: true,
     name: true,
     slug: true,
     authorities: true,
@@ -41,12 +42,20 @@ export class ApiKeyService {
     await this.isApiKeyUnique(user, dto.name)
 
     const plainTextApiKey = generateApiKey()
+
+    // Generate the preview key in format ks_****<last 4 chars>
+    const previewKey = `ks_****${plainTextApiKey.slice(-4)}`
+    this.logger.log(
+      `User ${user.id} created API key ${previewKey} with name ${dto.name}`
+    )
+
     const hashedApiKey = toSHA256(plainTextApiKey)
     const apiKey = await this.prisma.apiKey.create({
       data: {
         name: dto.name,
         slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
         value: hashedApiKey,
+        preview: previewKey,
         authorities: dto.authorities
           ? {
               set: dto.authorities
