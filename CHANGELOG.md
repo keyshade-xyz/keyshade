@@ -1,3 +1,9 @@
+## [2.11.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.3...v2.11.0-stage.4) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Update table ui and change variable to accordion ([#676](https://github.com/keyshade-xyz/keyshade/issues/676)) ([71e9ae9](https://github.com/keyshade-xyz/keyshade/commit/71e9ae91b6067a18f144eea3e06f06a97fb73457))
+
 ## [2.11.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.2...v2.11.0-stage.3) (2025-01-30)
 
 ### 🚀 Features
