@@ -1,3 +1,9 @@
+## [2.11.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.7...v2.11.0-stage.8) (2025-01-30)
+
+### 🚀 Features
+
+* **api, schema:** Add preview field in API Key ([#680](https://github.com/keyshade-xyz/keyshade/issues/680)) ([06d8c44](https://github.com/keyshade-xyz/keyshade/commit/06d8c44c4e06d823cdb2a41cd482aace9cba8ec2))
+
 ## [2.11.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.6...v2.11.0-stage.7) (2025-01-30)
 
 ### 🚀 Features
