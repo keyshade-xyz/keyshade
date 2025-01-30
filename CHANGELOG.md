@@ -1,3 +1,39 @@
+## [2.11.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.5...v2.11.0-stage.6) (2025-01-30)
+
+### 🐛 Bug Fixes
+
+* **cli:** Version flag causing errors ([#679](https://github.com/keyshade-xyz/keyshade/issues/679)) ([65bb70b](https://github.com/keyshade-xyz/keyshade/commit/65bb70b118f643a3079ece64c8b6ffd7949b8e95))
+
+## [2.11.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.4...v2.11.0-stage.5) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add new access level SVGs and integrate into ProjectCard component ([#678](https://github.com/keyshade-xyz/keyshade/issues/678)) ([cc3ef77](https://github.com/keyshade-xyz/keyshade/commit/cc3ef77b93054e44fc5de01e12ef9d0d707a0a14))
+
+## [2.11.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.3...v2.11.0-stage.4) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Update table ui and change variable to accordion ([#676](https://github.com/keyshade-xyz/keyshade/issues/676)) ([71e9ae9](https://github.com/keyshade-xyz/keyshade/commit/71e9ae91b6067a18f144eea3e06f06a97fb73457))
+
+## [2.11.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.2...v2.11.0-stage.3) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add CopySVG icon to the Slug component and update imports ([#677](https://github.com/keyshade-xyz/keyshade/issues/677)) ([2ad93ba](https://github.com/keyshade-xyz/keyshade/commit/2ad93baa24e256aafdbeed9d0ee9b268d4781aa4))
+
+## [2.11.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.1...v2.11.0-stage.2) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add SVGs to projectTabs ([#673](https://github.com/keyshade-xyz/keyshade/issues/673)) ([37bfddf](https://github.com/keyshade-xyz/keyshade/commit/37bfddfc993aa76b4688ac1b8693d0bad25809a4))
+
+## [2.11.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0...v2.11.0-stage.1) (2025-01-29)
+
+### 🚀 Features
+
+* **platform:** Add new design for slug ([#675](https://github.com/keyshade-xyz/keyshade/issues/675)) ([2b8985c](https://github.com/keyshade-xyz/keyshade/commit/2b8985c4725dbf062dc66acf560f8433ce5d87dc))
+
 ## [2.10.0](https://github.com/keyshade-xyz/keyshade/compare/v2.9.1...v2.10.0) (2025-01-28)
 
 ### 🚀 Features
