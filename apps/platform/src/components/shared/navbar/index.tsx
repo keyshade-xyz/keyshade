@@ -55,7 +55,6 @@ function Navbar(): React.JSX.Element {
   const pathname = usePathname()
 
   const settingsTabs = [
-    { id: 'workspace', label: 'Workspace' },
     { id: 'profile', label: 'Profile' },
     { id: 'billing', label: 'Billing' }
   ]
@@ -162,8 +161,8 @@ function Navbar(): React.JSX.Element {
               <Link href="/teams">
                 <DropdownMenuItem>Team</DropdownMenuItem>
               </Link>
-              <Link href="/settings?tab=workspace">
-                <DropdownMenuItem>Workspace Settings</DropdownMenuItem>
+              <Link href="/settings?tab=profile">
+                <DropdownMenuItem>User Settings</DropdownMenuItem>
               </Link>
 
               <DropdownMenuSeparator />
