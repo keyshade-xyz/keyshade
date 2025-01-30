@@ -1,3 +1,9 @@
+## [2.11.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.5...v2.11.0-stage.6) (2025-01-30)
+
+### 🐛 Bug Fixes
+
+* **cli:** Version flag causing errors ([#679](https://github.com/keyshade-xyz/keyshade/issues/679)) ([65bb70b](https://github.com/keyshade-xyz/keyshade/commit/65bb70b118f643a3079ece64c8b6ffd7949b8e95))
+
 ## [2.11.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.4...v2.11.0-stage.5) (2025-01-30)
 
 ### 🚀 Features
