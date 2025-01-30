@@ -1,6 +1,7 @@
 import type { Secret } from '@keyshade/schema'
 import { NoteIconSVG } from '@public/svg/secret'
 import dayjs from 'dayjs'
+import { useSetAtom } from 'jotai'
 import {
   AccordionContent,
   AccordionItem,
@@ -27,7 +28,6 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { deleteSecretOpenAtom, selectedSecretAtom } from '@/store'
-import { useSetAtom } from 'jotai'
 
 interface SecretCardProps {
   secretData: Secret
