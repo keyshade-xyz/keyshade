@@ -1,3 +1,9 @@
+## [2.11.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.6...v2.11.0-stage.7) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Added the feature for deleting a [secure] ([#674](https://github.com/keyshade-xyz/keyshade/issues/674)) ([37e7960](https://github.com/keyshade-xyz/keyshade/commit/37e796080fe426b69333b134db4031ba2849e401))
+
 ## [2.11.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.5...v2.11.0-stage.6) (2025-01-30)
 
 ### 🐛 Bug Fixes
