@@ -22,6 +22,7 @@ describe('API Key Schemas Tests', () => {
         name: 'API Key Name',
         slug: 'api-key-slug',
         value: 'api-key-value',
+        preview: 'api-key-preview',
         expiresAt: '2024-10-10T10:00:00Z',
         createdAt: '2024-10-09T10:00:00Z',
         updatedAt: '2024-10-09T10:00:00Z',
@@ -44,7 +45,7 @@ describe('API Key Schemas Tests', () => {
         // no userId
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 
@@ -95,6 +96,7 @@ describe('API Key Schemas Tests', () => {
         name: 'API Key Name',
         slug: 'api-key-slug',
         value: 'api-key-value',
+        preview: 'api-key-preview',
         expiresAt: '2024-10-10T10:00:00Z',
         createdAt: '2024-10-09T10:00:00Z',
         updatedAt: '2024-10-09T10:00:00Z',
@@ -118,7 +120,7 @@ describe('API Key Schemas Tests', () => {
         // no userId
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 
@@ -151,6 +153,7 @@ describe('API Key Schemas Tests', () => {
         id: 'apikey123',
         name: 'API Key Name',
         slug: 'api-key-slug',
+        preview: 'api-key-preview',
         expiresAt: '2024-10-10T10:00:00Z',
         createdAt: '2024-10-09T10:00:00Z',
         updatedAt: '2024-10-09T10:00:00Z',
@@ -170,7 +173,7 @@ describe('API Key Schemas Tests', () => {
         authorities: ['INVALID_AUTHORITY'] // Invalid authority
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
@@ -232,6 +235,7 @@ describe('API Key Schemas Tests', () => {
             id: 'apikey123',
             name: 'API Key Name',
             slug: 'api-key-slug',
+            preview: 'api-key-preview',
             expiresAt: '2024-10-10T10:00:00Z',
             createdAt: '2024-10-09T10:00:00Z',
             updatedAt: '2024-10-09T10:00:00Z',
@@ -283,7 +287,7 @@ describe('API Key Schemas Tests', () => {
         }
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 
@@ -310,6 +314,7 @@ describe('API Key Schemas Tests', () => {
         id: 'apikey123',
         name: 'API Key Name',
         slug: 'api-key-slug',
+        preview: 'api-key-preview',
         expiresAt: '2024-10-10T10:00:00Z',
         createdAt: '2024-10-09T10:00:00Z',
         updatedAt: '2024-10-09T10:00:00Z',
@@ -329,7 +334,7 @@ describe('API Key Schemas Tests', () => {
         authorities: ['INVALID_AUTHORITY'] // Invalid authority
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 

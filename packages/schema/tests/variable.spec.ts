@@ -42,7 +42,6 @@ describe('Variable Schema Tests', () => {
           }
         ]
       })
-      console.log(result.error)
       expect(result.success).toBe(true)
     })
 
