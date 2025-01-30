@@ -13,7 +13,8 @@ import {
 import {
   ContextMenu,
   ContextMenuContent,
-  ContextMenuItem} from '@/components/ui/context-menu'
+  ContextMenuItem
+} from '@/components/ui/context-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -67,9 +68,7 @@ export default function VariableCard(
           }
         >
           <div className="flex gap-x-5">
-            <div className="flex items-center gap-x-4">
-              {variable.name}
-            </div>
+            <div className="flex items-center gap-x-4">{variable.name}</div>
             {variable.note ? (
               <TooltipProvider>
                 <Tooltip>
