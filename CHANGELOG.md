@@ -1,3 +1,9 @@
+## [2.11.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.2...v2.11.0-stage.3) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add CopySVG icon to the Slug component and update imports ([#677](https://github.com/keyshade-xyz/keyshade/issues/677)) ([2ad93ba](https://github.com/keyshade-xyz/keyshade/commit/2ad93baa24e256aafdbeed9d0ee9b268d4781aa4))
+
 ## [2.11.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.1...v2.11.0-stage.2) (2025-01-30)
 
 ### 🚀 Features
