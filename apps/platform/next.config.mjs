@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url'
 const nextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
+  experimental: {
+    serverActions: true
+  },
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/,

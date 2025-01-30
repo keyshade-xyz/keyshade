@@ -1,13 +1,12 @@
 'use client'
 
 import { ChevronsUpDown, Check } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
 import type {
   GetAllWorkspacesOfUserResponse,
-  Workspace
 } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { Input } from './input'
@@ -35,47 +34,16 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { selectedWorkspaceAtom } from '@/store'
-
-async function getAllWorkspace(): Promise<
-  GetAllWorkspacesOfUserResponse['items'] | undefined
-> {
-  try {
-    const { data, success, error } =
-      await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
-        {},
-        {}
-      )
-
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while fetching workspaces. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      throw error
-    }
-
-    if (success && data) {
-      return data.items
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
+import { selectedWorkspaceAtom, workspacesAtom } from '@/store'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
+  const [workspaces, setWorkspaces] = useAtom(workspacesAtom)
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
 
-  const [selectedWorkspace, setselectedWorkspace] = useAtom(
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
@@ -104,7 +72,7 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setselectedWorkspace({ ...data, projects: 0 })
+        setSelectedWorkspace({ ...data, projects: 0 })
         setOpen(false)
       }
     } catch (error) {
@@ -113,19 +81,54 @@ export function Combobox(): React.JSX.Element {
     }
   }
 
+  const getAllWorkspace = useCallback(async (): Promise<
+    GetAllWorkspacesOfUserResponse['items'] | undefined
+  > => {
+    try {
+      const { data, success, error } =
+        await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+          {},
+          {}
+        )
+
+      if (error) {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while fetching workspaces. Check console for
+              more info.
+            </p>
+          )
+        })
+
+        throw new Error('Failed to fetch workspaces')
+      }
+
+      if (success && data) {
+        return data.items
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+      clearAuthCookies()
+
+      router.push('/auth')
+    }
+  }, [router])
+
   useEffect(() => {
     getAllWorkspace()
       .then((data) => {
         if (data) {
-          setAllWorkspaces(data)
-          setselectedWorkspace(data[0])
+          setWorkspaces(data)
+          setSelectedWorkspace(data[0])
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error('error:', error)
       })
-  }, [setselectedWorkspace])
+  }, [getAllWorkspace, setSelectedWorkspace, setWorkspaces])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -161,12 +164,12 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspaces.map((workspace) => {
+              {workspaces.map((workspace) => {
                 return (
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setselectedWorkspace(workspace)
+                      setSelectedWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}

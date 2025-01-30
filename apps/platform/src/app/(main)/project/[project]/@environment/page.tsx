@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import type {
   ClientResponse,
   GetAllEnvironmentsOfProjectResponse
@@ -8,6 +8,7 @@ import type {
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import {
   createEnvironmentOpenAtom,
   selectedProjectAtom,
@@ -21,6 +22,7 @@ import ConfirmDeleteEnvironment from '@/components/dashboard/environment/confirm
 import EditEnvironmentDialogue from '@/components/dashboard/environment/editEnvironmentSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
@@ -29,6 +31,8 @@ function EnvironmentPage(): React.JSX.Element {
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
+
+  const router = useRouter()
 
   useEffect(() => {
     const getAllEnvironments = async () => {
@@ -66,11 +70,15 @@ function EnvironmentPage(): React.JSX.Element {
         })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
+
+        clearAuthCookies()
+
+        router.push('/auth')
       }
     }
 
     getAllEnvironments()
-  }, [selectedProject, setEnvironments])
+  }, [router, selectedProject, setEnvironments])
 
   return (
     <div

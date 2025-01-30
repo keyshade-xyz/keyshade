@@ -67,6 +67,7 @@ export default function AuthOTPPage(): React.JSX.Element {
           'The OTP you entered is either incorrect or has expired. Please enter the correct OTP.'
         )
         setIsLoading(false)
+        return
       }
       const user: User = (await response.json()) as User
 

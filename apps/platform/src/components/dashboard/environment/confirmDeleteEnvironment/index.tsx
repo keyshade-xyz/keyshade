@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +22,7 @@ import {
 } from '@/store'
 
 export default function ConfirmDeleteEnvironment(): React.JSX.Element {
-  const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
+  const [selectedEnvironment, setSelectedEnvironment] = useAtom(selectedEnvironmentAtom)
   const [isDeleteEnvironmentOpen, setIsDeleteEnvironmentOpen] = useAtom(
     deleteEnvironmentOpenAtom
   )
@@ -67,6 +67,9 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
           (environment) => environment.slug !== environmentSlug
         )
       )
+
+      // Set the selected environment to null
+      setSelectedEnvironment(null)
     }
     if (error) {
       toast.error('Something went wrong!', {
@@ -82,7 +85,7 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
     }
 
     handleClose()
-  }, [setEnvironments, selectedEnvironment, handleClose])
+  }, [selectedEnvironment, handleClose, setEnvironments, setSelectedEnvironment])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {

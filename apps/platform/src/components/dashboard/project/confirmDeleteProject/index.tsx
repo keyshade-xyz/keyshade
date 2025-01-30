@@ -1,8 +1,8 @@
 import { TrashSVG } from '@public/svg/shared'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { deleteProjectOpenAtom, selectedProjectAtom } from '@/store'
+import { deleteProjectOpenAtom, projectsOfWorkspaceAtom, selectedProjectAtom } from '@/store'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,17 +15,15 @@ import {
 } from '@/components/ui/alert-dialog'
 import ControllerInstance from '@/lib/controller-instance'
 
-interface ConfirmDeleteProjectProps {
-  reCallGetAllProjects: () => void
-}
 
-function ConfirmDeleteProject({
-  reCallGetAllProjects
-}: ConfirmDeleteProjectProps): React.JSX.Element {
+
+function ConfirmDeleteProject(): React.JSX.Element {
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+
   const [isDeleteProjectOpen, setIsDeleteProjectOpen] = useAtom(
     deleteProjectOpenAtom
   )
-  const selectedProject = useAtomValue(selectedProjectAtom)
+  const setProjects = useSetAtom(projectsOfWorkspaceAtom)
 
   const handleClose = () => {
     setIsDeleteProjectOpen(false)
@@ -59,7 +57,15 @@ function ConfirmDeleteProject({
           </p>
         )
       })
-      reCallGetAllProjects()
+      
+
+      // Remove the project from the projects list
+      setProjects((prevProjects) =>
+        prevProjects.filter((project) => project.slug !== projectSlug)
+      )
+
+      // Set the selected project to null
+      setSelectedProject(null)
     }
 
     if (error) {

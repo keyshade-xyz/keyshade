@@ -1,11 +1,13 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 function ProfilePage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -16,6 +18,8 @@ function ProfilePage(): React.JSX.Element {
   })
   const [isModified, setIsModified] = useState<boolean>(false)
   const [email, setEmail] = useState<string>('')
+
+  const router = useRouter()
 
   const updateSelf = useCallback(async () => {
     try {
@@ -30,9 +34,12 @@ function ProfilePage(): React.JSX.Element {
     } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
+      clearAuthCookies()
+
+      router.push('/auth')
     }
     setIsModified(false)
-  }, [userData, email])
+  }, [userData.name, userData.email, email, router])
 
   useEffect(() => {
     ControllerInstance.getInstance()

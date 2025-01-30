@@ -1,8 +1,8 @@
 'use client'
 
 import { Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
 import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
@@ -18,30 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 interface UserNameImage {
   name: string | null
   image: string | null
-}
-
-async function fetchNameImage(): Promise<UserNameImage | undefined> {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
-      {
-        method: 'GET',
-        credentials: 'include'
-      }
-    )
-    const data: User = (await response.json()) as User
-    return {
-      name: data.name.split(' ')[0] ?? data.email.split('@')[0],
-      image: data.profilePictureUrl
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
 }
 
 function Navbar(): React.JSX.Element {
@@ -53,6 +34,8 @@ function Navbar(): React.JSX.Element {
   })
 
   const pathname = usePathname()
+
+  const router = useRouter()
 
   const settingsTabs = [
     { id: 'workspace', label: 'Workspace' },
@@ -77,6 +60,28 @@ function Navbar(): React.JSX.Element {
       icon: <EnvironmentSVG />
     }
   ]
+
+  const fetchNameImage = useCallback(async (): Promise<UserNameImage | undefined> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
+        {
+          method: 'GET',
+          credentials: 'include'
+        }
+      )
+      const data: User = (await response.json()) as User
+      return {
+        name: data.name.split(' ')[0] ?? data.email.split('@')[0],
+        image: data.profilePictureUrl
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+      clearAuthCookies()
+      router.push('/auth')
+    }
+  }, [router])
 
   useEffect(() => {
     const down = (e: KeyboardEvent): void => {
@@ -105,7 +110,7 @@ function Navbar(): React.JSX.Element {
     return () => {
       document.removeEventListener('keydown', down)
     }
-  }, [])
+  }, [fetchNameImage])
 
   return (
     <>

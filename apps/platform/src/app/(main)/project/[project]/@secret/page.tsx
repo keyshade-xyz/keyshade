@@ -5,6 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { SecretSVG } from '@public/svg/dashboard'
+import { useRouter } from 'next/navigation'
 import { Accordion } from '@/components/ui/accordion'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ControllerInstance from '@/lib/controller-instance'
@@ -16,6 +17,7 @@ import {
   selectedProjectAtom
 } from '@/store'
 import SecretCard from '@/components/dashboard/secret/secretCard'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 extend(relativeTime)
 
@@ -28,6 +30,8 @@ function SecretPage(): React.JSX.Element {
     () => selectedProject?.storePrivateKey === true || false,
     [selectedProject]
   )
+
+  const router = useRouter()
 
   useEffect(() => {
     setIsLoading(true)
@@ -63,13 +67,17 @@ function SecretPage(): React.JSX.Element {
         })
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
+
+        clearAuthCookies()
+
+        router.push('/auth')
       }
     }
 
     getAllSecretsByProjectSlug()
 
     setIsLoading(false)
-  }, [isDecrypted, selectedProject, setSecrets])
+  }, [isDecrypted, router, selectedProject, setSecrets])
 
   if (isLoading) {
     return (

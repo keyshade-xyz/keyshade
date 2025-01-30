@@ -1,9 +1,10 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useRouter } from 'next/navigation'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
@@ -18,6 +19,7 @@ import {
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
+import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
@@ -27,42 +29,45 @@ export default function Index(): JSX.Element {
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
+  const router = useRouter()
+
   // Projects to be displayed in the dashboard
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
 
-  const getAllProjects = useCallback(async () => {
+  useEffect(() => {
     setLoading(true)
 
-    if (selectedWorkspace) {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().projectController.getAllProjects(
-          { workspaceSlug: selectedWorkspace.slug },
-          {}
-        )
+    if (!selectedWorkspace) return
 
-      if (success && data) {
-        setProjects(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching projects. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
+    ControllerInstance.getInstance()
+      .projectController.getAllProjects(
+        { workspaceSlug: selectedWorkspace.slug },
+        {}
+      )
+      .then(({ success, error, data }) => {
+        if (success && data) {
+          setProjects(data.items)
+        } else {
+          toast.error('Something went wrong!', {
+            description: (
+              <p className="text-xs text-red-300">
+                Something went wrong while fetching projects. Check console for
+                more info.
+              </p>
+            )
+          })
+          // eslint-disable-next-line no-console -- we need to log the error
+          console.error(error)
+          clearAuthCookies()
+
+          router.push('/auth')
+        }
+      })
+      .finally(() => setLoading(false))
 
     setLoading(false)
-  }, [selectedWorkspace, setProjects])
-
-  useEffect(() => {
-    getAllProjects()
-  }, [getAllProjects, selectedWorkspace, setProjects])
+  }, [router, selectedWorkspace, setProjects])
 
   return (
     <div className="flex flex-col gap-4">
@@ -97,9 +102,7 @@ export default function Index(): JSX.Element {
         </div>
       )}
 
-      {isDeleteProjectOpen && selectedProject ? (
-        <ConfirmDeleteProject reCallGetAllProjects={getAllProjects} />
-      ) : null}
+      {isDeleteProjectOpen && selectedProject ? <ConfirmDeleteProject /> : null}
 
       <EditProjectSheet />
     </div>
