@@ -11,7 +11,7 @@ interface SettingsLayoutProps {
 function SettingsLayout({
   // params,
   billing,
-  profile,
+  profile
 }: SettingsLayoutProps): React.JSX.Element {
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
