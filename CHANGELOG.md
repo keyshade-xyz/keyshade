@@ -1,3 +1,9 @@
+## [2.11.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.4...v2.11.0-stage.5) (2025-01-30)
+
+### 🚀 Features
+
+* **platform:** Add new access level SVGs and integrate into ProjectCard component ([#678](https://github.com/keyshade-xyz/keyshade/issues/678)) ([cc3ef77](https://github.com/keyshade-xyz/keyshade/commit/cc3ef77b93054e44fc5de01e12ef9d0d707a0a14))
+
 ## [2.11.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.3...v2.11.0-stage.4) (2025-01-30)
 
 ### 🚀 Features
