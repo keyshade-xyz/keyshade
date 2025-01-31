@@ -1,3 +1,9 @@
+## [2.11.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.8...v2.11.0-stage.9) (2025-01-31)
+
+### 🚀 Features
+
+* **platform:** Restructure workspace settings and user settings ([#682](https://github.com/keyshade-xyz/keyshade/issues/682)) ([cd0013a](https://github.com/keyshade-xyz/keyshade/commit/cd0013ade20f224bf9db24ef7431810c142be6b3))
+
 ## [2.11.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.7...v2.11.0-stage.8) (2025-01-30)
 
 ### 🚀 Features
