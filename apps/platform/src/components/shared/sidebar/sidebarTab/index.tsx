@@ -24,7 +24,7 @@ function SidebarTab({
    * @returns The background color for the tab.
    */
   const isCurrentActive = (tabName: string): boolean => {
-    if (currentPath.split('/')[1] === tabName.toLowerCase()) {
+    if (currentPath === tabName) {
       return true
     }
     return false
