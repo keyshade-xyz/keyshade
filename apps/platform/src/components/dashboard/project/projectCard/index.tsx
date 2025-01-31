@@ -11,7 +11,7 @@ import {
   InternalSVG
 } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,7 +22,8 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  selectedWorkspaceAtom
 } from '@/store'
 
 interface ProjectCardProps {
@@ -46,6 +47,7 @@ export default function ProjectCard({
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedVariable = useSetAtom(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -102,7 +104,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`/project/${slug}?tab=Secret`}
+          href={`${selectedWorkspace?.slug}/project/${slug}?tab=secret`}
           key={id}
         >
           <div className="flex items-center gap-x-5">

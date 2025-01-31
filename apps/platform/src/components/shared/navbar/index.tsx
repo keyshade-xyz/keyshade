@@ -172,11 +172,11 @@ function Navbar(): React.JSX.Element {
         </div>
         <div className="px-4">
           {(pathname === '/settings' ||
-            pathname.split('/')[1] === 'project') && (
+            pathname.split('/')[2] === 'project') && (
             <LineTab
               customID="linetab"
               tabs={
-                pathname.split('/')[1] === 'project'
+                pathname.split('/')[2] === 'project'
                   ? projectTabs
                   : settingsTabs
               }
