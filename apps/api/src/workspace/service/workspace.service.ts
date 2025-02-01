@@ -3,7 +3,7 @@ import { getCollectiveProjectAuthorities } from '@/common/collective-authorities
 import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { createWorkspace } from '@/common/workspace'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -50,7 +50,12 @@ export class WorkspaceService {
    */
   async createWorkspace(user: User, dto: CreateWorkspace) {
     if (await this.existsByName(dto.name, user.id)) {
-      throw new ConflictException('Workspace already exists')
+      throw new ConflictException(
+        constructErrorBody(
+          'Workspace already exists',
+          `Workspace with name ${dto.name} already exists`
+        )
+      )
     }
 
     return await createWorkspace(user, dto, this.prisma)
@@ -84,7 +89,12 @@ export class WorkspaceService {
       (dto.name && (await this.existsByName(dto.name, user.id))) ||
       dto.name === workspace.name
     ) {
-      throw new ConflictException('Workspace already exists')
+      throw new ConflictException(
+        constructErrorBody(
+          'Workspace already exists',
+          `Workspace with name ${dto.name} already exists`
+        )
+      )
     }
 
     const updatedWorkspace = await this.prisma.workspace.update({
@@ -146,7 +156,10 @@ export class WorkspaceService {
     // We don't want the users to delete their default workspace
     if (workspace.isDefault) {
       throw new BadRequestException(
-        `You cannot delete the default workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'Can not delete default workspace',
+          `You can not delete the default workspace.`
+        )
       )
     }
 

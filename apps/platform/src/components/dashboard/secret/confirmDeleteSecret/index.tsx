@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { TrashSVG } from '@public/svg/shared'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,8 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { TrashSVG } from '@public/svg/shared'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   deleteSecretOpenAtom,
   secretsOfProjectAtom,
@@ -65,22 +65,11 @@ function ConfirmDeleteSecret() {
       )
 
       setSelectedSecret(null)
+      handleClose()
+    } else {
+      throw new Error(JSON.stringify(error))
     }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the secret. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-
-    handleClose()
-  }, [setSecrets, selectedSecret, handleClose])
+  }, [selectedSecret, setSecrets, setSelectedSecret, handleClose])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {

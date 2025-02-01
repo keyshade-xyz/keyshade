@@ -280,9 +280,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toEqual(
-        `Secret already exists: Secret 1 in project ${project1.slug}`
-      )
     })
 
     it('should have created a SECRET_ADDED event', async () => {
@@ -319,9 +316,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
     })
 
     it('should be able to update the secret name and note without creating a new version', async () => {
@@ -444,9 +438,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
     })
 
     it('should not be able to roll back a secret it does not have access to', async () => {
@@ -471,9 +462,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `Invalid rollback version: 2 for secret: ${secret1.slug}`
-      )
     })
 
     it('should not be able to roll back if the secret has no versions', async () => {
@@ -492,9 +480,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `No versions found for environment: ${environment1.slug} for secret: ${secret1.slug}`
-      )
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
@@ -605,9 +590,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
     })
 
     it('should be able to fetch all secrets', async () => {
@@ -793,9 +775,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
     })
 
     it('should not be able to fetch all secrets decrypted if somehow the project does not have a private key even though it stores it (hypothetical)', async () => {
@@ -818,9 +797,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not have a private key`
-      )
 
       await prisma.project.update({
         where: {
@@ -854,9 +830,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Project non-existing-project-slug not found'
-      )
     })
   })
 
@@ -889,9 +862,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Project non-existing-project-slug not found'
-      )
     })
 
     it('should not be able to fetch all secrets by project and environment if environment does not exists', async () => {
@@ -904,9 +874,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Environment non-existing-environment-slug not found'
-      )
     })
 
     it('should not be able to fetch all secrets by project and environment if the user has no access to the project', async () => {
@@ -975,9 +942,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
     })
 
     it('should not be able to delete a secret it does not have access to', async () => {
@@ -1090,7 +1054,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Secret 9999 not found`)
     })
 
     it('should return error if environment does not exist', async () => {
@@ -1103,7 +1066,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Environment 9999 not found`)
     })
 
     it('returns error if secret is not accessible', async () => {

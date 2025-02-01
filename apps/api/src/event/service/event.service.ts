@@ -9,7 +9,7 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class EventService {
@@ -28,11 +28,15 @@ export class EventService {
     source?: EventSource
   ) {
     if (severity && !Object.values(EventSeverity).includes(severity)) {
-      throw new BadRequestException('Invalid "severity" value')
+      throw new BadRequestException(
+        constructErrorBody('Invalid value', 'Invalid "severity" value')
+      )
     }
 
     if (source && !Object.values(EventSource).includes(source)) {
-      throw new BadRequestException('Invalid "source" value')
+      throw new BadRequestException(
+        constructErrorBody('Invalid value', 'Invalid "source" value')
+      )
     }
 
     // Check for workspace authority

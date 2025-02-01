@@ -283,9 +283,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(400)
-      expect(result.json().message).toEqual(
-        'Environment can only be provided if project is also provided'
-      )
     })
 
     it('should not be able to create an integration for an environment the user does not have access to', async () => {
@@ -491,9 +488,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(400)
-      expect(result.json().message).toEqual(
-        'Environment can only be provided if project is also provided'
-      )
     })
 
     it('should not fail to update if the integration has projectSlug present and only environmentSlug is updated', async () => {

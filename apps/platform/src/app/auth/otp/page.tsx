@@ -89,33 +89,18 @@ export default function AuthOTPPage(): React.JSX.Element {
     }
   }
   const handleResendOtp = async (userEmail: string): Promise<void> => {
-    try {
-      setIsLoadingRefresh(true)
+    setIsLoadingRefresh(true)
 
-      const { error, success } =
-        await ControllerInstance.getInstance().authController.resendOTP({
-          userEmail: encodeURIComponent(userEmail)
-        })
-      if (success) {
-        toast.success('OTP successfully sent to your email')
-        setIsLoadingRefresh(false)
-      } else {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.log(error)
-        toast.error("Couldn't send OTP, too many requests")
-        setIsLoadingRefresh(false)
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to send OTP: ${error}`)
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong sending the OTP. Check console for more info.
-          </p>
-        )
+    const { error, success } =
+      await ControllerInstance.getInstance().authController.resendOTP({
+        userEmail: encodeURIComponent(userEmail)
       })
+    if (success) {
+      toast.success('OTP successfully sent to your email')
       setIsLoadingRefresh(false)
+    } else {
+      setIsLoadingRefresh(false)
+      throw new Error(JSON.stringify(error))
     }
   }
   return (

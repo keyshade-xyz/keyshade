@@ -65,21 +65,10 @@ export default function ConfirmDeleteVariable() {
       setVariables((prevVariables) =>
         prevVariables.filter(({ variable }) => variable.slug !== variableSlug)
       )
+      handleClose()
+    } else {
+      throw new Error(JSON.stringify(error))
     }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the variable. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-
-    handleClose()
   }, [setVariables, selectedVariable, handleClose])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog

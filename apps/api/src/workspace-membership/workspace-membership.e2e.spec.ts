@@ -210,11 +210,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You are already the owner of the workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
 
     it('should not be able to transfer ownership to a non member', async () => {
@@ -231,11 +226,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${newWorkspace.slug}/transfer-ownership/${user3.email}`
       })
 
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `${user3.email} is not a member of workspace ${newWorkspace.name} (${newWorkspace.slug})`
-      })
+      expect(response.statusCode).toBe(404)
     })
 
     it('should not be able to transfer ownership to a member who did not accept the invitation', async () => {
@@ -255,11 +246,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${newWorkspace.slug}/transfer-ownership/${user3.email}`
       })
 
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user3.email} has not accepted the invitation to workspace ${newWorkspace.name} (${newWorkspace.slug})`
-      })
+      expect(response.statusCode).toBe(400)
     })
 
     it('should be able to transfer the ownership of the workspace', async () => {
@@ -349,11 +336,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot transfer ownership of default workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
   })
 
@@ -387,11 +369,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Admin role cannot be assigned to the user`
-      })
     })
 
     it('should allow user to invite another user to the workspace', async () => {
@@ -449,11 +426,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `User ${user2.name} (${user2.id}) is already a member of workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
 
     it('should have created a INVITED_TO_WORKSPACE event', async () => {
@@ -557,11 +529,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot remove yourself from the workspace. Please transfer the ownership to another member before leaving the workspace.`
-      })
     })
 
     it('should have created a REMOVED_FROM_WORKSPACE event', async () => {
@@ -609,11 +576,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Admin role cannot be assigned to the user`
-      })
     })
 
     it('should be able to update the role of a member', async () => {
@@ -694,11 +656,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `${user2.email} is not a member of workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
   })
 
@@ -748,11 +705,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a CANCELLED_INVITATION event', async () => {
@@ -840,11 +792,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a DECLINED_INVITATION event', async () => {
@@ -925,11 +872,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a ACCEPT_INVITATION event', async () => {
@@ -1004,11 +946,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.`
-      })
     })
 
     it('should not be able to leave the workspace if the user is not a member', async () => {

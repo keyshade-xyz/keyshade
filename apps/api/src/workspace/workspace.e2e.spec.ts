@@ -226,11 +226,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: 'Workspace already exists'
-      })
     })
 
     it('should let other user to create workspace with same name', async () => {
@@ -352,11 +347,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: 'Workspace already exists'
-      })
     })
 
     it('should not allow external user to update a workspace', async () => {
@@ -624,11 +614,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace abc not found`
-      })
     })
 
     it('should not be able to export data of a workspace it is not a member of', async () => {
@@ -698,11 +683,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
 
     it('should not be able to delete the default workspace', async () => {
@@ -716,11 +696,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot delete the default workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
   })
 

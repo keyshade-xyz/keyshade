@@ -46,8 +46,7 @@ export default function AuthPage(): React.JSX.Element {
       }
     } catch (error) {
       setIsLoading(false)
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to send OTP: ${error}`)
+      throw new Error(JSON.stringify(error))
     }
   }
 

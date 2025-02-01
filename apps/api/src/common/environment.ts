@@ -6,6 +6,7 @@ import { UpdateVariable } from '@/variable/dto/update.variable/update.variable'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { Authority, Project, User } from '@prisma/client'
 import { AuthorityCheckerService } from './authority-checker.service'
+import { constructErrorBody } from './util'
 
 /**
  * Given a list of environment slugs in a CreateSecret, UpdateSecret, CreateVariable, or UpdateVariable DTO,
@@ -45,13 +46,21 @@ export const getEnvironmentIdToSlugMap = async (
         })
 
       if (!environment) {
-        throw new NotFoundException(`Environment: ${environmentSlug} not found`)
+        throw new NotFoundException(
+          constructErrorBody(
+            'Environment not found',
+            `Environment ${environmentSlug} not found`
+          )
+        )
       }
 
       // Check if the environment belongs to the project
       if (environment.projectId !== project.id) {
         throw new BadRequestException(
-          `Environment: ${environmentSlug} does not belong to project: ${project.slug}`
+          constructErrorBody(
+            'Environment does not belong to the project',
+            `Environment ${environmentSlug} does not belong to project ${project.slug}`
+          )
         )
       }
 

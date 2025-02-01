@@ -37,43 +37,33 @@ function SecretPage(): React.JSX.Element {
   useEffect(() => {
     setIsLoading(true)
 
-    async function getAllSecretsByProjectSlug() {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
-
-      const { success, error, data } =
-        await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
-          { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
-          {}
+    if (!selectedProject) {
+      toast.error('No project selected', {
+        description: (
+          <p className="text-xs text-red-300">
+            No project selected. Please select a project.
+          </p>
         )
-
-      if (success && data) {
-        setSecrets(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching secrets. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
+      })
+      return
     }
 
-    getAllSecretsByProjectSlug()
-
-    setIsLoading(false)
+    ControllerInstance.getInstance()
+      .secretController.getAllSecretsOfProject(
+        { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
+        {}
+      )
+      .then(({ success, error, data }) => {
+        if (success && data) {
+          setSecrets(data.items)
+        } else {
+          throw new Error(JSON.stringify(error))
+        }
+      })
+      .catch((error) => {
+        throw new Error(JSON.stringify(error))
+      })
+      .finally(() => setIsLoading(false))
   }, [isDecrypted, selectedProject, setSecrets])
 
   if (isLoading) {
@@ -118,11 +108,11 @@ function SecretPage(): React.JSX.Element {
               collapsible
               type="single"
             >
-              {secrets.map((secret) => (
+              {secrets.map((secretData) => (
                 <SecretCard
                   isDecrypted={isDecrypted}
-                  key={secret.id}
-                  secretData={secret}
+                  key={secretData.secret.id}
+                  secretData={secretData}
                 />
               ))}
             </Accordion>

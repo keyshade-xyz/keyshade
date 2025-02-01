@@ -22,7 +22,7 @@ import IntegrationFactory from '../plugins/factory/integration.factory'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class IntegrationService {
@@ -91,7 +91,10 @@ export class IntegrationService {
     // Check if only environmentId is provided
     if (dto.environmentSlug && !dto.projectSlug) {
       throw new BadRequestException(
-        'Environment can only be provided if project is also provided'
+        constructErrorBody(
+          'Can not provide environment without project',
+          'Environment can only be provided if project is also provided'
+        )
       )
     }
 
@@ -208,7 +211,10 @@ export class IntegrationService {
     // Check if only environmentId is provided, or if the integration has no project associated from prior
     if (dto.environmentSlug && !integration.projectId && !dto.projectSlug) {
       throw new BadRequestException(
-        'Environment can only be provided if project is also provided'
+        constructErrorBody(
+          'Can not provide environment without project',
+          'Environment can only be provided if project is also provided'
+        )
       )
     }
 
@@ -483,7 +489,10 @@ export class IntegrationService {
       })) !== null
     )
       throw new ConflictException(
-        'Integration with the same name already exists in the workspace'
+        constructErrorBody(
+          'Integration already exists',
+          `Integration with name ${name} already exists in workspace ${workspace.slug}`
+        )
       )
   }
 }

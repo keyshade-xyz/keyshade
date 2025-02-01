@@ -103,20 +103,8 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
 
       // Close the sheet
       setIsEditEnvironmentOpen(false)
-    }
-
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while updating the environment. Check console
-            for more info.
-          </p>
-        )
-      })
-
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.log(error)
+    } else {
+      throw new Error(JSON.stringify(error))
     }
   }, [
     selectedEnvironment,

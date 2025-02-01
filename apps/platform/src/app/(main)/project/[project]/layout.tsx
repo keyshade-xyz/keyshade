@@ -1,10 +1,6 @@
 'use client'
 import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import type {
-  ClientResponse,
-  GetAllEnvironmentsOfProjectResponse
-} from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
@@ -24,72 +20,54 @@ interface DetailedProjectPageProps {
 function DetailedProjectPage({
   params
 }: DetailedProjectPageProps): JSX.Element {
-  const [selectedProject, setselectedProject] = useAtom(selectedProjectAtom)
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
   useEffect(() => {
-    async function getProjectBySlug() {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().projectController.getProject(
-          { projectSlug: params.project },
-          {}
-        )
-
-      if (success && data) {
-        setselectedProject(data)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    getProjectBySlug()
-  }, [params.project, setselectedProject])
+    ControllerInstance.getInstance()
+      .projectController.getProject({ projectSlug: params.project }, {})
+      .then(({ data, success, error }) => {
+        if (success && data) {
+          setSelectedProject(data)
+        } else {
+          throw new Error(JSON.stringify(error))
+        }
+      })
+      .catch((error) => {
+        throw new Error(JSON.stringify(error))
+      })
+  }, [params.project, setSelectedProject])
 
   useEffect(() => {
-    const getAllEnvironments = async () => {
-      if (!selectedProject) {
-        return
-      }
-
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
-        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
+    if (!selectedProject) {
+      toast.error('No project selected', {
+        description: (
+          <p className="text-xs text-red-300">
+            No project selected. Please select a project.
+          </p>
         )
-
-      if (success && data) {
-        setEnvironments(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching environments. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
+      })
+      return
     }
 
-    getAllEnvironments()
+    ControllerInstance.getInstance()
+      .environmentController.getAllEnvironmentsOfProject(
+        { projectSlug: selectedProject.slug },
+        {}
+      )
+      .then(({ data, success, error }) => {
+        if (success && data) {
+          setEnvironments(data.items)
+        } else {
+          throw new Error(JSON.stringify(error))
+        }
+      })
+      .catch((error) => {
+        throw new Error(JSON.stringify(error))
+      })
   }, [selectedProject, setEnvironments])
 
   return (

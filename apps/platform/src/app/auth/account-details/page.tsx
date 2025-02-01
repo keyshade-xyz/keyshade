@@ -49,8 +49,7 @@ export default function AuthDetailsPage(): React.JSX.Element {
         router.push('/')
       }
     } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to update user details: ${error}`)
+      throw new Error(JSON.stringify(error))
       setIsLoading(false)
     }
   }

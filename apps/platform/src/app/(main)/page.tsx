@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { FolderSVG } from '@public/svg/dashboard'
-import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
@@ -44,16 +43,7 @@ export default function Index(): JSX.Element {
       if (success && data) {
         setProjects(data.items)
       } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching projects. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        throw new Error(JSON.stringify(error))
       }
     }
 

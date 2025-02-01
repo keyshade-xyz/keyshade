@@ -28,8 +28,7 @@ function ProfilePage(): React.JSX.Element {
       )
       toast.success('Profile updated successfully')
     } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
+      throw new Error(JSON.stringify(error))
     }
     setIsModified(false)
   }, [userData, email])
@@ -47,13 +46,11 @@ function ProfilePage(): React.JSX.Element {
           setEmail(data.email)
           setIsLoading(false)
         } else {
-          // eslint-disable-next-line no-console -- we need to log the error
-          console.error(error)
+          throw new Error(JSON.stringify(error))
         }
       })
       .catch((error) => {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        throw new Error(JSON.stringify(error))
       })
   }, [])
 

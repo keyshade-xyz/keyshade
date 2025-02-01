@@ -280,9 +280,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toEqual(
-        `Variable already exists: Variable 1 in project ${project1.slug}`
-      )
     })
 
     it('should have created a VARIABLE_ADDED event', async () => {
@@ -340,9 +337,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Variable non-existing-variable-slug not found'
-      )
     })
 
     it('should not be able to update a variable with same name in the same project', async () => {
@@ -359,9 +353,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toEqual(
-        `Variable already exists: Variable 1 in project ${project1.slug}`
-      )
     })
 
     it('should be able to update the variable name and note without creating a new version', async () => {
@@ -482,9 +473,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Variable non-existing-variable-slug not found'
-      )
     })
 
     it('should not be able to roll back a variable it does not have access to', async () => {
@@ -509,9 +497,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `Invalid rollback version: 2 for variable: ${variable1.slug}`
-      )
     })
 
     it('should be able to roll back a variable', async () => {
@@ -580,9 +565,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `No versions found for environment: ${environment1.slug} for variable: ${variable1.slug}`
-      )
     })
   })
 
@@ -726,9 +708,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Project non-existing-project-slug not found'
-      )
     })
   })
 
@@ -773,9 +752,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Project non-existing-project-slug not found'
-      )
     })
 
     it('should not be able to fetch all variables by project and environment if the environment does not exist', async () => {
@@ -802,9 +778,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Variable non-existing-variable-slug not found'
-      )
     })
 
     it('should not be able to delete a variable it does not have access to', async () => {
@@ -917,7 +890,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Variable 9999 not found`)
     })
 
     it('should return error if environment does not exist', async () => {
@@ -930,7 +902,6 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Environment 9999 not found`)
     })
 
     it('returns error if variable is not accessible', async () => {

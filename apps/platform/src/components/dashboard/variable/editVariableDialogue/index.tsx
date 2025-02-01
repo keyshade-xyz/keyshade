@@ -104,21 +104,11 @@ export default function EditVariableDialog() {
         })
         return newVariables
       })
-    }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while updating the variable. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error('Error while updating variable: ', error)
-    }
 
-    handleClose()
+      handleClose()
+    } else {
+      throw new Error(JSON.stringify(error))
+    }
   }, [selectedVariableData, requestData, handleClose, setVariables])
 
   return (

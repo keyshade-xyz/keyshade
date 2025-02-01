@@ -1,10 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import type {
-  ClientResponse,
-  GetAllVariablesOfProjectResponse
-} from '@keyshade/schema'
 import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
@@ -32,45 +28,34 @@ function VariablePage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
 
   useEffect(() => {
-    const getAllVariables = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
-
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllVariablesOfProjectResponse> =
-        await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
+    if (!selectedProject) {
+      toast.error('No project selected', {
+        description: (
+          <p className="text-xs text-red-300">
+            No project selected. Please select a project.
+          </p>
         )
-
-      if (success && data) {
-        setVariables(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching variables. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
+      })
+      return
     }
 
-    getAllVariables()
+    ControllerInstance.getInstance()
+      .variableController.getAllVariablesOfProject(
+        {
+          projectSlug: selectedProject.slug
+        },
+        {}
+      )
+      .then(({ data, error, success }) => {
+        if (success && data) {
+          setVariables(data.items)
+        } else {
+          throw new Error(JSON.stringify(error))
+        }
+      })
+      .catch((error) => {
+        throw new Error(JSON.stringify(error))
+      })
   }, [selectedProject, setVariables])
 
   return (

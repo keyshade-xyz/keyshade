@@ -1,4 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service'
+import { InternalServerErrorException } from '@nestjs/common'
 import { Workspace } from '@prisma/client'
 
 export const incrementSlugSuffix = (
@@ -26,7 +27,9 @@ export const incrementSlugSuffix = (
       const index = charset.indexOf(currentChar)
 
       if (index === -1) {
-        throw new Error(`Invalid character in slug suffix: ${currentChar}`)
+        throw new InternalServerErrorException(
+          `Invalid character in slug suffix: ${currentChar}`
+        )
       }
       const nextIndex = (index + 1) % charset.length
       result = charset[nextIndex] + result

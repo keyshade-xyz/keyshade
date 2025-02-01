@@ -85,20 +85,11 @@ export default function CreateProjectDialogue(): JSX.Element {
             variableCount: 0
           }
         ])
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while creating the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
 
-      setIsCreateProjectDialogOpen(false)
+        setIsCreateProjectDialogOpen(false)
+      } else {
+        throw new Error(JSON.stringify(error))
+      }
     } else {
       toast.error('No workspace selected')
     }

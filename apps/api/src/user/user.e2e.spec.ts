@@ -492,11 +492,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(401)
-    expect(JSON.parse(result.body)).toEqual({
-      message: 'Invalid or expired OTP',
-      error: 'Unauthorized',
-      statusCode: 401
-    })
 
     const nonUpdatedUser = await prisma.user.findUnique({
       where: {
@@ -556,11 +551,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: 'User with this email already exists',
-      error: 'Conflict'
-    })
   })
 
   it('should return 409 Conflict if no previous OTP exists for email change', async () => {
@@ -573,11 +563,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: `No previous OTP for email change exists for user ${regularUser.id}`,
-      error: 'Conflict'
-    })
   })
 
   // test('user should be able to delete their own account', async () => {

@@ -90,33 +90,11 @@ export default function AddVariableDialogue() {
 
         // Add the variable to the store
         setVariables((prev) => [...prev, data])
-      }
 
-      if (error) {
-        if (error.statusCode === 409) {
-          toast.error('Variable already exists', {
-            description: (
-              <p className="text-xs text-red-300">
-                Variable with the same name already exists. Please use different
-                one.
-              </p>
-            )
-          })
-        } else {
-          toast.error('Something went wrong!', {
-            description: (
-              <p className="text-xs text-red-300">
-                Something went wrong adding the variable. Check console for more
-                info.
-              </p>
-            )
-          })
-          // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
-          console.error(error)
-        }
+        setIsCreateVariableOpen(false)
+      } else {
+        throw new Error(JSON.stringify(error))
       }
-
-      setIsCreateVariableOpen(false)
     },
     [selectedProject, newVariableData, setIsCreateVariableOpen, setVariables]
   )

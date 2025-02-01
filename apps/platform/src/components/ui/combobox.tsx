@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronsUpDown, Check } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
@@ -37,57 +37,26 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
 
-async function getAllWorkspace(): Promise<
-  GetAllWorkspacesOfUserResponse['items'] | undefined
-> {
-  try {
-    const { data, success, error } =
-      await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
-        {},
-        {}
-      )
-
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while fetching workspaces. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      throw error
-    }
-
-    if (success && data) {
-      return data.items
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
-
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
 
-  const [selectedWorkspace, setselectedWorkspace] = useAtom(
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
   const router = useRouter()
 
-  async function createWorkspace(name: string): Promise<void> {
-    if (name === '') {
-      setIsNameEmpty(true)
-      return
-    }
-    setIsNameEmpty(false)
-    try {
+  const createWorkspace = useCallback(
+    async (name: string) => {
+      if (name === '') {
+        setIsNameEmpty(true)
+        return
+      }
+      setIsNameEmpty(false)
+
       const { data, error, success } =
         await ControllerInstance.getInstance().workspaceController.createWorkspace(
           {
@@ -96,36 +65,29 @@ export function Combobox(): React.JSX.Element {
           {}
         )
 
-      if (error) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-        return
-      }
-
       if (success && data) {
         toast.success('Workspace created successfully')
-        setselectedWorkspace({ ...data, projects: 0 })
+        setSelectedWorkspace({ ...data, projects: 0 })
         setOpen(false)
+      } else {
+        throw new Error(JSON.stringify(error))
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-  }
+    },
+    [setIsNameEmpty, setOpen, setSelectedWorkspace]
+  )
 
   useEffect(() => {
-    getAllWorkspace()
-      .then((data) => {
-        if (data) {
-          setAllWorkspaces(data)
-          setselectedWorkspace(data[0])
+    ControllerInstance.getInstance()
+      .workspaceController.getWorkspacesOfUser({}, {})
+      .then(({ data, success, error }) => {
+        if (success && data) {
+          setAllWorkspaces(data.items)
+          setSelectedWorkspace(data.items[0])
+        } else {
+          throw new Error(JSON.stringify(error))
         }
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error('error:', error)
-      })
-  }, [setselectedWorkspace])
+  }, [setSelectedWorkspace])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -166,7 +128,7 @@ export function Combobox(): React.JSX.Element {
                   <CommandItem
                     key={workspace.id}
                     onSelect={() => {
-                      setselectedWorkspace(workspace)
+                      setSelectedWorkspace(workspace)
                       router.refresh()
                       setOpen(false)
                     }}

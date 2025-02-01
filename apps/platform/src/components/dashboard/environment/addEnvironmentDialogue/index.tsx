@@ -91,27 +91,8 @@ export default function AddEnvironmentDialogue() {
 
       // Close the dialog
       setIsCreateEnvironmentOpen(false)
-    }
-
-    if (error) {
-      if (error.statusCode === 409) {
-        toast.error('Environment already exists', {
-          description: (
-            <p className="text-xs text-red-300">Environment already exists</p>
-          )
-        })
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while adding the environment. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
+    } else {
+      throw new Error(JSON.stringify(error))
     }
   }, [
     newEnvironmentData.environmentDescription,

@@ -15,6 +15,7 @@ import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
 import { toSHA256 } from '@/common/cryptography'
 import { getUserByEmailOrId } from '@/common/user'
+import { constructErrorBody } from '@/common/util'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -142,7 +143,12 @@ export class AuthGuard implements CanActivate {
 
     // If the user is not active, we throw an UnauthorizedException.
     if (!user.isActive) {
-      throw new UnauthorizedException('User is not active')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'User not active',
+          'Please contact us if you think this is a mistake'
+        )
+      )
     }
 
     const onboardingBypassed =
@@ -153,7 +159,12 @@ export class AuthGuard implements CanActivate {
 
     // If the onboarding is not finished, we throw an UnauthorizedException.
     if (!onboardingBypassed && !user.isOnboardingFinished) {
-      throw new UnauthorizedException('Onboarding not finished')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Onboarding not finished',
+          'Please complete the onboarding'
+        )
+      )
     }
 
     // We attach the user to the request object.

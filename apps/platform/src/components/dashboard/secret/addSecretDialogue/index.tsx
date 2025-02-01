@@ -82,38 +82,17 @@ export default function AddSecretDialog() {
       })
       // Add the new secret to the list of secrets
       setSecrets((prev) => [...prev, data])
-    }
-    if (error) {
-      if (error.statusCode === 409) {
-        toast.error('Secret already exists', {
-          description: (
-            <p className="text-xs text-red-300">
-              A secret with the same name already exists. Please use a different
-              one.
-            </p>
-          )
-        })
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while adding the secret. Check the console
-              for more details.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
-        console.error(error)
-      }
-    }
 
-    setNewSecretData({
-      secretName: '',
-      secretNote: '',
-      environmentSlug: '',
-      environmentValue: ''
-    })
-    setIsCreateSecretOpen(false)
+      setNewSecretData({
+        secretName: '',
+        secretNote: '',
+        environmentSlug: '',
+        environmentValue: ''
+      })
+      setIsCreateSecretOpen(false)
+    } else {
+      throw new Error(JSON.stringify(error))
+    }
   }, [selectedProject, newSecretData, setIsCreateSecretOpen, setSecrets])
 
   return (
