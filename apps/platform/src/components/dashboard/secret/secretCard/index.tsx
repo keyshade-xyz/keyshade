@@ -1,6 +1,7 @@
 import type { Secret } from '@keyshade/schema'
 import { NoteIconSVG } from '@public/svg/secret'
 import dayjs from 'dayjs'
+import { useSetAtom } from 'jotai'
 import {
   AccordionContent,
   AccordionItem,
@@ -27,7 +28,6 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { deleteSecretOpenAtom, selectedSecretAtom } from '@/store'
-import { useSetAtom } from 'jotai'
 
 interface SecretCardProps {
   secretData: Secret
@@ -123,14 +123,12 @@ export default function SecretCard({
         <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
           Show Version History
         </ContextMenuItem>
-        <ContextMenuItem
-          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-        >
+        <ContextMenuItem className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide">
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-        onSelect={handleDeleteClick}
+          onSelect={handleDeleteClick}
         >
           Delete
         </ContextMenuItem>
