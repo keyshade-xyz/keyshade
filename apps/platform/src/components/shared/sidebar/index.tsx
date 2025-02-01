@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import {
   DashboardSVG,
@@ -6,34 +7,38 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
+import { useAtomValue } from 'jotai'
 import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
+import { selectedWorkspaceAtom } from '@/store'
 
 function Sidebar(): JSX.Element {
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+
   const sidebarTabData = [
     {
       name: 'Dashboard',
       icon: <DashboardSVG />,
       link: '/',
-      matchTo: ''
+      matchTo: '/'
     },
     {
       name: 'Teams',
       icon: <TeamSVG />,
       link: '/teams',
-      matchTo: 'teams'
+      matchTo: '/teams'
     },
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
       link: '/',
-      matchTo: 'integrations'
+      matchTo: '/integrations'
     },
     {
-      name: 'Settings',
+      name: 'Workspace Settings',
       icon: <SettingsSVG />,
-      link: '/settings?tab=workspace',
-      matchTo: 'settings'
+      link: `/${selectedWorkspace?.slug}/settings`,
+      matchTo: `/${selectedWorkspace?.slug}/settings`
     }
   ]
 
