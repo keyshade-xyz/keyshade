@@ -1,6 +1,8 @@
 import { useAtom } from 'jotai'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import type { UpdateProjectRequest } from '@keyshade/schema'
+
 import {
   Sheet,
   SheetContent,
@@ -13,28 +15,20 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { editProjectOpenAtom, selectedProjectAtom } from '@/store'
-import { ProjectController } from '@keyshade/api-client'
-
-interface FormData {
-  name: string
-  description: string
-  storePrivateKey: boolean
-}
+import { 
+  editProjectOpenAtom, 
+  selectedProjectAtom,
+  projectsOfWorkspaceAtom 
+} from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
 
 export default function EditProjectSheet(): JSX.Element {
-  const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] =
-    useAtom(editProjectOpenAtom)
+  const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] = useAtom(editProjectOpenAtom)
   const [selectedProject] = useAtom(selectedProjectAtom)
+  const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState(false)
 
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    description: '',
-    storePrivateKey: false
-  })
-
-  const [initialData, setInitialData] = useState<FormData>({
+  const [formData, setFormData] = useState<Omit<UpdateProjectRequest, 'projectSlug'>>({
     name: '',
     description: '',
     storePrivateKey: false
@@ -42,13 +36,11 @@ export default function EditProjectSheet(): JSX.Element {
 
   useEffect(() => {
     if (selectedProject) {
-      const newData = {
+      setFormData({
         name: selectedProject.name || '',
         description: selectedProject.description || '',
         storePrivateKey: selectedProject.storePrivateKey || false
-      }
-      setFormData(newData)
-      setInitialData(newData)
+      })
     }
   }, [selectedProject])
 
@@ -68,16 +60,18 @@ export default function EditProjectSheet(): JSX.Element {
   }
 
   const getChangedFields = () => {
-    const changes: Partial<FormData> = {}
+    if (!selectedProject) return {}
 
-    // Only include fields that have actually changed
-    if (formData.name !== initialData.name) {
-      changes.name = formData.name.trim()
+    const changes: Partial<Omit<UpdateProjectRequest, 'projectSlug'>> = {}
+
+    if (formData.name !== undefined && formData.name !== selectedProject.name) { 
+      changes.name = formData.name.trim() 
     }
-    if (formData.description !== initialData.description) {
+    
+    if (formData.description !== undefined && formData.description!== selectedProject.description) {
       changes.description = formData.description.trim()
     }
-    if (formData.storePrivateKey !== initialData.storePrivateKey) {
+    if (formData.storePrivateKey !== selectedProject.storePrivateKey) {
       changes.storePrivateKey = formData.storePrivateKey
     }
 
@@ -102,70 +96,45 @@ export default function EditProjectSheet(): JSX.Element {
       return
     }
 
-    try {
-      setIsLoading(true)
-
-      const projectController = new ProjectController(
-        process.env.NEXT_PUBLIC_BACKEND_URL || ''
-      )
-
-      const response = await projectController.updateProject({
-        projectSlug: selectedProject.slug,
-        ...changes
-      })
-
-      if (!response) {
-        throw new Error('No response received from server')
-      }
-
-      if (response.success) {
-        toast.success('Project updated successfully')
-        setIsEditProjectSheetOpen(false)
-        window.location.reload()
-
-      } else {
-        if (response.error?.statusCode === 404) {
-          toast.error(
-            'Project not found. It may have been deleted or you may not have access.'
-          )
-        } else if (response.error?.message?.includes('already exists')) {
-          toast.error(
-            'A project with this name already exists. Please choose a different name.'
-          )
-        } else {
-          toast.error(response.error?.message || 'Failed to update project')
-        }
-      }
-    } catch (error) {
-      console.error('Update project error:', error)
-
-      if (error instanceof Response && error.status === 404) {
-        toast.error('Project not found. Please refresh the page and try again.')
-      } else if (error instanceof SyntaxError) {
-        toast.error('Invalid response from server. Please try again later.')
-      } else if (error instanceof Error) {
-        toast.error(`Error: ${error.message}`)
-      } else {
-        toast.error('An unexpected error occurred while updating the project')
-      }
-    } finally {
-      setIsLoading(false)
+    setIsLoading(true)
+    
+    const updateRequest: UpdateProjectRequest = {
+      projectSlug: selectedProject.slug,
+      ...changes
     }
+
+    const { data, error, success } = await ControllerInstance.getInstance()
+      .projectController.updateProject(updateRequest)
+
+    if (success && data) {
+      setProjects(projects.map(project => 
+        project.slug === selectedProject.slug 
+          ? { ...project, ...data }
+          : project
+      ))
+      
+      toast.success('Project updated successfully')
+      setIsEditProjectSheetOpen(false)
+    } else {
+      toast.error('Failed to update project', {
+        description: error?.message || 'An unexpected error occurred'
+      })
+      console.error(error)
+    }
+
+    setIsLoading(false)
   }
 
   const handleSheetChange = (open: boolean) => {
     setIsEditProjectSheetOpen(open)
     if (!open && selectedProject) {
-      const resetData = {
+      setFormData({
         name: selectedProject.name || '',
         description: selectedProject.description || '',
         storePrivateKey: selectedProject.storePrivateKey || false
-      }
-      setFormData(resetData)
-      setInitialData(resetData)
+      })
     }
   }
-
 
   return (
     <Sheet open={isEditProjectSheetOpen} onOpenChange={handleSheetChange}>
