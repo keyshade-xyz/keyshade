@@ -35,7 +35,7 @@ export default function EditSecretSheet(): JSX.Element {
 	}, [setIsEditSecretSheetOpen])
 
 	const updateSecret = useCallback(async () => {
-		if (!selectedSecretData) {
+	  if (!selectedSecretData) {
 			toast.error('No secret selected', {
 				description: (
 					<p className="text-xs text-red-300">
