@@ -5,7 +5,6 @@ import NextError from 'next/error'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { clearAuthCookies } from '@/lib/clear-auth-cookie'
 
 export default function GlobalError({
   error
@@ -24,8 +23,13 @@ export default function GlobalError({
       } = JSON.parse(error.message)
 
       if (statusCode === 403) {
-        // Clear cookies and redirect user to auth page
-        clearAuthCookies()
+        // Clear cookies
+        document.cookie =
+          'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
+        document.cookie =
+          'isOnboardingFinished=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
+
+        // Redirect to sign in
         router.push('/auth')
 
         toast.info('Authentication expired', {
@@ -35,13 +39,16 @@ export default function GlobalError({
             </p>
           )
         })
+
+        return
       } else if (statusCode.toString().startsWith('4')) {
         const { header, body } = JSON.parse(error.message).error
         // For 4xx errors
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- ignore
         toast.error(header, {
           description: <p className="text-xs text-red-300">{body}</p>
         })
+
+        return
       } else if (statusCode.toString().startsWith('5')) {
         // For 5xx errors
         toast.error("It's us, not you", {

@@ -5,10 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import type {
-  GetAllWorkspacesOfUserResponse,
-  Workspace
-} from '@keyshade/schema'
+import type { Workspace } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { Input } from './input'
 import { Label } from './label'
