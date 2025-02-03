@@ -7,6 +7,7 @@ export const ApiKeySchema = z.object({
   name: z.string(),
   slug: z.string(),
   value: z.string(),
+  preview: z.string(),
   expiresAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

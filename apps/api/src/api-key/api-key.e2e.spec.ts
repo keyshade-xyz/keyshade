@@ -85,7 +85,12 @@ describe('Api Key Role Controller Tests', () => {
       expect(response.json().name).toBe('Test')
       expect(response.json().slug).toBeDefined()
       expect(response.json().value).toMatch(/^ks_*/)
+      expect(response.json().preview).toMatch(/^ks_*/)
       expect(response.json().authorities).toEqual(['READ_API_KEY'])
+
+      const last4CharsOfValue = response.json().value.slice(-4)
+      const last4CharsOfPreview = response.json().preview.slice(-4)
+      expect(last4CharsOfValue).toBe(last4CharsOfPreview)
 
       const apiKey = await prisma.apiKey.findUnique({
         where: {
@@ -254,6 +259,7 @@ describe('Api Key Role Controller Tests', () => {
         id: apiKey.id,
         name: 'Test Key',
         slug: apiKey.slug,
+        preview: apiKey.preview,
         authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
         expiresAt: expect.any(String),
         createdAt: expect.any(String),
