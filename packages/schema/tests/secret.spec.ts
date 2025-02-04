@@ -10,8 +10,6 @@ import {
   RollBackSecretResponseSchema,
   GetAllSecretsOfProjectRequestSchema,
   GetAllSecretsOfProjectResponseSchema,
-  GetAllSecretsOfEnvironmentRequestSchema,
-  GetAllSecretsOfEnvironmentResponseSchema,
   GetRevisionsOfSecretRequestSchema,
   GetRevisionsOfSecretResponseSchema
 } from '@/secret'
@@ -44,6 +42,12 @@ describe('Secret Schema Tests', () => {
               id: 'env123',
               name: 'Development',
               slug: 'development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -77,11 +81,13 @@ describe('Secret Schema Tests', () => {
               // Missing slug
               // Missing name
             }
+            // Missing createdBy
+            // Missing createdOn
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(5)
     })
   })
 
@@ -146,6 +152,12 @@ describe('Secret Schema Tests', () => {
               id: 'env123',
               name: 'Development',
               slug: 'development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -179,11 +191,13 @@ describe('Secret Schema Tests', () => {
               // Missing slug
               // Missing name
             }
+            // Missing createdBy
+            // Missing createdOn
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(5)
     })
   })
 
@@ -377,7 +391,13 @@ describe('Secret Schema Tests', () => {
                   slug: 'development'
                 },
                 value: 'secret-value',
-                version: 1
+                version: 1,
+                createdOn: '2024-10-01T00:00:00Z',
+                createdBy: {
+                  id: 'user123',
+                  name: 'John Doe',
+                  profilePictureUrl: null
+                }
               }
             ]
           }
@@ -421,50 +441,6 @@ describe('Secret Schema Tests', () => {
     })
   })
 
-  describe('GetAllSecretsOfEnvironmentRequestSchema Tests', () => {
-    it('should validate a valid GetAllSecretsOfEnvironmentRequestSchema', () => {
-      const result = GetAllSecretsOfEnvironmentRequestSchema.safeParse({
-        projectSlug: 'project-slug',
-        environmentSlug: 'development'
-      })
-      expect(result.success).toBe(true)
-    })
-
-    it('should not validate an invalid GetAllSecretsOfEnvironmentRequestSchema', () => {
-      const result = GetAllSecretsOfEnvironmentRequestSchema.safeParse({
-        projectSlug: 123, // Should be a string
-        environmentSlug: 'development'
-      })
-      expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
-    })
-  })
-
-  describe('GetAllSecretsOfEnvironmentResponseSchema Tests', () => {
-    it('should validate a valid GetAllSecretsOfEnvironmentResponseSchema', () => {
-      const result = GetAllSecretsOfEnvironmentResponseSchema.safeParse([
-        {
-          name: 'SECRET_NAME',
-          value: 'SECRET_VALUE',
-          isPlaintext: true
-        }
-      ])
-      expect(result.success).toBe(true)
-    })
-
-    it('should not validate an invalid GetAllSecretsOfEnvironmentResponseSchema', () => {
-      const result = GetAllSecretsOfEnvironmentResponseSchema.safeParse([
-        {
-          name: 'SECRET_NAME',
-          value: 123, // Should be a string
-          isPlaintext: 'true' // Should be a boolean
-        }
-      ])
-      expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
-    })
-  })
-
   describe('GetRevisionsOfSecretRequestSchema Tests', () => {
     it('should validate a valid GetRevisionsOfSecretRequestSchema', () => {
       const result = GetRevisionsOfSecretRequestSchema.safeParse({
@@ -498,7 +474,12 @@ describe('Secret Schema Tests', () => {
             secretId: 'secret123',
             createdOn: '2024-10-01T00:00:00Z',
             createdById: 'user123',
-            environmentId: 'env123'
+            environmentId: 'env123',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: null
+            }
           }
         ],
         metadata: {
@@ -529,6 +510,7 @@ describe('Secret Schema Tests', () => {
             createdOn: '2024-10-01T00:00:00Z',
             createdById: 'user123',
             environmentId: 'env123'
+            // Missing createdBy
           }
         ],
         metadata: {
@@ -546,7 +528,7 @@ describe('Secret Schema Tests', () => {
         }
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(4)
     })
   })
 })

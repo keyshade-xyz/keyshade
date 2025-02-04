@@ -208,28 +208,6 @@ describe('Secret Controller Tests', () => {
     expect(secrets.data.items.length).toBe(1)
   })
 
-  // // Get all secrets of an Environment
-  it('should get all secrets of an environment', async () => {
-    const secrets: any = await secretController.getAllSecretsOfEnvironment(
-      {
-        environmentSlug,
-        projectSlug
-      },
-      { 'x-e2e-user-email': email }
-    )
-    expect(secrets.data.length).toBe(1)
-    secrets.data.forEach((secret) => {
-      expect(secret).toHaveProperty('name')
-      expect(typeof secret.name).toBe('string')
-
-      expect(secret).toHaveProperty('value')
-      expect(typeof secret.value).toBe('string')
-
-      expect(secret).toHaveProperty('isPlaintext')
-      expect(typeof secret.isPlaintext).toBe('boolean')
-    })
-  })
-
   // Delete a Secret from a Project
   it('should delete a secret', async () => {
     await secretController.deleteSecret(

@@ -24,10 +24,6 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
-import {
-  ChangeNotification,
-  ChangeNotificationEvent
-} from 'src/socket/socket.types'
 import { paginate } from '@/common/paginate'
 import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
 import generateEntitySlug from '@/common/slug-generator'
@@ -41,6 +37,7 @@ import {
 } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SecretWithProject } from '../secret.types'
+import { ChangeNotificationEvent } from '@/socket/socket.types'
 
 @Injectable()
 export class SecretService {
@@ -144,7 +141,15 @@ export class SecretService {
               }
             },
             value: true,
-            version: true
+            version: true,
+            createdBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            },
+            createdOn: true
           }
         }
       }
@@ -485,95 +490,11 @@ export class SecretService {
   }
 
   /**
-   * Gets all secrets of a project and environment
-   * @param user the user performing the action
-   * @param projectSlug the slug of the project
-   * @param environmentSlug the slug of the environment
-   * @returns an array of objects with the secret name and value
-   * @throws {NotFoundException} if the project or environment does not exist
-   * @throws {BadRequestException} if the user does not have the required role
-   */
-  async getAllSecretsOfProjectAndEnvironment(
-    user: User,
-    projectSlug: Project['slug'],
-    environmentSlug: Environment['slug']
-  ) {
-    // Fetch the project
-    const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
-        entity: { slug: projectSlug },
-        authorities: [Authority.READ_SECRET],
-        prisma: this.prisma
-      })
-    const projectId = project.id
-
-    // Check access to the environment
-    const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
-        entity: { slug: environmentSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
-      })
-    const environmentId = environment.id
-
-    const secrets = await this.prisma.secret.findMany({
-      where: {
-        projectId,
-        versions: {
-          some: {
-            environmentId
-          }
-        }
-      },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        versions: {
-          where: {
-            environmentId
-          },
-          orderBy: {
-            version: 'desc'
-          },
-          take: 1,
-          include: {
-            environment: {
-              select: {
-                id: true,
-                slug: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    const response: ChangeNotification[] = []
-
-    for (const secret of secrets) {
-      response.push({
-        name: secret.name,
-        value: project.storePrivateKey
-          ? await decrypt(project.privateKey, secret.versions[0].value)
-          : secret.versions[0].value,
-        isPlaintext: project.storePrivateKey
-      })
-    }
-
-    return response
-  }
-
-  /**
    * Gets all revisions of a secret in an environment
    * @param user the user performing the action
    * @param secretSlug the slug of the secret
    * @param environmentSlug the slug of the environment
+   * @param decryptValue whether to decrypt the secret values or not
    * @param page the page of items to return
    * @param limit the number of items to return per page
    * @param order the order of the items. Default is 'desc'
@@ -583,6 +504,7 @@ export class SecretService {
     user: User,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
+    decryptValue: boolean,
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
@@ -606,6 +528,9 @@ export class SecretService {
       })
     const environmentId = environment.id
 
+    // Check if the secret can be decrypted
+    await this.checkAutoDecrypt(decryptValue, secret.project)
+
     // Get the revisions
     const items = await this.prisma.secretVersion.findMany({
       where: {
@@ -616,8 +541,24 @@ export class SecretService {
       take: limitMaxItemsPerPage(limit),
       orderBy: {
         version: order
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
+
+    // Decrypt the values
+    if (decryptValue) {
+      for (const item of items) {
+        item.value = await decrypt(secret.project.privateKey, item.value)
+      }
+    }
 
     const totalCount = await this.prisma.secretVersion.count({
       where: {
@@ -681,7 +622,8 @@ export class SecretService {
         lastUpdatedBy: {
           select: {
             id: true,
-            name: true
+            name: true,
+            profilePictureUrl: true
           }
         },
         versions: {
@@ -694,7 +636,15 @@ export class SecretService {
                 id: true,
                 slug: true
               }
-            }
+            },
+            createdBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            },
+            createdOn: true
           }
         }
       },
@@ -716,6 +666,12 @@ export class SecretService {
         }
         value: SecretVersion['value']
         version: SecretVersion['version']
+        createdBy: {
+          id: User['id']
+          name: User['name']
+          profilePictureUrl: User['profilePictureUrl']
+        }
+        createdOn: SecretVersion['createdOn']
       }[]
     }>()
 
@@ -731,6 +687,11 @@ export class SecretService {
             id: Environment['id']
             slug: Environment['slug']
             name: Environment['name']
+          }
+          createdBy: {
+            id: User['id']
+            name: User['name']
+            profilePictureUrl: User['profilePictureUrl']
           }
         }
       >()
@@ -764,7 +725,13 @@ export class SecretService {
               value: decryptValue
                 ? await decrypt(project.privateKey, secretVersion.value)
                 : secretVersion.value,
-              version: secretVersion.version
+              version: secretVersion.version,
+              createdBy: {
+                id: secretVersion.createdBy.id,
+                name: secretVersion.createdBy.name,
+                profilePictureUrl: secretVersion.createdBy.profilePictureUrl
+              },
+              createdOn: secretVersion.createdOn
             })
           )
         )

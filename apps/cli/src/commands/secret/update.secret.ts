@@ -25,6 +25,12 @@ export default class UpdateSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `wqwqd
+      ${this.getName()} <Secret Slug> [options]
+    `
+  }
+
   getOptions(): CommandOption[] {
     return [
       {
@@ -46,8 +52,9 @@ export default class UpdateSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
-        description: 'An array of values for the secret.'
+        long: '--entry [entries...]',
+        description:
+          'An array of values for the secret. If specified, should be in the form <environment slug>=<value>'
       }
     ]
   }
@@ -63,7 +70,7 @@ export default class UpdateSecret extends BaseCommand {
       await ControllerInstance.getInstance().secretController.updateSecret(
         {
           secretSlug,
-          ...options
+          ...(await this.parseInput(options))
         },
         this.headers
       )
@@ -75,6 +82,50 @@ export default class UpdateSecret extends BaseCommand {
       if (this.metricsEnabled && error?.statusCode === 500) {
         Logger.report('Failed to update secret.\n' + JSON.stringify(error))
       }
+    }
+  }
+
+  private async parseInput(options: any): Promise<{
+    name?: string
+    note?: string
+    rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
+    entries?: Array<{ value: string; environmentSlug: string }>
+  }> {
+    const { name, note, rotateAfter, entry: rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
+
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
+      }
+    }
+
+    return {
+      name,
+      note,
+      rotateAfter,
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }

@@ -46,9 +46,9 @@ export default class CreateSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
+        long: '--entry [entries...]',
         description:
-          'An array of key-value pair (value and environmentSlug) for the secret.'
+          'An array of values for the secret. If specified, should be in the form <environment slug>:<value>'
       }
     ]
   }

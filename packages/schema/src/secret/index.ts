@@ -28,7 +28,13 @@ export const SecretSchema = z.object({
         slug: z.string()
       }),
       value: z.string(),
-      version: z.number()
+      version: z.number(),
+      createdOn: z.string().datetime(),
+      createdBy: z.object({
+        id: z.string(),
+        name: z.string(),
+        profilePictureUrl: z.string().nullable()
+      })
     })
   )
 })
@@ -99,23 +105,11 @@ export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
 export const GetAllSecretsOfProjectResponseSchema =
   PageResponseSchema(SecretSchema)
 
-export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
-  environmentSlug: EnvironmentSchema.shape.slug
-})
-
-export const GetAllSecretsOfEnvironmentResponseSchema = z.array(
-  z.object({
-    name: z.string(),
-    value: z.string(),
-    isPlaintext: z.boolean()
-  })
-)
-
 export const GetRevisionsOfSecretRequestSchema =
   PageRequestSchema.partial().extend({
     secretSlug: z.string(),
-    environmentSlug: EnvironmentSchema.shape.slug
+    environmentSlug: EnvironmentSchema.shape.slug,
+    decryptValue: z.boolean().optional()
   })
 
 export const GetRevisionsOfSecretResponseSchema = PageResponseSchema(
@@ -126,6 +120,11 @@ export const GetRevisionsOfSecretResponseSchema = PageResponseSchema(
     secretId: z.string(),
     createdOn: z.string().datetime(),
     createdById: z.string().nullable(),
-    environmentId: EnvironmentSchema.shape.id
+    environmentId: EnvironmentSchema.shape.id,
+    createdBy: z.object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
   })
 )
