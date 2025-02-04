@@ -46,11 +46,22 @@ export default class CreateSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
+        long: '--entry [entries...]',
         description:
-          'An array of key-value pair (value and environmentSlug) for the secret.'
+          'An array of values for the secret. If specified, should be in the form <environment slug>:<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade secret create <project slug> [options]
+    
+  Create a secret
+  keyshade secret create project-1 --name "API_KEY" --entry "alpha=ks_k23mg45kl6k76l"
+  
+  Create a secret with note and rotate settings
+  keyshade secret create project-1 --name "API_KEY" --note "This is a secret" --rotate-after "24"
+    `
   }
 
   canMakeHttpRequests(): boolean {
