@@ -1,3 +1,9 @@
+## [2.11.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.10...v2.11.0-stage.11) (2025-02-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Project hard sync existing entities deleted ([#660](https://github.com/keyshade-xyz/keyshade/issues/660)) ([3632217](https://github.com/keyshade-xyz/keyshade/commit/36322175290723089b8bd9a1a479925efd00f6f1))
+
 ## [2.11.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.9...v2.11.0-stage.10) (2025-02-04)
 
 ### 🚀 Features
