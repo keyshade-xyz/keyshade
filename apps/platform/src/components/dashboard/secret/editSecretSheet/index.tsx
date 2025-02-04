@@ -48,15 +48,15 @@ export default function EditSecretSheet(): JSX.Element {
 
 		const { secret } = selectedSecretData
 
-		const request: UpdateSecretRequest = {
-			secretSlug: secret.slug,
-			name:
-				requestData.name === secret.name || requestData.name === ''
-					? undefined
-					: requestData.name,
-			note: requestData.note === '' ? undefined : requestData.note,
-			entries: undefined
-		}
+  const request: UpdateSecretRequest = {
+    secretSlug: secret.slug,
+    name: 
+      !requestData.name?.trim() || requestData.name === secret.name
+        ? undefined
+        : requestData.name.trim(),
+    note: requestData.note?.trim() || undefined,
+    entries: undefined
+  }
 
 		const { success, error, data } =
 			await ControllerInstance.getInstance().secretController.updateSecret(
