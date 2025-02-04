@@ -24,7 +24,7 @@ import ControllerInstance from '@/lib/controller-instance'
 
 export default function EditProjectSheet(): JSX.Element {
   const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] = useAtom(editProjectOpenAtom)
-  const [selectedProject] = useAtom(selectedProjectAtom)
+  const [selectedProject , setSelectedProject] = useAtom(selectedProjectAtom)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -91,7 +91,7 @@ export default function EditProjectSheet(): JSX.Element {
       return
     }
 
-    if (changes.name !== undefined && !changes.name) {
+    if (changes.name !== undefined && changes.name === '') {
       toast.error('Project name is required')
       return
     }
@@ -115,6 +115,7 @@ export default function EditProjectSheet(): JSX.Element {
       
       toast.success('Project updated successfully')
       setIsEditProjectSheetOpen(false)
+      setSelectedProject(null)
     } else {
       toast.error('Failed to update project', {
         description: error?.message || 'An unexpected error occurred'
