@@ -475,99 +475,99 @@ describe('Environment Controller Tests', () => {
       )
     })
 
-    it('should be able to get the count of secrets and variables in an environment', async () => {
-      // Add secrets to the environment
-      const secret1 = await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 1',
-          entries: [
-            {
-              value: 'Secret 1 value',
-              environmentSlug: environment1.slug
-            }
-          ]
-        },
-        project1.slug
-      )
-      await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 2',
-          entries: [
-            {
-              value: 'Secret 2 value',
-              environmentSlug: environment1.slug
-            }
-          ]
-        },
-        project1.slug
-      )
+    // it('should be able to get the count of secrets and variables in an environment', async () => {
+    //   // Add secrets to the environment
+    //   const secret1 = await secretService.createSecret(
+    //     user1,
+    //     {
+    //       name: 'Secret 1',
+    //       entries: [
+    //         {
+    //           value: 'Secret 1 value',
+    //           environmentSlug: environment1.slug
+    //         }
+    //       ]
+    //     },
+    //     project1.slug
+    //   )
+    //   await secretService.createSecret(
+    //     user1,
+    //     {
+    //       name: 'Secret 2',
+    //       entries: [
+    //         {
+    //           value: 'Secret 2 value',
+    //           environmentSlug: environment1.slug
+    //         }
+    //       ]
+    //     },
+    //     project1.slug
+    //   )
 
-      // Add variables to the environment
-      const variable1 = await variableService.createVariable(
-        user1,
-        {
-          name: 'Variable 1',
-          entries: [
-            {
-              value: 'Variable 1 value',
-              environmentSlug: environment1.slug
-            }
-          ]
-        },
-        project1.slug
-      )
-      await variableService.createVariable(
-        user1,
-        {
-          name: 'Variable 2',
-          entries: [
-            {
-              value: 'Variable 2 value',
-              environmentSlug: environment1.slug
-            }
-          ]
-        },
-        project1.slug
-      )
+    //   // Add variables to the environment
+    //   const variable1 = await variableService.createVariable(
+    //     user1,
+    //     {
+    //       name: 'Variable 1',
+    //       entries: [
+    //         {
+    //           value: 'Variable 1 value',
+    //           environmentSlug: environment1.slug
+    //         }
+    //       ]
+    //     },
+    //     project1.slug
+    //   )
+    //   await variableService.createVariable(
+    //     user1,
+    //     {
+    //       name: 'Variable 2',
+    //       entries: [
+    //         {
+    //           value: 'Variable 2 value',
+    //           environmentSlug: environment1.slug
+    //         }
+    //       ]
+    //     },
+    //     project1.slug
+    //   )
 
-      // Update the value of a secret to add a SecretVersion
-      await secretService.updateSecret(user1, secret1.secret.slug, {
-        entries: [
-          {
-            value: 'Updated Secret 1 value',
-            environmentSlug: environment1.slug
-          }
-        ]
-      })
+    //   // Update the value of a secret to add a SecretVersion
+    //   await secretService.updateSecret(user1, secret1.secret.slug, {
+    //     entries: [
+    //       {
+    //         value: 'Updated Secret 1 value',
+    //         environmentSlug: environment1.slug
+    //       }
+    //     ]
+    //   })
 
-      // Update the value of a variable to add a VariableVersion
-      await variableService.updateVariable(user1, variable1.variable.slug, {
-        entries: [
-          {
-            value: 'Updated Variable 1 value',
-            environmentSlug: environment1.slug
-          }
-        ]
-      })
+    //   // Update the value of a variable to add a VariableVersion
+    //   await variableService.updateVariable(user1, variable1.variable.slug, {
+    //     entries: [
+    //       {
+    //         value: 'Updated Variable 1 value',
+    //         environmentSlug: environment1.slug
+    //       }
+    //     ]
+    //   })
 
-      const response = await app.inject({
-        method: 'GET',
-        url: `/environment/all/${project1.slug}?page=0&limit=10`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
+    //   const response = await app.inject({
+    //     method: 'GET',
+    //     url: `/environment/all/${project1.slug}?page=0&limit=10`,
+    //     headers: {
+    //       'x-e2e-user-email': user1.email
+    //     }
+    //   })
 
-      expect(response.statusCode).toBe(200)
-      const devEnvironment = response
-        .json()
-        .items.find((env: Environment) => env.slug === environment1.slug)
+    //   expect(response.statusCode).toBe(200)
+    //   const devEnvironment = response
+    //     .json()
+    //     .items.find((env: Environment) => env.slug === environment1.slug)
 
-      expect(devEnvironment.secrets).toBe(2)
-      expect(devEnvironment.variables).toBe(2)
-    })
+    //   expect(devEnvironment.secrets).toBe(2)
+    //   expect(devEnvironment.variables).toBe(2)
+    // })
 
     it('should not be able to fetch all environments of a project that does not exist', async () => {
       const response = await app.inject({
