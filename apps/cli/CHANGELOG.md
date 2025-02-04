@@ -80,3 +80,5 @@
 - Removed `keyshade secret get` command
 - Updated `keyshade secret update` and `keyshade secret create` commands to include `-e/--entry` flag for specifying values to environments
 - Formatted outputs of `keyshade secret list` and `keyshade secret revisions` commands
+- Update `keyshade secret rollback` to check for missing environment or version
+- Added usage examples in secret commands

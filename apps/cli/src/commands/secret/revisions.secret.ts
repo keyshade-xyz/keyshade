@@ -43,6 +43,20 @@ export default class FetchSecretRevisions extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret revisions <secret slug> [options]
+
+  Fetch all revisions of a secret
+  keyshade secret revisions secret-1 --environment dev
+
+  Decrypt values while listing
+  keyshade secret revisions secret-1 --environment dev --decrypt-value
+
+  Pagination options
+  keyshade secret revisions secret-1 --environment dev --page 1 --limit 10
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }

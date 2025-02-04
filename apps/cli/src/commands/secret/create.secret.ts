@@ -53,6 +53,17 @@ export default class CreateSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret create <project slug> [options]
+    
+  Create a secret
+  keyshade secret create project-1 --name "API_KEY" --entry "alpha=ks_k23mg45kl6k76l"
+  
+  Create a secret with note and rotate settings
+  keyshade secret create project-1 --name "API_KEY" --note "This is a secret" --rotate-after "24"
+    `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }

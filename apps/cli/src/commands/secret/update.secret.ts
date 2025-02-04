@@ -25,12 +25,6 @@ export default class UpdateSecret extends BaseCommand {
     ]
   }
 
-  getUsage(): string {
-    return `wqwqd
-      ${this.getName()} <Secret Slug> [options]
-    `
-  }
-
   getOptions(): CommandOption[] {
     return [
       {
@@ -57,6 +51,20 @@ export default class UpdateSecret extends BaseCommand {
           'An array of values for the secret. If specified, should be in the form <environment slug>=<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade secret update <secret slug> [options]
+    
+  Update secret's name and note
+  keyshade secret update secret-1 --name "My Secret" --note "This is a secret"
+  
+  Update the rotation time of a secret
+  keyshade secret update secret-1 --rotate-after "24"
+  
+  Add more entries to a secret
+  keyshade secret update apikey-1 --entry "dev=super" "prod=secret"
+    `
   }
 
   canMakeHttpRequests(): boolean {

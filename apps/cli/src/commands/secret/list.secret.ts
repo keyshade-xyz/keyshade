@@ -43,6 +43,20 @@ export default class ListSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret list <project slug> [options]
+
+  List all secrets under a project
+  keyshade secret list project-1
+
+  Decrypt values while listing
+  keyshade secret list project-1 --decrypt-value
+
+  Pagination options
+  keyshade secret list project-1 --page 1 --limit 10
+  `
+  }
+
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { decryptValue, paginationOptions } = await this.parseInput(options)
