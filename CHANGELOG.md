@@ -1,3 +1,9 @@
+## [2.11.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.9...v2.11.0-stage.10) (2025-02-04)
+
+### 🚀 Features
+
+* **api:** Workspace-membership invitationAccepted included ([#665](https://github.com/keyshade-xyz/keyshade/issues/665)) ([3877249](https://github.com/keyshade-xyz/keyshade/commit/38772498be229c8d83c8a99c395dded9e0a6ef7f))
+
 ## [2.11.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.8...v2.11.0-stage.9) (2025-01-31)
 
 ### 🚀 Features
