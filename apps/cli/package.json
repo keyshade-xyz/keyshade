@@ -46,6 +46,7 @@
     "cli-table": "^0.3.11",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
+    "dayjs": "^1.11.11",
     "dotenv": "^16.4.7",
     "eccrypto": "^1.1.6",
     "figlet": "^1.7.0",

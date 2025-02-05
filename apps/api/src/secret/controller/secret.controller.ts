@@ -88,26 +88,13 @@ export class SecretController {
     )
   }
 
-  @Get('/:projectSlug/:environmentSlug')
-  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
-  async getAllSecretsOfEnvironment(
-    @CurrentUser() user: User,
-    @Param('projectSlug') projectSlug: string,
-    @Param('environmentSlug') environmentSlug: string
-  ) {
-    return await this.secretService.getAllSecretsOfProjectAndEnvironment(
-      user,
-      projectSlug,
-      environmentSlug
-    )
-  }
-
   @Get(':secretSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getRevisionsOfSecret(
     @CurrentUser() user: User,
     @Param('secretSlug') secretSlug: string,
     @Param('environmentSlug') environmentSlug: string,
+    @Query('decryptValue') decryptValue: boolean = false,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('order') order: 'asc' | 'desc' = 'desc'
@@ -116,6 +103,7 @@ export class SecretController {
       user,
       secretSlug,
       environmentSlug,
+      decryptValue,
       page,
       limit,
       order
