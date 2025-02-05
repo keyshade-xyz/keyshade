@@ -27,7 +27,11 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { deleteSecretOpenAtom, selectedSecretAtom } from '@/store'
+import {
+  deleteSecretOpenAtom,
+  editSecretOpenAtom,
+  selectedSecretAtom
+} from '@/store'
 
 interface SecretCardProps {
   secretData: Secret
@@ -41,7 +45,13 @@ export default function SecretCard({
   const { secret, values } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
+  const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
+
+  const handleEditClick = () => {
+    setSelectedSecret(secretData)
+    setIsEditSecretOpen(true)
+  }
 
   const handleDeleteClick = () => {
     setSelectedSecret(secretData)
@@ -123,7 +133,10 @@ export default function SecretCard({
         <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
           Show Version History
         </ContextMenuItem>
-        <ContextMenuItem className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          onSelect={handleEditClick}
+        >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
