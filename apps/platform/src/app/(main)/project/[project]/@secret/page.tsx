@@ -124,7 +124,7 @@ function SecretPage(): React.JSX.Element {
               {secrets.map((secret) => (
                 <SecretCard
                   isDecrypted={isDecrypted}
-                  key={secret.id}
+                  key={secret.secret.id}
                   secretData={secret}
                 />
               ))}
@@ -137,10 +137,7 @@ function SecretPage(): React.JSX.Element {
           ) : null}
 
           {/* Edit secret sheet */}
-          {isEditSecretOpen && selectedSecret ? (
-            <EditSecretSheet />
-          ) : null}
-
+          {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
         </div>
       )}
     </div>

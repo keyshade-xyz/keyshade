@@ -27,8 +27,11 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { deleteSecretOpenAtom, editSecretOpenAtom, selectedSecretAtom } from '@/store'
-import { useSetAtom } from 'jotai'
+import {
+  deleteSecretOpenAtom,
+  editSecretOpenAtom,
+  selectedSecretAtom
+} from '@/store'
 
 interface SecretCardProps {
   secretData: Secret
