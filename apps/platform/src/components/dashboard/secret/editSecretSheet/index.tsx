@@ -20,6 +20,7 @@ import {
   selectedSecretAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
@@ -150,7 +151,7 @@ export default function EditSecretSheet(): JSX.Element {
             <Label className="text-right" htmlFor="name">
               Extra Note
             </Label>
-            <Input
+            <Textarea
               className="col-span-3 h-[2.75rem]"
               id="name"
               onChange={(e) => {
