@@ -62,7 +62,7 @@ describe('Auth Schema Tests', () => {
   describe('ValidateOTPRequestSchema Tests', () => {
     it('should validate a valid ValidateOTPRequestSchema', () => {
       const result = ValidateOTPRequestSchema.safeParse({
-        email: 'test@example',
+        email: 'test@example.com',
         otp: '123456'
       })
 
@@ -71,7 +71,7 @@ describe('Auth Schema Tests', () => {
 
     it('should not validate an invalid ValidateOTPRequestSchema', () => {
       const result = ValidateOTPRequestSchema.safeParse({
-        email: 'test@example',
+        email: 'test@example.com',
         otp: '12345' // Missing a digit
       })
 
