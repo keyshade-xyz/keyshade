@@ -1,3 +1,15 @@
+## [2.11.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.13...v2.11.0-stage.14) (2025-02-06)
+
+### 🐛 Bug Fixes
+
+* **platform:** ContextMenu not working on variable card ([#688](https://github.com/keyshade-xyz/keyshade/issues/688)) ([fbb147a](https://github.com/keyshade-xyz/keyshade/commit/fbb147a9be27d0510112789fd0e7eaaa4db96083))
+
+## [2.11.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.12...v2.11.0-stage.13) (2025-02-05)
+
+### 🚀 Features
+
+* **platform:** Edit [secure] in project ([#684](https://github.com/keyshade-xyz/keyshade/issues/684)) ([1e34030](https://github.com/keyshade-xyz/keyshade/commit/1e340302bc34ec061683a4af1ee0da178f59aef0))
+
 ## [2.11.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.11...v2.11.0-stage.12) (2025-02-04)
 
 ### 🚀 Features
