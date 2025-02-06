@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
 import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
 import type { User } from '@keyshade/schema'
+import { useAtomValue } from 'jotai'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
+import { selectedProjectAtom } from '@/store'
 
 interface UserNameImage {
   name: string | null
@@ -51,6 +53,8 @@ function Navbar(): React.JSX.Element {
     name: null,
     image: null
   })
+
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const pathname = usePathname()
 
@@ -172,11 +176,11 @@ function Navbar(): React.JSX.Element {
         </div>
         <div className="px-4">
           {(pathname === '/settings' ||
-            pathname.split('/')[2] === 'project') && (
+            pathname.split('/')[2] === selectedProject?.slug) && (
             <LineTab
               customID="linetab"
               tabs={
-                pathname.split('/')[2] === 'project'
+                pathname.split('/')[2] === selectedProject?.slug
                   ? projectTabs
                   : settingsTabs
               }
