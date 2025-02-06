@@ -1,9 +1,9 @@
 'use client'
 import { GeistSans } from 'geist/font/sans'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
-import { useAtom } from 'jotai'
+import { useSetAtom } from 'jotai'
 import Cookies from 'js-cookie'
 import { LoadingSVG } from '@public/svg/shared'
 import {
@@ -12,21 +12,72 @@ import {
   KeyshadeBigSVG,
   GitlabSVG
 } from '@public/svg/auth'
+import { toast } from 'sonner'
+import type { User } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { authEmailAtom } from '@/store'
+import { userAtom } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+
+const GOOGLE_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/google`
+const GITHUB_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/github`
+const GITLAB_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/gitlab`
 
 export default function AuthPage(): React.JSX.Element {
-  const [email, setEmail] = useAtom(authEmailAtom)
   const [inInvalidEmail, setInInvalidEmail] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>('')
+
+  const setUser = useSetAtom(userAtom)
 
   const router = useRouter()
 
-  Cookies.set('isOnboardingFinished', 'false', { expires: 7 })
+  // If user comes here with redirection from OAuth login,
+  // fetch the details from the url query params.
+  useEffect(() => {
+    const urlEncodedData = new URLSearchParams(window.location.search).get(
+      'data'
+    )
 
-  const handleGetStarted = async (userEmail: string): Promise<void> => {
-    const result = z.string().email().safeParse(userEmail)
+    if (!urlEncodedData) {
+      // Not OAuth login
+      return
+    }
+
+    const decodedJSONData = decodeURIComponent(urlEncodedData)
+    if (decodedJSONData) {
+      const data = JSON.parse(decodedJSONData) as User
+      setUser(data)
+
+      Cookies.set('isOnboardingFinished', `${data.isOnboardingFinished}`, {
+        expires: 7
+      })
+      router.push('/')
+
+      toast.success('Successfully logged in!', {
+        description: (
+          <p className="text-xs text-green-300">
+            Successfully logged in as {data.name}
+          </p>
+        )
+      })
+    } else {
+      toast.error('Something went wrong while logging you in!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while logging you in. Check console for more
+            info.
+          </p>
+        )
+      })
+      throw new Error(
+        `Expected JSON Object in query param for OAuth login. Got ${urlEncodedData}`
+      )
+    }
+  })
+
+  const handleGetStarted = async (): Promise<void> => {
+    const result = z.string().email().safeParse(email)
     if (!result.success) {
       setInInvalidEmail(true)
       return
@@ -34,21 +85,41 @@ export default function AuthPage(): React.JSX.Element {
     setIsLoading(true)
     setInInvalidEmail(false)
 
+    toast.loading('Sending OTP...')
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/send-otp/${encodeURIComponent(userEmail)}`,
-        {
-          method: 'POST'
-        }
-      )
-      if (response.status === 201) {
+      const { success, error } =
+        await ControllerInstance.getInstance().authController.sendOTP({
+          email
+        })
+      toast.dismiss()
+      if (success) {
+        toast.success('OTP successfully sent to your email')
         router.push('/auth/otp')
+        setUser({ email })
+      } else if (error) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.log(error)
+        toast.error("Couldn't send OTP", {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong sending the OTP. Check console for more info.
+            </p>
+          )
+        })
       }
     } catch (error) {
-      setIsLoading(false)
+      toast.dismiss()
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong sending the OTP. Check console for more info.
+          </p>
+        )
+      })
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(`Failed to send OTP: ${error}`)
     }
+    setIsLoading(false)
   }
 
   return (
@@ -63,13 +134,13 @@ export default function AuthPage(): React.JSX.Element {
           </h1>
         </div>
         <div className="grid grid-cols-3 gap-x-6">
-          <Button>
+          <Button onClick={() => (window.location.href = GOOGLE_OAUTH_PATH)}>
             <GoogleSVG />
           </Button>
-          <Button>
+          <Button onClick={() => (window.location.href = GITHUB_OAUTH_PATH)}>
             <GithubSVG />
           </Button>
-          <Button>
+          <Button onClick={() => (window.location.href = GITLAB_OAUTH_PATH)}>
             <GitlabSVG />
           </Button>
         </div>
@@ -94,16 +165,11 @@ export default function AuthPage(): React.JSX.Element {
           <Button
             className="w-full"
             disabled={isLoading}
-            onClick={() => {
-              void handleGetStarted(email)
-            }}
+            onClick={handleGetStarted}
           >
             {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
           </Button>
         </form>
-        {/* <Button className="w-full" variant="outline">
-          Already have an account? Sign In
-        </Button> */}
         <div className="text-center text-xs text-[#808080]">
           By continuing, you acknowledge and agree to our <br />
           <a
