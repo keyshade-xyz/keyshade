@@ -1,3 +1,9 @@
+## [2.11.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.14...v2.11.0-stage.15) (2025-02-06)
+
+### 🚀 Features
+
+* **project:** Edit project feature ([#685](https://github.com/keyshade-xyz/keyshade/issues/685)) ([a906920](https://github.com/keyshade-xyz/keyshade/commit/a9069200d02cb7555ce5265b462d3cffe3a65f0a))
+
 ## [2.11.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.13...v2.11.0-stage.14) (2025-02-06)
 
 ### 🐛 Bug Fixes
