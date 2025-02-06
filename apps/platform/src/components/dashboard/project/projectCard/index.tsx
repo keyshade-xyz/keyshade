@@ -45,7 +45,7 @@ export default function ProjectCard({
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
-  const setSelectedVariable = useSetAtom(selectedProjectAtom)
+  const setSelectedProject = useSetAtom(selectedProjectAtom)
 
   const copyToClipboard = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
@@ -79,8 +79,13 @@ export default function ProjectCard({
     }
   }
 
+  const handleEditProject = () => {
+    setSelectedProject(project)
+    setIsEditProjectSheetOpen(true)
+  }
+
   const handleDeleteProject = () => {
-    setSelectedVariable(project)
+    setSelectedProject(project)
     setIsDeleteProjectOpen(true)
   }
 
@@ -153,12 +158,7 @@ export default function ProjectCard({
           Copy link
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            setIsEditProjectSheetOpen(true)
-          }}
-        >
+        <ContextMenuItem inset onClick={handleEditProject}>
           Edit
         </ContextMenuItem>
         <ContextMenuItem inset onClick={handleDeleteProject}>
