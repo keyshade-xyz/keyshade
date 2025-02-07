@@ -1,6 +1,6 @@
 'use client'
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
-import { useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
@@ -8,7 +8,6 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import type { User } from '@keyshade/schema'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,11 +16,11 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp'
-import { authEmailAtom } from '@/store'
+import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 
 export default function AuthOTPPage(): React.JSX.Element {
-  const email = useAtomValue(authEmailAtom)
+  const [user, setUser] = useAtom(userAtom)
 
   const [otp, setOtp] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -31,15 +30,16 @@ export default function AuthOTPPage(): React.JSX.Element {
   const router = useRouter()
 
   useEffect(() => {
-    if (email === '') {
+    if (!user?.email) {
       router.push('/auth')
     }
-  }, [email, router])
+  }, [router, user?.email])
 
-  const handleVerifyOTP = async (
-    userEmail: string,
-    userOtp: string
-  ): Promise<void> => {
+  const handleVerifyOTP = async (): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain -- safe
+    const userEmail = user?.email!
+    const userOtp = otp
+
     const emailResult = z.string().email().safeParse(userEmail)
     const alphanumeric = z
       .string()
@@ -52,60 +52,103 @@ export default function AuthOTPPage(): React.JSX.Element {
       setIsInvalidOtp(true)
       return
     }
+
     setIsInvalidOtp(false)
     setIsLoading(true)
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/validate-otp?email=${userEmail}&otp=${userOtp}`,
-        {
-          method: 'POST',
-          credentials: 'include'
-        }
-      )
-      if (response.status === 401) {
-        toast.warning(
-          'The OTP you entered is either incorrect or has expired. Please enter the correct OTP.'
-        )
-        setIsLoading(false)
-      }
-      const user: User = (await response.json()) as User
+    toast.loading('Verifying OTP...')
 
-      if (user.isOnboardingFinished) {
-        Cookies.set('isOnboardingFinished', 'true')
-        router.push('/')
-      } else {
-        Cookies.set('isOnboardingFinished', 'false')
-        router.push('/auth/account-details')
+    try {
+      const { error, success, data } =
+        await ControllerInstance.getInstance().authController.validateOTP({
+          email: encodeURIComponent(userEmail),
+          otp: userOtp
+        })
+
+      toast.dismiss()
+
+      if (success && data) {
+        setUser(data)
+
+        if (data.isOnboardingFinished) {
+          router.push('/')
+        } else {
+          router.push('/auth/account-details')
+        }
+
+        Cookies.set(
+          'isOnboardingFinished',
+          data.isOnboardingFinished ? 'true' : 'false'
+        )
+
+        toast.success('OTP verified successfully')
+      } else if (error) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.log(error)
+
+        toast.error('Failed to verify OTP', {
+          description:
+            error.statusCode === 401 ? (
+              <p className="text-xs text-red-300">
+                The OTP you entered is either incorrect or has expired. Please
+                enter the correct OTP.
+              </p>
+            ) : (
+              <p className="text-xs text-red-300">
+                Something went wrong while verifying OTP. Check console for more
+                info.
+              </p>
+            )
+        })
       }
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(`Invalid user data: ${error.message}`)
-      } else {
-        setIsLoading(false)
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(`Failed to verify OTP: ${error}`)
-      }
+      toast.dismiss()
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(`Failed to verify OTP: ${error}`)
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while verifying OTP. Check console for more
+            info.
+          </p>
+        )
+      })
     }
+
+    setIsLoading(false)
   }
-  const handleResendOtp = async (userEmail: string): Promise<void> => {
+
+  const handleResendOtp = async (): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain -- safe
+    const userEmail = user?.email!
+
+    toast.loading('Sending OTP...')
+
     try {
       setIsLoadingRefresh(true)
 
       const { error, success } =
         await ControllerInstance.getInstance().authController.resendOTP({
-          userEmail: encodeURIComponent(userEmail)
+          userEmail
         })
+
+      toast.dismiss()
       if (success) {
         toast.success('OTP successfully sent to your email')
         setIsLoadingRefresh(false)
       } else {
         // eslint-disable-next-line no-console -- we need to log the error
         console.log(error)
-        toast.error("Couldn't send OTP, too many requests")
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong sending the OTP. Check console for more info.
+            </p>
+          )
+        })
         setIsLoadingRefresh(false)
       }
     } catch (error) {
+      toast.dismiss()
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(`Failed to send OTP: ${error}`)
       toast.error('Something went wrong!', {
@@ -118,6 +161,7 @@ export default function AuthOTPPage(): React.JSX.Element {
       setIsLoadingRefresh(false)
     }
   }
+
   return (
     <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
@@ -132,7 +176,7 @@ export default function AuthOTPPage(): React.JSX.Element {
             className={`${GeistSansFont.className} flex flex-col items-center`}
           >
             <span>We&apos;ve sent a verification code to </span>
-            <span>{email}</span>
+            <span>{user?.email}</span>
           </div>
         </div>
         <div className="flex w-full justify-center">
@@ -166,10 +210,7 @@ export default function AuthOTPPage(): React.JSX.Element {
             <Button
               className="w-full"
               disabled={isLoading}
-              onClick={(e) => {
-                e.preventDefault()
-                void handleVerifyOTP(email, otp)
-              }}
+              onClick={handleVerifyOTP}
             >
               {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
             </Button>
@@ -184,10 +225,7 @@ export default function AuthOTPPage(): React.JSX.Element {
                   <Button
                     className="text-[#71717A]"
                     disabled={isLoading}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      void handleResendOtp(email)
-                    }}
+                    onClick={handleResendOtp}
                     variant="link"
                   >
                     Resend OTP

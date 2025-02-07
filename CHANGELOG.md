@@ -1,3 +1,9 @@
+## [2.11.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.15...v2.11.0-stage.16) (2025-02-06)
+
+### 🚀 Features
+
+* **platform:** Add Google OAuth ([#689](https://github.com/keyshade-xyz/keyshade/issues/689)) ([ad3a3d2](https://github.com/keyshade-xyz/keyshade/commit/ad3a3d2d94a77fcd5c0d1b3b48564a298d510f4a))
+
 ## [2.11.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.14...v2.11.0-stage.15) (2025-02-06)
 
 ### 🚀 Features
