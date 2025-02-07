@@ -86,7 +86,7 @@ export class AuthController {
   @Public()
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  async githubOAuthCallback(@Req() req: any) {
+  async githubOAuthCallback(@Req() req: any, @Res() res: Response) {
     const { emails, displayName: name, photos } = req.user
 
     if (!emails.length) {
@@ -97,11 +97,12 @@ export class AuthController {
     const email = emails[0].value
     const profilePictureUrl = photos[0]?.value
 
-    return this.authService.handleOAuthLogin(
+    return this.handleOAuthProcess(
       email,
       name,
       profilePictureUrl,
-      AuthProvider.GITHUB
+      AuthProvider.GITHUB,
+      res
     )
   }
 
