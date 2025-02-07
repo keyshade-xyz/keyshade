@@ -9,12 +9,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle
+} from '@/components/ui/sheet'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   editVariableOpenAtom,
@@ -22,7 +24,7 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 
-export default function EditVariableDialog() {
+export default function EditVariablSheet() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
     useAtom(editVariableOpenAtom)
   const selectedVariableData = useAtomValue(selectedVariableAtom)
@@ -122,64 +124,68 @@ export default function EditVariableDialog() {
   }, [selectedVariableData, requestData, handleClose, setVariables])
 
   return (
-    <div className="p-4">
-      <Dialog onOpenChange={handleClose} open={isEditVariableOpen}>
-        <DialogContent className="bg-[#18181B] p-6 text-white sm:max-w-[506px]">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-white">
-              Edit this variable
-            </DialogTitle>
-            <DialogDescription className="text-sm font-normal text-white/60">
-              Edit the variable name or the note
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 pt-4">
-            <div className="flex w-full items-center justify-between gap-6">
-              <Label
-                className="w-[7.125rem] text-base font-semibold text-white"
-                htmlFor="variable-name"
-              >
-                Variable Name
-              </Label>
-              <Input
-                className="w-[20rem] bg-[#262626] text-base font-normal text-white"
-                id="variable-name"
-                name="name"
-                onChange={(e) =>
-                  updateRequestData(e.target.name, e.target.value)
-                }
-                value={requestData.name}
-              />
-            </div>
-            <div className="flex w-full items-center justify-between gap-6">
-              <Label
-                className="w-[7.125rem] text-base font-semibold text-white"
-                htmlFor="extra-note"
-              >
-                Extra Note
-              </Label>
-              <Textarea
-                className="w-[20rem] bg-[#262626] text-base font-normal text-white"
-                id="extra-note"
-                name="note"
-                onChange={(e) =>
-                  updateRequestData(e.target.name, e.target.value)
-                }
-                value={requestData.note}
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button
-                className="rounded-lg border-white/10 bg-[#E0E0E0] text-xs font-semibold text-black hover:bg-gray-200"
-                onClick={updateVariable}
-                variant="secondary"
-              >
-                Save Variable
-              </Button>
-            </div>
+    <Sheet
+      onOpenChange={(open) => {
+        setIsEditVariableOpen(open)
+      }}
+      open={isEditVariableOpen}
+    >
+      <SheetContent className="border-white/15 bg-[#222425]">
+        <SheetHeader>
+          <SheetTitle className="text-white">Edit this variable</SheetTitle>
+          <SheetDescription className="text-white/60">
+            Edit the variable name or the note
+          </SheetDescription>
+        </SheetHeader>
+        <div className="grid gap-x-4 gap-y-6 py-8">
+          <div className="flex flex-col items-start gap-x-4 gap-y-3">
+            <Label className="text-right" htmlFor="name">
+              Variable Name
+            </Label>
+            <Input
+              className="col-span-3 h-[2.75rem]"
+              id="name"
+              onChange={(e) => {
+                setRequestData((prev) => ({
+                  ...prev,
+                  name: e.target.value
+                }))
+              }}
+              placeholder="Enter the name of the variable"
+              value={requestData.name}
+            />
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+
+          <div className="flex flex-col items-start gap-x-4 gap-y-3">
+            <Label className="text-right" htmlFor="name">
+              Extra Note
+            </Label>
+            <Textarea
+              className="col-span-3 h-[2.75rem]"
+              id="name"
+              onChange={(e) => {
+                setRequestData((prev) => ({
+                  ...prev,
+                  note: e.target.value
+                }))
+              }}
+              placeholder="Enter the note of the variable"
+              value={requestData.note}
+            />
+          </div>
+        </div>
+        <SheetFooter className="py-3">
+          <SheetClose asChild>
+            <Button
+              className="font-semibold"
+              onClick={updateVariable}
+              variant="secondary"
+            >
+              Edit Variable
+            </Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
