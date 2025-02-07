@@ -1,3 +1,13 @@
+## [2.11.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.16...v2.11.0-stage.17) (2025-02-07)
+
+### 🐛 Bug Fixes
+
+* **api:** Github OAuth redirect not working ([#692](https://github.com/keyshade-xyz/keyshade/issues/692)) ([3495f8a](https://github.com/keyshade-xyz/keyshade/commit/3495f8ad425018e49bb1d85ada76e13594709b99))
+
+### 🔨 Code Refactoring
+
+* **platform:** Updated the [secure] table and changed edit variable dialog to a sheet ([#690](https://github.com/keyshade-xyz/keyshade/issues/690)) ([f51ad34](https://github.com/keyshade-xyz/keyshade/commit/f51ad34335ef41e5175e5c8df6dbc9d3b3ab5856))
+
 ## [2.11.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.15...v2.11.0-stage.16) (2025-02-06)
 
 ### 🚀 Features
