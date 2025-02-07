@@ -98,12 +98,15 @@ export default function SecretCard({
         <AccordionContent>
           <Table className="h-full w-full">
             <TableHeader className="h-[3.125rem] w-full">
-              <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
-                <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+              <TableRow className="h-[3.125rem] w-full bg-white/10">
+                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
                   Environment
                 </TableHead>
-                <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
+                <TableHead className="h-full text-base font-normal text-white/50">
                   Value
+                </TableHead>
+                <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                  Version
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -111,16 +114,19 @@ export default function SecretCard({
               {values.map((value) => {
                 return (
                   <TableRow
-                    className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
+                    className="h-[3.125rem] w-full hover:bg-white/5"
                     key={value.environment.id}
                   >
-                    <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+                    <TableCell className="h-full w-[10.25rem] text-base">
                       {value.environment.name}
                     </TableCell>
-                    <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
+                    <TableCell className="h-full text-base">
                       {isDecrypted
                         ? value.value
                         : value.value.replace(/./g, '*').substring(0, 20)}
+                    </TableCell>
+                    <TableCell className="h-full px-8 py-4 text-base">
+                      {value.version}
                     </TableCell>
                   </TableRow>
                 )

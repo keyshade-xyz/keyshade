@@ -92,7 +92,7 @@ export default function VariableCard(
           <Table className="h-full w-full">
             <TableHeader className="h-[3.125rem] w-full ">
               <TableRow className="h-full w-full bg-white/10 ">
-                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-bold text-white/50">
+                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
                   Environment
                 </TableHead>
                 <TableHead className="h-full text-base font-normal text-white/50">
