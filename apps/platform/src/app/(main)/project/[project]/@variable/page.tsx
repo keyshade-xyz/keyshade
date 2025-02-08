@@ -122,7 +122,10 @@ function VariablePage(): React.JSX.Element {
           ) : null}
 
           {/* Edit variable sheet */}
-          {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
+          {isEditVariableOpen && selectedVariable ? (
+            <EditVariablSheet />
+          ) : null}
+
         </div>
       )}
     </div>
