@@ -1,3 +1,25 @@
+## [2.11.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.17...v2.11.0-stage.18) (2025-02-08)
+
+### 🐛 Bug Fixes
+
+* **api:** Convert email to lowercase ([#694](https://github.com/keyshade-xyz/keyshade/issues/694)) ([b41db33](https://github.com/keyshade-xyz/keyshade/commit/b41db33045091a47afcda0278884caeaffebfccc))
+
+## [2.11.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.16...v2.11.0-stage.17) (2025-02-07)
+
+### 🐛 Bug Fixes
+
+* **api:** Github OAuth redirect not working ([#692](https://github.com/keyshade-xyz/keyshade/issues/692)) ([3495f8a](https://github.com/keyshade-xyz/keyshade/commit/3495f8ad425018e49bb1d85ada76e13594709b99))
+
+### 🔨 Code Refactoring
+
+* **platform:** Updated the [secure] table and changed edit variable dialog to a sheet ([#690](https://github.com/keyshade-xyz/keyshade/issues/690)) ([f51ad34](https://github.com/keyshade-xyz/keyshade/commit/f51ad34335ef41e5175e5c8df6dbc9d3b3ab5856))
+
+## [2.11.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.15...v2.11.0-stage.16) (2025-02-06)
+
+### 🚀 Features
+
+* **platform:** Add Google OAuth ([#689](https://github.com/keyshade-xyz/keyshade/issues/689)) ([ad3a3d2](https://github.com/keyshade-xyz/keyshade/commit/ad3a3d2d94a77fcd5c0d1b3b48564a298d510f4a))
+
 ## [2.11.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.14...v2.11.0-stage.15) (2025-02-06)
 
 ### 🚀 Features
