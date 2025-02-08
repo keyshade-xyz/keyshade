@@ -1,3 +1,9 @@
+## [2.11.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.17...v2.11.0-stage.18) (2025-02-08)
+
+### 🐛 Bug Fixes
+
+* **api:** Convert email to lowercase ([#694](https://github.com/keyshade-xyz/keyshade/issues/694)) ([b41db33](https://github.com/keyshade-xyz/keyshade/commit/b41db33045091a47afcda0278884caeaffebfccc))
+
 ## [2.11.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.16...v2.11.0-stage.17) (2025-02-07)
 
 ### 🐛 Bug Fixes
