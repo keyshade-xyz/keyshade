@@ -264,7 +264,7 @@ export class WorkspaceMembershipService {
       .findMany({
         where: {
           email: {
-            in: userEmails
+            in: userEmails.map((email) => email.toLowerCase())
           }
         },
         select: {
@@ -489,7 +489,7 @@ export class WorkspaceMembershipService {
             },
             {
               email: {
-                contains: search
+                contains: search.toLowerCase()
               }
             }
           ]
@@ -534,7 +534,7 @@ export class WorkspaceMembershipService {
             },
             {
               email: {
-                contains: search
+                contains: search.toLowerCase()
               }
             }
           ]
@@ -841,7 +841,7 @@ export class WorkspaceMembershipService {
 
       const memberUser: User | null = await this.prisma.user.findUnique({
         where: {
-          email: member.email
+          email: member.email.toLowerCase()
         }
       })
 

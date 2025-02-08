@@ -68,7 +68,7 @@ export const generateOtp = async (
       expiresAt: new Date(new Date().getTime() + OTP_EXPIRY),
       user: {
         connect: {
-          email
+          email: email.toLowerCase()
         }
       }
     }
