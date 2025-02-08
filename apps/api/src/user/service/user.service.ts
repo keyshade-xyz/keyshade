@@ -351,7 +351,7 @@ export class UserService {
       const adminUser = await this.prisma.user.create({
         data: {
           name: 'Admin',
-          email: process.env.ADMIN_EMAIL.toLowerCase(),
+          email: process.env.ADMIN_EMAIL,
           isAdmin: true,
           isActive: true,
           isOnboardingFinished: true
