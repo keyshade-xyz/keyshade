@@ -1,3 +1,13 @@
+## [2.11.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.18...v2.11.0-stage.19) (2025-02-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed the typo in query params ([#723](https://github.com/keyshade-xyz/keyshade/issues/723)) ([6c6bb7f](https://github.com/keyshade-xyz/keyshade/commit/6c6bb7f6f20c0110c3f4e94d120a61cdad60b847))
+
+### 📚 Documentation
+
+* Added section for building packages ([#720](https://github.com/keyshade-xyz/keyshade/issues/720)) ([ecfde92](https://github.com/keyshade-xyz/keyshade/commit/ecfde929f7554396ced6dbdc7c6cfb5bb5620edd))
+
 ## [2.11.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.17...v2.11.0-stage.18) (2025-02-08)
 
 ### 🐛 Bug Fixes
