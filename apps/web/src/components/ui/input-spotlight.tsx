@@ -1,6 +1,7 @@
 'use client'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 interface InputBorderSpotlightProps {
   setEmail: Dispatch<SetStateAction<string>>
@@ -41,6 +42,18 @@ export function InputBorderSpotlight({
     setOpacity(0)
   }
 
+  const validateEmail = (email: string): void => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)){
+      toast.custom(() => (
+        <div className="text-brandBlue border-brandBlue/20 bg-errorRed w-[90vw] rounded-lg border p-2 shadow-2xl backdrop-blur-3xl md:w-[20vw]">
+        <p className="text-sm">Please enter a valid email address</p>
+        </div>
+      ))
+      return
+    }
+    }
+
   return (
     <div className="relative w-80">
       <input
@@ -59,7 +72,7 @@ export function InputBorderSpotlight({
         onMouseMove={handleMouseMove}
         placeholder="Enter your email address"
         size={25}
-        type="email"
+        type="text"
       />
       <input
         aria-hidden="true"
