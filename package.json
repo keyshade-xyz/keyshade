@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.11.0-stage.16",
+  "version": "2.11.0-stage.19",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -115,6 +115,7 @@
     "build:api-client": "pnpm build:schema && turbo run --filter=@keyshade/api-client build",
     "build:schema": "turbo run build --filter=@keyshade/schema",
     "build:secret-scan": "turbo run build --filter=@keyshade/secret-scan",
+    "build:packages": "pnpm build:schema && turbo run --filter=@keyshade/api-client build && turbo run build --filter=@keyshade/secret-scan",
     "start": "turbo run start",
     "start:api": "turbo run start --filter=@keyshade/api",
     "start:web": "turbo run start --filter=@keyshade/web",

@@ -125,6 +125,7 @@ function VariablePage(): React.JSX.Element {
           {isEditVariableOpen && selectedVariable ? (
             <EditVariablSheet />
           ) : null}
+
         </div>
       )}
     </div>

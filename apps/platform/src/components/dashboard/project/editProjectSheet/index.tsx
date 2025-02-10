@@ -15,20 +15,23 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { 
-  editProjectOpenAtom, 
+import {
+  editProjectOpenAtom,
   selectedProjectAtom,
-  projectsOfWorkspaceAtom 
+  projectsOfWorkspaceAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 
 export default function EditProjectSheet(): JSX.Element {
-  const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] = useAtom(editProjectOpenAtom)
-  const [selectedProject , setSelectedProject] = useAtom(selectedProjectAtom)
+  const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] =
+    useAtom(editProjectOpenAtom)
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState(false)
 
-  const [formData, setFormData] = useState<Omit<UpdateProjectRequest, 'projectSlug'>>({
+  const [formData, setFormData] = useState<
+    Omit<UpdateProjectRequest, 'projectSlug'>
+  >({
     name: '',
     description: '',
     storePrivateKey: false
@@ -64,11 +67,14 @@ export default function EditProjectSheet(): JSX.Element {
 
     const changes: Partial<Omit<UpdateProjectRequest, 'projectSlug'>> = {}
 
-    if (formData.name !== undefined && formData.name !== selectedProject.name) { 
-      changes.name = formData.name.trim() 
+    if (formData.name !== undefined && formData.name !== selectedProject.name) {
+      changes.name = formData.name.trim()
     }
-    
-    if (formData.description !== undefined && formData.description!== selectedProject.description) {
+
+    if (
+      formData.description !== undefined &&
+      formData.description !== selectedProject.description
+    ) {
       changes.description = formData.description.trim()
     }
     if (formData.storePrivateKey !== selectedProject.storePrivateKey) {
@@ -97,22 +103,26 @@ export default function EditProjectSheet(): JSX.Element {
     }
 
     setIsLoading(true)
-    
+
     const updateRequest: UpdateProjectRequest = {
       projectSlug: selectedProject.slug,
       ...changes
     }
 
-    const { data, error, success } = await ControllerInstance.getInstance()
-      .projectController.updateProject(updateRequest)
+    const { data, error, success } =
+      await ControllerInstance.getInstance().projectController.updateProject(
+        updateRequest
+      )
 
     if (success && data) {
-      setProjects(projects.map(project => 
-        project.slug === selectedProject.slug 
-          ? { ...project, ...data }
-          : project
-      ))
-      
+      setProjects(
+        projects.map((project) =>
+          project.slug === selectedProject.slug
+            ? { ...project, ...data }
+            : project
+        )
+      )
+
       toast.success('Project updated successfully')
       setIsEditProjectSheetOpen(false)
       setSelectedProject(null)
