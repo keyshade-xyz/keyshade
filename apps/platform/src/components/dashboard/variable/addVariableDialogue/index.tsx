@@ -36,6 +36,7 @@ export default function AddVariableDialogue() {
   const environments = useAtomValue(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
+  const [isloading, setIsLoading] = useState<boolean>(false)
 
   const [newVariableData, setNewVariableData] = useState({
     variableName: '',
@@ -47,6 +48,9 @@ export default function AddVariableDialogue() {
   const handleAddVariable = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
+      
+      toast.loading('Adding New Variable...')
+      setIsLoading(true)
 
       if (!selectedProject) {
         toast.error('No project selected', {
@@ -78,7 +82,7 @@ export default function AddVariableDialogue() {
           request,
           {}
         )
-
+      toast.dismiss();
       if (success && data) {
         toast.success('Variable added successfully', {
           description: (
@@ -115,7 +119,7 @@ export default function AddVariableDialogue() {
           console.error(error)
         }
       }
-
+      setIsLoading(false)
       setIsCreateVariableOpen(false)
     },
     [selectedProject, newVariableData, setIsCreateVariableOpen, setVariables]
@@ -244,6 +248,7 @@ export default function AddVariableDialogue() {
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
                 onClick={handleAddVariable}
+                disabled={isloading}
               >
                 Add Variable
               </Button>
