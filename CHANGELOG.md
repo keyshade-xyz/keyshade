@@ -1,3 +1,9 @@
+## [2.11.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.19...v2.11.0-stage.20) (2025-02-10)
+
+### 🚀 Features
+
+* Variables listing revamp ([#735](https://github.com/keyshade-xyz/keyshade/issues/735)) ([38b42fa](https://github.com/keyshade-xyz/keyshade/commit/38b42fadb791871f48dfbd3527e9b81cdbb36d1c))
+
 ## [2.11.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.18...v2.11.0-stage.19) (2025-02-09)
 
 ### 🐛 Bug Fixes

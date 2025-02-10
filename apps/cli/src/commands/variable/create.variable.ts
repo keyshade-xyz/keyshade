@@ -41,11 +41,22 @@ export default class CreateVariable extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
+        long: '--entry [entries...]',
         description:
-          'An array of key-value pair (value and environmentSlug) for the variable.'
+          'An array of values for the variable. If specified, should be in the form <environment slug>:<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade variable create <project slug> [options]
+    
+  Create a variable
+  keyshade variable create project-1 --name "PORT" --entry "alpha=8080"
+  
+  Create a variable with note
+  keyshade variable create project-1 --name "PORT" --note "This is a variable"
+    `
   }
 
   canMakeHttpRequests(): boolean {
@@ -92,7 +103,9 @@ export default class CreateVariable extends BaseCommand {
     entries: Array<{ value: string; environmentSlug: string }>
   }> {
     let { name, note } = options
-    const { entries } = options
+    const { rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
 
     if (!name) {
       name = await text({
@@ -101,28 +114,40 @@ export default class CreateVariable extends BaseCommand {
       })
     }
 
-    if (!entries) {
-      throw new Error('Entries is required')
-    }
-
     if (!note) {
       note = name
     }
 
-    const parsedEntries = entries.map((entry) => {
-      const [environmentSlug, value] = entry.split('=').map((s) => s.trim())
-      if (!environmentSlug || !value) {
-        throw new Error(
-          `Invalid entry format: ${entry}. Expected format: "environmentSlug=value"`
-        )
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
       }
-      return { environmentSlug, value }
-    })
+    }
 
     return {
       name,
       note,
-      entries: parsedEntries
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }

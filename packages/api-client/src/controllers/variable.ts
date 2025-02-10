@@ -7,8 +7,6 @@ import {
   CreateVariableResponse,
   DeleteVariableRequest,
   DeleteVariableResponse,
-  GetAllVariablesOfEnvironmentRequest,
-  GetAllVariablesOfEnvironmentResponse,
   GetAllVariablesOfProjectRequest,
   GetAllVariablesOfProjectResponse,
   GetRevisionsOfVariableRequest,
@@ -87,16 +85,6 @@ export default class VariableController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllVariablesOfProjectResponse>(response)
-  }
-
-  async getAllVariablesOfEnvironment(
-    request: GetAllVariablesOfEnvironmentRequest,
-    headers: Record<string, string>
-  ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
-    const url = `/api/variable/${request.projectSlug}/${request.environmentSlug}`
-    const response = await this.apiClient.get(url, headers)
-
-    return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)
   }
 
   async getRevisionsOfVariable(
