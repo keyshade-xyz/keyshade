@@ -72,7 +72,7 @@
 - Added version flag (`keyshade -v` or `keyshade --version`) to display the current CLI version
 - Error reports get sent to Sentry if metrics is enabled
 
-## 2.5.1-stage
+## 2.5.1
 
 ### Patches
 
