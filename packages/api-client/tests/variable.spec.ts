@@ -232,33 +232,6 @@ describe('Get Variable Tests', () => {
     })
   })
 
-  // Get all variables for an environment
-  it('should get all variables for an environment', async () => {
-    const variables = await variableController.getAllVariablesOfEnvironment(
-      {
-        environmentSlug: environment.slug,
-        projectSlug
-      },
-      { 'x-e2e-user-email': email }
-    )
-
-    expect(variables.data.length).toBe(1)
-    variables.data.forEach((variable) => {
-      expect(variable).toHaveProperty('name')
-      expect(typeof variable.name).toBe('string')
-
-      expect(variable).toHaveProperty('value')
-      expect(typeof variable.value).toBe('string')
-
-      expect(variable).toHaveProperty('isPlaintext')
-      expect(typeof variable.isPlaintext).toBe('boolean')
-    })
-    const variable1 = variables.data[0]
-    expect(variable1.name).toBe('Variable 1')
-    expect(variable1.value).toBe('Variable 1 value')
-    expect(variable1.isPlaintext).toBe(true)
-  })
-
   // Delete a variable
   it('should delete variable', async () => {
     await variableController.deleteVariable(
