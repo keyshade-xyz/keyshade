@@ -23,7 +23,7 @@ import {
   editProjectOpenAtom,
   selectedProjectAtom
 } from '@/store'
-import { copyToClipboard } from '@/lib/cliboard'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
   project: ProjectWithCount
