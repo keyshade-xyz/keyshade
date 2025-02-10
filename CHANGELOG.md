@@ -1,3 +1,13 @@
+## [2.11.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0...v2.11.1-stage.1) (2025-02-10)
+
+### 🐛 Bug Fixes
+
+* **platform:** Adjust grid layout for environment cards ([#724](https://github.com/keyshade-xyz/keyshade/issues/724)) ([029d3da](https://github.com/keyshade-xyz/keyshade/commit/029d3da61afd70527cd9a561d4d35c86f68ca988))
+
+### 🔧 Miscellaneous Chores
+
+* **platform:** Extract `copyToClipboad` into reusable util ([#734](https://github.com/keyshade-xyz/keyshade/issues/734)) ([1f9e42d](https://github.com/keyshade-xyz/keyshade/commit/1f9e42db84f683dc60dd104e484f4c45b8e90484))
+
 ## [2.11.0](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0...v2.11.0) (2025-02-10)
 
 ### 🚀 Features
