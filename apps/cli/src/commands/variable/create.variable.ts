@@ -103,7 +103,9 @@ export default class CreateVariable extends BaseCommand {
     entries: Array<{ value: string; environmentSlug: string }>
   }> {
     let { name, note } = options
-    const { entries } = options
+    const { rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
 
     if (!name) {
       name = await text({
@@ -112,31 +114,40 @@ export default class CreateVariable extends BaseCommand {
       })
     }
 
-    if (!entries) {
-      throw new Error('Entries is required')
-    }
-
     if (!note) {
       note = name
     }
 
-    const parsedEntries = entries.map((entry) => {
-      const entryObj: { value: string; environmentSlug: string } = {
-        value: '',
-        environmentSlug: ''
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
       }
-      entry.split(' ').forEach((pair) => {
-        const [key, value] = pair.split('=')
-        entryObj.environmentSlug = key
-        entryObj.value = value
-      })
-      return entryObj
-    })
+    }
 
     return {
       name,
       note,
-      entries: parsedEntries
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }
