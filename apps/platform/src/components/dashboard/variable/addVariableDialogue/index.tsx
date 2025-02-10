@@ -48,7 +48,7 @@ export default function AddVariableDialogue() {
   const handleAddVariable = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
-      
+
       toast.loading('Adding New Variable...')
       setIsLoading(true)
 
@@ -82,7 +82,7 @@ export default function AddVariableDialogue() {
           request,
           {}
         )
-      toast.dismiss();
+      toast.dismiss()
       if (success && data) {
         toast.success('Variable added successfully', {
           description: (
