@@ -26,6 +26,12 @@ export const VariableSchema = z.object({
         id: EnvironmentSchema.shape.id,
         name: EnvironmentSchema.shape.name,
         slug: EnvironmentSchema.shape.slug
+      }),
+      createdOn: z.string().datetime(),
+      createdBy: z.object({
+        id: z.string(),
+        name: z.string(),
+        profilePictureUrl: z.string().nullable()
       })
     })
   )
@@ -104,19 +110,6 @@ export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
 export const GetAllVariablesOfProjectResponseSchema =
   PageResponseSchema(VariableSchema)
 
-export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
-  environmentSlug: EnvironmentSchema.shape.slug
-})
-
-export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
-  z.object({
-    name: z.string(),
-    value: z.string(),
-    isPlaintext: z.boolean()
-  })
-)
-
 export const GetRevisionsOfVariableRequestSchema =
   PageRequestSchema.partial().extend({
     variableSlug: z.string(),
@@ -131,6 +124,11 @@ export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
     variableId: z.string(),
     createdOn: z.string().datetime(),
     createdById: z.string(),
-    environmentId: EnvironmentSchema.shape.id
+    environmentId: EnvironmentSchema.shape.id,
+    createdBy: z.object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
   })
 )
