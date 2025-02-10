@@ -13,11 +13,12 @@ export function copyToClipboard(
       .catch((error) => {
         // eslint-disable-next-line no-console -- console.error is used for debugging
         console.error(errorMsg, error)
+        toast.error(errorMsg)
       })
   } else {
     // Fallback for browsers that don't support the Clipboard API
     // eslint-disable-next-line no-console -- console.log is used for debugging
-    console.log('Clipboard API not supported')
+    console.warn('Clipboard API not supported')
 
     const textarea = document.createElement('textarea')
     textarea.value = message
@@ -29,6 +30,7 @@ export function copyToClipboard(
     } catch (error) {
       // eslint-disable-next-line no-console -- console.error is used for debugging
       console.error(errorMsg, error)
+      toast.error(errorMsg)
     }
     document.body.removeChild(textarea)
   }
