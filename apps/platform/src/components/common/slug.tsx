@@ -23,11 +23,12 @@ export default function Slug({ text }: SlugProps): React.JSX.Element {
 
   return (
     <button
-      className={`${roboto.className} flex cursor-copy gap-2 rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
+      className={`${roboto.className} flex cursor-copy items-center justify-between gap-2 rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15 w-full overflow-hidden`}
       onClick={copyToClipboard}
       type="button"
     >
-      {text} <CopySVG className="w-[20px]" />
+      <span className="truncate">{text}</span>
+      <CopySVG className="w-[20px] flex-shrink-0" />
     </button>
   )
 }
