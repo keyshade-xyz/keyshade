@@ -1,3 +1,13 @@
+## [2.11.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.2...v2.11.1-stage.3) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Secrets with empty names ([#738](https://github.com/keyshade-xyz/keyshade/issues/738)) ([5e9c57f](https://github.com/keyshade-xyz/keyshade/commit/5e9c57fce1122289d2ee3cea1b9baae4f1c8ed11))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add SMTP_SECURE environment variable to Mail Service ([#741](https://github.com/keyshade-xyz/keyshade/issues/741)) ([dd89d57](https://github.com/keyshade-xyz/keyshade/commit/dd89d57d9c5aee3979b31f8036b0870bba20ffa1))
+
 ## [2.11.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.1...v2.11.1-stage.2) (2025-02-11)
 
 ### 🐛 Bug Fixes
