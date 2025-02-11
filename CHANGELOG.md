@@ -1,3 +1,9 @@
+## [2.11.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.1...v2.11.1-stage.2) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **platform:** Follow-up for remaining changes from PR [#724](https://github.com/keyshade-xyz/keyshade/issues/724) ([#736](https://github.com/keyshade-xyz/keyshade/issues/736)) ([271c561](https://github.com/keyshade-xyz/keyshade/commit/271c561b155d7b4c18c5059a33688f8b3e182e7c))
+
 ## [2.11.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0...v2.11.1-stage.1) (2025-02-10)
 
 ### 🐛 Bug Fixes
