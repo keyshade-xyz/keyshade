@@ -78,7 +78,8 @@ const devSchema = z.object({
   SMTP_SECURE: z
     .string()
     .default('false')
-    .transform((val) => val === 'true'),
+    .transform((val) => val === 'true')
+    .pipe(z.boolean()),
   SMTP_EMAIL_ADDRESS: z.string().email(),
   SMTP_PASSWORD: z.string(),
   FROM_EMAIL: z
@@ -149,7 +150,8 @@ const prodSchema = z.object({
   SMTP_SECURE: z
     .string()
     .default('true')
-    .transform((val) => val === 'true'),
+    .transform((val) => val === 'true')
+    .pipe(z.boolean()),
   SMTP_EMAIL_ADDRESS: z.string().email().min(5),
   SMTP_PASSWORD: z.string().min(1),
   FROM_EMAIL: z
