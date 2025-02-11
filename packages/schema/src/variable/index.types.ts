@@ -11,8 +11,6 @@ import {
   DeleteVariableResponseSchema,
   GetAllVariablesOfProjectRequestSchema,
   GetAllVariablesOfProjectResponseSchema,
-  GetAllVariablesOfEnvironmentRequestSchema,
-  GetAllVariablesOfEnvironmentResponseSchema,
   GetRevisionsOfVariableRequestSchema,
   GetRevisionsOfVariableResponseSchema
 } from '.'
@@ -51,14 +49,6 @@ export type GetAllVariablesOfProjectRequest = z.infer<
 
 export type GetAllVariablesOfProjectResponse = z.infer<
   typeof GetAllVariablesOfProjectResponseSchema
->
-
-export type GetAllVariablesOfEnvironmentRequest = z.infer<
-  typeof GetAllVariablesOfEnvironmentRequestSchema
->
-
-export type GetAllVariablesOfEnvironmentResponse = z.infer<
-  typeof GetAllVariablesOfEnvironmentResponseSchema
 >
 
 export type GetRevisionsOfVariableRequest = z.infer<
