@@ -19,7 +19,7 @@ export class MailService implements IMailService {
     this.transporter = createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true',
+      secure: process.env.SMTP_SECURE,
       auth: {
         user: process.env.SMTP_EMAIL_ADDRESS,
         pass: process.env.SMTP_PASSWORD
