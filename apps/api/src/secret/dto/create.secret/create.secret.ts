@@ -2,14 +2,18 @@ import 'reflect-metadata'
 import { Transform, Type } from 'class-transformer'
 import {
   IsArray,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   ValidateNested
 } from 'class-validator'
+import { TrimString } from '@/decorators/trim-string.decorator'
 
 export class CreateSecret {
   @IsString()
+  @IsNotEmpty()
+  @TrimString()
   name: string
 
   @IsString()
@@ -30,10 +34,12 @@ export class CreateSecret {
 
 class Entry {
   @IsString()
-  @Transform(({ value }) => value.trim())
+  @IsNotEmpty()
+  @TrimString()
   environmentSlug: string
 
   @IsString()
-  @Transform(({ value }) => value.trim())
+  @IsNotEmpty()
+  @TrimString()
   value: string
 }
