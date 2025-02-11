@@ -75,7 +75,7 @@ const devSchema = z.object({
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
-  SMTP_SECURE: z.string(),
+  SMTP_SECURE: z.boolean(),
   SMTP_EMAIL_ADDRESS: z.string().email(),
   SMTP_PASSWORD: z.string(),
   FROM_EMAIL: z
