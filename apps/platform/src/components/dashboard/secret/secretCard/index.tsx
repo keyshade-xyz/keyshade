@@ -32,6 +32,7 @@ import {
   editSecretOpenAtom,
   selectedSecretAtom
 } from '@/store'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface SecretCardProps {
   secretData: Secret
@@ -69,9 +70,18 @@ export default function SecretCard({
           <AccordionTrigger
             className="hover:no-underline"
             rightChildren={
-              <div className="text-xs text-white/50">
+              <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
-                <span className="text-white">{secret.lastUpdatedBy.name}</span>
+                <div className='flex items-center gap-x-2'>
+                  <span className="text-white">{secret.lastUpdatedBy.name}</span>
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage />
+                    <AvatarFallback className="font-semibold">
+                      {secret.lastUpdatedBy.name.charAt(0).toUpperCase() +
+                        secret.lastUpdatedBy.name.slice(1, 2).toLowerCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
               </div>
             }
           >
