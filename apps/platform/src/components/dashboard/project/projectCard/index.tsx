@@ -53,7 +53,7 @@ export default function ProjectCard({
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
     if (navigator.clipboard) {
       navigator.clipboard
-        .writeText(`${window.location.origin}/project/${slug}`)
+        .writeText(`${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`)
         .then(() => {
           toast.success('Link has been copied to clipboard.')
         })
@@ -67,7 +67,7 @@ export default function ProjectCard({
       console.log('Clipboard API not supported')
 
       const textarea = document.createElement('textarea')
-      textarea.value = `${window.location.origin}/project/${slug}`
+      textarea.value = `${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`
       document.body.appendChild(textarea)
       textarea.select()
       try {
@@ -139,10 +139,10 @@ export default function ProjectCard({
         </Link>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <Link href={`/project/${slug}`}>
+        <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
-        <a href={`/project/${slug}`} rel="noopener noreferrer" target="_blank">
+        <a href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`} rel="noopener noreferrer" target="_blank">
           <ContextMenuItem inset>Open in new tab</ContextMenuItem>
         </a>
         <ContextMenuSeparator className="bg-white/15" />
