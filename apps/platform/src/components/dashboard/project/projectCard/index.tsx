@@ -10,7 +10,7 @@ import {
   InternalSVG
 } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,7 +21,8 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  selectedWorkspaceAtom
 } from '@/store'
 import { copyToClipboard } from '@/lib/clipboard'
 
@@ -46,6 +47,7 @@ export default function ProjectCard({
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedProject = useSetAtom(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const handleEditProject = () => {
     setSelectedProject(project)
@@ -75,7 +77,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`/project/${slug}?tab=secret`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=secret`}
           key={id}
         >
           <div className="flex items-center gap-x-5">
@@ -110,10 +112,14 @@ export default function ProjectCard({
         </Link>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <Link href={`/project/${slug}`}>
+        <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
-        <a href={`/project/${slug}`} rel="noopener noreferrer" target="_blank">
+        <a
+          href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           <ContextMenuItem inset>Open in new tab</ContextMenuItem>
         </a>
         <ContextMenuSeparator className="bg-white/15" />
