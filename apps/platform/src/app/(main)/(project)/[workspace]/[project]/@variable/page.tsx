@@ -18,7 +18,7 @@ import {
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
-import EditVariableDialog from '@/components/dashboard/variable/editVariableDialogue'
+import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
@@ -121,10 +121,8 @@ function VariablePage(): React.JSX.Element {
             <ConfirmDeleteVariable />
           ) : null}
 
-          {/* Edit variable dialog */}
-          {isEditVariableOpen && selectedVariable ? (
-            <EditVariableDialog />
-          ) : null}
+          {/* Edit variable sheet */}
+          {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
         </div>
       )}
     </div>

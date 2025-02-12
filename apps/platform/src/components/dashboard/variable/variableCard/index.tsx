@@ -13,7 +13,8 @@ import {
 import {
   ContextMenu,
   ContextMenuContent,
-  ContextMenuItem
+  ContextMenuItem,
+  ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import {
   Tooltip,
@@ -58,36 +59,40 @@ export default function VariableCard(
         key={variable.id}
         value={variable.id}
       >
-        <AccordionTrigger
-          className="hover:no-underline"
-          rightChildren={
-            <div className="text-xs text-white/50">
-              {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
-              <span className="text-white">{variable.lastUpdatedBy.name}</span>
+        <ContextMenuTrigger>
+          <AccordionTrigger
+            className="hover:no-underline"
+            rightChildren={
+              <div className="text-xs text-white/50">
+                {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
+                <span className="text-white">
+                  {variable.lastUpdatedBy.name}
+                </span>
+              </div>
+            }
+          >
+            <div className="flex gap-x-5">
+              <div className="flex items-center gap-x-4">{variable.name}</div>
+              {variable.note ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <NoteIconSVG className="w-7" />
+                    </TooltipTrigger>
+                    <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                      <p>{variable.note}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : null}
             </div>
-          }
-        >
-          <div className="flex gap-x-5">
-            <div className="flex items-center gap-x-4">{variable.name}</div>
-            {variable.note ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <NoteIconSVG className="w-7" />
-                  </TooltipTrigger>
-                  <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                    <p>{variable.note}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : null}
-          </div>
-        </AccordionTrigger>
+          </AccordionTrigger>
+        </ContextMenuTrigger>
         <AccordionContent>
           <Table className="h-full w-full">
             <TableHeader className="h-[3.125rem] w-full ">
               <TableRow className="h-full w-full bg-white/10 ">
-                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-bold text-white/50">
+                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
                   Environment
                 </TableHead>
                 <TableHead className="h-full text-base font-normal text-white/50">

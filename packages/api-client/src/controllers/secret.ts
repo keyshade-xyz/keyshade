@@ -6,8 +6,6 @@ import {
   CreateSecretResponse,
   DeleteSecretRequest,
   DeleteSecretResponse,
-  GetAllSecretsOfEnvironmentRequest,
-  GetAllSecretsOfEnvironmentResponse,
   GetAllSecretsOfProjectRequest,
   GetAllSecretsOfProjectResponse,
   GetRevisionsOfSecretRequest,
@@ -93,16 +91,6 @@ export default class SecretController {
     return await parseResponse<GetAllSecretsOfProjectResponse>(response)
   }
 
-  async getAllSecretsOfEnvironment(
-    request: GetAllSecretsOfEnvironmentRequest,
-    headers?: Record<string, string>
-  ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
-    const url = `/api/secret/${request.projectSlug}/${request.environmentSlug}`
-    const response = await this.apiClient.get(url, headers)
-
-    return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)
-  }
-
   async getRevisionsOfSecret(
     request: GetRevisionsOfSecretRequest,
     headers?: Record<string, string>
@@ -111,7 +99,10 @@ export default class SecretController {
       `/api/secret/${request.secretSlug}/revisions/${request.environmentSlug}`,
       request
     )
-    const response = await this.apiClient.get(url, headers)
+    const response = await this.apiClient.get(
+      `${url}&decryptValue=${request.decryptValue}`,
+      headers
+    )
 
     return await parseResponse<GetRevisionsOfSecretResponse>(response)
   }

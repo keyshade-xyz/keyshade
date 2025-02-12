@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
 import {
   SecretSVG,
@@ -25,6 +24,7 @@ import {
   selectedProjectAtom,
   selectedWorkspaceAtom
 } from '@/store'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
   project: ProjectWithCount
@@ -46,45 +46,16 @@ export default function ProjectCard({
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
-  const setSelectedVariable = useSetAtom(selectedProjectAtom)
+  const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
-  const copyToClipboard = (): void => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
-    if (navigator.clipboard) {
-      navigator.clipboard
-        .writeText(
-          `${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`
-        )
-        .then(() => {
-          toast.success('Link has been copied to clipboard.')
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Error copying text: ', error)
-        })
-    } else {
-      // Fallback for browsers that don't support the Clipboard API
-      // eslint-disable-next-line no-console -- console.log is used for debugging
-      console.log('Clipboard API not supported')
-
-      const textarea = document.createElement('textarea')
-      textarea.value = `${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`
-      document.body.appendChild(textarea)
-      textarea.select()
-      try {
-        document.execCommand('copy')
-        toast.success('Link has been copied to clipboard.')
-      } catch (error) {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Error copying text: ', error)
-      }
-      document.body.removeChild(textarea)
-    }
+  const handleEditProject = () => {
+    setSelectedProject(project)
+    setIsEditProjectSheetOpen(true)
   }
 
   const handleDeleteProject = () => {
-    setSelectedVariable(project)
+    setSelectedProject(project)
     setIsDeleteProjectOpen(true)
   }
 
@@ -155,18 +126,13 @@ export default function ProjectCard({
         <ContextMenuItem
           inset
           onClick={() => {
-            copyToClipboard()
+            copyToClipboard(`${window.location.origin}/project/${slug}`)
           }}
         >
           Copy link
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            setIsEditProjectSheetOpen(true)
-          }}
-        >
+        <ContextMenuItem inset onClick={handleEditProject}>
           Edit
         </ContextMenuItem>
         <ContextMenuItem inset onClick={handleDeleteProject}>

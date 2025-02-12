@@ -238,7 +238,7 @@ export default function CreateProjectDialogue(): JSX.Element {
                 Access Level
               </Label>
               <Select
-                defaultValue="GLOBAL"
+                value={newProjectData.accessLevel}
                 onValueChange={(currValue) => {
                   setNewProjectData((prevData) => ({
                     ...prevData,

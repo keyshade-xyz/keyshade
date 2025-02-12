@@ -6,6 +6,8 @@ import type {
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+import formatDate from '@/util/date-formatter'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
 
 export default class ListSecret extends BaseCommand {
   getName(): string {
@@ -36,17 +38,35 @@ export default class ListSecret extends BaseCommand {
         long: '--decrypt-value',
         description:
           'Set this to true if the project contains the private key. If set to true, the values of the secret will be in plaintext format'
-      }
+      },
+      ...PAGINATION_OPTION
     ]
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getUsage(): string {
+    return `keyshade secret list <project slug> [options]
+
+  List all secrets under a project
+  keyshade secret list project-1
+
+  Decrypt values while listing
+  keyshade secret list project-1 --decrypt-value
+
+  Pagination options
+  keyshade secret list project-1 --page 1 --limit 10
+  `
+  }
+
+  async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
+    const { decryptValue, paginationOptions } = await this.parseInput(options)
 
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
-          projectSlug
+          projectSlug,
+          decryptValue,
+          ...paginationOptions
         },
         this.headers
       )
@@ -56,29 +76,39 @@ export default class ListSecret extends BaseCommand {
       if (secrets.length > 0) {
         secrets.forEach(({ secret, values }) => {
           Logger.info(`- ${secret.name} (${secret.slug})`)
-          values.forEach(({ environment, value }) => {
-            Logger.info(
-              `  |_ ${environment.name} (${environment.slug}): ${value}`
-            )
-          })
+          values.forEach(
+            ({ environment, value, version, createdOn, createdBy }) => {
+              Logger.info(
+                `  | ${environment.name} (${environment.slug}): ${decryptValue ? value : 'Hidden'} (version ${version})`
+              )
+              Logger.info(
+                `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
+              )
+              Logger.info('')
+            }
+          )
         })
       } else {
-        Logger.error(`Failed fetching secrets: ${error.message}`)
-        if (this.metricsEnabled && error?.statusCode === 500) {
-          Logger.report(
-            'Failed fetching secrets for project.\n' + JSON.stringify(error)
-          )
-        }
+        Logger.info('No secrets found')
+      }
+    } else {
+      Logger.error(`Failed fetching secrets: ${error.message}`)
+      if (this.metricsEnabled && error?.statusCode === 500) {
+        Logger.report(
+          'Failed fetching secrets for project.\n' + JSON.stringify(error)
+        )
       }
     }
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
     decryptValue: boolean
+    paginationOptions: CommandActionData['options']
   }> {
-    const { decryptValue = false } = options // defaults to false
+    const { decryptValue = false, ...paginationOptions } = options // defaults to false
     return {
-      decryptValue
+      decryptValue,
+      paginationOptions
     }
   }
 }

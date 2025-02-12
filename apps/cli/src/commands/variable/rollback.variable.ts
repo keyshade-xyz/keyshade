@@ -41,6 +41,14 @@ export default class RollbackVariable extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade variable rollback <variable slug> [options]
+  
+  Rollback a variable
+  keyshade variable rollback variable-1 --version 2 --environment dev
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
@@ -75,6 +83,16 @@ export default class RollbackVariable extends BaseCommand {
     version: number
   }> {
     const { environment, version } = options
+
+    if (!environment) {
+      Logger.error('Environment slug is required')
+      process.exit(1)
+    }
+
+    if (!version) {
+      Logger.error('Version is required')
+      process.exit(1)
+    }
 
     return {
       environment,

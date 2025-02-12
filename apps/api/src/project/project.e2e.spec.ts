@@ -269,7 +269,7 @@ describe('Project Controller Tests', () => {
 
       expect(adminRole).toBeDefined()
       expect(adminRole.projects).toHaveLength(2)
-      expect(adminRole.projects[0].projectId).toBe(project1.id)
+      expect(adminRole.projects).toContainEqual({ projectId: project1.id })
     })
 
     it('should not let non-member create a project', async () => {

@@ -180,7 +180,7 @@ These are the options supported by the `sync` command:
 
 #### `-h, --hard-sync`
 
-Upserts a new copy of the parent onto the child. Defaults to soft sync.
+Force the child to match the parent by discarding all changes in the child. Defaults to soft sync.
 
 ## `unlink`
 

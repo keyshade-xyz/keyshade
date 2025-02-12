@@ -11,8 +11,6 @@ import {
   RollBackSecretResponseSchema,
   GetAllSecretsOfProjectRequestSchema,
   GetAllSecretsOfProjectResponseSchema,
-  GetAllSecretsOfEnvironmentRequestSchema,
-  GetAllSecretsOfEnvironmentResponseSchema,
   GetRevisionsOfSecretRequestSchema,
   GetRevisionsOfSecretResponseSchema
 } from '.'
@@ -43,14 +41,6 @@ export type GetAllSecretsOfProjectRequest = z.infer<
 
 export type GetAllSecretsOfProjectResponse = z.infer<
   typeof GetAllSecretsOfProjectResponseSchema
->
-
-export type GetAllSecretsOfEnvironmentRequest = z.infer<
-  typeof GetAllSecretsOfEnvironmentRequestSchema
->
-
-export type GetAllSecretsOfEnvironmentResponse = z.infer<
-  typeof GetAllSecretsOfEnvironmentResponseSchema
 >
 
 export type GetRevisionsOfSecretRequest = z.infer<

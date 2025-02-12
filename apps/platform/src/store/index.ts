@@ -1,14 +1,16 @@
 import { atom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 import type {
   GetAllEnvironmentsOfProjectResponse,
   Project,
   ProjectWithCount,
   Secret,
+  User,
   Variable,
   Workspace
 } from '@keyshade/schema'
 
-export const authEmailAtom = atom<string>('')
+export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const selectedWorkspaceAtom = atom<
   (Workspace & { projects: number }) | null

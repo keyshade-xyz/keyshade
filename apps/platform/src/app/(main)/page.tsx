@@ -13,7 +13,8 @@ import {
   selectedWorkspaceAtom,
   projectsOfWorkspaceAtom,
   deleteProjectOpenAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  userAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeletePr
 
 export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
+  const setUser = useSetAtom(userAtom)
 
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -60,9 +62,29 @@ export default function Index(): JSX.Element {
     setLoading(false)
   }, [selectedWorkspace, setProjects])
 
+  const getSelf = useCallback(async () => {
+    const { success, error, data } =
+      await ControllerInstance.getInstance().userController.getSelf()
+    if (success && data) {
+      setUser(data)
+    } else {
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while fetching user. Check console for more
+            info.
+          </p>
+        )
+      })
+      // eslint-disable-next-line no-console -- we need to log the error
+      console.error(error)
+    }
+  }, [setUser])
+
   useEffect(() => {
     getAllProjects()
-  }, [getAllProjects, selectedWorkspace, setProjects])
+    getSelf()
+  }, [getAllProjects, selectedWorkspace, setProjects, getSelf])
 
   return (
     <div className="flex flex-col gap-4">
