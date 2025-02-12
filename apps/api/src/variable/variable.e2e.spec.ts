@@ -252,9 +252,7 @@ describe('Variable Controller Tests', () => {
       const messages = response.json().message
 
       expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual(
-        'name should not be empty'
-      )
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to create a variable with a non-existing environment', async () => {
@@ -391,9 +389,7 @@ describe('Variable Controller Tests', () => {
       const messages = response.json().message
 
       expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual(
-        'name should not be empty'
-      )
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to update a variable with same name in the same project', async () => {
