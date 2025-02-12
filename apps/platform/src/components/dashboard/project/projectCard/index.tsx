@@ -53,7 +53,9 @@ export default function ProjectCard({
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
     if (navigator.clipboard) {
       navigator.clipboard
-        .writeText(`${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`)
+        .writeText(
+          `${window.location.origin}/${selectedWorkspace?.slug}/${slug}?tab=secret`
+        )
         .then(() => {
           toast.success('Link has been copied to clipboard.')
         })
@@ -142,7 +144,11 @@ export default function ProjectCard({
         <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
-        <a href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`} rel="noopener noreferrer" target="_blank">
+        <a
+          href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           <ContextMenuItem inset>Open in new tab</ContextMenuItem>
         </a>
         <ContextMenuSeparator className="bg-white/15" />
