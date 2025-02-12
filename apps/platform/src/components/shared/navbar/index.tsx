@@ -175,17 +175,18 @@ function Navbar(): React.JSX.Element {
           </DropdownMenu>
         </div>
         <div className="px-4">
-          {(pathname === '/settings' ||
-            pathname.split('/')[2] === selectedProject?.slug) && (
-            <LineTab
-              customID="linetab"
-              tabs={
-                pathname.split('/')[2] === selectedProject?.slug
-                  ? projectTabs
-                  : settingsTabs
-              }
-            />
-          )}
+          {pathname !== '/' &&
+            (pathname === '/settings' ||
+              pathname.split('/')[2] === selectedProject?.slug) && (
+              <LineTab
+                customID="linetab"
+                tabs={
+                  pathname.split('/')[2] === selectedProject?.slug
+                    ? projectTabs
+                    : settingsTabs
+                }
+              />
+            )}
         </div>
       </nav>
       <SearchModel isOpen={isOpen} setIsOpen={setIsOpen} />
