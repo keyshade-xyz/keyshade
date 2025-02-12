@@ -37,6 +37,7 @@ import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -82,7 +83,13 @@ describe('Secret Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -228,6 +235,26 @@ describe('Secret Controller Tests', () => {
       expect(secretVersion.environmentId).toBe(environment1.id)
     })
 
+    it('should not be able to create secret with empty name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        payload: {
+          name: ' '
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+
+      const messages = response.json().message
+
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual('name should not be empty')
+    })
+
     it('should not be able to create a secret with a non-existing environment', async () => {
       const response = await app.inject({
         method: 'POST',
@@ -322,6 +349,26 @@ describe('Secret Controller Tests', () => {
       expect(response.json().message).toEqual(
         'Secret non-existing-secret-slug not found'
       )
+    })
+
+    it('should not be able to update secret with empty name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          name: ' '
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+
+      const messages = response.json().message
+
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should be able to update the secret name and note without creating a new version', async () => {

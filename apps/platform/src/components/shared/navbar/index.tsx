@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { DropdownSVG } from '@public/svg/shared'
 import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
+import type { User } from '@keyshade/schema'
 import { useAtomValue } from 'jotai'
 import SearchModel from './searchModel'
 import {
@@ -18,12 +19,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
+import { selectedProjectAtom } from '@/store'
 import { userAtom } from '@/store'
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isApple, setIsApple] = useState<boolean>(false)
   const user = useAtomValue(userAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const pathname = usePathname()
 
@@ -154,17 +157,18 @@ function Navbar(): React.JSX.Element {
               </DropdownMenu>
             </div>
             <div className="px-4">
-              {(pathname === '/settings' ||
-                pathname.split('/')[1] === 'project') && (
-                <LineTab
-                  customID="linetab"
-                  tabs={
-                    pathname.split('/')[1] === 'project'
-                      ? projectTabs
-                      : settingsTabs
-                  }
-                />
-              )}
+              {pathname !== '/' &&
+                (pathname === '/settings' ||
+                  pathname.split('/')[2] === selectedProject?.slug) && (
+                  <LineTab
+                    customID="linetab"
+                    tabs={
+                      pathname.split('/')[2] === selectedProject?.slug
+                        ? projectTabs
+                        : settingsTabs
+                    }
+                  />
+                )}
             </div>
           </nav>
           <SearchModel isOpen={isOpen} setIsOpen={setIsOpen} />
