@@ -77,50 +77,60 @@ export default function AddVariableDialogue() {
         note: newVariableData.note
       }
 
-      const { success, error, data } =
-        await ControllerInstance.getInstance().variableController.createVariable(
-          request,
-          {}
-        )
-      toast.dismiss()
-      if (success && data) {
-        toast.success('Variable added successfully', {
-          description: (
-            <p className="text-xs text-emerald-300">
-              The variable has been added to the project
-            </p>
+      try {
+        const { success, error, data } =
+          await ControllerInstance.getInstance().variableController.createVariable(
+            request,
+            {}
           )
-        })
 
-        // Add the variable to the store
-        setVariables((prev) => [...prev, data])
-      }
-
-      if (error) {
-        if (error.statusCode === 409) {
-          toast.error('Variable already exists', {
+        if (success && data) {
+          toast.success('Variable added successfully', {
             description: (
-              <p className="text-xs text-red-300">
-                Variable with the same name already exists. Please use different
-                one.
+              <p className="text-xs text-emerald-300">
+                The variable has been added to the project
               </p>
             )
           })
-        } else {
-          toast.error('Something went wrong!', {
-            description: (
-              <p className="text-xs text-red-300">
-                Something went wrong adding the variable. Check console for more
-                info.
-              </p>
-            )
+
+          // Add the variable to the store
+          setVariables((prev) => [...prev, data])
+          setNewVariableData({
+            variableName: '',
+            note: '',
+            environmentSlug: environments[0]?.slug,
+            environmentValue: ''
           })
-          // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
-          console.error(error)
         }
+
+        if (error) {
+          if (error.statusCode === 409) {
+            toast.error('Variable already exists', {
+              description: (
+                <p className="text-xs text-red-300">
+                  Variable with the same name already exists. Please use
+                  different one.
+                </p>
+              )
+            })
+          } else {
+            toast.error('Something went wrong!', {
+              description: (
+                <p className="text-xs text-red-300">
+                  Something went wrong adding the variable. Check console for
+                  more info.
+                </p>
+              )
+            })
+            // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
+            console.error(error)
+          }
+        }
+      } finally {
+        toast.dismiss()
+        setIsLoading(false)
+        setIsCreateVariableOpen(false)
       }
-      setIsLoading(false)
-      setIsCreateVariableOpen(false)
     },
     [selectedProject, newVariableData, setIsCreateVariableOpen, setVariables]
   )
