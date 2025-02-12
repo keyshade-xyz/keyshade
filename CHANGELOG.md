@@ -1,3 +1,35 @@
+## [2.12.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.3...v2.12.0-stage.1) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add workspace slug for projects in url ([#683](https://github.com/keyshade-xyz/keyshade/issues/683)) ([8bdd47f](https://github.com/keyshade-xyz/keyshade/commit/8bdd47fb71e902fcaf2558356be0b35bb79c7151))
+
+## [2.11.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.2...v2.11.1-stage.3) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Secrets with empty names ([#738](https://github.com/keyshade-xyz/keyshade/issues/738)) ([5e9c57f](https://github.com/keyshade-xyz/keyshade/commit/5e9c57fce1122289d2ee3cea1b9baae4f1c8ed11))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add SMTP_SECURE environment variable to Mail Service ([#741](https://github.com/keyshade-xyz/keyshade/issues/741)) ([dd89d57](https://github.com/keyshade-xyz/keyshade/commit/dd89d57d9c5aee3979b31f8036b0870bba20ffa1))
+
+## [2.11.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.1...v2.11.1-stage.2) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **platform:** Follow-up for remaining changes from PR [#724](https://github.com/keyshade-xyz/keyshade/issues/724) ([#736](https://github.com/keyshade-xyz/keyshade/issues/736)) ([271c561](https://github.com/keyshade-xyz/keyshade/commit/271c561b155d7b4c18c5059a33688f8b3e182e7c))
+
+## [2.11.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0...v2.11.1-stage.1) (2025-02-10)
+
+### 🐛 Bug Fixes
+
+* **platform:** Adjust grid layout for environment cards ([#724](https://github.com/keyshade-xyz/keyshade/issues/724)) ([029d3da](https://github.com/keyshade-xyz/keyshade/commit/029d3da61afd70527cd9a561d4d35c86f68ca988))
+
+### 🔧 Miscellaneous Chores
+
+* **platform:** Extract `copyToClipboad` into reusable util ([#734](https://github.com/keyshade-xyz/keyshade/issues/734)) ([1f9e42d](https://github.com/keyshade-xyz/keyshade/commit/1f9e42db84f683dc60dd104e484f4c45b8e90484))
+
 ## [2.11.0](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0...v2.11.0) (2025-02-10)
 
 ### 🚀 Features
