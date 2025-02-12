@@ -1,3 +1,9 @@
+## [2.12.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.3...v2.12.0-stage.1) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add workspace slug for projects in url ([#683](https://github.com/keyshade-xyz/keyshade/issues/683)) ([8bdd47f](https://github.com/keyshade-xyz/keyshade/commit/8bdd47fb71e902fcaf2558356be0b35bb79c7151))
+
 ## [2.11.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.2...v2.11.1-stage.3) (2025-02-11)
 
 ### 🐛 Bug Fixes
