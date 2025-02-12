@@ -252,9 +252,7 @@ describe('Secret Controller Tests', () => {
       const messages = response.json().message
 
       expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual(
-        'name should not be empty'
-      )
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to create a secret with a non-existing environment', async () => {
@@ -370,9 +368,7 @@ describe('Secret Controller Tests', () => {
       const messages = response.json().message
 
       expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual(
-        'name should not be empty'
-      )
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should be able to update the secret name and note without creating a new version', async () => {

@@ -158,7 +158,7 @@ function Navbar(): React.JSX.Element {
             </div>
             <div className="px-4">
               {pathname !== '/' &&
-            (pathname === '/settings' ||
+                (pathname === '/settings' ||
                   pathname.split('/')[2] === selectedProject?.slug) && (
                   <LineTab
                     customID="linetab"
