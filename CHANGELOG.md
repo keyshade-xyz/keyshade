@@ -1,3 +1,9 @@
+## [2.12.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.1...v2.12.0-stage.2) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add roles tab in sidebar ([#749](https://github.com/keyshade-xyz/keyshade/issues/749)) ([bbe4366](https://github.com/keyshade-xyz/keyshade/commit/bbe4366c3131ea2991cbde32454b39e02c45c4c9))
+
 ## [2.12.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.3...v2.12.0-stage.1) (2025-02-12)
 
 ### 🚀 Features
