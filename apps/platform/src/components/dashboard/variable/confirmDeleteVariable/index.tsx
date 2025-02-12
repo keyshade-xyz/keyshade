@@ -44,42 +44,46 @@ export default function ConfirmDeleteVariable() {
       return
     }
 
+    toast.loading('Deleting Variable...')
     const variableSlug = selectedVariable.variable.slug
 
-    const { success, error } =
-      await ControllerInstance.getInstance().variableController.deleteVariable(
-        { variableSlug },
-        {}
-      )
-
-    if (success) {
-      toast.success('Variable deleted successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The variable has been deleted.
-          </p>
+    try {
+      const { success, error } =
+        await ControllerInstance.getInstance().variableController.deleteVariable(
+          { variableSlug },
+          {}
         )
-      })
 
-      // Remove the variable from the store
-      setVariables((prevVariables) =>
-        prevVariables.filter(({ variable }) => variable.slug !== variableSlug)
-      )
-    }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the variable. Check console for
-            more info.
-          </p>
+      if (success) {
+        toast.success('Variable deleted successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              The variable has been deleted.
+            </p>
+          )
+        })
+
+        // Remove the variable from the store
+        setVariables((prevVariables) =>
+          prevVariables.filter(({ variable }) => variable.slug !== variableSlug)
         )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
+      }
+      if (error) {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while deleting the variable. Check console
+              for more info.
+            </p>
+          )
+        })
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
+    } finally {
+      toast.dismiss()
+      handleClose()
     }
-
-    handleClose()
   }, [setVariables, selectedVariable, handleClose])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
