@@ -17,10 +17,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
 import { selectedProjectAtom } from '@/store'
 import { userAtom } from '@/store'
+import AvatarComponent from '@/components/common/avatar'
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -122,12 +122,7 @@ function Navbar(): React.JSX.Element {
                     </>
                   ) : (
                     <>
-                      <Avatar>
-                        <AvatarImage src={user.profilePictureUrl ?? ''} />
-                        <AvatarFallback>
-                          {user.name ? user.name.slice(0, 2) : ''}
-                        </AvatarFallback>
-                      </Avatar>
+                      <AvatarComponent name={user?.name} />
                       <span>{user.name}</span>
                     </>
                   )}

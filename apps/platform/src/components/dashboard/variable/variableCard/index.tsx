@@ -32,7 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import AvatarComponent from '@/components/common/avatar'
 
 export default function VariableCard(
   variableData: GetAllVariablesOfProjectResponse['items'][number]
@@ -70,13 +70,7 @@ export default function VariableCard(
                   <span className="text-white">
                     {variable.lastUpdatedBy.name}
                   </span>
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage />
-                    <AvatarFallback className="font-semibold">
-                      {variable.lastUpdatedBy.name.charAt(0).toUpperCase() +
-                        variable.lastUpdatedBy.name.slice(1, 2).toLowerCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <AvatarComponent name={variable.lastUpdatedBy.name} />
                 </div>
               </div>
             }
