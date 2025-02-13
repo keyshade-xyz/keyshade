@@ -37,6 +37,7 @@ import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { ValidationPipe } from '@nestjs/common'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -84,7 +85,13 @@ describe('Variable Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
 
-    app.useGlobalPipes(new QueryTransformPipe())
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true
+      }),
+      new QueryTransformPipe()
+    )
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
@@ -186,7 +193,7 @@ describe('Variable Controller Tests', () => {
           entries: [
             {
               value: 'Variable 3 value',
-              environmentId: environment2.id
+              environmentSlug: environment2.slug
             }
           ]
         },
@@ -226,6 +233,26 @@ describe('Variable Controller Tests', () => {
       expect(variableVersion).toBeDefined()
       expect(variableVersion.value).toBe('Variable 1 value')
       expect(variableVersion.version).toBe(1)
+    })
+
+    it('should not be able to create variable with empty name', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}`,
+        payload: {
+          name: ' '
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+
+      const messages = response.json().message
+
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to create a variable with a non-existing environment', async () => {
@@ -343,6 +370,26 @@ describe('Variable Controller Tests', () => {
       expect(response.json().message).toEqual(
         'Variable non-existing-variable-slug not found'
       )
+    })
+
+    it('should not be able to update variable with empty name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}`,
+        payload: {
+          name: ' '
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+
+      const messages = response.json().message
+
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to update a variable with same name in the same project', async () => {

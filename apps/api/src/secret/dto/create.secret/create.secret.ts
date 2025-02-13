@@ -8,17 +8,15 @@ import {
   Length,
   ValidateNested
 } from 'class-validator'
-import { TrimString } from '@/decorators/trim-string.decorator'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
 
 export class CreateSecret {
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
+  @NonEmptyTrimmedString()
   name: string
 
-  @IsString()
   @IsOptional()
   @Length(0, 100)
+  @NonEmptyTrimmedString()
   note?: string
 
   @IsString()
@@ -33,13 +31,9 @@ export class CreateSecret {
 }
 
 class Entry {
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
+  @NonEmptyTrimmedString()
   environmentSlug: string
 
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
+  @NonEmptyTrimmedString()
   value: string
 }
