@@ -21,7 +21,7 @@ import { UpdateVariable } from '../dto/update.variable/update.variable'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { ChangeNotificationEvent } from 'src/socket/socket.types'
 import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
@@ -29,6 +29,7 @@ import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { getVariableWithValues, VariableWithValues } from '@/common/variable'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class VariableService {
@@ -37,11 +38,11 @@ export class VariableService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly authorizationService: AuthorizationService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    },
-    private readonly authorityCheckerService: AuthorityCheckerService
+    }
   ) {
     this.redis = redisClient.publisher
   }
@@ -54,17 +55,16 @@ export class VariableService {
    * @returns the newly created variable
    */
   async createVariable(
-    user: User,
+    user: AuthenticatedUser,
     dto: CreateVariable,
     projectSlug: Project['slug']
   ): Promise<VariableWithValues> {
     // Fetch the project
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.CREATE_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
 
@@ -80,7 +80,7 @@ export class VariableService {
           user,
           project,
           this.prisma,
-          this.authorityCheckerService
+          this.authorizationService
         )
       : new Map<string, string>()
 
@@ -127,14 +127,7 @@ export class VariableService {
               }
             },
             version: true,
-            value: true,
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            }
+            value: true
           }
         }
       }
@@ -173,16 +166,15 @@ export class VariableService {
    * @returns the updated variable and its new versions
    */
   async updateVariable(
-    user: User,
+    user: AuthenticatedUser,
     variableSlug: Variable['slug'],
     dto: UpdateVariable
   ) {
     const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
         entity: { slug: variableSlug },
-        authorities: [Authority.UPDATE_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_VARIABLE]
       })
 
     // Check if the variable already exists in the project
@@ -197,7 +189,7 @@ export class VariableService {
           user,
           variable.project,
           this.prisma,
-          this.authorityCheckerService
+          this.authorizationService
         )
       : new Map<string, string>()
 
@@ -337,26 +329,24 @@ export class VariableService {
    * @returns the deleted variable versions
    */
   async rollbackVariable(
-    user: User,
+    user: AuthenticatedUser,
     variableSlug: Variable['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
   ) {
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.UPDATE_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_VARIABLE]
       })
     const environmentId = environment.id
 
     const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
         entity: { slug: variableSlug },
-        authorities: [Authority.UPDATE_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_VARIABLE]
       })
 
     // Filter the variable versions by the environment
@@ -443,13 +433,15 @@ export class VariableService {
    * @throws `NotFoundException` if the variable does not exist
    * @throws `ForbiddenException` if the user does not have the required authority
    */
-  async deleteVariable(user: User, variableSlug: Variable['slug']) {
+  async deleteVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug']
+  ) {
     const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
         entity: { slug: variableSlug },
-        authorities: [Authority.DELETE_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.DELETE_VARIABLE]
       })
 
     // Delete the variable
@@ -494,7 +486,7 @@ export class VariableService {
    * @throws `ForbiddenException` if the user does not have the required authority
    */
   async getAllVariablesOfProject(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     page: number,
     limit: number,
@@ -504,11 +496,10 @@ export class VariableService {
   ) {
     // Check if the user has the required authorities in the project
     const { id: projectId } =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_VARIABLE]
       })
 
     const variables = await this.prisma.variable.findMany({
@@ -674,7 +665,7 @@ export class VariableService {
    * @throws `ForbiddenException` if the user does not have the required authority
    */
   async getRevisionsOfVariable(
-    user: User,
+    user: AuthenticatedUser,
     variableSlug: Variable['slug'],
     environmentSlug: Environment['slug'],
     page: number,
@@ -682,19 +673,17 @@ export class VariableService {
     order: 'asc' | 'desc' = 'desc'
   ) {
     const { id: variableId } =
-      await this.authorityCheckerService.checkAuthorityOverVariable({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
         entity: { slug: variableSlug },
-        authorities: [Authority.READ_VARIABLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_VARIABLE]
       })
 
     const { id: environmentId } =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
+        authorities: [Authority.READ_ENVIRONMENT]
       })
 
     const items = await this.prisma.variableVersion.findMany({
@@ -704,17 +693,9 @@ export class VariableService {
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
+
       orderBy: {
         version: order
-      },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
       }
     })
 

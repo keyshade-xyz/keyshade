@@ -10,7 +10,6 @@ import {
   EventTriggerer,
   EventType,
   Project,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
@@ -27,6 +26,7 @@ import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -35,14 +35,16 @@ describe('Workspace Role Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
   let userService: UserService
 
-  let alice: User
-  let bob: User
-  let charlie: User
+  let alice: AuthenticatedUser
+  let bob: AuthenticatedUser
+  let charlie: AuthenticatedUser
   let workspaceAlice: Workspace
   let workspaceBob: Workspace
   let adminRole1: WorkspaceRole
   let adminRole2: WorkspaceRole
   let projects: Project[]
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -98,9 +100,9 @@ describe('Workspace Role Controller Tests', () => {
     delete createBob.defaultWorkspace
     delete createCharlie.defaultWorkspace
 
-    alice = createAlice
-    bob = createBob
-    charlie = createCharlie
+    alice = { ...createAlice, ipAddress: USER_IP_ADDRESS }
+    bob = { ...createBob, ipAddress: USER_IP_ADDRESS }
+    charlie = { ...createCharlie, ipAddress: USER_IP_ADDRESS }
 
     adminRole1 = await prisma.workspaceRole.findFirst({
       where: {

@@ -19,6 +19,8 @@ describe('User Controller Tests', () => {
   let adminUser: User
   let regularUser: User
 
+  const USER_IP_ADDRESS = '127.0.0.1'
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, UserModule]
@@ -83,7 +85,8 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
       ...adminUser,
-      defaultWorkspace: null
+      defaultWorkspace: null,
+      ipAddress: USER_IP_ADDRESS
     })
   })
 
@@ -106,7 +109,8 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
       ...regularUser,
-      defaultWorkspace: expect.any(Object)
+      defaultWorkspace: expect.any(Object),
+      ipAddress: USER_IP_ADDRESS
     })
 
     expect(result.json().defaultWorkspace).toMatchObject({
