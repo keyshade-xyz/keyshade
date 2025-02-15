@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
 
       - name: Install PNPM
@@ -406,7 +406,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.check-versions.outputs.skip_publish != 'true'
         with:
-          node-version: '20.x'
+          node-version: 22.x
           registry-url: 'https://registry.npmjs.org'
           scope: '@keyshade'
 
@@ -446,7 +446,7 @@ jobs:
       - name: node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
 
       - name: Install PNPM
