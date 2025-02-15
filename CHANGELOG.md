@@ -1,3 +1,14 @@
+## [2.12.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.2...v2.12.0-stage.3) (2025-02-15)
+
+### 🐛 Bug Fixes
+
+* **api:** Variables with empty names ([#745](https://github.com/keyshade-xyz/keyshade/issues/745)) ([b8e2abf](https://github.com/keyshade-xyz/keyshade/commit/b8e2abf77a3fbec0afb53681472f17c9e2e92ac3))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Release workflow node 22.x ([#757](https://github.com/keyshade-xyz/keyshade/issues/757)) ([e910b90](https://github.com/keyshade-xyz/keyshade/commit/e910b90eb0e94b4f35ca05994210b900c72e41b3))
+* lint-staged configured ([#746](https://github.com/keyshade-xyz/keyshade/issues/746)) ([27b8405](https://github.com/keyshade-xyz/keyshade/commit/27b8405e228c5558e60d07d5493d6e98edc4b420))
+
 ## [2.12.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.1...v2.12.0-stage.2) (2025-02-12)
 
 ### 🚀 Features
