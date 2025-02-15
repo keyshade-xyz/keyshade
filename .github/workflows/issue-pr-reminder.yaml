@@ -1,0 +1,108 @@
+name: Issue PR Reminder
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:
+
+jobs:
+  issue-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          CREATE_REMINDER_AFTER_HOURS: ${{ vars.CREATE_REMINDER_AFTER_HOURS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = "keyshade-xyz";
+            const repo = "keyshade";
+            const createReminderAfterHours = process.env.CREATE_REMINDER_AFTER_HOURS || 48;
+            const createReminderAfterMilliseconds = createReminderAfterHours * 60 * 60 * 1000;
+            const now = Date.now();
+
+            async function listOpenIssuesWithoutPR() {
+              const allIssues = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listForRepo({
+                  owner,
+                  repo,
+                  state: "open",
+                  per_page: 100,
+                  page
+                });
+
+                const issuesWithoutPR = issuesResponse.data.filter(issue => !issue.pull_request);
+
+                allIssues.push(...issuesWithoutPR);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return allIssues;
+            }
+
+            async function listIssueComments(issue) {
+              const allComments = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listComments({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  per_page: 100,
+                  page
+                });
+
+                allComments.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return allComments;
+            }
+
+            async function createReminders() {
+              const issues = await listOpenIssuesWithoutPR();
+
+              for (const issue of issues) {
+                const issueCreatedAt = new Date(issue.created_at);
+                const createReminderAfter = new Date(issueCreatedAt.getTime() + createReminderAfterMilliseconds);
+
+                // Check if it's time to create the reminder
+                if (now < createReminderAfter) {
+                  continue;
+                }
+
+                // Create reminder for each assignee
+                const comments = await listIssueComments(issue);
+
+                for (const assignee of issue.assignees) {
+                  const reminder = `@${assignee.login}, please open a draft PR linking this issue!`;
+
+                  // Check if the issue already has the reminder
+                  if (comments.some(comment => comment.body === reminder)) {
+                    continue;
+                  }
+
+                  // Create the reminder
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: reminder
+                  });
+
+                  console.log(`Reminder created for: ${assignee.login}`);
+                }
+              }
+            }
+
+            await createReminders();
