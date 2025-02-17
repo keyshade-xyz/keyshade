@@ -2,8 +2,6 @@ import { Toaster } from '@/components/ui/sonner'
 import './global.css'
 import JotaiProvider from '@/components/jotaiProvider'
 import OnlineStatusHandler from '@/components/common/online-status-handler'
-import { ErrorBoundary } from 'next/dist/client/components/error-boundary'
-import GlobalError from './global-error'
 
 export const metadata = {
   title: 'Keyshade',
@@ -18,14 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ErrorBoundary errorComponent={GlobalError}>
-          <JotaiProvider>
-            <>
-              <OnlineStatusHandler />
-              {children}
-            </>
-          </JotaiProvider>
-        </ErrorBoundary>
+        <JotaiProvider>
+          <>
+            <OnlineStatusHandler />
+            {children}
+          </>
+        </JotaiProvider>
       </body>
       <Toaster richColors />
     </html>

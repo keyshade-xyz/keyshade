@@ -33,18 +33,26 @@ import {
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+  const router = useRouter()
+
+  const getWorkspacesOfUser = useHttp(
+    () =>
+      ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+        {}
+      ),
+    router
+  )
 
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
-
-  const router = useRouter()
 
   const createWorkspace = useCallback(
     async (name: string) => {
@@ -74,17 +82,8 @@ export function Combobox(): React.JSX.Element {
   )
 
   useEffect(() => {
-    ControllerInstance.getInstance()
-      .workspaceController.getWorkspacesOfUser({}, {})
-      .then(({ data, success, error }) => {
-        if (success && data) {
-          setAllWorkspaces(data.items)
-          setSelectedWorkspace(data.items[0])
-        } else {
-          throw new Error(JSON.stringify(error))
-        }
-      })
-  }, [setSelectedWorkspace])
+    getWorkspacesOfUser()
+  }, [setSelectedWorkspace, getWorkspacesOfUser])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
