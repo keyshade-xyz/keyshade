@@ -43,6 +43,17 @@ export default function AddSecretDialog() {
   })
 
   const handleAddSecret = useCallback(async () => {
+    if (!newSecretData.secretName.trim()) {
+      toast.error('Secret name is required', {
+        description: (
+          <p className="text-xs text-red-300">
+            Please provide a name for the secret.
+          </p>
+        )
+      })
+      return
+    }
+
     if (selectedProject === null) {
       toast.error('No project selected', {
         description: (
