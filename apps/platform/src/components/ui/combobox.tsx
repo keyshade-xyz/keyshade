@@ -37,9 +37,11 @@ import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
+  const [allWorkspaces, setAllWorkspaces] = useState<
+    (Workspace & { projects: number })[]
+  >([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
-  const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 
   const getWorkspacesOfUser = useHttp(
@@ -49,40 +51,52 @@ export function Combobox(): React.JSX.Element {
       ),
     router
   )
+  const createWorkspace = useHttp(
+    () =>
+      ControllerInstance.getInstance().workspaceController.createWorkspace(
+        {
+          name: newWorkspaceName
+        },
+        {}
+      ),
+    router
+  )
 
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
-  const createWorkspace = useCallback(
-    async (name: string) => {
-      if (name === '') {
-        setIsNameEmpty(true)
-        return
-      }
-      setIsNameEmpty(false)
+  const handleCreateWorkspace = useCallback(async () => {
+    if (newWorkspaceName.trim() === '') {
+      toast.warning('Workspace name is empty', {
+        description: 'Please enter a workspace name'
+      })
+      return
+    }
 
-      const { data, error, success } =
-        await ControllerInstance.getInstance().workspaceController.createWorkspace(
-          {
-            name
-          },
-          {}
-        )
+    setIsLoading(true)
+    toast.loading('Creating workspace...')
+
+    try {
+      const { success, data } = await createWorkspace()
 
       if (success && data) {
         toast.success('Workspace created successfully')
         setSelectedWorkspace({ ...data, projects: 0 })
         setOpen(false)
-      } else {
-        throw new Error(JSON.stringify(error))
       }
-    },
-    [setIsNameEmpty, setOpen, setSelectedWorkspace]
-  )
+    } finally {
+      setIsLoading(false)
+      toast.dismiss()
+    }
+  }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
 
   useEffect(() => {
-    getWorkspacesOfUser()
+    getWorkspacesOfUser().then(({ success, data }) => {
+      if (success && data) {
+        setAllWorkspaces(data.items)
+      }
+    })
   }, [setSelectedWorkspace, getWorkspacesOfUser])
 
   return (
@@ -172,32 +186,12 @@ export function Combobox(): React.JSX.Element {
                       placeholder="Enter the name"
                     />
                   </div>
-                  {isNameEmpty ? (
-                    <span className="ml-[3.5rem] mt-1 text-red-500">
-                      Name cannot be empty
-                    </span>
-                  ) : null}
                 </div>
 
                 <div className="flex w-full justify-end">
                   <Button
-                    onClick={() => {
-                      createWorkspace(newWorkspaceName)
-                        .then(() => {
-                          toast.success('User details updated successfully')
-                          router.refresh()
-                        })
-                        .catch(() => {
-                          toast.error('Something went wrong!', {
-                            description: (
-                              <p className="text-xs text-red-300">
-                                Failed to update the user details. Check console
-                                for more info.
-                              </p>
-                            )
-                          })
-                        })
-                    }}
+                    disabled={isLoading}
+                    onClick={handleCreateWorkspace}
                     variant="secondary"
                   >
                     Add workspace

@@ -17,6 +17,7 @@ Here's the description of the environment variables used in the project. You can
 - **DATABASE_URL**: The URL of the PSQL database to connect to. This is used by the [Prisma Client](https://www.prisma.io/docs/orm/prisma-client) to connect to the database.
 - **SMTP_HOST**: This is used to send out emails from the backend.&#x20;
 - **SMTP_PORT:** The SMTP port as specified by your SMTP provider.
+- **SMTP_SECURE:** The SMTP security as specified by your SMTP client, By default `false`, for local development/testing. Set to `true` for real SMTP servers which support SSL/TLS e.g. in production.
 - **SMTP_EMAIL_ADDRESS:** The email address you want to be sending out the emails from.
 - **SMTP_PASSWORD:** The app password for your email account. &#x20;
 - **JWT_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.

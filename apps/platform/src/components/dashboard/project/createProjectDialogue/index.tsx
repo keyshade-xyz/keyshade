@@ -229,13 +229,13 @@ export default function CreateProjectDialogue(): JSX.Element {
                 Access Level
               </Label>
               <Select
-                defaultValue="GLOBAL"
                 onValueChange={(currValue) => {
                   setNewProjectData((prevData) => ({
                     ...prevData,
                     accessLevel: currValue as 'GLOBAL' | 'INTERNAL' | 'PRIVATE'
                   }))
                 }}
+                value={newProjectData.accessLevel}
               >
                 <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
                   <SelectValue />

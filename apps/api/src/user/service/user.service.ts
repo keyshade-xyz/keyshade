@@ -50,7 +50,7 @@ export class UserService {
       const userExists =
         (await this.prisma.user.count({
           where: {
-            email: dto.email
+            email: dto.email.toLowerCase()
           }
         })) > 0
 
@@ -70,10 +70,10 @@ export class UserService {
           otpId: otp.id
         },
         update: {
-          newEmail: dto.email
+          newEmail: dto.email.toLowerCase()
         },
         create: {
-          newEmail: dto.email,
+          newEmail: dto.email.toLowerCase(),
           otpId: otp.id
         }
       })
@@ -110,7 +110,7 @@ export class UserService {
       const userExists =
         (await this.prisma.user.count({
           where: {
-            email: dto.email
+            email: dto.email.toLowerCase()
           }
         })) > 0
 
@@ -129,7 +129,7 @@ export class UserService {
           id: userId
         },
         data: {
-          email: dto.email,
+          email: dto.email.toLowerCase(),
           authProvider: AuthProvider.EMAIL_OTP
         }
       })
@@ -188,7 +188,7 @@ export class UserService {
         id: user.id
       },
       data: {
-        email: userEmailChange.newEmail,
+        email: userEmailChange.newEmail.toLowerCase(),
         authProvider: AuthProvider.EMAIL_OTP
       }
     })
@@ -262,7 +262,7 @@ export class UserService {
           },
           {
             email: {
-              contains: search
+              contains: search.toLowerCase()
             }
           }
         ]
@@ -299,36 +299,36 @@ export class UserService {
     this.log.log(`Deleted user ${userId}`)
   }
 
-  async createUser(user: CreateUserDto) {
-    this.log.log(`Creating user with email ${user.email}`)
+  async createUser(dto: CreateUserDto) {
+    this.log.log(`Creating user with email ${dto.email}`)
 
     // Check for duplicate user
     const checkDuplicateUser =
       (await this.prisma.user.count({
         where: {
-          email: user.email
+          email: dto.email.toLowerCase()
         }
       })) > 0
     if (checkDuplicateUser) {
       throw new ConflictException(
         constructErrorBody(
           'User already exists with this email',
-          `Can not create user with email ${user.email} as it already exists`
+          `Can not create user with email ${dto.email} as it already exists`
         )
       )
     }
 
     // Create the user's default workspace along with user
-    const userWithWorkspace = await createUser(
-      { authProvider: AuthProvider.EMAIL_OTP, ...user },
+    const createdUser = await createUser(
+      { authProvider: AuthProvider.EMAIL_OTP, ...dto },
       this.prisma
     )
-    this.log.log(`Created user with email ${user.email}`)
+    this.log.log(`Created user with email ${createdUser.email}`)
 
-    await this.mailService.accountLoginEmail(userWithWorkspace.email)
-    this.log.log(`Sent login email to ${user.email}`)
+    await this.mailService.accountLoginEmail(createdUser.email)
+    this.log.log(`Sent login email to ${createdUser.email}`)
 
-    return userWithWorkspace
+    return createdUser
   }
 
   private async createDummyUser() {

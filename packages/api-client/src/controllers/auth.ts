@@ -1,4 +1,11 @@
-import { ResendOTPResponse, ResendOTPRequest } from '@keyshade/schema'
+import {
+  ResendOTPResponse,
+  ResendOTPRequest,
+  ValidateOTPResponse,
+  ValidateOTPRequest,
+  SendOTPRequest,
+  SendOTPResponse
+} from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
 import { ClientResponse } from '@keyshade/schema'
@@ -15,10 +22,34 @@ export default class AuthController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<ResendOTPResponse>> {
     const response = await this.apiClient.post(
-      `/api/auth/resend-otp/${request.userEmail}`,
+      `/api/auth/resend-otp/${encodeURIComponent(request.userEmail)}`,
       request,
       headers
     )
     return await parseResponse<ResendOTPResponse>(response)
+  }
+
+  async validateOTP(
+    request: ValidateOTPRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ValidateOTPResponse>> {
+    const response = await this.apiClient.post(
+      `/api/auth/validate-otp?email=${request.email}&otp=${request.otp}`,
+      request,
+      headers
+    )
+    return await parseResponse<ValidateOTPResponse>(response)
+  }
+
+  async sendOTP(
+    request: SendOTPRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<SendOTPResponse>> {
+    const response = await this.apiClient.post(
+      `/api/auth/send-otp/${encodeURIComponent(request.email)}`,
+      request,
+      headers
+    )
+    return await parseResponse<SendOTPResponse>(response)
   }
 }

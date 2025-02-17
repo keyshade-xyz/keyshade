@@ -24,6 +24,14 @@ export default class DeleteVariable extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade variable delete <variable slug>
+
+  Delete a variable
+  keyshade variable delete variable-1
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }

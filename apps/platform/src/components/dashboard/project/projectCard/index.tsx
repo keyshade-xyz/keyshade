@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import { toast } from 'sonner'
 import Avvvatars from 'avvvatars-react'
 import {
   SecretSVG,
@@ -11,7 +10,7 @@ import {
   InternalSVG
 } from '@public/svg/dashboard'
 import type { ProjectWithCount } from '@keyshade/schema'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,8 +21,10 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  selectedWorkspaceAtom
 } from '@/store'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
   project: ProjectWithCount
@@ -45,42 +46,16 @@ export default function ProjectCard({
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
-  const setSelectedVariable = useSetAtom(selectedProjectAtom)
+  const setSelectedProject = useSetAtom(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
-  const copyToClipboard = (): void => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- navigator.clipboard is checked
-    if (navigator.clipboard) {
-      navigator.clipboard
-        .writeText(`${window.location.origin}/project/${slug}`)
-        .then(() => {
-          toast.success('Link has been copied to clipboard.')
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Error copying text: ', error)
-        })
-    } else {
-      // Fallback for browsers that don't support the Clipboard API
-      // eslint-disable-next-line no-console -- console.log is used for debugging
-      console.log('Clipboard API not supported')
-
-      const textarea = document.createElement('textarea')
-      textarea.value = `${window.location.origin}/project/${slug}`
-      document.body.appendChild(textarea)
-      textarea.select()
-      try {
-        document.execCommand('copy')
-        toast.success('Link has been copied to clipboard.')
-      } catch (error) {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Error copying text: ', error)
-      }
-      document.body.removeChild(textarea)
-    }
+  const handleEditProject = () => {
+    setSelectedProject(project)
+    setIsEditProjectSheetOpen(true)
   }
 
   const handleDeleteProject = () => {
-    setSelectedVariable(project)
+    setSelectedProject(project)
     setIsDeleteProjectOpen(true)
   }
 
@@ -102,7 +77,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`/project/${slug}?tab=Secret`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=secret`}
           key={id}
         >
           <div className="flex items-center gap-x-5">
@@ -137,28 +112,27 @@ export default function ProjectCard({
         </Link>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <Link href={`/project/${slug}`}>
+        <Link href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}>
           <ContextMenuItem inset>Open</ContextMenuItem>
         </Link>
-        <a href={`/project/${slug}`} rel="noopener noreferrer" target="_blank">
+        <a
+          href={`/${selectedWorkspace?.slug}/${slug}?tab=secret`}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           <ContextMenuItem inset>Open in new tab</ContextMenuItem>
         </a>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem
           inset
           onClick={() => {
-            copyToClipboard()
+            copyToClipboard(`${window.location.origin}/project/${slug}`)
           }}
         >
           Copy link
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem
-          inset
-          onClick={() => {
-            setIsEditProjectSheetOpen(true)
-          }}
-        >
+        <ContextMenuItem inset onClick={handleEditProject}>
           Edit
         </ContextMenuItem>
         <ContextMenuItem inset onClick={handleDeleteProject}>

@@ -4,6 +4,7 @@ import {
   DashboardSVG,
   IntegrationSVG,
   KeyshadeLogoSVG,
+  RolesSVG,
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
@@ -27,6 +28,12 @@ function Sidebar(): JSX.Element {
       icon: <TeamSVG />,
       link: '/teams',
       matchTo: '/teams'
+    },
+    {
+      name: 'Roles',
+      icon: <RolesSVG />,
+      link: '/roles',
+      matchTo: '/roles'
     },
     {
       name: 'Integrations',

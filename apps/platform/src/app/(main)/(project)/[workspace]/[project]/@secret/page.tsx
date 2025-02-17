@@ -13,17 +13,20 @@ import { Button } from '@/components/ui/button'
 import {
   createSecretOpenAtom,
   deleteSecretOpenAtom,
+  editSecretOpenAtom,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
 } from '@/store'
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
+import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
+  const isEditSecretOpen = useAtomValue(editSecretOpenAtom)
   const isDeleteSecretOpen = useAtomValue(deleteSecretOpenAtom)
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
@@ -122,6 +125,9 @@ function SecretPage(): React.JSX.Element {
           {isDeleteSecretOpen && selectedSecret ? (
             <ConfirmDeleteSecret />
           ) : null}
+
+          {/* Edit secret sheet */}
+          {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
         </div>
       )}
     </div>

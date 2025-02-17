@@ -1,6 +1,6 @@
 'use client'
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
-import { useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
@@ -8,7 +8,6 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import type { User } from '@keyshade/schema'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,92 +16,123 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp'
-import { authEmailAtom } from '@/store'
+import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AuthOTPPage(): React.JSX.Element {
-  const email = useAtomValue(authEmailAtom)
+  const [user, setUser] = useAtom(userAtom)
 
   const [otp, setOtp] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [isInvalidOtp, setIsInvalidOtp] = useState<boolean>(false)
   const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false)
 
   const router = useRouter()
 
+  const validateOTP = useHttp(() => {
+    if (user?.email) {
+      return ControllerInstance.getInstance().authController.validateOTP({
+        email: user.email,
+        otp
+      })
+    }
+    throw new Error('User not set in context')
+  }, router)
+
+  const resendOtp = useHttp(() => {
+    if (user?.email) {
+      return ControllerInstance.getInstance().authController.resendOTP({
+        userEmail: user.email
+      })
+    }
+    throw new Error('User not set in context')
+  }, router)
+
   useEffect(() => {
-    if (email === '') {
+    if (!user?.email) {
       router.push('/auth')
     }
-  }, [email, router])
+  }, [router, user?.email])
 
-  const handleVerifyOTP = async (
-    userEmail: string,
-    userOtp: string
-  ): Promise<void> => {
-    const emailResult = z.string().email().safeParse(userEmail)
+  const handleVerifyOTP = async (): Promise<void> => {
+    if (!user) {
+      throw new Error('User not set in context')
+    }
+
+    const emailResult = z.string().email().safeParse(user.email)
     const alphanumeric = z
       .string()
       .length(6)
       .refine((value) => /^[a-z0-9]+$/i.test(value), {
         message: 'OTP must be alphanumeric'
       })
-    const otpResult = alphanumeric.safeParse(userOtp)
+    const otpResult = alphanumeric.safeParse(otp)
+
     if (!emailResult.success || !otpResult.success) {
-      setIsInvalidOtp(true)
+      toast.warning('Invalid OTP', {
+        description: (
+          <p className="text-xs text-red-300">
+            Please enter a valid 6 digit alphanumeric OTP.
+          </p>
+        )
+      })
       return
     }
-    setIsInvalidOtp(false)
+
     setIsLoading(true)
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/validate-otp?email=${userEmail}&otp=${userOtp}`,
-        {
-          method: 'POST',
-          credentials: 'include'
-        }
-      )
-      if (response.status === 401) {
-        toast.warning(
-          'The OTP you entered is either incorrect or has expired. Please enter the correct OTP.'
-        )
-        setIsLoading(false)
-      }
-      const user: User = (await response.json()) as User
-
-      if (user.isOnboardingFinished) {
-        Cookies.set('isOnboardingFinished', 'true')
-        router.push('/')
-      } else {
-        Cookies.set('isOnboardingFinished', 'false')
-        router.push('/auth/account-details')
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(`Invalid user data: ${error.message}`)
-      } else {
-        setIsLoading(false)
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(`Failed to verify OTP: ${error}`)
-      }
-    }
-  }
-  const handleResendOtp = async (userEmail: string): Promise<void> => {
     setIsLoadingRefresh(true)
+    toast.loading('Verifying OTP...')
 
-    const { error, success } =
-      await ControllerInstance.getInstance().authController.resendOTP({
-        userEmail: encodeURIComponent(userEmail)
-      })
-    if (success) {
-      toast.success('OTP successfully sent to your email')
+    try {
+      const { success, data } = await validateOTP()
+
+      if (success && data) {
+        setUser(data)
+
+        if (data.isOnboardingFinished) {
+          router.push('/')
+        } else {
+          router.push('/auth/account-details')
+        }
+
+        Cookies.set(
+          'isOnboardingFinished',
+          data.isOnboardingFinished ? 'true' : 'false'
+        )
+
+        toast.success('OTP verified successfully')
+      }
+    } finally {
+      setIsLoading(false)
       setIsLoadingRefresh(false)
-    } else {
+      toast.dismiss()
+    }
+
+    setIsLoading(false)
+  }
+
+  const handleResendOtp = async (): Promise<void> => {
+    if (!user) {
+      throw new Error('User not set in context')
+    }
+
+    setIsLoading(true)
+    setIsLoadingRefresh(true)
+    toast.loading('Sending OTP...')
+
+    try {
+      const { success } = await resendOtp()
+
+      if (success) {
+        toast.success('OTP successfully sent to your email')
+      }
+    } finally {
+      setIsLoading(false)
       setIsLoadingRefresh(false)
-      throw new Error(JSON.stringify(error))
+      toast.dismiss()
     }
   }
+
   return (
     <main className="flex h-dvh items-center justify-center justify-items-center px-4">
       <div className="flex flex-col gap-6">
@@ -117,7 +147,7 @@ export default function AuthOTPPage(): React.JSX.Element {
             className={`${GeistSansFont.className} flex flex-col items-center`}
           >
             <span>We&apos;ve sent a verification code to </span>
-            <span>{email}</span>
+            <span>{user?.email}</span>
           </div>
         </div>
         <div className="flex w-full justify-center">
@@ -143,18 +173,12 @@ export default function AuthOTPPage(): React.JSX.Element {
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
-              <span className="text-xs text-red-400">
-                {isInvalidOtp ? 'Invalid OTP' : null}
-              </span>
             </div>
 
             <Button
               className="w-full"
               disabled={isLoading}
-              onClick={(e) => {
-                e.preventDefault()
-                void handleVerifyOTP(email, otp)
-              }}
+              onClick={handleVerifyOTP}
             >
               {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
             </Button>
@@ -169,10 +193,7 @@ export default function AuthOTPPage(): React.JSX.Element {
                   <Button
                     className="text-[#71717A]"
                     disabled={isLoading}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      void handleResendOtp(email)
-                    }}
+                    onClick={handleResendOtp}
                     variant="link"
                   >
                     Resend OTP

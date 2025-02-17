@@ -1024,8 +1024,18 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toBeInstanceOf(Array)
-      expect(response.json().items).toHaveLength(1)
+
+      const workspaceMembers = response.json().items
+
+      expect(workspaceMembers).toBeInstanceOf(Array)
+      expect(workspaceMembers).toHaveLength(1)
+
+      const workspaceMember = workspaceMembers[0]
+
+      expect(workspaceMember.id).toBeDefined()
+      expect(workspaceMember.user).toBeDefined()
+      expect(workspaceMember.roles).toBeDefined()
+      expect(workspaceMember.invitationAccepted).toBeDefined()
 
       //check metadata
       const metadata = response.json().metadata

@@ -29,8 +29,8 @@ import { UserService } from '@/user/service/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { ValidationPipe } from '@nestjs/common'
-import { SecretService } from '@/secret/service/secret.service'
-import { VariableService } from '@/variable/service/variable.service'
+// import { SecretService } from '@/secret/service/secret.service'
+// import { VariableService } from '@/variable/service/variable.service'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
 
@@ -41,8 +41,8 @@ describe('Environment Controller Tests', () => {
   let environmentService: EnvironmentService
   let userService: UserService
   let eventService: EventService
-  let secretService: SecretService
-  let variableService: VariableService
+  // let secretService: SecretService
+  // let variableService: VariableService
 
   let user1: User, user2: User
   let workspace1: Workspace
@@ -73,8 +73,8 @@ describe('Environment Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
-    secretService = moduleRef.get(SecretService)
-    variableService = moduleRef.get(VariableService)
+    // secretService = moduleRef.get(SecretService)
+    // variableService = moduleRef.get(VariableService)
 
     app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
 
@@ -466,7 +466,6 @@ describe('Environment Controller Tests', () => {
       )
     })
 
-    // Not working due to some redis error, no clue why.
     // it('should be able to get the count of secrets and variables in an environment', async () => {
     //   // Add secrets to the environment
     //   const secret1 = await secretService.createSecret(

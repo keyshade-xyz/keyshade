@@ -100,7 +100,12 @@ export class AuthService {
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
-      throw new UnauthorizedException('Invalid login code')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'Please enter a valid 6 digit alphanumeric OTP.'
+        )
+      )
     }
 
     await this.prisma.otp.delete({

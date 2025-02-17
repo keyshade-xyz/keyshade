@@ -940,6 +940,11 @@ export class ProjectService {
     // hardCopy = false: Only add those items in the toProject that are not already present in it
     hardCopy: boolean = false
   ) {
+    // This field will be populated if hardCopy is true
+    // When we are doing a hard copy, we need to delete all the
+    // items in the toProject that are already present in it
+    const deleteOps = []
+
     // Get all the environments that belongs to the parent project
     // and replicate them for the new project
     const createEnvironmentOps = []
@@ -986,6 +991,30 @@ export class ProjectService {
       variables.forEach((variable) => {
         toProjectVariables.add(variable.name)
       })
+    } else {
+      deleteOps.push(
+        this.prisma.environment.deleteMany({
+          where: {
+            projectId: toProject.id
+          }
+        })
+      )
+
+      deleteOps.push(
+        this.prisma.secret.deleteMany({
+          where: {
+            projectId: toProject.id
+          }
+        })
+      )
+
+      deleteOps.push(
+        this.prisma.variable.deleteMany({
+          where: {
+            projectId: toProject.id
+          }
+        })
+      )
     }
 
     // We want to find all such environments in the fromProject that
@@ -1139,7 +1168,12 @@ export class ProjectService {
       )
     }
 
-    return [...createEnvironmentOps, ...createSecretOps, ...createVariableOps]
+    return [
+      ...deleteOps,
+      ...createEnvironmentOps,
+      ...createSecretOps,
+      ...createVariableOps
+    ]
   }
 
   /**

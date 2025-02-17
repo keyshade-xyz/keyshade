@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Transform, Type } from 'class-transformer'
+import { Type } from 'class-transformer'
 import {
   IsArray,
   IsOptional,
@@ -7,14 +7,15 @@ import {
   Length,
   ValidateNested
 } from 'class-validator'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
 
 export class CreateSecret {
-  @IsString()
+  @NonEmptyTrimmedString()
   name: string
 
-  @IsString()
   @IsOptional()
   @Length(0, 100)
+  @NonEmptyTrimmedString()
   note?: string
 
   @IsString()
@@ -29,11 +30,9 @@ export class CreateSecret {
 }
 
 class Entry {
-  @IsString()
-  @Transform(({ value }) => value.trim())
+  @NonEmptyTrimmedString()
   environmentSlug: string
 
-  @IsString()
-  @Transform(({ value }) => value.trim())
+  @NonEmptyTrimmedString()
   value: string
 }

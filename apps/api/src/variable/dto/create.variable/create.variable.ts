@@ -1,22 +1,15 @@
 import 'reflect-metadata'
-import { Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsOptional,
-  IsString,
-  Length,
-  ValidateNested
-} from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsArray, IsOptional, Length, ValidateNested } from 'class-validator'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
 
 export class CreateVariable {
-  @IsString()
-  @Transform(({ value }) => value.trim())
+  @NonEmptyTrimmedString()
   name: string
 
-  @IsString()
   @IsOptional()
   @Length(0, 100)
-  @Transform(({ value }) => (value ? value.trim() : null))
+  @NonEmptyTrimmedString()
   note?: string
 
   @IsOptional()
@@ -27,11 +20,9 @@ export class CreateVariable {
 }
 
 class Entry {
-  @IsString()
-  @Transform(({ value }) => value.trim())
+  @NonEmptyTrimmedString()
   environmentSlug: string
 
-  @IsString()
-  @Transform(({ value }) => value.trim())
+  @NonEmptyTrimmedString()
   value: string
 }

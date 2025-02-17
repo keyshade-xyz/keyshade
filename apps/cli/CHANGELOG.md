@@ -72,8 +72,18 @@
 - Added version flag (`keyshade -v` or `keyshade --version`) to display the current CLI version
 - Error reports get sent to Sentry if metrics is enabled
 
-## 2.5.1-stage
+## 2.5.1
 
 ### Patches
 
 - `-v` flag replaced with `-V`
+- Removed `keyshade secret get` command
+- Updated `keyshade secret update` and `keyshade secret create` commands to include `-e/--entry` flag for specifying values to environments
+- Formatted outputs of `keyshade secret list` and `keyshade secret revisions` commands
+- Update `keyshade secret rollback` to check for missing environment or version
+- Added usage examples in secret commands
+- Removed `keyshade variable get` command
+- Updated `keyshade variable update` and `keyshade variable create` commands to include `-e/--entry` flag for specifying values to environments
+- Formatted outputs of `keyshade variable list` and `keyshade variable revisions` commands
+- Update `keyshade variable rollback` to check for missing environment or version
+- Added usage examples in variable commands

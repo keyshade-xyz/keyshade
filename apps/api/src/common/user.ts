@@ -22,7 +22,7 @@ export async function createUser(
   const user = await prisma.user.create({
     data: {
       id: dto.id,
-      email: dto.email,
+      email: dto.email.toLowerCase(),
       name: dto.name,
       profilePictureUrl: dto.profilePictureUrl,
       isActive: dto.isActive ?? true,
@@ -70,7 +70,7 @@ export async function getUserByEmailOrId(
   const user =
     (await prisma.user.findUnique({
       where: {
-        email: input
+        email: input.toLowerCase()
       }
     })) ??
     (await prisma.user.findUnique({

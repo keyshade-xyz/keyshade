@@ -1,13 +1,17 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useAtom } from 'jotai'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { userAtom } from '@/store'
 
 function ProfilePage(): React.JSX.Element {
+  const [user, setUser] = useAtom(userAtom)
+
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [userData, setUserData] = useState({
     email: '',
@@ -15,23 +19,39 @@ function ProfilePage(): React.JSX.Element {
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
-  const [email, setEmail] = useState<string>('')
 
   const updateSelf = useCallback(async () => {
+    toast.loading('Updating profile...')
+    setIsLoading(true)
     try {
-      await ControllerInstance.getInstance().userController.updateSelf(
-        {
-          name: userData.name,
-          email: userData.email === email ? undefined : email
-        },
-        {}
-      )
-      toast.success('Profile updated successfully')
+      const { success, error, data } =
+        await ControllerInstance.getInstance().userController.updateSelf({
+          name: userData.name === user?.name ? undefined : userData.name,
+          email: userData.email === user?.email ? undefined : userData.email
+        })
+
+      toast.dismiss()
+
+      if (success && data) {
+        toast.success('Profile updated successfully!')
+        setUser(data)
+      } else {
+        toast.error('Something went wrong', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong updating the profile. Check console for more
+              info.
+            </p>
+          )
+        })
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
     } catch (error) {
       throw new Error(JSON.stringify(error))
     }
     setIsModified(false)
-  }, [userData, email])
+  }, [userData.name, userData.email, user?.name, user?.email, setUser])
 
   useEffect(() => {
     ControllerInstance.getInstance()
@@ -43,7 +63,6 @@ function ProfilePage(): React.JSX.Element {
             name: data.name,
             profilePictureUrl: data.profilePictureUrl || ''
           })
-          setEmail(data.email)
           setIsLoading(false)
         } else {
           throw new Error(JSON.stringify(error))
@@ -106,7 +125,7 @@ function ProfilePage(): React.JSX.Element {
             //   setEmail(e.target.value)
             // }}
             placeholder="email"
-            value={email}
+            value={user?.email}
           />
         )}
       </div>

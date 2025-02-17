@@ -24,6 +24,14 @@ export default class DeleteSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret delete <secret slug>
+
+  Delete a secret
+  keyshade secret delete secret-1
+    `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }

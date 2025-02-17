@@ -37,7 +37,7 @@ export function useHttp<T, V extends ClientResponse<T>>(
           handle403(router)
         } else if (statusCode.toString().startsWith('4')) {
           // For 4xx errors
-          const { header, body } = JSON.parse(response.error.message).error as {
+          const { header, body } = JSON.parse(response.error.message) as {
             header: string
             body: string
           }

@@ -37,6 +37,7 @@ export default abstract class BaseCommand {
     const command = program
       .command(this.getName())
       .description(this.getDescription())
+      .usage(this.getUsage())
       .action(async (...data) => {
         try {
           const globalOptions = program.optsWithGlobals()
@@ -147,6 +148,15 @@ export default abstract class BaseCommand {
    */
   getSubCommands(): BaseCommand[] {
     return []
+  }
+
+  /**
+   * Returns a string representing the usage information for the command.
+   * This method should be overridden by subclasses to provide specific usage
+   * instructions for each command.
+   */
+  getUsage(): string {
+    return ''
   }
 
   private async setGlobalContextFields(

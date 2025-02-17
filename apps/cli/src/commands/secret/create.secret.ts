@@ -46,11 +46,22 @@ export default class CreateSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
+        long: '--entry [entries...]',
         description:
-          'An array of key-value pair (value and environmentSlug) for the secret.'
+          'An array of values for the secret. If specified, should be in the form <environment slug>=<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade secret create <project slug> [options]
+    
+  Create a secret
+  keyshade secret create project-1 --name "API_KEY" --entry "alpha=ks_k23mg45kl6k76l"
+  
+  Create a secret with note and rotate settings
+  keyshade secret create project-1 --name "API_KEY" --note "This is a secret" --rotate-after "24"
+    `
   }
 
   canMakeHttpRequests(): boolean {
@@ -99,7 +110,9 @@ export default class CreateSecret extends BaseCommand {
     entries: Array<{ value: string; environmentSlug: string }>
   }> {
     let { name, note, rotateAfter } = options
-    const { entries } = options
+    const { rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
 
     if (!name) {
       name = await text({
@@ -108,32 +121,41 @@ export default class CreateSecret extends BaseCommand {
       })
     }
 
-    if (!entries) {
-      throw new Error('Entries is required')
-    }
-
     if (!note) {
       note = name
     }
 
-    const parsedEntries = entries.map((entry) => {
-      const entryObj: { value: string; environmentSlug: string } = {
-        value: '',
-        environmentSlug: ''
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
       }
-      entry.split(' ').forEach((pair) => {
-        const [key, value] = pair.split('=')
-        entryObj.environmentSlug = value
-        entryObj.value = key
-      })
-      return entryObj
-    })
+    }
 
     return {
       name,
       note,
       rotateAfter,
-      entries: parsedEntries
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }
