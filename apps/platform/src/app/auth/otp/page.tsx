@@ -107,8 +107,6 @@ export default function AuthOTPPage(): React.JSX.Element {
       setIsLoadingRefresh(false)
       toast.dismiss()
     }
-
-    setIsLoading(false)
   }
 
   const handleResendOtp = async (): Promise<void> => {

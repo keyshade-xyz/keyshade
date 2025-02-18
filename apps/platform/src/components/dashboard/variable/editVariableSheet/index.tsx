@@ -137,7 +137,7 @@ export default function EditVariablSheet() {
             <Input
               className="col-span-3 h-[2.75rem]"
               id="name"
-              onChange={(e) => updateRequestData(e.target.name, e.target.value)}
+              onChange={(e) => updateRequestData(e.target.id, e.target.value)}
               placeholder="Enter the name of the variable"
               value={requestData.name}
             />
@@ -150,7 +150,7 @@ export default function EditVariablSheet() {
             <Textarea
               className="col-span-3 h-[2.75rem]"
               id="name"
-              onChange={(e) => updateRequestData(e.target.name, e.target.value)}
+              onChange={(e) => updateRequestData(e.target.id, e.target.value)}
               placeholder="Enter the note of the variable"
               value={requestData.note}
             />

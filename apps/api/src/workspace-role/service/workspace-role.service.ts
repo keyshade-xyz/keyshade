@@ -324,8 +324,8 @@ export class WorkspaceRoleService {
           if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
               constructErrorBody(
-                `EnvironmentSlugs in the project ${pe.projectSlug} are required`,
-                `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+                'Missing environment slugs',
+                `Environment slugs must be specified for project ${pe.projectSlug}`
               )
             )
           if (pe.environmentSlugs) {
