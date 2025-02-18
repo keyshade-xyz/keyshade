@@ -1,3 +1,13 @@
+## [2.12.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.3...v2.12.0-stage.4) (2025-02-18)
+
+### 🐛 Bug Fixes
+
+* **platform:** Avoid toast duplication & added optional description ([#759](https://github.com/keyshade-xyz/keyshade/issues/759)) ([7a0798a](https://github.com/keyshade-xyz/keyshade/commit/7a0798a16ee83fe1707bd6aecf534670648753a0))
+
+### 🔧 Miscellaneous Chores
+
+* **lint:** Fixed module not found error ([be887ff](https://github.com/keyshade-xyz/keyshade/commit/be887ff4406ed5df5e9b803355449c8b69609c6d))
+
 ## [2.12.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.2...v2.12.0-stage.3) (2025-02-15)
 
 ### 🐛 Bug Fixes

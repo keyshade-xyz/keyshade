@@ -7,7 +7,6 @@ import SecretPage from './@secret/page'
 import EnvironmentPage from './@environment/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { Toaster } from '@/components/ui/sonner'
 import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
@@ -73,7 +72,6 @@ function DetailedProjectPage({
         {tab === 'variable' && <VariablePage />}
         {tab === 'environment' && <EnvironmentPage />}
       </div>
-      <Toaster />
     </main>
   )
 }
