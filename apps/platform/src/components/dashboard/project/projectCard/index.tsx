@@ -1,6 +1,8 @@
 'use client'
 import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
+import type { ProjectWithCount } from '@keyshade/schema'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   SecretSVG,
   EnvironmentSVG,
@@ -9,8 +11,6 @@ import {
   PrivateSVG,
   InternalSVG
 } from '@public/svg/dashboard'
-import type { ProjectWithCount } from '@keyshade/schema'
-import { useAtomValue, useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,

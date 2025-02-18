@@ -4,9 +4,9 @@ import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { DropdownSVG } from '@public/svg/shared'
-import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtomValue } from 'jotai'
+import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
+import { DropdownSVG } from '@public/svg/shared'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,

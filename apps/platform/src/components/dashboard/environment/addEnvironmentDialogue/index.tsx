@@ -1,16 +1,15 @@
-import { AddSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
   DialogTitle,
   DialogDescription
-} from '../../../ui/dialog'
+, DialogHeader } from '../../../ui/dialog'
 import { Button } from '@/components/ui/button'
-import { DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   createEnvironmentOpenAtom,

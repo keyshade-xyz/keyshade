@@ -1,8 +1,8 @@
-import { AddSVG } from '@public/svg/shared'
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useCallback, useMemo, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
+import { AddSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

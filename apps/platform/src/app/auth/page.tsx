@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
 import Cookies from 'js-cookie'
+import { toast } from 'sonner'
+import type { User } from '@keyshade/schema'
 import { LoadingSVG } from '@public/svg/shared'
 import {
   GithubSVG,
@@ -12,8 +14,6 @@ import {
   KeyshadeBigSVG,
   GitlabSVG
 } from '@public/svg/auth'
-import { toast } from 'sonner'
-import type { User } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { userAtom } from '@/store'

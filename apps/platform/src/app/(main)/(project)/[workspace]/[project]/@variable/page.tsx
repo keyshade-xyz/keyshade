@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { VariableSVG } from '@public/svg/dashboard'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,

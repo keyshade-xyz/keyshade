@@ -4,11 +4,10 @@ import { ChevronsUpDown, Check } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { AddSVG } from '@public/svg/shared'
 import type { Workspace } from '@keyshade/schema'
 import { useAtom } from 'jotai'
-import { Input } from './input'
-import { Label } from './label'
+import { AddSVG } from '@public/svg/shared'
+import { Button } from './button'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from './dialog'
-import { Button } from './button'
+import { Input } from './input'
+import { Label } from './label'
 import { cn } from '@/lib/utils'
 import {
   Popover,

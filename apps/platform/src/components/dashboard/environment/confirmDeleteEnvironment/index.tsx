@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
+import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
   AlertDialogAction,

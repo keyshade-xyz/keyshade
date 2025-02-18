@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { EnvironmentSVG } from '@public/svg/dashboard'
 import {
   createEnvironmentOpenAtom,
   selectedProjectAtom,

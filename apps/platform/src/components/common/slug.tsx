@@ -1,7 +1,7 @@
-import { CopySVG } from '@public/svg/shared'
 // eslint-disable-next-line camelcase -- we need to import the font
 import { Roboto_Mono } from 'next/font/google'
 import { toast } from 'sonner'
+import { CopySVG } from '@public/svg/shared'
 
 const roboto = Roboto_Mono({ weight: ['400'], subsets: ['latin'] })
 

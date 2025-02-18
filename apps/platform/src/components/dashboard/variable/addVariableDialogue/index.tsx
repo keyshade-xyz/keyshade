@@ -1,7 +1,7 @@
-import { AddSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
+import { AddSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

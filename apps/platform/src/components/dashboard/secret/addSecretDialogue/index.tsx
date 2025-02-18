@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
-import { AddSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
   DialogContent,
@@ -19,14 +19,14 @@ import {
   SelectTrigger,
   SelectValue
 } from '../../../ui/select'
-import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
   environmentsOfProjectAtom,
   secretsOfProjectAtom
 } from '@/store'
-import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
 
 export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =
