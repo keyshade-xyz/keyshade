@@ -49,7 +49,7 @@ function Tab({
       type="button"
     >
       <span className="relative z-10 flex items-center gap-2">
-        {icon && <span className={'h-4 w-4'}>{icon}</span>}
+        {icon ? <span className="h-4 w-4">{icon}</span> : null}
         {text}
       </span>
       {selected ? (

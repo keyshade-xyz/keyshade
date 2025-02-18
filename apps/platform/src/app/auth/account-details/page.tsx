@@ -4,21 +4,30 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useAtom } from 'jotai'
 import Cookies from 'js-cookie'
+import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
-import { toast } from 'sonner'
 import { GeistSansFont, NunitoSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AuthDetailsPage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
 
   const [name, setName] = useState<string>(user?.name ?? '')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
   const router = useRouter()
+
+  const updateSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.updateSelf({
+      name,
+      isOnboardingFinished: true
+    })
+  )
 
   useEffect(() => {
     if (!user?.email) {
@@ -39,13 +48,8 @@ export default function AuthDetailsPage(): React.JSX.Element {
 
     toast.loading('Updating profile details...')
     try {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().userController.updateSelf({
-          name,
-          isOnboardingFinished: true
-        })
+      const { success, data } = await updateSelf()
 
-      toast.dismiss()
       if (success && data) {
         toast.success('Profile details successfully updated')
 
@@ -55,32 +59,11 @@ export default function AuthDetailsPage(): React.JSX.Element {
         )
 
         setUser(data)
-        window.location.reload()
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong updating your profile details. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
       }
-    } catch (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong updating your profile details. Check console
-            for more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to update user details: ${error}`)
+    } finally {
+      toast.dismiss()
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   return (

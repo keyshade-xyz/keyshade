@@ -19,7 +19,7 @@ import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class EnvironmentService {
@@ -385,7 +385,10 @@ export class EnvironmentService {
     })
     if (count === 1) {
       throw new BadRequestException(
-        'Cannot delete the last environment in the project'
+        constructErrorBody(
+          'Last environment cannot be deleted',
+          'Can not delete the last environment in the project. Please create another environment first.'
+        )
       )
     }
 
@@ -437,7 +440,10 @@ export class EnvironmentService {
       })) !== null
     ) {
       throw new ConflictException(
-        `Environment with name ${name} already exists in project ${slug}`
+        constructErrorBody(
+          'Environment exits',
+          `Environment with name ${name} already exists in project ${slug}`
+        )
       )
     }
   }

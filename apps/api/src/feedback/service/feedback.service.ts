@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
+import { constructErrorBody } from '@/common/util'
 
 @Injectable()
 export class FeedbackService {
@@ -14,7 +15,12 @@ export class FeedbackService {
    */
   async registerFeedback(feedback: string): Promise<void> {
     if (!feedback || feedback.trim().length === 0) {
-      throw new BadRequestException('Feedback cannot be null or empty')
+      throw new BadRequestException(
+        constructErrorBody(
+          'Empty feedback',
+          'Sadly, empty feedback is not allowed'
+        )
+      )
     }
     const adminEmail = process.env.FEEDBACK_FORWARD_EMAIL
 

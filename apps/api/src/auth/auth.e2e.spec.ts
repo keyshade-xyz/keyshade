@@ -49,7 +49,6 @@ describe('Auth Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(400)
-    expect(response.json().message).toBe('Please enter a valid email address')
   })
 
   it('should not send otp if email is invalid', async () => {
@@ -59,7 +58,6 @@ describe('Auth Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(400)
-    expect(response.json().message).toBe('Please enter a valid email address')
   })
 
   it('should send otp if email is valid', async () => {

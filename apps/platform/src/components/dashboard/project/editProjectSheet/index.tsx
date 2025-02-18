@@ -1,8 +1,7 @@
 import { useAtom } from 'jotai'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import type { UpdateProjectRequest } from '@keyshade/schema'
-
 import {
   Sheet,
   SheetContent,
@@ -21,14 +20,15 @@ import {
   projectsOfWorkspaceAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function EditProjectSheet(): JSX.Element {
   const [isEditProjectSheetOpen, setIsEditProjectSheetOpen] =
     useAtom(editProjectOpenAtom)
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
-  const [isLoading, setIsLoading] = useState(false)
 
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<
     Omit<UpdateProjectRequest, 'projectSlug'>
   >({
@@ -36,6 +36,13 @@ export default function EditProjectSheet(): JSX.Element {
     description: '',
     storePrivateKey: false
   })
+
+  const updateProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.updateProject({
+      projectSlug: selectedProject!.slug,
+      ...formData
+    })
+  )
 
   useEffect(() => {
     if (selectedProject) {
@@ -62,79 +69,40 @@ export default function EditProjectSheet(): JSX.Element {
     }))
   }
 
-  const getChangedFields = () => {
-    if (!selectedProject) return {}
+  const handleUpdateProject = useCallback(async () => {
+    if (selectedProject) {
+      setIsLoading(true)
+      toast.loading('Updating project...')
 
-    const changes: Partial<Omit<UpdateProjectRequest, 'projectSlug'>> = {}
+      try {
+        const { data, success } = await updateProject()
 
-    if (formData.name !== undefined && formData.name !== selectedProject.name) {
-      changes.name = formData.name.trim()
+        if (success && data) {
+          setProjects(
+            projects.map((project) =>
+              project.slug === selectedProject.slug
+                ? { ...project, ...data }
+                : project
+            )
+          )
+
+          toast.success('Project updated successfully')
+        }
+      } finally {
+        setIsEditProjectSheetOpen(false)
+        setSelectedProject(null)
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
-
-    if (
-      formData.description !== undefined &&
-      formData.description !== selectedProject.description
-    ) {
-      changes.description = formData.description.trim()
-    }
-    if (formData.storePrivateKey !== selectedProject.storePrivateKey) {
-      changes.storePrivateKey = formData.storePrivateKey
-    }
-
-    return changes
-  }
-
-  const handleSubmit = async () => {
-    if (!selectedProject?.slug) {
-      toast.error('No project selected')
-      return
-    }
-
-    const changes = getChangedFields()
-
-    if (Object.keys(changes).length === 0) {
-      toast.info('No changes to save')
-      return
-    }
-
-    if (changes.name !== undefined && changes.name === '') {
-      toast.error('Project name is required')
-      return
-    }
-
-    setIsLoading(true)
-
-    const updateRequest: UpdateProjectRequest = {
-      projectSlug: selectedProject.slug,
-      ...changes
-    }
-
-    const { data, error, success } =
-      await ControllerInstance.getInstance().projectController.updateProject(
-        updateRequest
-      )
-
-    if (success && data) {
-      setProjects(
-        projects.map((project) =>
-          project.slug === selectedProject.slug
-            ? { ...project, ...data }
-            : project
-        )
-      )
-
-      toast.success('Project updated successfully')
-      setIsEditProjectSheetOpen(false)
-      setSelectedProject(null)
-    } else {
-      toast.error('Failed to update project', {
-        description: error?.message || 'An unexpected error occurred'
-      })
-      console.error(error)
-    }
-
-    setIsLoading(false)
-  }
+  }, [
+    selectedProject,
+    updateProject,
+    setProjects,
+    projects,
+    setIsEditProjectSheetOpen,
+    setSelectedProject
+  ])
 
   const handleSheetChange = (open: boolean) => {
     setIsEditProjectSheetOpen(open)
@@ -148,7 +116,7 @@ export default function EditProjectSheet(): JSX.Element {
   }
 
   return (
-    <Sheet open={isEditProjectSheetOpen} onOpenChange={handleSheetChange}>
+    <Sheet onOpenChange={handleSheetChange} open={isEditProjectSheetOpen}>
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">Edit Project</SheetTitle>
@@ -160,21 +128,21 @@ export default function EditProjectSheet(): JSX.Element {
           <div className="flex flex-col items-start gap-4">
             <Label htmlFor="name">Project Name</Label>
             <Input
-              id="name"
               className="col-span-3"
-              value={formData.name}
+              id="name"
               onChange={handleInputChange}
               placeholder="Enter project name"
+              value={formData.name}
             />
           </div>
           <div className="flex flex-col items-start gap-4">
             <Label htmlFor="description">Project Description</Label>
             <Input
-              id="description"
               className="col-span-3"
-              value={formData.description}
+              id="description"
               onChange={handleInputChange}
               placeholder="Enter project description"
+              value={formData.description}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -184,8 +152,8 @@ export default function EditProjectSheet(): JSX.Element {
             <div className="flex gap-1 text-sm">
               <div>No</div>
               <Switch
-                id="storePrivateKey"
                 checked={formData.storePrivateKey}
+                id="storePrivateKey"
                 onCheckedChange={handleSwitchChange}
               />
               <div>Yes</div>
@@ -194,10 +162,10 @@ export default function EditProjectSheet(): JSX.Element {
         </div>
         <SheetFooter>
           <Button
+            disabled={isLoading}
+            onClick={handleUpdateProject}
             type="submit"
             variant="secondary"
-            disabled={isLoading}
-            onClick={handleSubmit}
           >
             {isLoading ? 'Saving...' : 'Save changes'}
           </Button>

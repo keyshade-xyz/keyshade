@@ -24,7 +24,7 @@ import { paginate, PaginatedMetadata } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -54,7 +54,10 @@ export class WorkspaceRoleService {
       dto.authorities.includes(Authority.WORKSPACE_ADMIN)
     ) {
       throw new BadRequestException(
-        'You can not explicitly assign workspace admin authority to a role'
+        constructErrorBody(
+          'Can not add workspace admin authority',
+          'You can not explicitly assign workspace admin authority to a role'
+        )
       )
     }
 
@@ -69,7 +72,10 @@ export class WorkspaceRoleService {
 
     if (await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) {
       throw new ConflictException(
-        'Workspace role with the same name already exists'
+        constructErrorBody(
+          'Workspace role already exists',
+          `Another workspace role with the name ${dto.name} already exists`
+        )
       )
     }
 
@@ -115,7 +121,10 @@ export class WorkspaceRoleService {
         if (projectId) {
           if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+              constructErrorBody(
+                'Environment slugs in the project are required',
+                `Environment slugs in the project ${pe.projectSlug} are required`
+              )
             )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
@@ -134,7 +143,10 @@ export class WorkspaceRoleService {
 
             if (!project) {
               throw new BadRequestException(
-                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                constructErrorBody(
+                  'Some environment slugs are not part of the project',
+                  'Some or all of the environment slugs specified do not belong to this project'
+                )
               )
             }
 
@@ -153,7 +165,10 @@ export class WorkspaceRoleService {
                 )
               } catch {
                 throw new UnauthorizedException(
-                  `User does not have read authority over environment ${environmentSlug}`
+                  constructErrorBody(
+                    `Autority to read environment ${environmentSlug} is required`,
+                    `You do not have the required read authority over environment ${environmentSlug}`
+                  )
                 )
               }
             }
@@ -172,7 +187,10 @@ export class WorkspaceRoleService {
           )
         } else {
           throw new NotFoundException(
-            `Project with slug ${pe.projectSlug} not found`
+            constructErrorBody(
+              `Project not found`,
+              `Project ${pe.projectSlug} does not exist`
+            )
           )
         }
       }
@@ -253,7 +271,10 @@ export class WorkspaceRoleService {
       dto.authorities.includes(Authority.WORKSPACE_ADMIN)
     ) {
       throw new BadRequestException(
-        'You can not explicitly assign workspace admin authority to a role'
+        constructErrorBody(
+          'Can not assign admin authority',
+          'You can not explicitly assign workspace admin authority to a role'
+        )
       )
     }
 
@@ -279,7 +300,10 @@ export class WorkspaceRoleService {
         dto.name === workspaceRole.name)
     ) {
       throw new ConflictException(
-        'Workspace role with the same name already exists'
+        constructErrorBody(
+          'Workspace role already exists',
+          `A workspace role with the name ${dto.name} already exists in this workspace`
+        )
       )
     }
 
@@ -299,7 +323,10 @@ export class WorkspaceRoleService {
         if (projectId) {
           if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+              constructErrorBody(
+                'Missing environment slugs',
+                `Environment slugs must be specified for project ${pe.projectSlug}`
+              )
             )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
@@ -318,7 +345,10 @@ export class WorkspaceRoleService {
 
             if (!project) {
               throw new BadRequestException(
-                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                constructErrorBody(
+                  'Invalid environment slugs',
+                  `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                )
               )
             }
 
@@ -336,8 +366,11 @@ export class WorkspaceRoleService {
                   }
                 )
               } catch {
-                throw new UnauthorizedException(
-                  `User does not have update authority over environment ${environmentSlug}`
+                throw new BadRequestException(
+                  constructErrorBody(
+                    'Missing required authorities',
+                    `You do not have update authority over environment ${environmentSlug}`
+                  )
                 )
               }
             }
@@ -366,7 +399,10 @@ export class WorkspaceRoleService {
           })
         } else {
           throw new NotFoundException(
-            `Project with slug ${pe.projectSlug} not found`
+            constructErrorBody(
+              'Project not found',
+              `Project ${pe.projectSlug} not found`
+            )
           )
         }
       }
@@ -447,7 +483,10 @@ export class WorkspaceRoleService {
 
     if (workspaceRole.hasAdminAuthority) {
       throw new UnauthorizedException(
-        'Cannot delete workspace role with administrative authority'
+        constructErrorBody(
+          'Can not delete workspace role',
+          'This role contains the workspace admin authority. You can not delete this role'
+        )
       )
     }
 
@@ -638,7 +677,10 @@ export class WorkspaceRoleService {
 
     if (!workspaceRole) {
       throw new NotFoundException(
-        `Workspace role ${workspaceRoleSlug} not found`
+        constructErrorBody(
+          `Workspace role not found`,
+          `The workspace role ${workspaceRoleSlug} does not exist`
+        )
       )
     }
 
@@ -653,7 +695,10 @@ export class WorkspaceRoleService {
       !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
     ) {
       throw new UnauthorizedException(
-        `User ${userId} does not have the required authorities to perform the action`
+        constructErrorBody(
+          'Unauthorized',
+          `You do not have the required authorities to perform the action`
+        )
       )
     }
 

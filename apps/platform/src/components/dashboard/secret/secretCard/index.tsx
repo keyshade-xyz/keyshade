@@ -1,7 +1,7 @@
 import type { Secret } from '@keyshade/schema'
-import { NoteIconSVG } from '@public/svg/secret'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
+import { NoteIconSVG } from '@public/svg/secret'
 import {
   AccordionContent,
   AccordionItem,

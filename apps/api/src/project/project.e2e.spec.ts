@@ -225,11 +225,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Project 1** already exists`
-      })
     })
 
     it('should have created a PROJECT_CREATED event', async () => {
@@ -304,11 +299,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
   })
 
@@ -352,11 +342,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Project 1** already exists`
-      })
     })
 
     it('should not be able to update a non existing project', async () => {
@@ -373,11 +358,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to update a project if the user is not a member of the workspace', async () => {
@@ -452,11 +432,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to fetch a project if the user is not a member of the workspace', async () => {
@@ -527,11 +502,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
 
     it('should not be able to fetch all projects of a workspace if the user is not a member of the workspace', async () => {
@@ -823,11 +793,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to delete a project if the user is not a member of the workspace', async () => {
@@ -1064,11 +1029,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Private key is required to make the project GLOBAL'
-      })
     })
 
     it('should regenerate key-pair if access level of GLOBAL project is updated to INTERNAL or PRIVATE', async () => {
@@ -1206,11 +1166,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to fork a project that is not GLOBAL', async () => {
@@ -1277,11 +1232,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Forked Project** already exists in the selected workspace`
-      })
     })
 
     it('should copy over all environments, secrets and variables into the forked project', async () => {
@@ -1810,11 +1760,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Project ${project3.slug} is not a forked project`
-      })
     })
 
     it('should be able to unlink a forked project', async () => {

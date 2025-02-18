@@ -27,7 +27,7 @@ import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { getVariableWithValues, VariableWithValues } from '@/common/variable'
 
 @Injectable()
@@ -366,7 +366,10 @@ export class VariableService {
 
     if (variable.versions.length === 0) {
       throw new NotFoundException(
-        `No versions found for environment: ${environmentSlug} for variable: ${variableSlug}`
+        constructErrorBody(
+          'No versions found for environment',
+          `Variable ${variable} has no versions for environment ${environmentSlug}`
+        )
       )
     }
 
@@ -376,7 +379,10 @@ export class VariableService {
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for variable: ${variableSlug}`
+        constructErrorBody(
+          'Invalid rollback version',
+          `Variable ${variableSlug} can not be rolled back to version ${rollbackVersion}`
+        )
       )
     }
 
@@ -749,7 +755,10 @@ export class VariableService {
       })) !== null
     ) {
       throw new ConflictException(
-        `Variable already exists: ${variableName} in project ${project.slug}`
+        constructErrorBody(
+          'Variable already exists',
+          `Variable ${variableName} already exists in project ${project.slug}`
+        )
       )
     }
   }

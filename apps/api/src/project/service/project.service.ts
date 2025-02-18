@@ -28,7 +28,11 @@ import { paginate } from '@/common/paginate'
 import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
-import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
+import {
+  constructErrorBody,
+  excludeFields,
+  limitMaxItemsPerPage
+} from '@/common/util'
 
 @Injectable()
 export class ProjectService {
@@ -65,7 +69,10 @@ export class ProjectService {
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
       throw new ConflictException(
-        `Project with this name **${dto.name}** already exists`
+        constructErrorBody(
+          'Project already exists',
+          `Project with name ${dto.name} already exists in workspace ${workspace.slug}`
+        )
       )
 
     // Create the public and private key pair
@@ -245,7 +252,10 @@ export class ProjectService {
       project.name === dto.name
     )
       throw new ConflictException(
-        `Project with this name **${dto.name}** already exists`
+        constructErrorBody(
+          'Project already exists',
+          `Project with this name **${dto.name}** already exists`
+        )
       )
 
     if (dto.accessLevel) {
@@ -264,7 +274,10 @@ export class ProjectService {
         // because we need to decrypt the secrets
         if (!dto.privateKey) {
           throw new BadRequestException(
-            'Private key is required to make the project GLOBAL'
+            constructErrorBody(
+              'Private key required',
+              'Please provide the private key if you wish to set the project as GLOBAL'
+            )
           )
         }
       } else if (
@@ -319,7 +332,10 @@ export class ProjectService {
         versionUpdateOps.push(...txs)
       } else {
         throw new BadRequestException(
-          'Private key is required to regenerate the key pair'
+          constructErrorBody(
+            'Private key required',
+            'Please provide the private key if you wish to regenerate the key pair'
+          )
         )
       }
     }
@@ -417,7 +433,10 @@ export class ProjectService {
     // Check if project with this name already exists for the user
     if (await this.projectExists(newProjectName, workspaceId))
       throw new ConflictException(
-        `Project with this name **${newProjectName}** already exists in the selected workspace`
+        constructErrorBody(
+          'Project already exists',
+          `Project with name ${newProjectName} already exists in the selected workspace`
+        )
       )
 
     const { privateKey, publicKey } = createKeyPair()
@@ -567,7 +586,10 @@ export class ProjectService {
 
     if (!project.isForked || project.forkedFromId == null) {
       throw new BadRequestException(
-        `Project ${projectSlug} is not a forked project`
+        constructErrorBody(
+          'Not a forked project',
+          `Project ${projectSlug} is not a forked project`
+        )
       )
     }
 

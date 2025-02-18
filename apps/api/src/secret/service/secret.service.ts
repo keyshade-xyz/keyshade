@@ -25,7 +25,11 @@ import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
-import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import {
+  addHoursToDate,
+  constructErrorBody,
+  limitMaxItemsPerPage
+} from '@/common/util'
 import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
@@ -386,7 +390,10 @@ export class SecretService {
 
     if (secret.versions.length === 0) {
       throw new NotFoundException(
-        `No versions found for environment: ${environmentSlug} for secret: ${secretSlug}`
+        constructErrorBody(
+          'No versions found for environment',
+          `Secret ${secretSlug} has no versions for environment ${environmentSlug}`
+        )
       )
     }
 
@@ -396,7 +403,10 @@ export class SecretService {
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for secret: ${secretSlug}`
+        constructErrorBody(
+          'Invalid rollback version',
+          `Secret ${secretSlug} can not be rolled back to version ${rollbackVersion}`
+        )
       )
     }
 
@@ -908,7 +918,10 @@ export class SecretService {
       })) !== null
     ) {
       throw new ConflictException(
-        `Secret already exists: ${secretName} in project ${project.slug}`
+        constructErrorBody(
+          'Secret already exists',
+          `Secret ${secretName} already exists in project ${project.slug}`
+        )
       )
     }
   }
@@ -924,7 +937,10 @@ export class SecretService {
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {
       throw new BadRequestException(
-        `Cannot decrypt secret values as the project does not store the private key`
+        constructErrorBody(
+          'Cannot decrypt secret values',
+          `Project ${project.slug} does not store the private key`
+        )
       )
     }
 
@@ -932,7 +948,10 @@ export class SecretService {
     // problems while decrypting the secret
     if (decryptValue && !project.privateKey) {
       throw new NotFoundException(
-        `Cannot decrypt secret values as the project does not have a private key`
+        constructErrorBody(
+          'Cannot decrypt secret values',
+          `Project ${project.slug} does not have a private key`
+        )
       )
     }
   }

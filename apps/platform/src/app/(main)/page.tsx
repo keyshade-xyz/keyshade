@@ -1,9 +1,8 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
-import { FolderSVG } from '@public/svg/dashboard'
-import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { FolderSVG } from '@public/svg/dashboard'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
@@ -19,72 +18,49 @@ import {
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
+import { useHttp } from '@/hooks/use-http'
 
 export default function Index(): JSX.Element {
-  const [loading, setLoading] = useState<boolean>(false)
-  const setUser = useSetAtom(userAtom)
+  const [loading, setLoading] = useState<boolean>(true)
 
+  const setUser = useSetAtom(userAtom)
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
-
   // Projects to be displayed in the dashboard
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
+
   const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
 
-  const getAllProjects = useCallback(async () => {
-    setLoading(true)
+  const getAllProjects = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getAllProjects({
+      workspaceSlug: selectedWorkspace!.slug
+    })
+  )
 
-    if (selectedWorkspace) {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().projectController.getAllProjects(
-          { workspaceSlug: selectedWorkspace.slug },
-          {}
-        )
-
-      if (success && data) {
-        setProjects(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching projects. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    setLoading(false)
-  }, [selectedWorkspace, setProjects])
-
-  const getSelf = useCallback(async () => {
-    const { success, error, data } =
-      await ControllerInstance.getInstance().userController.getSelf()
-    if (success && data) {
-      setUser(data)
-    } else {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while fetching user. Check console for more
-            info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-  }, [setUser])
+  const getSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.getSelf()
+  )
 
   useEffect(() => {
-    getAllProjects()
-    getSelf()
-  }, [getAllProjects, selectedWorkspace, setProjects, getSelf])
+    selectedWorkspace &&
+      getAllProjects()
+        .then(({ data, success }) => {
+          if (success && data) {
+            setProjects(data.items)
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+
+    getSelf().then(({ data, success }) => {
+      if (success && data) {
+        setUser(data)
+      }
+    })
+  }, [getAllProjects, selectedWorkspace, setProjects, getSelf, setUser])
 
   return (
     <div className="flex flex-col gap-4">

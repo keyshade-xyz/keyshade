@@ -21,6 +21,7 @@ import {
   getCollectiveWorkspaceAuthorities
 } from './collective-authorities'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
+import { constructErrorBody } from './util'
 
 export interface AuthorityInput {
   userId: string
@@ -70,7 +71,12 @@ export class AuthorityCheckerService {
     }
 
     if (!workspace) {
-      throw new NotFoundException(`Workspace ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Workspace not found',
+          `Workspace ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
@@ -79,7 +85,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
 
     return workspace
   }
@@ -127,7 +133,12 @@ export class AuthorityCheckerService {
     }
 
     if (!project) {
-      throw new NotFoundException(`Project ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Project not found',
+          `Project ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthoritiesForProject: Set<Authority> =
@@ -152,23 +163,20 @@ export class AuthorityCheckerService {
         ) {
           this.checkHasPermissionOverEntity(
             permittedAuthoritiesForWorkspace,
-            authorities,
-            userId
+            authorities
           )
         }
         break
       case ProjectAccessLevel.INTERNAL:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForWorkspace,
-          authorities,
-          userId
+          authorities
         )
         break
       case ProjectAccessLevel.PRIVATE:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForProject,
-          authorities,
-          userId
+          authorities
         )
         break
     }
@@ -219,7 +227,12 @@ export class AuthorityCheckerService {
     }
 
     if (!environment) {
-      throw new NotFoundException(`Environment ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Environment not found',
+          `Environment ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthorities = await getCollectiveEnvironmentAuthorities(
@@ -228,7 +241,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
 
     return environment
   }
@@ -278,7 +291,12 @@ export class AuthorityCheckerService {
     }
 
     if (!variable) {
-      throw new NotFoundException(`Variable ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Variable not found',
+          `Variable ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthorities = await getCollectiveProjectAuthorities(
@@ -287,7 +305,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
 
     return variable
   }
@@ -337,7 +355,12 @@ export class AuthorityCheckerService {
     }
 
     if (!secret) {
-      throw new NotFoundException(`Secret ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Secret not found',
+          `Secret ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthorities = await getCollectiveProjectAuthorities(
@@ -346,7 +369,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
 
     return secret
   }
@@ -394,7 +417,12 @@ export class AuthorityCheckerService {
     }
 
     if (!integration) {
-      throw new NotFoundException(`Integration ${entity.slug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Integration not found',
+          `Integration ${entity.slug} does not exist`
+        )
+      )
     }
 
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
@@ -403,7 +431,7 @@ export class AuthorityCheckerService {
       prisma
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities, userId)
+    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
 
     if (integration.projectId) {
       const project = await prisma.project.findUnique({
@@ -424,7 +452,7 @@ export class AuthorityCheckerService {
         prisma
       )
 
-      this.checkHasPermissionOverEntity(projectAuthorities, authorities, userId)
+      this.checkHasPermissionOverEntity(projectAuthorities, authorities)
     }
 
     return integration
@@ -442,8 +470,7 @@ export class AuthorityCheckerService {
    */
   private checkHasPermissionOverEntity(
     permittedAuthorities: Set<Authority>,
-    authorities: Authority[],
-    userId: string
+    authorities: Authority[]
   ): void {
     // We commence the check if WORKSPACE_ADMIN isn't in the list of permitted authorities
     if (!permittedAuthorities.has(Authority.WORKSPACE_ADMIN)) {
@@ -454,7 +481,10 @@ export class AuthorityCheckerService {
 
       if (!hasRequiredAuthority) {
         throw new UnauthorizedException(
-          `User ${userId} does not have any of the required authorities to perform the action`
+          constructErrorBody(
+            'Insufficient permissions',
+            `You do not have any of the required authorities to perform the action`
+          )
         )
       }
     }
