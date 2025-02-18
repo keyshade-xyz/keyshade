@@ -16,8 +16,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const owner = "keyshade-xyz";
-            const repo = "keyshade";
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
             const createPrReminderEnabled = process.env.CREATE_PR_REMINDER_ENABLED || false;
             const createPrReminderAfterDays = process.env.CREATE_PR_REMINDER_AFTER_DAYS || 2;
             const createPrReminderAfterMilliseconds = createPrReminderAfterDays * 24 * 60 * 60 * 1000;
@@ -36,7 +36,7 @@ jobs:
                 const issuesResponse = await github.rest.issues.listForRepo({
                   owner,
                   repo,
-                  state: "open",
+                  state: 'open',
                   per_page: 100,
                   page
                 });

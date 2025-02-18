@@ -16,8 +16,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const owner = "keyshade-xyz";
-            const repo = "keyshade";
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
             const unassignIssueEnabled = process.env.UNASSIGN_ISSUE_ENABLED || false;
             const unassignIssueAfterDays = process.env.CREATE_PR_REMINDER_AFTER_DAYS || 14;
             const unassignIssueAfterMilliseconds = unassignIssueAfterDays * 24 * 60 * 60 * 1000;
@@ -36,7 +36,7 @@ jobs:
                 const issuesResponse = await github.rest.issues.listForRepo({
                   owner,
                   repo,
-                  state: "open",
+                  state: 'open',
                   per_page: 100,
                   page
                 });
