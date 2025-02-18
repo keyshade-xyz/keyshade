@@ -6,23 +6,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  issue-reminder:
+  issue-pr-reminder:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
         env:
-          CREATE_REMINDER_AFTER_HOURS: ${{ vars.CREATE_REMINDER_AFTER_HOURS }}
+          CREATE_PR_REMINDER_ENABLED: ${{ vars.CREATE_PR_REMINDER_ENABLED }}
+          CREATE_PR_REMINDER_AFTER_DAYS: ${{ vars.CREATE_PR_REMINDER_AFTER_DAYS }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = "keyshade-xyz";
             const repo = "keyshade";
-            const createReminderAfterHours = process.env.CREATE_REMINDER_AFTER_HOURS || 48;
-            const createReminderAfterMilliseconds = createReminderAfterHours * 60 * 60 * 1000;
+            const createPrReminderEnabled = process.env.CREATE_PR_REMINDER_ENABLED || false;
+            const createPrReminderAfterDays = process.env.CREATE_PR_REMINDER_AFTER_DAYS || 2;
+            const createPrReminderAfterMilliseconds = createPrReminderAfterDays * 24 * 60 * 60 * 1000;
             const now = Date.now();
 
-            async function listOpenIssuesWithoutPR() {
-              const allIssues = [];
+            if(!createPrReminderEnabled) {
+              console.log('!!! Dry run, there are no changes made !!!');
+            }
+
+            async function listOpenIssues() {
+              const issues = [];
               let page = 1;
               let hasNextPage = true;
 
@@ -35,15 +41,36 @@ jobs:
                   page
                 });
 
-                const issuesWithoutPR = issuesResponse.data.filter(issue => !issue.pull_request);
-
-                allIssues.push(...issuesWithoutPR);
+                issues.push(...issuesResponse.data);
 
                 hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
                 page++;
               }
 
-              return allIssues;
+              return issues;
+            }
+
+            async function listIssueEvents(issue) {
+              const allEvents = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listEventsForTimeline({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  per_page: 100,
+                  page
+                });
+
+                allEvents.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return allEvents.sort((a, b) => a.id > b.id);
             }
 
             async function listIssueComments(issue) {
@@ -69,40 +96,54 @@ jobs:
               return allComments;
             }
 
-            async function createReminders() {
-              const issues = await listOpenIssuesWithoutPR();
+            async function createPrReminders() {
+              const issues = await listOpenIssues();
 
               for (const issue of issues) {
-                const issueCreatedAt = new Date(issue.created_at);
-                const createReminderAfter = new Date(issueCreatedAt.getTime() + createReminderAfterMilliseconds);
-
-                // Check if it's time to create the reminder
-                if (now < createReminderAfter) {
-                  continue;
-                }
-
-                // Create reminder for each assignee
+                const events = await listIssueEvents(issue);
+                const pullRequests = events
+                    .filter(event => event.event === 'cross-referenced')
+                    .map(event => event.source.issue)
+                    .filter(issue => issue && issue.pull_request);
                 const comments = await listIssueComments(issue);
 
                 for (const assignee of issue.assignees) {
+                  // Check if assignee has already opened a PR
+                  const assigneePullRequest = pullRequests.find(pullRequest => pullRequest.user.login === assignee.login);
+
+                  if(assigneePullRequest) {
+                    continue;
+                  }
+
+                  // Check if it is time to create a reminder
+                  const assignedEvent = events.find(event => event.event === 'assigned' && event.assignee.login === assignee.login);                  
+                  const issueAssignedAt = new Date(assignedEvent.created_at);
+                  const createPrReminderAfter = new Date(issueAssignedAt.getTime() + createPrReminderAfterMilliseconds);
+
+                  if (now < createPrReminderAfter) {
+                    continue;
+                  }
+
+                  // Check if reminder has already been created
                   const reminder = `@${assignee.login}, please open a draft PR linking this issue!`;
 
-                  // Check if the issue already has the reminder
                   if (comments.some(comment => comment.body === reminder)) {
                     continue;
                   }
 
-                  // Create the reminder
-                  await github.rest.issues.createComment({
-                    owner,
-                    repo,
-                    issue_number: issue.number,
-                    body: reminder
-                  });
+                  // Create reminder
+                  if(createPrReminderEnabled) {
+                    await github.rest.issues.createComment({
+                      owner,
+                      repo,
+                      issue_number: issue.number,
+                      body: reminder
+                    });
+                  }
 
-                  console.log(`Reminder created for: ${assignee.login}`);
+                  console.log(`Issue '${issue.number}' reminder created for: ${assignee.login}`);
                 }
               }
             }
 
-            await createReminders();
+            await createPrReminders();
