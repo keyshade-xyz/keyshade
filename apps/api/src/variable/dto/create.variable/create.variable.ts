@@ -9,7 +9,6 @@ export class CreateVariable {
 
   @IsOptional()
   @Length(0, 100)
-  @NonEmptyTrimmedString()
   note?: string
 
   @IsOptional()

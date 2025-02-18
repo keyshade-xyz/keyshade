@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { userAtom } from '@/store'
+import { useHttp } from '@/hooks/use-http'
+import { logout } from '@/lib/utils'
 
 function ProfilePage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
@@ -20,58 +22,70 @@ function ProfilePage(): React.JSX.Element {
   })
   const [isModified, setIsModified] = useState<boolean>(false)
 
-  const updateSelf = useCallback(async () => {
+  const updateSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.updateSelf({
+      name: userData.name === user?.name ? undefined : userData.name,
+      email: userData.email === user?.email ? undefined : userData.email
+    })
+  )
+
+  const deleteSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.deleteSelf()
+  )
+
+  const getSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.getSelf()
+  )
+
+  const handleDeleteSelf = useCallback(async () => {
+    toast.loading('Deleting profile...')
+    setIsLoading(true)
+
+    try {
+      const { success } = await deleteSelf()
+
+      if (success) {
+        toast.success('Profile deleted successfully! Logging you out.')
+        logout()
+      }
+    } finally {
+      setIsLoading(false)
+      setIsModified(false)
+      toast.dismiss()
+    }
+  }, [deleteSelf])
+
+  const handleUpdateSelf = useCallback(async () => {
     toast.loading('Updating profile...')
     setIsLoading(true)
-    try {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().userController.updateSelf({
-          name: userData.name === user?.name ? undefined : userData.name,
-          email: userData.email === user?.email ? undefined : userData.email
-        })
 
-      toast.dismiss()
+    try {
+      const { success, data } = await updateSelf()
 
       if (success && data) {
         toast.success('Profile updated successfully!')
         setUser(data)
-      } else {
-        toast.error('Something went wrong', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong updating the profile. Check console for more
-              info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
       }
-    } catch (error) {
-      throw new Error(JSON.stringify(error))
+    } finally {
+      setIsLoading(false)
+      setIsModified(false)
+      toast.dismiss()
     }
-    setIsModified(false)
-  }, [userData.name, userData.email, user?.name, user?.email, setUser])
+  }, [updateSelf, setUser])
 
   useEffect(() => {
-    ControllerInstance.getInstance()
-      .userController.getSelf()
-      .then(({ data, success, error }) => {
+    getSelf()
+      .then(({ data, success }) => {
         if (success && data) {
           setUserData({
             email: data.email,
             name: data.name,
             profilePictureUrl: data.profilePictureUrl || ''
           })
-          setIsLoading(false)
-        } else {
-          throw new Error(JSON.stringify(error))
         }
       })
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
-  }, [])
+      .finally(() => setIsLoading(false))
+  }, [getSelf])
 
   return (
     <main className="flex flex-col gap-y-10">
@@ -130,7 +144,11 @@ function ProfilePage(): React.JSX.Element {
         )}
       </div>
       <div>
-        <Button disabled={!isModified} onClick={updateSelf} variant="secondary">
+        <Button
+          disabled={!isModified}
+          onClick={handleUpdateSelf}
+          variant="secondary"
+        >
           Save Changes
         </Button>
       </div>
@@ -159,6 +177,7 @@ function ProfilePage(): React.JSX.Element {
           <Button
             aria-label="Delete account"
             disabled={isLoading}
+            onClick={handleDeleteSelf}
             variant="destructive"
           >
             Delete

@@ -1,7 +1,6 @@
 'use client'
 import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
 import SecretPage from './@secret/page'
@@ -12,6 +11,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
+import { useHttp } from '@/hooks/use-http'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -26,49 +26,38 @@ function DetailedProjectPage({
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
+  const getProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getProject({
+      projectSlug: params.project
+    })
+  )
+
+  const getAllEnvironmentsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: selectedProject!.slug
+      }
+    )
+  )
+
   useEffect(() => {
-    ControllerInstance.getInstance()
-      .projectController.getProject({ projectSlug: params.project }, {})
-      .then(({ data, success, error }) => {
-        if (success && data) {
-          setSelectedProject(data)
-        } else {
-          throw new Error(JSON.stringify(error))
-        }
-      })
-      .catch((error) => {
+    getProject().then(({ data, success, error }) => {
+      if (success && data) {
+        setSelectedProject(data)
+      } else {
         throw new Error(JSON.stringify(error))
-      })
-  }, [params.project, setSelectedProject])
+      }
+    })
+  }, [getProject, params.project, setSelectedProject])
 
   useEffect(() => {
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      return
-    }
-
-    ControllerInstance.getInstance()
-      .environmentController.getAllEnvironmentsOfProject(
-        { projectSlug: selectedProject.slug },
-        {}
-      )
-      .then(({ data, success, error }) => {
+    selectedProject &&
+      getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
-        } else {
-          throw new Error(JSON.stringify(error))
         }
       })
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
-  }, [selectedProject, setEnvironments])
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
 
   return (
     <main className="flex h-full flex-col gap-4">

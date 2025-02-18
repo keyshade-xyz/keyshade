@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
 import { SecretSVG } from '@public/svg/dashboard'
 import { Accordion } from '@/components/ui/accordion'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -21,6 +20,7 @@ import {
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
+import { useHttp } from '@/hooks/use-http'
 
 extend(relativeTime)
 
@@ -32,42 +32,29 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
+
   const isDecrypted = useMemo(
     () => selectedProject?.storePrivateKey === true || false,
     [selectedProject]
   )
 
+  const getAllSecretsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
+      projectSlug: selectedProject!.slug,
+      decryptValue: isDecrypted
+    })
+  )
+
   useEffect(() => {
-    setIsLoading(true)
-
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      return
-    }
-
-    ControllerInstance.getInstance()
-      .secretController.getAllSecretsOfProject(
-        { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
-        {}
-      )
-      .then(({ success, error, data }) => {
-        if (success && data) {
-          setSecrets(data.items)
-        } else {
-          throw new Error(JSON.stringify(error))
-        }
-      })
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
-      .finally(() => setIsLoading(false))
-  }, [isDecrypted, selectedProject, setSecrets])
+    selectedProject &&
+      getAllSecretsOfProject()
+        .then(({ success, data }) => {
+          if (success && data) {
+            setSecrets(data.items)
+          }
+        })
+        .finally(() => setIsLoading(false))
+  }, [getAllSecretsOfProject, isDecrypted, selectedProject, setSecrets])
 
   if (isLoading) {
     return (

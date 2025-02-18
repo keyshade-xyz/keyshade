@@ -1,7 +1,5 @@
-import type { CreateVariableRequest } from '@keyshade/schema'
 import { AddSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import type { MouseEvent } from 'react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -28,6 +26,7 @@ import {
   environmentsOfProjectAtom,
   variablesOfProjectAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AddVariableDialogue() {
   const [isCreateVariableOpen, setIsCreateVariableOpen] = useAtom(
@@ -43,61 +42,69 @@ export default function AddVariableDialogue() {
     environmentSlug: environments[0]?.slug,
     environmentValue: ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const handleAddVariable = useCallback(
-    async (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault()
-
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        throw new Error("Current project doesn't exist")
-      }
-
-      const request: CreateVariableRequest = {
-        name: newVariableData.variableName,
-        projectSlug: selectedProject.slug,
-        entries: newVariableData.environmentValue
-          ? [
-              {
-                value: newVariableData.environmentValue,
-                environmentSlug: newVariableData.environmentSlug
-              }
-            ]
-          : undefined,
-        note: newVariableData.note
-      }
-
-      const { success, error, data } =
-        await ControllerInstance.getInstance().variableController.createVariable(
-          request,
-          {}
-        )
-
-      if (success && data) {
-        toast.success('Variable added successfully', {
-          description: (
-            <p className="text-xs text-emerald-300">
-              The variable has been added to the project
-            </p>
-          )
-        })
-
-        // Add the variable to the store
-        setVariables((prev) => [...prev, data])
-
-        setIsCreateVariableOpen(false)
-      } else {
-        throw new Error(JSON.stringify(error))
-      }
-    },
-    [selectedProject, newVariableData, setIsCreateVariableOpen, setVariables]
+  const createVariable = useHttp(() =>
+    ControllerInstance.getInstance().variableController.createVariable({
+      name: newVariableData.variableName,
+      projectSlug: selectedProject!.slug,
+      entries: newVariableData.environmentValue
+        ? [
+            {
+              value: newVariableData.environmentValue,
+              environmentSlug: newVariableData.environmentSlug
+            }
+          ]
+        : undefined,
+      note: newVariableData.note
+    })
   )
+
+  const handleAddVariable = useCallback(async () => {
+    if (selectedProject) {
+      if (newVariableData.variableName.trim() === '') {
+        toast.error('Variable name is required')
+        return
+      }
+
+      setIsLoading(true)
+      toast.loading('Creating variable...')
+
+      try {
+        const { success, data } = await createVariable()
+
+        if (success && data) {
+          toast.success('Variable added successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                The variable has been added to the project
+              </p>
+            )
+          })
+
+          // Add the variable to the store
+          setVariables((prev) => [...prev, data])
+          setIsCreateVariableOpen(false)
+          setNewVariableData({
+            variableName: '',
+            note: '',
+            environmentSlug: environments[0]?.slug,
+            environmentValue: ''
+          })
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
+    }
+  }, [
+    selectedProject,
+    newVariableData.variableName,
+    createVariable,
+    setVariables,
+    setIsCreateVariableOpen,
+    environments
+  ])
 
   return (
     <Dialog
@@ -221,6 +228,7 @@ export default function AddVariableDialogue() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                disabled={isLoading}
                 onClick={handleAddVariable}
               >
                 Add Variable

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
@@ -20,6 +20,7 @@ import {
   selectedEnvironmentAtom,
   environmentsOfProjectAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function ConfirmDeleteEnvironment(): React.JSX.Element {
   const [selectedEnvironment, setSelectedEnvironment] = useAtom(
@@ -30,58 +31,58 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
   )
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const deleteEnvironment = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.deleteEnvironment({
+      slug: selectedEnvironment!.slug
+    })
+  )
+
   const handleClose = useCallback(() => {
     setIsDeleteEnvironmentOpen(false)
   }, [setIsDeleteEnvironmentOpen])
 
-  const deleteEnvironment = useCallback(async () => {
-    if (selectedEnvironment === null) {
-      toast.error('No environment selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No environment selected. Please select a environment.
-          </p>
-        )
-      })
-      return
-    }
+  const handleDeleteEnvironment = useCallback(async () => {
+    if (selectedEnvironment) {
+      setIsLoading(true)
+      toast.loading('Deleting environment...')
 
-    const environmentSlug = selectedEnvironment.slug
+      try {
+        const { success } = await deleteEnvironment()
 
-    const { success, error } =
-      await ControllerInstance.getInstance().environmentController.deleteEnvironment(
-        { slug: environmentSlug },
-        {}
-      )
+        if (success) {
+          toast.success('Environment deleted successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                The environment has been deleted.
+              </p>
+            )
+          })
 
-    if (success) {
-      toast.success('Environment deleted successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The environment has been deleted.
-          </p>
-        )
-      })
+          // Remove the environment from the store
+          setEnvironments((prevEnvironments) =>
+            prevEnvironments.filter(
+              (environment) => environment.slug !== selectedEnvironment.slug
+            )
+          )
 
-      // Remove the environment from the store
-      setEnvironments((prevEnvironments) =>
-        prevEnvironments.filter(
-          (environment) => environment.slug !== environmentSlug
-        )
-      )
+          // Set the selected environment to null
+          setSelectedEnvironment(null)
 
-      // Set the selected environment to null
-      setSelectedEnvironment(null)
-
-      handleClose()
-    } else {
-      throw new Error(JSON.stringify(error))
+          handleClose()
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
   }, [
     selectedEnvironment,
-    handleClose,
+    deleteEnvironment,
     setEnvironments,
-    setSelectedEnvironment
+    setSelectedEnvironment,
+    handleClose
   ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
@@ -125,7 +126,8 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            onClick={deleteEnvironment}
+            disabled={isLoading}
+            onClick={handleDeleteEnvironment}
           >
             Yes, delete the environment
           </AlertDialogAction>

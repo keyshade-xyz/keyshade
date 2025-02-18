@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { UpdateVariableRequest } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +22,7 @@ import {
   selectedVariableAtom,
   variablesOfProjectAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function EditVariablSheet() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
@@ -37,6 +37,20 @@ export default function EditVariablSheet() {
     name: selectedVariableData?.variable.name,
     note: selectedVariableData?.variable.note || ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const updateVariable = useHttp(() =>
+    ControllerInstance.getInstance().variableController.updateVariable({
+      variableSlug: selectedVariableData!.variable.slug,
+      name:
+        requestData.name === selectedVariableData!.variable.name ||
+        requestData.name === ''
+          ? undefined
+          : requestData.name,
+      note: requestData.note === '' ? undefined : requestData.note,
+      entries: undefined
+    })
+  )
 
   const handleClose = useCallback(() => {
     setIsEditVariableOpen(false)
@@ -49,69 +63,57 @@ export default function EditVariablSheet() {
     }))
   }, [])
 
-  const updateVariable = useCallback(async () => {
-    if (!selectedVariableData) {
-      toast.error('No variable selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No variable selected. Please select a variable.
-          </p>
-        )
-      })
-      return
-    }
+  const handleUpdateVariable = useCallback(async () => {
+    if (selectedVariableData) {
+      setIsLoading(true)
+      toast.loading('Updating variable...')
 
-    const { variable } = selectedVariableData
+      try {
+        const { success, data } = await updateVariable()
 
-    const request: UpdateVariableRequest = {
-      variableSlug: variable.slug,
-      name:
-        requestData.name === variable.name || requestData.name === ''
-          ? undefined
-          : requestData.name,
-      note: requestData.note === '' ? undefined : requestData.note,
-      entries: undefined
-    }
+        if (success && data) {
+          toast.success('Variable edited successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                You successfully edited the variable
+              </p>
+            )
+          })
 
-    const { success, error, data } =
-      await ControllerInstance.getInstance().variableController.updateVariable(
-        request,
-        {}
-      )
-
-    if (success && data) {
-      toast.success('Variable edited successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            You successfully edited the variable
-          </p>
-        )
-      })
-
-      // Update the variable in the store
-      setVariables((prev) => {
-        const newVariables = prev.map((v) => {
-          if (v.variable.slug === variable.slug) {
-            return {
-              ...v,
-              variable: {
-                ...v.variable,
-                name: requestData.name || v.variable.name,
-                note: requestData.note || v.variable.note,
-                slug: data.variable.slug
+          // Update the variable in the store
+          setVariables((prev) => {
+            const newVariables = prev.map((v) => {
+              if (v.variable.slug === selectedVariableData.variable.slug) {
+                return {
+                  ...v,
+                  variable: {
+                    ...v.variable,
+                    name: requestData.name || v.variable.name,
+                    note: requestData.note || v.variable.note,
+                    slug: data.variable.slug
+                  }
+                }
               }
-            }
-          }
-          return v
-        })
-        return newVariables
-      })
+              return v
+            })
+            return newVariables
+          })
 
-      handleClose()
-    } else {
-      throw new Error(JSON.stringify(error))
+          handleClose()
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
-  }, [selectedVariableData, requestData, handleClose, setVariables])
+  }, [
+    selectedVariableData,
+    updateVariable,
+    setVariables,
+    handleClose,
+    requestData.name,
+    requestData.note
+  ])
 
   return (
     <Sheet
@@ -158,7 +160,8 @@ export default function EditVariablSheet() {
           <SheetClose asChild>
             <Button
               className="font-semibold"
-              onClick={updateVariable}
+              disabled={isLoading}
+              onClick={handleUpdateVariable}
               variant="secondary"
             >
               Edit Variable

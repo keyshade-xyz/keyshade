@@ -1,8 +1,12 @@
 import { TrashSVG } from '@public/svg/shared'
-import { useAtom, useAtomValue } from 'jotai'
-import React, { useCallback, useEffect } from 'react'
+import { useAtom, useSetAtom } from 'jotai'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { deleteProjectOpenAtom, selectedProjectAtom } from '@/store'
+import {
+  deleteProjectOpenAtom,
+  projectsOfWorkspaceAtom,
+  selectedProjectAtom
+} from '@/store'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,55 +18,56 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
-interface ConfirmDeleteProjectProps {
-  reCallGetAllProjects: () => void
-}
-
-function ConfirmDeleteProject({
-  reCallGetAllProjects
-}: ConfirmDeleteProjectProps): React.JSX.Element {
+function ConfirmDeleteProject(): React.JSX.Element {
   const [isDeleteProjectOpen, setIsDeleteProjectOpen] = useAtom(
     deleteProjectOpenAtom
   )
-  const selectedProject = useAtomValue(selectedProjectAtom)
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const setProjects = useSetAtom(projectsOfWorkspaceAtom)
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const deleteProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.deleteProject({
+      projectSlug: selectedProject!.slug
+    })
+  )
 
   const handleClose = () => {
     setIsDeleteProjectOpen(false)
   }
 
-  const deleteProject = async () => {
-    if (selectedProject === null) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      return
-    }
+  const handleDeleteProject = async () => {
+    if (selectedProject) {
+      setIsLoading(true)
+      toast.loading('Deleting project...')
 
-    const projectSlug = selectedProject.slug
+      try {
+        const { success } = await deleteProject()
 
-    const { success, error } =
-      await ControllerInstance.getInstance().projectController.deleteProject(
-        { projectSlug },
-        {}
-      )
+        if (success) {
+          toast.success('Project deleted successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                The project has been deleted.
+              </p>
+            )
+          })
 
-    if (success) {
-      toast.success('Project deleted successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The project has been deleted.
-          </p>
-        )
-      })
-      reCallGetAllProjects()
-      handleClose()
-    } else {
-      throw new Error(JSON.stringify(error))
+          // Remove the project from the state
+          setProjects((projects) =>
+            projects.filter((project) => project.slug !== selectedProject.slug)
+          )
+          setSelectedProject(null)
+
+          handleClose()
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
   }
 
@@ -108,7 +113,8 @@ function ConfirmDeleteProject({
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            onClick={deleteProject}
+            disabled={isLoading}
+            onClick={handleDeleteProject}
           >
             Yes, delete the project
           </AlertDialogAction>

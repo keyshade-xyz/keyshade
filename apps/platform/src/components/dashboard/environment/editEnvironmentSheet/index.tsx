@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { UpdateEnvironmentRequest } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   Sheet,
@@ -23,6 +22,7 @@ import {
   selectedEnvironmentAtom,
   environmentsOfProjectAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function EditEnvironmentDialogue(): React.JSX.Element {
   const [isEditEnvironmentOpen, setIsEditEnvironmentOpen] = useAtom(
@@ -38,6 +38,7 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
     name: selectedEnvironment?.name,
     description: selectedEnvironment?.description || ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const updateRequestData = useCallback(
     (name: string, value: string) => {
@@ -49,67 +50,62 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
     [setRequestData]
   )
 
-  const updateEnvironment = useCallback(async () => {
-    if (!selectedEnvironment) {
-      toast.error('No environment selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No environment selected. Please select an environment.
-          </p>
-        )
-      })
-      return
-    }
-
-    const request: UpdateEnvironmentRequest = {
-      slug: selectedEnvironment.slug,
+  const updateEnvironment = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.updateEnvironment({
+      slug: selectedEnvironment!.slug,
       description:
         requestData.description === '' ? undefined : requestData.description,
       name:
-        requestData.name === selectedEnvironment.name || requestData.name === ''
+        requestData.name === selectedEnvironment!.name ||
+        requestData.name === ''
           ? undefined
           : requestData.name
-    }
+    })
+  )
 
-    const { success, error, data } =
-      await ControllerInstance.getInstance().environmentController.updateEnvironment(
-        request,
-        {}
-      )
+  const handleUpdateEnvironment = useCallback(async () => {
+    if (selectedEnvironment) {
+      setIsLoading(true)
+      toast.loading('Updating environment...')
 
-    if (success && data) {
-      toast.success('Environment updated successfully', {
-        description: (
-          <p className="text-xs text-green-300">
-            You successfully edited the environment
-          </p>
-        )
-      })
+      try {
+        const { success, data } = await updateEnvironment()
 
-      // Update the environment in the store
-      setEnvironments((prev) => {
-        return prev.map((environment) => {
-          if (environment.slug === selectedEnvironment.slug) {
-            return {
-              ...environment,
-              slug: data.slug,
-              name: data.name,
-              description: data.description
-            }
-          }
-          return environment
-        })
-      })
+        if (success && data) {
+          toast.success('Environment updated successfully', {
+            description: (
+              <p className="text-xs text-green-300">
+                You successfully edited the environment
+              </p>
+            )
+          })
 
-      // Close the sheet
-      setIsEditEnvironmentOpen(false)
-    } else {
-      throw new Error(JSON.stringify(error))
+          // Update the environment in the store
+          setEnvironments((prev) => {
+            return prev.map((environment) => {
+              if (environment.slug === selectedEnvironment.slug) {
+                return {
+                  ...environment,
+                  slug: data.slug,
+                  name: data.name,
+                  description: data.description
+                }
+              }
+              return environment
+            })
+          })
+
+          // Close the sheet
+          setIsEditEnvironmentOpen(false)
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
   }, [
     selectedEnvironment,
-    requestData.description,
-    requestData.name,
+    updateEnvironment,
     setEnvironments,
     setIsEditEnvironmentOpen
   ])
@@ -158,10 +154,11 @@ export default function EditEnvironmentDialogue(): React.JSX.Element {
               <div className="flex justify-end">
                 <Button
                   className="rounded-lg border-white/10 bg-[#E0E0E0] text-xs font-semibold text-black hover:bg-gray-200"
-                  onClick={updateEnvironment}
+                  disabled={isLoading}
+                  onClick={handleUpdateEnvironment}
                   variant="secondary"
                 >
-                  Save Environment
+                  Save Changes
                 </Button>
               </div>
             </SheetClose>

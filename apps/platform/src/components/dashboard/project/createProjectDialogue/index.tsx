@@ -29,6 +29,7 @@ import {
   selectedWorkspaceAtom,
   projectsOfWorkspaceAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
@@ -53,52 +54,59 @@ export default function CreateProjectDialogue(): JSX.Element {
     ],
     accessLevel: 'PRIVATE'
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const createProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.createProject({
+      ...newProjectData,
+      workspaceSlug: selectedWorkspace!.slug,
+      environments:
+        newProjectData.environments?.filter((env) => env.name.trim() !== '') ||
+        []
+    })
+  )
 
   // Function to create a new project
-  const createNewProject = useCallback(async () => {
+  const handleCreateNewProject = useCallback(async () => {
     if (selectedWorkspace) {
-      // Filter out environments with empty names
-      const projectData = {
-        ...newProjectData,
-        workspaceSlug: selectedWorkspace.slug,
-        environments:
-          newProjectData.environments?.filter(
-            (env) => env.name.trim() !== ''
-          ) || []
+      if (newProjectData.name.trim() === '') {
+        toast.error('Project name cannot be empty')
+        return
       }
 
-      const { data, error, success } =
-        await ControllerInstance.getInstance().projectController.createProject(
-          projectData,
-          {}
-        )
+      setIsLoading(true)
+      toast.loading('Creating project...')
 
-      if (success && data) {
-        setProjects([
-          ...projects,
-          {
-            ...data,
-            environmentCount: newProjectData.environments
-              ? newProjectData.environments.length
-              : 0,
-            secretCount: 0,
-            variableCount: 0
-          }
-        ])
+      try {
+        const { data, success } = await createProject()
 
+        if (success && data) {
+          setProjects([
+            ...projects,
+            {
+              ...data,
+              environmentCount: newProjectData.environments
+                ? newProjectData.environments.length
+                : 0,
+              secretCount: 0,
+              variableCount: 0
+            }
+          ])
+        }
+      } finally {
         setIsCreateProjectDialogOpen(false)
-      } else {
-        throw new Error(JSON.stringify(error))
+        setIsLoading(false)
+        toast.dismiss()
       }
-    } else {
-      toast.error('No workspace selected')
     }
   }, [
     selectedWorkspace,
-    newProjectData,
+    newProjectData.name,
+    newProjectData.environments,
+    createProject,
+    setProjects,
     projects,
-    setIsCreateProjectDialogOpen,
-    setProjects
+    setIsCreateProjectDialogOpen
   ])
 
   const toggleDialog = useCallback(
@@ -284,7 +292,8 @@ export default function CreateProjectDialogue(): JSX.Element {
         <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
           <Button
             className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
-            onClick={createNewProject}
+            disabled={isLoading}
+            onClick={handleCreateNewProject}
             variant="secondary"
           >
             Create project

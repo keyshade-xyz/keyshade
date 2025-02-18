@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
 import {
   createEnvironmentOpenAtom,
   selectedProjectAtom,
@@ -17,6 +16,7 @@ import ConfirmDeleteEnvironment from '@/components/dashboard/environment/confirm
 import EditEnvironmentDialogue from '@/components/dashboard/environment/editEnvironmentSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { useHttp } from '@/hooks/use-http'
 
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
@@ -26,34 +26,22 @@ function EnvironmentPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
 
-  useEffect(() => {
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      return
-    }
+  const getAllEnvironmentsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: selectedProject!.slug
+      }
+    )
+  )
 
-    ControllerInstance.getInstance()
-      .environmentController.getAllEnvironmentsOfProject(
-        { projectSlug: selectedProject.slug },
-        {}
-      )
-      .then(({ data, error, success }) => {
+  useEffect(() => {
+    selectedProject &&
+      getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
-        } else {
-          throw new Error(JSON.stringify(error))
         }
       })
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
-  }, [selectedProject, setEnvironments])
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
 
   return (
     <div

@@ -44,22 +44,14 @@ export function Combobox(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 
-  const getWorkspacesOfUser = useHttp(
-    () =>
-      ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
-        {}
-      ),
-    router
+  const getWorkspacesOfUser = useHttp(() =>
+    ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
   )
-  const createWorkspace = useHttp(
-    () =>
-      ControllerInstance.getInstance().workspaceController.createWorkspace(
-        {
-          name: newWorkspaceName
-        },
-        {}
-      ),
-    router
+
+  const createWorkspace = useHttp(() =>
+    ControllerInstance.getInstance().workspaceController.createWorkspace({
+      name: newWorkspaceName
+    })
   )
 
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
@@ -68,7 +60,7 @@ export function Combobox(): React.JSX.Element {
 
   const handleCreateWorkspace = useCallback(async () => {
     if (newWorkspaceName.trim() === '') {
-      toast.warning('Workspace name is empty', {
+      toast.error('Workspace name is empty', {
         description: 'Please enter a workspace name'
       })
       return
@@ -95,6 +87,7 @@ export function Combobox(): React.JSX.Element {
     getWorkspacesOfUser().then(({ success, data }) => {
       if (success && data) {
         setAllWorkspaces(data.items)
+        setSelectedWorkspace((prev) => (prev !== null ? prev : data.items[0]))
       }
     })
   }, [setSelectedWorkspace, getWorkspacesOfUser])

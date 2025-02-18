@@ -1,20 +1,15 @@
 import type { ClientResponse } from '@keyshade/schema'
-import type { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
+import { logout } from '@/lib/utils'
 
-function handle403(router: ReturnType<typeof useRouter>) {
-  // Clear cookies
-  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
-  document.cookie =
-    'isOnboardingFinished=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
-
+function handle403() {
   toast.info('Session expired', {
     description: 'Session expired. Please sign in again.'
   })
 
-  router.push('/auth')
+  logout()
 }
 
 function handle500(error) {
@@ -23,8 +18,7 @@ function handle500(error) {
 }
 
 export function useHttp<T, V extends ClientResponse<T>>(
-  fn: () => Promise<V>,
-  router: ReturnType<typeof useRouter>
+  fn: () => Promise<V>
 ): () => Promise<V> {
   return useCallback(async (): Promise<V> => {
     try {
@@ -34,7 +28,7 @@ export function useHttp<T, V extends ClientResponse<T>>(
         const statusCode = response.error.statusCode
 
         if (statusCode === 403) {
-          handle403(router)
+          handle403()
         } else if (statusCode.toString().startsWith('4')) {
           // For 4xx errors
           const { header, body } = JSON.parse(response.error.message) as {
@@ -52,11 +46,11 @@ export function useHttp<T, V extends ClientResponse<T>>(
       return response
     } catch (error) {
       if (error.status === 403) {
-        handle403(router)
+        handle403()
       } else if (error.status === 500) {
         handle500(error)
       }
       throw error
     }
-  }, [fn, router])
+  }, [fn])
 }

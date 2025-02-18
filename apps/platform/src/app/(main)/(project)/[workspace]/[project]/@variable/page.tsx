@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
@@ -18,6 +17,7 @@ import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
+import { useHttp } from '@/hooks/use-http'
 
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
@@ -27,36 +27,22 @@ function VariablePage(): React.JSX.Element {
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
-  useEffect(() => {
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      return
-    }
+  const getAllVariablesOfProject = useHttp(() =>
+    ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+      {
+        projectSlug: selectedProject!.slug
+      }
+    )
+  )
 
-    ControllerInstance.getInstance()
-      .variableController.getAllVariablesOfProject(
-        {
-          projectSlug: selectedProject.slug
-        },
-        {}
-      )
-      .then(({ data, error, success }) => {
+  useEffect(() => {
+    selectedProject &&
+      getAllVariablesOfProject().then(({ data, success }) => {
         if (success && data) {
           setVariables(data.items)
-        } else {
-          throw new Error(JSON.stringify(error))
         }
       })
-      .catch((error) => {
-        throw new Error(JSON.stringify(error))
-      })
-  }, [selectedProject, setVariables])
+  }, [getAllVariablesOfProject, selectedProject, setVariables])
 
   return (
     <div

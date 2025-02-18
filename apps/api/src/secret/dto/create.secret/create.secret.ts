@@ -15,7 +15,6 @@ export class CreateSecret {
 
   @IsOptional()
   @Length(0, 100)
-  @NonEmptyTrimmedString()
   note?: string
 
   @IsString()

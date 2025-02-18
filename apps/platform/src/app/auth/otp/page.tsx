@@ -37,7 +37,7 @@ export default function AuthOTPPage(): React.JSX.Element {
       })
     }
     throw new Error('User not set in context')
-  }, router)
+  })
 
   const resendOtp = useHttp(() => {
     if (user?.email) {
@@ -46,7 +46,7 @@ export default function AuthOTPPage(): React.JSX.Element {
       })
     }
     throw new Error('User not set in context')
-  }, router)
+  })
 
   useEffect(() => {
     if (!user?.email) {
@@ -69,7 +69,7 @@ export default function AuthOTPPage(): React.JSX.Element {
     const otpResult = alphanumeric.safeParse(otp)
 
     if (!emailResult.success || !otpResult.success) {
-      toast.warning('Invalid OTP', {
+      toast.error('Invalid OTP', {
         description: (
           <p className="text-xs text-red-300">
             Please enter a valid 6 digit alphanumeric OTP.
