@@ -1,3 +1,9 @@
+## [2.12.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.4...v2.12.0-stage.5) (2025-02-18)
+
+### 🚀 Features
+
+* Enhanced error handling in platfrom and API ([#765](https://github.com/keyshade-xyz/keyshade/issues/765)) ([b4349ad](https://github.com/keyshade-xyz/keyshade/commit/b4349adc0c197750cb2dbdc41fe294907c193293))
+
 ## [2.12.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.3...v2.12.0-stage.4) (2025-02-18)
 
 ### 🐛 Bug Fixes
