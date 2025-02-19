@@ -1,3 +1,9 @@
+## [2.12.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.7...v2.12.0-stage.8) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add checkmark icon to copy slug button for environments ([#742](https://github.com/keyshade-xyz/keyshade/issues/742)) ([#766](https://github.com/keyshade-xyz/keyshade/issues/766)) ([cd2925f](https://github.com/keyshade-xyz/keyshade/commit/cd2925f4fa7cc721ce2b2808ad424983742a963c))
+
 ## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
 
 ### 🚀 Features
