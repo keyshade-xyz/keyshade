@@ -4,10 +4,9 @@ import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { DropdownSVG } from '@public/svg/shared'
-import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
-import type { User } from '@keyshade/schema'
 import { useAtomValue } from 'jotai'
+import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
+import { DropdownSVG } from '@public/svg/shared'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -19,8 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
-import { selectedProjectAtom } from '@/store'
-import { userAtom } from '@/store'
+import { selectedProjectAtom, userAtom } from '@/store'
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)

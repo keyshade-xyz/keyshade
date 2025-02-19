@@ -20,12 +20,17 @@ import {
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { ChangeNotificationEvent } from 'src/socket/socket.types'
 import { paginate } from '@/common/paginate'
-import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import {
+  addHoursToDate,
+  constructErrorBody,
+  limitMaxItemsPerPage
+} from '@/common/util'
 import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
@@ -37,7 +42,7 @@ import {
 } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SecretWithProject } from '../secret.types'
-import { ChangeNotificationEvent } from '@/socket/socket.types'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class SecretService {
@@ -46,11 +51,11 @@ export class SecretService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly authorizationService: AuthorizationService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
-    },
-    private readonly authorityCheckerService: AuthorityCheckerService
+    }
   ) {
     this.redis = redisClient.publisher
   }
@@ -63,17 +68,16 @@ export class SecretService {
    * @returns the created secret
    */
   async createSecret(
-    user: User,
+    user: AuthenticatedUser,
     dto: CreateSecret,
     projectSlug: Project['slug']
   ): Promise<SecretWithValues> {
     // Fetch the project
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.CREATE_SECRET],
-        prisma: this.prisma
+        authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
 
@@ -89,7 +93,7 @@ export class SecretService {
           user,
           project,
           this.prisma,
-          this.authorityCheckerService
+          this.authorizationService
         )
       : new Map<string, string>()
 
@@ -188,15 +192,14 @@ export class SecretService {
    * @returns the updated secret and the updated versions
    */
   async updateSecret(
-    user: User,
+    user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     dto: UpdateSecret
   ) {
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
       entity: { slug: secretSlug },
-      authorities: [Authority.UPDATE_SECRET],
-      prisma: this.prisma
+      authorities: [Authority.UPDATE_SECRET]
     })
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
@@ -211,7 +214,7 @@ export class SecretService {
           user,
           secret.project,
           this.prisma,
-          this.authorityCheckerService
+          this.authorizationService
         )
       : new Map<string, string>()
 
@@ -354,26 +357,24 @@ export class SecretService {
    * @returns the deleted secret versions
    */
   async rollbackSecret(
-    user: User,
+    user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
     rollbackVersion: SecretVersion['version']
   ) {
     // Fetch the secret
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
       entity: { slug: secretSlug },
-      authorities: [Authority.UPDATE_SECRET],
-      prisma: this.prisma
+      authorities: [Authority.UPDATE_SECRET]
     })
 
     // Fetch the environment
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.UPDATE_SECRET],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_SECRET]
       })
     const environmentId = environment.id
 
@@ -386,7 +387,10 @@ export class SecretService {
 
     if (secret.versions.length === 0) {
       throw new NotFoundException(
-        `No versions found for environment: ${environmentSlug} for secret: ${secretSlug}`
+        constructErrorBody(
+          'No versions found for environment',
+          `Secret ${secretSlug} has no versions for environment ${environmentSlug}`
+        )
       )
     }
 
@@ -396,7 +400,10 @@ export class SecretService {
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
       throw new NotFoundException(
-        `Invalid rollback version: ${rollbackVersion} for secret: ${secretSlug}`
+        constructErrorBody(
+          'Invalid rollback version',
+          `Secret ${secretSlug} can not be rolled back to version ${rollbackVersion}`
+        )
       )
     }
 
@@ -455,13 +462,12 @@ export class SecretService {
    * @param secretSlug the slug of the secret to delete
    * @returns void
    */
-  async deleteSecret(user: User, secretSlug: Secret['slug']) {
+  async deleteSecret(user: AuthenticatedUser, secretSlug: Secret['slug']) {
     // Check if the user has the required role
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
       entity: { slug: secretSlug },
-      authorities: [Authority.DELETE_SECRET],
-      prisma: this.prisma
+      authorities: [Authority.DELETE_SECRET]
     })
 
     // Delete the secret
@@ -501,7 +507,7 @@ export class SecretService {
    * @returns an object with the items and the pagination metadata
    */
   async getRevisionsOfSecret(
-    user: User,
+    user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
     decryptValue: boolean,
@@ -510,21 +516,19 @@ export class SecretService {
     order: 'asc' | 'desc' = 'desc'
   ) {
     // Fetch the secret
-    const secret = await this.authorityCheckerService.checkAuthorityOverSecret({
-      userId: user.id,
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
       entity: { slug: secretSlug },
-      authorities: [Authority.READ_SECRET],
-      prisma: this.prisma
+      authorities: [Authority.READ_SECRET]
     })
     const secretId = secret.id
 
     // Fetch the environment
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
+        authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
 
@@ -589,7 +593,7 @@ export class SecretService {
    * @returns an object with the items and the pagination metadata
    */
   async getAllSecretsOfProject(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     decryptValue: boolean,
     page: number,
@@ -600,11 +604,10 @@ export class SecretService {
   ) {
     // Fetch the project
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_SECRET],
-        prisma: this.prisma
+        authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
 
@@ -908,7 +911,10 @@ export class SecretService {
       })) !== null
     ) {
       throw new ConflictException(
-        `Secret already exists: ${secretName} in project ${project.slug}`
+        constructErrorBody(
+          'Secret already exists',
+          `Secret ${secretName} already exists in project ${project.slug}`
+        )
       )
     }
   }
@@ -924,7 +930,10 @@ export class SecretService {
     // Check if the project is allowed to store the private key
     if (decryptValue && !project.storePrivateKey) {
       throw new BadRequestException(
-        `Cannot decrypt secret values as the project does not store the private key`
+        constructErrorBody(
+          'Cannot decrypt secret values',
+          `Project ${project.slug} does not store the private key`
+        )
       )
     }
 
@@ -932,7 +941,10 @@ export class SecretService {
     // problems while decrypting the secret
     if (decryptValue && !project.privateKey) {
       throw new NotFoundException(
-        `Cannot decrypt secret values as the project does not have a private key`
+        constructErrorBody(
+          'Cannot decrypt secret values',
+          `Project ${project.slug} does not have a private key`
+        )
       )
     }
   }

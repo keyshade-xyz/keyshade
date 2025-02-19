@@ -2,7 +2,6 @@ import 'reflect-metadata'
 import { Type } from 'class-transformer'
 import {
   IsArray,
-  IsNotEmpty,
   IsOptional,
   IsString,
   Length,
@@ -16,7 +15,6 @@ export class CreateSecret {
 
   @IsOptional()
   @Length(0, 100)
-  @NonEmptyTrimmedString()
   note?: string
 
   @IsString()

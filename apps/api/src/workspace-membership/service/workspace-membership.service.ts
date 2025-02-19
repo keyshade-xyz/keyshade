@@ -1,8 +1,8 @@
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { paginate } from '@/common/paginate'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
   BadRequestException,
   ConflictException,
@@ -25,9 +25,9 @@ import {
 } from '@prisma/client'
 import { v4 } from 'uuid'
 import { CreateWorkspaceMember } from '../dto/create.workspace/create.workspace-membership'
-
 import { createEvent } from '@/common/event'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -35,9 +35,9 @@ export class WorkspaceMembershipService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly authorizationService: AuthorizationService,
     private readonly jwt: JwtService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
   /**
@@ -51,24 +51,25 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async transferOwnership(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     otherUserEmail: User['email']
   ): Promise<void> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.WORKSPACE_ADMIN],
-
-        prisma: this.prisma
+        authorities: [Authority.WORKSPACE_ADMIN]
       })
 
     const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
 
     if (otherUser.id === user.id) {
       throw new BadRequestException(
-        `You are already the owner of the workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'You cannot transfer ownership to yourself',
+          `You are already the owner of this workspace`
+        )
       )
     }
 
@@ -76,7 +77,10 @@ export class WorkspaceMembershipService {
     // ownership if the workspace is the default workspace
     if (workspace.isDefault) {
       throw new BadRequestException(
-        `You cannot transfer ownership of default workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'Can not transfer default workspace ownership',
+          `You cannot transfer ownership of a default workspace.`
+        )
       )
     }
 
@@ -88,14 +92,20 @@ export class WorkspaceMembershipService {
     // Check if the user is a member of the workspace
     if (!workspaceMembership) {
       throw new NotFoundException(
-        `${otherUser.email} is not a member of workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'You are not a member of this workspace',
+          `Could not resolve your access to this workspace. If you think this is a mistake, please get in touch with the workspace admin.`
+        )
       )
     }
 
     // Check if the user has accepted the invitation
     if (!workspaceMembership.invitationAccepted) {
       throw new BadRequestException(
-        `${otherUser.email} has not accepted the invitation to workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'You have not accepted the invitation',
+          `Your invitation to this workspace is still pending. Check the invitations tab to accept the invitation.`
+        )
       )
     }
 
@@ -192,16 +202,15 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async inviteUsersToWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     members: CreateWorkspaceMember[]
   ): Promise<void> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.ADD_USER],
-        prisma: this.prisma
+        authorities: [Authority.ADD_USER]
       })
 
     // Add users to the workspace if any
@@ -248,16 +257,15 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async removeUsersFromWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     userEmails: User['email'][]
   ): Promise<void> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.REMOVE_USER],
-        prisma: this.prisma
+        authorities: [Authority.REMOVE_USER]
       })
 
     const userIds = await this.prisma.user
@@ -277,7 +285,10 @@ export class WorkspaceMembershipService {
     if (userIds && userIds.length > 0) {
       if (userIds.find((id) => id === user.id)) {
         throw new BadRequestException(
-          `You cannot remove yourself from the workspace. Please transfer the ownership to another member before leaving the workspace.`
+          constructErrorBody(
+            `You can not remove yourself from the workspace.`,
+            `You can only leave a workspace.`
+          )
         )
       }
 
@@ -337,7 +348,7 @@ export class WorkspaceMembershipService {
    * @param roleSlugs The slugs of the roles to assign to the user
    */
   async updateMemberRoles(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     otherUserEmail: User['email'],
     roleSlugs: WorkspaceRole['slug'][]
@@ -345,11 +356,10 @@ export class WorkspaceMembershipService {
     const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
 
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.UPDATE_USER_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_USER_ROLE]
       })
 
     if (!roleSlugs || roleSlugs.length === 0) {
@@ -361,14 +371,22 @@ export class WorkspaceMembershipService {
     // Check if the member in concern is a part of the workspace or not
     if (!(await this.memberExistsInWorkspace(workspace.id, otherUser.id)))
       throw new NotFoundException(
-        `${otherUser.email} is not a member of workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'User is not a member of the workspace',
+          'Please check the teams tab to confirm whether the user is a member of this workspace'
+        )
       )
 
     const workspaceAdminRole = await this.getWorkspaceAdminRole(workspace.id)
 
     // Check if the admin role is tried to be assigned to the user
     if (roleSlugs.includes(workspaceAdminRole.slug)) {
-      throw new BadRequestException(`Admin role cannot be assigned to the user`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'This role can not be assigned',
+          'You can not assign admin role to other members of the workspace'
+        )
+      )
     }
 
     // Update the role of the user
@@ -399,7 +417,12 @@ export class WorkspaceMembershipService {
       })
 
       if (!role) {
-        throw new NotFoundException(`Role ${slug} not found`)
+        throw new NotFoundException(
+          constructErrorBody(
+            'Role not found',
+            `Role ${slug} not found in the workspace ${workspace.name} (${workspace.id})`
+          )
+        )
       }
 
       roleSet.add(role)
@@ -454,7 +477,7 @@ export class WorkspaceMembershipService {
    * @returns The members of the workspace, paginated, with metadata
    */
   async getAllMembersOfWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
@@ -463,11 +486,10 @@ export class WorkspaceMembershipService {
     search: string
   ) {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_USERS],
-        prisma: this.prisma
+        authorities: [Authority.READ_USERS]
       })
     //get all members of workspace for page with limit
     const items = await this.prisma.workspaceMember.findMany({
@@ -566,7 +588,7 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async acceptInvitation(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
     // Check if the user has a pending invitation to the workspace
@@ -621,18 +643,17 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async cancelInvitation(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     inviteeEmail: User['email']
   ): Promise<void> {
     const inviteeUser = await getUserByEmailOrId(inviteeEmail, this.prisma)
 
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.REMOVE_USER],
-        prisma: this.prisma
+        authorities: [Authority.REMOVE_USER]
       })
 
     // Check if the user has a pending invitation to the workspace
@@ -671,7 +692,7 @@ export class WorkspaceMembershipService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async declineInvitation(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
     // Check if the user has a pending invitation to the workspace
@@ -713,15 +734,14 @@ export class WorkspaceMembershipService {
    * @param workspaceSlug The slug of the workspace to leave
    */
   async leaveWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE],
-        prisma: this.prisma
+        authorities: [Authority.READ_WORKSPACE]
       })
 
     const workspaceOwnerId = await this.prisma.workspace
@@ -738,7 +758,10 @@ export class WorkspaceMembershipService {
     // Check if the user is the owner of the workspace
     if (workspaceOwnerId === user.id)
       throw new BadRequestException(
-        `You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.`
+        constructErrorBody(
+          'Can not leave workspace',
+          'You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.'
+        )
       )
 
     // Delete the membership
@@ -772,7 +795,7 @@ export class WorkspaceMembershipService {
    * @returns True if the user is a member of the workspace, false otherwise
    */
   async isUserMemberOfWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     otherUserEmail: User['email']
   ): Promise<boolean> {
@@ -785,11 +808,10 @@ export class WorkspaceMembershipService {
     }
 
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_USERS],
-        prisma: this.prisma
+        authorities: [Authority.READ_USERS]
       })
 
     return await this.memberExistsInWorkspace(workspace.id, otherUser.id)
@@ -826,7 +848,7 @@ export class WorkspaceMembershipService {
    */
   private async addMembersToWorkspace(
     workspace: Workspace,
-    currentUser: User,
+    currentUser: AuthenticatedUser,
     members: CreateWorkspaceMember[]
   ) {
     const workspaceAdminRole = await this.getWorkspaceAdminRole(workspace.id)
@@ -835,7 +857,10 @@ export class WorkspaceMembershipService {
       // Check if the admin role is tried to be assigned to the user
       if (member.roleSlugs.includes(workspaceAdminRole.slug)) {
         throw new BadRequestException(
-          `Admin role cannot be assigned to the user`
+          constructErrorBody(
+            'Admin role cannot be assigned to the user',
+            'You can not assign the admin role to the user. Please check the teams tab to confirm whether the user is a member of this workspace'
+          )
         )
       }
 
@@ -860,7 +885,10 @@ export class WorkspaceMembershipService {
           }). Skipping.`
         )
         throw new ConflictException(
-          `User ${memberUser.name || memberUser.email} (${userId}) is already a member of workspace ${workspace.name} (${workspace.slug})`
+          constructErrorBody(
+            `User ${memberUser.name || memberUser.email} is already a member of this workspace`,
+            'Please check the teams tab to confirm whether the user is a member of this workspace'
+          )
         )
       }
 
@@ -874,7 +902,12 @@ export class WorkspaceMembershipService {
         })
 
         if (!role) {
-          throw new NotFoundException(`Workspace role ${slug} does not exist`)
+          throw new NotFoundException(
+            constructErrorBody(
+              `Workspace role ${slug} does not exist`,
+              `Please check the workspace roles to confirm whether the role exists`
+            )
+          )
         }
 
         roleSet.add(role)
@@ -1039,7 +1072,10 @@ export class WorkspaceMembershipService {
 
     if (!membershipExists)
       throw new BadRequestException(
-        `${user.email} is not invited to workspace ${workspaceSlug}`
+        constructErrorBody(
+          'User is not invited to the workspace',
+          `${user.email} is not invited to workspace ${workspaceSlug}`
+        )
       )
   }
 }

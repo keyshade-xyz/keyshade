@@ -1,3 +1,27 @@
+## [2.12.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.7...v2.12.0-stage.8) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add checkmark icon to copy slug button for environments ([#742](https://github.com/keyshade-xyz/keyshade/issues/742)) ([#766](https://github.com/keyshade-xyz/keyshade/issues/766)) ([cd2925f](https://github.com/keyshade-xyz/keyshade/commit/cd2925f4fa7cc721ce2b2808ad424983742a963c))
+
+## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for [secure] slug ([#767](https://github.com/keyshade-xyz/keyshade/issues/767)) ([ce05835](https://github.com/keyshade-xyz/keyshade/commit/ce0583595cf91b3d1afb134ff94564abcae0b9b4))
+
+## [2.12.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.5...v2.12.0-stage.6) (2025-02-19)
+
+### 🚀 Features
+
+* **api:** Workspace ip blacklisting ([#687](https://github.com/keyshade-xyz/keyshade/issues/687)) ([bc5f6a5](https://github.com/keyshade-xyz/keyshade/commit/bc5f6a5d55206c4ab008246061f2bf472d402208))
+
+## [2.12.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.4...v2.12.0-stage.5) (2025-02-18)
+
+### 🚀 Features
+
+* Enhanced error handling in platfrom and API ([#765](https://github.com/keyshade-xyz/keyshade/issues/765)) ([b4349ad](https://github.com/keyshade-xyz/keyshade/commit/b4349adc0c197750cb2dbdc41fe294907c193293))
+
 ## [2.12.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.3...v2.12.0-stage.4) (2025-02-18)
 
 ### 🐛 Bug Fixes

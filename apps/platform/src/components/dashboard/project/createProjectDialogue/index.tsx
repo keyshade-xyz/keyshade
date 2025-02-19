@@ -1,8 +1,8 @@
-import { AddSVG } from '@public/svg/shared'
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useCallback, useMemo, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
+import { AddSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -29,6 +29,7 @@ import {
   selectedWorkspaceAtom,
   projectsOfWorkspaceAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
@@ -53,61 +54,59 @@ export default function CreateProjectDialogue(): JSX.Element {
     ],
     accessLevel: 'PRIVATE'
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const createProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.createProject({
+      ...newProjectData,
+      workspaceSlug: selectedWorkspace!.slug,
+      environments:
+        newProjectData.environments?.filter((env) => env.name.trim() !== '') ||
+        []
+    })
+  )
 
   // Function to create a new project
-  const createNewProject = useCallback(async () => {
+  const handleCreateNewProject = useCallback(async () => {
     if (selectedWorkspace) {
-      // Filter out environments with empty names
-      const projectData = {
-        ...newProjectData,
-        workspaceSlug: selectedWorkspace.slug,
-        environments:
-          newProjectData.environments?.filter(
-            (env) => env.name.trim() !== ''
-          ) || []
+      if (newProjectData.name.trim() === '') {
+        toast.error('Project name cannot be empty')
+        return
       }
 
-      const { data, error, success } =
-        await ControllerInstance.getInstance().projectController.createProject(
-          projectData,
-          {}
-        )
+      setIsLoading(true)
+      toast.loading('Creating project...')
 
-      if (success && data) {
-        setProjects([
-          ...projects,
-          {
-            ...data,
-            environmentCount: newProjectData.environments
-              ? newProjectData.environments.length
-              : 0,
-            secretCount: 0,
-            variableCount: 0
-          }
-        ])
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while creating the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+      try {
+        const { data, success } = await createProject()
+
+        if (success && data) {
+          setProjects([
+            ...projects,
+            {
+              ...data,
+              environmentCount: newProjectData.environments
+                ? newProjectData.environments.length
+                : 0,
+              secretCount: 0,
+              variableCount: 0
+            }
+          ])
+        }
+      } finally {
+        setIsCreateProjectDialogOpen(false)
+        setIsLoading(false)
+        toast.dismiss()
       }
-
-      setIsCreateProjectDialogOpen(false)
-    } else {
-      toast.error('No workspace selected')
     }
   }, [
     selectedWorkspace,
-    newProjectData,
+    newProjectData.name,
+    newProjectData.environments,
+    createProject,
+    setProjects,
     projects,
-    setIsCreateProjectDialogOpen,
-    setProjects
+    setIsCreateProjectDialogOpen
   ])
 
   const toggleDialog = useCallback(
@@ -238,13 +237,13 @@ export default function CreateProjectDialogue(): JSX.Element {
                 Access Level
               </Label>
               <Select
-                value={newProjectData.accessLevel}
                 onValueChange={(currValue) => {
                   setNewProjectData((prevData) => ({
                     ...prevData,
                     accessLevel: currValue as 'GLOBAL' | 'INTERNAL' | 'PRIVATE'
                   }))
                 }}
+                value={newProjectData.accessLevel}
               >
                 <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
                   <SelectValue />
@@ -293,7 +292,8 @@ export default function CreateProjectDialogue(): JSX.Element {
         <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
           <Button
             className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
-            onClick={createNewProject}
+            disabled={isLoading}
+            onClick={handleCreateNewProject}
             variant="secondary"
           >
             Create project

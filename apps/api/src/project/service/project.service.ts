@@ -13,22 +13,26 @@ import {
   ProjectAccessLevel,
   Secret,
   SecretVersion,
-  User,
   Variable,
   Workspace
 } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { v4 } from 'uuid'
 import { ProjectWithCounts, ProjectWithSecrets } from '../project.types'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { ForkProject } from '../dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
 import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
-import { excludeFields, limitMaxItemsPerPage } from '@/common/util'
+import {
+  constructErrorBody,
+  excludeFields,
+  limitMaxItemsPerPage
+} from '@/common/util'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class ProjectService {
@@ -36,7 +40,7 @@ export class ProjectService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   /**
@@ -48,24 +52,26 @@ export class ProjectService {
    * @returns The newly created project
    */
   async createProject(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: CreateProject
   ) {
     // Check if the workspace exists or not
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.CREATE_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.CREATE_PROJECT]
       })
     const workspaceId = workspace.id
 
     // Check if project with this name already exists for the user
     if (await this.projectExists(dto.name, workspaceId))
       throw new ConflictException(
-        `Project with this name **${dto.name}** already exists`
+        constructErrorBody(
+          'Project already exists',
+          `Project with name ${dto.name} already exists in workspace ${workspace.slug}`
+        )
       )
 
     // Create the public and private key pair
@@ -221,7 +227,7 @@ export class ProjectService {
    * @throws BadRequestException If the private key is required but not supplied
    */
   async updateProject(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     dto: UpdateProject
   ) {
@@ -232,11 +238,10 @@ export class ProjectService {
     if (dto.accessLevel) authority = Authority.WORKSPACE_ADMIN
 
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [authority],
-        prisma: this.prisma
+        authorities: [authority]
       })
 
     // Check if project with this name already exists for the user
@@ -245,7 +250,10 @@ export class ProjectService {
       project.name === dto.name
     )
       throw new ConflictException(
-        `Project with this name **${dto.name}** already exists`
+        constructErrorBody(
+          'Project already exists',
+          `Project with this name **${dto.name}** already exists`
+        )
       )
 
     if (dto.accessLevel) {
@@ -264,7 +272,10 @@ export class ProjectService {
         // because we need to decrypt the secrets
         if (!dto.privateKey) {
           throw new BadRequestException(
-            'Private key is required to make the project GLOBAL'
+            constructErrorBody(
+              'Private key required',
+              'Please provide the private key if you wish to set the project as GLOBAL'
+            )
           )
         }
       } else if (
@@ -319,7 +330,10 @@ export class ProjectService {
         versionUpdateOps.push(...txs)
       } else {
         throw new BadRequestException(
-          'Private key is required to regenerate the key pair'
+          constructErrorBody(
+            'Private key required',
+            'Please provide the private key if you wish to regenerate the key pair'
+          )
         )
       }
     }
@@ -376,27 +390,25 @@ export class ProjectService {
    * @throws BadRequestException If the private key is required but not supplied
    */
   async forkProject(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     forkMetadata: ForkProject
   ) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
 
     let workspaceId = null
 
     if (forkMetadata.workspaceSlug) {
       const workspace =
-        await this.authorityCheckerService.checkAuthorityOverWorkspace({
-          userId: user.id,
+        await this.authorizationService.authorizeUserAccessToWorkspace({
+          user,
           entity: { slug: forkMetadata.workspaceSlug },
-          authorities: [Authority.CREATE_PROJECT],
-          prisma: this.prisma
+          authorities: [Authority.CREATE_PROJECT]
         })
 
       workspaceId = workspace.id
@@ -417,7 +429,10 @@ export class ProjectService {
     // Check if project with this name already exists for the user
     if (await this.projectExists(newProjectName, workspaceId))
       throw new ConflictException(
-        `Project with this name **${newProjectName}** already exists in the selected workspace`
+        constructErrorBody(
+          'Project already exists',
+          `Project with name ${newProjectName} already exists in the selected workspace`
+        )
       )
 
     const { privateKey, publicKey } = createKeyPair()
@@ -521,13 +536,15 @@ export class ProjectService {
    * @throws BadRequestException If the project is not a forked project
    * @throws UnauthorizedException If the user does not have the authority to update the project
    */
-  async unlinkParentOfFork(user: User, projectSlug: Project['slug']) {
+  async unlinkParentOfFork(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug']
+  ) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.UPDATE_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
 
@@ -555,19 +572,25 @@ export class ProjectService {
    * @throws BadRequestException If the project is not a forked project
    * @throws UnauthorizedException If the user does not have the authority to update the project
    */
-  async syncFork(user: User, projectSlug: Project['slug'], hardSync: boolean) {
+  async syncFork(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    hardSync: boolean
+  ) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.UPDATE_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
 
     if (!project.isForked || project.forkedFromId == null) {
       throw new BadRequestException(
-        `Project ${projectSlug} is not a forked project`
+        constructErrorBody(
+          'Not a forked project',
+          `Project ${projectSlug} is not a forked project`
+        )
       )
     }
 
@@ -578,11 +601,10 @@ export class ProjectService {
     })
 
     const parentProject =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: forkedFromProject.slug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
 
     const copyProjectOp = await this.copyProjectData(
@@ -608,13 +630,12 @@ export class ProjectService {
    *
    * @throws UnauthorizedException If the user does not have the authority to delete the project
    */
-  async deleteProject(user: User, projectSlug: Project['slug']) {
+  async deleteProject(user: AuthenticatedUser, projectSlug: Project['slug']) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.DELETE_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.DELETE_PROJECT]
       })
 
     const op = []
@@ -674,17 +695,16 @@ export class ProjectService {
    * and `metadata` is the pagination metadata for the forks.
    */
   async getAllProjectForks(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     page: number,
     limit: number
   ) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
     const projectId = project.id
 
@@ -696,11 +716,10 @@ export class ProjectService {
 
     const forksAllowed = forks.filter(async (fork) => {
       const allowed =
-        (await this.authorityCheckerService.checkAuthorityOverProject({
-          userId: user.id,
+        (await this.authorizationService.authorizeUserAccessToProject({
+          user,
           entity: { slug: fork.slug },
-          authorities: [Authority.READ_PROJECT],
-          prisma: this.prisma
+          authorities: [Authority.READ_PROJECT]
         })) != null
 
       return allowed
@@ -730,13 +749,12 @@ export class ProjectService {
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project
    */
-  async getProject(user: User, projectSlug: Project['slug']) {
+  async getProject(user: AuthenticatedUser, projectSlug: Project['slug']) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
 
     delete project.secrets
@@ -762,7 +780,7 @@ export class ProjectService {
    * and `metadata` is an object with pagination metadata.
    */
   async getProjectsOfWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
@@ -771,11 +789,10 @@ export class ProjectService {
     search: string
   ) {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
     const workspaceId = workspace.id
 
@@ -905,7 +922,7 @@ export class ProjectService {
    * @returns An array of database operations that need to be performed to copy the data.
    */
   private async copyProjectData(
-    user: User,
+    user: AuthenticatedUser,
     fromProject: {
       id: Project['id']
       privateKey: string // Need the private key to decrypt the secrets
@@ -1234,7 +1251,7 @@ export class ProjectService {
 
   private async countEnvironmentsVariablesAndSecretsInProject(
     project: Partial<Project>,
-    user: User
+    user: AuthenticatedUser
   ): Promise<ProjectWithCounts> {
     let environmentCount = 0
     let variableCount = 0
@@ -1252,8 +1269,8 @@ export class ProjectService {
     // This entire block will become invalid after RBAC for environments are implemented
     const envPromises = allEnvs.map(async (env) => {
       const hasRequiredPermission =
-        await this.authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
+        await this.authorizationService.authorizeUserAccessToEnvironment({
+          user,
           entity: { slug: env.slug },
           authorities:
             project.accessLevel == ProjectAccessLevel.GLOBAL
@@ -1262,8 +1279,7 @@ export class ProjectService {
                   Authority.READ_ENVIRONMENT,
                   Authority.READ_SECRET,
                   Authority.READ_VARIABLE
-                ],
-          prisma: this.prisma
+                ]
         })
       if (hasRequiredPermission) {
         environmentCount += 1

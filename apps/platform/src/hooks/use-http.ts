@@ -1,0 +1,56 @@
+import type { ClientResponse } from '@keyshade/schema'
+import { useCallback } from 'react'
+import { toast } from 'sonner'
+import * as Sentry from '@sentry/nextjs'
+import { logout } from '@/lib/utils'
+
+function handle403() {
+  toast.info('Session expired', {
+    description: 'Session expired. Please sign in again.'
+  })
+
+  logout()
+}
+
+function handle500(error) {
+  toast.error('Something went wrong on our end')
+  Sentry.captureException(error)
+}
+
+export function useHttp<T, V extends ClientResponse<T>>(
+  fn: () => Promise<V>
+): () => Promise<V> {
+  return useCallback(async (): Promise<V> => {
+    try {
+      const response = await fn()
+
+      if (response.error) {
+        const statusCode = response.error.statusCode
+
+        if (statusCode === 403) {
+          handle403()
+        } else if (statusCode.toString().startsWith('4')) {
+          // For 4xx errors
+          const { header, body } = JSON.parse(response.error.message) as {
+            header: string
+            body: string
+          }
+
+          toast.error(header, {
+            description: body
+          })
+        } else if (statusCode === 500) {
+          handle500(response.error)
+        }
+      }
+      return response
+    } catch (error) {
+      if (error.status === 403) {
+        handle403()
+      } else if (error.status === 500) {
+        handle500(error)
+      }
+      throw error
+    }
+  }, [fn])
+}
