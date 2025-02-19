@@ -1,0 +1,116 @@
+name: PR Close
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:
+
+jobs:
+  pr-close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          CLOSE_PR_ENABLED: ${{ vars.CLOSE_PR_ENABLED }}
+          CLOSE_PR_AFTER_DAYS: ${{ vars.CLOSE_PR_AFTER_DAYS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
+            const closePrEnabled = process.env.CLOSE_PR_ENABLED || false;
+            const closePrAfterDays = process.env.CLOSE_PR_AFTER_DAYS || 7;
+            const closePrAfterMilliseconds = closePrAfterDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if(!closePrEnabled) {
+              console.log('!!! Dry run, there are no changes made !!!');
+            }
+
+            async function listOpenPrs() {
+              const pullRequests = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const pullRequestsResponse = await github.rest.pulls.list({
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  page
+                });
+
+                pullRequests.push(...pullRequestsResponse.data);
+
+                hasNextPage = pullRequestsResponse.headers.link && pullRequestsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return pullRequests;
+            }
+
+            async function listPrReviews(pullRequest) {
+              const reviews = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const reviewsResponse = await github.rest.pulls.listReviews({
+                  owner,
+                  repo,
+                  pull_number: pullRequest.number,
+                  per_page: 100,
+                  page
+                });
+
+                reviews.push(...reviewsResponse.data);
+
+                hasNextPage = reviewsResponse.headers.link && reviewsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return reviews;
+            }
+
+            async function closePrs() {
+              const pullRequests = await listOpenPrs();
+
+              for (const pullRequest of pullRequests) {
+                const reviews = await listPrReviews(pullRequest);
+                const unapprovedReviews = reviews.filter(review => review.state !== 'APPROVED');
+                const pullRequestCreatedAt = new Date(pullRequest.created_at);
+
+                // Check if PR has unapproved reviews
+                if(unapprovedReviews.length === 0) {
+                  continue;
+                }
+
+                // Check if it is time to close PR
+                const closePrAfter = new Date(pullRequestCreatedAt.getTime() + closePrAfterMilliseconds);
+
+                if (now < closePrAfter) {
+                  continue;
+                }
+
+                if(closePrEnabled) {
+                  await github.rest.pulls.update({
+                    owner,
+                    repo,
+                    pull_number: pullRequest.number,
+                    state: 'closed'
+                  });
+
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: pullRequest.number,
+                    body: `PR closed due to inactivity`,
+                  });
+                }
+
+                console.log(`PR '${pullRequest.number}' closed`);
+              }
+            }
+
+            await closePrs();

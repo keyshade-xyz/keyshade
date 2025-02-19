@@ -112,7 +112,7 @@ jobs:
                       owner,
                       repo,
                       issue_number: issue.number,
-                      body: `Unassigned the issue from @${assignee.login}!`,
+                      body: `Unassigned the issue from @${assignee.login} due to inactivity!`,
                     });
                   }
 
