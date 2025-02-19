@@ -32,6 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
+import { copyToClipboard } from '@/lib/clipboard'
 
 export default function VariableCard(
   variableData: GetAllVariablesOfProjectResponse['items'][number]
@@ -41,6 +42,10 @@ export default function VariableCard(
   const setIsDeleteVariableOpen = useSetAtom(deleteVariableOpenAtom)
 
   const { variable, values } = variableData
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(variable.slug, 'You copied the slug successfully.', 'Failed to copy the slug.', 'You successfully copied the slug.')
+  }
 
   const handleEditClick = () => {
     setSelectedVariable(variableData)
@@ -126,9 +131,15 @@ export default function VariableCard(
           </Table>
         </AccordionContent>
       </AccordionItem>
-      <ContextMenuContent className="flex h-[6.375rem] w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
+      <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
         <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
           Show Version History
+        </ContextMenuItem>
+        <ContextMenuItem
+        className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+        onSelect={handleCopyToClipboard}
+        >
+          Copy Slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
