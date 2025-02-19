@@ -16,19 +16,9 @@ import {
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
-import { constructErrorBody } from './util'
-
-export interface AuthorityInput {
-  userId: string
-  authorities: Authority[]
-  prisma: PrismaClient
-  entity: { slug?: string; name?: string }
-}
-=======
 import { AuthorizationParams } from './authorization.types'
 import { PrismaService } from '@/prisma/prisma.service'
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
+import { constructErrorBody } from '@/common/util'
 
 @Injectable()
 export class AuthorityCheckerService {
@@ -75,14 +65,10 @@ export class AuthorityCheckerService {
 
     if (!workspace) {
       throw new NotFoundException(
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
         constructErrorBody(
           'Workspace not found',
-          `Workspace ${entity.slug} does not exist`
+          `Workspace ${entity.slug ?? entity.name} not found`
         )
-=======
-        `Workspace ${entity.slug ?? entity.name} not found`
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
       )
     }
 
@@ -92,15 +78,7 @@ export class AuthorityCheckerService {
       this.prisma
     )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
     this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
-=======
-    this.checkHasPermissionOverEntity(
-      permittedAuthorities,
-      authorities,
-      user.id
-    )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
 
     return workspace
   }
@@ -178,35 +156,20 @@ export class AuthorityCheckerService {
         ) {
           this.checkHasPermissionOverEntity(
             permittedAuthoritiesForWorkspace,
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
             authorities
-=======
-            authorities,
-            user.id
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
           )
         }
         break
       case ProjectAccessLevel.INTERNAL:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForWorkspace,
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
           authorities
-=======
-          authorities,
-          user.id
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
         )
         break
       case ProjectAccessLevel.PRIVATE:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForProject,
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
           authorities
-=======
-          authorities,
-          user.id
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
         )
         break
     }
@@ -271,15 +234,7 @@ export class AuthorityCheckerService {
       this.prisma
     )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
     this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
-=======
-    this.checkHasPermissionOverEntity(
-      permittedAuthorities,
-      authorities,
-      user.id
-    )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
 
     return environment
   }
@@ -343,15 +298,7 @@ export class AuthorityCheckerService {
       this.prisma
     )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
     this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
-=======
-    this.checkHasPermissionOverEntity(
-      permittedAuthorities,
-      authorities,
-      user.id
-    )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
 
     return variable
   }
@@ -415,15 +362,7 @@ export class AuthorityCheckerService {
       this.prisma
     )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
     this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
-=======
-    this.checkHasPermissionOverEntity(
-      permittedAuthorities,
-      authorities,
-      user.id
-    )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
 
     return secret
   }
@@ -485,15 +424,7 @@ export class AuthorityCheckerService {
       this.prisma
     )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
     this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
-=======
-    this.checkHasPermissionOverEntity(
-      permittedAuthorities,
-      authorities,
-      user.id
-    )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
 
     if (integration.projectId) {
       const project = await this.prisma.project.findUnique({
@@ -514,15 +445,7 @@ export class AuthorityCheckerService {
         this.prisma
       )
 
-<<<<<<< HEAD:apps/api/src/common/authority-checker.service.ts
       this.checkHasPermissionOverEntity(projectAuthorities, authorities)
-=======
-      this.checkHasPermissionOverEntity(
-        projectAuthorities,
-        authorities,
-        user.id
-      )
->>>>>>> 054ea92 (Blacklisted IP address filtering implemented):apps/api/src/auth/service/authority-checker.service.ts
     }
 
     return integration
