@@ -1,7 +1,8 @@
+import { CheckmarkSVG, CopySVG } from '@public/svg/shared'
 // eslint-disable-next-line camelcase -- we need to import the font
 import { Roboto_Mono } from 'next/font/google'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { CopySVG } from '@public/svg/shared'
 
 const roboto = Roboto_Mono({ weight: ['400'], subsets: ['latin'] })
 
@@ -10,8 +11,12 @@ interface SlugProps {
 }
 
 export default function Slug({ text }: SlugProps): React.JSX.Element {
+  const [copied, setCopied] = useState(false)
+  
   const copyToClipboard = () => {
     navigator.clipboard.writeText(text)
+    setCopied(true)
+
     toast.success('Copied to clipboard!', {
       description: (
         <p className="text-xs text-green-300">
@@ -19,6 +24,8 @@ export default function Slug({ text }: SlugProps): React.JSX.Element {
         </p>
       )
     })
+
+    setTimeout(() => setCopied(false), 5000)
   }
 
   return (
@@ -27,7 +34,7 @@ export default function Slug({ text }: SlugProps): React.JSX.Element {
       onClick={copyToClipboard}
       type="button"
     >
-      {text} <CopySVG className="w-[20px]" />
+      {text} {copied ? <CheckmarkSVG className="w-[20px] h-[20px]" /> : <CopySVG className="w-[20px]" />}
     </button>
   )
 }
