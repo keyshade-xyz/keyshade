@@ -11,9 +11,10 @@ import {
 import { EnvironmentService } from '../service/environment.service'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
-import { Authority, User } from '@prisma/client'
+import { Authority } from '@prisma/client'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('environment')
 export class EnvironmentController {
@@ -22,7 +23,7 @@ export class EnvironmentController {
   @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_ENVIRONMENT)
   async createEnvironment(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateEnvironment,
     @Param('projectSlug') projectSlug: string
   ) {
@@ -36,7 +37,7 @@ export class EnvironmentController {
   @Put(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_ENVIRONMENT)
   async updateEnvironment(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateEnvironment,
     @Param('environmentSlug') environmentSlug: string
   ) {
@@ -50,7 +51,7 @@ export class EnvironmentController {
   @Get(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironment(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('environmentSlug') environmentSlug: string
   ) {
     return await this.environmentService.getEnvironment(user, environmentSlug)
@@ -59,7 +60,7 @@ export class EnvironmentController {
   @Get('/all/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_ENVIRONMENT)
   async getEnvironmentsOfProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
@@ -81,7 +82,7 @@ export class EnvironmentController {
   @Delete(':environmentSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_ENVIRONMENT)
   async deleteEnvironment(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('environmentSlug') environmentSlug: string
   ) {
     return await this.environmentService.deleteEnvironment(

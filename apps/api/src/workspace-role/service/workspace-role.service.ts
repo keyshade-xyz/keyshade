@@ -19,12 +19,13 @@ import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspa
 import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { paginate, PaginatedMetadata } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -32,7 +33,7 @@ export class WorkspaceRoleService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   /**
@@ -45,7 +46,7 @@ export class WorkspaceRoleService {
    * @returns the newly created workspace role
    */
   async createWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: CreateWorkspaceRole
   ) {
@@ -62,11 +63,10 @@ export class WorkspaceRoleService {
     }
 
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.CREATE_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.CREATE_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
 
@@ -153,14 +153,13 @@ export class WorkspaceRoleService {
             // Check if the user has read authority over all the environments
             for (const environmentSlug of pe.environmentSlugs) {
               try {
-                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                await this.authorizationService.authorizeUserAccessToEnvironment(
                   {
-                    userId: user.id,
+                    user,
                     entity: {
                       slug: environmentSlug
                     },
-                    authorities: [Authority.READ_ENVIRONMENT],
-                    prisma: this.prisma
+                    authorities: [Authority.READ_ENVIRONMENT]
                   }
                 )
               } catch {
@@ -262,7 +261,7 @@ export class WorkspaceRoleService {
    * @returns the updated workspace role
    */
   async updateWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug'],
     dto: UpdateWorkspaceRole
   ) {
@@ -355,14 +354,13 @@ export class WorkspaceRoleService {
             // Check if the user has read authority over all the environments
             for (const environmentSlug of pe.environmentSlugs) {
               try {
-                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                await this.authorizationService.authorizeUserAccessToEnvironment(
                   {
-                    userId: user.id,
+                    user,
                     entity: {
                       slug: environmentSlug
                     },
-                    authorities: [Authority.READ_ENVIRONMENT],
-                    prisma: this.prisma
+                    authorities: [Authority.READ_ENVIRONMENT]
                   }
                 )
               } catch {
@@ -471,7 +469,7 @@ export class WorkspaceRoleService {
    * @param workspaceRoleSlug the slug of the workspace role to be deleted
    */
   async deleteWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug']
   ) {
     const workspaceRole = await this.getWorkspaceRoleWithAuthority(
@@ -525,16 +523,15 @@ export class WorkspaceRoleService {
    * @returns true if a workspace role with the given name exists, false otherwise
    */
   async checkWorkspaceRoleExists(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     name: string
   ) {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
 
@@ -556,7 +553,7 @@ export class WorkspaceRoleService {
    * @returns the workspace role with the given slug
    */
   async getWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug']
   ): Promise<WorkspaceRole> {
     return await this.getWorkspaceRoleWithAuthority(
@@ -579,7 +576,7 @@ export class WorkspaceRoleService {
    * @returns a PaginatedMetadata object containing the items and metadata
    */
   async getWorkspaceRolesOfWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
@@ -588,11 +585,10 @@ export class WorkspaceRoleService {
     search: string
   ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
     const { id: workspaceId } =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_WORKSPACE_ROLE]
       })
     //get workspace roles of a workspace for given page and limit
     const items = await this.prisma.workspaceRole.findMany({
