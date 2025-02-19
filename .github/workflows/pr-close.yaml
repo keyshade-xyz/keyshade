@@ -3,7 +3,6 @@ name: PR Close
 on:
   schedule:
     - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:
 
 jobs:
   pr-close:

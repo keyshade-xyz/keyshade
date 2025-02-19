@@ -3,7 +3,6 @@ name: PR Review Reminder
 on:
   schedule:
     - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:
 
 jobs:
   pr-review-reminder:
