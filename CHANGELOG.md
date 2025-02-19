@@ -1,3 +1,9 @@
+## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for [secure] slug ([#767](https://github.com/keyshade-xyz/keyshade/issues/767)) ([ce05835](https://github.com/keyshade-xyz/keyshade/commit/ce0583595cf91b3d1afb134ff94564abcae0b9b4))
+
 ## [2.12.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.5...v2.12.0-stage.6) (2025-02-19)
 
 ### 🚀 Features
