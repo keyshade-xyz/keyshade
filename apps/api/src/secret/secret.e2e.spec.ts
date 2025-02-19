@@ -15,7 +15,6 @@ import {
   ProjectAccessLevel,
   Secret,
   SecretVersion,
-  User,
   Workspace
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
@@ -37,6 +36,7 @@ import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 import { ValidationPipe } from '@nestjs/common'
 
 describe('Secret Controller Tests', () => {
@@ -48,11 +48,13 @@ describe('Secret Controller Tests', () => {
   let secretService: SecretService
   let eventService: EventService
   let userService: UserService
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
   let project1: Project, project2: Project
   let environment1: Environment
   let secret1: Secret
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -113,8 +115,8 @@ describe('Secret Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',

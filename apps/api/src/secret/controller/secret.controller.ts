@@ -10,10 +10,11 @@ import {
 } from '@nestjs/common'
 import { SecretService } from '../service/secret.service'
 import { CurrentUser } from '@/decorators/user.decorator'
-import { Authority, User } from '@prisma/client'
+import { Authority } from '@prisma/client'
 import { CreateSecret } from '../dto/create.secret/create.secret'
 import { UpdateSecret } from '../dto/update.secret/update.secret'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('secret')
 export class SecretController {
@@ -22,7 +23,7 @@ export class SecretController {
   @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
   async createSecret(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
     @Body() dto: CreateSecret
   ) {
@@ -32,7 +33,7 @@ export class SecretController {
   @Put(':secretSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async updateSecret(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
     @Body() dto: UpdateSecret
   ) {
@@ -42,7 +43,7 @@ export class SecretController {
   @Put(':secretSlug/rollback/:rollbackVersion')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async rollbackSecret(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
     @Query('environmentSlug') environmentSlug: string,
     @Param('rollbackVersion') rollbackVersion: number
@@ -58,7 +59,7 @@ export class SecretController {
   @Delete(':secretSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string
   ) {
     return await this.secretService.deleteSecret(user, secretSlug)
@@ -67,7 +68,7 @@ export class SecretController {
   @Get('/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getAllSecretsOfProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
@@ -91,7 +92,7 @@ export class SecretController {
   @Get(':secretSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_SECRET)
   async getRevisionsOfSecret(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
     @Param('environmentSlug') environmentSlug: string,
     @Query('decryptValue') decryptValue: boolean = false,

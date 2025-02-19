@@ -10,11 +10,12 @@ import {
 } from '@nestjs/common'
 import { ProjectService } from '../service/project.service'
 import { CurrentUser } from '@/decorators/user.decorator'
-import { Authority, Project, User, Workspace } from '@prisma/client'
+import { Authority, Project, Workspace } from '@prisma/client'
 import { CreateProject } from '../dto/create.project/create.project'
 import { UpdateProject } from '../dto/update.project/update.project'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { ForkProject } from '../dto/fork.project/fork.project'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('project')
 export class ProjectController {
@@ -23,7 +24,7 @@ export class ProjectController {
   @Post(':workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_PROJECT)
   async createProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['id'],
     @Body() dto: CreateProject
   ) {
@@ -33,7 +34,7 @@ export class ProjectController {
   @Put(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
   async updateProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
     @Body() dto: UpdateProject
   ) {
@@ -43,7 +44,7 @@ export class ProjectController {
   @Delete(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_PROJECT)
   async deleteProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug']
   ) {
     return await this.service.deleteProject(user, projectSlug)
@@ -52,7 +53,7 @@ export class ProjectController {
   @Get(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug']
   ) {
     return await this.service.getProject(user, projectSlug)
@@ -61,7 +62,7 @@ export class ProjectController {
   @Post(':projectSlug/fork')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.CREATE_PROJECT)
   async forkProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
     @Body() forkMetadata: ForkProject
   ) {
@@ -71,7 +72,7 @@ export class ProjectController {
   @Put(':projectSlug/fork')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT, Authority.UPDATE_PROJECT)
   async syncFork(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
     @Query('hardSync') hardSync: boolean = false
   ) {
@@ -81,7 +82,7 @@ export class ProjectController {
   @Delete(':projectSlug/fork')
   @RequiredApiKeyAuthorities(Authority.UPDATE_PROJECT)
   async unlinkFork(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug']
   ) {
     return await this.service.unlinkParentOfFork(user, projectSlug)
@@ -90,7 +91,7 @@ export class ProjectController {
   @Get(':projectSlug/forks')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getForks(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10
@@ -101,7 +102,7 @@ export class ProjectController {
   @Get('/all/:workspaceSlug')
   @RequiredApiKeyAuthorities(Authority.READ_PROJECT)
   async getAllProjects(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['id'],
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, Global } from '@nestjs/common'
 import { AuthService } from './service/auth.service'
 import { AuthController } from './controller/auth.controller'
 import { JwtModule } from '@nestjs/jwt'
@@ -11,7 +11,10 @@ import { GitlabOAuthStrategyFactory } from '@/config/factory/gitlab/gitlab-strat
 import { GitlabStrategy } from '@/config/oauth-strategy/gitlab/gitlab.strategy'
 import { seconds, ThrottlerModule } from '@nestjs/throttler'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { AuthorizationService } from './service/authorization.service'
+import { AuthorityCheckerService } from './service/authority-checker.service'
 
+@Global()
 @Module({
   imports: [
     JwtModule.register({
@@ -37,6 +40,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
   ],
   providers: [
     AuthService,
+    AuthorizationService,
+    AuthorityCheckerService,
     GithubOAuthStrategyFactory,
     {
       provide: GithubStrategy,
@@ -62,6 +67,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
       inject: [GitlabOAuthStrategyFactory]
     }
   ],
-  controllers: [AuthController]
+  controllers: [AuthController],
+  exports: [AuthorizationService]
 })
 export class AuthModule {}

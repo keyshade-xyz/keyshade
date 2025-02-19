@@ -15,7 +15,6 @@ import {
   EventTriggerer,
   EventType,
   ProjectAccessLevel,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
@@ -38,6 +37,8 @@ import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
 import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
+import { HttpStatus } from '@nestjs/common'
 
 const createMembership = async (
   roleId: string,
@@ -75,9 +76,12 @@ describe('Workspace Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
   let workspaceMembershipService: WorkspaceMembershipService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
+
+  const USER_IP_ADDRESS = '127.0.0.1'
+  const BLACKLISTED_IP_ADDRESS = '192.168.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -144,8 +148,8 @@ describe('Workspace Controller Tests', () => {
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -600,6 +604,107 @@ describe('Workspace Controller Tests', () => {
       const body = response.json()
       expect(body.items).toHaveLength(0)
       expect(body.metadata).toEqual({})
+    })
+  })
+
+  describe('Get Blacklisted IP Addresses Tests', () => {
+    it('should not be able to fetch blacklisted IP addresses by user', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should be able to fetch blacklisted IP addresses by workspace administrator', async () => {
+      await prisma.workspace.update({
+        where: {
+          id: workspace1.id
+        },
+        data: {
+          blacklistedIpAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.OK)
+
+      const blacklistedIpAddresses = response.json()
+
+      expect(blacklistedIpAddresses).toHaveLength(1)
+      expect(blacklistedIpAddresses[0]).toBe(BLACKLISTED_IP_ADDRESS)
+    })
+  })
+
+  describe('Update Blacklisted IP Addresses Tests', () => {
+    it('should not be able to update blacklisted IP addresses by user', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should not be able to update blacklisted IP addresses by workspace administrator from a blacklisted IP address', async () => {
+      await prisma.workspace.update({
+        where: {
+          id: workspace1.id
+        },
+        data: {
+          blacklistedIpAddresses: [USER_IP_ADDRESS]
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: []
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should be able to update blacklisted IP addresses by workspace administrator', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.OK)
+
+      const updatedBlacklistedIpAddresses = response.json()
+
+      expect(updatedBlacklistedIpAddresses).toHaveLength(1)
+      expect(updatedBlacklistedIpAddresses[0]).toBe(BLACKLISTED_IP_ADDRESS)
     })
   })
 

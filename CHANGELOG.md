@@ -1,3 +1,15 @@
+## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for [secure] slug ([#767](https://github.com/keyshade-xyz/keyshade/issues/767)) ([ce05835](https://github.com/keyshade-xyz/keyshade/commit/ce0583595cf91b3d1afb134ff94564abcae0b9b4))
+
+## [2.12.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.5...v2.12.0-stage.6) (2025-02-19)
+
+### 🚀 Features
+
+* **api:** Workspace ip blacklisting ([#687](https://github.com/keyshade-xyz/keyshade/issues/687)) ([bc5f6a5](https://github.com/keyshade-xyz/keyshade/commit/bc5f6a5d55206c4ab008246061f2bf472d402208))
+
 ## [2.12.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.4...v2.12.0-stage.5) (2025-02-18)
 
 ### 🚀 Features

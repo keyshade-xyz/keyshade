@@ -13,6 +13,7 @@ import {
 import { Authority, User, Workspace, WorkspaceRole } from '@prisma/client'
 import { CreateWorkspaceMember } from '../dto/create.workspace/create.workspace-membership'
 import { WorkspaceMembershipService } from '../service/workspace-membership.service'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('workspace-membership')
 export class WorkspaceMembershipController {
@@ -23,7 +24,7 @@ export class WorkspaceMembershipController {
   @Put(':workspaceSlug/transfer-ownership/:userEmail')
   @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   async transferOwnership(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('userEmail') userEmail: User['email']
   ) {
@@ -37,7 +38,7 @@ export class WorkspaceMembershipController {
   @Post(':workspaceSlug/invite-users')
   @RequiredApiKeyAuthorities(Authority.ADD_USER, Authority.READ_WORKSPACE)
   async addUsers(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Body() members: CreateWorkspaceMember[]
   ) {
@@ -51,7 +52,7 @@ export class WorkspaceMembershipController {
   @Delete(':workspaceSlug/remove-users')
   @RequiredApiKeyAuthorities(Authority.REMOVE_USER, Authority.READ_WORKSPACE)
   async removeUsers(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Query('userEmails') userEmails: string = ''
   ) {
@@ -68,7 +69,7 @@ export class WorkspaceMembershipController {
     Authority.READ_WORKSPACE
   )
   async updateMemberRoles(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('userEmail') userEmail: User['email'],
     @Body() roleSlugs: WorkspaceRole['slug'][]
@@ -84,7 +85,7 @@ export class WorkspaceMembershipController {
   @Post(':workspaceSlug/accept-invitation')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async acceptInvitation(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
     return this.workspaceMembershipService.acceptInvitation(user, workspaceSlug)
@@ -93,7 +94,7 @@ export class WorkspaceMembershipController {
   @Delete(':workspaceSlug/decline-invitation')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async declineInvitation(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
     return this.workspaceMembershipService.declineInvitation(
@@ -105,7 +106,7 @@ export class WorkspaceMembershipController {
   @Delete(':workspaceSlug/cancel-invitation/:userEmail')
   @RequiredApiKeyAuthorities(Authority.REMOVE_USER)
   async cancelInvitation(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('userEmail') userEmail: User['email']
   ) {
@@ -119,7 +120,7 @@ export class WorkspaceMembershipController {
   @Delete(':workspaceSlug/leave')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async leave(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug']
   ) {
     return this.workspaceMembershipService.leaveWorkspace(user, workspaceSlug)
@@ -128,7 +129,7 @@ export class WorkspaceMembershipController {
   @Get(':workspaceSlug/is-member/:userEmail')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async isMember(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Param('userEmail') userEmail: User['email']
   ) {
@@ -142,7 +143,7 @@ export class WorkspaceMembershipController {
   @Get(':workspaceSlug/members')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getMembers(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,

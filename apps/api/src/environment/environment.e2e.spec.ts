@@ -16,7 +16,6 @@ import {
   EventType,
   Project,
   ProjectAccessLevel,
-  User,
   Workspace
 } from '@prisma/client'
 import { ProjectModule } from '@/project/project.module'
@@ -33,6 +32,7 @@ import { ValidationPipe } from '@nestjs/common'
 // import { VariableService } from '@/variable/service/variable.service'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -44,10 +44,12 @@ describe('Environment Controller Tests', () => {
   // let secretService: SecretService
   // let variableService: VariableService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
   let project1: Project
   let environment1: Environment, environment2: Environment
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -100,8 +102,8 @@ describe('Environment Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
