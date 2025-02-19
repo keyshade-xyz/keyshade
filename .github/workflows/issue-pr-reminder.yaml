@@ -11,18 +11,18 @@ jobs:
     steps:
       - uses: actions/github-script@v7
         env:
-          CREATE_PR_REMINDER_ENABLED: ${{ vars.CREATE_PR_REMINDER_ENABLED }}
-          CREATE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS: ${{ vars.CREATE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS }}
-          CREATE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS: ${{ vars.CREATE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS }}
+          CREATE_ISSUE_PR_REMINDER_ENABLED: ${{ vars.CREATE_ISSUE_PR_REMINDER_ENABLED }}
+          CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS: ${{ vars.CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS }}
+          CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS: ${{ vars.CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS }}
           UNASSIGN_ISSUE_AFTER_DAYS: ${{ vars.UNASSIGN_ISSUE_AFTER_DAYS }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = 'keyshade-xyz';
             const repo = 'keyshade';
-            const createPrReminderEnabled = process.env.CREATE_PR_REMINDER_ENABLED || false;
-            const createPrReminderAfterIssueAssignedDays = process.env.CREATE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS || 2;
-            const createPrReminderBeforeIssueUnassignedDays = process.env.CREATE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS || 2;
+            const createPrReminderEnabled = process.env.CREATE_ISSUE_PR_REMINDER_ENABLED || false;
+            const createPrReminderAfterIssueAssignedDays = process.env.CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS || 2;
+            const createPrReminderBeforeIssueUnassignedDays = process.env.CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS || 2;
             const unassignIssueAfterDays = process.env.UNASSIGN_ISSUE_AFTER_DAYS || 14;
             const createPrReminderAfterIssueAssignedMilliseconds = createPrReminderAfterIssueAssignedDays * 24 * 60 * 60 * 1000;
             const createPrReminderBeforeIssueUnassignedMilliseconds = createPrReminderBeforeIssueUnassignedDays * 24 * 60 * 60 * 1000;
@@ -57,12 +57,12 @@ jobs:
             }
 
             async function listIssueEvents(issue) {
-              const allEvents = [];
+              const events = [];
               let page = 1;
               let hasNextPage = true;
 
               while (hasNextPage) {
-                const issuesResponse = await github.rest.issues.listEventsForTimeline({
+                const eventsResponse = await github.rest.issues.listEventsForTimeline({
                   owner,
                   repo,
                   issue_number: issue.number,
@@ -70,22 +70,22 @@ jobs:
                   page
                 });
 
-                allEvents.push(...issuesResponse.data);
+                events.push(...eventsResponse.data);
 
-                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                hasNextPage = eventsResponse.headers.link && eventsResponse.headers.link.includes('rel="next"');
                 page++;
               }
 
-              return allEvents.sort((a, b) => a.id > b.id);
+              return events.sort((a, b) => a.id > b.id);
             }
 
             async function listIssueComments(issue) {
-              const allComments = [];
+              const comments = [];
               let page = 1;
               let hasNextPage = true;
 
               while (hasNextPage) {
-                const issuesResponse = await github.rest.issues.listComments({
+                const commentsResponse = await github.rest.issues.listComments({
                   owner,
                   repo,
                   issue_number: issue.number,
@@ -93,13 +93,13 @@ jobs:
                   page
                 });
 
-                allComments.push(...issuesResponse.data);
+                comments.push(...commentsResponse.data);
 
-                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                hasNextPage = commentsResponse.headers.link && commentsResponse.headers.link.includes('rel="next"');
                 page++;
               }
 
-              return allComments;
+              return comments;
             }
 
             async function createPrReminder(assignee, issueNumber, comments, createPrReminderAfter, prReminder) {
@@ -161,8 +161,9 @@ jobs:
                   }
 
                   // Create final PR reminder
+                  const unassignIssueAfter = new Date(issueAssignedAt.getTime() + unassignIssueAfterMilliseconds);
                   const createFinalPrReminderAfter = new Date(issueAssignedAt.getTime() + unassignIssueAfterMilliseconds - createPrReminderBeforeIssueUnassignedMilliseconds);
-                  const finalPrReminder = `@${assignee.login}, please open a draft PR linking this issue!`;
+                  const finalPrReminder = `@${assignee.login}, please open a draft PR linking this issue; otherwise you will be unassigned from this issue after ${unassignIssueAfter}!`;
 
                   await createPrReminder(assignee, issue.number, comments, createFinalPrReminderAfter, finalPrReminder);
                 }
