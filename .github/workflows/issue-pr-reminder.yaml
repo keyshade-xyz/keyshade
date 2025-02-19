@@ -123,7 +123,7 @@ jobs:
                 });
               }
 
-              console.log(`Issue '${issueNumber}' PR reminder created for: ${assignee.login}`);}
+              console.log(`Issue '${issueNumber}' PR reminder created for: ${assignee.login}`);
 
               return true;
             }
