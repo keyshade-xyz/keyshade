@@ -32,12 +32,12 @@ import {
   EventSource,
   EventTriggerer,
   EventType,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
 import { WorkspaceMembershipService } from './service/workspace-membership.service'
 import { WorkspaceMembershipModule } from './workspace-membership.module'
+import { AuthenticatedUser } from '@/user/user.types'
 
 const createMembership = async (
   roleId: string,
@@ -75,9 +75,13 @@ describe('Workspace Membership Controller Tests', () => {
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
 
-  let user1: User, user2: User, user3: User
+  let user1: AuthenticatedUser,
+    user2: AuthenticatedUser,
+    user3: AuthenticatedUser
   let workspace1: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -143,9 +147,9 @@ describe('Workspace Membership Controller Tests', () => {
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
-    user3 = createUser3
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
+    user3 = { ...createUser3, ipAddress: USER_IP_ADDRESS }
 
     memberRole = await prisma.workspaceRole.create({
       data: {

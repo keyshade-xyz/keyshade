@@ -18,7 +18,6 @@ import {
   Project,
   ProjectAccessLevel,
   Secret,
-  User,
   Variable,
   Workspace
 } from '@prisma/client'
@@ -41,6 +40,7 @@ import { SecretModule } from '@/secret/secret.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -55,9 +55,11 @@ describe('Project Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project, project3: Project, project4: Project
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -115,14 +117,14 @@ describe('Project Controller Tests', () => {
       isAdmin: false
     })
 
-    workspace1 = createUser1.defaultWorkspace as Workspace
-    workspace2 = createUser2.defaultWorkspace as Workspace
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
@@ -929,13 +931,15 @@ describe('Project Controller Tests', () => {
 
     it('should require WORKSPACE_ADMIN authority to alter the access level', async () => {
       // Create a user
-      const johnny = await userService.createUser({
+      const user = await userService.createUser({
         name: 'Johnny Doe',
         email: 'johhny@keyshade.xyz',
         isOnboardingFinished: true,
         isActive: true,
         isAdmin: false
       })
+
+      const johnny: AuthenticatedUser = { ...user, ipAddress: USER_IP_ADDRESS }
 
       // Create a member role for the workspace
       const role = await workspaceRoleService.createWorkspaceRole(

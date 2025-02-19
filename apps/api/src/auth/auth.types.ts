@@ -6,6 +6,7 @@ export interface UserAuthenticatedResponse extends UserWithWorkspace {
 }
 
 export type AuthenticatedUserContext = User & {
+  ipAddress: string
   isAuthViaApiKey?: boolean
   apiKeyAuthorities?: Set<Authority>
   defaultWorkspace: Workspace

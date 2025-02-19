@@ -9,17 +9,17 @@ import {
   Environment,
   EventSource,
   EventType,
-  Project,
-  User
+  Project
 } from '@prisma/client'
 import { CreateEnvironment } from '../dto/create.environment/create.environment'
 import { UpdateEnvironment } from '../dto/update.environment/update.environment'
 import { PrismaService } from '@/prisma/prisma.service'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class EnvironmentService {
@@ -27,7 +27,7 @@ export class EnvironmentService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   /**
@@ -56,21 +56,20 @@ export class EnvironmentService {
    * @returns The created environment
    */
   async createEnvironment(
-    user: User,
+    user: AuthenticatedUser,
     dto: CreateEnvironment,
     projectSlug: Project['slug']
   ) {
     // Check if the user has the required role to create an environment
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
         authorities: [
           Authority.CREATE_ENVIRONMENT,
           Authority.READ_ENVIRONMENT,
           Authority.READ_PROJECT
-        ],
-        prisma: this.prisma
+        ]
       })
     const projectId = project.id
 
@@ -157,20 +156,19 @@ export class EnvironmentService {
    * @returns The updated environment
    */
   async updateEnvironment(
-    user: User,
+    user: AuthenticatedUser,
     dto: UpdateEnvironment,
     environmentSlug: Environment['slug']
   ) {
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
         authorities: [
           Authority.UPDATE_ENVIRONMENT,
           Authority.READ_ENVIRONMENT,
           Authority.READ_PROJECT
-        ],
-        prisma: this.prisma
+        ]
       })
 
     // Check if an environment with the same name already exists
@@ -230,13 +228,15 @@ export class EnvironmentService {
    * @param environmentSlug The slug of the environment to get
    * @returns The environment
    */
-  async getEnvironment(user: User, environmentSlug: Environment['slug']) {
+  async getEnvironment(
+    user: AuthenticatedUser,
+    environmentSlug: Environment['slug']
+  ) {
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
+        authorities: [Authority.READ_ENVIRONMENT]
       })
 
     delete environment.project
@@ -275,7 +275,7 @@ export class EnvironmentService {
    * @returns An object with a list of environments and metadata
    */
   async getEnvironmentsOfProject(
-    user: User,
+    user: AuthenticatedUser,
     projectSlug: Project['slug'],
     page: number,
     limit: number,
@@ -284,11 +284,10 @@ export class EnvironmentService {
     search: string
   ) {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: projectSlug },
-        authorities: [Authority.READ_ENVIRONMENT],
-        prisma: this.prisma
+        authorities: [Authority.READ_ENVIRONMENT]
       })
     const projectId = project.id
 
@@ -368,13 +367,15 @@ export class EnvironmentService {
    * @param user The user that is deleting the environment
    * @param environmentSlug The slug of the environment to delete
    */
-  async deleteEnvironment(user: User, environmentSlug: Environment['slug']) {
+  async deleteEnvironment(
+    user: AuthenticatedUser,
+    environmentSlug: Environment['slug']
+  ) {
     const environment =
-      await this.authorityCheckerService.checkAuthorityOverEnvironment({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
         entity: { slug: environmentSlug },
-        authorities: [Authority.DELETE_ENVIRONMENT],
-        prisma: this.prisma
+        authorities: [Authority.DELETE_ENVIRONMENT]
       })
 
     // Check if this is the only existing environment

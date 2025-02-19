@@ -14,16 +14,17 @@ import {
   ChangeNotificationEvent,
   ChangeNotifierRegistration
 } from './socket.types'
-import { Authority, User } from '@prisma/client'
+import { Authority } from '@prisma/client'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
 import { AuthGuard } from '@/auth/guard/auth/auth.guard'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthenticatedUser } from '@/user/user.types'
 
 // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
@@ -51,7 +52,7 @@ export default class ChangeNotifier
       publisher: RedisClientType
     },
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -97,7 +98,7 @@ export default class ChangeNotifier
   async handleRegister(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChangeNotifierRegistration,
-    @CurrentUser() user: User
+    @CurrentUser() user: AuthenticatedUser
   ) {
     /**
      * This event is emitted from the CLI to register
@@ -116,32 +117,29 @@ export default class ChangeNotifier
 
     try {
       // Check if the user has access to the workspace
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: data.workspaceSlug },
         authorities: [
           Authority.READ_WORKSPACE,
           Authority.READ_VARIABLE,
           Authority.READ_SECRET
-        ],
-        prisma: this.prisma
+        ]
       })
 
       // Check if the user has access to the project
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: data.projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
 
       // Check if the user has access to the environment
       const environment =
-        await this.authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
+        await this.authorizationService.authorizeUserAccessToEnvironment({
+          user,
           entity: { slug: data.environmentSlug },
-          authorities: [Authority.READ_ENVIRONMENT],
-          prisma: this.prisma
+          authorities: [Authority.READ_ENVIRONMENT]
         })
 
       // Add the client to the environment
