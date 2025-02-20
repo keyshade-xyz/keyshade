@@ -152,8 +152,8 @@ jobs:
                 }
 
                 // Create final review reminder
-                const closePrAfter = new Date(issueAssignedAt.getTime() + closePrAfterMilliseconds);
-                const createFinalReviewReminderAfter = new Date(issueAssignedAt.getTime() + closePrAfterMilliseconds - createReviewReminderBeforePrClosedMilliseconds);
+                const closePrAfter = new Date(pullRequestCreatedAt.getTime() + closePrAfterMilliseconds);
+                const createFinalReviewReminderAfter = new Date(pullRequestCreatedAt.getTime() + closePrAfterMilliseconds - createReviewReminderBeforePrClosedMilliseconds);
                 const finalReviewReminder = `@${pullRequest.user.login}, please resolve all open reviews; otherwise this PR will be closed after ${closePrAfter}!`;
 
                 await createReviewReminder(pullRequest.user, pullRequest.number, comments, createFinalReviewReminderAfter, finalReviewReminder);
