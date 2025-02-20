@@ -141,7 +141,7 @@ jobs:
                     owner,
                     repo,
                     issue_number: issue.number,
-                    body: '@${comment.user.login}, cannot concurrently work on more than ${userMaxConcurrentIssueCount} issues. Tag a maintainer if you need to take over.',
+                    body: `@${comment.user.login}, cannot concurrently work on more than ${userMaxConcurrentIssueCount} issues. Tag a maintainer if you need to take over.`,
                   });
                 }
               } else {
@@ -149,7 +149,7 @@ jobs:
                   owner,
                   repo,
                   issue_number: issue.number,
-                  body: '@${comment.user.login}, this issue is already assigned. Tag a maintainer if you need to take over.',
+                  body: `@${comment.user.login}, this issue is already assigned. Tag a maintainer if you need to take over.`,
                 });
               }
             }
