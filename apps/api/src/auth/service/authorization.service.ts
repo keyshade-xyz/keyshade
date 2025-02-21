@@ -1,4 +1,4 @@
-import { UnauthorizedException, Injectable } from '@nestjs/common'
+import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { EnvironmentWithProject } from '@/environment/environment.types'
@@ -7,9 +7,8 @@ import { SecretWithProjectAndVersion } from '@/secret/secret.types'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
 import { AuthorizationParams } from '../authorization.types'
 import { AuthenticatedUser } from '@/user/user.types'
-import { Workspace, User } from '@prisma/client'
+import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
-import { CustomLoggerService } from '@/common/logger.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 
 @Injectable()
@@ -17,7 +16,7 @@ export class AuthorizationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorityCheckerService: AuthorityCheckerService,
-    private readonly customLoggerService: CustomLoggerService
+    private readonly logger: Logger
   ) {}
 
   /**
@@ -55,10 +54,7 @@ export class AuthorizationService {
     const project =
       await this.authorityCheckerService.checkAuthorityOverProject(params)
 
-    const workspace = await this.getWorkspace(
-      params.user.id,
-      project.workspaceId
-    )
+    const workspace = await this.getWorkspace(project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -80,10 +76,7 @@ export class AuthorizationService {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment(params)
 
-    const workspace = await this.getWorkspace(
-      params.user.id,
-      environment.project.workspaceId
-    )
+    const workspace = await this.getWorkspace(environment.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -105,10 +98,7 @@ export class AuthorizationService {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable(params)
 
-    const workspace = await this.getWorkspace(
-      params.user.id,
-      variable.project.workspaceId
-    )
+    const workspace = await this.getWorkspace(variable.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -130,10 +120,7 @@ export class AuthorizationService {
     const secret =
       await this.authorityCheckerService.checkAuthorityOverSecret(params)
 
-    const workspace = await this.getWorkspace(
-      params.user.id,
-      secret.project.workspaceId
-    )
+    const workspace = await this.getWorkspace(secret.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -168,12 +155,10 @@ export class AuthorizationService {
    * @throws InternalServerErrorException if there's an error when communicating with the database
    * @throws NotFoundException if the workspace is not found
    */
-  private async getWorkspace(
-    userId: User['id'],
-    workspaceId: Workspace['id']
-  ): Promise<Workspace> {
+  private async getWorkspace(workspaceId: Workspace['id']): Promise<Workspace> {
     let workspace: Workspace
 
+    this.logger.log(`Fetching workspace ${workspaceId}`)
     try {
       workspace = await this.prisma.workspace.findUnique({
         where: {
@@ -181,12 +166,14 @@ export class AuthorizationService {
         }
       })
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!workspace) {
-      throw new NotFoundException(`Workspace ${workspaceId} not found`)
+      const errorMessage = `Workspace ${workspaceId} not found`
+      this.logger.error(errorMessage)
+      throw new NotFoundException(errorMessage)
     }
 
     return workspace
@@ -196,14 +183,24 @@ export class AuthorizationService {
     user: AuthenticatedUser,
     workspace: Workspace
   ) {
+    this.logger.log(
+      `Checking if user ${user.id}'s IP address has access to workspace ${workspace.id}`
+    )
     if (
       workspace.blacklistedIpAddresses.some(
         (ipAddress) => ipAddress === user.ipAddress
       )
     ) {
+      this.logger.error(
+        `User ${user.id}'s IP address is blacklisted from accessing workspace ${workspace.id}`
+      )
       throw new UnauthorizedException(
         `User ${user.id} is not allowed to access this workspace`
       )
     }
+
+    this.logger.log(
+      `Checking if user ${user.id}'s email has access to workspace ${workspace.id}`
+    )
   }
 }
