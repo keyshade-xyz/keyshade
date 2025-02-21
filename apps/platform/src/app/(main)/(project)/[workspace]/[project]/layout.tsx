@@ -1,21 +1,16 @@
 'use client'
 import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import type {
-  ClientResponse,
-  GetAllEnvironmentsOfProjectResponse
-} from '@keyshade/schema'
-import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
-import VariablePage from './@variable/page'
-import SecretPage from './@secret/page'
 import EnvironmentPage from './@environment/page'
+import SecretPage from './@secret/page'
+import VariablePage from './@variable/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { Toaster } from '@/components/ui/sonner'
 import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
+import { useHttp } from '@/hooks/use-http'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -24,73 +19,44 @@ interface DetailedProjectPageProps {
 function DetailedProjectPage({
   params
 }: DetailedProjectPageProps): JSX.Element {
-  const [selectedProject, setselectedProject] = useAtom(selectedProjectAtom)
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
-  useEffect(() => {
-    async function getProjectBySlug() {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().projectController.getProject(
-          { projectSlug: params.project },
-          {}
-        )
+  const getProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getProject({
+      projectSlug: params.project
+    })
+  )
 
-      if (success && data) {
-        setselectedProject(data)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+  const getAllEnvironmentsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: selectedProject!.slug
       }
-    }
-
-    getProjectBySlug()
-  }, [params.project, setselectedProject])
+    )
+  )
 
   useEffect(() => {
-    const getAllEnvironments = async () => {
-      if (!selectedProject) {
-        return
-      }
-
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
-        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
-        )
-
+    getProject().then(({ data, success, error }) => {
       if (success && data) {
-        setEnvironments(data.items)
+        setSelectedProject(data)
       } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching environments. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        throw new Error(JSON.stringify(error))
       }
-    }
+    })
+  }, [getProject, params.project, setSelectedProject])
 
-    getAllEnvironments()
-  }, [selectedProject, setEnvironments])
+  useEffect(() => {
+    selectedProject &&
+      getAllEnvironmentsOfProject().then(({ data, success }) => {
+        if (success && data) {
+          setEnvironments(data.items)
+        }
+      })
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
 
   return (
     <main className="flex h-full flex-col gap-4">
@@ -106,7 +72,6 @@ function DetailedProjectPage({
         {tab === 'variable' && <VariablePage />}
         {tab === 'environment' && <EnvironmentPage />}
       </div>
-      <Toaster />
     </main>
   )
 }

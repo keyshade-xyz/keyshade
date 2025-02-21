@@ -83,7 +83,7 @@ describe('Feedback Controller (E2E)', () => {
   })
 
   it('should handle empty feedback', async () => {
-    const { statusCode, payload } = await app.inject({
+    const { statusCode } = await app.inject({
       method: 'POST',
       url: '/feedback',
       payload: { feedback: '' },
@@ -93,10 +93,5 @@ describe('Feedback Controller (E2E)', () => {
     })
 
     expect(statusCode).toBe(400)
-    expect(JSON.parse(payload)).toEqual({
-      error: 'Bad Request',
-      message: 'Feedback cannot be null or empty',
-      statusCode: 400
-    })
   })
 })

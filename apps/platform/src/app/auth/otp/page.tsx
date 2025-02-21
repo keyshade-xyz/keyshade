@@ -18,16 +18,35 @@ import {
 } from '@/components/ui/input-otp'
 import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AuthOTPPage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
 
   const [otp, setOtp] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [isInvalidOtp, setIsInvalidOtp] = useState<boolean>(false)
   const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false)
 
   const router = useRouter()
+
+  const validateOTP = useHttp(() => {
+    if (user?.email) {
+      return ControllerInstance.getInstance().authController.validateOTP({
+        email: user.email,
+        otp
+      })
+    }
+    throw new Error('User not set in context')
+  })
+
+  const resendOtp = useHttp(() => {
+    if (user?.email) {
+      return ControllerInstance.getInstance().authController.resendOTP({
+        userEmail: user.email
+      })
+    }
+    throw new Error('User not set in context')
+  })
 
   useEffect(() => {
     if (!user?.email) {
@@ -36,35 +55,36 @@ export default function AuthOTPPage(): React.JSX.Element {
   }, [router, user?.email])
 
   const handleVerifyOTP = async (): Promise<void> => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain -- safe
-    const userEmail = user?.email!
-    const userOtp = otp
+    if (!user) {
+      throw new Error('User not set in context')
+    }
 
-    const emailResult = z.string().email().safeParse(userEmail)
+    const emailResult = z.string().email().safeParse(user.email)
     const alphanumeric = z
       .string()
       .length(6)
       .refine((value) => /^[a-z0-9]+$/i.test(value), {
         message: 'OTP must be alphanumeric'
       })
-    const otpResult = alphanumeric.safeParse(userOtp)
+    const otpResult = alphanumeric.safeParse(otp)
+
     if (!emailResult.success || !otpResult.success) {
-      setIsInvalidOtp(true)
+      toast.error('Invalid OTP', {
+        description: (
+          <p className="text-xs text-red-300">
+            Please enter a valid 6 digit alphanumeric OTP.
+          </p>
+        )
+      })
       return
     }
 
-    setIsInvalidOtp(false)
     setIsLoading(true)
+    setIsLoadingRefresh(true)
     toast.loading('Verifying OTP...')
 
     try {
-      const { error, success, data } =
-        await ControllerInstance.getInstance().authController.validateOTP({
-          email: encodeURIComponent(userEmail),
-          otp: userOtp
-        })
-
-      toast.dismiss()
+      const { success, data } = await validateOTP()
 
       if (success && data) {
         setUser(data)
@@ -81,84 +101,33 @@ export default function AuthOTPPage(): React.JSX.Element {
         )
 
         toast.success('OTP verified successfully')
-      } else if (error) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.log(error)
-
-        toast.error('Failed to verify OTP', {
-          description:
-            error.statusCode === 401 ? (
-              <p className="text-xs text-red-300">
-                The OTP you entered is either incorrect or has expired. Please
-                enter the correct OTP.
-              </p>
-            ) : (
-              <p className="text-xs text-red-300">
-                Something went wrong while verifying OTP. Check console for more
-                info.
-              </p>
-            )
-        })
       }
-    } catch (error) {
+    } finally {
+      setIsLoading(false)
+      setIsLoadingRefresh(false)
       toast.dismiss()
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to verify OTP: ${error}`)
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while verifying OTP. Check console for more
-            info.
-          </p>
-        )
-      })
     }
-
-    setIsLoading(false)
   }
 
   const handleResendOtp = async (): Promise<void> => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain -- safe
-    const userEmail = user?.email!
+    if (!user) {
+      throw new Error('User not set in context')
+    }
 
+    setIsLoading(true)
+    setIsLoadingRefresh(true)
     toast.loading('Sending OTP...')
 
     try {
-      setIsLoadingRefresh(true)
+      const { success } = await resendOtp()
 
-      const { error, success } =
-        await ControllerInstance.getInstance().authController.resendOTP({
-          userEmail
-        })
-
-      toast.dismiss()
       if (success) {
         toast.success('OTP successfully sent to your email')
-        setIsLoadingRefresh(false)
-      } else {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.log(error)
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong sending the OTP. Check console for more info.
-            </p>
-          )
-        })
-        setIsLoadingRefresh(false)
       }
-    } catch (error) {
-      toast.dismiss()
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to send OTP: ${error}`)
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong sending the OTP. Check console for more info.
-          </p>
-        )
-      })
+    } finally {
+      setIsLoading(false)
       setIsLoadingRefresh(false)
+      toast.dismiss()
     }
   }
 
@@ -202,9 +171,6 @@ export default function AuthOTPPage(): React.JSX.Element {
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
-              <span className="text-xs text-red-400">
-                {isInvalidOtp ? 'Invalid OTP' : null}
-              </span>
             </div>
 
             <Button

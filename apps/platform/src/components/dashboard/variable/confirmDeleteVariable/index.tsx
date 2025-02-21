@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
-import { TrashSVG } from '@public/svg/shared'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
+import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,67 +20,66 @@ import {
   selectedVariableAtom,
   variablesOfProjectAtom
 } from '@/store'
+import { useHttp } from '@/hooks/use-http'
 
 export default function ConfirmDeleteVariable() {
-  const selectedVariable = useAtomValue(selectedVariableAtom)
+  const [selectedVariable, setSelectedVariable] = useAtom(selectedVariableAtom)
   const [isDeleteVariableOpen, setIsDeleteVariableOpen] = useAtom(
     deleteVariableOpenAtom
   )
   const setVariables = useSetAtom(variablesOfProjectAtom)
 
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const deleteVariable = useHttp(() =>
+    ControllerInstance.getInstance().variableController.deleteVariable({
+      variableSlug: selectedVariable!.variable.slug
+    })
+  )
+
   const handleClose = useCallback(() => {
     setIsDeleteVariableOpen(false)
   }, [setIsDeleteVariableOpen])
 
-  const deleteVariable = useCallback(async () => {
-    if (selectedVariable === null) {
-      toast.error('No variable selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No variable selected. Please select a variable.
-          </p>
-        )
-      })
-      return
+  const handleDeleteVariable = useCallback(async () => {
+    if (selectedVariable) {
+      const { success } = await deleteVariable()
+
+      setIsLoading(true)
+      toast.loading('Deleting variable...')
+
+      try {
+        if (success) {
+          toast.success('Variable deleted successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                The variable has been deleted.
+              </p>
+            )
+          })
+
+          // Remove the variable from the store
+          setVariables((prevVariables) =>
+            prevVariables.filter(
+              ({ variable }) => variable.slug !== selectedVariable.variable.slug
+            )
+          )
+          setSelectedVariable(null)
+
+          handleClose()
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+      }
     }
-
-    const variableSlug = selectedVariable.variable.slug
-
-    const { success, error } =
-      await ControllerInstance.getInstance().variableController.deleteVariable(
-        { variableSlug },
-        {}
-      )
-
-    if (success) {
-      toast.success('Variable deleted successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The variable has been deleted.
-          </p>
-        )
-      })
-
-      // Remove the variable from the store
-      setVariables((prevVariables) =>
-        prevVariables.filter(({ variable }) => variable.slug !== variableSlug)
-      )
-    }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the variable. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
-    }
-
-    handleClose()
-  }, [setVariables, selectedVariable, handleClose])
+  }, [
+    selectedVariable,
+    deleteVariable,
+    setVariables,
+    setSelectedVariable,
+    handleClose
+  ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {
@@ -123,7 +122,8 @@ export default function ConfirmDeleteVariable() {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            onClick={deleteVariable}
+            disabled={isLoading}
+            onClick={handleDeleteVariable}
           >
             Yes, delete the variable
           </AlertDialogAction>

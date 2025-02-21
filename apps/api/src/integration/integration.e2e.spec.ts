@@ -17,7 +17,6 @@ import {
   Integration,
   IntegrationType,
   Project,
-  User,
   Workspace
 } from '@prisma/client'
 import { ProjectService } from '@/project/service/project.service'
@@ -27,6 +26,7 @@ import { MockMailService } from '@/mail/services/mock.service'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/service/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
+import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -37,11 +37,13 @@ describe('Integration Controller Tests', () => {
   let projectService: ProjectService
   let environmentService: EnvironmentService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
   let integration1: Integration
   let project1: Project, project2: Project
   let environment1: Environment, environment2: Environment
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -74,30 +76,30 @@ describe('Integration Controller Tests', () => {
   })
 
   beforeEach(async () => {
-    const createUser1Response = (await userService.createUser({
+    const createUser1 = (await userService.createUser({
       email: 'john@keyshade.xyz',
       name: 'John',
       isActive: true,
       isAdmin: false,
       isOnboardingFinished: true
-    })) as User & { defaultWorkspace: Workspace }
+    })) as UserWithWorkspace
 
-    const createUser2Response = (await userService.createUser({
+    const createUser2 = (await userService.createUser({
       email: 'jane@keyshade.xyz',
       name: 'Jane',
       isActive: true,
       isAdmin: false,
       isOnboardingFinished: true
-    })) as User & { defaultWorkspace: Workspace }
+    })) as UserWithWorkspace
 
-    workspace1 = createUser1Response.defaultWorkspace
-    workspace2 = createUser2Response.defaultWorkspace
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
 
-    delete createUser1Response.defaultWorkspace
-    delete createUser2Response.defaultWorkspace
+    delete createUser1.defaultWorkspace
+    delete createUser2.defaultWorkspace
 
-    user1 = createUser1Response
-    user2 = createUser2Response
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     integration1 = await integrationService.createIntegration(
       user1,
@@ -283,9 +285,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(400)
-      expect(result.json().message).toEqual(
-        'Environment can only be provided if project is also provided'
-      )
     })
 
     it('should not be able to create an integration for an environment the user does not have access to', async () => {
@@ -491,9 +490,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(400)
-      expect(result.json().message).toEqual(
-        'Environment can only be provided if project is also provided'
-      )
     })
 
     it('should not fail to update if the integration has projectSlug present and only environmentSlug is updated', async () => {

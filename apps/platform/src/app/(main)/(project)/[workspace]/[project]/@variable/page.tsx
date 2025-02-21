@@ -1,13 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import type {
-  ClientResponse,
-  GetAllVariablesOfProjectResponse
-} from '@keyshade/schema'
-import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
+import { VariableSVG } from '@public/svg/dashboard'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
@@ -22,6 +17,7 @@ import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
+import { useHttp } from '@/hooks/use-http'
 
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
@@ -31,47 +27,22 @@ function VariablePage(): React.JSX.Element {
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
+  const getAllVariablesOfProject = useHttp(() =>
+    ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+      {
+        projectSlug: selectedProject!.slug
+      }
+    )
+  )
+
   useEffect(() => {
-    const getAllVariables = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
-
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllVariablesOfProjectResponse> =
-        await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
-        )
-
-      if (success && data) {
-        setVariables(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching variables. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    getAllVariables()
-  }, [selectedProject, setVariables])
+    selectedProject &&
+      getAllVariablesOfProject().then(({ data, success }) => {
+        if (success && data) {
+          setVariables(data.items)
+        }
+      })
+  }, [getAllVariablesOfProject, selectedProject, setVariables])
 
   return (
     <div

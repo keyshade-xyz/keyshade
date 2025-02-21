@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from 'react'
-import { AddSVG } from '@public/svg/shared'
-import type { CreateSecretRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
   DialogContent,
@@ -20,13 +19,14 @@ import {
   SelectTrigger,
   SelectValue
 } from '../../../ui/select'
-import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
   environmentsOfProjectAtom,
   secretsOfProjectAtom
 } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
 
 export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =
@@ -41,22 +41,12 @@ export default function AddSecretDialog() {
     environmentSlug: environments[0]?.slug,
     environmentValue: ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const handleAddSecret = useCallback(async () => {
-    if (selectedProject === null) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-      throw new Error("Current project doesn't exist")
-    }
-
-    const request: CreateSecretRequest = {
+  const createSecret = useHttp(() =>
+    ControllerInstance.getInstance().secretController.createSecret({
       name: newSecretData.secretName,
-      projectSlug: selectedProject.slug,
+      projectSlug: selectedProject!.slug,
       entries: newSecretData.environmentValue
         ? [
             {
@@ -66,55 +56,53 @@ export default function AddSecretDialog() {
           ]
         : undefined,
       note: newSecretData.secretNote
-    }
+    })
+  )
 
-    const { success, error, data } =
-      await ControllerInstance.getInstance().secretController.createSecret(
-        request,
-        {}
-      )
+  const handleAddSecret = useCallback(async () => {
+    if (selectedProject) {
+      if (newSecretData.secretName.trim() === '') {
+        toast.error('Please enter a secret name')
+        return
+      }
 
-    if (success && data) {
-      toast.success('Secret added successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">You created a new secret</p>
-        )
-      })
-      // Add the new secret to the list of secrets
-      setSecrets((prev) => [...prev, data])
-    }
-    if (error) {
-      if (error.statusCode === 409) {
-        toast.error('Secret already exists', {
-          description: (
-            <p className="text-xs text-red-300">
-              A secret with the same name already exists. Please use a different
-              one.
-            </p>
-          )
-        })
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while adding the secret. Check the console
-              for more details.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error that are not in the if condition
-        console.error(error)
+      setIsLoading(true)
+      toast.loading('Creating secret...')
+
+      try {
+        const { success, data } = await createSecret()
+
+        if (success && data) {
+          toast.success('Secret added successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                You created a new secret
+              </p>
+            )
+          })
+          // Add the new secret to the list of secrets
+          setSecrets((prev) => [...prev, data])
+
+          setNewSecretData({
+            secretName: '',
+            secretNote: '',
+            environmentSlug: '',
+            environmentValue: ''
+          })
+          setIsCreateSecretOpen(false)
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
       }
     }
-
-    setNewSecretData({
-      secretName: '',
-      secretNote: '',
-      environmentSlug: '',
-      environmentValue: ''
-    })
-    setIsCreateSecretOpen(false)
-  }, [selectedProject, newSecretData, setIsCreateSecretOpen, setSecrets])
+  }, [
+    selectedProject,
+    newSecretData.secretName,
+    createSecret,
+    setSecrets,
+    setIsCreateSecretOpen
+  ])
 
   return (
     <Dialog
@@ -239,6 +227,7 @@ export default function AddSecretDialog() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                disabled={isLoading}
                 onClick={handleAddSecret}
               >
                 Add Secret

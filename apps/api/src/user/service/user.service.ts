@@ -11,7 +11,11 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '../dto/create.user/create.user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { EnvSchema } from '@/common/env/env.schema'
-import { generateOtp, limitMaxItemsPerPage } from '@/common/util'
+import {
+  constructErrorBody,
+  generateOtp,
+  limitMaxItemsPerPage
+} from '@/common/util'
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from '../user.types'
@@ -51,7 +55,12 @@ export class UserService {
         })) > 0
 
       if (userExists) {
-        throw new ConflictException('User with this email already exists')
+        throw new ConflictException(
+          constructErrorBody(
+            'Email already exists',
+            `Can not update email to ${dto.email} as it already exists`
+          )
+        )
       }
 
       const otp = await generateOtp(user.email, user.id, this.prisma)
@@ -106,7 +115,12 @@ export class UserService {
         })) > 0
 
       if (userExists) {
-        throw new ConflictException('User with this email already exists')
+        throw new ConflictException(
+          constructErrorBody(
+            'Email already exists',
+            `Can not update email to ${dto.email} as it already exists`
+          )
+        )
       }
 
       //directly updating email when admin triggered
@@ -143,7 +157,12 @@ export class UserService {
 
     if (!otp || otp.expiresAt < new Date()) {
       this.log.log(`OTP expired or invalid`)
-      throw new UnauthorizedException('Invalid or expired OTP')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'The OTP has either exipred or is invalid '
+        )
+      )
     }
     const userEmailChange = await this.prisma.userEmailChange.findUnique({
       where: {
@@ -198,7 +217,10 @@ export class UserService {
 
     if (!oldOtp?.emailChange) {
       throw new ConflictException(
-        `No previous OTP for email change exists for user ${user.id}`
+        constructErrorBody(
+          'No OTP for email change exists',
+          `Seems like you did not register for an email change`
+        )
       )
     }
 
@@ -288,7 +310,12 @@ export class UserService {
         }
       })) > 0
     if (checkDuplicateUser) {
-      throw new ConflictException('User already exists with this email')
+      throw new ConflictException(
+        constructErrorBody(
+          'User already exists with this email',
+          `Can not create user with email ${dto.email} as it already exists`
+        )
+      )
     }
 
     // Create the user's default workspace along with user

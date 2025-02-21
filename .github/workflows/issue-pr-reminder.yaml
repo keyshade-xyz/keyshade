@@ -1,0 +1,172 @@
+name: Issue PR Reminder
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+
+jobs:
+  issue-pr-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          CREATE_ISSUE_PR_REMINDER_ENABLED: ${{ vars.CREATE_ISSUE_PR_REMINDER_ENABLED }}
+          CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS: ${{ vars.CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS }}
+          CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS: ${{ vars.CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS }}
+          UNASSIGN_ISSUE_AFTER_DAYS: ${{ vars.UNASSIGN_ISSUE_AFTER_DAYS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
+            const createPrReminderEnabled = process.env.CREATE_ISSUE_PR_REMINDER_ENABLED || false;
+            const createPrReminderAfterIssueAssignedDays = process.env.CREATE_ISSUE_PR_REMINDER_AFTER_ISSUE_ASSIGNED_DAYS || 2;
+            const createPrReminderBeforeIssueUnassignedDays = process.env.CREATE_ISSUE_PR_REMINDER_BEFORE_ISSUE_UNASSIGNED_DAYS || 2;
+            const unassignIssueAfterDays = process.env.UNASSIGN_ISSUE_AFTER_DAYS || 14;
+            const createPrReminderAfterIssueAssignedMilliseconds = createPrReminderAfterIssueAssignedDays * 24 * 60 * 60 * 1000;
+            const createPrReminderBeforeIssueUnassignedMilliseconds = createPrReminderBeforeIssueUnassignedDays * 24 * 60 * 60 * 1000;
+            const unassignIssueAfterMilliseconds = unassignIssueAfterDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if(!createPrReminderEnabled) {
+              console.log('!!! Dry run, there are no changes made !!!');
+            }
+
+            async function listOpenIssues() {
+              const issues = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listForRepo({
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  page
+                });
+
+                issues.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return issues;
+            }
+
+            async function listIssueEvents(issue) {
+              const events = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const eventsResponse = await github.rest.issues.listEventsForTimeline({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  per_page: 100,
+                  page
+                });
+
+                events.push(...eventsResponse.data);
+
+                hasNextPage = eventsResponse.headers.link && eventsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return events.sort((a, b) => a.id > b.id);
+            }
+
+            async function listIssueComments(issue) {
+              const comments = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const commentsResponse = await github.rest.issues.listComments({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  per_page: 100,
+                  page
+                });
+
+                comments.push(...commentsResponse.data);
+
+                hasNextPage = commentsResponse.headers.link && commentsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return comments;
+            }
+
+            async function createPrReminder(assignee, issueNumber, comments, createPrReminderAfter, prReminder) {
+              // Check if it is time to create PR reminder
+              if (now < createPrReminderAfter) {
+                return false;
+              }
+
+              // Check if PR reminder has already been created
+              if (comments.some(comment => comment.body === prReminder)) {
+                return false;
+              }
+
+              // Create PR reminder
+              if(createPrReminderEnabled) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  body: prReminder
+                });
+              }
+
+              console.log(`Issue '${issueNumber}' PR reminder created for: ${assignee.login}`);
+
+              return true;
+            }
+
+            async function createPrReminders() {
+              const issues = await listOpenIssues();
+
+              for (const issue of issues) {
+                const events = await listIssueEvents(issue);
+                const pullRequests = events
+                    .filter(event => event.event === 'cross-referenced')
+                    .map(event => event.source.issue)
+                    .filter(issue => issue && issue.pull_request);
+                const comments = await listIssueComments(issue);
+
+                for (const assignee of issue.assignees) {
+                  const assignedEvent = events.find(event => event.event === 'assigned' && event.assignee.login === assignee.login);                  
+                  const issueAssignedAt = new Date(assignedEvent.created_at);
+
+                  // Check if assignee has already opened a PR
+                  const assigneePullRequest = pullRequests.find(pullRequest => pullRequest.user.login === assignee.login);
+
+                  if(assigneePullRequest) {
+                    continue;
+                  }
+
+                  // Create first PR reminder
+                  const createFirstPrReminderAfter = new Date(issueAssignedAt.getTime() + createPrReminderAfterIssueAssignedMilliseconds);
+                  const firstPrReminder = `@${assignee.login}, please open a draft PR linking this issue!`;
+
+                  const isFirstPrReminderCreated = await createPrReminder(assignee, issue.number, comments, createFirstPrReminderAfter, firstPrReminder);
+
+                  if(isFirstPrReminderCreated) {
+                    continue;
+                  }
+
+                  // Create final PR reminder
+                  const unassignIssueAfter = new Date(issueAssignedAt.getTime() + unassignIssueAfterMilliseconds);
+                  const createFinalPrReminderAfter = new Date(issueAssignedAt.getTime() + unassignIssueAfterMilliseconds - createPrReminderBeforeIssueUnassignedMilliseconds);
+                  const finalPrReminder = `@${assignee.login}, please open a draft PR linking this issue; otherwise you will be unassigned from this issue after ${unassignIssueAfter}!`;
+
+                  await createPrReminder(assignee, issue.number, comments, createFinalPrReminderAfter, finalPrReminder);
+                }
+              }
+            }
+
+            await createPrReminders();

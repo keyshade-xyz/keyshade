@@ -19,12 +19,13 @@ import { UpdateWorkspaceRole } from '../dto/update-workspace-role/update-workspa
 import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleWithProjects } from '../workspace-role.types'
 import { v4 } from 'uuid'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { paginate, PaginatedMetadata } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -32,7 +33,7 @@ export class WorkspaceRoleService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   /**
@@ -45,7 +46,7 @@ export class WorkspaceRoleService {
    * @returns the newly created workspace role
    */
   async createWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: CreateWorkspaceRole
   ) {
@@ -54,22 +55,27 @@ export class WorkspaceRoleService {
       dto.authorities.includes(Authority.WORKSPACE_ADMIN)
     ) {
       throw new BadRequestException(
-        'You can not explicitly assign workspace admin authority to a role'
+        constructErrorBody(
+          'Can not add workspace admin authority',
+          'You can not explicitly assign workspace admin authority to a role'
+        )
       )
     }
 
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.CREATE_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.CREATE_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
 
     if (await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) {
       throw new ConflictException(
-        'Workspace role with the same name already exists'
+        constructErrorBody(
+          'Workspace role already exists',
+          `Another workspace role with the name ${dto.name} already exists`
+        )
       )
     }
 
@@ -115,7 +121,10 @@ export class WorkspaceRoleService {
         if (projectId) {
           if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+              constructErrorBody(
+                'Environment slugs in the project are required',
+                `Environment slugs in the project ${pe.projectSlug} are required`
+              )
             )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
@@ -134,26 +143,31 @@ export class WorkspaceRoleService {
 
             if (!project) {
               throw new BadRequestException(
-                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                constructErrorBody(
+                  'Some environment slugs are not part of the project',
+                  'Some or all of the environment slugs specified do not belong to this project'
+                )
               )
             }
 
             // Check if the user has read authority over all the environments
             for (const environmentSlug of pe.environmentSlugs) {
               try {
-                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                await this.authorizationService.authorizeUserAccessToEnvironment(
                   {
-                    userId: user.id,
+                    user,
                     entity: {
                       slug: environmentSlug
                     },
-                    authorities: [Authority.READ_ENVIRONMENT],
-                    prisma: this.prisma
+                    authorities: [Authority.READ_ENVIRONMENT]
                   }
                 )
               } catch {
                 throw new UnauthorizedException(
-                  `User does not have read authority over environment ${environmentSlug}`
+                  constructErrorBody(
+                    `Autority to read environment ${environmentSlug} is required`,
+                    `You do not have the required read authority over environment ${environmentSlug}`
+                  )
                 )
               }
             }
@@ -172,7 +186,10 @@ export class WorkspaceRoleService {
           )
         } else {
           throw new NotFoundException(
-            `Project with slug ${pe.projectSlug} not found`
+            constructErrorBody(
+              `Project not found`,
+              `Project ${pe.projectSlug} does not exist`
+            )
           )
         }
       }
@@ -244,7 +261,7 @@ export class WorkspaceRoleService {
    * @returns the updated workspace role
    */
   async updateWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug'],
     dto: UpdateWorkspaceRole
   ) {
@@ -253,7 +270,10 @@ export class WorkspaceRoleService {
       dto.authorities.includes(Authority.WORKSPACE_ADMIN)
     ) {
       throw new BadRequestException(
-        'You can not explicitly assign workspace admin authority to a role'
+        constructErrorBody(
+          'Can not assign admin authority',
+          'You can not explicitly assign workspace admin authority to a role'
+        )
       )
     }
 
@@ -279,7 +299,10 @@ export class WorkspaceRoleService {
         dto.name === workspaceRole.name)
     ) {
       throw new ConflictException(
-        'Workspace role with the same name already exists'
+        constructErrorBody(
+          'Workspace role already exists',
+          `A workspace role with the name ${dto.name} already exists in this workspace`
+        )
       )
     }
 
@@ -299,7 +322,10 @@ export class WorkspaceRoleService {
         if (projectId) {
           if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
             throw new BadRequestException(
-              `EnvironmentSlugs in the project ${pe.projectSlug} are required`
+              constructErrorBody(
+                'Missing environment slugs',
+                `Environment slugs must be specified for project ${pe.projectSlug}`
+              )
             )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
@@ -318,26 +344,31 @@ export class WorkspaceRoleService {
 
             if (!project) {
               throw new BadRequestException(
-                `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                constructErrorBody(
+                  'Invalid environment slugs',
+                  `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
+                )
               )
             }
 
             // Check if the user has read authority over all the environments
             for (const environmentSlug of pe.environmentSlugs) {
               try {
-                await this.authorityCheckerService.checkAuthorityOverEnvironment(
+                await this.authorizationService.authorizeUserAccessToEnvironment(
                   {
-                    userId: user.id,
+                    user,
                     entity: {
                       slug: environmentSlug
                     },
-                    authorities: [Authority.READ_ENVIRONMENT],
-                    prisma: this.prisma
+                    authorities: [Authority.READ_ENVIRONMENT]
                   }
                 )
               } catch {
-                throw new UnauthorizedException(
-                  `User does not have update authority over environment ${environmentSlug}`
+                throw new BadRequestException(
+                  constructErrorBody(
+                    'Missing required authorities',
+                    `You do not have update authority over environment ${environmentSlug}`
+                  )
                 )
               }
             }
@@ -366,7 +397,10 @@ export class WorkspaceRoleService {
           })
         } else {
           throw new NotFoundException(
-            `Project with slug ${pe.projectSlug} not found`
+            constructErrorBody(
+              'Project not found',
+              `Project ${pe.projectSlug} not found`
+            )
           )
         }
       }
@@ -435,7 +469,7 @@ export class WorkspaceRoleService {
    * @param workspaceRoleSlug the slug of the workspace role to be deleted
    */
   async deleteWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug']
   ) {
     const workspaceRole = await this.getWorkspaceRoleWithAuthority(
@@ -447,7 +481,10 @@ export class WorkspaceRoleService {
 
     if (workspaceRole.hasAdminAuthority) {
       throw new UnauthorizedException(
-        'Cannot delete workspace role with administrative authority'
+        constructErrorBody(
+          'Can not delete workspace role',
+          'This role contains the workspace admin authority. You can not delete this role'
+        )
       )
     }
 
@@ -486,16 +523,15 @@ export class WorkspaceRoleService {
    * @returns true if a workspace role with the given name exists, false otherwise
    */
   async checkWorkspaceRoleExists(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     name: string
   ) {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
 
@@ -517,7 +553,7 @@ export class WorkspaceRoleService {
    * @returns the workspace role with the given slug
    */
   async getWorkspaceRole(
-    user: User,
+    user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug']
   ): Promise<WorkspaceRole> {
     return await this.getWorkspaceRoleWithAuthority(
@@ -540,7 +576,7 @@ export class WorkspaceRoleService {
    * @returns a PaginatedMetadata object containing the items and metadata
    */
   async getWorkspaceRolesOfWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     page: number,
     limit: number,
@@ -549,11 +585,10 @@ export class WorkspaceRoleService {
     search: string
   ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
     const { id: workspaceId } =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE_ROLE],
-        prisma: this.prisma
+        authorities: [Authority.READ_WORKSPACE_ROLE]
       })
     //get workspace roles of a workspace for given page and limit
     const items = await this.prisma.workspaceRole.findMany({
@@ -638,7 +673,10 @@ export class WorkspaceRoleService {
 
     if (!workspaceRole) {
       throw new NotFoundException(
-        `Workspace role ${workspaceRoleSlug} not found`
+        constructErrorBody(
+          `Workspace role not found`,
+          `The workspace role ${workspaceRoleSlug} does not exist`
+        )
       )
     }
 
@@ -653,7 +691,10 @@ export class WorkspaceRoleService {
       !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
     ) {
       throw new UnauthorizedException(
-        `User ${userId} does not have the required authorities to perform the action`
+        constructErrorBody(
+          'Unauthorized',
+          `You do not have the required authorities to perform the action`
+        )
       )
     }
 

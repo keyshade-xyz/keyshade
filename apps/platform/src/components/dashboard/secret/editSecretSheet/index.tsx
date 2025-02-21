@@ -1,7 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { UpdateSecretRequest } from '@keyshade/schema'
 import {
   Sheet,
   SheetClose,
@@ -21,6 +20,7 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
+import { useHttp } from '@/hooks/use-http'
 
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
@@ -35,84 +35,75 @@ export default function EditSecretSheet(): JSX.Element {
     name: selectedSecretData?.secret.name,
     note: selectedSecretData?.secret.note || ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const updateSecret = useHttp(() =>
+    ControllerInstance.getInstance().secretController.updateSecret({
+      secretSlug: selectedSecretData!.secret.slug,
+      name:
+        !requestData.name?.trim() ||
+        requestData.name === selectedSecretData!.secret.name
+          ? undefined
+          : requestData.name.trim(),
+      note: requestData.note?.trim() || undefined,
+      entries: undefined
+    })
+  )
 
   const handleClose = useCallback(() => {
     setIsEditSecretSheetOpen(false)
   }, [setIsEditSecretSheetOpen])
 
-  const updateSecret = useCallback(async () => {
-    if (!selectedSecretData) {
-      toast.error('No secret selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No secret selected. Please select a secret.
-          </p>
-        )
-      })
-      return
-    }
+  const handleUpdateSecret = useCallback(async () => {
+    if (selectedSecretData) {
+      setIsLoading(true)
+      toast.loading('Updating secret...')
 
-    const { secret } = selectedSecretData
+      try {
+        const { success, data } = await updateSecret()
 
-    const request: UpdateSecretRequest = {
-      secretSlug: secret.slug,
-      name:
-        !requestData.name?.trim() || requestData.name === secret.name
-          ? undefined
-          : requestData.name.trim(),
-      note: requestData.note?.trim() || undefined,
-      entries: undefined
-    }
+        if (success && data) {
+          toast.success('Secret edited successfully', {
+            description: (
+              <p className="text-xs text-emerald-300">
+                You successfully edited the secret
+              </p>
+            )
+          })
 
-    const { success, error, data } =
-      await ControllerInstance.getInstance().secretController.updateSecret(
-        request,
-        {}
-      )
-
-    if (success && data) {
-      toast.success('Secret edited successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            You successfully edited the secret
-          </p>
-        )
-      })
-
-      // Update the secret in the store
-      setSecrets((prev) => {
-        const newSecrets = prev.map((s) => {
-          if (s.secret.slug === secret.slug) {
-            return {
-              ...s,
-              secret: {
-                ...s.secret,
-                name: requestData.name || s.secret.name,
-                note: requestData.note || s.secret.note,
-                slug: data.secret.slug
+          // Update the secret in the store
+          setSecrets((prev) => {
+            const newSecrets = prev.map((s) => {
+              if (s.secret.slug === selectedSecretData.secret.slug) {
+                return {
+                  ...s,
+                  secret: {
+                    ...s.secret,
+                    name: requestData.name || s.secret.name,
+                    note: requestData.note || s.secret.note,
+                    slug: data.secret.slug
+                  }
+                }
               }
-            }
-          }
-          return s
-        })
-        return newSecrets
-      })
+              return s
+            })
+            return newSecrets
+          })
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
+        handleClose()
+      }
     }
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while updating the secret. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error('Error while updating secret: ', error)
-    }
-
-    handleClose()
-  }, [selectedSecretData, requestData, handleClose, setSecrets])
+  }, [
+    selectedSecretData,
+    updateSecret,
+    setSecrets,
+    requestData.name,
+    requestData.note,
+    handleClose
+  ])
 
   return (
     <Sheet
@@ -169,7 +160,8 @@ export default function EditSecretSheet(): JSX.Element {
           <SheetClose asChild>
             <Button
               className="font-semibold"
-              onClick={updateSecret}
+              disabled={isLoading}
+              onClick={handleUpdateSecret}
               variant="secondary"
             >
               Edit Secret

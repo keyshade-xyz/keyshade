@@ -1,17 +1,15 @@
-import { AddSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { CreateEnvironmentRequest } from '@keyshade/schema'
+import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
   DialogTitle,
   DialogDescription
-} from '../../../ui/dialog'
+, DialogHeader } from '../../../ui/dialog'
 import { Button } from '@/components/ui/button'
-import { DialogHeader } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   createEnvironmentOpenAtom,
@@ -19,6 +17,7 @@ import {
   selectedProjectAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AddEnvironmentDialogue() {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
@@ -31,90 +30,66 @@ export default function AddEnvironmentDialogue() {
     environmentName: '',
     environmentDescription: ''
   })
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const handleAddEnvironment = useCallback(async () => {
-    if (!selectedProject) {
-      toast.error('No project selected', {
-        description: (
-          <p className="text-xs text-red-300">
-            No project selected. Please select a project.
-          </p>
-        )
-      })
-
-      throw new Error('No project selected')
-    }
-
-    if (newEnvironmentData.environmentName === '') {
-      toast.error('Environment name is required', {
-        description: (
-          <p className="text-xs text-red-300">
-            Please provide a name for the environment.
-          </p>
-        )
-      })
-      return
-    }
-
-    const request: CreateEnvironmentRequest = {
+  const createEnvironment = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.createEnvironment({
       name: newEnvironmentData.environmentName,
       description: newEnvironmentData.environmentDescription,
-      projectSlug: selectedProject.slug
-    }
+      projectSlug: selectedProject!.slug
+    })
+  )
 
-    const { success, error, data } =
-      await ControllerInstance.getInstance().environmentController.createEnvironment(
-        request,
-        {}
-      )
-
-    if (success && data) {
-      toast.success('Environment added successfully', {
-        description: (
-          <p className="text-xs text-green-300">
-            You created a new environment
-          </p>
-        )
-      })
-
-      // Add the new environment to the list
-      setEnvironments((prev) => [
-        ...prev,
-        { ...data, secrets: 0, variables: 0 }
-      ])
-
-      // Reset the form
-      setNewEnvironmentData({
-        environmentName: '',
-        environmentDescription: ''
-      })
-
-      // Close the dialog
-      setIsCreateEnvironmentOpen(false)
-    }
-
-    if (error) {
-      if (error.statusCode === 409) {
-        toast.error('Environment already exists', {
-          description: (
-            <p className="text-xs text-red-300">Environment already exists</p>
-          )
-        })
-      } else {
-        toast.error('Something went wrong!', {
+  const handleAddEnvironment = useCallback(async () => {
+    if (selectedProject) {
+      if (newEnvironmentData.environmentName === '') {
+        toast.error('Environment name is required', {
           description: (
             <p className="text-xs text-red-300">
-              Something went wrong while adding the environment. Check console
-              for more info.
+              Please provide a name for the environment.
             </p>
           )
         })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        return
+      }
+
+      setIsLoading(true)
+      toast.loading('Adding environment...')
+
+      try {
+        const { success, data } = await createEnvironment()
+
+        if (success && data) {
+          toast.success('Environment added successfully', {
+            description: (
+              <p className="text-xs text-green-300">
+                You created a new environment
+              </p>
+            )
+          })
+
+          // Add the new environment to the list
+          setEnvironments((prev) => [
+            ...prev,
+            { ...data, secrets: 0, variables: 0 }
+          ])
+
+          // Reset the form
+          setNewEnvironmentData({
+            environmentName: '',
+            environmentDescription: ''
+          })
+
+          // Close the dialog
+          setIsCreateEnvironmentOpen(false)
+        }
+      } finally {
+        setIsLoading(false)
+        toast.dismiss()
       }
     }
   }, [
-    newEnvironmentData.environmentDescription,
+    createEnvironment,
     newEnvironmentData.environmentName,
     selectedProject,
     setEnvironments,
@@ -192,6 +167,7 @@ export default function AddEnvironmentDialogue() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
+                disabled={isLoading}
                 onClick={handleAddEnvironment}
               >
                 Add Environment

@@ -17,6 +17,7 @@ import {
 import { JsonObject } from '@prisma/client/runtime/library'
 import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
 import { EventService } from '@/event/service/event.service'
+import { AuthenticatedUser } from '@/user/user.types'
 
 /**
  * Creates a new event and saves it to the database.
@@ -175,7 +176,7 @@ export const createEvent = async (
  */
 export const fetchEvents = async (
   eventService: EventService,
-  user: User,
+  user: AuthenticatedUser,
   workspaceSlug: string,
   source?: EventSource,
   severity?: EventSeverity

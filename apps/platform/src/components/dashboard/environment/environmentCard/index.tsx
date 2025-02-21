@@ -1,9 +1,9 @@
 'use client'
 
 import type { GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
-import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
+import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import {
   ContextMenu,
   ContextMenuContent,

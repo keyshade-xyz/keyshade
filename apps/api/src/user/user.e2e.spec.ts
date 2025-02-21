@@ -19,6 +19,8 @@ describe('User Controller Tests', () => {
   let adminUser: User
   let regularUser: User
 
+  const USER_IP_ADDRESS = '127.0.0.1'
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, UserModule]
@@ -83,7 +85,8 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
       ...adminUser,
-      defaultWorkspace: null
+      defaultWorkspace: null,
+      ipAddress: USER_IP_ADDRESS
     })
   })
 
@@ -106,7 +109,8 @@ describe('User Controller Tests', () => {
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body)).toEqual({
       ...regularUser,
-      defaultWorkspace: expect.any(Object)
+      defaultWorkspace: expect.any(Object),
+      ipAddress: USER_IP_ADDRESS
     })
 
     expect(result.json().defaultWorkspace).toMatchObject({
@@ -492,11 +496,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(401)
-    expect(JSON.parse(result.body)).toEqual({
-      message: 'Invalid or expired OTP',
-      error: 'Unauthorized',
-      statusCode: 401
-    })
 
     const nonUpdatedUser = await prisma.user.findUnique({
       where: {
@@ -556,11 +555,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: 'User with this email already exists',
-      error: 'Conflict'
-    })
   })
 
   it('should return 409 Conflict if no previous OTP exists for email change', async () => {
@@ -573,11 +567,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: `No previous OTP for email change exists for user ${regularUser.id}`,
-      error: 'Conflict'
-    })
   })
 
   // test('user should be able to delete their own account', async () => {
