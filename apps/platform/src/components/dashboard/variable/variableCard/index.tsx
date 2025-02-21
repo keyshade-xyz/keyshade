@@ -32,6 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
+import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
 export default function VariableCard(
@@ -68,11 +69,17 @@ export default function VariableCard(
           <AccordionTrigger
             className="hover:no-underline"
             rightChildren={
-              <div className="text-xs text-white/50">
+              <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
-                <span className="text-white">
-                  {variable.lastUpdatedBy.name}
-                </span>
+                <div className="flex items-center gap-x-2">
+                  <span className="text-white">
+                    {variable.lastUpdatedBy.name}
+                  </span>
+                  <AvatarComponent
+                    name={variable.lastUpdatedBy.name}
+                    src={variable.lastUpdatedBy.profilePictureUrl}
+                  />
+                </div>
               </div>
             }
           >
