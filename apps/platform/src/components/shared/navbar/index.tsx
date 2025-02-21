@@ -122,9 +122,9 @@ function Navbar(): React.JSX.Element {
                     </>
                   ) : (
                     <>
-                      <AvatarComponent 
-                        name={user?.name}
-                        src={user?.profilePictureUrl || ''} 
+                      <AvatarComponent
+                        name={user.name}
+                        src={user.profilePictureUrl || ''}
                       />
                       <span>{user.name}</span>
                     </>
