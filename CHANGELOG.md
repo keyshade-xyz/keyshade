@@ -1,3 +1,64 @@
+## [2.12.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.8...v2.12.0-stage.9) (2025-02-20)
+
+### 🚀 Features
+
+* **platform:** Add copy slug functionality to variable card context menu ([#769](https://github.com/keyshade-xyz/keyshade/issues/769)) ([d252668](https://github.com/keyshade-xyz/keyshade/commit/d252668658552ddd3669402045db3849c60753ce))
+
+### 🔧 Miscellaneous Chores
+
+* Issue PR reminder workflow created ([#763](https://github.com/keyshade-xyz/keyshade/issues/763)) ([7667ebd](https://github.com/keyshade-xyz/keyshade/commit/7667ebd275f9a741d72332da7767b9b1d88b036a))
+
+## [2.12.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.7...v2.12.0-stage.8) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add checkmark icon to copy slug button for environments ([#742](https://github.com/keyshade-xyz/keyshade/issues/742)) ([#766](https://github.com/keyshade-xyz/keyshade/issues/766)) ([cd2925f](https://github.com/keyshade-xyz/keyshade/commit/cd2925f4fa7cc721ce2b2808ad424983742a963c))
+
+## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for [secure] slug ([#767](https://github.com/keyshade-xyz/keyshade/issues/767)) ([ce05835](https://github.com/keyshade-xyz/keyshade/commit/ce0583595cf91b3d1afb134ff94564abcae0b9b4))
+
+## [2.12.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.5...v2.12.0-stage.6) (2025-02-19)
+
+### 🚀 Features
+
+* **api:** Workspace ip blacklisting ([#687](https://github.com/keyshade-xyz/keyshade/issues/687)) ([bc5f6a5](https://github.com/keyshade-xyz/keyshade/commit/bc5f6a5d55206c4ab008246061f2bf472d402208))
+
+## [2.12.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.4...v2.12.0-stage.5) (2025-02-18)
+
+### 🚀 Features
+
+* Enhanced error handling in platfrom and API ([#765](https://github.com/keyshade-xyz/keyshade/issues/765)) ([b4349ad](https://github.com/keyshade-xyz/keyshade/commit/b4349adc0c197750cb2dbdc41fe294907c193293))
+
+## [2.12.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.3...v2.12.0-stage.4) (2025-02-18)
+
+### 🐛 Bug Fixes
+
+* **platform:** Avoid toast duplication & added optional description ([#759](https://github.com/keyshade-xyz/keyshade/issues/759)) ([7a0798a](https://github.com/keyshade-xyz/keyshade/commit/7a0798a16ee83fe1707bd6aecf534670648753a0))
+
+### 🔧 Miscellaneous Chores
+
+* **lint:** Fixed module not found error ([be887ff](https://github.com/keyshade-xyz/keyshade/commit/be887ff4406ed5df5e9b803355449c8b69609c6d))
+
+## [2.12.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.2...v2.12.0-stage.3) (2025-02-15)
+
+### 🐛 Bug Fixes
+
+* **api:** Variables with empty names ([#745](https://github.com/keyshade-xyz/keyshade/issues/745)) ([b8e2abf](https://github.com/keyshade-xyz/keyshade/commit/b8e2abf77a3fbec0afb53681472f17c9e2e92ac3))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Release workflow node 22.x ([#757](https://github.com/keyshade-xyz/keyshade/issues/757)) ([e910b90](https://github.com/keyshade-xyz/keyshade/commit/e910b90eb0e94b4f35ca05994210b900c72e41b3))
+* lint-staged configured ([#746](https://github.com/keyshade-xyz/keyshade/issues/746)) ([27b8405](https://github.com/keyshade-xyz/keyshade/commit/27b8405e228c5558e60d07d5493d6e98edc4b420))
+
+## [2.12.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.1...v2.12.0-stage.2) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add roles tab in sidebar ([#749](https://github.com/keyshade-xyz/keyshade/issues/749)) ([bbe4366](https://github.com/keyshade-xyz/keyshade/commit/bbe4366c3131ea2991cbde32454b39e02c45c4c9))
+
 ## [2.12.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.3...v2.12.0-stage.1) (2025-02-12)
 
 ### 🚀 Features

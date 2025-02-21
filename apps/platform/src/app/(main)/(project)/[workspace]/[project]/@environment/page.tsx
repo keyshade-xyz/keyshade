@@ -1,13 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import type {
-  ClientResponse,
-  GetAllEnvironmentsOfProjectResponse
-} from '@keyshade/schema'
-import { EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
+import { EnvironmentSVG } from '@public/svg/dashboard'
 import {
   createEnvironmentOpenAtom,
   selectedProjectAtom,
@@ -21,6 +16,7 @@ import ConfirmDeleteEnvironment from '@/components/dashboard/environment/confirm
 import EditEnvironmentDialogue from '@/components/dashboard/environment/editEnvironmentSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
+import { useHttp } from '@/hooks/use-http'
 
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
@@ -30,47 +26,22 @@ function EnvironmentPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
 
+  const getAllEnvironmentsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: selectedProject!.slug
+      }
+    )
+  )
+
   useEffect(() => {
-    const getAllEnvironments = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
-
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
-        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
-        )
-
-      if (success && data) {
-        setEnvironments(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching environments. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    getAllEnvironments()
-  }, [selectedProject, setEnvironments])
+    selectedProject &&
+      getAllEnvironmentsOfProject().then(({ data, success }) => {
+        if (success && data) {
+          setEnvironments(data.items)
+        }
+      })
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
 
   return (
     <div

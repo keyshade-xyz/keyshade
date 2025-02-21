@@ -1,7 +1,7 @@
 import type { Secret } from '@keyshade/schema'
-import { NoteIconSVG } from '@public/svg/secret'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
+import { NoteIconSVG } from '@public/svg/secret'
 import {
   AccordionContent,
   AccordionItem,
@@ -32,7 +32,9 @@ import {
   editSecretOpenAtom,
   selectedSecretAtom
 } from '@/store'
+
 import AvatarComponent from '@/components/common/avatar'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface SecretCardProps {
   secretData: Secret
@@ -48,6 +50,10 @@ export default function SecretCard({
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(secret.slug, 'You copied the slug successfully.', 'Failed to copy the slug.', 'You successfully copied the slug.')
+  }
 
   const handleEditClick = () => {
     setSelectedSecret(secretData)
@@ -144,9 +150,15 @@ export default function SecretCard({
           </Table>
         </AccordionContent>
       </AccordionItem>
-      <ContextMenuContent className="flex h-[6.375rem] w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
+      <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
         <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
           Show Version History
+        </ContextMenuItem>
+        <ContextMenuItem
+        className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+        onSelect={handleCopyToClipboard}
+        >
+          Copy Slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"

@@ -15,7 +15,6 @@ import {
   ProjectAccessLevel,
   Secret,
   SecretVersion,
-  User,
   Workspace
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
@@ -37,6 +36,7 @@ import { UserService } from '@/user/service/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 import { ValidationPipe } from '@nestjs/common'
 
 describe('Secret Controller Tests', () => {
@@ -48,11 +48,13 @@ describe('Secret Controller Tests', () => {
   let secretService: SecretService
   let eventService: EventService
   let userService: UserService
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
   let project1: Project, project2: Project
   let environment1: Environment
   let secret1: Secret
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -113,8 +115,8 @@ describe('Secret Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
@@ -307,9 +309,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toEqual(
-        `Secret already exists: Secret 1 in project ${project1.slug}`
-      )
     })
 
     it('should have created a SECRET_ADDED event', async () => {
@@ -346,9 +345,26 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
+    })
+
+    it('should not be able to update secret with empty name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          name: ' '
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+
+      const messages = response.json().message
+
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual('name should not be empty')
     })
 
     it('should not be able to update secret with empty name', async () => {
@@ -491,9 +507,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
     })
 
     it('should not be able to roll back a secret it does not have access to', async () => {
@@ -518,9 +531,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `Invalid rollback version: 2 for secret: ${secret1.slug}`
-      )
     })
 
     it('should not be able to roll back if the secret has no versions', async () => {
@@ -539,9 +549,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `No versions found for environment: ${environment1.slug} for secret: ${secret1.slug}`
-      )
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
@@ -652,9 +659,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
     })
 
     it('should be able to fetch all secrets', async () => {
@@ -843,9 +847,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not store the private key`
-      )
     })
 
     it('should not be able to fetch all secrets decrypted if somehow the project does not have a private key even though it stores it (hypothetical)', async () => {
@@ -868,9 +869,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        `Cannot decrypt secret values as the project does not have a private key`
-      )
 
       await prisma.project.update({
         where: {
@@ -904,9 +902,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Project non-existing-project-slug not found'
-      )
     })
   })
 
@@ -921,9 +916,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(
-        'Secret non-existing-secret-slug not found'
-      )
     })
 
     it('should not be able to delete a secret it does not have access to', async () => {
@@ -1036,7 +1028,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Secret 9999 not found`)
     })
 
     it('should return error if environment does not exist', async () => {
@@ -1049,7 +1040,6 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toEqual(`Environment 9999 not found`)
     })
 
     it('returns error if secret is not accessible', async () => {

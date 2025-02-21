@@ -4,6 +4,7 @@ import { CreateUserDto } from '@/user/dto/create.user/create.user'
 import { Logger, NotFoundException } from '@nestjs/common'
 import { createWorkspace } from './workspace'
 import { UserWithWorkspace } from '@/user/user.types'
+import { constructErrorBody } from './util'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
@@ -79,7 +80,9 @@ export async function getUserByEmailOrId(
     }))
 
   if (!user) {
-    throw new NotFoundException(`User ${input} not found`)
+    throw new NotFoundException(
+      constructErrorBody('User not found', `User ${input} not found`)
+    )
   }
 
   const defaultWorkspace = await prisma.workspace.findFirst({

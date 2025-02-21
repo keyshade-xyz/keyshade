@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
 import { SecretSVG } from '@public/svg/dashboard'
 import { Accordion } from '@/components/ui/accordion'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -21,6 +20,7 @@ import {
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
+import { useHttp } from '@/hooks/use-http'
 
 extend(relativeTime)
 
@@ -32,52 +32,29 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
+
   const isDecrypted = useMemo(
     () => selectedProject?.storePrivateKey === true || false,
     [selectedProject]
   )
 
+  const getAllSecretsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
+      projectSlug: selectedProject!.slug,
+      decryptValue: isDecrypted
+    })
+  )
+
   useEffect(() => {
-    setIsLoading(true)
-
-    async function getAllSecretsByProjectSlug() {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
+    selectedProject &&
+      getAllSecretsOfProject()
+        .then(({ success, data }) => {
+          if (success && data) {
+            setSecrets(data.items)
+          }
         })
-        return
-      }
-
-      const { success, error, data } =
-        await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
-          { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
-          {}
-        )
-
-      if (success && data) {
-        setSecrets(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching secrets. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-    }
-
-    getAllSecretsByProjectSlug()
-
-    setIsLoading(false)
-  }, [isDecrypted, selectedProject, setSecrets])
+        .finally(() => setIsLoading(false))
+  }, [getAllSecretsOfProject, isDecrypted, selectedProject, setSecrets])
 
   if (isLoading) {
     return (
@@ -121,11 +98,11 @@ function SecretPage(): React.JSX.Element {
               collapsible
               type="single"
             >
-              {secrets.map((secret) => (
+              {secrets.map((secretData) => (
                 <SecretCard
                   isDecrypted={isDecrypted}
-                  key={secret.secret.id}
-                  secretData={secret}
+                  key={secretData.secret.id}
+                  secretData={secretData}
                 />
               ))}
             </Accordion>

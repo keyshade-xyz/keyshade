@@ -9,7 +9,6 @@ import {
   EventType,
   Project,
   ProjectAccessLevel,
-  User,
   Variable,
   Workspace
 } from '@prisma/client'
@@ -33,6 +32,7 @@ import { VariableService } from '@/variable/service/variable.service'
 import { VariableModule } from '@/variable/variable.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { createEvent } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -45,7 +45,9 @@ describe('Event Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
 
-  let user: User
+  let user: AuthenticatedUser
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -82,13 +84,15 @@ describe('Event Controller Tests', () => {
   })
 
   beforeEach(async () => {
-    user = await prisma.user.create({
+    const createUser = await prisma.user.create({
       data: {
         email: 'johndoe@keyshade.xyz',
         name: 'John Doe',
         isOnboardingFinished: true
       }
     })
+
+    user = { ...createUser, ipAddress: USER_IP_ADDRESS }
   })
 
   it('should be defined', async () => {

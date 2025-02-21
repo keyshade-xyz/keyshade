@@ -1,12 +1,12 @@
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
 import { getCollectiveProjectAuthorities } from '@/common/collective-authorities'
 import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
-import { limitMaxItemsPerPage } from '@/common/util'
+import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { createWorkspace } from '@/common/workspace'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
   BadRequestException,
   ConflictException,
@@ -29,6 +29,8 @@ import {
 } from '@prisma/client'
 import { CreateWorkspace } from '../dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from '../dto/update.workspace/update.workspace'
+import { AuthenticatedUser } from '@/user/user.types'
+import { UpdateBlacklistedIpAddresses } from '../dto/update.blacklistedIpAddresses/update.blacklistedIpAddresses'
 
 @Injectable()
 export class WorkspaceService {
@@ -36,9 +38,9 @@ export class WorkspaceService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly authorizationService: AuthorizationService,
     private readonly jwt: JwtService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
   /**
@@ -48,9 +50,14 @@ export class WorkspaceService {
    * @param dto The data to create the workspace with
    * @returns The created workspace
    */
-  async createWorkspace(user: User, dto: CreateWorkspace) {
+  async createWorkspace(user: AuthenticatedUser, dto: CreateWorkspace) {
     if (await this.existsByName(dto.name, user.id)) {
-      throw new ConflictException('Workspace already exists')
+      throw new ConflictException(
+        constructErrorBody(
+          'Workspace already exists',
+          `Workspace with name ${dto.name} already exists`
+        )
+      )
     }
 
     return await createWorkspace(user, dto, this.prisma)
@@ -65,18 +72,16 @@ export class WorkspaceService {
    * @returns The updated workspace
    */
   async updateWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
   ) {
     // Fetch the workspace
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.UPDATE_WORKSPACE],
-
-        prisma: this.prisma
+        authorities: [Authority.UPDATE_WORKSPACE]
       })
 
     // Check if a same named workspace already exists
@@ -84,7 +89,12 @@ export class WorkspaceService {
       (dto.name && (await this.existsByName(dto.name, user.id))) ||
       dto.name === workspace.name
     ) {
-      throw new ConflictException('Workspace already exists')
+      throw new ConflictException(
+        constructErrorBody(
+          'Workspace already exists',
+          `Workspace with name ${dto.name} already exists`
+        )
+      )
     }
 
     const updatedWorkspace = await this.prisma.workspace.update({
@@ -132,21 +142,23 @@ export class WorkspaceService {
    * @param workspaceSlug The slug of the workspace to delete
    */
   async deleteWorkspace(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.DELETE_WORKSPACE],
-        prisma: this.prisma
+        authorities: [Authority.DELETE_WORKSPACE]
       })
 
     // We don't want the users to delete their default workspace
     if (workspace.isDefault) {
       throw new BadRequestException(
-        `You cannot delete the default workspace ${workspace.name} (${workspace.slug})`
+        constructErrorBody(
+          'Can not delete default workspace',
+          `You can not delete the default workspace.`
+        )
       )
     }
 
@@ -168,15 +180,14 @@ export class WorkspaceService {
    * @throws NotFoundException if the workspace does not exist or the user does not have the authority to read the workspace
    */
   async getWorkspaceBySlug(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<Workspace> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_USERS],
-        prisma: this.prisma
+        authorities: [Authority.READ_USERS]
       })
 
     return {
@@ -196,7 +207,7 @@ export class WorkspaceService {
    * @returns The workspaces of the user, paginated, with metadata
    */
   async getWorkspacesOfUser(
-    user: User,
+    user: AuthenticatedUser,
     page: number,
     limit: number,
     sort: string,
@@ -224,10 +235,7 @@ export class WorkspaceService {
     })
 
     for (const workspace of items) {
-      workspace['projects'] = await this.getProjectsOfWorkspace(
-        workspace.id,
-        user.id
-      )
+      workspace['projects'] = await this.getProjectsOfWorkspace(workspace, user)
     }
 
     // get total count of workspaces of the user
@@ -271,13 +279,12 @@ export class WorkspaceService {
    * @throws NotFoundException if the workspace does not exist or the user does not have the authority to read the workspace
    * @throws InternalServerErrorException if there is an error in the transaction
    */
-  async exportData(user: User, workspaceSlug: Workspace['slug']) {
+  async exportData(user: AuthenticatedUser, workspaceSlug: Workspace['slug']) {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
-        authorities: [Authority.WORKSPACE_ADMIN],
-        prisma: this.prisma
+        authorities: [Authority.WORKSPACE_ADMIN]
       })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -359,7 +366,7 @@ export class WorkspaceService {
    * @returns An object with the search results
    */
   async globalSearch(
-    user: User,
+    user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     searchTerm: string
   ): Promise<{
@@ -370,8 +377,8 @@ export class WorkspaceService {
   }> {
     // Check authority over workspace
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: workspaceSlug },
         authorities: [
           Authority.READ_WORKSPACE,
@@ -379,8 +386,7 @@ export class WorkspaceService {
           Authority.READ_ENVIRONMENT,
           Authority.READ_SECRET,
           Authority.READ_VARIABLE
-        ],
-        prisma: this.prisma
+        ]
       })
 
     // Get a list of project IDs that the user has access to READ
@@ -415,7 +421,7 @@ export class WorkspaceService {
    * @returns The workspace invitations of the user, paginated, with metadata
    */
   async getAllWorkspaceInvitations(
-    user: User,
+    user: AuthenticatedUser,
     page: number,
     limit: number,
     sort: string,
@@ -507,6 +513,80 @@ export class WorkspaceService {
       })),
       metadata
     }
+  }
+
+  /**
+   * Gets a list of blacklisted IP addresses.
+   * @param user The user to get the workspace for
+   * @param workspaceSlug The slug of the workspace to delete
+   * @returns The list of IP addresses
+   */
+  async getBlacklistedIpAddresses(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug']
+  ): Promise<string[]> {
+    const workspace =
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.WORKSPACE_ADMIN]
+      })
+
+    return workspace.blacklistedIpAddresses
+  }
+
+  /**
+   * Updates the list of blacklisted IP addresses
+   * @throws ConflictException if the workspace with the same name already exists
+   * @param user The user to update the workspace for
+   * @param workspaceSlug The slug of the workspace to update
+   * @param dto The data to update the list of blacklisted IP addresses with
+   * @returns The updated list of blacklisted IP addresses
+   */
+  async updateBlacklistedIpAddresses(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug'],
+    dto: UpdateBlacklistedIpAddresses
+  ) {
+    // Fetch the workspace
+    const workspace =
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.WORKSPACE_ADMIN]
+      })
+
+    // Update blacklisted IP addresses
+    const updatedWorkspace = await this.prisma.workspace.update({
+      where: {
+        id: workspace.id
+      },
+      data: {
+        blacklistedIpAddresses: dto.ipAddresses
+      }
+    })
+
+    this.log.debug(
+      `Updated workspace blacklisted IP addresses ${workspace.name} (${workspace.id})`
+    )
+
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: workspace,
+        type: EventType.WORKSPACE_UPDATED,
+        source: EventSource.WORKSPACE,
+        title: `Workspace blacklisted IP addresses updated`,
+        metadata: {
+          workspaceId: workspace.id,
+          name: workspace.name
+        },
+        workspaceId: workspace.id
+      },
+      this.prisma
+    )
+
+    return updatedWorkspace.blacklistedIpAddresses
   }
 
   /**
@@ -677,12 +757,12 @@ export class WorkspaceService {
    */
 
   private async getProjectsOfWorkspace(
-    workspaceId: Workspace['id'],
-    userId: User['id']
+    workspace: Workspace,
+    user: AuthenticatedUser
   ) {
     const projects = await this.prisma.project.findMany({
       where: {
-        workspaceId
+        workspaceId: workspace.id
       }
     })
 
@@ -690,11 +770,10 @@ export class WorkspaceService {
 
     for (const project of projects) {
       const hasAuthority =
-        await this.authorityCheckerService.checkAuthorityOverProject({
-          userId,
+        await this.authorizationService.authorizeUserAccessToProject({
+          user,
           entity: { slug: project.slug },
-          authorities: [Authority.READ_PROJECT],
-          prisma: this.prisma
+          authorities: [Authority.READ_PROJECT]
         })
 
       if (hasAuthority) {

@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
 import Cookies from 'js-cookie'
+import { toast } from 'sonner'
+import type { User } from '@keyshade/schema'
 import { LoadingSVG } from '@public/svg/shared'
 import {
   GithubSVG,
@@ -12,25 +14,30 @@ import {
   KeyshadeBigSVG,
   GitlabSVG
 } from '@public/svg/auth'
-import { toast } from 'sonner'
-import type { User } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 const GOOGLE_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/google`
 const GITHUB_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/github`
 const GITLAB_OAUTH_PATH = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/gitlab`
 
 export default function AuthPage(): React.JSX.Element {
-  const [inInvalidEmail, setInInvalidEmail] = useState<boolean>(false)
+  const [isInvalidEmail, setIsInvalidEmail] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [email, setEmail] = useState<string>('')
 
   const setUser = useSetAtom(userAtom)
 
   const router = useRouter()
+
+  const sendOTP = useHttp(() =>
+    ControllerInstance.getInstance().authController.sendOTP({
+      email
+    })
+  )
 
   // If user comes here with redirection from OAuth login,
   // fetch the details from the url query params.
@@ -79,47 +86,24 @@ export default function AuthPage(): React.JSX.Element {
   const handleGetStarted = async (): Promise<void> => {
     const result = z.string().email().safeParse(email)
     if (!result.success) {
-      setInInvalidEmail(true)
+      setIsInvalidEmail(true)
       return
     }
     setIsLoading(true)
-    setInInvalidEmail(false)
+    setIsInvalidEmail(false)
 
     toast.loading('Sending OTP...')
     try {
-      const { success, error } =
-        await ControllerInstance.getInstance().authController.sendOTP({
-          email
-        })
-      toast.dismiss()
+      const { success } = await sendOTP()
       if (success) {
         toast.success('OTP successfully sent to your email')
         router.push('/auth/otp')
         setUser({ email })
-      } else if (error) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.log(error)
-        toast.error("Couldn't send OTP", {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong sending the OTP. Check console for more info.
-            </p>
-          )
-        })
       }
-    } catch (error) {
+    } finally {
+      setIsLoading(false)
       toast.dismiss()
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong sending the OTP. Check console for more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to send OTP: ${error}`)
     }
-    setIsLoading(false)
   }
 
   return (
@@ -158,7 +142,7 @@ export default function AuthPage(): React.JSX.Element {
               type="email"
             />
             <span className="text-xs text-red-400">
-              {inInvalidEmail ? 'Invalid email' : null}
+              {isInvalidEmail ? 'Invalid email' : null}
             </span>
           </label>
 

@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { WorkspaceRoleController } from './workspace-role.controller'
-import { MockMailService } from '@/mail/services/mock.service'
-import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleService } from '../service/workspace-role.service'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
+import { AuthorityCheckerService } from '@/auth/service/authority-checker.service'
 import { CommonModule } from '@/common/common.module'
 
 describe('WorkspaceRoleController', () => {
@@ -16,7 +15,7 @@ describe('WorkspaceRoleController', () => {
       providers: [
         WorkspaceRoleService,
         PrismaService,
-        { provide: MAIL_SERVICE, useClass: MockMailService },
+        AuthorizationService,
         AuthorityCheckerService
       ],
       controllers: [WorkspaceRoleController]

@@ -1,0 +1,163 @@
+name: PR Review Reminder
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+
+jobs:
+  pr-review-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          CREATE_PR_REVIEW_REMINDER_ENABLED: ${{ vars.CREATE_PR_REVIEW_REMINDER_ENABLED }}
+          CREATE_PR_REVIEW_REMINDER_AFTER_PR_OPENED_DAYS: ${{ vars.CREATE_PR_REVIEW_REMINDER_AFTER_PR_OPENED_DAYS }}
+          CREATE_PR_REVIEW_REMINDER_BEFORE_PR_CLOSED_DAYS: ${{ vars.CREATE_PR_REVIEW_REMINDER_BEFORE_PR_CLOSED_DAYS }}
+          CLOSE_PR_AFTER_DAYS: ${{ vars.CLOSE_PR_AFTER_DAYS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
+            const createReviewReminderEnabled = process.env.CREATE_PR_REVIEW_REMINDER_ENABLED || false;
+            const createReviewReminderAfterPrOpenedDays = process.env.CREATE_PR_REVIEW_REMINDER_AFTER_PR_OPENED_DAYS || 2;
+            const createReviewReminderBeforePrClosedDays = process.env.CREATE_PR_REVIEW_REMINDER_BEFORE_PR_CLOSED_DAYS || 2;
+            const closePrAfterDays = process.env.CLOSE_PR_AFTER_DAYS || 7;
+            const createReviewReminderAfterPrOpenedMilliseconds = createReviewReminderAfterPrOpenedDays * 24 * 60 * 60 * 1000;
+            const createReviewReminderBeforePrClosedMilliseconds = createReviewReminderBeforePrClosedDays * 24 * 60 * 60 * 1000;
+            const closePrAfterMilliseconds = closePrAfterDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if(!createReviewReminderEnabled) {
+              console.log('!!! Dry run, there are no changes made !!!');
+            }
+
+            async function listOpenPrs() {
+              const pullRequests = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const pullRequestsResponse = await github.rest.pulls.list({
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  page
+                });
+
+                pullRequests.push(...pullRequestsResponse.data);
+
+                hasNextPage = pullRequestsResponse.headers.link && pullRequestsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return pullRequests;
+            }
+
+            async function listPrReviews(pullRequest) {
+              const reviews = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const reviewsResponse = await github.rest.pulls.listReviews({
+                  owner,
+                  repo,
+                  pull_number: pullRequest.number,
+                  per_page: 100,
+                  page
+                });
+
+                reviews.push(...reviewsResponse.data);
+
+                hasNextPage = reviewsResponse.headers.link && reviewsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return reviews;
+            }
+
+            async function listPrComments(pullRequest) {
+              const comments = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listComments({
+                  owner,
+                  repo,
+                  issue_number: pullRequest.number,
+                  per_page: 100,
+                  page
+                });
+
+                comments.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return comments;
+            }
+
+            async function createReviewReminder(user, pullRequestNumber, comments, createReviewReminderAfter, reviewReminder) {
+              // Check if it is time to create review reminder
+              if (now < createReviewReminderAfter) {
+                return false;
+              }
+
+              // Check if review reminder has already been created
+              if (comments.some(comment => comment.body === reviewReminder)) {
+                return false;
+              }
+
+              // Create review reminder
+              if(createReviewReminderEnabled) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pullRequestNumber,
+                  body: reviewReminder
+                });
+              }
+
+              console.log(`PR '${pullRequestNumber}' review reminder created for: ${user.login}`);
+
+              return true;
+            }
+
+            async function createReviewReminders() {
+              const pullRequests = await listOpenPrs();
+
+              for (const pullRequest of pullRequests) {
+                const reviews = await listPrReviews(pullRequest);
+                const unapprovedReviews = reviews.filter(review => review.state !== 'APPROVED');
+                const comments = await listPrComments(pullRequest);
+                const pullRequestCreatedAt = new Date(pullRequest.created_at);
+
+                // Check if PR has unapproved reviews
+                if(unapprovedReviews.length === 0) {
+                  continue;
+                }
+
+                // Create first review reminder
+                const createFirstReviewReminderAfter = new Date(pullRequestCreatedAt.getTime() + createReviewReminderAfterPrOpenedMilliseconds);
+                const firstReviewReminder = `@${pullRequest.user.login}, please resolve all open reviews!`;
+
+                const isFirstReviewReminderCreated = await createReviewReminder(pullRequest.user, pullRequest.number, comments, createFirstReviewReminderAfter, firstReviewReminder);
+
+                if(isFirstReviewReminderCreated) {
+                  continue;
+                }
+
+                // Create final review reminder
+                const closePrAfter = new Date(pullRequestCreatedAt.getTime() + closePrAfterMilliseconds);
+                const createFinalReviewReminderAfter = new Date(pullRequestCreatedAt.getTime() + closePrAfterMilliseconds - createReviewReminderBeforePrClosedMilliseconds);
+                const finalReviewReminder = `@${pullRequest.user.login}, please resolve all open reviews; otherwise this PR will be closed after ${closePrAfter}!`;
+
+                await createReviewReminder(pullRequest.user, pullRequest.number, comments, createFinalReviewReminderAfter, finalReviewReminder);
+              }
+            }
+
+            await createReviewReminders();
