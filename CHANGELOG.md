@@ -1,3 +1,13 @@
+## [2.12.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.8...v2.12.0-stage.9) (2025-02-20)
+
+### 🚀 Features
+
+* **platform:** Add copy slug functionality to variable card context menu ([#769](https://github.com/keyshade-xyz/keyshade/issues/769)) ([d252668](https://github.com/keyshade-xyz/keyshade/commit/d252668658552ddd3669402045db3849c60753ce))
+
+### 🔧 Miscellaneous Chores
+
+* Issue PR reminder workflow created ([#763](https://github.com/keyshade-xyz/keyshade/issues/763)) ([7667ebd](https://github.com/keyshade-xyz/keyshade/commit/7667ebd275f9a741d72332da7767b9b1d88b036a))
+
 ## [2.12.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.7...v2.12.0-stage.8) (2025-02-19)
 
 ### 🚀 Features
