@@ -50,10 +50,16 @@ export class WorkspaceRoleService {
     workspaceSlug: Workspace['slug'],
     dto: CreateWorkspaceRole
   ) {
+    this.logger.log(
+      `Creating workspace role ${dto.name} for workspace ${workspaceSlug}. UserID: ${user.id}`
+    )
     if (
       dto.authorities &&
       dto.authorities.includes(Authority.WORKSPACE_ADMIN)
     ) {
+      this.logger.warn(
+        `Attempt to create workspace role ${dto.name} for workspace ${workspaceSlug} with workspace admin authority. UserID: ${user.id}`
+      )
       throw new BadRequestException(
         constructErrorBody(
           'Can not add workspace admin authority',
@@ -70,7 +76,7 @@ export class WorkspaceRoleService {
       })
     const workspaceId = workspace.id
 
-    if (await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) {
+    if (await this.checkWorkspaceRoleExists(workspace, dto.name)) {
       throw new ConflictException(
         constructErrorBody(
           'Workspace role already exists',
@@ -284,18 +290,15 @@ export class WorkspaceRoleService {
     )) as WorkspaceRoleWithProjects
     const workspaceRoleId = workspaceRole.id
 
-    const { slug: workspaceSlug } = await this.prisma.workspace.findUnique({
+    const workspace = await this.prisma.workspace.findUnique({
       where: {
         id: workspaceRole.workspaceId
-      },
-      select: {
-        slug: true
       }
     })
 
     if (
       dto.name &&
-      ((await this.checkWorkspaceRoleExists(user, workspaceSlug, dto.name)) ||
+      ((await this.checkWorkspaceRoleExists(workspace, dto.name)) ||
         dto.name === workspaceRole.name)
     ) {
       throw new ConflictException(
@@ -517,28 +520,19 @@ export class WorkspaceRoleService {
   /**
    * Checks if a workspace role with the given name exists
    * @throws {UnauthorizedException} if the user does not have the required authority
-   * @param user the user performing the check
-   * @param workspaceSlug the slug of the workspace
+   * @param workspace the workspace
    * @param name the name of the workspace role to check
    * @returns true if a workspace role with the given name exists, false otherwise
    */
-  async checkWorkspaceRoleExists(
-    user: AuthenticatedUser,
-    workspaceSlug: Workspace['slug'],
-    name: string
-  ) {
-    const workspace =
-      await this.authorizationService.authorizeUserAccessToWorkspace({
-        user,
-        entity: { slug: workspaceSlug },
-        authorities: [Authority.READ_WORKSPACE_ROLE]
-      })
-    const workspaceId = workspace.id
+  async checkWorkspaceRoleExists(workspace: Workspace, name: string) {
+    this.logger.log(
+      `Checking if workspace role ${name} exists in workspace ${workspace.slug}`
+    )
 
     return (
       (await this.prisma.workspaceRole.count({
         where: {
-          workspaceId,
+          workspaceId: workspace.id,
           name
         }
       })) > 0
@@ -683,7 +677,8 @@ export class WorkspaceRoleService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspaceRole.workspaceId,
       userId,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
     if (

@@ -1,4 +1,5 @@
 import { EnvironmentWithProject } from '@/environment/environment.types'
+import { Logger } from '@nestjs/common'
 import {
   Authority,
   PrismaClient,
@@ -18,10 +19,17 @@ import {
 export const getCollectiveWorkspaceAuthorities = async (
   workspaceId: Workspace['id'],
   userId: User['id'],
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  logger: Logger
 ): Promise<Set<Authority>> => {
+  logger.log(
+    `Getting collective workspace authorities for workspaceId: ${workspaceId} and userId: ${userId}`
+  )
   const authorities = new Set<Authority>()
 
+  logger.log(
+    `Fetching workspaceMemberRoleAssociation for workspaceId: ${workspaceId} and userId: ${userId}`
+  )
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -35,12 +43,15 @@ export const getCollectiveWorkspaceAuthorities = async (
       }
     }
   )
+  logger.log(`Found ${roleAssociations.length} workspaceMemberRoleAssociations`)
+
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
       authorities.add(authority)
     })
   })
 
+  logger.log(`Found ${authorities.size} authorities`)
   return authorities
 }
 
@@ -57,10 +68,17 @@ export const getCollectiveWorkspaceAuthorities = async (
 export const getCollectiveProjectAuthorities = async (
   userId: User['id'],
   project: Project,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  logger: Logger
 ): Promise<Set<Authority>> => {
+  logger.log(
+    `Getting collective project authorities for userId: ${userId} and projectId: ${project.id}`
+  )
   const authorities = new Set<Authority>()
 
+  logger.log(
+    `Fetching workspaceMemberRoleAssociation for userId: ${userId} and projectId: ${project.id}`
+  )
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -86,12 +104,18 @@ export const getCollectiveProjectAuthorities = async (
     }
   )
 
+  logger.log(
+    `Found ${roleAssociations.length} workspaceMemberRoleAssociations for userId: ${userId} and projectId: ${project.id}`
+  )
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
       authorities.add(authority)
     })
   })
 
+  logger.log(
+    `Found ${authorities.size} authorities for userId: ${userId} and projectId: ${project.id}`
+  )
   return authorities
 }
 
@@ -108,10 +132,17 @@ export const getCollectiveProjectAuthorities = async (
 export const getCollectiveEnvironmentAuthorities = async (
   userId: User['id'],
   environment: EnvironmentWithProject,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  logger: Logger
 ): Promise<Set<Authority>> => {
+  logger.log(
+    `Getting collective environment authorities for userId: ${userId} and environmentId: ${environment.id}`
+  )
   const authorities = new Set<Authority>()
 
+  logger.log(
+    `Fetching workspaceMemberRoleAssociation for userId: ${userId} and environmentId: ${environment.id}`
+  )
   const roleAssociations = await prisma.workspaceMemberRoleAssociation.findMany(
     {
       where: {
@@ -152,11 +183,17 @@ export const getCollectiveEnvironmentAuthorities = async (
     }
   )
 
+  logger.log(
+    `Found ${roleAssociations.length} workspaceMemberRoleAssociations for userId: ${userId} and environmentId: ${environment.id}`
+  )
   roleAssociations.forEach((roleAssociation) => {
     roleAssociation.role.authorities.forEach((authority) => {
       authorities.add(authority)
     })
   })
 
+  logger.log(
+    `Found ${authorities.size} authorities for userId: ${userId} and environmentId: ${environment.id}`
+  )
   return authorities
 }

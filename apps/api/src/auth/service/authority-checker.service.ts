@@ -3,20 +3,20 @@ import { VariableWithProjectAndVersion } from '@/variable/variable.types'
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
 import { EnvironmentWithProject } from '@/environment/environment.types'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { SecretWithProjectAndVersion } from '@/secret/secret.types'
-import { CustomLoggerService } from '@/common/logger.service'
 import {
   getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
-import { AuthorizationParams } from './authorization.types'
+import { AuthorizationParams } from '../authorization.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 
@@ -24,7 +24,7 @@ import { constructErrorBody } from '@/common/util'
 export class AuthorityCheckerService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly customLoggerService: CustomLoggerService
+    private readonly logger: Logger
   ) {}
 
   /**
@@ -40,17 +40,22 @@ export class AuthorityCheckerService {
     params: AuthorizationParams
   ): Promise<Workspace> {
     const { user, entity, authorities } = params
+    this.logger.log(
+      `Checking authority over workspace for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
+    )
 
     let workspace: Workspace
 
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching workspace by slug ${entity.slug}`)
         workspace = await this.prisma.workspace.findUnique({
           where: {
             slug: entity.slug
           }
         })
       } else if (entity.name) {
+        this.logger.log(`Fetching workspace by name ${entity.name}`)
         workspace = await this.prisma.workspace.findFirst({
           where: {
             name: entity.name,
@@ -59,11 +64,12 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!workspace) {
+      this.logger.warn(`Workspace ${entity.slug} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Workspace not found',
@@ -75,11 +81,19 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspace.id,
       user.id,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
+    this.checkHasPermissionOverEntity(
+      permittedAuthorities,
+      authorities,
+      user.id
+    )
 
+    this.logger.log(
+      `User ${user.id} is cleared to access workspace ${workspace.slug} for authorities ${authorities}`
+    )
     return workspace
   }
 
@@ -96,11 +110,15 @@ export class AuthorityCheckerService {
     params: AuthorizationParams
   ): Promise<ProjectWithSecrets> {
     const { user, entity, authorities } = params
+    this.logger.log(
+      `Checking authority over project for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
+    )
 
     let project: ProjectWithSecrets
 
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching project by slug ${entity.slug}`)
         project = await this.prisma.project.findUnique({
           where: {
             slug: entity.slug
@@ -110,6 +128,7 @@ export class AuthorityCheckerService {
           }
         })
       } else {
+        this.logger.log(`Fetching project by name ${entity.name}`)
         project = await this.prisma.project.findFirst({
           where: {
             name: entity.name,
@@ -121,11 +140,12 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!project) {
+      this.logger.warn(`Project ${entity.slug} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Project not found',
@@ -135,45 +155,57 @@ export class AuthorityCheckerService {
     }
 
     const permittedAuthoritiesForProject: Set<Authority> =
-      await getCollectiveProjectAuthorities(user.id, project, this.prisma)
+      await getCollectiveProjectAuthorities(
+        user.id,
+        project,
+        this.prisma,
+        this.logger
+      )
 
     const permittedAuthoritiesForWorkspace: Set<Authority> =
       await getCollectiveWorkspaceAuthorities(
         project.workspaceId,
         user.id,
-        this.prisma
+        this.prisma,
+        this.logger
       )
 
     const projectAccessLevel = project.accessLevel
+    this.logger.log(
+      `Project ${project.slug} has access level ${projectAccessLevel}`
+    )
     switch (projectAccessLevel) {
       case ProjectAccessLevel.GLOBAL:
-        // In the global case, we check if the authorities being passed in
-        // contains just the READ_PROJECT authority. If not, we need to
-        // check if the user has access to the other authorities mentioned as well.
         if (
           authorities.length !== 1 ||
           !authorities.includes(Authority.READ_PROJECT)
         ) {
           this.checkHasPermissionOverEntity(
             permittedAuthoritiesForWorkspace,
-            authorities
+            authorities,
+            user.id
           )
         }
         break
       case ProjectAccessLevel.INTERNAL:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForWorkspace,
-          authorities
+          authorities,
+          user.id
         )
         break
       case ProjectAccessLevel.PRIVATE:
         this.checkHasPermissionOverEntity(
           permittedAuthoritiesForProject,
-          authorities
+          authorities,
+          user.id
         )
         break
     }
 
+    this.logger.log(
+      `User ${user.id} is cleared to access project ${project.slug} for authorities ${authorities}`
+    )
     return project
   }
 
@@ -190,11 +222,17 @@ export class AuthorityCheckerService {
     params: AuthorizationParams
   ): Promise<EnvironmentWithProject> {
     const { user, entity, authorities } = params
+    this.logger.log(
+      `Checking authority over environment for user ${user.id}, entity ${JSON.stringify(
+        entity
+      )} and authorities ${authorities}`
+    )
 
     let environment: EnvironmentWithProject
 
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching environment by slug ${entity.slug}`)
         environment = await this.prisma.environment.findUnique({
           where: {
             slug: entity.slug
@@ -204,6 +242,7 @@ export class AuthorityCheckerService {
           }
         })
       } else {
+        this.logger.log(`Fetching environment by name ${entity.name}`)
         environment = await this.prisma.environment.findFirst({
           where: {
             name: entity.name,
@@ -215,11 +254,12 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!environment) {
+      this.logger.warn(`Environment ${entity.slug} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Environment not found',
@@ -231,11 +271,22 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveEnvironmentAuthorities(
       user.id,
       environment,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
+    this.logger.log(
+      `Checking if user ${user.id} has authorities ${authorities} for environment ${environment.slug}`
+    )
+    this.checkHasPermissionOverEntity(
+      permittedAuthorities,
+      authorities,
+      user.id
+    )
 
+    this.logger.log(
+      `User ${user.id} is cleared to access environment ${environment.slug} for authorities ${authorities}`
+    )
     return environment
   }
 
@@ -252,11 +303,17 @@ export class AuthorityCheckerService {
     params: AuthorizationParams
   ): Promise<VariableWithProjectAndVersion> {
     const { user, entity, authorities } = params
+    this.logger.log(
+      `Checking authority over variable for user ${user.id}, entity ${JSON.stringify(
+        entity
+      )} and authorities ${authorities}`
+    )
 
     let variable: VariableWithProjectAndVersion
 
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching variable by slug ${entity.slug}`)
         variable = await this.prisma.variable.findUnique({
           where: {
             slug: entity.slug
@@ -267,6 +324,7 @@ export class AuthorityCheckerService {
           }
         })
       } else {
+        this.logger.log(`Fetching variable by name ${entity.name}`)
         variable = await this.prisma.variable.findFirst({
           where: {
             name: entity.name,
@@ -279,15 +337,16 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!variable) {
+      this.logger.warn(`Variable ${entity.slug || entity.name} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Variable not found',
-          `Variable ${entity.slug} does not exist`
+          `Variable ${entity.slug || entity.name} does not exist`
         )
       )
     }
@@ -295,10 +354,22 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       variable.project,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
+    this.logger.log(
+      `Checking if user ${user.id} has authorities ${authorities} for variable ${variable.slug}`
+    )
+    this.checkHasPermissionOverEntity(
+      permittedAuthorities,
+      authorities,
+      user.id
+    )
+
+    this.logger.log(
+      `User ${user.id} is cleared to access variable ${variable.slug} for authorities ${authorities}`
+    )
 
     return variable
   }
@@ -319,8 +390,15 @@ export class AuthorityCheckerService {
 
     let secret: SecretWithProjectAndVersion
 
+    this.logger.log(
+      `Checking authority over secret for user ${user.id}, entity ${JSON.stringify(
+        entity
+      )} and authorities ${authorities}`
+    )
+
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching secret by slug ${entity.slug}`)
         secret = await this.prisma.secret.findUnique({
           where: {
             slug: entity.slug
@@ -331,6 +409,7 @@ export class AuthorityCheckerService {
           }
         })
       } else {
+        this.logger.log(`Fetching secret by name ${entity.name}`)
         secret = await this.prisma.secret.findFirst({
           where: {
             name: entity.name,
@@ -343,15 +422,16 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!secret) {
+      this.logger.warn(`Secret ${entity.slug || entity.name} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Secret not found',
-          `Secret ${entity.slug} does not exist`
+          `Secret ${entity.slug || entity.name} does not exist`
         )
       )
     }
@@ -359,10 +439,22 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       secret.project,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
+    this.logger.log(
+      `Checking if user ${user.id} has authorities ${authorities} for secret ${secret.slug}`
+    )
+    this.checkHasPermissionOverEntity(
+      permittedAuthorities,
+      authorities,
+      user.id
+    )
+
+    this.logger.log(
+      `User ${user.id} is cleared to access secret ${secret.slug} for authorities ${authorities}`
+    )
 
     return secret
   }
@@ -380,11 +472,15 @@ export class AuthorityCheckerService {
     params: AuthorizationParams
   ): Promise<IntegrationWithWorkspace> {
     const { user, entity, authorities } = params
+    this.logger.log(
+      `Checking authority over integration for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
+    )
 
     let integration: IntegrationWithWorkspace | null
 
     try {
       if (entity.slug) {
+        this.logger.log(`Fetching integration by slug ${entity.slug}`)
         integration = await this.prisma.integration.findUnique({
           where: {
             slug: entity.slug
@@ -394,6 +490,7 @@ export class AuthorityCheckerService {
           }
         })
       } else {
+        this.logger.log(`Fetching integration by name ${entity.name}`)
         integration = await this.prisma.integration.findFirst({
           where: {
             name: entity.name,
@@ -405,15 +502,16 @@ export class AuthorityCheckerService {
         })
       }
     } catch (error) {
-      this.customLoggerService.error(error)
+      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 
     if (!integration) {
+      this.logger.warn(`Integration ${entity.slug || entity.name} not found`)
       throw new NotFoundException(
         constructErrorBody(
           'Integration not found',
-          `Integration ${entity.slug} does not exist`
+          `Integration ${entity.slug || entity.name} does not exist`
         )
       )
     }
@@ -421,12 +519,21 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       integration.workspaceId,
       user.id,
-      this.prisma
+      this.prisma,
+      this.logger
     )
 
-    this.checkHasPermissionOverEntity(permittedAuthorities, authorities)
+    this.logger.log(
+      `Checking if user ${user.id} has authorities ${authorities} for integration ${integration.slug}`
+    )
+    this.checkHasPermissionOverEntity(
+      permittedAuthorities,
+      authorities,
+      user.id
+    )
 
     if (integration.projectId) {
+      this.logger.log(`Fetching project by ID ${integration.projectId}`)
       const project = await this.prisma.project.findUnique({
         where: {
           id: integration.projectId
@@ -434,6 +541,7 @@ export class AuthorityCheckerService {
       })
 
       if (!project) {
+        this.logger.warn(`Project with ID ${integration.projectId} not found`)
         throw new NotFoundException(
           `Project with ID ${integration.projectId} not found`
         )
@@ -442,12 +550,23 @@ export class AuthorityCheckerService {
       const projectAuthorities = await getCollectiveProjectAuthorities(
         user.id,
         project,
-        this.prisma
+        this.prisma,
+        this.logger
       )
 
-      this.checkHasPermissionOverEntity(projectAuthorities, authorities)
+      this.logger.log(
+        `Checking if user ${user.id} has authorities ${authorities} for project ${project.id}`
+      )
+      this.checkHasPermissionOverEntity(
+        projectAuthorities,
+        authorities,
+        user.id
+      )
     }
 
+    this.logger.log(
+      `User ${user.id} is cleared to access integration ${integration.slug} for authorities ${authorities}`
+    )
     return integration
   }
 
@@ -463,23 +582,39 @@ export class AuthorityCheckerService {
    */
   private checkHasPermissionOverEntity(
     permittedAuthorities: Set<Authority>,
-    authorities: Authority[]
+    authorities: Authority[],
+    userId: string
   ): void {
+    this.logger.log(
+      `Checking if user ${userId} has all the required authorities: ${authorities}`
+    )
+
     // We commence the check if WORKSPACE_ADMIN isn't in the list of permitted authorities
     if (!permittedAuthorities.has(Authority.WORKSPACE_ADMIN)) {
+      this.logger.log(
+        `User ${userId} does not have the WORKSPACE_ADMIN authority`
+      )
+
       // Check if the authority object passed is completely contained within the permitted authorities
       const hasRequiredAuthority = authorities.every((auth) =>
         permittedAuthorities.has(auth)
       )
 
       if (!hasRequiredAuthority) {
+        this.logger.log(
+          `User ${userId} does not have all the required authorities`
+        )
         throw new UnauthorizedException(
           constructErrorBody(
             'Insufficient permissions',
             `You do not have any of the required authorities to perform the action`
           )
         )
+      } else {
+        this.logger.log(`User ${userId} has all the required authorities`)
       }
+    } else {
+      this.logger.log(`User ${userId} has the WORKSPACE_ADMIN authority`)
     }
   }
 }
