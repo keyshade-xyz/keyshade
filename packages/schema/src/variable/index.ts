@@ -15,7 +15,8 @@ export const VariableSchema = z.object({
     projectId: BaseProjectSchema.shape.id,
     lastUpdatedBy: z.object({
       id: z.string(),
-      name: z.string()
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
     })
   }),
   values: z.array(

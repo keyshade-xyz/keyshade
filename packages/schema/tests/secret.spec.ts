@@ -31,7 +31,8 @@ describe('Secret Schema Tests', () => {
           projectId: 'project123',
           lastUpdatedBy: {
             id: 'user123',
-            name: 'John Doe'
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
           }
         },
         values: [
@@ -70,6 +71,7 @@ describe('Secret Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123',
             name: 'John Doe'
+            // Missing profilePictureUrl
           }
         },
         values: [
@@ -87,7 +89,7 @@ describe('Secret Schema Tests', () => {
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(5)
+      expect(result.error?.issues).toHaveLength(6)
     })
   })
 
@@ -141,7 +143,8 @@ describe('Secret Schema Tests', () => {
           projectId: 'project123',
           lastUpdatedBy: {
             id: 'user123',
-            name: 'John Doe'
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
           }
         },
         values: [
@@ -180,6 +183,7 @@ describe('Secret Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123',
             name: 'John Doe'
+            // Missing profilePictureUrl
           }
         },
         values: [
@@ -197,7 +201,7 @@ describe('Secret Schema Tests', () => {
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(5)
+      expect(result.error?.issues).toHaveLength(6)
     })
   })
 
@@ -380,7 +384,8 @@ describe('Secret Schema Tests', () => {
               projectId: 'project123',
               lastUpdatedBy: {
                 id: 'user123',
-                name: 'John Doe'
+                name: 'John Doe',
+                profilePictureUrl: null
               }
             },
             values: [

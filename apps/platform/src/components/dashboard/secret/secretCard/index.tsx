@@ -76,7 +76,10 @@ export default function SecretCard({
                   <span className="text-white">
                     {secret.lastUpdatedBy.name}
                   </span>
-                  <AvatarComponent name={secret.lastUpdatedBy.name} />
+                  <AvatarComponent
+                    name={secret.lastUpdatedBy.name}
+                    src={secret.lastUpdatedBy.profilePictureUrl}
+                  />
                 </div>
               </div>
             }

@@ -70,7 +70,10 @@ export default function VariableCard(
                   <span className="text-white">
                     {variable.lastUpdatedBy.name}
                   </span>
-                  <AvatarComponent name={variable.lastUpdatedBy.name} />
+                  <AvatarComponent
+                    name={variable.lastUpdatedBy.name}
+                    src={variable.lastUpdatedBy.profilePictureUrl}
+                  />
                 </div>
               </div>
             }
