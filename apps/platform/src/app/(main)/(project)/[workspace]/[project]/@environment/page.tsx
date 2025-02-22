@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import {
@@ -18,6 +18,8 @@ import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 
+const INITIAL_DISPLAY_COUNT = 4
+
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
@@ -25,6 +27,7 @@ function EnvironmentPage(): React.JSX.Element {
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_DISPLAY_COUNT)
 
   const getAllEnvironmentsOfProject = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
@@ -69,23 +72,30 @@ function EnvironmentPage(): React.JSX.Element {
           </Button>
         </div>
       ) : (
-        // Showing this when environments are present
-        <div
-          className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
-        >
-          {environments.map((environment) => (
-            <EnvironmentCard environment={environment} key={environment.id} />
-          ))}
+        //Showing this when environments are present
+        <div className="flex w-full flex-col">
+          <div
+            className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
+          >
+            {environments.slice(0, visibleCount).map((environment) => (
+              <EnvironmentCard environment={environment} key={environment.id} />
+            ))}
 
-          {/* Delete environment alert dialog */}
-          {isDeleteEnvironmentOpen && selectedEnvironment ? (
-            <ConfirmDeleteEnvironment />
-          ) : null}
+            {/* Delete environment alert dialog */}
+            {isDeleteEnvironmentOpen && selectedEnvironment ? (
+              <ConfirmDeleteEnvironment />
+            ) : null}
 
-          {/* Edit environment dialog */}
-          {isEditEnvironmentOpen && selectedEnvironment ? (
-            <EditEnvironmentDialogue />
-          ) : null}
+            {/* Edit environment dialog */}
+            {isEditEnvironmentOpen && selectedEnvironment ? (
+              <EditEnvironmentDialogue />
+            ) : null}
+          </div>
+          {visibleCount < environments.length && (
+            <div className="my-2 flex w-full justify-center py-2">
+              <Button onClick={()=> setVisibleCount((prev) => prev + INITIAL_DISPLAY_COUNT)}>Load More</Button>
+            </div>
+          )}
         </div>
       )}
     </div>
