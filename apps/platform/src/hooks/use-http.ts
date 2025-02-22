@@ -1,5 +1,5 @@
 import type { ClientResponse } from '@keyshade/schema'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
@@ -21,6 +21,11 @@ export function useHttp<T, V extends ClientResponse<T>>(
   fn: () => Promise<V>
 ): () => Promise<V> {
   const fnRef = useRef(fn)
+
+  useEffect(() => {
+    fnRef.current = fn
+  }, [fn])
+
   return useCallback(async (): Promise<V> => {
     try {
       const response = await fnRef.current()
