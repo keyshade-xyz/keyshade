@@ -1,5 +1,5 @@
 import type { ClientResponse } from '@keyshade/schema'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
@@ -20,9 +20,10 @@ function handle500(error) {
 export function useHttp<T, V extends ClientResponse<T>>(
   fn: () => Promise<V>
 ): () => Promise<V> {
+  const fnRef = useRef(fn)
   return useCallback(async (): Promise<V> => {
     try {
-      const response = await fn()
+      const response = await fnRef.current()
 
       if (response.error) {
         const statusCode = response.error.statusCode
@@ -52,5 +53,5 @@ export function useHttp<T, V extends ClientResponse<T>>(
       }
       throw error
     }
-  }, [fn])
+  }, [])
 }
