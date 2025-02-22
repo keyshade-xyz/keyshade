@@ -49,6 +49,10 @@ export default function ProjectCard({
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
+  const handleCopyToClipboard = () => {
+    copyToClipboard(slug, 'You copied the slug successfully.', 'Unable to copy slug.', 'You successfully copied the slug.', 'Something went wrong while coping the slug.')
+  }
+
   const handleEditProject = () => {
     setSelectedProject(project)
     setIsEditProjectSheetOpen(true)
@@ -130,6 +134,12 @@ export default function ProjectCard({
           }}
         >
           Copy link
+        </ContextMenuItem>
+        <ContextMenuItem
+          inset
+          onClick={handleCopyToClipboard}
+        >
+          Copy Slug
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem inset onClick={handleEditProject}>
