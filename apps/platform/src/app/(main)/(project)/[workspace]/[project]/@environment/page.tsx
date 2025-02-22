@@ -77,7 +77,7 @@ function EnvironmentPage(): React.JSX.Element {
           <div
             className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
           >
-            {environments.slice(0, visibleCount).map((environment) => (
+            {environments?.slice(0, visibleCount)?.map((environment) => (
               <EnvironmentCard environment={environment} key={environment.id} />
             ))}
 
