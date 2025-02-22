@@ -146,7 +146,7 @@ export default function VariableCard(
         className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
         onSelect={handleCopyToClipboard}
         >
-          Copy Slug
+          Copy slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"

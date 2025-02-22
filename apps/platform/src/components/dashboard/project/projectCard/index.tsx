@@ -139,7 +139,7 @@ export default function ProjectCard({
           inset
           onClick={handleCopyToClipboard}
         >
-          Copy Slug
+          Copy slug
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem inset onClick={handleEditProject}>
