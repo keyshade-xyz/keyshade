@@ -1,6 +1,6 @@
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ import {
 import { useHttp } from '@/hooks/use-http'
 
 export default function CreateProjectDialogue(): JSX.Element {
+  const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
     createProjectOpenAtom
@@ -110,9 +111,20 @@ export default function CreateProjectDialogue(): JSX.Element {
   ])
 
   const toggleDialog = useCallback(
-    () => setIsCreateProjectDialogOpen((prev) => !prev),
-    [setIsCreateProjectDialogOpen]
+    () => {
+      setIsCreateProjectDialogOpen((prev) => !prev)
+      if (!isCreateProjectDialogOpen) {
+        setNewProjectData((prev) => ({ ...prev, storePrivateKey: false })) // Reset switch state
+      }
+    },
+    [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen]
   )
+
+  useEffect(() => {
+    if (newProjectData.storePrivateKey && privateKeyWarningRef.current) {
+      privateKeyWarningRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [newProjectData.storePrivateKey])
 
   return (
     <Dialog
@@ -126,20 +138,20 @@ export default function CreateProjectDialogue(): JSX.Element {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="h-[39.5rem] w-[28.625rem] rounded-[12px] border bg-[#1E1E1F] ">
-        <div className="flex h-[3.125rem] w-[25.625rem] flex-col items-start justify-center">
+      <DialogContent className="h-[39.5rem] w-full rounded-[12px] border bg-[#1E1E1F] ">
+        <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
           <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
-            Create Projects
+            Create Project
           </DialogHeader>
 
-          <DialogDescription className=" font-inter h-[1.25rem] w-[25.625rem] text-[0.875rem] font-normal text-[#D4D4D4]">
+          <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
             Create your new project
           </DialogDescription>
         </div>
-        <div className="flex flex-col gap-y-8">
-          <div className="flex h-[29.125rem] w-[25.813rem] flex-col gap-[1rem] py-[1rem] ">
+        <div className="flex flex-col gap-y-8 overflow-auto">
+          <div className="flex h-[29.125rem] w-full flex-col gap-[1rem] py-[1rem] ">
             {/* NAME */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+            <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
               <Label
                 className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                 htmlFor="name"
@@ -160,7 +172,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </div>
 
             {/* DESCRIPTION */}
-            <div className="flex h-[5.625rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+            <div className="flex h-[5.625rem] w-full items-center justify-between gap-[1rem]">
               <Label
                 className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                 htmlFor="name"
@@ -181,7 +193,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </div>
 
             {/* ENV. NAME */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+            <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
               <Label
                 className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                 htmlFor="envName"
@@ -204,7 +216,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </div>
 
             {/* ENV. DESCRIPTION */}
-            <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+            <div className="flex h-[4.875rem] w-full items-center justify-between gap-[1rem]">
               <Label
                 className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500]"
                 htmlFor="envDescription"
@@ -229,7 +241,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </div>
 
             {/* ACCESS LEVEL */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
+            <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
               <Label
                 className="font-geist h-[0.875rem] w-[5.5rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                 htmlFor="accessLevel"
@@ -264,32 +276,41 @@ export default function CreateProjectDialogue(): JSX.Element {
               </Select>
             </div>
 
-            <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
-                <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
-                  Should the private key be saved or not?
-                </h1>
-                <h1 className="font-inter h-[1.25rem] w-[16.563rem] text-[0.8rem] font-normal text-[#A1A1AA] ">
-                  Choose if you want to save your private key
-                </h1>
-              </div>
+            {/* SWITCH */}
+            <div className="flex flex-col gap-y-4 pb-4">
+              <div className="flex h-[4.875rem] w-full items-center justify-between gap-[1rem]">
+                <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
+                  <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
+                    Should the private key be saved or not?
+                  </h1>
+                  <h1 className="font-inter h-[1.25rem] w-[16.563rem] text-[0.8rem] font-normal text-[#A1A1AA] ">
+                    Choose if you want to save your private key
+                  </h1>
+                </div>
 
-              <div className="p-[0.125rem]">
-                <Switch
-                  checked={newProjectData.storePrivateKey}
-                  className="h-[1.25rem] w-[2.25rem]"
-                  onCheckedChange={(checked) => {
-                    setNewProjectData((prev) => ({
-                      ...prev,
-                      storePrivateKey: checked
-                    }))
-                  }}
-                />
+                <div className="p-[0.125rem]">
+                  <Switch
+                    checked={newProjectData.storePrivateKey}
+                    onCheckedChange={(checked) => {
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        storePrivateKey: checked
+                      }))
+                    }}
+                  />
+                </div>
               </div>
+              {
+                newProjectData.storePrivateKey ? (
+                  <div className="p-4 border border-yellow-300 rounded-lg" ref={privateKeyWarningRef}>
+                    <p className="text-[0.8rem] font-normal text-[#A1A1AA]">Enabling this would save the private key in our database. This would allow all permissible members to read your secrets. In the unnatural event of a data breach, your secrets might be exposed to attackers. We recommend you to not save your private key.</p>
+                  </div>
+                ) : null
+              }
             </div>
           </div>
         </div>
-        <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
+        <div className="flex h-[2.25rem] w-full justify-end">
           <Button
             className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
             disabled={isLoading}

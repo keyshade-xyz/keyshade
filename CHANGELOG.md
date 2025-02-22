@@ -1,3 +1,9 @@
+## [2.12.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.11...v2.12.0-stage.12) (2025-02-22)
+
+### 🚀 Features
+
+* **platform:** Displays a warning message when store private key switch is ON ([#782](https://github.com/keyshade-xyz/keyshade/issues/782)) ([ae8a432](https://github.com/keyshade-xyz/keyshade/commit/ae8a432ebf269d85eb8add5c7293eb89fe94b913))
+
 ## [2.12.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.10...v2.12.0-stage.11) (2025-02-22)
 
 ### 🐛 Bug Fixes
