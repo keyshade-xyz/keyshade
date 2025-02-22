@@ -50,7 +50,7 @@ export default function ProjectCard({
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const handleCopyToClipboard = () => {
-    copyToClipboard(slug, 'You copied the slug successfully.', 'Unable to copy slug.', 'You successfully copied the slug.', 'Something went wrong while coping the slug.')
+    copyToClipboard(slug, 'You copied the slug successfully.', 'Unable to copy slug.', 'You successfully copied the slug.', 'Something went wrong while copying the slug.')
   }
 
   const handleEditProject = () => {
