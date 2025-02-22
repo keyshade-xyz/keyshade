@@ -1,3 +1,9 @@
+## [2.12.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.10...v2.12.0-stage.11) (2025-02-22)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed infinite API calls bug ([#778](https://github.com/keyshade-xyz/keyshade/issues/778)) ([5aec6fc](https://github.com/keyshade-xyz/keyshade/commit/5aec6fc1c16ef4404619d4ef2a539e71fe60740f))
+
 ## [2.12.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.9...v2.12.0-stage.10) (2025-02-22)
 
 ### 🚀 Features
