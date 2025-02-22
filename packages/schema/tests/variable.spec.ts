@@ -104,6 +104,7 @@ describe('Variable Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123'
             // Missing name
+            // Missing profilePictureUrl
           }
         },
         values: [
@@ -121,7 +122,7 @@ describe('Variable Schema Tests', () => {
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(6)
+      expect(result.error?.issues).toHaveLength(7)
     })
   })
 
@@ -240,6 +241,7 @@ describe('Variable Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123',
             name: 'John Doe'
+            // Missing profilePicture
           }
         },
         values: [
@@ -255,7 +257,7 @@ describe('Variable Schema Tests', () => {
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(5)
+      expect(result.error?.issues).toHaveLength(6)
     })
   })
 
