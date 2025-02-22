@@ -32,7 +32,6 @@ import {
   editSecretOpenAtom,
   selectedSecretAtom
 } from '@/store'
-
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
@@ -158,7 +157,7 @@ export default function SecretCard({
         className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
         onSelect={handleCopyToClipboard}
         >
-          Copy Slug
+          Copy slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"

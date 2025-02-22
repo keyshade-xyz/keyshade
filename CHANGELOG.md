@@ -1,3 +1,13 @@
+## [2.12.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.9...v2.12.0-stage.10) (2025-02-22)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for project slug ([#774](https://github.com/keyshade-xyz/keyshade/issues/774)) ([746e87d](https://github.com/keyshade-xyz/keyshade/commit/746e87d3560843481e35677a329c0def81b9cbb1))
+
+### 🔨 Code Refactoring
+
+* **platform:** Added avatars on [secure] and variable accordions ([#751](https://github.com/keyshade-xyz/keyshade/issues/751)) ([5345925](https://github.com/keyshade-xyz/keyshade/commit/5345925bfe1234da8fd0f0bb2e2b2aa7c84845d2))
+
 ## [2.12.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.8...v2.12.0-stage.9) (2025-02-20)
 
 ### 🚀 Features
