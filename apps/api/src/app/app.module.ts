@@ -25,6 +25,8 @@ import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
+import { ThrottlerModule } from '@nestjs/throttler'
+import { RateLimitGuard } from '@/common/rate-limit-guard'
 
 @Module({
   controllers: [AppController],
@@ -37,6 +39,16 @@ import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-memb
         allowUnknown: false,
         abortEarly: true
       }
+    }),
+
+    // ✅ Corrected ThrottlerModule Configuration
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60, // Time window in seconds
+          limit: 10 // Max requests per IP per window
+        }
+      ]
     }),
 
     ScheduleModule.forRoot(),
@@ -61,6 +73,10 @@ import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-memb
     WorkspaceMembershipModule
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RateLimitGuard // ✅ Applied custom rate limit guard globally
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard
