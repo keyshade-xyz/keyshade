@@ -13,13 +13,6 @@ import {
 } from '../../../ui/dialog'
 import { Button } from '../../../ui/button'
 import { Input } from '../../../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '../../../ui/select'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
@@ -38,8 +31,13 @@ export default function AddSecretDialog() {
   const [newSecretData, setNewSecretData] = useState({
     secretName: '',
     secretNote: '',
-    environmentSlug: environments[0]?.slug,
-    environmentValue: ''
+    environmentValues: environments.reduce(
+      (acc, env) => {
+        acc[env.slug] = ''
+        return acc
+      },
+      {} as Record<string, string>
+    )
   })
 
   const handleAddSecret = useCallback(async () => {
@@ -57,14 +55,12 @@ export default function AddSecretDialog() {
     const request: CreateSecretRequest = {
       name: newSecretData.secretName,
       projectSlug: selectedProject.slug,
-      entries: newSecretData.environmentValue
-        ? [
-            {
-              value: newSecretData.environmentValue,
-              environmentSlug: newSecretData.environmentSlug
-            }
-          ]
-        : undefined,
+      entries: Object.entries(newSecretData.environmentValues).map(
+        ([environmentSlug, value]) => ({
+          value,
+          environmentSlug
+        })
+      ),
       note: newSecretData.secretNote
     }
 
@@ -110,11 +106,22 @@ export default function AddSecretDialog() {
     setNewSecretData({
       secretName: '',
       secretNote: '',
-      environmentSlug: '',
-      environmentValue: ''
+      environmentValues: environments.reduce(
+        (acc, env) => {
+          acc[env.slug] = ''
+          return acc
+        },
+        {} as Record<string, string>
+      )
     })
     setIsCreateSecretOpen(false)
-  }, [selectedProject, newSecretData, setIsCreateSecretOpen, setSecrets])
+  }, [
+    selectedProject,
+    newSecretData,
+    setIsCreateSecretOpen,
+    setSecrets,
+    environments
+  ])
 
   return (
     <Dialog
@@ -129,7 +136,7 @@ export default function AddSecretDialog() {
           <AddSVG /> Add Secret
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[25rem] w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="max-h-[80vh] w-[31.625rem] overflow-y-auto bg-[#18181B] text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new secret
@@ -184,55 +191,56 @@ export default function AddSecretDialog() {
               />
             </div>
 
-            <div className="grid h-[4.5rem] w-[28.125rem] grid-cols-2 gap-4">
-              <div className="h-[4.5rem] w-[13.5rem] space-y-2">
-                <label
-                  className="h-[1.25rem] w-[9.75rem] text-base font-semibold"
-                  htmlFor="envName"
-                >
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="mb-4 text-base font-semibold">
                   Environment Name
                 </label>
-                <Select
-                  defaultValue={newSecretData.environmentSlug}
-                  onValueChange={(val) =>
-                    setNewSecretData({
-                      ...newSecretData,
-                      environmentSlug: val
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300">
-                    <SelectValue placeholder="Select environment" />
-                  </SelectTrigger>
-                  <SelectContent className=" w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300">
-                    {environments.map((env) => (
-                      <SelectItem key={env.id} value={env.slug}>
+                <div className="space-y-4">
+                  {environments.map((env) => (
+                    <div
+                      key={env.slug}
+                      className="flex h-[2.75rem] items-center"
+                    >
+                      <label
+                        className="w-full text-base font-semibold"
+                        htmlFor={`env-value-${env.slug}`}
+                      >
                         {env.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="h-[4.5rem] w-[13.375rem] space-y-2">
-                <label
-                  className="h-[1.25rem] w-[9.75rem] text-base font-semibold"
-                  htmlFor="env-value"
-                >
+              <div className="flex flex-col">
+                <h1 className="mb-4 text-base font-semibold">
                   Environment Value
-                </label>
-                <Input
-                  className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
-                  id="env-value"
-                  onChange={(e) =>
-                    setNewSecretData({
-                      ...newSecretData,
-                      environmentValue: e.target.value
-                    })
-                  }
-                  placeholder="Environment Value"
-                  value={newSecretData.environmentValue}
-                />
+                </h1>
+                <div className="space-y-4">
+                  {environments.map((env) => (
+                    <div
+                      key={env.slug}
+                      className="flex h-[2.75rem] items-center"
+                    >
+                      <Input
+                        className="h-[2.75rem] w-full border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                        id={`env-value-${env.slug}`}
+                        onChange={(e) =>
+                          setNewSecretData({
+                            ...newSecretData,
+                            environmentValues: {
+                              ...newSecretData.environmentValues,
+                              [env.slug]: e.target.value
+                            }
+                          })
+                        }
+                        placeholder={`Enter value for ${env.name}`}
+                        value={newSecretData.environmentValues[env.slug]}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
