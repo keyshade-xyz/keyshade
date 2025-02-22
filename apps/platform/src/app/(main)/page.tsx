@@ -95,9 +95,7 @@ export default function Index(): JSX.Element {
         </div>
       )}
 
-      {isDeleteProjectOpen && selectedProject ? (
-        <ConfirmDeleteProject reCallGetAllProjects={getAllProjects} />
-      ) : null}
+      {isDeleteProjectOpen && selectedProject ? <ConfirmDeleteProject /> : null}
 
       <EditProjectSheet />
     </div>
