@@ -18,7 +18,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 
-const INITIAL_DISPLAY_COUNT = 4
+const INITIAL_DISPLAY_COUNT = 10
 
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
