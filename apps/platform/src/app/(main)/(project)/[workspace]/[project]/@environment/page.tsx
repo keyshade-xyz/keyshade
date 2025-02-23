@@ -18,8 +18,6 @@ import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 
-const INITIAL_DISPLAY_COUNT = 10
-
 function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
@@ -27,24 +25,40 @@ function EnvironmentPage(): React.JSX.Element {
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
-  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_DISPLAY_COUNT)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const getAllEnvironmentsOfProject = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
-        projectSlug: selectedProject!.slug
+        projectSlug: selectedProject!.slug,
+        page,
       }
     )
   )
 
   useEffect(() => {
-    selectedProject &&
-      getAllEnvironmentsOfProject().then(({ data, success }) => {
+    if (!selectedProject) return 
+    setLoading(true)
+    getAllEnvironmentsOfProject()
+      .then(({ data, success }) => {
         if (success && data) {
-          setEnvironments(data.items)
+          const newData = page === 0 ? data.items : [...environments, ...data.items];
+          setEnvironments(newData);
+          if (newData.length >= data.metadata.totalCount) setHasMore(false);
         }
       })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [selectedProject, page, getAllEnvironmentsOfProject, setEnvironments])
+
+  const handlePageShift = () => {
+    if (hasMore && !loading) {
+      setPage(prevPage => prevPage + 1)
+    }
+  }
 
   return (
     <div
@@ -77,7 +91,7 @@ function EnvironmentPage(): React.JSX.Element {
           <div
             className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
           >
-            {environments?.slice(0, visibleCount)?.map((environment) => (
+            {environments.map((environment) => (
               <EnvironmentCard environment={environment} key={environment.id} />
             ))}
 
@@ -90,12 +104,15 @@ function EnvironmentPage(): React.JSX.Element {
             {isEditEnvironmentOpen && selectedEnvironment ? (
               <EditEnvironmentDialogue />
             ) : null}
+
+            {hasMore ? <div className="col-span-full flex justify-center">
+              <Button disabled={loading} onClick={handlePageShift}>
+                {loading ? 'Loading...' : 'Load More'}
+              </Button>
+            </div> : null}
+
           </div>
-          {visibleCount < environments.length && (
-            <div className="my-2 flex w-full justify-center py-2">
-              <Button onClick={()=> setVisibleCount((prev) => prev + INITIAL_DISPLAY_COUNT)}>Load More</Button>
-            </div>
-          )}
+          
         </div>
       )}
     </div>
