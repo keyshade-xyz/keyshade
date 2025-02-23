@@ -1,7 +1,7 @@
 import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
-import * as dayjs from 'dayjs'
-import * as relativeTime from 'dayjs/plugin/relativeTime'
+import { extend, default as dayjs } from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { NoteIconSVG } from '@public/svg/secret'
 import {
   Table,
@@ -38,7 +38,7 @@ import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
 // Initialize dayjs relative time plugin
-dayjs.extend(relativeTime)
+extend(relativeTime)
 
 export default function VariableCard(
   variableData: GetAllVariablesOfProjectResponse['items'][number]
@@ -81,7 +81,7 @@ export default function VariableCard(
             className="hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
+                {dayjs(variable.updatedAt).fromNow()} ago by{' '}
                 <div className="flex items-center gap-x-2">
                   <span className="text-white">
                     {variable.lastUpdatedBy.name}

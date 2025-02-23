@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -46,17 +47,38 @@ function VariablePage(): React.JSX.Element {
   const getAllVariablesOfProject = useHttp<
     GetAllVariablesOfProjectResponse,
     ClientResponse<GetAllVariablesOfProjectResponse>
-  >(() =>
-    ControllerInstance.getInstance().variableController.getAllVariablesOfProject({
-      projectSlug: selectedProject!.slug
-    })
-  )
+  >(async () => {
+    if (!selectedProject?.slug) {
+      throw new Error('Project slug is required')
+    }
+
+    const response = await ControllerInstance.getInstance()
+      .variableController.getAllVariablesOfProject({
+        projectSlug: selectedProject.slug
+      })
+    
+    if (!response.success || !response.data) {
+      throw new Error(response.error?.message || 'Failed to fetch variables')
+    }
+    
+    return {
+      data: response.data,
+      success: true,
+      error: null
+    } as ClientResponse<GetAllVariablesOfProjectResponse>
+  })
 
   useEffect(() => {
     if (selectedProject) {
-      getAllVariablesOfProject().then(({ data }) => {
-        setVariables(data.items)
-      })
+      getAllVariablesOfProject()
+        .then(({ data }) => {
+          setVariables(data.items)
+        })
+        .catch((error: Error) => {
+          toast.error('Failed to fetch variables', {
+            description: error.message
+          })
+        })
     }
   }, [getAllVariablesOfProject, selectedProject, setVariables])
 
