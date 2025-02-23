@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
-import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
-import { VariableSVG } from '@public/svg/dashboard'
+import React, { useEffect } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { VariableSVG } from '@public/svg/dashboard'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
@@ -22,17 +21,6 @@ import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
 import { useHttp } from '@/hooks/use-http'
 
-interface ErrorResponse {
-  message: string;
-  error: string;
-  statusCode: number;
-}
-
-interface ClientResponse<T> {
-  data: T;
-  success: boolean;
-  error: ErrorResponse | null;
-}
 
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
@@ -43,10 +31,7 @@ function VariablePage(): React.JSX.Element {
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
-  const getAllVariablesOfProject = useHttp<
-    GetAllVariablesOfProjectResponse,
-    ClientResponse<GetAllVariablesOfProjectResponse>
-  >(() =>
+  const getAllVariablesOfProject = useHttp(() =>
     ControllerInstance.getInstance().variableController.getAllVariablesOfProject({
       projectSlug: selectedProject!.slug
     })
@@ -55,14 +40,17 @@ function VariablePage(): React.JSX.Element {
   useEffect(() => {
     if (selectedProject) {
       getAllVariablesOfProject().then(({ data }) => {
-        setVariables(data.items)
+        if (data) {
+
+          setVariables(data.items)
+        }
       })
     }
   }, [getAllVariablesOfProject, selectedProject, setVariables])
 
   return (
-    <div 
-      className="flex h-full w-full" 
+    <div
+      className="flex h-full w-full"
       data-inert={isRollbackVariableOpen ? true : undefined}
     >
       {/* Showing this when there are no variables present */}
@@ -89,9 +77,8 @@ function VariablePage(): React.JSX.Element {
       ) : (
         // Showing this when variables are present
         <div
-          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${
-            isDeleteVariableOpen ? 'inert' : ''
-          } `}
+          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteVariableOpen ? 'inert' : ''
+            } `}
         >
           <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
             {variables.map(({ variable, values }) => (
