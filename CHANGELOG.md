@@ -1,3 +1,9 @@
+## [2.12.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.14...v2.12.0-stage.15) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Added import statement for crypto module ([#789](https://github.com/keyshade-xyz/keyshade/issues/789)) ([f6ddf0f](https://github.com/keyshade-xyz/keyshade/commit/f6ddf0fc54280c9844143ac42840fcbde1438b23))
+
 ## [2.12.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.13...v2.12.0-stage.14) (2025-02-23)
 
 ### 🐛 Bug Fixes
