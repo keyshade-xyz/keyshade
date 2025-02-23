@@ -16,7 +16,7 @@ jobs:
           script: |
             const comment = context.payload.comment;
             const issue = context.issue;
-            const owner = 'keyshade-xyz';
+            const owner = 'csehatt741';
             const repo = 'keyshade';
             const userMaxConcurrentIssueCount = process.env.USER_MAX_CONCURRENT_ISSUE_COUNT || 5;
 
@@ -117,6 +117,7 @@ jobs:
             }
 
             if (comment.body.startsWith('/attempt')) {
+              console.log(`Assignee: ${issue.assignee}`);
               if (!issue.assignee) {
                 const userActiveIssues = await listUserOpenIssuesWithoutActivePullRequest(comment.user);
 
