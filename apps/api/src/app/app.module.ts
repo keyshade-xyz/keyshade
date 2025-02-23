@@ -41,12 +41,12 @@ import { RateLimitGuard } from '@/common/rate-limit-guard'
       }
     }),
 
-    // ✅ Corrected ThrottlerModule Configuration
+    // ✅ Corrected ThrottlerModule Configuration (Now uses throttle array)
     ThrottlerModule.forRoot({
       throttlers: [
         {
           ttl: 60, // Time window in seconds
-          limit: 10 // Max requests per IP per window
+          limit: 10 // Max requests per user per window
         }
       ]
     }),
@@ -75,15 +75,15 @@ import { RateLimitGuard } from '@/common/rate-limit-guard'
   providers: [
     {
       provide: APP_GUARD,
-      useClass: RateLimitGuard // ✅ Applied custom rate limit guard globally
+      useClass: AuthGuard // ✅ Ensuring authentication before rate limiting
     },
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
+      useClass: ApiKeyGuard // ✅ Ensuring API key check before rate limiting
     },
     {
       provide: APP_GUARD,
-      useClass: ApiKeyGuard
+      useClass: RateLimitGuard // ✅ Applying rate limit guard after auth
     }
   ]
 })
