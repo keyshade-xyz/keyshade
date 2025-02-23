@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
 import { History } from 'lucide-react'
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import ConfirmRollbackDialog from '../confirmRollbackDialog'
 import {
   Sheet,
@@ -24,29 +24,19 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 
-/**
- * Formats a date into a standardized string representation.
- * 
- * @param date - The date to format
- * @returns The formatted date string in "D MMMM, YYYY h:mm A" format
- */
-const formatDate = (date: Date | string): string => {
-  return dayjs(date).format('D MMMM, YYYY h:mm A')
-}
-
 interface Revision {
   version: number
   value: string
-  createdBy?: {  // Make createdBy optional
+  createdBy?: {
     id: string
     name: string
     profilePictureUrl: string | null
-  } | null  // Allow null
+  } | null
   createdOn: string
   id: string
   environmentId: string
-  createdById: string
-  SecretId: string
+  createdById: string | null
+  secretId: string
 }
 
 interface EnvironmentRevisions {
@@ -60,7 +50,11 @@ interface RollbackDetails {
   version: number
 }
 
-export default function RollbackSecretSheet() {
+interface RollbackSheetProps {
+  isDecrypted?: boolean;  // Add isDecrypted prop
+}
+
+export default function RollbackSecretSheet({ isDecrypted = false }: RollbackSheetProps) {
   const [isRollbackSecretOpen, setIsRollbackSecretOpen] = useAtom(
     rollbackSecretOpenAtom
   )
@@ -83,7 +77,6 @@ export default function RollbackSecretSheet() {
               environmentName: value.environment.name,
               environmentSlug: value.environment.slug,
               revisions: data.items
-
             } as EnvironmentRevisions
           }
           return null
@@ -190,14 +183,14 @@ export default function RollbackSecretSheet() {
                             <div className="flex-grow space-y-3 pr-8">
                               <div className="flex items-center gap-3">
                                 <div className="text-base text-white/80 flex-grow">
-                                  {revision.value}
+                                  {isDecrypted ? revision.value : revision.value.replace(/./g, '*').substring(0, 20)}
                                   <span className="px-2 py-1 rounded-md bg-blue-500/20 text-blue-400 text-sm font-medium ml-3">
                                     v{revision.version}
                                   </span>
                                 </div>
                               </div>
                               <div className="text-sm text-white/40">
-                                {formatDate(revision.createdOn)} by {revision.createdBy?.name ?? 'Unknown'}
+                                {dayjs(revision.createdOn).fromNow()} by {revision.createdBy?.name ?? 'Unknown'}
                               </div>
                             </div>
                           </div>

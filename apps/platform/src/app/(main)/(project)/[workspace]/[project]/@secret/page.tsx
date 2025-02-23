@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
@@ -91,8 +90,12 @@ function SecretPage(): React.JSX.Element {
             } `}
         >
           <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
-            {secrets.map(({ secret, values }) => (
-              <SecretCard key={secret.id} secret={secret} values={values} />
+            {secrets.map((secretData) => (
+              <SecretCard 
+                isDecrypted={isDecrypted} 
+                key={secretData.secret.id}
+                secretData={secretData}
+              />
             ))}
           </Accordion>
           {/* Delete Secret alert dialog */}
@@ -102,7 +105,7 @@ function SecretPage(): React.JSX.Element {
           {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
 
           {/* Rollback Secret sheet */}
-          {isRollbackSecretOpen && selectedSecret ? <RollbackSecretSheet /> : null}
+          {isRollbackSecretOpen && selectedSecret ? <RollbackSecretSheet isDecrypted={isDecrypted} /> : null}
         </div>
       )}
     </div>

@@ -38,21 +38,24 @@ import { copyToClipboard } from '@/lib/clipboard'
 
 extend(dayjs)
 
-
 interface SecretCardProps {
-  secretData: Secret
+  secretData: Secret | undefined
   isDecrypted: boolean
 }
 export default function SecretCard({
   secretData,
   isDecrypted
 }: SecretCardProps) {
-  const { secret, values } = secretData
-
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
   const setIsRollbackSecretOpen = useSetAtom(rollbackSecretOpenAtom)
+  
+  if (!secretData?.secret) {
+    return null;
+  }
+  
+  const { secret, values } = secretData
 
   const handleCopyToClipboard = () => {
     copyToClipboard(secret.slug, 'You copied the slug successfully.', 'Failed to copy the slug.', 'You successfully copied the slug.')
@@ -69,17 +72,9 @@ export default function SecretCard({
   }
 
   const handleVersionHistoryClick = () => {
-
-
-
     setSelectedSecret(secretData)
-
-
     setIsRollbackSecretOpen(true)
-
-
   }
-
 
   return (
     <ContextMenu>
