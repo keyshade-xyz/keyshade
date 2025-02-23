@@ -33,7 +33,6 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
   }, [setIsDeleteApiKeyOpen])
 
   const deleteApiKey = useCallback(async () => {
-
     if (selectedApiKey === null) {
       toast.error('No API Key selected', {
         description: (

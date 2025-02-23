@@ -119,7 +119,7 @@ const authorityGroups = [
       {
         id: 'ADMIN',
         label: 'Admin',
-        description: 'Full access to all admin actions',
+        description: 'Full access to all admin actions'
       }
     ]
   },
@@ -260,20 +260,20 @@ const authorityGroups = [
       {
         id: 'UPDATE_PROFILE',
         label: 'UPDATE_PROFILE',
-        description: 'Full access to all update_profile actions',
+        description: 'Full access to all update_profile actions'
       },
       {
         id: 'READ_SELF',
         label: 'READ_SELF',
-        description: 'Full access to all read_self actions',
+        description: 'Full access to all read_self actions'
       },
       {
         id: 'UPDATE_SELF',
         label: 'UPDATE_SELF_READ_EVENT',
-        description: 'Full access to all update_self_read_event actions',
-      },
+        description: 'Full access to all update_self_read_event actions'
+      }
     ]
-  },
+  }
 ]
 
 export default function AddApiKeyDialog() {
@@ -285,7 +285,9 @@ export default function AddApiKeyDialog() {
     apiKeyName: '',
     expiryDate: '24'
   })
-  const [selectedPermissions, setSelectedPermissions] = React.useState<Set<CreateApiKeyRequest['authorities']>>(new Set())
+  const [selectedPermissions, setSelectedPermissions] = React.useState<
+    Set<CreateApiKeyRequest['authorities']>
+  >(new Set())
 
   const togglePermission = useCallback((permissionId: string) => {
     setSelectedPermissions((current) => {
@@ -377,7 +379,9 @@ export default function AddApiKeyDialog() {
       if (success && data) {
         toast.success('API Key added successfully', {
           description: (
-            <p className="text-xs text-emerald-300">You created a new API Key</p>
+            <p className="text-xs text-emerald-300">
+              You created a new API Key
+            </p>
           )
         })
         setApiKeys((prev) => [...prev, data])
@@ -385,9 +389,9 @@ export default function AddApiKeyDialog() {
           action: {
             label: <X className="h-4 w-3" />,
             onClick: () => {
-              toast.dismiss();
+              toast.dismiss()
             }
-          },
+          }
         })
       }
       if (error) {
