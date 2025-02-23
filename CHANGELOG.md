@@ -1,3 +1,9 @@
+## [2.12.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.13...v2.12.0-stage.14) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Issue fetched via API ([#788](https://github.com/keyshade-xyz/keyshade/issues/788)) ([b373eeb](https://github.com/keyshade-xyz/keyshade/commit/b373eeb5974ee61bd07ce586da4b56dbd0d10fab))
+
 ## [2.12.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.12...v2.12.0-stage.13) (2025-02-23)
 
 ### 🐛 Bug Fixes
