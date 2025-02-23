@@ -1,6 +1,5 @@
 'use client'
-
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import {
@@ -22,33 +21,61 @@ function EnvironmentPage(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
   const isEditEnvironmentOpen = useAtomValue(editEnvironmentOpenAtom)
-  const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
+  const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
 
-  const getAllEnvironmentsOfProject = useHttp(() =>
-    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-      {
-        projectSlug: selectedProject!.slug
-      }
-    )
+  // Pagination state: page number, loading, and whether more data is available
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const limit = 10 // default number of items per request
+
+  // Prepare the API call using the useHttp hook with pagination parameters
+  const getEnvironments = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getEnvironmentsOfProject({
+      projectSlug: selectedProject!.slug,
+      page,
+      limit,
+      sort: 'name',
+      order: 'asc',
+      search: ''
+    })
   )
 
+  // Fetch environments when the component mounts or when the page changes
   useEffect(() => {
-    selectedProject &&
-      getAllEnvironmentsOfProject().then(({ data, success }) => {
-        if (success && data) {
-          setEnvironments(data.items)
-        }
-      })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+    if (selectedProject) {
+      setLoading(true)
+      getEnvironments()
+        .then(({ data, success }) => {
+          if (success && data) {
+            // On first page, replace; on subsequent pages, append new items
+            setEnvironments(prev =>
+              page === 0 ? data.items : [...prev, ...data.items]
+            )
+            // If the returned items are fewer than the limit, there's no more data
+            if (data.items.length < limit) {
+              setHasMore(false)
+            }
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+  }, [selectedProject, page, getEnvironments, setEnvironments])
+
+  const handleLoadMore = () => {
+    if (hasMore && !loading) {
+      setPage(prevPage => prevPage + 1)
+    }
+  }
 
   return (
-    <div
-      className={`flex h-full w-full ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
-    >
-      {/* Showing this when there are no environments present */}
-      {environments.length === 0 ? (
+    <div className={`flex h-full w-full ${isDeleteEnvironmentOpen ? 'inert' : ''}`}>
+      {environments.length === 0 && !loading ? (
+        // Display when no environments are present
         <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
           <EnvironmentSVG width={100} />
 
@@ -69,23 +96,24 @@ function EnvironmentPage(): React.JSX.Element {
           </Button>
         </div>
       ) : (
-        // Showing this when environments are present
+        // Display environment cards along with the "Load More" button if more data exists
         <div
-          className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
+          className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${
+            isDeleteEnvironmentOpen ? 'inert' : ''
+          }`}
         >
-          {environments.map((environment) => (
+          {environments.map(environment => (
             <EnvironmentCard environment={environment} key={environment.id} />
           ))}
 
-          {/* Delete environment alert dialog */}
-          {isDeleteEnvironmentOpen && selectedEnvironment ? (
-            <ConfirmDeleteEnvironment />
-          ) : null}
+          {hasMore ? <div className="col-span-full flex justify-center">
+              <Button disabled={loading} onClick={handleLoadMore}>
+                {loading ? 'Loading...' : 'Load More'}
+              </Button>
+            </div> : null}
 
-          {/* Edit environment dialog */}
-          {isEditEnvironmentOpen && selectedEnvironment ? (
-            <EditEnvironmentDialogue />
-          ) : null}
+          {isDeleteEnvironmentOpen && selectedEnvironment ? <ConfirmDeleteEnvironment /> : null}
+          {isEditEnvironmentOpen && selectedEnvironment ? <EditEnvironmentDialogue /> : null}
         </div>
       )}
     </div>
