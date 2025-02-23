@@ -2,6 +2,7 @@ import { UserAuthenticatedResponse } from '@/auth/auth.types'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
+import * as crypto from 'crypto'
 
 /**
  * Limits the given limit to a maximum number of items per page.
