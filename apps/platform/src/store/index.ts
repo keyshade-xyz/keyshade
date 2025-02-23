@@ -43,3 +43,5 @@ export const deleteSecretOpenAtom = atom<boolean>(false)
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
+
+export const rollbackVariableOpenAtom = atom<boolean>(false)
