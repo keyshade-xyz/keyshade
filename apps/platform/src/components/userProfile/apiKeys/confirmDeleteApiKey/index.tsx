@@ -24,7 +24,8 @@ import {
 export default function ConfirmDeleteApiKey(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(false)
   const selectedApiKey = useAtomValue(selectedApiKeyAtom)
-  const [isDeleteApiKeyOpen, setIsDeleteApiKeyOpen] = useAtom(deleteApiKeyOpenAtom)
+  const [isDeleteApiKeyOpen, setIsDeleteApiKeyOpen] =
+    useAtom(deleteApiKeyOpenAtom)
   const setApiKeys = useSetAtom(apiKeysOfProjectAtom)
 
   const handleClose = useCallback(() => {
@@ -32,7 +33,6 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
   }, [setIsDeleteApiKeyOpen])
 
   const deleteApiKey = useCallback(async () => {
-    setIsLoading(true)
 
     if (selectedApiKey === null) {
       toast.error('No API Key selected', {
@@ -47,41 +47,47 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
 
     const apiKeySlug = selectedApiKey.slug
 
-    toast.loading("Deleting your API Key...")
-    const { success, error } =
-      await ControllerInstance.getInstance().apiKeyController.deleteApiKey(
-        { apiKeySlug: apiKeySlug },
-        {}
-      )
+    setIsLoading(true)
 
-    toast.dismiss()
-    if (success) {
-      toast.success('API Key deleted successfully', {
-        description: (
-          <p className="text-xs text-emerald-300">
-            The API Key has been deleted.
-          </p>
+    try {
+      toast.loading('Deleting your API Key...')
+      const { success, error } =
+        await ControllerInstance.getInstance().apiKeyController.deleteApiKey(
+          { apiKeySlug: apiKeySlug },
+          {}
         )
-      })
 
-      // Remove the API Key from the store
-      setApiKeys((prevApiKeys) =>
-        prevApiKeys.filter(
-          (apiKey) => apiKey.slug !== apiKeySlug
+      if (success) {
+        toast.success('API Key deleted successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              The API Key has been deleted.
+            </p>
+          )
+        })
+
+        // Remove the API Key from the store
+        setApiKeys((prevApiKeys) =>
+          prevApiKeys.filter((apiKey) => apiKey.slug !== apiKeySlug)
         )
-      )
-    }
-    if (error) {
-      toast.dismiss()
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the API Key. Check console for more info.
-          </p>
-        )
-      })
+      }
+      if (error) {
+        toast.error('Something went wrong!', {
+          description: (
+            <p className="text-xs text-red-300">
+              Something went wrong while deleting the API Key. Check console for
+              more info.
+            </p>
+          )
+        })
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.error(error)
+      }
+    } catch (error) {
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
+    } finally {
+      toast.dismiss()
     }
 
     handleClose()
@@ -116,7 +122,8 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This action cannot be undone. This will permanently delete your API and remove your API key data from our servers.
+            This action cannot be undone. This will permanently delete your API
+            and remove your API key data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -131,7 +138,7 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
             onClick={deleteApiKey}
             disabled={isLoading}
           >
-            Yes, delete {selectedApiKey ? selectedApiKey.name : "this API Key" }
+            Yes, delete {selectedApiKey ? selectedApiKey.name : 'this API Key'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
