@@ -27,7 +27,8 @@ describe('Variable Schema Tests', () => {
           projectId: 'project123',
           lastUpdatedBy: {
             id: 'user123',
-            name: 'John Doe'
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
           }
         },
         values: [
@@ -38,6 +39,12 @@ describe('Variable Schema Tests', () => {
               id: 'env123',
               name: 'Development',
               slug: 'development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -58,7 +65,8 @@ describe('Variable Schema Tests', () => {
           projectId: 'project123',
           lastUpdatedBy: {
             id: 'user123',
-            name: 'John Doe'
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
           }
         },
         values: [
@@ -69,6 +77,12 @@ describe('Variable Schema Tests', () => {
               id: 'env123',
               name: 'Development',
               slug: 'development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -90,6 +104,7 @@ describe('Variable Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123'
             // Missing name
+            // Missing profilePictureUrl
           }
         },
         values: [
@@ -101,11 +116,13 @@ describe('Variable Schema Tests', () => {
               // Missing slug
               //Missing name
             }
+            // Missing createdOn
+            // Missing createdBy
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(4)
+      expect(result.error?.issues).toHaveLength(7)
     })
   })
 
@@ -185,7 +202,8 @@ describe('Variable Schema Tests', () => {
           projectId: 'project123',
           lastUpdatedBy: {
             id: 'user123',
-            name: 'John Doe'
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
           }
         },
         values: [
@@ -196,6 +214,12 @@ describe('Variable Schema Tests', () => {
               id: 'env123',
               name: 'Development',
               slug: 'development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -217,6 +241,7 @@ describe('Variable Schema Tests', () => {
           lastUpdatedBy: {
             id: 'user123',
             name: 'John Doe'
+            // Missing profilePicture
           }
         },
         values: [
@@ -232,7 +257,7 @@ describe('Variable Schema Tests', () => {
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(3)
+      expect(result.error?.issues).toHaveLength(6)
     })
   })
 
@@ -424,7 +449,8 @@ describe('Variable Schema Tests', () => {
               projectId: 'project123',
               lastUpdatedBy: {
                 id: 'user123',
-                name: 'John Doe'
+                name: 'John Doe',
+                profilePictureUrl: 'http://example.com/profile.jpg'
               }
             },
             values: [
@@ -435,7 +461,13 @@ describe('Variable Schema Tests', () => {
                   slug: 'development'
                 },
                 value: 'variable-value',
-                version: 1
+                version: 1,
+                createdOn: '2024-10-01T00:00:00Z',
+                createdBy: {
+                  id: 'user123',
+                  name: 'John Doe',
+                  profilePictureUrl: 'http://example.com/profile.jpg'
+                }
               }
             ]
           }

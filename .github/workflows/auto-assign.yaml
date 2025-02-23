@@ -9,13 +9,79 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
+        env:
+            USER_MAX_CONCURRENT_ISSUE_COUNT: ${{ vars.USER_MAX_CONCURRENT_ISSUE_COUNT }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const comment = context.payload.comment;
-            const issue = context.issue;
-            const owner = "keyshade-xyz";
-            const repo = "keyshade";
+            const issue = context.payload.issue;
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
+            const userMaxConcurrentIssueCount = process.env.USER_MAX_CONCURRENT_ISSUE_COUNT || 5;
+
+            async function listIssueEvents(issueNumber) {
+              const events = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const eventsResponse = await github.rest.issues.listEventsForTimeline({
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  per_page: 100,
+                  page
+                });
+
+                events.push(...eventsResponse.data);
+
+                hasNextPage = eventsResponse.headers.link && eventsResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return events;
+            }
+
+            async function listUserOpenIssuesWithoutActivePullRequest(user) {
+              const issuesWithoutActivePullRequest = [];
+
+              const { data: userOpenIssues } = await github.rest.issues.listForRepo({
+                owner,
+                repo,
+                state: 'open',
+                assignee: user.login,
+                per_page: 100
+              });
+
+              for (const issue of userOpenIssues) {
+                const events = await listIssueEvents(issue.number);
+                const userPullRequestIssues = events
+                  .filter(event => event.event === 'cross-referenced')
+                  .map(event => event.source.issue)
+                  .filter(issue => issue && issue.pull_request && issue.user.login === comment.user.login);
+
+                if(userPullRequestIssues.length === 0) {
+                  issuesWithoutActivePullRequest.push(issue);
+                  continue;
+                }
+
+                for (const pullRequestIssue of userPullRequestIssues) {
+                  const { data: pullRequest } = await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: pullRequestIssue.number
+                  });
+
+                  if(pullRequest.draft) {
+                    issuesWithoutActivePullRequest.push(issue);
+                    break;
+                  }
+                }
+              }
+
+              return issuesWithoutActivePullRequest;
+            }
 
             async function updateProjectStatus(issueNumber) {
               const projectsResponse = await github.rest.projects.listForRepo({
@@ -30,7 +96,7 @@ jobs:
                   per_page: 100,
                 });
 
-                const inProgressColumn = columnsResponse.data.find(column => column.name === "In Progress");
+                const inProgressColumn = columnsResponse.data.find(column => column.name === 'In Progress');
                 if (!inProgressColumn) continue;
 
                 const cardsResponse = await github.rest.projects.listCards({
@@ -38,13 +104,13 @@ jobs:
                   per_page: 100,
                 });
 
-                const issueCardExists = cardsResponse.data.some(card => card.content_id === issueNumber && card.content_type === "Issue");
+                const issueCardExists = cardsResponse.data.some(card => card.content_id === issueNumber && card.content_type === 'Issue');
 
                 if (!issueCardExists) {
                   await github.rest.projects.createCard({
                     column_id: inProgressColumn.id,
                     content_id: issueNumber,
-                    content_type: "Issue",
+                    content_type: 'Issue',
                   });
                 }
               }
@@ -52,27 +118,38 @@ jobs:
 
             if (comment.body.startsWith('/attempt')) {
               if (!issue.assignee) {
-                await github.rest.issues.addAssignees({
-                  owner,
-                  repo,
-                  issue_number: issue.number,
-                  assignees: [comment.user.login],
-                });
+                const userActiveIssues = await listUserOpenIssuesWithoutActivePullRequest(comment.user);
 
-                await github.rest.issues.createComment({
-                  owner,
-                  repo,
-                  issue_number: issue.number,
-                  body: `Assigned the issue to @${comment.user.login}!`,
-                });
+                if(userActiveIssues.length < userMaxConcurrentIssueCount) {
+                  await github.rest.issues.addAssignees({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    assignees: [comment.user.login],
+                  });
 
-                await updateProjectStatus(issue.number);
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: `Assigned the issue to @${comment.user.login}!`,
+                  });
+
+                  await updateProjectStatus(issue.number);
+                } else {
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: `@${comment.user.login}, cannot concurrently work on more than ${userMaxConcurrentIssueCount} issues. Tag a maintainer if you need to take over.`,
+                  });
+                }
               } else {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: issue.number,
-                  body: 'This issue is already assigned. Tag a maintainer if you need to take over.',
+                  body: `@${comment.user.login}, this issue is already assigned. Tag a maintainer if you need to take over.`,
                 });
               }
             }

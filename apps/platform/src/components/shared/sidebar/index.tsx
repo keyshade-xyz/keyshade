@@ -1,13 +1,14 @@
 'use client'
 import React from 'react'
+import { useAtomValue } from 'jotai'
 import {
   DashboardSVG,
   IntegrationSVG,
   KeyshadeLogoSVG,
+  RolesSVG,
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import { useAtomValue } from 'jotai'
 import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
@@ -27,6 +28,12 @@ function Sidebar(): JSX.Element {
       icon: <TeamSVG />,
       link: '/teams',
       matchTo: '/teams'
+    },
+    {
+      name: 'Roles',
+      icon: <RolesSVG />,
+      link: '/roles',
+      matchTo: '/roles'
     },
     {
       name: 'Integrations',

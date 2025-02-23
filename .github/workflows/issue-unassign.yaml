@@ -1,0 +1,123 @@
+name: Issue Unassign
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+
+jobs:
+  issue-unassign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          UNASSIGN_ISSUE_ENABLED: ${{ vars.UNASSIGN_ISSUE_ENABLED }}
+          UNASSIGN_ISSUE_AFTER_DAYS: ${{ vars.UNASSIGN_ISSUE_AFTER_DAYS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = 'keyshade-xyz';
+            const repo = 'keyshade';
+            const unassignIssueEnabled = process.env.UNASSIGN_ISSUE_ENABLED || false;
+            const unassignIssueAfterDays = process.env.UNASSIGN_ISSUE_AFTER_DAYS || 14;
+            const unassignIssueAfterMilliseconds = unassignIssueAfterDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if(!unassignIssueEnabled) {
+              console.log('!!! Dry run, there are no changes made !!!');
+            }
+
+            async function listOpenIssues() {
+              const issues = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listForRepo({
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  page
+                });
+
+                issues.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return issues;
+            }
+
+            async function listIssueEvents(issue) {
+              const allEvents = [];
+              let page = 1;
+              let hasNextPage = true;
+
+              while (hasNextPage) {
+                const issuesResponse = await github.rest.issues.listEventsForTimeline({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  per_page: 100,
+                  page
+                });
+
+                allEvents.push(...issuesResponse.data);
+
+                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                page++;
+              }
+
+              return allEvents.sort((a, b) => a.id > b.id);
+            }
+
+            async function unassignIssues() {
+              const issues = await listOpenIssues();
+
+              for (const issue of issues) {
+                const events = await listIssueEvents(issue);
+                const pullRequests = events
+                    .filter(event => event.event === 'cross-referenced')
+                    .map(event => event.source.issue)
+                    .filter(issue => issue && issue.pull_request);
+
+                for (const assignee of issue.assignees) {
+                  // Check if assignee has already opened a PR
+                  const assigneePullRequest = pullRequests.find(pullRequest => pullRequest.user.login === assignee.login);
+
+                  if(assigneePullRequest) {
+                    continue;
+                  }
+
+                  // Check if it is time to unassign issue
+                  const assignedEvent = events.find(event => event.event === 'assigned' && event.assignee.login === assignee.login);                  
+                  const issueAssignedAt = new Date(assignedEvent.created_at);
+                  const unassignIssueAfter = new Date(issueAssignedAt.getTime() + unassignIssueAfterMilliseconds);
+
+                  if (now < unassignIssueAfter) {
+                    continue;
+                  }
+
+                  if(unassignIssueEnabled) {
+                    await github.rest.issues.removeAssignees({
+                      owner,
+                      repo,
+                      issue_number: issue.number,
+                      assignees: [assignee.login],
+                    });
+
+                    await github.rest.issues.createComment({
+                      owner,
+                      repo,
+                      issue_number: issue.number,
+                      body: `Unassigned the issue from @${assignee.login} due to inactivity!`,
+                    });
+                  }
+
+                  console.log(`Issue '${issue.number}' user unassigned: ${assignee.login}`);
+                }
+              }
+            }
+
+            await unassignIssues();

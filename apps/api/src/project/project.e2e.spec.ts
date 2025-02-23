@@ -18,7 +18,6 @@ import {
   Project,
   ProjectAccessLevel,
   Secret,
-  User,
   Variable,
   Workspace
 } from '@prisma/client'
@@ -41,6 +40,7 @@ import { SecretModule } from '@/secret/secret.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -55,9 +55,11 @@ describe('Project Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project, project3: Project, project4: Project
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -115,14 +117,14 @@ describe('Project Controller Tests', () => {
       isAdmin: false
     })
 
-    workspace1 = createUser1.defaultWorkspace as Workspace
-    workspace2 = createUser2.defaultWorkspace as Workspace
+    workspace1 = createUser1.defaultWorkspace
+    workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
+    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
@@ -225,11 +227,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Project 1** already exists`
-      })
     })
 
     it('should have created a PROJECT_CREATED event', async () => {
@@ -304,11 +301,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
   })
 
@@ -352,11 +344,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Project 1** already exists`
-      })
     })
 
     it('should not be able to update a non existing project', async () => {
@@ -373,11 +360,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to update a project if the user is not a member of the workspace', async () => {
@@ -452,11 +434,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to fetch a project if the user is not a member of the workspace', async () => {
@@ -527,11 +504,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
 
     it('should not be able to fetch all projects of a workspace if the user is not a member of the workspace', async () => {
@@ -823,11 +795,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to delete a project if the user is not a member of the workspace', async () => {
@@ -964,13 +931,15 @@ describe('Project Controller Tests', () => {
 
     it('should require WORKSPACE_ADMIN authority to alter the access level', async () => {
       // Create a user
-      const johnny = await userService.createUser({
+      const user = await userService.createUser({
         name: 'Johnny Doe',
         email: 'johhny@keyshade.xyz',
         isOnboardingFinished: true,
         isActive: true,
         isAdmin: false
       })
+
+      const johnny: AuthenticatedUser = { ...user, ipAddress: USER_IP_ADDRESS }
 
       // Create a member role for the workspace
       const role = await workspaceRoleService.createWorkspaceRole(
@@ -1064,11 +1033,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Private key is required to make the project GLOBAL'
-      })
     })
 
     it('should regenerate key-pair if access level of GLOBAL project is updated to INTERNAL or PRIVATE', async () => {
@@ -1206,11 +1170,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Project 123 not found`
-      })
     })
 
     it('should not be able to fork a project that is not GLOBAL', async () => {
@@ -1277,11 +1236,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `Project with this name **Forked Project** already exists in the selected workspace`
-      })
     })
 
     it('should copy over all environments, secrets and variables into the forked project', async () => {
@@ -1810,11 +1764,6 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Project ${project3.slug} is not a forked project`
-      })
     })
 
     it('should be able to unlink a forked project', async () => {

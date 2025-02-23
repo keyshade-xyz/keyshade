@@ -14,7 +14,7 @@ import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
 import { CacheService } from '@/cache/cache.service'
-import { generateOtp } from '@/common/util'
+import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
@@ -40,7 +40,12 @@ export class AuthService {
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
-      throw new BadRequestException('Please enter a valid email address')
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid email address',
+          'Please enter a valid email address'
+        )
+      )
     }
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
@@ -95,7 +100,12 @@ export class AuthService {
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
-      throw new UnauthorizedException('Invalid login code')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'Please enter a valid 6 digit alphanumeric OTP.'
+        )
+      )
     }
 
     await this.prisma.otp.delete({

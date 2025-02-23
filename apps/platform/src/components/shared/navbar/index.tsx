@@ -4,9 +4,9 @@ import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { DropdownSVG } from '@public/svg/shared'
-import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
 import { useAtomValue } from 'jotai'
+import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
+import { DropdownSVG } from '@public/svg/shared'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -16,14 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LineTab from '@/components/ui/line-tab'
-import { userAtom } from '@/store'
+import AvatarComponent from '@/components/common/avatar'
+import { selectedProjectAtom, userAtom } from '@/store'
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isApple, setIsApple] = useState<boolean>(false)
   const user = useAtomValue(userAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const pathname = usePathname()
 
@@ -119,12 +120,10 @@ function Navbar(): React.JSX.Element {
                     </>
                   ) : (
                     <>
-                      <Avatar>
-                        <AvatarImage src={user.profilePictureUrl ?? ''} />
-                        <AvatarFallback>
-                          {user.name ? user.name.slice(0, 2) : ''}
-                        </AvatarFallback>
-                      </Avatar>
+                      <AvatarComponent
+                        name={user.name}
+                        src={user.profilePictureUrl || ''}
+                      />
                       <span>{user.name}</span>
                     </>
                   )}
@@ -154,17 +153,18 @@ function Navbar(): React.JSX.Element {
               </DropdownMenu>
             </div>
             <div className="px-4">
-              {(pathname === '/settings' ||
-                pathname.split('/')[1] === 'project') && (
-                <LineTab
-                  customID="linetab"
-                  tabs={
-                    pathname.split('/')[1] === 'project'
-                      ? projectTabs
-                      : settingsTabs
-                  }
-                />
-              )}
+              {pathname !== '/' &&
+                (pathname === '/settings' ||
+                  pathname.split('/')[2] === selectedProject?.slug) && (
+                  <LineTab
+                    customID="linetab"
+                    tabs={
+                      pathname.split('/')[2] === selectedProject?.slug
+                        ? projectTabs
+                        : settingsTabs
+                    }
+                  />
+                )}
             </div>
           </nav>
           <SearchModel isOpen={isOpen} setIsOpen={setIsOpen} />

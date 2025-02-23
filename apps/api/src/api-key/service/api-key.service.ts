@@ -10,7 +10,11 @@ import { UpdateApiKey } from '../dto/update.api-key/update.api-key'
 import { ApiKey, User } from '@prisma/client'
 import generateEntitySlug from '@/common/slug-generator'
 import { generateApiKey, toSHA256 } from '@/common/cryptography'
-import { addHoursToDate, limitMaxItemsPerPage } from '@/common/util'
+import {
+  addHoursToDate,
+  constructErrorBody,
+  limitMaxItemsPerPage
+} from '@/common/util'
 import { paginate } from '@/common/paginate'
 
 @Injectable()
@@ -103,7 +107,12 @@ export class ApiKeyService {
     const apiKeyId = apiKey.id
 
     if (!apiKey) {
-      throw new NotFoundException(`API key ${apiKeySlug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'API Key not found',
+          `API key ${apiKeySlug} not found`
+        )
+      )
     }
 
     const updatedApiKey = await this.prisma.apiKey.update({
@@ -147,7 +156,12 @@ export class ApiKeyService {
         }
       })
     } catch (error) {
-      throw new NotFoundException(`API key ${apiKeySlug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'API Key not found',
+          `API key ${apiKeySlug} not found`
+        )
+      )
     }
 
     this.logger.log(`User ${user.id} deleted API key ${apiKeySlug}`)
@@ -171,7 +185,12 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
-      throw new NotFoundException(`API key ${apiKeySlug} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'API Key not found',
+          `API key ${apiKeySlug} not found`
+        )
+      )
     }
 
     return apiKey
@@ -252,7 +271,10 @@ export class ApiKeyService {
 
     if (apiKey) {
       throw new ConflictException(
-        `API key with name ${apiKeyName} already exists`
+        constructErrorBody(
+          'API Key already exists',
+          `API key with name ${apiKeyName} already exists`
+        )
       )
     }
   }

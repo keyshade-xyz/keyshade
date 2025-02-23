@@ -4,8 +4,10 @@ import { UpdateSecret } from '@/secret/dto/update.secret/update.secret'
 import { CreateVariable } from '@/variable/dto/create.variable/create.variable'
 import { UpdateVariable } from '@/variable/dto/update.variable/update.variable'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
-import { Authority, Project, User } from '@prisma/client'
-import { AuthorityCheckerService } from './authority-checker.service'
+import { Authority, Project } from '@prisma/client'
+import { AuthorizationService } from '@/auth/service/authorization.service'
+import { AuthenticatedUser } from '@/user/user.types'
+import { constructErrorBody } from './util'
 
 /**
  * Given a list of environment slugs in a CreateSecret, UpdateSecret, CreateVariable, or UpdateVariable DTO,
@@ -25,10 +27,10 @@ import { AuthorityCheckerService } from './authority-checker.service'
  */
 export const getEnvironmentIdToSlugMap = async (
   dto: CreateSecret | UpdateSecret | CreateVariable | UpdateVariable,
-  user: User,
+  user: AuthenticatedUser,
   project: Project,
   prisma: PrismaService,
-  authorityCheckerService: AuthorityCheckerService
+  authorizationService: AuthorizationService
 ): Promise<Map<string, string>> => {
   const environmentSlugToIdMap = new Map<string, string>()
 
@@ -37,21 +39,28 @@ export const getEnvironmentIdToSlugMap = async (
   await Promise.all(
     environmentSlugs.map(async (environmentSlug) => {
       const environment =
-        await authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
+        await authorizationService.authorizeUserAccessToEnvironment({
+          user,
           entity: { slug: environmentSlug },
-          authorities: [Authority.READ_ENVIRONMENT],
-          prisma: prisma
+          authorities: [Authority.READ_ENVIRONMENT]
         })
 
       if (!environment) {
-        throw new NotFoundException(`Environment: ${environmentSlug} not found`)
+        throw new NotFoundException(
+          constructErrorBody(
+            'Environment not found',
+            `Environment ${environmentSlug} not found`
+          )
+        )
       }
 
       // Check if the environment belongs to the project
       if (environment.projectId !== project.id) {
         throw new BadRequestException(
-          `Environment: ${environmentSlug} does not belong to project: ${project.slug}`
+          constructErrorBody(
+            'Environment does not belong to the project',
+            `Environment ${environmentSlug} does not belong to project ${project.slug}`
+          )
         )
       }
 

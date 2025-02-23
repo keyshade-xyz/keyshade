@@ -1,5 +1,6 @@
 'use client'
-import React, { useCallback, useState, useEffect } from 'react'
+
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
 import InputLoading from './loading'
@@ -17,6 +18,8 @@ import { useSearchParams } from 'next/navigation'
 import AddApiKeyDialog from '@/components/userProfile/apiKeys/addApiKeyDialog'
 import ApiKeyCard from '@/components/userProfile/apiKeys/apiKeyCard'
 import ConfirmDeleteApiKey from '@/components/userProfile/apiKeys/confirmDeleteApiKey'
+import { useHttp } from '@/hooks/use-http'
+import { logout } from '@/lib/utils'
 
 function ProfilePage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
@@ -35,48 +38,70 @@ function ProfilePage(): React.JSX.Element {
   const searchParams = useSearchParams()
   const tab = searchParams.get('profile') ?? 'profile'
 
-  const updateSelf = useCallback(async () => {
+  const updateSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.updateSelf({
+      name: userData.name === user?.name ? undefined : userData.name,
+      email: userData.email === user?.email ? undefined : userData.email
+    })
+  )
+
+  const deleteSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.deleteSelf()
+  )
+
+  const getSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.getSelf()
+  )
+
+  const handleDeleteSelf = useCallback(async () => {
+    toast.loading('Deleting profile...')
+    setIsLoading(true)
+
+    try {
+      const { success } = await deleteSelf()
+
+      if (success) {
+        toast.success('Profile deleted successfully! Logging you out.')
+        logout()
+      }
+    } finally {
+      setIsLoading(false)
+      setIsModified(false)
+      toast.dismiss()
+    }
+  }, [deleteSelf])
+
+  const handleUpdateSelf = useCallback(async () => {
     toast.loading('Updating profile...')
     setIsLoading(true)
-    try {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().userController.updateSelf({
-          name: userData.name === user?.name ? undefined : userData.name,
-          email: userData.email === user?.email ? undefined : userData.email
-        })
 
-      toast.dismiss()
+    try {
+      const { success, data } = await updateSelf()
 
       if (success && data) {
         toast.success('Profile updated successfully!')
         setUser(data)
-      } else {
-        toast.error('Something went wrong', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong updating the profile. Check console for more
-              info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
       }
-    } catch (error) {
-      toast.error('Something went wrong', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong updating the profile. Check console for more
-            info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
+    } finally {
+      setIsLoading(false)
+      setIsModified(false)
+      toast.dismiss()
     }
-    setIsModified(false)
-    setIsLoading(false)
-  }, [userData.name, userData.email, user?.name, user?.email, setUser])
+  }, [updateSelf, setUser])
+
+  useEffect(() => {
+    getSelf()
+      .then(({ data, success }) => {
+        if (success && data) {
+          setUserData({
+            email: data.email,
+            name: data.name,
+            profilePictureUrl: data.profilePictureUrl || ''
+          })
+        }
+      })
+      .finally(() => setIsLoading(false))
+  }, [getSelf])
 
   useEffect(() => {
     const getAllApiKeys = async () => {
@@ -162,7 +187,11 @@ function ProfilePage(): React.JSX.Element {
         )}
       </div>
       <div>
-        <Button disabled={!isModified} onClick={updateSelf} variant="secondary">
+        <Button
+          disabled={!isModified}
+          onClick={handleUpdateSelf}
+          variant="secondary"
+        >
           Save Changes
         </Button>
       </div>
@@ -206,6 +235,7 @@ function ProfilePage(): React.JSX.Element {
           <Button
             aria-label="Delete account"
             disabled={isLoading}
+            onClick={handleDeleteSelf}
             variant="destructive"
           >
             Delete

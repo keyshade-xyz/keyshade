@@ -10,10 +10,11 @@ import {
 } from '@nestjs/common'
 import { VariableService } from '../service/variable.service'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
-import { Authority, User } from '@prisma/client'
+import { Authority } from '@prisma/client'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateVariable } from '../dto/create.variable/create.variable'
 import { UpdateVariable } from '../dto/update.variable/update.variable'
+import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('variable')
 export class VariableController {
@@ -22,7 +23,7 @@ export class VariableController {
   @Post(':projectSlug')
   @RequiredApiKeyAuthorities(Authority.CREATE_VARIABLE)
   async createVariable(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
     @Body() dto: CreateVariable
   ) {
@@ -32,7 +33,7 @@ export class VariableController {
   @Put(':variableSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async updateVariable(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('variableSlug') variableSlug: string,
     @Body() dto: UpdateVariable
   ) {
@@ -42,7 +43,7 @@ export class VariableController {
   @Put(':variableSlug/rollback/:rollbackVersion')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async rollbackVariable(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('variableSlug') variableSlug: string,
     @Query('environmentSlug') environmentSlug: string,
     @Param('rollbackVersion') rollbackVersion: number
@@ -58,7 +59,7 @@ export class VariableController {
   @Delete(':variableSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_VARIABLE)
   async deleteVariable(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('variableSlug') variableSlug: string
   ) {
     return await this.variableService.deleteVariable(user, variableSlug)
@@ -67,7 +68,7 @@ export class VariableController {
   @Get('/:projectSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getAllVariablesOfProject(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: string,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
@@ -86,24 +87,10 @@ export class VariableController {
     )
   }
 
-  @Get('/:projectSlug/:environmentSlug')
-  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
-  async getAllVariablesOfEnvironment(
-    @CurrentUser() user: User,
-    @Param('projectSlug') projectSlug: string,
-    @Param('environmentSlug') environmentSlug: string
-  ) {
-    return await this.variableService.getAllVariablesOfProjectAndEnvironment(
-      user,
-      projectSlug,
-      environmentSlug
-    )
-  }
-
   @Get('/:variableSlug/revisions/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
   async getRevisionsOfVariable(
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('variableSlug') variableSlug: string,
     @Param('environmentSlug') environmentSlug: string,
     @Query('page') page: number = 0,

@@ -1,3 +1,224 @@
+## [2.12.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.15...v2.12.0-stage.16) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **web:** Misalignment of toast message after joining the waitlist ([#791](https://github.com/keyshade-xyz/keyshade/issues/791)) ([688e11c](https://github.com/keyshade-xyz/keyshade/commit/688e11c201f1cbdc77b8906805f384aad85f90ab))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Remove PR unassign script ([f174101](https://github.com/keyshade-xyz/keyshade/commit/f17410100d845a28affc25d369733facd3809ab5))
+
+## [2.12.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.14...v2.12.0-stage.15) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Added import statement for crypto module ([#789](https://github.com/keyshade-xyz/keyshade/issues/789)) ([f6ddf0f](https://github.com/keyshade-xyz/keyshade/commit/f6ddf0fc54280c9844143ac42840fcbde1438b23))
+
+## [2.12.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.13...v2.12.0-stage.14) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Issue fetched via API ([#788](https://github.com/keyshade-xyz/keyshade/issues/788)) ([b373eeb](https://github.com/keyshade-xyz/keyshade/commit/b373eeb5974ee61bd07ce586da4b56dbd0d10fab))
+
+## [2.12.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.12...v2.12.0-stage.13) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **platform:** Add graceful fallback in error parsing ([a59de60](https://github.com/keyshade-xyz/keyshade/commit/a59de60e40b6f3617a4278837e0c63fcb5752d16))
+
+## [2.12.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.11...v2.12.0-stage.12) (2025-02-22)
+
+### 🚀 Features
+
+* **platform:** Displays a warning message when store private key switch is ON ([#782](https://github.com/keyshade-xyz/keyshade/issues/782)) ([ae8a432](https://github.com/keyshade-xyz/keyshade/commit/ae8a432ebf269d85eb8add5c7293eb89fe94b913))
+
+## [2.12.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.10...v2.12.0-stage.11) (2025-02-22)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed infinite API calls bug ([#778](https://github.com/keyshade-xyz/keyshade/issues/778)) ([5aec6fc](https://github.com/keyshade-xyz/keyshade/commit/5aec6fc1c16ef4404619d4ef2a539e71fe60740f))
+
+## [2.12.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.9...v2.12.0-stage.10) (2025-02-22)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for project slug ([#774](https://github.com/keyshade-xyz/keyshade/issues/774)) ([746e87d](https://github.com/keyshade-xyz/keyshade/commit/746e87d3560843481e35677a329c0def81b9cbb1))
+
+### 🔨 Code Refactoring
+
+* **platform:** Added avatars on [secure] and variable accordions ([#751](https://github.com/keyshade-xyz/keyshade/issues/751)) ([5345925](https://github.com/keyshade-xyz/keyshade/commit/5345925bfe1234da8fd0f0bb2e2b2aa7c84845d2))
+
+## [2.12.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.8...v2.12.0-stage.9) (2025-02-20)
+
+### 🚀 Features
+
+* **platform:** Add copy slug functionality to variable card context menu ([#769](https://github.com/keyshade-xyz/keyshade/issues/769)) ([d252668](https://github.com/keyshade-xyz/keyshade/commit/d252668658552ddd3669402045db3849c60753ce))
+
+### 🔧 Miscellaneous Chores
+
+* Issue PR reminder workflow created ([#763](https://github.com/keyshade-xyz/keyshade/issues/763)) ([7667ebd](https://github.com/keyshade-xyz/keyshade/commit/7667ebd275f9a741d72332da7767b9b1d88b036a))
+
+## [2.12.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.7...v2.12.0-stage.8) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add checkmark icon to copy slug button for environments ([#742](https://github.com/keyshade-xyz/keyshade/issues/742)) ([#766](https://github.com/keyshade-xyz/keyshade/issues/766)) ([cd2925f](https://github.com/keyshade-xyz/keyshade/commit/cd2925f4fa7cc721ce2b2808ad424983742a963c))
+
+## [2.12.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.6...v2.12.0-stage.7) (2025-02-19)
+
+### 🚀 Features
+
+* **platform:** Add copy to clipboard functionality for [secure] slug ([#767](https://github.com/keyshade-xyz/keyshade/issues/767)) ([ce05835](https://github.com/keyshade-xyz/keyshade/commit/ce0583595cf91b3d1afb134ff94564abcae0b9b4))
+
+## [2.12.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.5...v2.12.0-stage.6) (2025-02-19)
+
+### 🚀 Features
+
+* **api:** Workspace ip blacklisting ([#687](https://github.com/keyshade-xyz/keyshade/issues/687)) ([bc5f6a5](https://github.com/keyshade-xyz/keyshade/commit/bc5f6a5d55206c4ab008246061f2bf472d402208))
+
+## [2.12.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.4...v2.12.0-stage.5) (2025-02-18)
+
+### 🚀 Features
+
+* Enhanced error handling in platfrom and API ([#765](https://github.com/keyshade-xyz/keyshade/issues/765)) ([b4349ad](https://github.com/keyshade-xyz/keyshade/commit/b4349adc0c197750cb2dbdc41fe294907c193293))
+
+## [2.12.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.3...v2.12.0-stage.4) (2025-02-18)
+
+### 🐛 Bug Fixes
+
+* **platform:** Avoid toast duplication & added optional description ([#759](https://github.com/keyshade-xyz/keyshade/issues/759)) ([7a0798a](https://github.com/keyshade-xyz/keyshade/commit/7a0798a16ee83fe1707bd6aecf534670648753a0))
+
+### 🔧 Miscellaneous Chores
+
+* **lint:** Fixed module not found error ([be887ff](https://github.com/keyshade-xyz/keyshade/commit/be887ff4406ed5df5e9b803355449c8b69609c6d))
+
+## [2.12.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.2...v2.12.0-stage.3) (2025-02-15)
+
+### 🐛 Bug Fixes
+
+* **api:** Variables with empty names ([#745](https://github.com/keyshade-xyz/keyshade/issues/745)) ([b8e2abf](https://github.com/keyshade-xyz/keyshade/commit/b8e2abf77a3fbec0afb53681472f17c9e2e92ac3))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Release workflow node 22.x ([#757](https://github.com/keyshade-xyz/keyshade/issues/757)) ([e910b90](https://github.com/keyshade-xyz/keyshade/commit/e910b90eb0e94b4f35ca05994210b900c72e41b3))
+* lint-staged configured ([#746](https://github.com/keyshade-xyz/keyshade/issues/746)) ([27b8405](https://github.com/keyshade-xyz/keyshade/commit/27b8405e228c5558e60d07d5493d6e98edc4b420))
+
+## [2.12.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.1...v2.12.0-stage.2) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add roles tab in sidebar ([#749](https://github.com/keyshade-xyz/keyshade/issues/749)) ([bbe4366](https://github.com/keyshade-xyz/keyshade/commit/bbe4366c3131ea2991cbde32454b39e02c45c4c9))
+
+## [2.12.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.3...v2.12.0-stage.1) (2025-02-12)
+
+### 🚀 Features
+
+* **platform:** Add workspace slug for projects in url ([#683](https://github.com/keyshade-xyz/keyshade/issues/683)) ([8bdd47f](https://github.com/keyshade-xyz/keyshade/commit/8bdd47fb71e902fcaf2558356be0b35bb79c7151))
+
+## [2.11.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.2...v2.11.1-stage.3) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Secrets with empty names ([#738](https://github.com/keyshade-xyz/keyshade/issues/738)) ([5e9c57f](https://github.com/keyshade-xyz/keyshade/commit/5e9c57fce1122289d2ee3cea1b9baae4f1c8ed11))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add SMTP_SECURE environment variable to Mail Service ([#741](https://github.com/keyshade-xyz/keyshade/issues/741)) ([dd89d57](https://github.com/keyshade-xyz/keyshade/commit/dd89d57d9c5aee3979b31f8036b0870bba20ffa1))
+
+## [2.11.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.11.1-stage.1...v2.11.1-stage.2) (2025-02-11)
+
+### 🐛 Bug Fixes
+
+* **platform:** Follow-up for remaining changes from PR [#724](https://github.com/keyshade-xyz/keyshade/issues/724) ([#736](https://github.com/keyshade-xyz/keyshade/issues/736)) ([271c561](https://github.com/keyshade-xyz/keyshade/commit/271c561b155d7b4c18c5059a33688f8b3e182e7c))
+
+## [2.11.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0...v2.11.1-stage.1) (2025-02-10)
+
+### 🐛 Bug Fixes
+
+* **platform:** Adjust grid layout for environment cards ([#724](https://github.com/keyshade-xyz/keyshade/issues/724)) ([029d3da](https://github.com/keyshade-xyz/keyshade/commit/029d3da61afd70527cd9a561d4d35c86f68ca988))
+
+### 🔧 Miscellaneous Chores
+
+* **platform:** Extract `copyToClipboad` into reusable util ([#734](https://github.com/keyshade-xyz/keyshade/issues/734)) ([1f9e42d](https://github.com/keyshade-xyz/keyshade/commit/1f9e42db84f683dc60dd104e484f4c45b8e90484))
+
+## [2.11.0](https://github.com/keyshade-xyz/keyshade/compare/v2.10.0...v2.11.0) (2025-02-10)
+
+### 🚀 Features
+
+* **api, schema:** Add preview field in API Key ([#680](https://github.com/keyshade-xyz/keyshade/issues/680)) ([06d8c44](https://github.com/keyshade-xyz/keyshade/commit/06d8c44c4e06d823cdb2a41cd482aace9cba8ec2))
+* **api:** Workspace-membership invitationAccepted included ([#665](https://github.com/keyshade-xyz/keyshade/issues/665)) ([3877249](https://github.com/keyshade-xyz/keyshade/commit/38772498be229c8d83c8a99c395dded9e0a6ef7f))
+* **platform:** Add CopySVG icon to the Slug component and update imports ([#677](https://github.com/keyshade-xyz/keyshade/issues/677)) ([2ad93ba](https://github.com/keyshade-xyz/keyshade/commit/2ad93baa24e256aafdbeed9d0ee9b268d4781aa4))
+* **platform:** Add Google OAuth ([#689](https://github.com/keyshade-xyz/keyshade/issues/689)) ([ad3a3d2](https://github.com/keyshade-xyz/keyshade/commit/ad3a3d2d94a77fcd5c0d1b3b48564a298d510f4a))
+* **platform:** Add new access level SVGs and integrate into ProjectCard component ([#678](https://github.com/keyshade-xyz/keyshade/issues/678)) ([cc3ef77](https://github.com/keyshade-xyz/keyshade/commit/cc3ef77b93054e44fc5de01e12ef9d0d707a0a14))
+* **platform:** Add new design for slug ([#675](https://github.com/keyshade-xyz/keyshade/issues/675)) ([2b8985c](https://github.com/keyshade-xyz/keyshade/commit/2b8985c4725dbf062dc66acf560f8433ce5d87dc))
+* **platform:** Add SVGs to projectTabs ([#673](https://github.com/keyshade-xyz/keyshade/issues/673)) ([37bfddf](https://github.com/keyshade-xyz/keyshade/commit/37bfddfc993aa76b4688ac1b8693d0bad25809a4))
+* **platform:** Added the feature for deleting a [secure] ([#674](https://github.com/keyshade-xyz/keyshade/issues/674)) ([37e7960](https://github.com/keyshade-xyz/keyshade/commit/37e796080fe426b69333b134db4031ba2849e401))
+* **platform:** Edit [secure] in project ([#684](https://github.com/keyshade-xyz/keyshade/issues/684)) ([1e34030](https://github.com/keyshade-xyz/keyshade/commit/1e340302bc34ec061683a4af1ee0da178f59aef0))
+* **platform:** Restructure workspace settings and user settings ([#682](https://github.com/keyshade-xyz/keyshade/issues/682)) ([cd0013a](https://github.com/keyshade-xyz/keyshade/commit/cd0013ade20f224bf9db24ef7431810c142be6b3))
+* **platform:** Update table ui and change variable to accordion ([#676](https://github.com/keyshade-xyz/keyshade/issues/676)) ([71e9ae9](https://github.com/keyshade-xyz/keyshade/commit/71e9ae91b6067a18f144eea3e06f06a97fb73457))
+* **project:** Edit project feature ([#685](https://github.com/keyshade-xyz/keyshade/issues/685)) ([a906920](https://github.com/keyshade-xyz/keyshade/commit/a9069200d02cb7555ce5265b462d3cffe3a65f0a))
+* Update details in listing [secure]s ([#686](https://github.com/keyshade-xyz/keyshade/issues/686)) ([84aa5f4](https://github.com/keyshade-xyz/keyshade/commit/84aa5f46083826ce9f84752f5abae0a61da7f90e))
+* Variables listing revamp ([#735](https://github.com/keyshade-xyz/keyshade/issues/735)) ([38b42fa](https://github.com/keyshade-xyz/keyshade/commit/38b42fadb791871f48dfbd3527e9b81cdbb36d1c))
+
+### 🐛 Bug Fixes
+
+* **api:** Convert email to lowercase ([#694](https://github.com/keyshade-xyz/keyshade/issues/694)) ([b41db33](https://github.com/keyshade-xyz/keyshade/commit/b41db33045091a47afcda0278884caeaffebfccc))
+* **api:** Github OAuth redirect not working ([#692](https://github.com/keyshade-xyz/keyshade/issues/692)) ([3495f8a](https://github.com/keyshade-xyz/keyshade/commit/3495f8ad425018e49bb1d85ada76e13594709b99))
+* **api:** Project hard sync existing entities deleted ([#660](https://github.com/keyshade-xyz/keyshade/issues/660)) ([3632217](https://github.com/keyshade-xyz/keyshade/commit/36322175290723089b8bd9a1a479925efd00f6f1))
+* **cli:** Version flag causing errors ([#679](https://github.com/keyshade-xyz/keyshade/issues/679)) ([65bb70b](https://github.com/keyshade-xyz/keyshade/commit/65bb70b118f643a3079ece64c8b6ffd7949b8e95))
+* **platform:** ContextMenu not working on variable card ([#688](https://github.com/keyshade-xyz/keyshade/issues/688)) ([fbb147a](https://github.com/keyshade-xyz/keyshade/commit/fbb147a9be27d0510112789fd0e7eaaa4db96083))
+* **platform:** Fixed the typo in query params ([#723](https://github.com/keyshade-xyz/keyshade/issues/723)) ([6c6bb7f](https://github.com/keyshade-xyz/keyshade/commit/6c6bb7f6f20c0110c3f4e94d120a61cdad60b847))
+
+### 📚 Documentation
+
+* Added section for building packages ([#720](https://github.com/keyshade-xyz/keyshade/issues/720)) ([ecfde92](https://github.com/keyshade-xyz/keyshade/commit/ecfde929f7554396ced6dbdc7c6cfb5bb5620edd))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Remove failing environment tests ([d1b9767](https://github.com/keyshade-xyz/keyshade/commit/d1b9767a9714ee7dfa38b9f066beb80db40b4757))
+* **cli:** Bumped CLI to v2.5.1 ([2d39815](https://github.com/keyshade-xyz/keyshade/commit/2d3981503e13fb050f23a16beab618dd11bb0a7c))
+* **platform:** Fixed formatting ([81f86de](https://github.com/keyshade-xyz/keyshade/commit/81f86deb4fe5510de58151ae40ee0f1ac4485e6f))
+* **release:** 2.11.0-stage.1 [skip ci] ([b442fe0](https://github.com/keyshade-xyz/keyshade/commit/b442fe0c883b2a89f1ffd22a84c96f93a6efa1a5)), closes [#675](https://github.com/keyshade-xyz/keyshade/issues/675)
+* **release:** 2.11.0-stage.10 [skip ci] ([cf34066](https://github.com/keyshade-xyz/keyshade/commit/cf34066efeecfe1d7b24c0d41ffc42ac2b9e2d0a)), closes [#665](https://github.com/keyshade-xyz/keyshade/issues/665)
+* **release:** 2.11.0-stage.11 [skip ci] ([1344cf1](https://github.com/keyshade-xyz/keyshade/commit/1344cf10f52cb6523cc9a2c7d4130fb0c0756928)), closes [#660](https://github.com/keyshade-xyz/keyshade/issues/660)
+* **release:** 2.11.0-stage.12 [skip ci] ([92cecfc](https://github.com/keyshade-xyz/keyshade/commit/92cecfcf5d09e188cc1ed6db62e2867581d2c10f)), closes [#686](https://github.com/keyshade-xyz/keyshade/issues/686)
+* **release:** 2.11.0-stage.13 [skip ci] ([c91d48a](https://github.com/keyshade-xyz/keyshade/commit/c91d48a277eb879cb717f5a4bf9b7611bca5f145)), closes [#684](https://github.com/keyshade-xyz/keyshade/issues/684)
+* **release:** 2.11.0-stage.14 [skip ci] ([5d20407](https://github.com/keyshade-xyz/keyshade/commit/5d2040717b7c1917dfb9b640800000bdc692b72b)), closes [#688](https://github.com/keyshade-xyz/keyshade/issues/688)
+* **release:** 2.11.0-stage.15 [skip ci] ([110e265](https://github.com/keyshade-xyz/keyshade/commit/110e265ae49ed48748b65c5929c32802cfc8d2a8)), closes [#685](https://github.com/keyshade-xyz/keyshade/issues/685)
+* **release:** 2.11.0-stage.16 [skip ci] ([2a7cba6](https://github.com/keyshade-xyz/keyshade/commit/2a7cba66186e6e43c072c025a45041840cc7b259)), closes [#689](https://github.com/keyshade-xyz/keyshade/issues/689)
+* **release:** 2.11.0-stage.17 [skip ci] ([e071a74](https://github.com/keyshade-xyz/keyshade/commit/e071a7427672504bd58de8fded6a76fb9ff68163)), closes [#692](https://github.com/keyshade-xyz/keyshade/issues/692) [#690](https://github.com/keyshade-xyz/keyshade/issues/690)
+* **release:** 2.11.0-stage.18 [skip ci] ([94f3938](https://github.com/keyshade-xyz/keyshade/commit/94f39384f7a78ea3e9a94021ce078fe9dc9bc51a)), closes [#694](https://github.com/keyshade-xyz/keyshade/issues/694)
+* **release:** 2.11.0-stage.19 [skip ci] ([f9b095c](https://github.com/keyshade-xyz/keyshade/commit/f9b095c0fd55f756531ce0ca7450f97ccc095369)), closes [#723](https://github.com/keyshade-xyz/keyshade/issues/723) [#720](https://github.com/keyshade-xyz/keyshade/issues/720)
+* **release:** 2.11.0-stage.2 [skip ci] ([f9d05de](https://github.com/keyshade-xyz/keyshade/commit/f9d05de2e5095a86e0db795729ff1063070ac8e4)), closes [#673](https://github.com/keyshade-xyz/keyshade/issues/673)
+* **release:** 2.11.0-stage.20 [skip ci] ([02972f2](https://github.com/keyshade-xyz/keyshade/commit/02972f266d96b8cc757d90b86d74ca5b86c8273d)), closes [#735](https://github.com/keyshade-xyz/keyshade/issues/735)
+* **release:** 2.11.0-stage.3 [skip ci] ([c2398a6](https://github.com/keyshade-xyz/keyshade/commit/c2398a655e638cfcf29a724a77d10b7a94fabbfc)), closes [#677](https://github.com/keyshade-xyz/keyshade/issues/677)
+* **release:** 2.11.0-stage.4 [skip ci] ([6c7e41a](https://github.com/keyshade-xyz/keyshade/commit/6c7e41a56919f352b6de1e396bf2d7f7a806c704)), closes [#676](https://github.com/keyshade-xyz/keyshade/issues/676)
+* **release:** 2.11.0-stage.5 [skip ci] ([defdbcd](https://github.com/keyshade-xyz/keyshade/commit/defdbcd0d8f30f877b48f08f34c0af6fece5cd9a)), closes [#678](https://github.com/keyshade-xyz/keyshade/issues/678)
+* **release:** 2.11.0-stage.6 [skip ci] ([5060fe7](https://github.com/keyshade-xyz/keyshade/commit/5060fe7118da47c0781208d5c9fbfe8e3036c06a)), closes [#679](https://github.com/keyshade-xyz/keyshade/issues/679)
+* **release:** 2.11.0-stage.7 [skip ci] ([b2be010](https://github.com/keyshade-xyz/keyshade/commit/b2be0109b1cf6018a70ed3355da4489ffbd06cf8)), closes [#674](https://github.com/keyshade-xyz/keyshade/issues/674)
+* **release:** 2.11.0-stage.8 [skip ci] ([972e55b](https://github.com/keyshade-xyz/keyshade/commit/972e55bbb431d2a60db333762e1cde4e3057597c)), closes [#680](https://github.com/keyshade-xyz/keyshade/issues/680)
+* **release:** 2.11.0-stage.9 [skip ci] ([fd92c3b](https://github.com/keyshade-xyz/keyshade/commit/fd92c3b3a464d3d903b097c6c5ca9aacb3041032)), closes [#682](https://github.com/keyshade-xyz/keyshade/issues/682)
+
+### 🔨 Code Refactoring
+
+* **platform:** Updated the [secure] table and changed edit variable dialog to a sheet ([#690](https://github.com/keyshade-xyz/keyshade/issues/690)) ([f51ad34](https://github.com/keyshade-xyz/keyshade/commit/f51ad34335ef41e5175e5c8df6dbc9d3b3ab5856))
+
+## [2.11.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.19...v2.11.0-stage.20) (2025-02-10)
+
+### 🚀 Features
+
+* Variables listing revamp ([#735](https://github.com/keyshade-xyz/keyshade/issues/735)) ([38b42fa](https://github.com/keyshade-xyz/keyshade/commit/38b42fadb791871f48dfbd3527e9b81cdbb36d1c))
+
+## [2.11.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.18...v2.11.0-stage.19) (2025-02-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed the typo in query params ([#723](https://github.com/keyshade-xyz/keyshade/issues/723)) ([6c6bb7f](https://github.com/keyshade-xyz/keyshade/commit/6c6bb7f6f20c0110c3f4e94d120a61cdad60b847))
+
+### 📚 Documentation
+
+* Added section for building packages ([#720](https://github.com/keyshade-xyz/keyshade/issues/720)) ([ecfde92](https://github.com/keyshade-xyz/keyshade/commit/ecfde929f7554396ced6dbdc7c6cfb5bb5620edd))
+
 ## [2.11.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0-stage.17...v2.11.0-stage.18) (2025-02-08)
 
 ### 🐛 Bug Fixes

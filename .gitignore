@@ -56,4 +56,7 @@ Thumbs.db
 # turbo
 .turbo
 
+# ESLint
+.eslintcache
+
 keyshade.json
