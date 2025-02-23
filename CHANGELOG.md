@@ -1,3 +1,21 @@
+## [2.12.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.14...v2.12.0-stage.15) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Added import statement for crypto module ([#789](https://github.com/keyshade-xyz/keyshade/issues/789)) ([f6ddf0f](https://github.com/keyshade-xyz/keyshade/commit/f6ddf0fc54280c9844143ac42840fcbde1438b23))
+
+## [2.12.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.13...v2.12.0-stage.14) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Issue fetched via API ([#788](https://github.com/keyshade-xyz/keyshade/issues/788)) ([b373eeb](https://github.com/keyshade-xyz/keyshade/commit/b373eeb5974ee61bd07ce586da4b56dbd0d10fab))
+
+## [2.12.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.12...v2.12.0-stage.13) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **platform:** Add graceful fallback in error parsing ([a59de60](https://github.com/keyshade-xyz/keyshade/commit/a59de60e40b6f3617a4278837e0c63fcb5752d16))
+
 ## [2.12.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.11...v2.12.0-stage.12) (2025-02-22)
 
 ### 🚀 Features
