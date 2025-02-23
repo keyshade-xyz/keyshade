@@ -37,14 +37,20 @@ export function useHttp<T, V extends ClientResponse<T>>(
           handle403()
         } else if (statusCode.toString().startsWith('4')) {
           // For 4xx errors
-          const { header, body } = JSON.parse(response.error.message) as {
-            header: string
-            body: string
-          }
+          try {
+            const { header, body } = JSON.parse(response.error.message) as {
+              header: string
+              body: string
+            }
 
-          toast.error(header, {
-            description: body
-          })
+            toast.error(header, {
+              description: body
+            })
+          } catch (error) {
+            toast.error('Faced an error processing your request', {
+              description: response.error.message
+            })
+          }
         } else if (statusCode === 500) {
           handle500(response.error)
         }
