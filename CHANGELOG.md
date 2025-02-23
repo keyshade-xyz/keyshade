@@ -1,3 +1,9 @@
+## [2.12.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.12...v2.12.0-stage.13) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **platform:** Add graceful fallback in error parsing ([a59de60](https://github.com/keyshade-xyz/keyshade/commit/a59de60e40b6f3617a4278837e0c63fcb5752d16))
+
 ## [2.12.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.11...v2.12.0-stage.12) (2025-02-22)
 
 ### 🚀 Features
