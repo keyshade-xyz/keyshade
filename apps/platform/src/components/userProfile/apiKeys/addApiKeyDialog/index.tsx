@@ -285,9 +285,7 @@ export default function AddApiKeyDialog() {
     apiKeyName: '',
     expiryDate: '24'
   })
-  const [selectedPermissions, setSelectedPermissions] = React.useState<
-    Set<CreateApiKeyRequest['authorities']>
-  >(new Set())
+  const [selectedPermissions, setSelectedPermissions] = React.useState<Set<CreateApiKeyRequest["authorities"]>>(new Set())
 
   const togglePermission = useCallback((permissionId: string) => {
     setSelectedPermissions((current) => {
