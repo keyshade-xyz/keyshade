@@ -27,7 +27,7 @@ function EnvironmentPage(): React.JSX.Element {
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const getAllEnvironmentsOfProject = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
@@ -39,24 +39,32 @@ function EnvironmentPage(): React.JSX.Element {
   )
 
   useEffect(() => {
-    if (!selectedProject) return 
-    setLoading(true)
+  if(!selectedProject) return
+   handleEnvironmentsFetch();
+  }, [selectedProject, getAllEnvironmentsOfProject, setEnvironments])
+
+  const handleEnvironmentsFetch = (newPage = 0) => {
+    if (!selectedProject) return
+    setIsLoading(true)
     getAllEnvironmentsOfProject()
       .then(({ data, success }) => {
         if (success && data) {
-          const newData = page === 0 ? data.items : [...environments, ...data.items];
-          setEnvironments(newData);
-          if (newData.length >= data.metadata.totalCount) setHasMore(false);
+          const newData = newPage === 0 ? data.items : [...environments, ...data.items]
+          if(newPage == 0 && page !== 0) setPage(0);
+          setEnvironments(newData)
+          if (newData.length >= data.metadata.totalCount) setHasMore(false)
         }
       })
       .finally(() => {
-        setLoading(false)
+        setIsLoading(false)
       })
-  }, [selectedProject, page, getAllEnvironmentsOfProject, setEnvironments])
+  }
 
   const handlePageShift = () => {
-    if (hasMore && !loading) {
-      setPage(prevPage => prevPage + 1)
+    if (hasMore && !isLoading) {
+      const finalPage = page + 1;
+      setPage(finalPage)
+      handleEnvironmentsFetch(finalPage)
     }
   }
 
@@ -105,14 +113,14 @@ function EnvironmentPage(): React.JSX.Element {
               <EditEnvironmentDialogue />
             ) : null}
 
-            {hasMore ? <div className="col-span-full flex justify-center">
-              <Button disabled={loading} onClick={handlePageShift}>
-                {loading ? 'Loading...' : 'Load More'}
-              </Button>
-            </div> : null}
-
+            {hasMore ? (
+              <div className="col-span-full flex justify-center">
+                <Button disabled={isLoading} onClick={handlePageShift}>
+                  {isLoading ? 'Loading...' : 'Load More'}
+                </Button>
+              </div>
+            ) : null}
           </div>
-          
         </div>
       )}
     </div>
