@@ -1,3 +1,13 @@
+## [2.12.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.15...v2.12.0-stage.16) (2025-02-23)
+
+### 🐛 Bug Fixes
+
+* **web:** Misalignment of toast message after joining the waitlist ([#791](https://github.com/keyshade-xyz/keyshade/issues/791)) ([688e11c](https://github.com/keyshade-xyz/keyshade/commit/688e11c201f1cbdc77b8906805f384aad85f90ab))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Remove PR unassign script ([f174101](https://github.com/keyshade-xyz/keyshade/commit/f17410100d845a28affc25d369733facd3809ab5))
+
 ## [2.12.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.14...v2.12.0-stage.15) (2025-02-23)
 
 ### 🐛 Bug Fixes
