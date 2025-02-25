@@ -154,8 +154,10 @@ describe('Project Controller Tests', () => {
   })
 
   afterEach(async () => {
-    await prisma.user.deleteMany()
-    await prisma.workspace.deleteMany()
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
   })
 
   it('should be defined', async () => {
@@ -1826,34 +1828,34 @@ describe('Project Controller Tests', () => {
       )
     })
 
-    //   it('should not contain a forked project that has access level other than GLOBAL', async () => {
-    //     // Make a hidden fork
-    //     const hiddenProject = await projectService.forkProject(
-    //       user2,
-    //       project3.slug,
-    //       {
-    //         name: 'Hidden Forked Project'
-    //       }
-    //     )
-    //     await projectService.updateProject(user2, hiddenProject.slug, {
-    //       accessLevel: ProjectAccessLevel.INTERNAL
-    //     })
+    it('should not contain a forked project that has access level other than GLOBAL', async () => {
+      // Make a hidden fork
+      const hiddenProject = await projectService.forkProject(
+        user2,
+        project3.slug,
+        {
+          name: 'Hidden Forked Project'
+        }
+      )
+      await projectService.updateProject(user2, hiddenProject.slug, {
+        accessLevel: ProjectAccessLevel.INTERNAL
+      })
 
-    //     // Make a public fork
-    //     await projectService.forkProject(user2, project3.slug, {
-    //       name: 'Forked Project'
-    //     })
+      // Make a public fork
+      await projectService.forkProject(user2, project3.slug, {
+        name: 'Forked Project'
+      })
 
-    //     const response = await app.inject({
-    //       method: 'GET',
-    //       url: `/project/${project3.slug}/forks`,
-    //       headers: {
-    //         'x-e2e-user-email': user1.email
-    //       }
-    //     })
+      const response = await app.inject({
+        method: 'GET',
+        url: `/project/${project3.slug}/forks`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
 
-    //     expect(response.statusCode).toBe(200)
-    //     expect(response.json().items).toHaveLength(0)
-    //   })
+      expect(response.statusCode).toBe(200)
+      expect(response.json().items).toHaveLength(1)
+    })
   })
 })
