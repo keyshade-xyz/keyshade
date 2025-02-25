@@ -48,10 +48,7 @@ export default class GetWorkspace extends BaseCommand {
       Logger.info(`Updated at: ${data.updatedAt}`)
       Logger.info(`Is default workspace: ${data.isDefault}`)
     } else {
-      Logger.error(`Failed fetching workspace: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching workspace.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed fetching workspace', error)
     }
   }
 }

@@ -90,12 +90,7 @@ export default class FetchVariableRevisions extends BaseCommand {
         Logger.info('No revisions found')
       }
     } else {
-      Logger.error(`Failed fetching revisions: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching revisions for variable.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError('Failed fetching revisions', error)
     }
   }
 }

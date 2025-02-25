@@ -43,10 +43,7 @@ export default class DeclineInvitationCommand extends BaseCommand {
       Logger.info('Declined invitation sucessfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
     } else {
-      Logger.error(`Failed to decline invitation: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to decline invitation.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed to decline invitation', error)
     }
   }
 }

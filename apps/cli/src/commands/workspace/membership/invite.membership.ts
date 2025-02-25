@@ -67,10 +67,7 @@ export default class InviteUserCommand extends BaseCommand {
       Logger.info(`Invitee: ${email}`)
       Logger.info(`Roles: ${roles}`)
     } else {
-      Logger.error(`Failed to invite user: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to invite user.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed to invite user', error)
     }
   }
 }

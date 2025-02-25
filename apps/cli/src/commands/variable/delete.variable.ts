@@ -50,10 +50,7 @@ export default class DeleteVariable extends BaseCommand {
     if (success) {
       Logger.info(`Variable ${variableSlug} deleted successfully!`)
     } else {
-      Logger.error(`Failed to delete variable: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to delete variable.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed to delete variable', error)
     }
   }
 }

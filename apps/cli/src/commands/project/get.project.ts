@@ -48,10 +48,7 @@ export default class GetProject extends BaseCommand {
       Logger.info(`Is Forked: ${data.isForked}`)
       Logger.info(`Access Level: ${data.accessLevel}`)
     } else {
-      Logger.error(`Failed fetching project: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching project.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed fetching project', error)
     }
   }
 }

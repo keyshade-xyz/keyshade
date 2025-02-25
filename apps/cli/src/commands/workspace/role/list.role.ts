@@ -59,12 +59,7 @@ export default class ListRoleCommand extends BaseCommand {
         Logger.info('No roles found')
       }
     } else {
-      Logger.error(`Failed fetching roles: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching workspace roles.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError('Failed fetching roles', error)
     }
   }
 }

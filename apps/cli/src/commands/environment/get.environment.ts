@@ -54,10 +54,7 @@ export class GetEnvironment extends BaseCommand {
       Logger.info(`Created On: ${environment.createdAt}`)
       Logger.info(`Updated On: ${environment.updatedAt}`)
     } else {
-      Logger.error(`Error fetching environment: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching environment.\n' + JSON.stringify(error))
-      }
+      this.logError('Error fetching environment', error)
     }
   }
 }

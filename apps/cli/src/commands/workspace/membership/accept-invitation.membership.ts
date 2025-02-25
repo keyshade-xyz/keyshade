@@ -43,10 +43,7 @@ export default class AcceptInvitationCommand extends BaseCommand {
       Logger.info('Accepted invitation sucessfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
     } else {
-      Logger.error(`Failed to accept invitation: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to accept invitation.\n' + JSON.stringify(error))
-      }
+      this.logError('Failed to accept invitation', error)
     }
   }
 }

@@ -47,12 +47,7 @@ export default class ListProjectForks extends BaseCommand {
         Logger.info('No forks found')
       }
     } else {
-      Logger.error(`Failed fetching forks: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching project forks.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError('Failed fetching forks', error)
     }
   }
 }

@@ -92,12 +92,7 @@ export default class ListSecret extends BaseCommand {
         Logger.info('No secrets found')
       }
     } else {
-      Logger.error(`Failed fetching secrets: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching secrets for project.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError('Failed fetching secrets', error)
     }
   }
 

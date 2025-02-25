@@ -159,6 +159,25 @@ export default abstract class BaseCommand {
     return ''
   }
 
+  /**
+   * Logs the error
+   * @param message The error message
+   * @param error The error object containing details about the error
+   */
+  protected logError(
+    message: string,
+    error: { message: string; error: string; statusCode: number }
+  ): void {
+    const { body } = JSON.parse(error.message) as {
+      body: string
+    }
+
+    Logger.error(`${message}: ${body}`)
+    if (this.metricsEnabled && error?.statusCode === 500) {
+      Logger.report(`${message}.\n` + JSON.stringify(error))
+    }
+  }
+
   private async setGlobalContextFields(
     globalOptions: Record<string, string>
   ): Promise<void> {
