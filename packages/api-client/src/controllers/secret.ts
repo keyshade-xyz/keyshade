@@ -1,5 +1,9 @@
 import { APIClient } from '@api-client/core/client'
-import { ClientResponse } from '@keyshade/schema'
+import {
+  ClientResponse,
+  GetAllSecretsOfEnvironmentRequest,
+  GetAllSecretsOfEnvironmentResponse
+} from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateSecretRequest,
@@ -105,5 +109,15 @@ export default class SecretController {
     )
 
     return await parseResponse<GetRevisionsOfSecretResponse>(response)
+  }
+
+  async getAllSecretsOfEnvironment(
+    request: GetAllSecretsOfEnvironmentRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
+    const url = `/api/secret/${request.projectSlug}/${request.environmentSlug}`
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)
   }
 }
