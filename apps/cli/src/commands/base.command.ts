@@ -168,13 +168,22 @@ export default abstract class BaseCommand {
     message: string,
     error: { message: string; error: string; statusCode: number }
   ): void {
-    const { body } = JSON.parse(error.message) as {
-      body: string
-    }
+    const errorMessage = getErrorMessage()
 
-    Logger.error(`${message}: ${body}`)
+    Logger.error(`${message}: ${errorMessage}`)
     if (this.metricsEnabled && error?.statusCode === 500) {
       Logger.report(`${message}.\n` + JSON.stringify(error))
+    }
+
+    function getErrorMessage() {
+      try {
+        const { body } = JSON.parse(error.message) as {
+          body: string
+        }
+        return body
+      } catch {
+        return error.message
+      }
     }
   }
 
