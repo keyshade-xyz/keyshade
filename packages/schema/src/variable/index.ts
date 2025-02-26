@@ -133,3 +133,16 @@ export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
     })
   })
 )
+
+export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
+  z.object({
+    name: z.string(),
+    value: z.string(),
+    isPlaintext: z.boolean()
+  })
+)

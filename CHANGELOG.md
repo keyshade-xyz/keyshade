@@ -1,3 +1,21 @@
+## [2.12.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.18...v2.12.0-stage.19) (2025-02-26)
+
+### 🐛 Bug Fixes
+
+* **api:** Added back missing endpoints ([#798](https://github.com/keyshade-xyz/keyshade/issues/798)) ([c6a0df9](https://github.com/keyshade-xyz/keyshade/commit/c6a0df9679eb4f0c1ec53ec436adc2b5f5bd84d8))
+
+## [2.12.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.17...v2.12.0-stage.18) (2025-02-26)
+
+### 🚀 Features
+
+* **cli:** Error message formatted ([#797](https://github.com/keyshade-xyz/keyshade/issues/797)) ([0322944](https://github.com/keyshade-xyz/keyshade/commit/03229446207dc7bc55d0aed5a049255fcc86ede3))
+
+## [2.12.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.16...v2.12.0-stage.17) (2025-02-26)
+
+### 🐛 Bug Fixes
+
+* **api:** Issue with authorities and expiry field update in API Key ([#800](https://github.com/keyshade-xyz/keyshade/issues/800)) ([8e30f15](https://github.com/keyshade-xyz/keyshade/commit/8e30f15449fcf3333c7eaa26f4d8c6bd02f8b0a6))
+
 ## [2.12.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.15...v2.12.0-stage.16) (2025-02-23)
 
 ### 🐛 Bug Fixes
