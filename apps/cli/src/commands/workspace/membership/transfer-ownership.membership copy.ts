@@ -61,10 +61,7 @@ export default class TransferOwnershipCommand extends BaseCommand {
       Logger.info(`New owner email: ${email}`)
       Logger.info(`Workspace slug: ${workspaceSlug}`)
     } else {
-      Logger.error(`Failed to transfer ownership: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to transfer ownership.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }
