@@ -57,7 +57,7 @@ export default class CancelInvitationCommand extends BaseCommand {
       Logger.info(`Workspace slug: ${workspaceSlug}`)
       Logger.info(`Invitee: ${email}`)
     } else {
-      this.logError('Failed to cancel invitation', error)
+      this.logError(error)
     }
   }
 }

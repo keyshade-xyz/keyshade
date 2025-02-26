@@ -50,7 +50,7 @@ export default class DeleteSecret extends BaseCommand {
     if (success) {
       Logger.info(`Secret ${secretSlug} deleted successfully!`)
     } else {
-      this.logError('Failed to delete secret', error)
+      this.logError(error)
     }
   }
 }

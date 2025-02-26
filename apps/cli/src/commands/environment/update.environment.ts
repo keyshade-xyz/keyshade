@@ -70,7 +70,7 @@ export class UpdateEnvironment extends BaseCommand {
         `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      this.logError('Error updating Environment', error)
+      this.logError(error)
     }
   }
 }

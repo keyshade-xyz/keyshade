@@ -43,7 +43,7 @@ export default class DeclineInvitationCommand extends BaseCommand {
       Logger.info('Declined invitation sucessfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
     } else {
-      this.logError('Failed to decline invitation', error)
+      this.logError(error)
     }
   }
 }

@@ -59,7 +59,7 @@ export class ListEnvironment extends BaseCommand {
         Logger.info(`- ${environment.name} (${environment.slug})`)
       })
     } else {
-      this.logError('Failed to fetch environments', error)
+      this.logError(error)
     }
   }
 }

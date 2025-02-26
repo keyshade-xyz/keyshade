@@ -70,7 +70,7 @@ export default class RollbackSecret extends BaseCommand {
     if (success) {
       Logger.info(`Secret rolled back by ${data.count} versions successfully.`)
     } else {
-      this.logError('Failed to rollback secret', error)
+      this.logError(error)
     }
   }
 

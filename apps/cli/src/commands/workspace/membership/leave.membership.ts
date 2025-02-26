@@ -43,7 +43,7 @@ export class LeaveWorkspaceCommand extends BaseCommand {
       Logger.info('Left workspace sucessfully!')
       Logger.info(`Workspace slug: ${workspaceSlug}`)
     } else {
-      this.logError('Failed to leave workspace', error)
+      this.logError(error)
     }
   }
 }

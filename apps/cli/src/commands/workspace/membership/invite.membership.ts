@@ -67,7 +67,7 @@ export default class InviteUserCommand extends BaseCommand {
       Logger.info(`Invitee: ${email}`)
       Logger.info(`Roles: ${roles}`)
     } else {
-      this.logError('Failed to invite user', error)
+      this.logError(error)
     }
   }
 }

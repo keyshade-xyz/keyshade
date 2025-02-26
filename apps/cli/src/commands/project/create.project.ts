@@ -99,7 +99,7 @@ Examples:
       Logger.info(`Private key: ${data.privateKey}`)
       Logger.info(`Access level: ${data.accessLevel}`)
     } else {
-      this.logError('Failed to create project', error)
+      this.logError(error)
     }
   }
 

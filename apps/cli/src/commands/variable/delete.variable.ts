@@ -50,7 +50,7 @@ export default class DeleteVariable extends BaseCommand {
     if (success) {
       Logger.info(`Variable ${variableSlug} deleted successfully!`)
     } else {
-      this.logError('Failed to delete variable', error)
+      this.logError(error)
     }
   }
 }

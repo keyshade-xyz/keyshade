@@ -42,7 +42,7 @@ export default class DeleteProject extends BaseCommand {
     if (success) {
       Logger.info(`Project ${projectSlug} deleted successfully!`)
     } else {
-      this.logError('Failed to delete project', error)
+      this.logError(error)
     }
   }
 }

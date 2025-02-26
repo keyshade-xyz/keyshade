@@ -54,7 +54,7 @@ export default class GetRoleCommand extends BaseCommand {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }
     } else {
-      this.logError('Failed fetching workspace role', error)
+      this.logError(error)
     }
   }
 }

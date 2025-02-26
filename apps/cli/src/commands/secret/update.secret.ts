@@ -86,7 +86,7 @@ export default class UpdateSecret extends BaseCommand {
     if (success) {
       Logger.info('Secret updated successfully')
     } else {
-      this.logError('Failed to update secret', error)
+      this.logError(error)
     }
   }
 

@@ -52,7 +52,7 @@ export default class CreateWorkspace extends BaseCommand {
       Logger.info(`Created at ${data.createdAt}`)
       Logger.info(`Updated at ${data.updatedAt}`)
     } else {
-      this.logError('Failed to create workspace', error)
+      this.logError(error)
     }
   }
 

@@ -71,7 +71,7 @@ export default class RollbackVariable extends BaseCommand {
         `Variable rolled back by ${data.count} versions successfully!`
       )
     } else {
-      this.logError('Failed to update variable', error)
+      this.logError(error)
     }
   }
 

@@ -57,7 +57,7 @@ export default class RemoveUserCommand extends BaseCommand {
       Logger.info(`Workspace slug: ${workspaceSlug}`)
       Logger.info(`Email: ${emails}`)
     } else {
-      this.logError('Failed to remove users', error)
+      this.logError(error)
     }
   }
 }

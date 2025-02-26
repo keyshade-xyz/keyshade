@@ -71,7 +71,7 @@ export class CreateEnvironment extends BaseCommand {
         `Environment created:${environment.name} (${environment.slug})`
       )
     } else {
-      this.logError('Failed to create environment', error)
+      this.logError(error)
     }
   }
 

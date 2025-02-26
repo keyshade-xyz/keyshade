@@ -50,7 +50,7 @@ export default class ListProject extends BaseCommand {
         Logger.info('No projects found')
       }
     } else {
-      this.logError('Failed fetching projects', error)
+      this.logError(error)
     }
   }
 }

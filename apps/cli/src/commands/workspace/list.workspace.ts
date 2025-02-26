@@ -45,7 +45,7 @@ export default class ListWorkspace extends BaseCommand {
         Logger.info('No workspaces found')
       }
     } else {
-      this.logError('Failed fetching workspaces', error)
+      this.logError(error)
     }
   }
 }

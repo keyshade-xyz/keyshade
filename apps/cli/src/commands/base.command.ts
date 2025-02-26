@@ -164,25 +164,34 @@ export default abstract class BaseCommand {
    * @param message The error message
    * @param error The error object containing details about the error
    */
-  protected logError(
-    message: string,
-    error: { message: string; error: string; statusCode: number }
-  ): void {
-    const errorMessage = getErrorMessage()
+  protected logError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }): void {
+    const { header, body } = this.extractError(error)
 
-    Logger.error(`${message}: ${errorMessage}`)
+    Logger.error(`${header}: ${body}`)
     if (this.metricsEnabled && error?.statusCode === 500) {
-      Logger.report(`${message}.\n` + JSON.stringify(error))
+      Logger.report(`${header}.\n` + JSON.stringify(error))
     }
+  }
 
-    function getErrorMessage() {
-      try {
-        const { body } = JSON.parse(error.message) as {
-          body: string
-        }
-        return body
-      } catch {
-        return error.message
+  private extractError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }) {
+    try {
+      const { header, body } = JSON.parse(error.message) as {
+        header: string
+        body: string
+      }
+      return { header, body }
+    } catch {
+      return {
+        header: 'Faced an error processing the request',
+        body: error.message
       }
     }
   }

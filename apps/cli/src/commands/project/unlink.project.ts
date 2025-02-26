@@ -43,7 +43,7 @@ export default class UnlinkProject extends BaseCommand {
     if (success) {
       Logger.info(`Project ${projectSlug} unlinked successfully!`)
     } else {
-      this.logError('Failed to unlink project', error)
+      this.logError(error)
     }
   }
 }

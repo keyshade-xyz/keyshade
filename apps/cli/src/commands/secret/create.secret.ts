@@ -96,7 +96,7 @@ export default class CreateSecret extends BaseCommand {
       Logger.info(`Created at ${data.secret.createdAt}`)
       Logger.info(`Updated at ${data.secret.updatedAt}`)
     } else {
-      this.logError('Failed to create secret', error)
+      this.logError(error)
     }
   }
 

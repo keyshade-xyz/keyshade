@@ -72,7 +72,7 @@ export default class UpdateRolesCommand extends BaseCommand {
       Logger.info(`Member Email: ${email}`)
       Logger.info(`New Roles: ${roles}`)
     } else {
-      this.logError('Failed to update roles', error)
+      this.logError(error)
     }
   }
 }

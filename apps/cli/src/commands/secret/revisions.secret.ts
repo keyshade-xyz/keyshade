@@ -96,7 +96,7 @@ export default class FetchSecretRevisions extends BaseCommand {
         Logger.info('No revisions found')
       }
     } else {
-      this.logError('Failed fetching revisions', error)
+      this.logError(error)
     }
   }
 

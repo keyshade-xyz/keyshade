@@ -76,7 +76,7 @@ export default class UpdateVariable extends BaseCommand {
     if (success) {
       Logger.info('Variable updated successfully!')
     } else {
-      this.logError('Failed to update variable', error)
+      this.logError(error)
     }
   }
 

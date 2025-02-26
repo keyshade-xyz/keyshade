@@ -128,7 +128,7 @@ export default class UpdateRoleCommand extends BaseCommand {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }
     } else {
-      this.logError('Failed updating workspace role', error)
+      this.logError(error)
     }
   }
 }

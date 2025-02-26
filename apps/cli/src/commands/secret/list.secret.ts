@@ -92,7 +92,7 @@ export default class ListSecret extends BaseCommand {
         Logger.info('No secrets found')
       }
     } else {
-      this.logError('Failed fetching secrets', error)
+      this.logError(error)
     }
   }
 

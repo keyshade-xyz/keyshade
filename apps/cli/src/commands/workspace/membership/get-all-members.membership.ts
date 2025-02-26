@@ -62,7 +62,7 @@ export default class GetAllMembersOfWorkspaceCommand extends BaseCommand {
         Logger.info('No members found')
       }
     } else {
-      this.logError('Failed fetching members', error)
+      this.logError(error)
     }
   }
 }

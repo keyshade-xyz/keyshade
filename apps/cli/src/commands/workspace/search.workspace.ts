@@ -77,7 +77,7 @@ export default class SearchWorkspace extends BaseCommand {
 
       Logger.info('')
     } else {
-      this.logError('Failed searching in workspace', error)
+      this.logError(error)
     }
   }
 }

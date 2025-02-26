@@ -66,7 +66,7 @@ export default class ExportWorkspace extends BaseCommand {
         Logger.info(JSON.stringify(data))
       }
     } else {
-      this.logError('Failed exporting workspace', error)
+      this.logError(error)
     }
   }
 }

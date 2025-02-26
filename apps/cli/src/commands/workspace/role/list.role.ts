@@ -59,7 +59,7 @@ export default class ListRoleCommand extends BaseCommand {
         Logger.info('No roles found')
       }
     } else {
-      this.logError('Failed fetching roles', error)
+      this.logError(error)
     }
   }
 }

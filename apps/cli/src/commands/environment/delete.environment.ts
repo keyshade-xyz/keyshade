@@ -47,7 +47,7 @@ export class DeleteEnvironment extends BaseCommand {
     if (success) {
       Logger.info('Environment deleted successfully')
     } else {
-      this.logError('Error deleting environment', error)
+      this.logError(error)
     }
   }
 }

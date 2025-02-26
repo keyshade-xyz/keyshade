@@ -74,7 +74,7 @@ export default class UpdateProject extends BaseCommand {
       Logger.info(`Created at ${data.createdAt}`)
       Logger.info(`Updated at ${data.updatedAt}`)
     } else {
-      this.logError('Failed to update project', error)
+      this.logError(error)
     }
   }
 }

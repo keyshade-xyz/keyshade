@@ -78,7 +78,7 @@ export default class ListVariable extends BaseCommand {
         Logger.info('No variables found')
       }
     } else {
-      this.logError('Failed fetching variables', error)
+      this.logError(error)
     }
   }
 }

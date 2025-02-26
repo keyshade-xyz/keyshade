@@ -42,7 +42,7 @@ export default class DeleteWorkspace extends BaseCommand {
     if (success) {
       Logger.info(`Workspace ${workspaceSlug} deleted successfully!`)
     } else {
-      this.logError('Failed to delete workspace', error)
+      this.logError(error)
     }
   }
 }

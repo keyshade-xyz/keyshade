@@ -68,7 +68,7 @@ export default class UpdateWorkspace extends BaseCommand {
         Logger.info(`Updated at: ${data.updatedAt}`)
         Logger.info(`Is default workspace: ${data.isDefault}`)
       } else {
-        this.logError('Failed updating workspace', error)
+        this.logError(error)
       }
     } else {
       Logger.info('No data provided. Skipping update.')

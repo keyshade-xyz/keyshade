@@ -132,7 +132,7 @@ export default class CreateRoleCommand extends BaseCommand {
         Logger.info(`- ${project.project.name} (${project.project.slug})`)
       }
     } else {
-      this.logError('Failed creating workspace role', error)
+      this.logError(error)
     }
   }
 }
