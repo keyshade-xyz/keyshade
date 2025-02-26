@@ -1,3 +1,9 @@
+## [2.12.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.16...v2.12.0-stage.17) (2025-02-26)
+
+### 🐛 Bug Fixes
+
+* **api:** Issue with authorities and expiry field update in API Key ([#800](https://github.com/keyshade-xyz/keyshade/issues/800)) ([8e30f15](https://github.com/keyshade-xyz/keyshade/commit/8e30f15449fcf3333c7eaa26f4d8c6bd02f8b0a6))
+
 ## [2.12.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.15...v2.12.0-stage.16) (2025-02-23)
 
 ### 🐛 Bug Fixes
