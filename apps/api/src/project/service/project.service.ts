@@ -462,7 +462,7 @@ export class ProjectService {
         accessLevel: project.accessLevel,
         isForked: true,
         forkedFromId: project.id,
-        workspaceId: workspaceId,
+        workspaceId,
         lastUpdatedById: userId
       }
     })

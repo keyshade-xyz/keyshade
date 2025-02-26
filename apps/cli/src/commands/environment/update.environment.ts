@@ -70,12 +70,7 @@ export class UpdateEnvironment extends BaseCommand {
         `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
       )
     } else {
-      Logger.error(
-        `Error updating Environment: ${error.message} (${error.statusCode})`
-      )
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Error updating environment.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

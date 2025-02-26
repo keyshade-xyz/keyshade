@@ -22,7 +22,10 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { ChangeNotificationEvent } from 'src/socket/socket.types'
+import {
+  ChangeNotification,
+  ChangeNotificationEvent
+} from '@/socket/socket.types'
 import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
@@ -713,6 +716,83 @@ export class VariableService {
     })
 
     return { items, metadata }
+  }
+
+  /**
+   * Gets all variables of a project and environment.
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project to get the variables from
+   * @param environmentSlug the slug of the environment to get the variables from
+   * @returns an array of objects containing the name, value and whether the value is a plaintext
+   * @throws `NotFoundException` if the project or environment does not exist
+   * @throws `ForbiddenException` if the user does not have the required authority
+   */
+  async getAllVariablesOfProjectAndEnvironment(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    // Check if the user has the required authorities in the project
+    const { id: projectId } =
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_VARIABLE]
+      })
+
+    // Check if the user has the required authorities in the environment
+    const { id: environmentId } =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT]
+      })
+
+    const variables = await this.prisma.variable.findMany({
+      where: {
+        projectId,
+        versions: {
+          some: {
+            environmentId
+          }
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        versions: {
+          where: {
+            environmentId
+          },
+          select: {
+            value: true,
+            environment: {
+              select: {
+                id: true,
+                slug: true
+              }
+            }
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1
+        }
+      }
+    })
+
+    return variables.map(
+      (variable) =>
+        ({
+          name: variable.name,
+          value: variable.versions[0].value,
+          isPlaintext: true
+        }) as ChangeNotification
+    )
   }
 
   /**
