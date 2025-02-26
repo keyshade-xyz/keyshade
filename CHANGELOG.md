@@ -1,3 +1,9 @@
+## [2.12.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.18...v2.12.0-stage.19) (2025-02-26)
+
+### 🐛 Bug Fixes
+
+* **api:** Added back missing endpoints ([#798](https://github.com/keyshade-xyz/keyshade/issues/798)) ([c6a0df9](https://github.com/keyshade-xyz/keyshade/commit/c6a0df9679eb4f0c1ec53ec436adc2b5f5bd84d8))
+
 ## [2.12.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.17...v2.12.0-stage.18) (2025-02-26)
 
 ### 🚀 Features
