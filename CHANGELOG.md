@@ -1,3 +1,9 @@
+## [2.12.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.19...v2.12.0-stage.20) (2025-02-26)
+
+### 🚀 Features
+
+* **platform:** Update Combobox to add new workspace to state ([#796](https://github.com/keyshade-xyz/keyshade/issues/796)) ([f817397](https://github.com/keyshade-xyz/keyshade/commit/f817397ceac8c67d110d6519929ba92796c90b9d))
+
 ## [2.12.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.18...v2.12.0-stage.19) (2025-02-26)
 
 ### 🐛 Bug Fixes
