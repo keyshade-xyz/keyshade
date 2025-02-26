@@ -1,3 +1,9 @@
+## [2.12.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.17...v2.12.0-stage.18) (2025-02-26)
+
+### 🚀 Features
+
+* **cli:** Error message formatted ([#797](https://github.com/keyshade-xyz/keyshade/issues/797)) ([0322944](https://github.com/keyshade-xyz/keyshade/commit/03229446207dc7bc55d0aed5a049255fcc86ede3))
+
 ## [2.12.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.16...v2.12.0-stage.17) (2025-02-26)
 
 ### 🐛 Bug Fixes
