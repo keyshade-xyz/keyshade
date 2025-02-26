@@ -11,5 +11,5 @@ export class CreateApiKey {
 
   @IsArray()
   @IsOptional()
-  authorities?: Authority[] = []
+  authorities?: Authority[]
 }
