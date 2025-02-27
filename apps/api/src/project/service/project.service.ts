@@ -714,16 +714,20 @@ export class ProjectService {
       }
     })
 
-    const forksAllowed = forks.filter(async (fork) => {
-      const allowed =
-        (await this.authorizationService.authorizeUserAccessToProject({
-          user,
-          entity: { slug: fork.slug },
-          authorities: [Authority.READ_PROJECT]
-        })) != null
+    const forksAllowed = await Promise.all(
+      forks.map(async (fork) => {
+        const allowed =
+          (await this.authorizationService.authorizeUserAccessToProject({
+            user,
+            entity: { slug: fork.slug },
+            authorities: [Authority.READ_PROJECT]
+          })) != null
 
-      return allowed
-    })
+        return { fork, allowed }
+      })
+    ).then((results) =>
+      results.filter((result) => result.allowed).map((result) => result.fork)
+    )
 
     const items = forksAllowed.slice(page * limit, (page + 1) * limit)
 
