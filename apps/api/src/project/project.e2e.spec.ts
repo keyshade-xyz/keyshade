@@ -154,8 +154,10 @@ describe('Project Controller Tests', () => {
   })
 
   afterEach(async () => {
-    await prisma.user.deleteMany()
-    await prisma.workspace.deleteMany()
+    await prisma.$transaction([
+      prisma.user.deleteMany(),
+      prisma.workspace.deleteMany()
+    ])
   })
 
   it('should be defined', async () => {

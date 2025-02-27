@@ -24,7 +24,10 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { ChangeNotificationEvent } from 'src/socket/socket.types'
+import {
+  ChangeNotification,
+  ChangeNotificationEvent
+} from '@/socket/socket.types'
 import { paginate } from '@/common/paginate'
 import {
   addHoursToDate,
@@ -768,6 +771,89 @@ export class SecretService {
     )
 
     return { items, metadata }
+  }
+
+  /**
+   * Gets all secrets of a project and environment
+   * @param user the user performing the action
+   * @param projectSlug the slug of the project
+   * @param environmentSlug the slug of the environment
+   * @returns an array of objects with the secret name and value
+   * @throws {NotFoundException} if the project or environment does not exist
+   * @throws {BadRequestException} if the user does not have the required role
+   */
+  async getAllSecretsOfProjectAndEnvironment(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    // Fetch the project
+    const project =
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
+        entity: { slug: projectSlug },
+        authorities: [Authority.READ_SECRET]
+      })
+    const projectId = project.id
+
+    // Check access to the environment
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.READ_ENVIRONMENT]
+      })
+    const environmentId = environment.id
+
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId,
+        versions: {
+          some: {
+            environmentId
+          }
+        }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        versions: {
+          where: {
+            environmentId
+          },
+          orderBy: {
+            version: 'desc'
+          },
+          take: 1,
+          include: {
+            environment: {
+              select: {
+                id: true,
+                slug: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const response: ChangeNotification[] = []
+
+    for (const secret of secrets) {
+      response.push({
+        name: secret.name,
+        value: project.storePrivateKey
+          ? await decrypt(project.privateKey, secret.versions[0].value)
+          : secret.versions[0].value,
+        isPlaintext: project.storePrivateKey
+      })
+    }
+
+    return response
   }
 
   /**

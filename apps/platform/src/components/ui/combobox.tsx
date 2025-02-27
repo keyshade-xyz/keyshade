@@ -75,6 +75,7 @@ export function Combobox(): React.JSX.Element {
       if (success && data) {
         toast.success('Workspace created successfully')
         setSelectedWorkspace({ ...data, projects: 0 })
+        setAllWorkspaces((prev) => [...prev, { ...data, projects: 0 }])
         setOpen(false)
       }
     } finally {
@@ -157,7 +158,7 @@ export function Combobox(): React.JSX.Element {
                 <AddSVG /> New workspace
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-[#1E1E1F]">
               <DialogHeader>
                 <DialogTitle>Make a new workspace</DialogTitle>
                 <DialogDescription>
