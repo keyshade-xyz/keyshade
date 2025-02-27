@@ -2,6 +2,7 @@ import { UserAuthenticatedResponse } from '@/auth/auth.types'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
+import * as crypto from 'crypto'
 
 /**
  * Limits the given limit to a maximum number of items per page.
@@ -97,8 +98,8 @@ export const excludeFields = <T, K extends keyof T>(
  * @param hours The number of hours to add to the current date
  * @returns The new date with the given number of hours added, or undefined if the hours is 'never'
  */
-export const addHoursToDate = (hours?: string | number): Date | undefined => {
-  if (!hours || hours === 'never') return undefined
+export const addHoursToDate = (hours?: string | number): Date | null => {
+  if (!hours || hours === 'never') return null
 
   const date = new Date()
   date.setHours(date.getHours() + +hours)
