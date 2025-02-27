@@ -1,5 +1,5 @@
 import type { Secret } from '@keyshade/schema'
-import dayjs from 'dayjs'
+import dayjs, { extend } from 'dayjs'
 import { useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
 import {
@@ -30,25 +30,32 @@ import {
 import {
   deleteSecretOpenAtom,
   editSecretOpenAtom,
-  selectedSecretAtom
+  selectedSecretAtom,
+  rollbackSecretOpenAtom
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
+extend(dayjs)
+
 interface SecretCardProps {
-  secretData: Secret
+  secretData: Secret | undefined
   isDecrypted: boolean
 }
-
 export default function SecretCard({
   secretData,
   isDecrypted
 }: SecretCardProps) {
-  const { secret, values } = secretData
-
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
+  const setIsRollbackSecretOpen = useSetAtom(rollbackSecretOpenAtom)
+  
+  if (!secretData?.secret) {
+    return null;
+  }
+  
+  const { secret, values } = secretData
 
   const handleCopyToClipboard = () => {
     copyToClipboard(secret.slug, 'You copied the slug successfully.', 'Failed to copy the slug.', 'You successfully copied the slug.')
@@ -62,6 +69,11 @@ export default function SecretCard({
   const handleDeleteClick = () => {
     setSelectedSecret(secretData)
     setIsDeleteSecretOpen(true)
+  }
+
+  const handleVersionHistoryClick = () => {
+    setSelectedSecret(secretData)
+    setIsRollbackSecretOpen(true)
   }
 
   return (
@@ -150,12 +162,15 @@ export default function SecretCard({
         </AccordionContent>
       </AccordionItem>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleVersionHistoryClick}
+        >
           Show Version History
         </ContextMenuItem>
         <ContextMenuItem
-        className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
-        onSelect={handleCopyToClipboard}
+          className="w-[15.938rem] py-2 border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleCopyToClipboard}
         >
           Copy slug
         </ContextMenuItem>

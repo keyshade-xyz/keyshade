@@ -1,6 +1,7 @@
 import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
-import dayjs from 'dayjs'
+import * as dayjs from 'dayjs'
+import * as relativeTime from 'dayjs/plugin/relativeTime'
 import { NoteIconSVG } from '@public/svg/secret'
 import {
   Table,
@@ -25,7 +26,8 @@ import {
 import {
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedVariableAtom
+  selectedVariableAtom,
+  rollbackVariableOpenAtom
 } from '@/store'
 import {
   AccordionContent,
@@ -35,12 +37,16 @@ import {
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
+// Initialize dayjs relative time plugin
+dayjs.extend(relativeTime)
+
 export default function VariableCard(
   variableData: GetAllVariablesOfProjectResponse['items'][number]
 ) {
   const setSelectedVariable = useSetAtom(selectedVariableAtom)
   const setIsEditVariableOpen = useSetAtom(editVariableOpenAtom)
   const setIsDeleteVariableOpen = useSetAtom(deleteVariableOpenAtom)
+  const setIsRollbackVariableOpen = useSetAtom(rollbackVariableOpenAtom)
 
   const { variable, values } = variableData
 
@@ -56,6 +62,11 @@ export default function VariableCard(
   const handleDeleteClick = () => {
     setSelectedVariable(variableData)
     setIsDeleteVariableOpen(true)
+  }
+
+  const handleVersionHistoryClick = () => {
+    setSelectedVariable(variableData)
+    setIsRollbackVariableOpen(true)
   }
 
   return (
@@ -139,7 +150,10 @@ export default function VariableCard(
         </AccordionContent>
       </AccordionItem>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+        <ContextMenuItem 
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleVersionHistoryClick}
+        >
           Show Version History
         </ContextMenuItem>
         <ContextMenuItem

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { VariableSVG } from '@public/svg/dashboard'
 import {
@@ -9,44 +9,49 @@ import {
   deleteVariableOpenAtom,
   editVariableOpenAtom,
   selectedVariableAtom,
-  variablesOfProjectAtom
+  variablesOfProjectAtom,
+  rollbackVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
 import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
+import RollbackVariableSheet from '@/components/dashboard/variable/rollbackVariableSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
 import { useHttp } from '@/hooks/use-http'
 
+
 function VariablePage(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
+  const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
   const getAllVariablesOfProject = useHttp(() =>
-    ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
-      {
-        projectSlug: selectedProject!.slug
-      }
-    )
+    ControllerInstance.getInstance().variableController.getAllVariablesOfProject({
+      projectSlug: selectedProject!.slug
+    })
   )
 
   useEffect(() => {
-    selectedProject &&
-      getAllVariablesOfProject().then(({ data, success }) => {
-        if (success && data) {
+    if (selectedProject) {
+      getAllVariablesOfProject().then(({ data }) => {
+        if (data) {
+
           setVariables(data.items)
         }
       })
+    }
   }, [getAllVariablesOfProject, selectedProject, setVariables])
 
   return (
     <div
-      className={` flex h-full w-full ${isDeleteVariableOpen ? 'inert' : ''} `}
+      className="flex h-full w-full"
+      data-inert={isRollbackVariableOpen ? true : undefined}
     >
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
@@ -72,28 +77,22 @@ function VariablePage(): React.JSX.Element {
       ) : (
         // Showing this when variables are present
         <div
-          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteVariableOpen ? 'inert' : ''} `}
+          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteVariableOpen ? 'inert' : ''
+            } `}
         >
-          <Accordion
-            className="flex h-fit w-full flex-col gap-4"
-            collapsible
-            type="single"
-          >
+          <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
             {variables.map(({ variable, values }) => (
-              <VariableCard
-                key={variable.id}
-                values={values}
-                variable={variable}
-              />
+              <VariableCard key={variable.id} values={values} variable={variable} />
             ))}
           </Accordion>
           {/* Delete variable alert dialog */}
-          {isDeleteVariableOpen && selectedVariable ? (
-            <ConfirmDeleteVariable />
-          ) : null}
+          {isDeleteVariableOpen && selectedVariable ? <ConfirmDeleteVariable /> : null}
 
           {/* Edit variable sheet */}
           {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
+
+          {/* Rollback variable sheet */}
+          {isRollbackVariableOpen && selectedVariable ? <RollbackVariableSheet /> : null}
         </div>
       )}
     </div>
