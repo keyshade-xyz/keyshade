@@ -52,7 +52,7 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
       toast.loading('Deleting your API Key...')
       const { success, error } =
         await ControllerInstance.getInstance().apiKeyController.deleteApiKey(
-          { apiKeySlug: apiKeySlug },
+          { apiKeySlug },
           {}
         )
 
@@ -117,7 +117,7 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
           <div className="flex items-center gap-x-3">
             <TrashSVG />
             <AlertDialogTitle className="text-lg font-semibold">
-              Do you want to delete this API?
+              Do you want to delete {selectedApiKey?.name} ?
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
@@ -134,8 +134,8 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            onClick={deleteApiKey}
             disabled={isLoading}
+            onClick={deleteApiKey}
           >
             Yes, delete {selectedApiKey ? selectedApiKey.name : 'this API Key'}
           </AlertDialogAction>
