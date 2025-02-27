@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { FolderSVG } from '@public/svg/dashboard'
+import { toast } from 'sonner'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
@@ -19,6 +20,7 @@ import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 import { useHttp } from '@/hooks/use-http'
+import { logout } from '@/lib/utils'
 
 export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(true)
@@ -44,6 +46,22 @@ export default function Index(): JSX.Element {
   )
 
   useEffect(() => {
+    getSelf().then(({ data, success, error }) => {
+      if (success && data) {
+        setUser(data)
+      }
+
+      if(error?.statusCode === 403) {
+        toast.info('Session expired', {
+          description: (
+            <p className="text-xs text-blue-300">Session expired. Please sign in again.</p>
+          )
+        })
+
+        logout()
+      }
+    })
+
     selectedWorkspace &&
       getAllProjects()
         .then(({ data, success }) => {
@@ -54,12 +72,6 @@ export default function Index(): JSX.Element {
         .finally(() => {
           setLoading(false)
         })
-
-    getSelf().then(({ data, success }) => {
-      if (success && data) {
-        setUser(data)
-      }
-    })
   }, [getAllProjects, selectedWorkspace, setProjects, getSelf, setUser])
 
   return (

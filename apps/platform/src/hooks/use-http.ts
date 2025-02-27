@@ -1,12 +1,14 @@
 import type { ClientResponse } from '@keyshade/schema'
-import { useCallback, useEffect, useRef } from 'react'
+import { createElement, useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
 
 function handle403() {
   toast.info('Session expired', {
-    description: 'Session expired. Please sign in again.'
+    description: (
+      createElement('p', { className: 'text-xs text-blue-300' }, 'Session expired. Please sign in again.')
+    )
   })
 
   logout()
