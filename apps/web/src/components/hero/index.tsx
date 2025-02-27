@@ -55,9 +55,9 @@ function Hero(): React.JSX.Element {
         })
 
         toast.custom((_t) => (
-          <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-2 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
+          <div className="text-brandBlue border-brandBlue/20 w-[90vw] rounded-lg border bg-[#293234] p-3 shadow-2xl backdrop-blur-3xl md:w-[25vw]">
             <h1 className="font-semibold">Welcome to Keyshade 🎉</h1>
-            <p className="text-sm">
+            <p className="text-sm leading-relaxed">
               You have been added to the waitlist. We will notify you once we
               launch
             </p>
