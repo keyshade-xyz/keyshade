@@ -1,3 +1,13 @@
+## [2.12.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0...v2.12.1-stage.1) (2025-02-27)
+
+### 🐛 Bug Fixes
+
+* **cli/api:** `eccrypto` loaded dynamically ([#805](https://github.com/keyshade-xyz/keyshade/issues/805)) ([94bef23](https://github.com/keyshade-xyz/keyshade/commit/94bef23ef110209be2a952319aaf68cb3f77b50f))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** Bumped CLI version to 2.5.2 ([a8f004c](https://github.com/keyshade-xyz/keyshade/commit/a8f004c1a8c306390a16bf1e7ab56c7f36354ae3))
+
 ## [2.12.0](https://github.com/keyshade-xyz/keyshade/compare/v2.11.0...v2.12.0) (2025-02-27)
 
 ### 🚀 Features
