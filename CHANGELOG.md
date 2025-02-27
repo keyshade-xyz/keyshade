@@ -1,3 +1,9 @@
+## [2.12.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.20...v2.12.0-stage.21) (2025-02-27)
+
+### 🐛 Bug Fixes
+
+* **api:** Forks asynchronous filter fixed ([#802](https://github.com/keyshade-xyz/keyshade/issues/802)) ([5a930d6](https://github.com/keyshade-xyz/keyshade/commit/5a930d66b4893ae0d28bc841c22ca2ee01512cdc))
+
 ## [2.12.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0-stage.19...v2.12.0-stage.20) (2025-02-26)
 
 ### 🚀 Features
