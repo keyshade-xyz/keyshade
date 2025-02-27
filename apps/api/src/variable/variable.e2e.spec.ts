@@ -932,4 +932,60 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(401)
     })
   })
+
+  describe('Get All Variables By Project And Environment Tests', () => {
+    it('should be able to fetch all variables by project and environment', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${project1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().length).toBe(1)
+
+      const variable = response.json()[0]
+      expect(variable.name).toBe('Variable 1')
+      expect(variable.value).toBe('Variable 1 value')
+      expect(variable.isPlaintext).toBe(true)
+    })
+
+    it('should not be able to fetch all variables by project and environment if the user has no access to the project', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${project1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to fetch all variables by project and environment if the project does not exist', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/non-existing-project-slug/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch all variables by project and environment if the environment does not exist', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${project1.slug}/non-existing-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+  })
 })

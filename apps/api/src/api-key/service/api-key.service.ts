@@ -125,9 +125,7 @@ export class ApiKeyService {
         slug: dto.name
           ? await generateEntitySlug(dto.name, 'API_KEY', this.prisma)
           : apiKey.slug,
-        authorities: {
-          set: dto.authorities ? dto.authorities : apiKey.authorities
-        },
+        authorities: dto.authorities ? dto.authorities : undefined,
         expiresAt: dto.expiresAfter
           ? addHoursToDate(dto.expiresAfter)
           : undefined

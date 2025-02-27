@@ -12,7 +12,9 @@ import {
   GetAllSecretsOfProjectRequestSchema,
   GetAllSecretsOfProjectResponseSchema,
   GetRevisionsOfSecretRequestSchema,
-  GetRevisionsOfSecretResponseSchema
+  GetRevisionsOfSecretResponseSchema,
+  GetAllSecretsOfEnvironmentRequestSchema,
+  GetAllSecretsOfEnvironmentResponseSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
@@ -49,4 +51,12 @@ export type GetRevisionsOfSecretRequest = z.infer<
 
 export type GetRevisionsOfSecretResponse = z.infer<
   typeof GetRevisionsOfSecretResponseSchema
+>
+
+export type GetAllSecretsOfEnvironmentRequest = z.infer<
+  typeof GetAllSecretsOfEnvironmentRequestSchema
+>
+
+export type GetAllSecretsOfEnvironmentResponse = z.infer<
+  typeof GetAllSecretsOfEnvironmentResponseSchema
 >

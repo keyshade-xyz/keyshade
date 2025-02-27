@@ -106,4 +106,18 @@ export class VariableController {
       order
     )
   }
+
+  @Get('/:projectSlug/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getAllVariablesOfEnvironment(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.getAllVariablesOfProjectAndEnvironment(
+      user,
+      projectSlug,
+      environmentSlug
+    )
+  }
 }

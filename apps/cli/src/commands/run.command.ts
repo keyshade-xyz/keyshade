@@ -160,9 +160,10 @@ export default class RunCommand extends BaseCommand {
       }
       if (childProcess === null) {
         childProcess = spawn(command, {
+          // @ts-expect-error this just works
           stdio: ['inherit', 'pipe', 'pipe'],
           shell: true,
-          env: this.processEnvironmentalVariables,
+          env: { ...process.env, ...this.processEnvironmentalVariables },
           detached: true
         })
 
