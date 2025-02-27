@@ -87,3 +87,7 @@
 - Formatted outputs of `keyshade variable list` and `keyshade variable revisions` commands
 - Update `keyshade variable rollback` to check for missing environment or version
 - Added usage examples in variable commands
+
+## 2.5.2
+
+- Update error logging
