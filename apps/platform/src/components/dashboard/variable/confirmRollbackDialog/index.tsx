@@ -32,11 +32,12 @@ export default function ConfirmRollbackDialog({
           <div className="flex items-center gap-x-3">
             <History className="h-5 w-5" />
             <AlertDialogTitle className="text-lg font-semibold">
-              Do you want to rollback the version {version}?
+              Do you want to rollback to version {version}?
             </AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]"> 
-            This action cannot be undone.This will permanently erase your current variable value.
+          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
+            This action cannot be undone. Proceeding would reset your
+            secret&apos;s value for this environment to a value from the past.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

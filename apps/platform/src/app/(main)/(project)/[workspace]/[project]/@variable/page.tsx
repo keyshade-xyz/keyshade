@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { VariableSVG } from '@public/svg/dashboard'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
@@ -24,15 +25,15 @@ import { Accordion } from '@/components/ui/accordion'
 import { useHttp } from '@/hooks/use-http'
 
 interface ErrorResponse {
-  message: string;
-  error: string;
-  statusCode: number;
+  message: string
+  error: string
+  statusCode: number
 }
 
 interface ClientResponse<T> {
-  data: T;
-  success: boolean;
-  error: ErrorResponse | null;
+  data: T
+  success: boolean
+  error: ErrorResponse | null
 }
 
 function VariablePage(): React.JSX.Element {
@@ -52,15 +53,17 @@ function VariablePage(): React.JSX.Element {
       throw new Error('Project slug is required')
     }
 
-    const response = await ControllerInstance.getInstance()
-      .variableController.getAllVariablesOfProject({
-        projectSlug: selectedProject.slug
-      })
-    
+    const response =
+      await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+        {
+          projectSlug: selectedProject.slug
+        }
+      )
+
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to fetch variables')
     }
-    
+
     return {
       data: response.data,
       success: true,
@@ -83,10 +86,7 @@ function VariablePage(): React.JSX.Element {
   }, [getAllVariablesOfProject, selectedProject, setVariables])
 
   return (
-    <div 
-      className="flex h-full w-full" 
-      data-inert={isRollbackVariableOpen ? true : undefined}
-    >
+    <div className={`flex h-full w-full justify-center `}>
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
         <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
@@ -115,19 +115,33 @@ function VariablePage(): React.JSX.Element {
             isDeleteVariableOpen ? 'inert' : ''
           } `}
         >
-          <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
-            {variables.map(({ variable, values }) => (
-              <VariableCard key={variable.id} values={values} variable={variable} />
-            ))}
-          </Accordion>
+          <ScrollArea className="mb-4 h-fit w-full">
+            <Accordion
+              className="flex h-fit w-full flex-col gap-4"
+              collapsible
+              type="single"
+            >
+              {variables.map(({ variable, values }) => (
+                <VariableCard
+                  key={variable.id}
+                  values={values}
+                  variable={variable}
+                />
+              ))}
+            </Accordion>
+          </ScrollArea>
           {/* Delete variable alert dialog */}
-          {isDeleteVariableOpen && selectedVariable ? <ConfirmDeleteVariable /> : null}
+          {isDeleteVariableOpen && selectedVariable ? (
+            <ConfirmDeleteVariable />
+          ) : null}
 
           {/* Edit variable sheet */}
           {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
 
           {/* Rollback variable sheet */}
-          {isRollbackVariableOpen && selectedVariable ? <RollbackVariableSheet /> : null}
+          {isRollbackVariableOpen && selectedVariable ? (
+            <RollbackVariableSheet />
+          ) : null}
         </div>
       )}
     </div>

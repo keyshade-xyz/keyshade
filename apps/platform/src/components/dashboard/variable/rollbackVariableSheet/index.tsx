@@ -222,13 +222,24 @@ export default function RollbackVariableSheet() {
     setRollbackDetails({ environmentSlug, version })
   }, [])
 
-  const handleConfirmRollback = useCallback(() => {
-    if (!rollbackDetails) return
+  const handleConfirmRollback = useCallback(async () => {
+    if (!rollbackDetails || !selectedVariableData?.variable) return
 
     setIsLoading(true)
     toast.loading('Rolling back variable...')
 
     try {
+      const response = await ControllerInstance.getInstance()
+        .variableController.rollbackVariable({
+          variableSlug: selectedVariableData.variable.slug,
+          environmentSlug: rollbackDetails.environmentSlug,
+          version: rollbackDetails.version
+        })
+
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to rollback variable')
+      }
+
       toast.success('Variable rolled back successfully', {
         description: (
           <p className="text-xs text-emerald-300">
@@ -236,13 +247,22 @@ export default function RollbackVariableSheet() {
           </p>
         )
       })
+      
+      // Close dialogs and reset state
       setRollbackDetails(null)
       setIsRollbackVariableOpen(false)
+
+      // Refresh the revisions list
+      window.location.reload()
+    } catch (error) {
+      toast.error('Failed to rollback variable', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
     } finally {
       setIsLoading(false)
       toast.dismiss()
     }
-  }, [rollbackDetails, setIsRollbackVariableOpen])
+  }, [rollbackDetails, selectedVariableData, setIsRollbackVariableOpen])
 
   return (
     <>
