@@ -15,32 +15,32 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const comment = context.payload.comment;
-            const issue = context.issue;
+            const issue = context.payload.issue;
             const owner = 'keyshade-xyz';
             const repo = 'keyshade';
             const userMaxConcurrentIssueCount = process.env.USER_MAX_CONCURRENT_ISSUE_COUNT || 5;
 
-            async function listIssueEvents(issue) {
-              const allEvents = [];
+            async function listIssueEvents(issueNumber) {
+              const events = [];
               let page = 1;
               let hasNextPage = true;
 
               while (hasNextPage) {
-                const issuesResponse = await github.rest.issues.listEventsForTimeline({
+                const eventsResponse = await github.rest.issues.listEventsForTimeline({
                   owner,
                   repo,
-                  issue_number: issue.number,
+                  issue_number: issueNumber,
                   per_page: 100,
                   page
                 });
 
-                allEvents.push(...issuesResponse.data);
+                events.push(...eventsResponse.data);
 
-                hasNextPage = issuesResponse.headers.link && issuesResponse.headers.link.includes('rel="next"');
+                hasNextPage = eventsResponse.headers.link && eventsResponse.headers.link.includes('rel="next"');
                 page++;
               }
 
-              return allEvents;
+              return events;
             }
 
             async function listUserOpenIssuesWithoutActivePullRequest(user) {
@@ -55,7 +55,7 @@ jobs:
               });
 
               for (const issue of userOpenIssues) {
-                const events = await listIssueEvents(issue);
+                const events = await listIssueEvents(issue.number);
                 const userPullRequestIssues = events
                   .filter(event => event.event === 'cross-referenced')
                   .map(event => event.source.issue)
