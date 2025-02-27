@@ -3,6 +3,7 @@ import { AddSVG } from '@public/svg/shared'
 import type { CreateApiKeyRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -23,30 +24,39 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { createApiKeyOpenAtom, apiKeysOfProjectAtom } from '@/store'
 import { Checkbox } from '@/components/ui/checkbox'
-import { X } from 'lucide-react'
 
-const authorityGroups = [
+interface AuthorityGroup {
+  name: string
+  description: string
+  permissions?: {
+    id: CreateApiKeyRequest['authorities']
+    label: string
+    description: string
+  }[]
+}
+
+const authorityGroups: AuthorityGroup[] = [
   {
     name: 'PROJECT',
     description: 'Full access to all project actions',
     permissions: [
       {
-        id: 'CREATE_PROJECT',
+        id: ['CREATE_PROJECT'],
         label: 'Create',
         description: 'Access to create projects'
       },
       {
-        id: 'READ_PROJECT',
+        id: ['READ_PROJECT'],
         label: 'Read',
         description: 'Access to read projects'
       },
       {
-        id: 'UPDATE_PROJECT',
+        id: ['UPDATE_PROJECT'],
         label: 'Update',
         description: 'Access to update projects'
       },
       {
-        id: 'DELETE_PROJECT',
+        id: ['DELETE_PROJECT'],
         label: 'Delete',
         description: 'Access to delete projects'
       }
@@ -57,67 +67,67 @@ const authorityGroups = [
     description: 'Full access to all workspace actions',
     permissions: [
       {
-        id: 'CREATE_WORKSPACE',
+        id: ['CREATE_WORKSPACE'],
         label: 'Create',
         description: 'Access to create workspaces'
       },
       {
-        id: 'READ_WORKSPACE',
+        id: ['READ_WORKSPACE'],
         label: 'Read',
         description: 'Access to read workspaces'
       },
       {
-        id: 'UPDATE_WORKSPACE',
+        id: ['UPDATE_WORKSPACE'],
         label: 'Update',
         description: 'Access to update workspaces'
       },
       {
-        id: 'DELETE_WORKSPACE',
+        id: ['DELETE_WORKSPACE'],
         label: 'Delete',
         description: 'Access to delete workspaces'
       },
       {
-        id: 'WORKSPACE_ADMIN',
+        id: ['WORKSPACE_ADMIN'],
         label: 'Admin',
         description: 'Access to admin workspace'
       },
       {
-        id: 'ADD_USER',
+        id: ['ADD_USER'],
         label: 'Add',
         description: 'Access to add users'
       },
       {
-        id: 'READ_USERS',
+        id: ['READ_USERS'],
         label: 'Read',
         description: 'Access to read users'
       },
       {
-        id: 'REMOVE_USER',
+        id: ['REMOVE_USER'],
         label: 'Remove',
         description: 'Access to remove users'
       },
       {
-        id: 'UPDATE_USER_ROLE',
+        id: ['UPDATE_USER_ROLE'],
         label: 'Update',
         description: 'Access to update users'
       },
       {
-        id: 'CREATE_WORKSPACE_ROLE',
+        id: ['CREATE_WORKSPACE_ROLE'],
         label: 'Create_Role',
         description: 'Access to create_role workspace'
       },
       {
-        id: 'READ_WORKSPACE_ROLE',
+        id: ['READ_WORKSPACE_ROLE'],
         label: 'Read_Role',
         description: 'Access to read_role workspace'
       },
       {
-        id: 'UPDATE_WORKSPACE_ROLE',
+        id: ['UPDATE_WORKSPACE_ROLE'],
         label: 'Update_Role',
         description: 'Access to update_role workspace'
       },
       {
-        id: 'ADMIN',
+        id: ['WORKSPACE_ADMIN'],
         label: 'Admin',
         description: 'Full access to all admin actions'
       }
@@ -128,22 +138,22 @@ const authorityGroups = [
     description: 'Full access to all secret actions',
     permissions: [
       {
-        id: 'CREATE_SECRET',
+        id: ['CREATE_SECRET'],
         label: 'Create',
         description: 'Access to create secrets'
       },
       {
-        id: 'READ_SECRET',
+        id: ['READ_SECRET'],
         label: 'Read',
         description: 'Access to read secrets'
       },
       {
-        id: 'UPDATE_SECRET',
+        id: ['UPDATE_SECRET'],
         label: 'Update',
         description: 'Access to update secrets'
       },
       {
-        id: 'DELETE_SECRET',
+        id: ['DELETE_SECRET'],
         label: 'Delete',
         description: 'Access to delete secrets'
       }
@@ -154,22 +164,22 @@ const authorityGroups = [
     description: 'Full access to all environment actions',
     permissions: [
       {
-        id: 'CREATE_ENVIRONMENT',
+        id: ['CREATE_ENVIRONMENT'],
         label: 'Create',
         description: 'Access to create environments'
       },
       {
-        id: 'READ_ENVIRONMENT',
+        id: ['READ_ENVIRONMENT'],
         label: 'Read',
         description: 'Access to read environments'
       },
       {
-        id: 'UPDATE_ENVIRONMENT',
+        id: ['UPDATE_ENVIRONMENT'],
         label: 'Update',
         description: 'Access to update environments'
       },
       {
-        id: 'DELETE_ENVIRONMENT',
+        id: ['DELETE_ENVIRONMENT'],
         label: 'Delete',
         description: 'Access to delete environments'
       }
@@ -180,22 +190,22 @@ const authorityGroups = [
     description: 'Full access to all variable actions',
     permissions: [
       {
-        id: 'CREATE_VARIABLE',
+        id: ['CREATE_VARIABLE'],
         label: 'Create',
         description: 'Access to create variables'
       },
       {
-        id: 'READ_VARIABLE',
+        id: ['READ_VARIABLE'],
         label: 'Read',
         description: 'Access to read variables'
       },
       {
-        id: 'UPDATE_VARIABLE',
+        id: ['UPDATE_VARIABLE'],
         label: 'Update',
         description: 'Access to update variables'
       },
       {
-        id: 'DELETE_VARIABLE',
+        id: ['DELETE_VARIABLE'],
         label: 'Delete',
         description: 'Access to delete variables'
       }
@@ -206,22 +216,22 @@ const authorityGroups = [
     description: 'Full access to all integration actions',
     permissions: [
       {
-        id: 'CREATE_INTEGRATION',
+        id: ['CREATE_INTEGRATION'],
         label: 'Create',
         description: 'Access to create integrations'
       },
       {
-        id: 'READ_INTEGRATION',
+        id: ['READ_INTEGRATION'],
         label: 'Read',
         description: 'Access to read integrations'
       },
       {
-        id: 'UPDATE_INTEGRATION',
+        id: ['UPDATE_INTEGRATION'],
         label: 'Update',
         description: 'Access to update integrations'
       },
       {
-        id: 'DELETE_INTEGRATION',
+        id: ['DELETE_INTEGRATION'],
         label: 'Delete',
         description: 'Access to delete integrations'
       }
@@ -232,22 +242,22 @@ const authorityGroups = [
     description: 'Full access to all API-Key actions',
     permissions: [
       {
-        id: 'CREATE_API_KEY',
+        id: ['CREATE_API_KEY'],
         label: 'Create',
         description: 'Access to create API-Key'
       },
       {
-        id: 'READ_API_KEY',
+        id: ['READ_API_KEY'],
         label: 'Read',
         description: 'Access to read API-Key'
       },
       {
-        id: 'UPDATE_API_KEY',
+        id: ['UPDATE_API_KEY'],
         label: 'Update',
         description: 'Access to update API-Key'
       },
       {
-        id: 'DELETE_API_KEY',
+        id: ['DELETE_API_KEY'],
         label: 'Delete',
         description: 'Access to delete API-Key'
       }
@@ -258,17 +268,17 @@ const authorityGroups = [
     description: 'Full access to all profile actions',
     permissions: [
       {
-        id: 'UPDATE_PROFILE',
+        id: ['UPDATE_PROFILE'],
         label: 'UPDATE_PROFILE',
         description: 'Full access to all update_profile actions'
       },
       {
-        id: 'READ_SELF',
+        id: ['READ_SELF'],
         label: 'READ_SELF',
         description: 'Full access to all read_self actions'
       },
       {
-        id: 'UPDATE_SELF',
+        id: ['UPDATE_SELF'],
         label: 'UPDATE_SELF_READ_EVENT',
         description: 'Full access to all update_self_read_event actions'
       }
@@ -285,22 +295,27 @@ export default function AddApiKeyDialog() {
     apiKeyName: '',
     expiryDate: '24'
   })
-  const [selectedPermissions, setSelectedPermissions] = React.useState<Set<CreateApiKeyRequest["authorities"]>>(new Set())
+  const [selectedPermissions, setSelectedPermissions] = useState<
+    Set<CreateApiKeyRequest['authorities']>
+  >(new Set())
 
-  const togglePermission = useCallback((permissionId: string) => {
-    setSelectedPermissions((current) => {
-      const newPermissions = new Set(current)
-      if (newPermissions.has(permissionId)) {
-        newPermissions.delete(permissionId)
-      } else {
-        newPermissions.add(permissionId)
-      }
-      return newPermissions
-    })
-  }, [])
+  const togglePermission = useCallback(
+    (permissionId: CreateApiKeyRequest['authorities']) => {
+      setSelectedPermissions((current) => {
+        const newPermissions = new Set(current)
+        if (newPermissions.has(permissionId)) {
+          newPermissions.delete(permissionId)
+        } else {
+          newPermissions.add(permissionId)
+        }
+        return newPermissions
+      })
+    },
+    []
+  )
 
   const getGroupState = useCallback(
-    (group: any) => {
+    (group: AuthorityGroup) => {
       if (!group.permissions) {
         return selectedPermissions.has(group.id)
       }
@@ -318,7 +333,7 @@ export default function AddApiKeyDialog() {
   )
 
   const toggleGroup = useCallback(
-    (group: any) => {
+    (group: AuthorityGroup) => {
       setSelectedPermissions((current) => {
         const newPermissions = new Set(current)
         if (group.permissions) {
@@ -330,12 +345,10 @@ export default function AddApiKeyDialog() {
               newPermissions.add(permission.id)
             }
           })
+        } else if (newPermissions.has(group.id)) {
+          newPermissions.delete(group.id)
         } else {
-          if (newPermissions.has(group.id)) {
-            newPermissions.delete(group.id)
-          } else {
-            newPermissions.add(group.id)
-          }
+          newPermissions.add(group.id)
         }
         return newPermissions
       })
@@ -486,13 +499,13 @@ export default function AddApiKeyDialog() {
               </label>
               <Select
                 defaultValue="24"
-                value={newApiKeyData.expiryDate}
                 onValueChange={(val) =>
                   setNewApiKeyData((prev) => ({
                     ...prev,
                     expiryDate: val
                   }))
                 }
+                value={newApiKeyData.expiryDate}
               >
                 <SelectTrigger className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300">
                   <SelectValue />
@@ -516,48 +529,50 @@ export default function AddApiKeyDialog() {
               </label>
               <div className="custom-scrollbar mt-2 max-h-[200px] space-y-4 overflow-y-auto">
                 {authorityGroups.map((group) => (
-                  <div key={group.name} className="space-y-2">
+                  <div className="space-y-2" key={group.name}>
                     <div className="flex items-center gap-2">
                       <Checkbox
-                        id={group.name}
                         checked={getGroupState(group) === true}
-                        onCheckedChange={() => toggleGroup(group)}
                         className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
                         data-state={getGroupState(group)}
+                        id={group.name}
+                        onCheckedChange={() => toggleGroup(group)}
                       />
                       <div className="flex w-full items-center gap-x-5">
                         <label className="min-w-44 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                           {group.name}
                         </label>
-                        <p className="whitespace-nowrap text-xs text-zinc-400">
+                        <p className="whitespace-nowrap text-xs text-zinc-400 max-w-10">
                           {group.description}
                         </p>
                       </div>
                     </div>
                     <div className="ml-6 space-y-2">
-                      {group.permissions?.map((permission) => (
-                        <div
-                          key={permission.id}
-                          className="flex items-center gap-2"
-                        >
-                          <Checkbox
-                            id={permission.id}
-                            checked={selectedPermissions.has(permission.id)}
-                            onCheckedChange={() =>
-                              togglePermission(permission.id)
-                            }
-                            className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                          />
-                          <div className="flex w-full items-center gap-x-5">
-                            <label className="min-w-40 text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                              {permission.label}
-                            </label>
-                            <p className=" whitespace-nowrap text-xs text-zinc-400">
-                              {permission.description}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                      {group.permissions
+                        ? group.permissions.map((permission) => (
+                            <div
+                              className="flex items-center gap-2"
+                              key={permission.id}
+                            >
+                              <Checkbox
+                                checked={selectedPermissions.has(permission.id)}
+                                className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
+                                id={permission.id}
+                                onCheckedChange={() =>
+                                  togglePermission(permission.id)
+                                }
+                              />
+                              <div className="flex w-full items-center gap-x-5">
+                                <label className="min-w-40 text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  {permission.label}
+                                </label>
+                                <p className=" whitespace-nowrap text-xs text-zinc-400">
+                                  {permission.description}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        : null}
                     </div>
                   </div>
                 ))}
@@ -567,8 +582,8 @@ export default function AddApiKeyDialog() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                onClick={handleAddApiKey}
                 disabled={isLoading}
+                onClick={handleAddApiKey}
               >
                 Add API Key
               </Button>

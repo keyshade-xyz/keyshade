@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
+import { useSearchParams } from 'next/navigation'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -14,7 +15,6 @@ import {
   deleteApiKeyOpenAtom,
   selectedApiKeyAtom
 } from '@/store'
-import { useSearchParams } from 'next/navigation'
 import AddApiKeyDialog from '@/components/userProfile/apiKeys/addApiKeyDialog'
 import ApiKeyCard from '@/components/userProfile/apiKeys/apiKeyCard'
 import ConfirmDeleteApiKey from '@/components/userProfile/apiKeys/confirmDeleteApiKey'
@@ -220,7 +220,7 @@ function ProfilePage(): React.JSX.Element {
         </div>
       }
 
-      <Separator className="max-w-[30vw] bg-white/15" />
+      <Separator className="w-full bg-white/15" />
 
       <div className=" flex max-w-[30vw] justify-between rounded-3xl border border-red-500  bg-red-500/5 px-10 py-8">
         <div>
