@@ -3,6 +3,7 @@
 import type { ApiKey } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
+import { CrownSVG } from '@public/svg/shared'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -15,11 +16,17 @@ import {
   deleteApiKeyOpenAtom
 } from '@/store'
 import Slug from '@/components/common/slug'
-import { CrownSVG } from '@public/svg/shared'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 const formatDate = (date: string): string => {
-  return dayjs(date).format('D MMMM, YYYY')
+  return dayjs(date).diff(dayjs(), 'day') >= 1
+    ? `${dayjs(date).diff(dayjs(), 'day')} days`
+    : `${dayjs(date).diff(dayjs(), 'hour')} hours`
 }
 
 export default function ApiKeyCard({
@@ -28,7 +35,7 @@ export default function ApiKeyCard({
   apiKey: ApiKey
 }): React.JSX.Element {
   const setSelectedApiKey = useSetAtom(selectedApiKeyAtom)
-  const setIsEditApiKeyOpen = useSetAtom(editApiKeyOpenAtom)
+  const _setIsEditApiKeyOpen = useSetAtom(editApiKeyOpenAtom)
   const setIsDeleteApiKeyOpen = useSetAtom(deleteApiKeyOpenAtom)
 
   const handleDeleteClick = () => {
@@ -38,61 +45,50 @@ export default function ApiKeyCard({
 
   return (
     <ContextMenu key={apiKey.id}>
-      <ContextMenuTrigger className="w-full hover:cursor-pointer">
+      <ContextMenuTrigger className="w-full">
         <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
           <div className="flex flex-col gap-y-6 px-6 py-4">
-            <div className='flex flex-row'>
+            <div className="flex flex-row">
               <div className="flex w-full flex-row items-center justify-between">
                 <div className="text-2xl font-normal"> {apiKey.name} </div>
               </div>
-              <div className="w-1/2 flex flex-col">
+              <div className="flex w-1/2 flex-col">
                 <Slug text={apiKey.slug} />
               </div>
             </div>
-            <div className='flex flex-row items-center justify-between'>
+            <div className="flex flex-row items-center justify-between">
               <div className="text-sm font-medium"> {apiKey.preview} </div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <div className="text-xs font-bold py-0.5 px-1 rounded-md flex items-center justify-center gap-1 bg-[#5A5A5A]">
+                    <div className="flex items-center justify-center gap-1 rounded-md bg-[#5A5A5A] px-1 py-0.5 text-xs font-bold">
                       <CrownSVG />
                       {apiKey.authorities.length}
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="border-none bg-[#3F3F46] rounded text-white font-bold text-sm">
+                  <TooltipContent className="rounded border-none bg-[#3F3F46] text-sm font-bold text-white">
                     <p>Show Attributes</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-
             </div>
           </div>
-          <div className="flex flex-row justify-between items-end rounded-b-xl bg-white/[6%] px-6 py-4 text-sm text-white/50">
+          <div className="flex flex-row items-end justify-between rounded-b-xl bg-white/[6%] px-6 py-4 text-sm text-white/50">
             <div className="flex flex-col items-start text-sm font-medium">
               <div>Created on</div>
-              <div>
-                {dayjs(apiKey.createdAt).format('D MMMM, YYYY')}
-              </div>
+              <div>{dayjs(apiKey.createdAt).format('D MMMM, YYYY')}</div>
             </div>
             <div className="flex flex-col items-end">
-              <div>{apiKey.expiresAt === null ? "Never" : "Expiring in"}</div>
+              <div>{apiKey.expiresAt === null ? 'Never' : 'Expiring in'}</div>
               <div>
-                {apiKey.expiresAt ? (
-                  dayjs(apiKey.expiresAt).diff(dayjs(), "day") >= 1 ? (
-                    `${dayjs(apiKey.expiresAt).diff(dayjs(), "day")} days`
-                  ) : (
-                    `${dayjs(apiKey.expiresAt).diff(dayjs(), "hour")} hours`
-                  )
-                ) : "Expiring"}
+                {apiKey.expiresAt ? formatDate(apiKey.expiresAt) : 'Expiring'}
               </div>
             </div>
           </div>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem
-          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-        >
+        <ContextMenuItem className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide">
           Edit
         </ContextMenuItem>
         <ContextMenuItem
