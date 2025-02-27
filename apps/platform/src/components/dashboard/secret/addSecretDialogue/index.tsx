@@ -89,11 +89,11 @@ export default function AddSecretDialog() {
             environmentSlug: '',
             environmentValue: ''
           })
-          setIsCreateSecretOpen(false)
         }
       } finally {
-        setIsLoading(false)
         toast.dismiss()
+        setIsLoading(false)
+        setIsCreateSecretOpen(false)
       }
     }
   }, [
@@ -139,6 +139,7 @@ export default function AddSecretDialog() {
               </label>
               <Input
                 className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                disabled={isLoading}
                 id="secret-name"
                 onChange={(e) =>
                   setNewSecretData({
@@ -160,6 +161,7 @@ export default function AddSecretDialog() {
               </label>
               <Input
                 className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                disabled={isLoading}
                 id="secret-note"
                 onChange={(e) =>
                   setNewSecretData({
@@ -211,6 +213,7 @@ export default function AddSecretDialog() {
                 </label>
                 <Input
                   className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                  disabled={isLoading}
                   id="env-value"
                   onChange={(e) =>
                     setNewSecretData({
