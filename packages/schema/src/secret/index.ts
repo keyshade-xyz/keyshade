@@ -129,3 +129,16 @@ export const GetRevisionsOfSecretResponseSchema = PageResponseSchema(
     })
   })
 )
+
+export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const GetAllSecretsOfEnvironmentResponseSchema = z.array(
+  z.object({
+    name: z.string(),
+    value: z.string(),
+    isPlaintext: z.boolean()
+  })
+)

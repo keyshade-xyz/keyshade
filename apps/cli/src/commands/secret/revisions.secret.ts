@@ -96,10 +96,7 @@ export default class FetchSecretRevisions extends BaseCommand {
         Logger.info('No revisions found')
       }
     } else {
-      Logger.error(`Failed fetching revisions: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching revisions.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 
