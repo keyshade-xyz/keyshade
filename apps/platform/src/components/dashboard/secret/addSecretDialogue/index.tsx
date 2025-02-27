@@ -82,13 +82,6 @@ export default function AddSecretDialog() {
           })
           // Add the new secret to the list of secrets
           setSecrets((prev) => [...prev, data])
-
-          setNewSecretData({
-            secretName: '',
-            secretNote: '',
-            environmentSlug: '',
-            environmentValue: ''
-          })
         }
       } finally {
         toast.dismiss()
@@ -104,9 +97,19 @@ export default function AddSecretDialog() {
     setIsCreateSecretOpen
   ])
 
+  const handleDialogOpenChange = () => {
+    setIsCreateSecretOpen(!isCreateSecretOpen);
+    setNewSecretData({
+      secretName: '',
+      secretNote: '',
+      environmentSlug: '',
+      environmentValue: ''
+    })
+  }
+
   return (
     <Dialog
-      onOpenChange={() => setIsCreateSecretOpen(!isCreateSecretOpen)}
+      onOpenChange={handleDialogOpenChange}
       open={isCreateSecretOpen}
     >
       <DialogTrigger asChild>
