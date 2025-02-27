@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { createHash, randomBytes } from 'crypto'
-import * as eccrypto from 'eccrypto'
 
 /**
  * Encrypts the given data using the given public key.
@@ -13,6 +13,8 @@ export const encrypt = async (
   publicKey: string,
   data: string
 ): Promise<string> => {
+  const eccrypto = require('eccrypto')
+
   const encrypted = await eccrypto.encrypt(
     Buffer.from(publicKey, 'hex'),
     Buffer.from(data)
@@ -33,6 +35,7 @@ export const decrypt = async (
   privateKey: string,
   data: string
 ): Promise<string> => {
+  const eccrypto = require('eccrypto')
   const parsed = JSON.parse(data)
 
   const eicesData = {
@@ -59,6 +62,8 @@ export const createKeyPair = (): {
   publicKey: string
   privateKey: string
 } => {
+  const eccrypto = require('eccrypto')
+
   const privateKey = eccrypto.generatePrivate()
   const publicKey = eccrypto.getPublic(privateKey)
 
