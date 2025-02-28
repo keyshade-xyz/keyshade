@@ -58,18 +58,10 @@ function VariablePage(): React.JSX.Element {
         const { data, success } = await getAllVariablesOfProject()
         if (success && data) {
           setVariables((prev) => page === 0 ? data.items : [...prev, ...data.items])
-          if (data.items.length < ITEMS_PER_PAGE) {
+          if (data.metadata.links.next === null) {
             setHasMore(false)
           }
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console -- debug error handling
-        console.error('Error fetching variables:', error)
-        toast.error('Failed to fetch variables', {
-          description: <p className="text-xs text-red-300">
-            Something went wrong while fetching variables. Please try again.
-          </p>
-        })
       } finally {
         setIsLoading(false)
       }
@@ -79,9 +71,7 @@ function VariablePage(): React.JSX.Element {
   }, [getAllVariablesOfProject, page, selectedProject, setVariables])
 
   const handleLoadMore = () => {
-    if(!isLoading && hasMore) {
-      setPage((prevPage) => prevPage + 1)
-    }
+    setPage((prevPage) => prevPage + 1)
   }
 
   if (isLoading && page === 0) {
