@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { AddSVG } from '@public/svg/shared'
 import type { CreateApiKeyRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { X } from 'lucide-react'
 import {
   Dialog,
@@ -315,9 +315,9 @@ export default function AddApiKeyDialog() {
   )
 
   const getGroupState = useCallback(
-    (group: AuthorityGroup) => {
+    (group: AuthorityGroup): boolean | 'indeterminate' => {
       if (!group.permissions) {
-        return selectedPermissions.has(group.id)
+        return false;
       }
       const groupPermissions = group.permissions.map((p) => p.id)
       const selectedGroupPermissions = groupPermissions.filter((p) =>
@@ -345,10 +345,6 @@ export default function AddApiKeyDialog() {
               newPermissions.add(permission.id)
             }
           })
-        } else if (newPermissions.has(group.id)) {
-          newPermissions.delete(group.id)
-        } else {
-          newPermissions.add(group.id)
         }
         return newPermissions
       })
@@ -371,7 +367,7 @@ export default function AddApiKeyDialog() {
     }
 
     // Create a new array from selectedPermissions to ensure we have the latest state
-    const authoritiesArray = Array.from(selectedPermissions) ?? []
+    const authoritiesArray = Array.from(selectedPermissions).flat() as CreateApiKeyRequest['authorities']
 
     const request: CreateApiKeyRequest = {
       name: newApiKeyData.apiKeyName,
@@ -550,28 +546,28 @@ export default function AddApiKeyDialog() {
                     <div className="ml-6 space-y-2">
                       {group.permissions
                         ? group.permissions.map((permission) => (
-                            <div
-                              className="flex items-center gap-2"
-                              key={permission.id}
-                            >
-                              <Checkbox
-                                checked={selectedPermissions.has(permission.id)}
-                                className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                                id={permission.id}
-                                onCheckedChange={() =>
-                                  togglePermission(permission.id)
-                                }
-                              />
-                              <div className="flex w-full items-center gap-x-5">
-                                <label className="min-w-40 text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                  {permission.label}
-                                </label>
-                                <p className=" whitespace-nowrap text-xs text-zinc-400">
-                                  {permission.description}
-                                </p>
-                              </div>
+                          <div
+                            className="flex items-center gap-2"
+                            key={String(permission.id)}
+                          >
+                            <Checkbox
+                              checked={selectedPermissions.has(permission.id)}
+                              className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
+                              id={String(permission.id)}
+                              onCheckedChange={() =>
+                                togglePermission(permission.id)
+                              }
+                            />
+                            <div className="flex w-full items-center gap-x-5">
+                              <label className="min-w-40 text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                {permission.label}
+                              </label>
+                              <p className=" whitespace-nowrap text-xs text-zinc-400">
+                                {permission.description}
+                              </p>
                             </div>
-                          ))
+                          </div>
+                        ))
                         : null}
                     </div>
                   </div>
