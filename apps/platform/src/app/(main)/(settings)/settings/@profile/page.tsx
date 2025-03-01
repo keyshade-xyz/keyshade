@@ -13,18 +13,21 @@ import {
   userAtom,
   apiKeysOfProjectAtom,
   deleteApiKeyOpenAtom,
-  selectedApiKeyAtom
+  selectedApiKeyAtom,
+  editApiKeyOpenAtom
 } from '@/store'
 import AddApiKeyDialog from '@/components/userProfile/apiKeys/addApiKeyDialog'
 import ApiKeyCard from '@/components/userProfile/apiKeys/apiKeyCard'
 import ConfirmDeleteApiKey from '@/components/userProfile/apiKeys/confirmDeleteApiKey'
 import { useHttp } from '@/hooks/use-http'
 import { logout } from '@/lib/utils'
+import EditApiKeySheet from '@/components/userProfile/apiKeys/editApiKeySheet'
 
 function ProfilePage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
   const [apiKeys, setApiKeys] = useAtom(apiKeysOfProjectAtom)
   const isDeleteApiKeyOpen = useAtomValue(deleteApiKeyOpenAtom)
+  const isEditApiKeyOpen = useAtomValue(editApiKeyOpenAtom)
   const selectedApiKey = useAtomValue(selectedApiKeyAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -217,6 +220,9 @@ function ProfilePage(): React.JSX.Element {
           {isDeleteApiKeyOpen && selectedApiKey ? (
             <ConfirmDeleteApiKey />
           ) : null}
+
+          {/* Edit API Key Sheet */}
+          {isEditApiKeyOpen && selectedApiKey ? <EditApiKeySheet /> : null}
         </div>
       }
 

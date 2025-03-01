@@ -87,11 +87,6 @@ const authorityGroups: AuthorityGroup[] = [
         description: 'Access to delete workspaces'
       },
       {
-        id: ['WORKSPACE_ADMIN'],
-        label: 'Admin',
-        description: 'Access to admin workspace'
-      },
-      {
         id: ['ADD_USER'],
         label: 'Add',
         description: 'Access to add users'
@@ -384,6 +379,8 @@ export default function AddApiKeyDialog() {
         )
 
       if (success && data) {
+        // eslint-disable-next-line no-console -- we need to log the error
+        console.log("data: ", data);
         toast.success('API Key added successfully', {
           description: (
             <p className="text-xs text-emerald-300">

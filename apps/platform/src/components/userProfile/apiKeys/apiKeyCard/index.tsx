@@ -35,8 +35,13 @@ export default function ApiKeyCard({
   apiKey: ApiKey
 }): React.JSX.Element {
   const setSelectedApiKey = useSetAtom(selectedApiKeyAtom)
-  const _setIsEditApiKeyOpen = useSetAtom(editApiKeyOpenAtom)
+  const setIsEditApiKeyOpen = useSetAtom(editApiKeyOpenAtom)
   const setIsDeleteApiKeyOpen = useSetAtom(deleteApiKeyOpenAtom)
+
+  const handleEditClick = () => {
+    setSelectedApiKey(apiKey)
+    setIsEditApiKeyOpen(true)
+  }
 
   const handleDeleteClick = () => {
     setSelectedApiKey(apiKey)
@@ -88,7 +93,10 @@ export default function ApiKeyCard({
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide">
+        <ContextMenuItem 
+          className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          onSelect={handleEditClick}
+          >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
