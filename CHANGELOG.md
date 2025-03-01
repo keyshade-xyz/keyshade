@@ -1,3 +1,9 @@
+## [2.13.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.12.1-stage.1...v2.13.0-stage.1) (2025-03-01)
+
+### 🚀 Features
+
+* **platform:** Added pagination & loading state for variables page ([#787](https://github.com/keyshade-xyz/keyshade/issues/787)) ([8a47896](https://github.com/keyshade-xyz/keyshade/commit/8a47896400865ed4c73f63c0ff7b05ca582cad09))
+
 ## [2.12.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0...v2.12.1-stage.1) (2025-02-27)
 
 ### 🐛 Bug Fixes
