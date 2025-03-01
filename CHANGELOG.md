@@ -1,3 +1,9 @@
+## [2.13.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.1...v2.13.0-stage.2) (2025-03-01)
+
+### 🚀 Features
+
+* **platform:** added loading state to add [secure] dialog & disabled input fields ([#804](https://github.com/keyshade-xyz/keyshade/issues/804)) ([11f8248](https://github.com/keyshade-xyz/keyshade/commit/11f82488796b4d3e9699849cecadd0f4bcbe49b4))
+
 ## [2.13.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.12.1-stage.1...v2.13.0-stage.1) (2025-03-01)
 
 ### 🚀 Features
