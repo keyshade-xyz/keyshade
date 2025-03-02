@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import {
@@ -25,23 +25,46 @@ function EnvironmentPage(): React.JSX.Element {
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedEnvironment = useAtomValue(selectedEnvironmentAtom)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   const getAllEnvironmentsOfProject = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
-        projectSlug: selectedProject!.slug
+        projectSlug: selectedProject!.slug,
+        page,
+        limit:1
       }
     )
   )
 
   useEffect(() => {
-    selectedProject &&
-      getAllEnvironmentsOfProject().then(({ data, success }) => {
+    fetchEnvironments();
+  }, [selectedProject, getAllEnvironmentsOfProject, setEnvironments,page])
+
+  const fetchEnvironments = () => {
+    if (!selectedProject) return
+    setIsLoading(true)
+    getAllEnvironmentsOfProject()
+      .then(({ data, success }) => {
         if (success && data) {
-          setEnvironments(data.items)
+          const newData = page === 0 ? data.items : [...environments, ...data.items]
+          setEnvironments(newData)
+          if (!data.metadata.links.next) setHasMore(false)
         }
       })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  const handlePageShift = () => {
+    if (hasMore && !isLoading) {
+      const finalPage = page + 1;
+      setPage(finalPage)
+    }
+  }
 
   return (
     <div
@@ -69,23 +92,33 @@ function EnvironmentPage(): React.JSX.Element {
           </Button>
         </div>
       ) : (
-        // Showing this when environments are present
-        <div
-          className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
-        >
-          {environments.map((environment) => (
-            <EnvironmentCard environment={environment} key={environment.id} />
-          ))}
+        //Showing this when environments are present
+        <div className="flex w-full flex-col">
+          <div
+            className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
+          >
+            {environments.map((environment) => (
+              <EnvironmentCard environment={environment} key={environment.id} />
+            ))}
 
-          {/* Delete environment alert dialog */}
-          {isDeleteEnvironmentOpen && selectedEnvironment ? (
-            <ConfirmDeleteEnvironment />
-          ) : null}
+            {/* Delete environment alert dialog */}
+            {isDeleteEnvironmentOpen && selectedEnvironment ? (
+              <ConfirmDeleteEnvironment />
+            ) : null}
 
-          {/* Edit environment dialog */}
-          {isEditEnvironmentOpen && selectedEnvironment ? (
-            <EditEnvironmentDialogue />
-          ) : null}
+            {/* Edit environment dialog */}
+            {isEditEnvironmentOpen && selectedEnvironment ? (
+              <EditEnvironmentDialogue />
+            ) : null}
+
+            {hasMore ? (
+              <div className="col-span-full flex justify-center">
+                <Button disabled={isLoading} onClick={handlePageShift}>
+                  {isLoading ? 'Loading...' : 'Load More'}
+                </Button>
+              </div>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

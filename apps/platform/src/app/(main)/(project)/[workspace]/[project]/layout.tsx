@@ -49,15 +49,6 @@ function DetailedProjectPage({
     })
   }, [getProject, params.project, setSelectedProject])
 
-  useEffect(() => {
-    selectedProject &&
-      getAllEnvironmentsOfProject().then(({ data, success }) => {
-        if (success && data) {
-          setEnvironments(data.items)
-        }
-      })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
-
   return (
     <main className="flex h-full flex-col gap-4">
       <div className="flex h-[3.625rem] w-full justify-between p-3 ">
