@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiKey } from '@keyshade/schema'
+import type { ApiKey as OriginalApiKey } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
 import { CrownSVG } from '@public/svg/shared'
@@ -22,6 +22,9 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+
+
+type ApiKey = Omit<OriginalApiKey, 'value' | 'userId'>
 
 const formatDate = (date: string): string => {
   return dayjs(date).diff(dayjs(), 'day') >= 1

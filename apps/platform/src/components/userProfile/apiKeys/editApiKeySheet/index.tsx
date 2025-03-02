@@ -380,8 +380,8 @@ export default function EditApiKeySheet(): JSX.Element {
                 });
               }
             } else if (!isPermissionInSet) {
-                newPermissions.add(permission.id);
-              }
+              newPermissions.add(permission.id);
+            }
           })
         }
         return newPermissions
@@ -418,7 +418,6 @@ export default function EditApiKeySheet(): JSX.Element {
       expiresAfter: requestData.expiryDate as 'never' | '24' | '168' | '720' | '8760',
       authorities: authoritiesArray
     }
-    // console.log("req: ", request)
 
     try {
       toast.loading("Updating your API Key...")
@@ -429,7 +428,6 @@ export default function EditApiKeySheet(): JSX.Element {
         )
 
       if (success && data) {
-        // console.log("data after update: ", data)
         toast.success('API Key edited successfully', {
           description: (
             <p className="text-xs text-emerald-300">
@@ -534,11 +532,11 @@ export default function EditApiKeySheet(): JSX.Element {
               }
               value={
                 !requestData.expiryDate ? undefined :
-                requestData.expiryDate === 'never' ? 'never' :
-                  Number(requestData.expiryDate) <= 24 ? '24' :
-                  Number(requestData.expiryDate) > 24 && Number(requestData.expiryDate) <= 168 ? '168' :
-                  Number(requestData.expiryDate) > 168 && Number(requestData.expiryDate) <= 720 ? '720' :
-                  Number(requestData.expiryDate) > 720 && Number(requestData.expiryDate) <= 8760 ? '8760' : undefined
+                  requestData.expiryDate === 'never' ? 'never' :
+                    Number(requestData.expiryDate) <= 24 ? '24' :
+                      Number(requestData.expiryDate) > 24 && Number(requestData.expiryDate) <= 168 ? '168' :
+                        Number(requestData.expiryDate) > 168 && Number(requestData.expiryDate) <= 720 ? '720' :
+                          Number(requestData.expiryDate) > 720 && Number(requestData.expiryDate) <= 8760 ? '8760' : undefined
               }
             >
               <SelectTrigger className="h-[2.75rem] border border-white/10 bg-neutral-800 text-gray-300">
