@@ -1,6 +1,6 @@
 'use client'
 
-import type { ApiKey } from '@keyshade/schema'
+import type { ApiKey as OriginalApiKey } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
 import { CrownSVG } from '@public/svg/shared'
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/context-menu'
 import {
   selectedApiKeyAtom,
-  editApiKeyOpenAtom,
   deleteApiKeyOpenAtom
 } from '@/store'
 import Slug from '@/components/common/slug'
@@ -22,6 +21,8 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+
+type ApiKey = Omit<OriginalApiKey, 'value' | 'userId'>
 
 const formatDate = (date: string): string => {
   return dayjs(date).diff(dayjs(), 'day') >= 1
@@ -35,7 +36,6 @@ export default function ApiKeyCard({
   apiKey: ApiKey
 }): React.JSX.Element {
   const setSelectedApiKey = useSetAtom(selectedApiKeyAtom)
-  const _setIsEditApiKeyOpen = useSetAtom(editApiKeyOpenAtom)
   const setIsDeleteApiKeyOpen = useSetAtom(deleteApiKeyOpenAtom)
 
   const handleDeleteClick = () => {
