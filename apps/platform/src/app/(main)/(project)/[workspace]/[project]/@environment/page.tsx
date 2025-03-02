@@ -34,25 +34,24 @@ function EnvironmentPage(): React.JSX.Element {
       {
         projectSlug: selectedProject!.slug,
         page,
+        limit:1
       }
     )
   )
 
   useEffect(() => {
-  if(!selectedProject) return
-   handleEnvironmentsFetch();
-  }, [selectedProject, getAllEnvironmentsOfProject, setEnvironments])
+    fetchEnvironments();
+  }, [selectedProject, getAllEnvironmentsOfProject, setEnvironments,page])
 
-  const handleEnvironmentsFetch = (newPage = 0) => {
+  const fetchEnvironments = () => {
     if (!selectedProject) return
     setIsLoading(true)
     getAllEnvironmentsOfProject()
       .then(({ data, success }) => {
         if (success && data) {
-          const newData = newPage === 0 ? data.items : [...environments, ...data.items]
-          if(newPage == 0 && page !== 0) setPage(0);
+          const newData = page === 0 ? data.items : [...environments, ...data.items]
           setEnvironments(newData)
-          if (newData.length >= data.metadata.totalCount) setHasMore(false)
+          if (!data.metadata.links.next) setHasMore(false)
         }
       })
       .finally(() => {
@@ -64,7 +63,6 @@ function EnvironmentPage(): React.JSX.Element {
     if (hasMore && !isLoading) {
       const finalPage = page + 1;
       setPage(finalPage)
-      handleEnvironmentsFetch(finalPage)
     }
   }
 
