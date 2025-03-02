@@ -47,10 +47,9 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
     const apiKeySlug = selectedApiKey.slug
 
     setIsLoading(true)
-
     try {
       toast.loading('Deleting your API Key...')
-      const { success, error } =
+      const { success } =
         await ControllerInstance.getInstance().apiKeyController.deleteApiKey(
           { apiKeySlug },
           {}
@@ -70,27 +69,22 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
           prevApiKeys.filter((apiKey) => apiKey.slug !== apiKeySlug)
         )
       }
-      if (error) {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while deleting the API Key. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
     } catch (error) {
+      toast.error('Something went wrong!', {
+        description: (
+          <p className="text-xs text-red-300">
+            Something went wrong while deleting the API Key. Check console for
+            more info.
+          </p>
+        )
+      })
       // eslint-disable-next-line no-console -- we need to log the error
       console.error(error)
     } finally {
       toast.dismiss()
+      handleClose()
+      setIsLoading(false)
     }
-
-    handleClose()
-    setIsLoading(false)
   }, [setApiKeys, selectedApiKey, handleClose])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog

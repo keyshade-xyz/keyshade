@@ -4,14 +4,6 @@ import type { CreateApiKeyRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
 import { X } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../../../ui/dialog'
 import { Button } from '../../../ui/button'
 import { Input } from '../../../ui/input'
 import {
@@ -24,6 +16,7 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { createApiKeyOpenAtom, apiKeysOfProjectAtom } from '@/store'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 interface AuthorityGroup {
   name: string
@@ -31,7 +24,7 @@ interface AuthorityGroup {
   permissions?: {
     id: CreateApiKeyRequest['authorities']
     label: string
-    description: string
+    description?: string
   }[]
 }
 
@@ -88,9 +81,35 @@ const authorityGroups: AuthorityGroup[] = [
       },
       {
         id: ['WORKSPACE_ADMIN'],
-        label: 'Admin',
-        description: 'Access to admin workspace'
+        label: 'Workspace Admin',
+        description: 'Access to all workspace actions'
       },
+      {
+        id: ['CREATE_WORKSPACE_ROLE'],
+        label: 'Create Role',
+        description: 'Access to create role workspace'
+      },
+      {
+        id: ['READ_WORKSPACE_ROLE'],
+        label: 'Read Role',
+        description: 'Access to read role workspace'
+      },
+      {
+        id: ['UPDATE_WORKSPACE_ROLE'],
+        label: 'Update Role',
+        description: 'Access to update role workspace'
+      },
+      {
+        id: ['WORKSPACE_ADMIN'],
+        label: 'Admin',
+        description: 'Full access to all admin actions'
+      }
+    ]
+  },
+  {
+    name: 'WORKSPACE MEMBERSHIP',
+    description: 'Full access to all workspace membership actions',
+    permissions: [
       {
         id: ['ADD_USER'],
         label: 'Add',
@@ -111,26 +130,6 @@ const authorityGroups: AuthorityGroup[] = [
         label: 'Update',
         description: 'Access to update users'
       },
-      {
-        id: ['CREATE_WORKSPACE_ROLE'],
-        label: 'Create_Role',
-        description: 'Access to create_role workspace'
-      },
-      {
-        id: ['READ_WORKSPACE_ROLE'],
-        label: 'Read_Role',
-        description: 'Access to read_role workspace'
-      },
-      {
-        id: ['UPDATE_WORKSPACE_ROLE'],
-        label: 'Update_Role',
-        description: 'Access to update_role workspace'
-      },
-      {
-        id: ['WORKSPACE_ADMIN'],
-        label: 'Admin',
-        description: 'Full access to all admin actions'
-      }
     ]
   },
   {
@@ -269,18 +268,15 @@ const authorityGroups: AuthorityGroup[] = [
     permissions: [
       {
         id: ['UPDATE_PROFILE'],
-        label: 'UPDATE_PROFILE',
-        description: 'Full access to all update_profile actions'
+        label: 'Update_profile',
       },
       {
         id: ['READ_SELF'],
-        label: 'READ_SELF',
-        description: 'Full access to all read_self actions'
+        label: 'Read_self',
       },
       {
         id: ['UPDATE_SELF'],
-        label: 'UPDATE_SELF_READ_EVENT',
-        description: 'Full access to all update_self_read_event actions'
+        label: 'Update_self_read_event',
       }
     ]
   }
@@ -353,18 +349,12 @@ export default function AddApiKeyDialog() {
   )
 
   const handleAddApiKey = useCallback(async () => {
-    setIsLoading(true)
-
-    if (!newApiKeyData.apiKeyName) {
+    if (newApiKeyData.apiKeyName.trim() === '') {
       toast.error('API Key name is required')
       return
     }
 
     const expiryDate = newApiKeyData.expiryDate || '24'
-    if (!expiryDate) {
-      toast.error('Expiry Date is required')
-      return
-    }
 
     // Create a new array from selectedPermissions to ensure we have the latest state
     const authoritiesArray = Array.from(selectedPermissions).flat() as CreateApiKeyRequest['authorities']
@@ -375,6 +365,7 @@ export default function AddApiKeyDialog() {
       authorities: authoritiesArray
     }
 
+    setIsLoading(true)
     try {
       toast.loading('Creating your API Key...')
       const { success, error, data } =
@@ -429,15 +420,14 @@ export default function AddApiKeyDialog() {
       console.error(error)
     } finally {
       toast.dismiss()
+      setIsLoading(false)
+      setNewApiKeyData({
+        apiKeyName: '',
+        expiryDate: '24'
+      })
+      setIsCreateApiKeyOpen(false)
+      setSelectedPermissions(new Set())
     }
-
-    setNewApiKeyData({
-      apiKeyName: '',
-      expiryDate: '24'
-    })
-    setIsLoading(false)
-    setIsCreateApiKeyOpen(false)
-    setSelectedPermissions(new Set())
   }, [newApiKeyData, selectedPermissions, setIsCreateApiKeyOpen, setApiKeys])
 
   return (
@@ -459,7 +449,7 @@ export default function AddApiKeyDialog() {
             Add a new API Key
           </DialogTitle>
           <DialogDescription>
-            Add a new API key to the project
+            Adding a new API key to the workspace enables you to interact with the various entities of the workspace from your codebase or any CI tool.
           </DialogDescription>
         </DialogHeader>
 
@@ -523,7 +513,7 @@ export default function AddApiKeyDialog() {
               >
                 Authorities
               </label>
-              <div className="custom-scrollbar mt-2 max-h-[200px] space-y-4 overflow-y-auto">
+              <div className="custom-scrollbar mt-2 max-h-[200px] w-full space-y-4 overflow-y-auto">
                 {authorityGroups.map((group) => (
                   <div className="space-y-2" key={group.name}>
                     <div className="flex items-center gap-2">
@@ -535,7 +525,7 @@ export default function AddApiKeyDialog() {
                         onCheckedChange={() => toggleGroup(group)}
                       />
                       <div className="flex w-full items-center gap-x-5">
-                        <label className="min-w-44 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        <label className="min-w-40 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                           {group.name}
                         </label>
                         <p className="whitespace-nowrap text-xs text-zinc-400 max-w-10">

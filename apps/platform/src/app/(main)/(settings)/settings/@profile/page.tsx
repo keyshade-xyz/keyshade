@@ -53,6 +53,13 @@ function ProfilePage(): React.JSX.Element {
     ControllerInstance.getInstance().userController.getSelf()
   )
 
+  const getApiKeysOfUser = useHttp(() =>
+    ControllerInstance.getInstance().apiKeyController.getApiKeysOfUser(
+      {},
+      {}
+    )
+  )
+
   const handleDeleteSelf = useCallback(async () => {
     toast.loading('Deleting profile...')
     setIsLoading(true)
@@ -105,30 +112,24 @@ function ProfilePage(): React.JSX.Element {
 
   useEffect(() => {
     const getAllApiKeys = async () => {
-      const { success, error, data } = await ControllerInstance.getInstance().apiKeyController.getApiKeysOfUser(
-        {},
-        {}
-      )
+      setIsLoading(true)
 
-      if (success && data) {
-        setApiKeys(data.items)
-      }
-      if (error) {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching API Keys. Check console for
-              more info.
-            </p>
-          )
-        })
+      try {
+        const { success, data } = await getApiKeysOfUser()
+
+        if (success && data) {
+          setApiKeys(data.items)
+        }
+      } catch (error) {
         // eslint-disable-next-line no-console -- we need to log the error
         console.error(error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
     getAllApiKeys()
-  }, [setApiKeys])
+  }, [setApiKeys, getApiKeysOfUser])
 
   return (
     <main className="flex flex-col gap-y-10">
@@ -207,18 +208,24 @@ function ProfilePage(): React.JSX.Element {
           {tab === 'profile' && <AddApiKeyDialog />}
         </div>
       </div>
-      {apiKeys.length !== 0 &&
-        <div className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 `}>
-          {apiKeys.map((apiKey) => (
-            <ApiKeyCard apiKey={apiKey} key={apiKey.id} />
-          ))}
-
-          {/* Delete API Key alert dialog */}
-          {isDeleteApiKeyOpen && selectedApiKey ? (
-            <ConfirmDeleteApiKey />
-          ) : null}
+      {isLoading ? (
+        <div className="p-3">
+          <InputLoading />
         </div>
-      }
+      ) : (
+        apiKeys.length !== 0 && (
+          <div className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 `}>
+            {apiKeys.map((apiKey) => (
+              <ApiKeyCard apiKey={apiKey} key={apiKey.id} />
+            ))}
+
+            {/* Delete API Key alert dialog */}
+            {isDeleteApiKeyOpen && selectedApiKey ? (
+              <ConfirmDeleteApiKey />
+            ) : null}
+          </div>
+        )
+      )}
 
       <Separator className="w-full bg-white/15" />
 
