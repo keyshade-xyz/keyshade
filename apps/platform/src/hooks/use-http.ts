@@ -1,5 +1,5 @@
 import type { ClientResponse } from '@keyshade/schema'
-import { useCallback, useEffect, useRef } from 'react'
+import { createElement, useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
@@ -37,14 +37,20 @@ export function useHttp<T, V extends ClientResponse<T>>(
           handle403()
         } else if (statusCode.toString().startsWith('4')) {
           // For 4xx errors
-          const { header, body } = JSON.parse(response.error.message) as {
-            header: string
-            body: string
-          }
+          try {
+            const { header, body } = JSON.parse(response.error.message) as {
+              header: string
+              body: string
+            }
 
-          toast.error(header, {
-            description: body
-          })
+            toast.error(header, {
+              description: createElement('p', { className: 'text-xs text-red-300' }, body)
+            })
+          } catch (error) {
+            toast.error('Faced an error processing your request', {
+              description: createElement('p', { className: 'text-xs text-red-300' }, response.error.message)
+            })
+          }
         } else if (statusCode === 500) {
           handle500(response.error)
         }

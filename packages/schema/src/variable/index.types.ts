@@ -12,7 +12,9 @@ import {
   GetAllVariablesOfProjectRequestSchema,
   GetAllVariablesOfProjectResponseSchema,
   GetRevisionsOfVariableRequestSchema,
-  GetRevisionsOfVariableResponseSchema
+  GetRevisionsOfVariableResponseSchema,
+  GetAllVariablesOfEnvironmentRequestSchema,
+  GetAllVariablesOfEnvironmentResponseSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
@@ -57,4 +59,12 @@ export type GetRevisionsOfVariableRequest = z.infer<
 
 export type GetRevisionsOfVariableResponse = z.infer<
   typeof GetRevisionsOfVariableResponseSchema
+>
+
+export type GetAllVariablesOfEnvironmentRequest = z.infer<
+  typeof GetAllVariablesOfEnvironmentRequestSchema
+>
+
+export type GetAllVariablesOfEnvironmentResponse = z.infer<
+  typeof GetAllVariablesOfEnvironmentResponseSchema
 >

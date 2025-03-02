@@ -159,6 +159,43 @@ export default abstract class BaseCommand {
     return ''
   }
 
+  /**
+   * Logs the error
+   * @param message The error message
+   * @param error The error object containing details about the error
+   */
+  protected logError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }): void {
+    const { header, body } = this.extractError(error)
+
+    Logger.error(`${header}: ${body}`)
+    if (this.metricsEnabled && error?.statusCode === 500) {
+      Logger.report(`${header}.\n` + JSON.stringify(error))
+    }
+  }
+
+  private extractError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }) {
+    try {
+      const { header, body } = JSON.parse(error.message) as {
+        header: string
+        body: string
+      }
+      return { header, body }
+    } catch {
+      return {
+        header: 'Faced an error processing the request',
+        body: error.message
+      }
+    }
+  }
+
   private async setGlobalContextFields(
     globalOptions: Record<string, string>
   ): Promise<void> {

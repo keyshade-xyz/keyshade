@@ -99,10 +99,7 @@ Examples:
       Logger.info(`Private key: ${data.privateKey}`)
       Logger.info(`Access level: ${data.accessLevel}`)
     } else {
-      Logger.error(`Failed to create project: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to create project.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 

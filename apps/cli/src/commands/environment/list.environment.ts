@@ -59,10 +59,7 @@ export class ListEnvironment extends BaseCommand {
         Logger.info(`- ${environment.name} (${environment.slug})`)
       })
     } else {
-      Logger.error(`Failed to fetch environments: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to fetch environments.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }
