@@ -4,8 +4,8 @@ import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { SecretSVG } from '@public/svg/dashboard'
+import { toast } from 'sonner'
 import { Accordion } from '@/components/ui/accordion'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
 import { Button } from '@/components/ui/button'
@@ -24,12 +24,16 @@ import { useHttp } from '@/hooks/use-http'
 
 extend(relativeTime)
 
+const ITEMS_PER_PAGE = 10
+
 function SecretPage(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
   const isEditSecretOpen = useAtomValue(editSecretOpenAtom)
   const isDeleteSecretOpen = useAtomValue(deleteSecretOpenAtom)
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
@@ -41,22 +45,45 @@ function SecretPage(): React.JSX.Element {
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,
-      decryptValue: isDecrypted
+      decryptValue: isDecrypted,
+      page,
+      limit: ITEMS_PER_PAGE
     })
   )
 
   useEffect(() => {
-    selectedProject &&
-      getAllSecretsOfProject()
-        .then(({ success, data }) => {
-          if (success && data) {
-            setSecrets(data.items)
-          }
+    const fetchSecrets = async () => {
+      if (!selectedProject) {
+        toast.error('No project selected', {
+          description: <p className="text-xs text-red-300">
+            Please select a project to view secrets.
+          </p>
         })
-        .finally(() => setIsLoading(false))
-  }, [getAllSecretsOfProject, isDecrypted, selectedProject, setSecrets])
+        return
+      }
 
-  if (isLoading) {
+      try {
+        setIsLoading(true)
+        const { data, success } = await getAllSecretsOfProject()
+        if (success && data) {
+          setSecrets((prev) => page === 0 ? data.items : [...prev, ...data.items])
+          if (data.metadata.links.next === null) {
+            setHasMore(false)
+          }
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSecrets()
+  }, [getAllSecretsOfProject, isDecrypted, page, selectedProject, setSecrets])
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1)
+  }
+
+  if (isLoading && page === 0) {
     return (
       <div className="space-y-4">
         <SecretLoader />
@@ -92,7 +119,7 @@ function SecretPage(): React.JSX.Element {
         <div
           className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteSecretOpen ? 'inert' : ''} `}
         >
-          <ScrollArea className="mb-4 h-fit w-full">
+          <div className="flex h-fit w-full flex-col gap-4">
             <Accordion
               className="flex h-fit w-full flex-col gap-4"
               collapsible
@@ -106,7 +133,17 @@ function SecretPage(): React.JSX.Element {
                 />
               ))}
             </Accordion>
-          </ScrollArea>
+
+            {isLoading && page > 0 ? <div className="w-full"><SecretLoader /></div> : null}
+          </div>
+
+          <Button
+            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+            disabled={isLoading || !hasMore}
+            onClick={handleLoadMore}
+          >
+            Load more
+          </Button>
 
           {/* Delete secret alert dialog */}
           {isDeleteSecretOpen && selectedSecret ? (
