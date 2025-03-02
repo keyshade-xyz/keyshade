@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
 import { History } from 'lucide-react'
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import ConfirmRollbackDialog from '../confirmRollbackDialog'
 import {
   Sheet,
@@ -132,7 +132,7 @@ export default function RollbackVariableSheet() {
         }}
         open={isRollbackVariableOpen}
       >
-        <SheetContent 
+        <SheetContent
           className="border-white/15 bg-[#222425] w-[1400px] max-w-[95vw]"
           onEscapeKeyDown={(e) => {
             e.preventDefault()
@@ -154,7 +154,7 @@ export default function RollbackVariableSheet() {
           <div className="mt-8 overflow-y-auto pr-2">
             <Accordion className="w-full space-y-2" collapsible type="single">
               {environmentRevisions.map((env) => (
-                <AccordionItem 
+                <AccordionItem
                   className="border border-white/10 rounded-xl px-6 bg-neutral-800/50"
                   key={env.environmentSlug}
                   value={env.environmentSlug}
@@ -175,10 +175,10 @@ export default function RollbackVariableSheet() {
                           <div className="absolute left-0 top-0 h-full w-0.5 bg-white/20">
                             <div className="absolute -left-[2px] top-0 h-1 w-1 rounded-full bg-white/60" />
                           </div>
-                          
+
                           {/* Version content with rollback icon */}
                           <div className="ml-6 flex flex-col group-hover:bg-white/5 rounded-lg transition-colors p-5 relative">
-                            <button 
+                            <button
                               className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity"
                               disabled={isLoading}
                               onClick={() => handleRollbackClick(env.environmentSlug, revision.version)}
