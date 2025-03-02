@@ -4,6 +4,7 @@ import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { SecretSVG } from '@public/svg/dashboard'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Accordion } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
@@ -54,7 +55,7 @@ function SecretPage(): React.JSX.Element {
             setSecrets(data.items)
           }
         })
-        .finally(() => { if (!isLoading) { setIsLoading(false) } })
+        .finally(() => setIsLoading(false))
   }, [getAllSecretsOfProject, isDecrypted, selectedProject, setSecrets, isLoading])
 
   return (
@@ -69,10 +70,10 @@ function SecretPage(): React.JSX.Element {
 
           <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
             <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
-              Secrete your firstSecret
+              Declare your first secret
             </p>
             <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
-              Declare and store a Secret against different environments
+              Declare and store a secret against different environments
             </p>
           </div>
 
@@ -80,7 +81,7 @@ function SecretPage(): React.JSX.Element {
             className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
             onClick={() => setIsCreateSecretOpen(true)}
           >
-            CreateSecret
+            Create secret
           </Button>
         </div>
       ) : (
@@ -88,16 +89,19 @@ function SecretPage(): React.JSX.Element {
         <div
           className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteSecretOpen ? 'inert' : ''
             } `}
+
         >
-          <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
-            {secrets.map((secretData) => (
-              <SecretCard 
-                isDecrypted={isDecrypted} 
-                key={secretData.secret.id}
-                secretData={secretData}
-              />
-            ))}
-          </Accordion>
+          <ScrollArea className="mb-4 h-fit w-full">
+            <Accordion className="flex h-fit w-full flex-col gap-4" collapsible type="single">
+              {secrets.map((secretData) => (
+                <SecretCard
+                  isDecrypted={isDecrypted}
+                  key={secretData.secret.id}
+                  secretData={secretData}
+                />
+              ))}
+            </Accordion>
+          </ScrollArea>
           {/* Delete Secret alert dialog */}
           {isDeleteSecretOpen && selectedSecret ? <ConfirmDeleteSecret /> : null}
 

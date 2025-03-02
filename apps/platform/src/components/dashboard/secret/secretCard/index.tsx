@@ -39,7 +39,7 @@ import { copyToClipboard } from '@/lib/clipboard'
 extend(dayjs)
 
 interface SecretCardProps {
-  secretData: Secret | undefined
+  secretData: Secret
   isDecrypted: boolean
 }
 export default function SecretCard({
@@ -50,11 +50,7 @@ export default function SecretCard({
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
   const setIsRollbackSecretOpen = useSetAtom(rollbackSecretOpenAtom)
-  
-  if (!secretData?.secret) {
-    return null;
-  }
-  
+
   const { secret, values } = secretData
 
   const handleCopyToClipboard = () => {
