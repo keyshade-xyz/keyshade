@@ -96,6 +96,20 @@ function ProfilePage(): React.JSX.Element {
     }
   }, [updateSelf, setUser])
 
+  const getAllApiKeys = useCallback(async () => {
+    setIsLoading(true)
+
+    try {
+      const { success, data } = await getApiKeysOfUser()
+
+      if (success && data) {
+        setApiKeys(data.items)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [setApiKeys, getApiKeysOfUser])
+
   useEffect(() => {
     getSelf()
       .then(({ data, success }) => {
@@ -111,25 +125,8 @@ function ProfilePage(): React.JSX.Element {
   }, [getSelf])
 
   useEffect(() => {
-    const getAllApiKeys = async () => {
-      setIsLoading(true)
-
-      try {
-        const { success, data } = await getApiKeysOfUser()
-
-        if (success && data) {
-          setApiKeys(data.items)
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     getAllApiKeys()
-  }, [setApiKeys, getApiKeysOfUser])
+  }, [getAllApiKeys])
 
   return (
     <main className="flex flex-col gap-y-10">

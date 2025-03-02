@@ -287,10 +287,23 @@ export default function AddApiKeyDialog() {
   const [isCreateApiKeyOpen, setIsCreateApiKeyOpen] =
     useAtom(createApiKeyOpenAtom)
   const setApiKeys = useSetAtom(apiKeysOfProjectAtom)
-  const [newApiKeyData, setNewApiKeyData] = useState({
-    apiKeyName: '',
-    expiryDate: '24'
+  const [newApiKeyData, setNewApiKeyData] = useState<CreateApiKeyRequest>({
+    name: '',
+    expiresAfter: '24'
   })
+
+  // name: string;
+  // id ?: string | undefined;
+  // slug ?: string | undefined;
+  // value ?: string | undefined;
+  // preview ?: string | undefined;
+  // expiresAt ?: string | null | undefined;
+  // createdAt ?: string | undefined;
+  // updatedAt ?: string | undefined;
+  // authorities ?: ("CREATE_PROJECT" | "READ_USERS" | "ADD_USER" | "REMOVE_USER" | "UPDATE_USER_ROLE" | "READ_WORKSPACE" | "UPDATE_WORKSPACE" | "DELETE_WORKSPACE" | "CREATE_WORKSPACE_ROLE" | "READ_WORKSPACE_ROLE" | "UPDATE_WORKSPACE_ROLE" | "DELETE_WORKSPACE_ROLE" | "WORKSPACE_ADMIN" | "READ_PROJECT" | "UPDATE_PROJECT" | "DELETE_PROJECT" | "CREATE_SECRET" | "READ_SECRET" | "UPDATE_SECRET" | "DELETE_SECRET" | "CREATE_ENVIRONMENT" | "READ_ENVIRONMENT" | "UPDATE_ENVIRONMENT" | "DELETE_ENVIRONMENT" | "CREATE_VARIABLE" | "READ_VARIABLE" | "UPDATE_VARIABLE" | "DELETE_VARIABLE" | "CREATE_INTEGRATION" | "READ_INTEGRATION" | "UPDATE_INTEGRATION" | "DELETE_INTEGRATION" | "CREATE_WORKSPACE" | "CREATE_API_KEY" | "READ_API_KEY" | "UPDATE_API_KEY" | "DELETE_API_KEY" | "UPDATE_PROFILE" | "READ_SELF" | "UPDATE_SELF" | "READ_EVENT")[] | undefined;
+  // userId ?: string | undefined;
+  // expiresAfter ?: "never" | "24" | "168" | "720" | "8760" | undefined;
+
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<CreateApiKeyRequest['authorities']>
   >(new Set())
@@ -349,26 +362,26 @@ export default function AddApiKeyDialog() {
   )
 
   const handleAddApiKey = useCallback(async () => {
-    if (newApiKeyData.apiKeyName.trim() === '') {
+    if (newApiKeyData.name.trim() === '') {
       toast.error('API Key name is required')
       return
     }
 
-    const expiryDate = newApiKeyData.expiryDate || '24'
+    const expiryDate = newApiKeyData.expiresAfter || '24'
 
     // Create a new array from selectedPermissions to ensure we have the latest state
     const authoritiesArray = Array.from(selectedPermissions).flat() as CreateApiKeyRequest['authorities']
 
     const request: CreateApiKeyRequest = {
-      name: newApiKeyData.apiKeyName,
-      expiresAfter: expiryDate as 'never' | '24' | '168' | '720' | '8760',
+      name: newApiKeyData.name,
+      expiresAfter: expiryDate,
       authorities: authoritiesArray
     }
 
     setIsLoading(true)
     try {
       toast.loading('Creating your API Key...')
-      const { success, error, data } =
+      const { success, data } =
         await ControllerInstance.getInstance().apiKeyController.crateApiKey(
           request,
           {}
@@ -392,38 +405,12 @@ export default function AddApiKeyDialog() {
           }
         })
       }
-      if (error) {
-        if (error.statusCode === 409) {
-          toast.error('API Key already exists', {
-            description: (
-              <p className="text-xs text-red-300">
-                An API Key with the same name already exists. Please use a
-                different one.
-              </p>
-            )
-          })
-        } else {
-          toast.error('Something went wrong!', {
-            description: (
-              <p className="text-xs text-red-300">
-                Something went wrong while adding the API Key. Check the console
-                for more details.
-              </p>
-            )
-          })
-          // eslint-disable-next-line no-console -- we need to log the error
-          console.error(error)
-        }
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
     } finally {
       toast.dismiss()
       setIsLoading(false)
       setNewApiKeyData({
-        apiKeyName: '',
-        expiryDate: '24'
+        name: '',
+        expiresAfter: '24'
       })
       setIsCreateApiKeyOpen(false)
       setSelectedPermissions(new Set())
@@ -457,7 +444,7 @@ export default function AddApiKeyDialog() {
           <div className="space-y-4">
             <div className="flex h-[2.75rem] items-center justify-start gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-[1.25rem] w-[7rem] text-base font-semibold"
                 htmlFor="secret-name"
               >
                 API Key Name
@@ -468,17 +455,17 @@ export default function AddApiKeyDialog() {
                 onChange={(e) =>
                   setNewApiKeyData((prev) => ({
                     ...prev,
-                    apiKeyName: e.target.value
+                    name: e.target.value
                   }))
                 }
                 placeholder="Enter the API key"
-                value={newApiKeyData.apiKeyName}
+                value={newApiKeyData.name}
               />
             </div>
 
             <div className="flex h-[2.75rem] items-center justify-start gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="h-[1.25rem] w-[7rem] text-base font-semibold"
                 htmlFor="expiry-date"
               >
                 Expiry Date
@@ -488,10 +475,10 @@ export default function AddApiKeyDialog() {
                 onValueChange={(val) =>
                   setNewApiKeyData((prev) => ({
                     ...prev,
-                    expiryDate: val
+                    expiresAfter: val
                   }))
                 }
-                value={newApiKeyData.expiryDate}
+                value={newApiKeyData.expiresAfter}
               >
                 <SelectTrigger className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300">
                   <SelectValue />
@@ -508,7 +495,7 @@ export default function AddApiKeyDialog() {
 
             <div className="flex items-start justify-start gap-6">
               <label
-                className="h-[1.25rem] w-[7.125rem] text-base font-semibold"
+                className="w-[9rem] text-base font-semibold"
                 htmlFor="authorities"
               >
                 Authorities
@@ -524,38 +511,38 @@ export default function AddApiKeyDialog() {
                         id={group.name}
                         onCheckedChange={() => toggleGroup(group)}
                       />
-                      <div className="flex w-full items-center gap-x-5">
-                        <label className="min-w-40 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          {group.name}
-                        </label>
-                        <p className="whitespace-nowrap text-xs text-zinc-400 max-w-10">
-                          {group.description}
-                        </p>
-                      </div>
+                      <label className="min-w-40 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {group.name}
+                      </label>
                     </div>
-                    <div className="ml-6 space-y-2">
+                    <div className="">
+                      <p className="whitespace-nowrap text-xs text-zinc-400 max-w-10">
+                        {group.description}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-3">
                       {group.permissions
                         ? group.permissions.map((permission) => (
                           <div
-                            className="flex items-center gap-2"
+                            className="flex flex-col mb-2"
                             key={String(permission.id)}
                           >
-                            <Checkbox
-                              checked={selectedPermissions.has(permission.id)}
-                              className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                              id={String(permission.id)}
-                              onCheckedChange={() =>
-                                togglePermission(permission.id)
-                              }
-                            />
-                            <div className="flex w-full items-center gap-x-5">
-                              <label className="min-w-40 text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={selectedPermissions.has(permission.id)}
+                                className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
+                                id={String(permission.id)}
+                                onCheckedChange={() =>
+                                  togglePermission(permission.id)
+                                }
+                              />
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                 {permission.label}
                               </label>
-                              <p className=" whitespace-nowrap text-xs text-zinc-400">
-                                {permission.description}
-                              </p>
                             </div>
+                            <p className="ml-6 text-xs text-zinc-400">
+                              {permission.description}
+                            </p>
                           </div>
                         ))
                         : null}

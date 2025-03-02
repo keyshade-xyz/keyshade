@@ -69,17 +69,6 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
           prevApiKeys.filter((apiKey) => apiKey.slug !== apiKeySlug)
         )
       }
-    } catch (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while deleting the API Key. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
     } finally {
       toast.dismiss()
       handleClose()
