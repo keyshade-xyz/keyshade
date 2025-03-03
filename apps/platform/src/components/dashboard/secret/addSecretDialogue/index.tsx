@@ -202,12 +202,11 @@ export default function AddSecretDialog() {
                       key={env.slug}
                       className="flex h-[2.75rem] items-center"
                     >
-                      <label
-                        className="w-full text-base font-semibold"
-                        htmlFor={`env-value-${env.slug}`}
-                      >
-                        {env.name}
-                      </label>
+                      <Input
+                        className="h-[2.75rem] w-full border border-white/10 bg-neutral-800 text-gray-300 disabled:opacity-50"
+                        value={env.name}
+                        disabled
+                      />
                     </div>
                   ))}
                 </div>
