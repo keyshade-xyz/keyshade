@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { AddSVG } from '@public/svg/shared'
-import type { CreateApiKeyRequest } from '@keyshade/schema'
+import type { ApiKey, CreateApiKeyRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
 import { X } from 'lucide-react'
@@ -16,13 +16,21 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { createApiKeyOpenAtom, apiKeysOfProjectAtom } from '@/store'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { useHttp } from '@/hooks/use-http'
 
 interface AuthorityGroup {
   name: string
   description: string
   permissions?: {
-    id: CreateApiKeyRequest['authorities']
+    id: ApiKey['authorities']
     label: string
     description?: string
   }[]
@@ -129,7 +137,7 @@ const authorityGroups: AuthorityGroup[] = [
         id: ['UPDATE_USER_ROLE'],
         label: 'Update',
         description: 'Access to update users'
-      },
+      }
     ]
   },
   {
@@ -268,15 +276,15 @@ const authorityGroups: AuthorityGroup[] = [
     permissions: [
       {
         id: ['UPDATE_PROFILE'],
-        label: 'Update_profile',
+        label: 'Update_profile'
       },
       {
         id: ['READ_SELF'],
-        label: 'Read_self',
+        label: 'Read_self'
       },
       {
         id: ['UPDATE_SELF'],
-        label: 'Update_self_read_event',
+        label: 'Update_self_read_event'
       }
     ]
   }
@@ -292,21 +300,19 @@ export default function AddApiKeyDialog() {
     expiresAfter: '24'
   })
 
-  // name: string;
-  // id ?: string | undefined;
-  // slug ?: string | undefined;
-  // value ?: string | undefined;
-  // preview ?: string | undefined;
-  // expiresAt ?: string | null | undefined;
-  // createdAt ?: string | undefined;
-  // updatedAt ?: string | undefined;
-  // authorities ?: ("CREATE_PROJECT" | "READ_USERS" | "ADD_USER" | "REMOVE_USER" | "UPDATE_USER_ROLE" | "READ_WORKSPACE" | "UPDATE_WORKSPACE" | "DELETE_WORKSPACE" | "CREATE_WORKSPACE_ROLE" | "READ_WORKSPACE_ROLE" | "UPDATE_WORKSPACE_ROLE" | "DELETE_WORKSPACE_ROLE" | "WORKSPACE_ADMIN" | "READ_PROJECT" | "UPDATE_PROJECT" | "DELETE_PROJECT" | "CREATE_SECRET" | "READ_SECRET" | "UPDATE_SECRET" | "DELETE_SECRET" | "CREATE_ENVIRONMENT" | "READ_ENVIRONMENT" | "UPDATE_ENVIRONMENT" | "DELETE_ENVIRONMENT" | "CREATE_VARIABLE" | "READ_VARIABLE" | "UPDATE_VARIABLE" | "DELETE_VARIABLE" | "CREATE_INTEGRATION" | "READ_INTEGRATION" | "UPDATE_INTEGRATION" | "DELETE_INTEGRATION" | "CREATE_WORKSPACE" | "CREATE_API_KEY" | "READ_API_KEY" | "UPDATE_API_KEY" | "DELETE_API_KEY" | "UPDATE_PROFILE" | "READ_SELF" | "UPDATE_SELF" | "READ_EVENT")[] | undefined;
-  // userId ?: string | undefined;
-  // expiresAfter ?: "never" | "24" | "168" | "720" | "8760" | undefined;
-
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<CreateApiKeyRequest['authorities']>
   >(new Set())
+
+  const createApiKey = useHttp(() =>
+    ControllerInstance.getInstance().apiKeyController.crateApiKey({
+      name: newApiKeyData.name,
+      expiresAfter: newApiKeyData.expiresAfter,
+      authorities: Array.from(
+        selectedPermissions
+      ).flat() as ApiKey['authorities']
+    })
+  )
 
   const togglePermission = useCallback(
     (permissionId: CreateApiKeyRequest['authorities']) => {
@@ -326,7 +332,7 @@ export default function AddApiKeyDialog() {
   const getGroupState = useCallback(
     (group: AuthorityGroup): boolean | 'indeterminate' => {
       if (!group.permissions) {
-        return false;
+        return false
       }
       const groupPermissions = group.permissions.map((p) => p.id)
       const selectedGroupPermissions = groupPermissions.filter((p) =>
@@ -367,34 +373,12 @@ export default function AddApiKeyDialog() {
       return
     }
 
-    const expiryDate = newApiKeyData.expiresAfter || '24'
-
-    // Create a new array from selectedPermissions to ensure we have the latest state
-    const authoritiesArray = Array.from(selectedPermissions).flat() as CreateApiKeyRequest['authorities']
-
-    const request: CreateApiKeyRequest = {
-      name: newApiKeyData.name,
-      expiresAfter: expiryDate,
-      authorities: authoritiesArray
-    }
-
     setIsLoading(true)
+    toast.loading('Creating your API Key...')
     try {
-      toast.loading('Creating your API Key...')
-      const { success, data } =
-        await ControllerInstance.getInstance().apiKeyController.crateApiKey(
-          request,
-          {}
-        )
+      const { success, data } = await createApiKey()
 
       if (success && data) {
-        toast.success('API Key added successfully', {
-          description: (
-            <p className="text-xs text-emerald-300">
-              You created a new API Key
-            </p>
-          )
-        })
         setApiKeys((prev) => [...prev, data])
         toast(`Created API Key: ${data.value}`, {
           action: {
@@ -410,7 +394,7 @@ export default function AddApiKeyDialog() {
       setIsLoading(false)
       setNewApiKeyData({
         name: '',
-        expiresAfter: '24'
+        expiresAfter: 'never'
       })
       setIsCreateApiKeyOpen(false)
       setSelectedPermissions(new Set())
@@ -436,7 +420,9 @@ export default function AddApiKeyDialog() {
             Add a new API Key
           </DialogTitle>
           <DialogDescription>
-            Adding a new API key to the workspace enables you to interact with the various entities of the workspace from your codebase or any CI tool.
+            Adding a new API key to the workspace enables you to interact with
+            the various entities of the workspace from your codebase or any CI
+            tool.
           </DialogDescription>
         </DialogHeader>
 
@@ -516,35 +502,37 @@ export default function AddApiKeyDialog() {
                       </label>
                     </div>
                     <div className="">
-                      <p className="whitespace-nowrap text-xs text-zinc-400 max-w-10">
+                      <p className="max-w-10 whitespace-nowrap text-xs text-zinc-400">
                         {group.description}
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-3">
                       {group.permissions
                         ? group.permissions.map((permission) => (
-                          <div
-                            className="flex flex-col mb-2"
-                            key={String(permission.id)}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                checked={selectedPermissions.has(permission.id)}
-                                className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                                id={String(permission.id)}
-                                onCheckedChange={() =>
-                                  togglePermission(permission.id)
-                                }
-                              />
-                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                {permission.label}
-                              </label>
+                            <div
+                              className="mb-2 flex flex-col"
+                              key={String(permission.id)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={selectedPermissions.has(
+                                    permission.id
+                                  )}
+                                  className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
+                                  id={String(permission.id)}
+                                  onCheckedChange={() =>
+                                    togglePermission(permission.id)
+                                  }
+                                />
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  {permission.label}
+                                </label>
+                              </div>
+                              <p className="ml-6 text-xs text-zinc-400">
+                                {permission.description}
+                              </p>
                             </div>
-                            <p className="ml-6 text-xs text-zinc-400">
-                              {permission.description}
-                            </p>
-                          </div>
-                        ))
+                          ))
                         : null}
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
 import { useSearchParams } from 'next/navigation'
+import type { ApiKey } from '@keyshade/schema'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -54,10 +55,7 @@ function ProfilePage(): React.JSX.Element {
   )
 
   const getApiKeysOfUser = useHttp(() =>
-    ControllerInstance.getInstance().apiKeyController.getApiKeysOfUser(
-      {},
-      {}
-    )
+    ControllerInstance.getInstance().apiKeyController.getApiKeysOfUser({})
   )
 
   const handleDeleteSelf = useCallback(async () => {
@@ -96,20 +94,6 @@ function ProfilePage(): React.JSX.Element {
     }
   }, [updateSelf, setUser])
 
-  const getAllApiKeys = useCallback(async () => {
-    setIsLoading(true)
-
-    try {
-      const { success, data } = await getApiKeysOfUser()
-
-      if (success && data) {
-        setApiKeys(data.items)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }, [setApiKeys, getApiKeysOfUser])
-
   useEffect(() => {
     getSelf()
       .then(({ data, success }) => {
@@ -125,8 +109,14 @@ function ProfilePage(): React.JSX.Element {
   }, [getSelf])
 
   useEffect(() => {
-    getAllApiKeys()
-  }, [getAllApiKeys])
+    getApiKeysOfUser()
+      .then(({ data, success }) => {
+        if (success && data) {
+          setApiKeys(data.items as ApiKey[])
+        }
+      })
+      .finally(() => setIsLoading(false))
+  }, [getApiKeysOfUser, setApiKeys])
 
   return (
     <main className="flex flex-col gap-y-10">
@@ -194,16 +184,14 @@ function ProfilePage(): React.JSX.Element {
         </Button>
       </div>
       <Separator className="w-full bg-white/15" />
-      <div className="flex flex-row justify-between items-center gap-4 p-3">
+      <div className="flex flex-row items-center justify-between gap-4 p-3">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">API Keys</div>
           <span className="text-sm text-white/70">
             Generate new API keys to use with the Keyshade CLI.
           </span>
         </div>
-        <div>
-          {tab === 'profile' && <AddApiKeyDialog />}
-        </div>
+        <div>{tab === 'profile' && <AddApiKeyDialog />}</div>
       </div>
       {isLoading ? (
         <div className="p-3">
@@ -211,7 +199,9 @@ function ProfilePage(): React.JSX.Element {
         </div>
       ) : (
         apiKeys.length !== 0 && (
-          <div className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 `}>
+          <div
+            className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 `}
+          >
             {apiKeys.map((apiKey) => (
               <ApiKeyCard apiKey={apiKey} key={apiKey.id} />
             ))}
