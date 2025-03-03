@@ -18,6 +18,7 @@
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "tailwind.config.ts",
     ".next/types/**/*.ts",
     "sentry.*.ts"
   ],

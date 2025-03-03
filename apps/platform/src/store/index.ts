@@ -1,6 +1,7 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import type {
+  ApiKey as OriginalApiKey,
   GetAllEnvironmentsOfProjectResponse,
   Project,
   ProjectWithCount,
@@ -9,6 +10,8 @@ import type {
   Variable,
   Workspace
 } from '@keyshade/schema'
+
+type ApiKey = Omit<OriginalApiKey, 'value' | 'userId'>
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
@@ -21,12 +24,14 @@ export const selectedSecretAtom = atom<Secret | null>(null)
 export const selectedEnvironmentAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items'][number] | null
 >(null)
+export const selectedApiKeyAtom  = atom<ApiKey | null>(null)
 export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
 export const environmentsOfProjectAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items']
 >([])
 export const variablesOfProjectAtom = atom<Variable[]>([])
 export const secretsOfProjectAtom = atom<Secret[]>([])
+export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
 
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
@@ -43,3 +48,7 @@ export const deleteSecretOpenAtom = atom<boolean>(false)
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
+
+export const createApiKeyOpenAtom = atom<boolean>(false)
+export const editApiKeyOpenAtom = atom<boolean>(false)
+export const deleteApiKeyOpenAtom = atom<boolean>(false)
