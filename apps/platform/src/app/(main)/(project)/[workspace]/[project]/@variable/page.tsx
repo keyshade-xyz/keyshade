@@ -20,8 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
 import { useHttp } from '@/hooks/use-http'
 import VariableLoader from '@/components/dashboard/variable/variableLoader'
-
-const ITEMS_PER_PAGE = 10
+import { VARIABLES_PAGE_SIZE } from '@/lib/constants'
 
 function VariablePage(): React.JSX.Element {
   const [page, setPage] = useState(0)
@@ -38,7 +37,7 @@ function VariablePage(): React.JSX.Element {
     ControllerInstance.getInstance().variableController.getAllVariablesOfProject({
         projectSlug: selectedProject!.slug,
         page,
-        limit: ITEMS_PER_PAGE,
+        limit: VARIABLES_PAGE_SIZE,
     }, {})
   )
 

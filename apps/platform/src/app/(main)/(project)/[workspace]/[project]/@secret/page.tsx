@@ -21,10 +21,9 @@ import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecr
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
 import { useHttp } from '@/hooks/use-http'
+import { SECRET_PAGE_SIZE } from '@/lib/constants'
 
 extend(relativeTime)
-
-const ITEMS_PER_PAGE = 10
 
 function SecretPage(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
@@ -47,7 +46,7 @@ function SecretPage(): React.JSX.Element {
       projectSlug: selectedProject!.slug,
       decryptValue: isDecrypted,
       page,
-      limit: ITEMS_PER_PAGE
+      limit: SECRET_PAGE_SIZE
     })
   )
 
