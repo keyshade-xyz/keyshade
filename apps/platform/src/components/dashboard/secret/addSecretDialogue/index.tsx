@@ -82,18 +82,11 @@ export default function AddSecretDialog() {
           })
           // Add the new secret to the list of secrets
           setSecrets((prev) => [...prev, data])
-
-          setNewSecretData({
-            secretName: '',
-            secretNote: '',
-            environmentSlug: '',
-            environmentValue: ''
-          })
-          setIsCreateSecretOpen(false)
         }
       } finally {
-        setIsLoading(false)
         toast.dismiss()
+        setIsLoading(false)
+        setIsCreateSecretOpen(false)
       }
     }
   }, [
@@ -104,9 +97,19 @@ export default function AddSecretDialog() {
     setIsCreateSecretOpen
   ])
 
+  const handleDialogOpenChange = () => {
+    setIsCreateSecretOpen(!isCreateSecretOpen);
+    setNewSecretData({
+      secretName: '',
+      secretNote: '',
+      environmentSlug: '',
+      environmentValue: ''
+    })
+  }
+
   return (
     <Dialog
-      onOpenChange={() => setIsCreateSecretOpen(!isCreateSecretOpen)}
+      onOpenChange={handleDialogOpenChange}
       open={isCreateSecretOpen}
     >
       <DialogTrigger asChild>
@@ -139,6 +142,7 @@ export default function AddSecretDialog() {
               </label>
               <Input
                 className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                disabled={isLoading}
                 id="secret-name"
                 onChange={(e) =>
                   setNewSecretData({
@@ -160,6 +164,7 @@ export default function AddSecretDialog() {
               </label>
               <Input
                 className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                disabled={isLoading}
                 id="secret-note"
                 onChange={(e) =>
                   setNewSecretData({
@@ -211,6 +216,7 @@ export default function AddSecretDialog() {
                 </label>
                 <Input
                   className="h-[2.75rem] w-[13.5rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                  disabled={isLoading}
                   id="env-value"
                   onChange={(e) =>
                     setNewSecretData({

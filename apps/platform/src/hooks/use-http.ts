@@ -1,5 +1,5 @@
 import type { ClientResponse } from '@keyshade/schema'
-import { useCallback, useEffect, useRef } from 'react'
+import { createElement, useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
@@ -44,11 +44,11 @@ export function useHttp<T, V extends ClientResponse<T>>(
             }
 
             toast.error(header, {
-              description: body
+              description: createElement('p', { className: 'text-xs text-red-300' }, body)
             })
           } catch (error) {
             toast.error('Faced an error processing your request', {
-              description: response.error.message
+              description: createElement('p', { className: 'text-xs text-red-300' }, response.error.message)
             })
           }
         } else if (statusCode === 500) {
