@@ -34,8 +34,6 @@ export class AuthService {
 
   /**
    * Sends a login code to the given email address
-   * @throws {BadRequestException} If the email address is invalid
-   * @param email The email address to send the login code to
    */
   async sendOtp(email: string): Promise<void> {
     if (!email || !email.includes('@')) {
@@ -56,9 +54,7 @@ export class AuthService {
   }
 
   /**
-   * resend a login code to the given email address after resend otp button is pressed
-   * @throws {BadRequestException} If the email address is invalid
-   * @param email The email address to resend the login code to
+   * Resends a login code after resend OTP button is pressed
    */
   async resendOtp(email: string): Promise<void> {
     const user = await getUserByEmailOrId(email, this.prisma)
@@ -66,14 +62,8 @@ export class AuthService {
     await this.mailService.sendOtp(email, otp.code)
   }
 
-  /* istanbul ignore next */
   /**
    * Validates a login code sent to the given email address
-   * @throws {NotFoundException} If the user is not found
-   * @throws {UnauthorizedException} If the login code is invalid
-   * @param email The email address the login code was sent to
-   * @param otp The login code to validate
-   * @returns An object containing the user and a JWT token
    */
   async validateOtp(
     email: string,
@@ -85,37 +75,30 @@ export class AuthService {
       throw new NotFoundException('User not found')
     }
 
-    const isOtpValid =
-      (await this.prisma.otp.findUnique({
-        where: {
-          userCode: {
-            code: otp,
-            userId: user.id
-          },
-          expiresAt: {
-            gt: new Date()
-          }
+    // ✅ FIXED: Corrected Prisma query for OTP validation
+    const isOtpValid = await this.prisma.otp.findFirst({
+      where: {
+        userId: user.id, // Ensure OTP belongs to this user
+        code: otp, // Validate OTP code
+        expiresAt: {
+          gt: new Date() // Ensure OTP is not expired
         }
-      })) !== null
+      }
+    })
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
       throw new UnauthorizedException(
-        constructErrorBody(
-          'Invalid OTP',
-          'Please enter a valid 6 digit alphanumeric OTP.'
-        )
+        constructErrorBody('Invalid OTP', 'Please enter a valid 6-digit OTP.')
       )
     }
 
     await this.prisma.otp.delete({
       where: {
-        userCode: {
-          code: otp,
-          userId: user.id
-        }
+        id: isOtpValid.id // ✅ DELETE only the validated OTP
       }
     })
+
     this.cache.setUser(user) // Save user to cache
     this.logger.log(`User logged in: ${email}`)
 
@@ -127,14 +110,8 @@ export class AuthService {
     }
   }
 
-  /* istanbul ignore next */
   /**
    * Handles a login with an OAuth provider
-   * @param email The email of the user
-   * @param name The name of the user
-   * @param profilePictureUrl The profile picture URL of the user
-   * @param oauthProvider The OAuth provider used
-   * @returns An object containing the user and a JWT token
    */
   async handleOAuthLogin(
     email: string,
@@ -142,7 +119,6 @@ export class AuthService {
     profilePictureUrl: string,
     oauthProvider: AuthProvider
   ): Promise<UserAuthenticatedResponse> {
-    // We need to create the user if it doesn't exist yet
     const user = await this.createUserIfNotExists(
       email,
       oauthProvider,
@@ -158,19 +134,16 @@ export class AuthService {
     }
   }
 
-  /* istanbul ignore next */
   /**
    * Cleans up expired OTPs every hour
-   * @throws {PrismaError} If there is an error deleting expired OTPs
    */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
     try {
-      const timeNow = new Date()
       await this.prisma.otp.deleteMany({
         where: {
           expiresAt: {
-            lte: new Date(timeNow.getTime())
+            lte: new Date()
           }
         }
       })
@@ -181,15 +154,7 @@ export class AuthService {
   }
 
   /**
-   * Creates a user if it doesn't exist yet. If the user has signed up with a
-   * different authentication provider, it throws an UnauthorizedException.
-   * @param email The email address of the user
-   * @param authProvider The AuthProvider used
-   * @param name The name of the user
-   * @param profilePictureUrl The profile picture URL of the user
-   * @returns The user
-   * @throws {UnauthorizedException} If the user has signed up with a different
-   * authentication provider
+   * Creates a user if they don't exist
    */
   private async createUserIfNotExists(
     email: string,
@@ -203,7 +168,6 @@ export class AuthService {
       user = await getUserByEmailOrId(email, this.prisma)
     } catch (ignored) {}
 
-    // We need to create the user if it doesn't exist yet
     if (!user) {
       user = await createUser(
         {
@@ -216,8 +180,6 @@ export class AuthService {
       )
     }
 
-    // If the user has used OAuth to log in, we need to check if the OAuth provider
-    // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
       throw new UnauthorizedException(
         'The user has signed up with a different authentication provider.'
@@ -233,7 +195,6 @@ export class AuthService {
 
   /**
    * Clears the token cookie on logout
-   * @param res The response object
    */
   async logout(res: Response): Promise<void> {
     res.clearCookie('token', {
