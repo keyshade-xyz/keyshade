@@ -1,21 +1,19 @@
 import React, { useCallback, useState } from 'react'
-import { AddSVG } from '@public/svg/shared'
-import type { ApiKey, CreateApiKeyRequest } from '@keyshade/schema'
+import type { CreateApiKeyRequest, AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
-import { X } from 'lucide-react'
-import { Button } from '../../../ui/button'
-import { Input } from '../../../ui/input'
+import { AddSVG } from '@public/svg/shared'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '../../../ui/select'
+} from '@/components/ui/select'
 import ControllerInstance from '@/lib/controller-instance'
 import { createApiKeyOpenAtom, apiKeysOfProjectAtom } from '@/store'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -25,270 +23,8 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useHttp } from '@/hooks/use-http'
-
-interface AuthorityGroup {
-  name: string
-  description: string
-  permissions?: {
-    id: ApiKey['authorities']
-    label: string
-    description?: string
-  }[]
-}
-
-const authorityGroups: AuthorityGroup[] = [
-  {
-    name: 'PROJECT',
-    description: 'Full access to all project actions',
-    permissions: [
-      {
-        id: ['CREATE_PROJECT'],
-        label: 'Create',
-        description: 'Access to create projects'
-      },
-      {
-        id: ['READ_PROJECT'],
-        label: 'Read',
-        description: 'Access to read projects'
-      },
-      {
-        id: ['UPDATE_PROJECT'],
-        label: 'Update',
-        description: 'Access to update projects'
-      },
-      {
-        id: ['DELETE_PROJECT'],
-        label: 'Delete',
-        description: 'Access to delete projects'
-      }
-    ]
-  },
-  {
-    name: 'WORKSPACE',
-    description: 'Full access to all workspace actions',
-    permissions: [
-      {
-        id: ['CREATE_WORKSPACE'],
-        label: 'Create',
-        description: 'Access to create workspaces'
-      },
-      {
-        id: ['READ_WORKSPACE'],
-        label: 'Read',
-        description: 'Access to read workspaces'
-      },
-      {
-        id: ['UPDATE_WORKSPACE'],
-        label: 'Update',
-        description: 'Access to update workspaces'
-      },
-      {
-        id: ['DELETE_WORKSPACE'],
-        label: 'Delete',
-        description: 'Access to delete workspaces'
-      },
-      {
-        id: ['WORKSPACE_ADMIN'],
-        label: 'Workspace Admin',
-        description: 'Access to all workspace actions'
-      },
-      {
-        id: ['CREATE_WORKSPACE_ROLE'],
-        label: 'Create Role',
-        description: 'Access to create role workspace'
-      },
-      {
-        id: ['READ_WORKSPACE_ROLE'],
-        label: 'Read Role',
-        description: 'Access to read role workspace'
-      },
-      {
-        id: ['UPDATE_WORKSPACE_ROLE'],
-        label: 'Update Role',
-        description: 'Access to update role workspace'
-      },
-      {
-        id: ['WORKSPACE_ADMIN'],
-        label: 'Admin',
-        description: 'Full access to all admin actions'
-      }
-    ]
-  },
-  {
-    name: 'WORKSPACE MEMBERSHIP',
-    description: 'Full access to all workspace membership actions',
-    permissions: [
-      {
-        id: ['ADD_USER'],
-        label: 'Add',
-        description: 'Access to add users'
-      },
-      {
-        id: ['READ_USERS'],
-        label: 'Read',
-        description: 'Access to read users'
-      },
-      {
-        id: ['REMOVE_USER'],
-        label: 'Remove',
-        description: 'Access to remove users'
-      },
-      {
-        id: ['UPDATE_USER_ROLE'],
-        label: 'Update',
-        description: 'Access to update users'
-      }
-    ]
-  },
-  {
-    name: 'SECRET',
-    description: 'Full access to all secret actions',
-    permissions: [
-      {
-        id: ['CREATE_SECRET'],
-        label: 'Create',
-        description: 'Access to create secrets'
-      },
-      {
-        id: ['READ_SECRET'],
-        label: 'Read',
-        description: 'Access to read secrets'
-      },
-      {
-        id: ['UPDATE_SECRET'],
-        label: 'Update',
-        description: 'Access to update secrets'
-      },
-      {
-        id: ['DELETE_SECRET'],
-        label: 'Delete',
-        description: 'Access to delete secrets'
-      }
-    ]
-  },
-  {
-    name: 'ENVIRONMENT',
-    description: 'Full access to all environment actions',
-    permissions: [
-      {
-        id: ['CREATE_ENVIRONMENT'],
-        label: 'Create',
-        description: 'Access to create environments'
-      },
-      {
-        id: ['READ_ENVIRONMENT'],
-        label: 'Read',
-        description: 'Access to read environments'
-      },
-      {
-        id: ['UPDATE_ENVIRONMENT'],
-        label: 'Update',
-        description: 'Access to update environments'
-      },
-      {
-        id: ['DELETE_ENVIRONMENT'],
-        label: 'Delete',
-        description: 'Access to delete environments'
-      }
-    ]
-  },
-  {
-    name: 'VARIABLE',
-    description: 'Full access to all variable actions',
-    permissions: [
-      {
-        id: ['CREATE_VARIABLE'],
-        label: 'Create',
-        description: 'Access to create variables'
-      },
-      {
-        id: ['READ_VARIABLE'],
-        label: 'Read',
-        description: 'Access to read variables'
-      },
-      {
-        id: ['UPDATE_VARIABLE'],
-        label: 'Update',
-        description: 'Access to update variables'
-      },
-      {
-        id: ['DELETE_VARIABLE'],
-        label: 'Delete',
-        description: 'Access to delete variables'
-      }
-    ]
-  },
-  {
-    name: 'INTEGRATIONS',
-    description: 'Full access to all integration actions',
-    permissions: [
-      {
-        id: ['CREATE_INTEGRATION'],
-        label: 'Create',
-        description: 'Access to create integrations'
-      },
-      {
-        id: ['READ_INTEGRATION'],
-        label: 'Read',
-        description: 'Access to read integrations'
-      },
-      {
-        id: ['UPDATE_INTEGRATION'],
-        label: 'Update',
-        description: 'Access to update integrations'
-      },
-      {
-        id: ['DELETE_INTEGRATION'],
-        label: 'Delete',
-        description: 'Access to delete integrations'
-      }
-    ]
-  },
-  {
-    name: 'API-KEY',
-    description: 'Full access to all API-Key actions',
-    permissions: [
-      {
-        id: ['CREATE_API_KEY'],
-        label: 'Create',
-        description: 'Access to create API-Key'
-      },
-      {
-        id: ['READ_API_KEY'],
-        label: 'Read',
-        description: 'Access to read API-Key'
-      },
-      {
-        id: ['UPDATE_API_KEY'],
-        label: 'Update',
-        description: 'Access to update API-Key'
-      },
-      {
-        id: ['DELETE_API_KEY'],
-        label: 'Delete',
-        description: 'Access to delete API-Key'
-      }
-    ]
-  },
-  {
-    name: 'PROFILE',
-    description: 'Full access to all profile actions',
-    permissions: [
-      {
-        id: ['UPDATE_PROFILE'],
-        label: 'Update_profile'
-      },
-      {
-        id: ['READ_SELF'],
-        label: 'Read_self'
-      },
-      {
-        id: ['UPDATE_SELF'],
-        label: 'Update_self_read_event'
-      }
-    ]
-  }
-]
+import AuthoritySelector from '@/components/common/authority-selector'
+import CopyToClipboard from '@/components/common/copy-to-clipboard'
 
 export default function AddApiKeyDialog() {
   const [isLoading, setIsLoading] = useState(false)
@@ -301,70 +37,15 @@ export default function AddApiKeyDialog() {
   })
 
   const [selectedPermissions, setSelectedPermissions] = useState<
-    Set<CreateApiKeyRequest['authorities']>
+    Set<AuthorityEnum>
   >(new Set())
 
   const createApiKey = useHttp(() =>
     ControllerInstance.getInstance().apiKeyController.crateApiKey({
       name: newApiKeyData.name,
       expiresAfter: newApiKeyData.expiresAfter,
-      authorities: Array.from(
-        selectedPermissions
-      ).flat() as ApiKey['authorities']
+      authorities: Array.from(selectedPermissions).flat()
     })
-  )
-
-  const togglePermission = useCallback(
-    (permissionId: CreateApiKeyRequest['authorities']) => {
-      setSelectedPermissions((current) => {
-        const newPermissions = new Set(current)
-        if (newPermissions.has(permissionId)) {
-          newPermissions.delete(permissionId)
-        } else {
-          newPermissions.add(permissionId)
-        }
-        return newPermissions
-      })
-    },
-    []
-  )
-
-  const getGroupState = useCallback(
-    (group: AuthorityGroup): boolean | 'indeterminate' => {
-      if (!group.permissions) {
-        return false
-      }
-      const groupPermissions = group.permissions.map((p) => p.id)
-      const selectedGroupPermissions = groupPermissions.filter((p) =>
-        selectedPermissions.has(p)
-      )
-
-      if (selectedGroupPermissions.length === 0) return false
-      if (selectedGroupPermissions.length === groupPermissions.length)
-        return true
-      return 'indeterminate'
-    },
-    [selectedPermissions]
-  )
-
-  const toggleGroup = useCallback(
-    (group: AuthorityGroup) => {
-      setSelectedPermissions((current) => {
-        const newPermissions = new Set(current)
-        if (group.permissions) {
-          const groupState = getGroupState(group)
-          group.permissions.forEach((permission) => {
-            if (groupState === true) {
-              newPermissions.delete(permission.id)
-            } else {
-              newPermissions.add(permission.id)
-            }
-          })
-        }
-        return newPermissions
-      })
-    },
-    [getGroupState]
   )
 
   const handleAddApiKey = useCallback(async () => {
@@ -380,13 +61,17 @@ export default function AddApiKeyDialog() {
 
       if (success && data) {
         setApiKeys((prev) => [...prev, data])
-        toast(`Created API Key: ${data.value}`, {
-          action: {
-            label: <X className="h-4 w-3" />,
-            onClick: () => {
-              toast.dismiss()
-            }
-          }
+        toast.success(`Created API Key`, {
+          description: (
+            <div className="mt-1 flex flex-col gap-y-2 text-green-300">
+              <p>
+                Your API key just got created. Make sure to copy it and store it
+                securely. You will not be able to see it again.
+              </p>
+              <CopyToClipboard text={data.value} />
+            </div>
+          ),
+          className: 'w-fit absolute bottom-0 right-0'
         })
       }
     } finally {
@@ -399,7 +84,7 @@ export default function AddApiKeyDialog() {
       setIsCreateApiKeyOpen(false)
       setSelectedPermissions(new Set())
     }
-  }, [newApiKeyData, selectedPermissions, setIsCreateApiKeyOpen, setApiKeys])
+  }, [newApiKeyData.name, createApiKey, setApiKeys, setIsCreateApiKeyOpen])
 
   return (
     <Dialog
@@ -414,7 +99,7 @@ export default function AddApiKeyDialog() {
           <AddSVG /> Add API Key
         </Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[42rem] bg-[#18181B] text-white">
+      <DialogContent className="flex h-[85vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new API Key
@@ -479,66 +164,10 @@ export default function AddApiKeyDialog() {
               </Select>
             </div>
 
-            <div className="flex items-start justify-start gap-6">
-              <label
-                className="w-[9rem] text-base font-semibold"
-                htmlFor="authorities"
-              >
-                Authorities
-              </label>
-              <div className="custom-scrollbar mt-2 max-h-[200px] w-full space-y-4 overflow-y-auto">
-                {authorityGroups.map((group) => (
-                  <div className="space-y-2" key={group.name}>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={getGroupState(group) === true}
-                        className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                        data-state={getGroupState(group)}
-                        id={group.name}
-                        onCheckedChange={() => toggleGroup(group)}
-                      />
-                      <label className="min-w-40 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        {group.name}
-                      </label>
-                    </div>
-                    <div className="">
-                      <p className="max-w-10 whitespace-nowrap text-xs text-zinc-400">
-                        {group.description}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-3">
-                      {group.permissions
-                        ? group.permissions.map((permission) => (
-                            <div
-                              className="mb-2 flex flex-col"
-                              key={String(permission.id)}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={selectedPermissions.has(
-                                    permission.id
-                                  )}
-                                  className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-[#71717A] data-[state=checked]:text-black"
-                                  id={String(permission.id)}
-                                  onCheckedChange={() =>
-                                    togglePermission(permission.id)
-                                  }
-                                />
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                  {permission.label}
-                                </label>
-                              </div>
-                              <p className="ml-6 text-xs text-zinc-400">
-                                {permission.description}
-                              </p>
-                            </div>
-                          ))
-                        : null}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <AuthoritySelector
+              selectedPermissions={selectedPermissions}
+              setSelectedPermissions={setSelectedPermissions}
+            />
 
             <div className="flex justify-end pt-4">
               <Button

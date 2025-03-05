@@ -20,13 +20,16 @@ import {
   apiKeysOfProjectAtom,
   selectedApiKeyAtom
 } from '@/store'
+import { Input } from '@/components/ui/input'
 
 export default function ConfirmDeleteApiKey(): React.JSX.Element {
-  const [isLoading, setIsLoading] = useState(false)
   const selectedApiKey = useAtomValue(selectedApiKeyAtom)
   const [isDeleteApiKeyOpen, setIsDeleteApiKeyOpen] =
     useAtom(deleteApiKeyOpenAtom)
   const setApiKeys = useSetAtom(apiKeysOfProjectAtom)
+
+  const [confirmName, setConfirmName] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleClose = useCallback(() => {
     setIsDeleteApiKeyOpen(false)
@@ -108,6 +111,17 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
             and remove your API key data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="flex w-full flex-col gap-y-5 text-sm">
+          To confirm that you really want to delete this API key, please type in
+          the name of the API key below.
+          <Input
+            className="w-full"
+            onChange={(e) => setConfirmName(e.target.value)}
+            placeholder={selectedApiKey?.name}
+            type="text"
+            value={confirmName}
+          />
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
@@ -117,7 +131,7 @@ export default function ConfirmDeleteApiKey(): React.JSX.Element {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            disabled={isLoading}
+            disabled={isLoading || confirmName !== selectedApiKey?.name}
             onClick={deleteApiKey}
           >
             Yes, delete {selectedApiKey ? selectedApiKey.name : 'this API Key'}

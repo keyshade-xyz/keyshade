@@ -10,11 +10,8 @@ import {
   ContextMenuItem,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import {
-  selectedApiKeyAtom,
-  deleteApiKeyOpenAtom
-} from '@/store'
-import Slug from '@/components/common/slug'
+import { selectedApiKeyAtom, deleteApiKeyOpenAtom } from '@/store'
+import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import {
   Tooltip,
   TooltipContent,
@@ -48,13 +45,9 @@ export default function ApiKeyCard({
       <ContextMenuTrigger className="w-full">
         <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
           <div className="flex flex-col gap-y-6 px-6 py-4">
-            <div className="flex flex-row">
-              <div className="flex w-full flex-row items-center justify-between">
-                <div className="text-2xl font-normal"> {apiKey.name} </div>
-              </div>
-              <div className="flex w-1/2 flex-col">
-                <Slug text={apiKey.slug} />
-              </div>
+            <div className="flex flex-row justify-between">
+              <div className="text-2xl font-normal"> {apiKey.name} </div>
+              <CopyToClipboard text={apiKey.slug} />
             </div>
             <div className="flex flex-row items-center justify-between">
               <div className="text-sm font-medium"> {apiKey.preview} </div>
@@ -67,7 +60,7 @@ export default function ApiKeyCard({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="rounded border-none bg-[#3F3F46] text-sm font-bold text-white">
-                    <p>Show Attributes</p>
+                    <p>Show Authorities</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

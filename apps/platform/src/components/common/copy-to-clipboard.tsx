@@ -1,8 +1,8 @@
-import { CheckmarkSVG, CopySVG } from '@public/svg/shared'
 // eslint-disable-next-line camelcase -- we need to import the font
 import { Roboto_Mono } from 'next/font/google'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { CheckmarkSVG, CopySVG } from '@public/svg/shared'
 
 const roboto = Roboto_Mono({ weight: ['400'], subsets: ['latin'] })
 
@@ -10,7 +10,9 @@ interface SlugProps {
   text: string
 }
 
-export default function Slug({ text }: SlugProps): React.JSX.Element {
+export default function CopyToClipboard({
+  text
+}: SlugProps): React.JSX.Element {
   const [copied, setCopied] = useState(false)
   const [isOverflowing, setIsOverflowing] = useState(false)
   const textRef = useRef<HTMLParagraphElement>(null)
@@ -47,7 +49,7 @@ export default function Slug({ text }: SlugProps): React.JSX.Element {
 
   return (
     <button
-      className={`${roboto.className} group flex cursor-copy gap-2 whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
+      className={`${roboto.className} group flex w-fit cursor-copy gap-2 whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
       onClick={copyToClipboard}
       type="button"
     >

@@ -2,6 +2,7 @@
   "extends": "tsconfig/nextjs.json",
   "compilerOptions": {
     "jsx": "preserve",
+    "target": "ESNext",
     "plugins": [
       {
         "name": "next"
