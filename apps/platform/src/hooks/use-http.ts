@@ -44,11 +44,19 @@ export function useHttp<T, V extends ClientResponse<T>>(
             }
 
             toast.error(header, {
-              description: createElement('p', { className: 'text-xs text-red-300' }, body)
+              description: createElement(
+                'p',
+                { className: 'text-xs text-red-300' },
+                body
+              )
             })
           } catch (error) {
             toast.error('Faced an error processing your request', {
-              description: createElement('p', { className: 'text-xs text-red-300' }, response.error.message)
+              description: createElement(
+                'p',
+                { className: 'text-xs text-red-300' },
+                response.error.message
+              )
             })
           }
         } else if (statusCode === 500) {

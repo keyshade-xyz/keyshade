@@ -7,7 +7,8 @@ import { toast } from 'sonner'
 import type { Workspace } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { Button } from './button'
+import { Label } from './label'
+import { Input } from './input'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +17,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from './dialog'
-import { Input } from './input'
-import { Label } from './label'
+import { Button } from './button'
 import { cn } from '@/lib/utils'
 import {
   Popover,

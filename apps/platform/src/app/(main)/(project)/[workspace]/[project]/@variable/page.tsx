@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { VariableSVG } from '@public/svg/dashboard'
 import { toast } from 'sonner'
+import { VariableSVG } from '@public/svg/dashboard'
 import {
   createVariableOpenAtom,
   selectedProjectAtom,
