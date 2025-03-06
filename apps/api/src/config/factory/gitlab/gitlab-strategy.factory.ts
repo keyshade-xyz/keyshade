@@ -19,14 +19,18 @@ export class GitlabOAuthStrategyFactory implements OAuthStrategyFactory {
   }
 
   public createOAuthStrategy<GitlabStrategy>(): GitlabStrategy | null {
+    const logger = new Logger(GitlabOAuthStrategyFactory.name)
+
+    logger.log('Creating GitLab OAuth Strategy')
     if (this.isOAuthEnabled()) {
+      logger.log('GitLab OAuth Strategy created')
       return new GitlabStrategy(
         this.clientID,
         this.clientSecret,
         this.callbackURL
       ) as GitlabStrategy
     } else {
-      Logger.warn(
+      logger.error(
         'GitLab Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
       )
       return null
