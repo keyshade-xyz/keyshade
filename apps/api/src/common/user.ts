@@ -22,9 +22,9 @@ export async function createUser(
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
+  logger.log(`Creating user: ${dto.email}`)
   try {
     // Create the user
-    logger.log(`Creating user: ${dto.email}`)
     const user = await prisma.user.create({
       data: {
         id: dto.id,
@@ -87,8 +87,8 @@ export async function getUserByEmailOrId(
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
+  logger.log(`Getting user by email or ID: ${input}`)
   try {
-    logger.log(`Getting user by email or ID: ${input}`)
     const user =
       (await prisma.user.findUnique({
         where: {
