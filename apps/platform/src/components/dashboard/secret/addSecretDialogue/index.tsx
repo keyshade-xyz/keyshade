@@ -203,7 +203,7 @@ export default function AddSecretDialog() {
                       className="flex h-[2.75rem] items-center"
                     >
                       <Input
-                        className="h-[2.75rem] w-full border border-white/10 bg-neutral-800 text-gray-300 disabled:opacity-50"
+                        className="h-[2.75rem] w-full border border-white/10 bg-neutral-800 text-gray-300 disabled:opacity-100"
                         value={env.name}
                         disabled
                       />
