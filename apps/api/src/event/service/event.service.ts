@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import {
   Authority,
   EventSeverity,
@@ -13,6 +13,8 @@ import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class EventService {
+  private readonly logger = new Logger(EventService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService
@@ -27,9 +29,15 @@ export class EventService {
     severity?: EventSeverity,
     source?: EventSource
   ) {
+    this.logger.log(
+      `User ${user.id} fetched events for workspace ${workspaceSlug}`
+    )
+
     if (severity && !Object.values(EventSeverity).includes(severity)) {
+      const errorMessage = 'Invalid "severity" value'
+      this.logger.error(errorMessage)
       throw new BadRequestException(
-        constructErrorBody('Invalid value', 'Invalid "severity" value')
+        constructErrorBody('Invalid value', errorMessage)
       )
     }
 
@@ -40,6 +48,9 @@ export class EventService {
     }
 
     // Check for workspace authority
+    this.logger.log(
+      `Checking user ${user.id} access to workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -67,8 +78,16 @@ export class EventService {
       query.where['source'] = source
     }
 
+    this.logger.log(
+      `Fetching events for workspace ${workspaceSlug} with query: ${JSON.stringify(
+        query
+      )}`
+    )
     // @ts-expect-error - Prisma does not have a type for severity
     const items = await this.prisma.event.findMany(query)
+    this.logger.log(
+      `Fetched ${items.length} events for workspace ${workspaceSlug}`
+    )
 
     //calculate metadata for pagination
     const totalCount = await this.prisma.event.count({

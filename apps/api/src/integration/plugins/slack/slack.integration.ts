@@ -57,6 +57,7 @@ export class SlackIntegration extends BaseIntegration {
     metadata: SlackIntegrationMetadata
   ): Promise<void> {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
+
     try {
       if (!this.app) {
         this.app = new App({
@@ -111,6 +112,8 @@ export class SlackIntegration extends BaseIntegration {
         blocks: block,
         text: data.title
       })
+
+      this.logger.log(`Successfully emitted event to Slack: ${data.title}`)
     } catch (error) {
       this.logger.error(`Failed to emit event to Slack: ${error.message}`)
       console.error(error)

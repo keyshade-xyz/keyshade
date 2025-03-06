@@ -61,7 +61,7 @@ export class EnvironmentService {
     projectSlug: Project['slug']
   ) {
     this.logger.log(
-      `User ${user.id} is creating environment ${dto.name} in project ${projectSlug}`
+      `User ${user.id} attempted to create environment ${dto.name} in project ${projectSlug}`
     )
 
     // Check if the user has the required role to create an environment
@@ -167,7 +167,7 @@ export class EnvironmentService {
     environmentSlug: Environment['slug']
   ) {
     this.logger.log(
-      `User ${user.id} is updating environment ${environmentSlug}`
+      `User ${user.id} attempted to update environment ${environmentSlug}`
     )
 
     const environment =
@@ -241,7 +241,7 @@ export class EnvironmentService {
     environmentSlug: Environment['slug']
   ) {
     this.logger.log(
-      `User ${user.id} is fetching environment ${environmentSlug}`
+      `User ${user.id} attempted to fetch an environment ${environmentSlug}`
     )
 
     this.logger.log(`Fetching environment ${environmentSlug}`)
@@ -298,7 +298,7 @@ export class EnvironmentService {
     search: string
   ) {
     this.logger.log(
-      `User ${user.id} is fetching environments of project ${projectSlug}`
+      `User ${user.id} attempted to fetch environments of project ${projectSlug}`
     )
 
     this.logger.log(`Fetching project of environment ${projectSlug}`)
@@ -402,7 +402,7 @@ export class EnvironmentService {
     environmentSlug: Environment['slug']
   ) {
     this.logger.log(
-      `User ${user.id} is deleting environment ${environmentSlug}`
+      `User ${user.id} attempted to delete environment ${environmentSlug}`
     )
 
     this.logger.log(`Fetching environment ${environmentSlug}`)
