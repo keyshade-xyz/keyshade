@@ -10,6 +10,7 @@ import WorkspaceRoleController from '@api-client/controllers/workspace-role'
 import WorkspaceMembershipController from '@api-client/controllers/workspace-membership'
 import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
+import ApiKeyController from './controllers/api-key'
 export {
   AppController,
   EnvironmentController,
@@ -22,5 +23,6 @@ export {
   WorkspaceRoleController,
   WorkspaceMembershipController,
   AuthController,
-  UserController
+  UserController,
+  ApiKeyController
 }

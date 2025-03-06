@@ -1,18 +1,32 @@
 'use client'
+
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
+import { useSearchParams } from 'next/navigation'
+import type { ApiKey } from '@keyshade/schema'
 import InputLoading from './loading'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
-import { userAtom } from '@/store'
+import {
+  userAtom,
+  apiKeysOfProjectAtom,
+  deleteApiKeyOpenAtom,
+  selectedApiKeyAtom
+} from '@/store'
+import AddApiKeyDialog from '@/components/userProfile/apiKeys/addApiKeyDialog'
+import ApiKeyCard from '@/components/userProfile/apiKeys/apiKeyCard'
+import ConfirmDeleteApiKey from '@/components/userProfile/apiKeys/confirmDeleteApiKey'
 import { useHttp } from '@/hooks/use-http'
 import { logout } from '@/lib/utils'
 
 function ProfilePage(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
+  const [apiKeys, setApiKeys] = useAtom(apiKeysOfProjectAtom)
+  const isDeleteApiKeyOpen = useAtomValue(deleteApiKeyOpenAtom)
+  const selectedApiKey = useAtomValue(selectedApiKeyAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [userData, setUserData] = useState({
@@ -21,6 +35,9 @@ function ProfilePage(): React.JSX.Element {
     profilePictureUrl: ''
   })
   const [isModified, setIsModified] = useState<boolean>(false)
+
+  const searchParams = useSearchParams()
+  const tab = searchParams.get('profile') ?? 'profile'
 
   const updateSelf = useHttp(() =>
     ControllerInstance.getInstance().userController.updateSelf({
@@ -35,6 +52,10 @@ function ProfilePage(): React.JSX.Element {
 
   const getSelf = useHttp(() =>
     ControllerInstance.getInstance().userController.getSelf()
+  )
+
+  const getApiKeysOfUser = useHttp(() =>
+    ControllerInstance.getInstance().apiKeyController.getApiKeysOfUser({})
   )
 
   const handleDeleteSelf = useCallback(async () => {
@@ -86,6 +107,16 @@ function ProfilePage(): React.JSX.Element {
       })
       .finally(() => setIsLoading(false))
   }, [getSelf])
+
+  useEffect(() => {
+    getApiKeysOfUser()
+      .then(({ data, success }) => {
+        if (success && data) {
+          setApiKeys(data.items as ApiKey[])
+        }
+      })
+      .finally(() => setIsLoading(false))
+  }, [getApiKeysOfUser, setApiKeys])
 
   return (
     <main className="flex flex-col gap-y-10">
@@ -152,17 +183,38 @@ function ProfilePage(): React.JSX.Element {
           Save Changes
         </Button>
       </div>
-      <Separator className="max-w-[30vw] bg-white/15" />
-      <div className="flex max-w-[20vw] flex-col gap-4">
+      <Separator className="w-full bg-white/15" />
+      <div className="flex flex-row items-center justify-between gap-4 p-3">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">API Keys</div>
           <span className="text-sm text-white/70">
             Generate new API keys to use with the Keyshade CLI.
           </span>
         </div>
+        <div>{tab === 'profile' && <AddApiKeyDialog />}</div>
       </div>
+      {isLoading ? (
+        <div className="p-3">
+          <InputLoading />
+        </div>
+      ) : (
+        apiKeys.length !== 0 && (
+          <div
+            className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 `}
+          >
+            {apiKeys.map((apiKey) => (
+              <ApiKeyCard apiKey={apiKey} key={apiKey.id} />
+            ))}
 
-      <Separator className="max-w-[30vw] bg-white/15" />
+            {/* Delete API Key alert dialog */}
+            {isDeleteApiKeyOpen && selectedApiKey ? (
+              <ConfirmDeleteApiKey />
+            ) : null}
+          </div>
+        )
+      )}
+
+      <Separator className="w-full bg-white/15" />
 
       <div className=" flex max-w-[30vw] justify-between rounded-3xl border border-red-500  bg-red-500/5 px-10 py-8">
         <div>
