@@ -33,6 +33,8 @@ import { VariableModule } from '@/variable/variable.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { createEvent } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
+import { UserModule } from '@/user/user.module'
+import { UserService } from '@/user/service/user.service'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -44,6 +46,7 @@ describe('Event Controller Tests', () => {
   let projectService: ProjectService
   let secretService: SecretService
   let variableService: VariableService
+  let userService: UserService
 
   let user: AuthenticatedUser
 
@@ -59,7 +62,8 @@ describe('Event Controller Tests', () => {
         SecretModule,
         ProjectModule,
         EnvironmentModule,
-        VariableModule
+        VariableModule,
+        UserModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -76,6 +80,7 @@ describe('Event Controller Tests', () => {
     projectService = moduleRef.get(ProjectService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+    userService = moduleRef.get(UserService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -84,12 +89,10 @@ describe('Event Controller Tests', () => {
   })
 
   beforeEach(async () => {
-    const createUser = await prisma.user.create({
-      data: {
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
-      }
+    const createUser = await userService.createUser({
+      email: 'johndoe@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
     })
 
     user = { ...createUser, ipAddress: USER_IP_ADDRESS }
