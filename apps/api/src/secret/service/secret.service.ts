@@ -92,7 +92,7 @@ export class SecretService {
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
-      `${dto.entries} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
+      `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
     // Check if the user has access to the environments
@@ -219,7 +219,7 @@ export class SecretService {
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
-      `${dto.entries} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
+      `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
     // Check if the secret with the same name already exists in the project
@@ -426,6 +426,9 @@ export class SecretService {
     secret.versions = secret.versions.filter(
       (version) => version.environmentId === environmentId
     )
+    this.logger.log(
+      `Found ${secret.versions.length} versions for secret ${secretSlug} in environment ${environmentSlug}`
+    )
 
     if (secret.versions.length === 0) {
       const errorMessage = `Secret ${secretSlug} has no versions for environment ${environmentSlug}`
@@ -438,7 +441,7 @@ export class SecretService {
     // Sorting is in ascending order of dates. So the last element is the latest version
     const maxVersion = secret.versions[secret.versions.length - 1].version
     this.logger.log(
-      `Max version of secret ${secretSlug} in environment ${environmentSlug} is ${maxVersion}. Rollback version is ${rollbackVersion}`
+      `Latest version of secret ${secretSlug} in environment ${environmentSlug} is ${maxVersion}. Rollback version is ${rollbackVersion}`
     )
 
     // Check if the rollback version is valid
