@@ -37,16 +37,23 @@ export class UserService {
   }
 
   async getSelf(user: UserWithWorkspace) {
+    this.log.log(`User ${user.id} attempted to fetch their own profile`)
     return user
   }
 
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
+    this.log.log(`User ${user.id} attempted to update their own profile`)
+
     const data: UpdateSelfRequest = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished
     }
+
     if (dto?.email) {
+      this.log.log(
+        `User ${user.id} attempted to update their email to ${dto.email}`
+      )
       const userExists =
         (await this.prisma.user.count({
           where: {
@@ -55,16 +62,18 @@ export class UserService {
         })) > 0
 
       if (userExists) {
+        const errorMessage = `Can not update email to ${dto.email} as it already exists`
+        this.log.error(errorMessage)
         throw new ConflictException(
-          constructErrorBody(
-            'Email already exists',
-            `Can not update email to ${dto.email} as it already exists`
-          )
+          constructErrorBody('Email already exists', errorMessage)
         )
       }
 
+      this.log.log(`Generating OTP for user ${user.id} to change email`)
       const otp = await generateOtp(user.email, user.id, this.prisma)
+      this.log.log(`Generated OTP for user ${user.id} to change email`)
 
+      this.log.log(`Creating email change record for user ${user.id}`)
       await this.prisma.userEmailChange.upsert({
         where: {
           otpId: otp.id
@@ -78,21 +87,23 @@ export class UserService {
         }
       })
 
+      this.log.log(`Sending email change OTP to user ${user.id}`)
       await this.mailService.sendEmailChangedOtp(dto.email, otp.code)
     }
 
+    this.log.log(`Updating user ${user.id} with data ${data}`)
     const updatedUser = await this.prisma.user.update({
       where: {
         id: user.id
       },
       data
     })
+    this.log.log(`Updated user ${user.id} with data ${data}`)
+
     await this.cache.setUser({
       ...updatedUser,
       defaultWorkspace: user.defaultWorkspace
     })
-
-    this.log.log(`Updated user ${user.id} with data ${dto}`)
 
     return updatedUser
   }
@@ -115,11 +126,10 @@ export class UserService {
         })) > 0
 
       if (userExists) {
+        const errorMessage = `Can not update email to ${dto.email} as it already exists`
+        this.log.error(errorMessage)
         throw new ConflictException(
-          constructErrorBody(
-            'Email already exists',
-            `Can not update email to ${dto.email} as it already exists`
-          )
+          constructErrorBody('Email already exists', errorMessage)
         )
       }
 
@@ -148,6 +158,9 @@ export class UserService {
     user: UserWithWorkspace,
     otpCode: string
   ): Promise<User> {
+    this.log.log(`User ${user.id} attempted to validate OTP for email change`)
+
+    this.log.log(`Checking if OTP is valid for user ${user.id}`)
     const otp = await this.prisma.otp.findUnique({
       where: {
         userId: user.id,
@@ -156,7 +169,7 @@ export class UserService {
     })
 
     if (!otp || otp.expiresAt < new Date()) {
-      this.log.log(`OTP expired or invalid`)
+      this.log.error(`OTP ${otpCode} is invalid or expired for user ${user.id}`)
       throw new UnauthorizedException(
         constructErrorBody(
           'Invalid OTP',
@@ -164,18 +177,56 @@ export class UserService {
         )
       )
     }
+
+    this.log.log(
+      `OTP ${otpCode} is valid for user ${
+        user.id
+      }, checking email change record`
+    )
     const userEmailChange = await this.prisma.userEmailChange.findUnique({
       where: {
         otpId: otp.id
       }
     })
 
+    if (!userEmailChange) {
+      this.log.error(`Email change record not found for OTP ${otpCode}`)
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'The OTP has either exipred or is invalid '
+        )
+      )
+    }
+
+    this.log.log(
+      `Email change record found for OTP ${otpCode}, checking if email is already in use`
+    )
+    const emailExists =
+      (await this.prisma.user.count({
+        where: {
+          email: userEmailChange.newEmail.toLowerCase()
+        }
+      })) > 0
+
+    if (emailExists) {
+      const errorMessage = `Can not update email to ${userEmailChange.newEmail} as it already exists`
+      this.log.error(errorMessage)
+      throw new ConflictException(
+        constructErrorBody('Email already exists', errorMessage)
+      )
+    }
+
+    this.log.log(
+      `Email ${userEmailChange.newEmail} is not in use, updating user ${user.id}`
+    )
     const deleteEmailChangeRecord = this.prisma.userEmailChange.delete({
       where: {
         otpId: otp.id
       }
     })
 
+    this.log.log(`Deleting OTP ${otpCode} for user ${user.id}`)
     const deleteOtp = this.prisma.otp.delete({
       where: {
         userId: user.id,
@@ -206,6 +257,9 @@ export class UserService {
   }
 
   async resendEmailChangeOtp(user: UserWithWorkspace) {
+    this.log.log(`User ${user.id} requested to resend OTP for email change`)
+
+    this.log.log(`Getting old OTP for user ${user.id}`)
     const oldOtp = await this.prisma.otp.findUnique({
       where: {
         userId: user.id
@@ -215,7 +269,8 @@ export class UserService {
       }
     })
 
-    if (!oldOtp?.emailChange) {
+    if (!oldOtp || !oldOtp.emailChange) {
+      this.log.error(`No OTP found for user ${user.id}`)
       throw new ConflictException(
         constructErrorBody(
           'No OTP for email change exists',
@@ -224,8 +279,11 @@ export class UserService {
       )
     }
 
+    this.log.log(`Generating new OTP for user ${user.id}`)
     const newOtp = await generateOtp(user.email, user.id, this.prisma)
+    this.log.log(`Generated new OTP for user ${user.id}`)
 
+    this.log.log(`Sending new OTP to user ${user.id}`)
     await this.mailService.sendEmailChangedOtp(
       oldOtp.emailChange.newEmail,
       newOtp.code
@@ -271,7 +329,9 @@ export class UserService {
   }
 
   async deleteSelf(user: UserWithWorkspace) {
+    this.log.log(`User ${user.id} attempted to delete their own account`)
     await this.deleteUserById(user.id)
+    this.log.log(`User ${user.id} deleted their own account`)
   }
 
   async deleteUser(userId: User['id']) {
@@ -310,6 +370,7 @@ export class UserService {
         }
       })) > 0
     if (checkDuplicateUser) {
+      this.log.error(`User already exists with email ${dto.email}`)
       throw new ConflictException(
         constructErrorBody(
           'User already exists with this email',
