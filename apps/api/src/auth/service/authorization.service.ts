@@ -13,10 +13,11 @@ import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 
 @Injectable()
 export class AuthorizationService {
+  private readonly logger = new Logger(AuthorizationService.name)
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService,
-    private readonly logger: Logger
+    private readonly authorityCheckerService: AuthorityCheckerService
   ) {}
 
   /**
@@ -198,9 +199,5 @@ export class AuthorizationService {
         `User ${user.id} is not allowed to access this workspace`
       )
     }
-
-    this.logger.log(
-      `Checking if user ${user.id}'s email has access to workspace ${workspace.id}`
-    )
   }
 }

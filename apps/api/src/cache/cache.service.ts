@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  LoggerService,
-  OnModuleDestroy
-} from '@nestjs/common'
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { UserWithWorkspace } from '@/user/user.types'
@@ -12,9 +7,10 @@ import { UserWithWorkspace } from '@/user/user.types'
 export class CacheService implements OnModuleDestroy {
   private static readonly USER_PREFIX = 'user-'
 
+  private readonly logger = new Logger(CacheService.name)
+
   constructor(
-    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType },
-    private logger: LoggerService
+    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
   ) {}
 
   private getUserKey(userId: string): string {

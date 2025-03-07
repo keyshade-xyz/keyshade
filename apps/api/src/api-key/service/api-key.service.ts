@@ -43,6 +43,8 @@ export class ApiKeyService {
    * @returns The created API key.
    */
   async createApiKey(user: User, dto: CreateApiKey) {
+    this.logger.log(`User ${user.id} attempted to create an API key`)
+
     await this.isApiKeyUnique(user, dto.name)
 
     const plainTextApiKey = generateApiKey()
@@ -97,6 +99,8 @@ export class ApiKeyService {
     apiKeySlug: ApiKey['slug'],
     dto: UpdateApiKey
   ) {
+    this.logger.log(`User ${user.id} attempted to update API key ${apiKeySlug}`)
+
     await this.isApiKeyUnique(user, dto.name)
 
     const apiKey = await this.prisma.apiKey.findUnique({
@@ -146,6 +150,8 @@ export class ApiKeyService {
    * @param apiKeySlug The slug of the API key to delete.
    */
   async deleteApiKey(user: User, apiKeySlug: ApiKey['slug']) {
+    this.logger.log(`User ${user.id} attempted to delete API key ${apiKeySlug}`)
+
     try {
       await this.prisma.apiKey.delete({
         where: {
@@ -154,11 +160,10 @@ export class ApiKeyService {
         }
       })
     } catch (error) {
+      const errorMessage = `API key ${apiKeySlug} not found`
+      this.logger.error(errorMessage)
       throw new NotFoundException(
-        constructErrorBody(
-          'API Key not found',
-          `API key ${apiKeySlug} not found`
-        )
+        constructErrorBody('API Key not found', errorMessage)
       )
     }
 
@@ -174,6 +179,10 @@ export class ApiKeyService {
    * @returns The API key with the given slug.
    */
   async getApiKeyBySlug(user: User, apiKeySlug: ApiKey['slug']) {
+    this.logger.log(
+      `User ${user.id} attempted to retrieve API key ${apiKeySlug}`
+    )
+
     const apiKey = await this.prisma.apiKey.findUnique({
       where: {
         slug: apiKeySlug,
@@ -183,11 +192,10 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
+      const errorMessage = `API key ${apiKeySlug} not found`
+      this.logger.error(errorMessage)
       throw new NotFoundException(
-        constructErrorBody(
-          'API Key not found',
-          `API key ${apiKeySlug} not found`
-        )
+        constructErrorBody('API Key not found', errorMessage)
       )
     }
 
@@ -213,6 +221,8 @@ export class ApiKeyService {
     order: string,
     search: string
   ) {
+    this.logger.log(`User ${user.id} attempted to retrieve API keys`)
+
     const items = await this.prisma.apiKey.findMany({
       where: {
         userId: user.id,
@@ -254,6 +264,8 @@ export class ApiKeyService {
    * @param apiKeyName The name of the API key to check.
    */
   private async isApiKeyUnique(user: User, apiKeyName: string) {
+    this.logger.log(`Checking if API key with name ${apiKeyName} exists`)
+
     let apiKey: ApiKey | null = null
 
     try {
@@ -268,12 +280,17 @@ export class ApiKeyService {
     } catch (_error) {}
 
     if (apiKey) {
+      this.logger.error(
+        `API key with name ${apiKeyName} already exists for user ${user.id}`
+      )
       throw new ConflictException(
         constructErrorBody(
           'API Key already exists',
           `API key with name ${apiKeyName} already exists`
         )
       )
+    } else {
+      this.logger.log(`API key with name ${apiKeyName} does not exist`)
     }
   }
 }

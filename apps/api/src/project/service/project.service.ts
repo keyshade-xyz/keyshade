@@ -667,7 +667,7 @@ export class ProjectService {
 
     this.isProjectForked(project)
 
-    this.logger.log(`Fetchign project that ${projectSlug} is forked from`)
+    this.logger.log(`Fetching project that ${projectSlug} is forked from`)
     const forkedFromProject = await this.prisma.project.findUnique({
       where: {
         id: project.forkedFromId
@@ -1009,7 +1009,7 @@ export class ProjectService {
     return { items, metadata }
   }
 
-  private async isProjectForked(project: Project) {
+  private isProjectForked(project: Project) {
     if (!project.isForked || project.forkedFromId == null) {
       this.logger.error(`Project ${project.slug} is not a forked project`)
       throw new BadRequestException(

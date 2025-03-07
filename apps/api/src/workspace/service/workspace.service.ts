@@ -84,7 +84,7 @@ export class WorkspaceService {
       })
 
     // Check if a same named workspace already exists
-    dto.name && this.existsByName(dto.name, user.id)
+    dto.name && (await this.existsByName(dto.name, user.id))
 
     // Update the workspace
     this.logger.log(`Updating workspace ${workspace.name} (${workspace.id})`)
@@ -93,7 +93,7 @@ export class WorkspaceService {
         id: workspace.id
       },
       data: {
-        name: dto.name,
+        name: dto.name === workspace.name ? undefined : dto.name,
         slug: dto.name
           ? await generateEntitySlug(dto.name, 'WORKSPACE', this.prisma)
           : undefined,

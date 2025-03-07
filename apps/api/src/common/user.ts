@@ -88,8 +88,11 @@ export async function getUserByEmailOrId(
   const logger = new Logger('getUserByEmailOrId')
 
   logger.log(`Getting user by email or ID: ${input}`)
+
+  let user: User
+
   try {
-    const user =
+    user =
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
@@ -100,17 +103,35 @@ export async function getUserByEmailOrId(
           id: input
         }
       }))
-
-    if (!user) {
-      logger.error(`User not found: ${input}`)
-      throw new NotFoundException(
-        constructErrorBody('User not found', `User ${input} not found`)
+  } catch (error) {
+    logger.error(`Error getting user by email or ID: ${input}`)
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Error getting user',
+        'An error occurred while getting the user.'
       )
+    )
+  }
+
+  if (!user) {
+    logger.error(`User not found: ${input}`)
+    throw new NotFoundException(
+      constructErrorBody('User not found', `User ${input} not found`)
+    )
+  }
+
+  logger.log(`Got user ${user.id}`)
+
+  if (user.isAdmin) {
+    logger.log(`User ${user.id} is an admin. No default workspace needed.`)
+    return {
+      ...user,
+      defaultWorkspace: null
     }
-
-    logger.log(`Got user ${user.id}`)
-
-    logger.log(`Getting default workspace for user ${user.id}`)
+  } else {
+    logger.log(
+      `User ${user.id} is a regular user. Getting default workspace for user ${user.id}`
+    )
     const defaultWorkspace = await prisma.workspace.findFirst({
       where: {
         ownerId: user.id,
@@ -136,13 +157,5 @@ export async function getUserByEmailOrId(
       ...user,
       defaultWorkspace
     }
-  } catch (error) {
-    logger.error(`Error getting user by email or ID: ${input}`)
-    throw new InternalServerErrorException(
-      constructErrorBody(
-        'Error getting user',
-        'An error occurred while getting the user.'
-      )
-    )
   }
 }

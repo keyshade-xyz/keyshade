@@ -22,10 +22,9 @@ import { constructErrorBody } from '@/common/util'
 
 @Injectable()
 export class AuthorityCheckerService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly logger: Logger
-  ) {}
+  private readonly logger = new Logger(AuthorityCheckerService.name)
+
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Checks if the user has the required authorities to access the given workspace.
@@ -155,12 +154,7 @@ export class AuthorityCheckerService {
     }
 
     const permittedAuthoritiesForProject: Set<Authority> =
-      await getCollectiveProjectAuthorities(
-        user.id,
-        project,
-        this.prisma,
-        this.logger
-      )
+      await getCollectiveProjectAuthorities(user.id, project, this.prisma)
 
     const permittedAuthoritiesForWorkspace: Set<Authority> =
       await getCollectiveWorkspaceAuthorities(
@@ -354,8 +348,7 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       variable.project,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     this.logger.log(
@@ -439,8 +432,7 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveProjectAuthorities(
       user.id,
       secret.project,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     this.logger.log(
@@ -552,8 +544,7 @@ export class AuthorityCheckerService {
       const projectAuthorities = await getCollectiveProjectAuthorities(
         user.id,
         project,
-        this.prisma,
-        this.logger
+        this.prisma
       )
 
       this.logger.log(

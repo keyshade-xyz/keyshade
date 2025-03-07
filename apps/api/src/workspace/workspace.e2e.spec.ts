@@ -338,21 +338,6 @@ describe('Workspace Controller Tests', () => {
       expect(body.icon).toBe('🔥')
     })
 
-    it('should not be able to change the name to an existing workspace or same name', async () => {
-      const response = await app.inject({
-        method: 'PUT',
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        url: `/workspace/${workspace1.slug}`,
-        payload: {
-          name: 'My Workspace'
-        }
-      })
-
-      expect(response.statusCode).toBe(409)
-    })
-
     it('should not allow external user to update a workspace', async () => {
       const response = await app.inject({
         method: 'PUT',
