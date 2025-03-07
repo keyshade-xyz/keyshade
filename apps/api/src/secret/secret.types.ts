@@ -13,3 +13,16 @@ export interface SecretWithProject extends Secret {
 }
 
 export type SecretWithProjectAndVersion = SecretWithProject & SecretWithVersion
+
+export interface SecretWithValues {
+  secret: Secret & { lastUpdatedBy: { id: string; name: string } }
+  values: Array<{
+    environment: {
+      id: string
+      name: string
+      slug: string
+    }
+    value: string
+    version: number
+  }>
+}

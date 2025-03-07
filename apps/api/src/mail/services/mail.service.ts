@@ -9,6 +9,7 @@ import RemovedFromWorkspaceEmail from '../emails/workspace-removal'
 import { render } from '@react-email/render'
 import WorkspaceInvitationEmail from '../emails/workspace-invitation'
 import OTPEmailTemplate from '../emails/otp-email-template'
+import { constructErrorBody } from '@/common/util'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -157,6 +158,7 @@ export class MailService implements IMailService {
     body: string
   ): Promise<void> {
     try {
+      this.log.log(`Sending email to ${email}`)
       await this.transporter.sendMail({
         from: process.env.FROM_EMAIL,
         to: email,
@@ -167,7 +169,10 @@ export class MailService implements IMailService {
     } catch (error) {
       this.log.error(`Error sending email to ${email}: ${error.message}`)
       throw new InternalServerErrorException(
-        `Error sending email to ${email}: ${error.message}`
+        constructErrorBody(
+          'Error sending email',
+          `Error sending email to ${email}: ${error.message}`
+        )
       )
     }
   }

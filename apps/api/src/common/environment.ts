@@ -1,9 +1,8 @@
-import { PrismaService } from '@/prisma/prisma.service'
 import { CreateSecret } from '@/secret/dto/create.secret/create.secret'
 import { UpdateSecret } from '@/secret/dto/update.secret/update.secret'
 import { CreateVariable } from '@/variable/dto/create.variable/create.variable'
 import { UpdateVariable } from '@/variable/dto/update.variable/update.variable'
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { BadRequestException } from '@nestjs/common'
 import { Authority, Project } from '@prisma/client'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -17,7 +16,6 @@ import { constructErrorBody } from './util'
  * @param dto The DTO containing the list of environment slugs
  * @param user The user making the request
  * @param project The project that the environments must belong to
- * @param prisma The PrismaService instance
  * @param authorityCheckerService The AuthorityCheckerService instance
  *
  * @throws NotFoundException if any of the environments do not exist
@@ -29,7 +27,6 @@ export const getEnvironmentIdToSlugMap = async (
   dto: CreateSecret | UpdateSecret | CreateVariable | UpdateVariable,
   user: AuthenticatedUser,
   project: Project,
-  prisma: PrismaService,
   authorizationService: AuthorizationService
 ): Promise<Map<string, string>> => {
   const environmentSlugToIdMap = new Map<string, string>()
@@ -44,15 +41,6 @@ export const getEnvironmentIdToSlugMap = async (
           entity: { slug: environmentSlug },
           authorities: [Authority.READ_ENVIRONMENT]
         })
-
-      if (!environment) {
-        throw new NotFoundException(
-          constructErrorBody(
-            'Environment not found',
-            `Environment ${environmentSlug} not found`
-          )
-        )
-      }
 
       // Check if the environment belongs to the project
       if (environment.projectId !== project.id) {

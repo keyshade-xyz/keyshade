@@ -36,7 +36,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 
 @Injectable()
 export class ProjectService {
-  private readonly log: Logger = new Logger(ProjectService.name)
+  private readonly logger: Logger = new Logger(ProjectService.name)
 
   constructor(
     private readonly prisma: PrismaService,
@@ -56,7 +56,10 @@ export class ProjectService {
     workspaceSlug: Workspace['slug'],
     dto: CreateProject
   ) {
+    this.logger.log(`User ${user.id} attempted to create a project ${dto.name}`)
+
     // Check if the workspace exists or not
+    this.logger.log(`Checking if workspace ${workspaceSlug} exists`)
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -66,15 +69,18 @@ export class ProjectService {
     const workspaceId = workspace.id
 
     // Check if project with this name already exists for the user
-    if (await this.projectExists(dto.name, workspaceId))
-      throw new ConflictException(
-        constructErrorBody(
-          'Project already exists',
-          `Project with name ${dto.name} already exists in workspace ${workspace.slug}`
-        )
+    if (await this.projectExists(dto.name, workspaceId)) {
+      const errorMessage = `Project with name ${dto.name} already exists in workspace ${workspace.slug}`
+      this.logger.error(
+        `User ${user.id} attempted to create a project that already exists: ${errorMessage}`
       )
+      throw new ConflictException(
+        constructErrorBody('Project already exists', errorMessage)
+      )
+    }
 
     // Create the public and private key pair
+    this.logger.log(`Creating key pair for project ${dto.name}`)
     const { publicKey, privateKey } = createKeyPair()
 
     const data: any = {
@@ -92,21 +98,31 @@ export class ProjectService {
     // Check if the private key should be stored
     // PLEASE DON'T STORE YOUR PRIVATE KEYS WITH US!!
     if (dto.storePrivateKey) {
+      this.logger.log(`Storing private key for project ${dto.name}`)
       data.privateKey = privateKey
+    } else {
+      this.logger.log(`Not storing private key for project ${dto.name}`)
     }
 
     const userId = user.id
 
     const newProjectId = v4()
 
+    this.logger.log(`Fetching admin role for workspace ${workspace.slug}`)
     const adminRole = await this.prisma.workspaceRole.findFirst({
       where: {
         workspaceId: workspaceId,
         hasAdminAuthority: true
       }
     })
+    this.logger.log(
+      `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
+    )
 
     // Create and return the project
+    this.logger.log(
+      `Creating project ${dto.name} under workspace ${workspace.slug}`
+    )
     const createNewProject = this.prisma.project.create({
       data: {
         id: newProjectId,
@@ -147,6 +163,9 @@ export class ProjectService {
     // Create and assign the environments provided in the request, if any
     // or create a default environment
     if (dto.environments && dto.environments.length > 0) {
+      this.logger.log(
+        `Project has ${dto.environments.length} environments to create`
+      )
       for (const environment of dto.environments) {
         createEnvironmentOps.push(
           this.prisma.environment.create({
@@ -165,6 +184,7 @@ export class ProjectService {
         )
       }
     } else {
+      this.logger.log(`Creating default environment for project ${dto.name}`)
       createEnvironmentOps.push(
         this.prisma.environment.create({
           data: {
@@ -206,7 +226,7 @@ export class ProjectService {
       this.prisma
     )
 
-    this.log.debug(`Created project ${newProject}`)
+    this.logger.debug(`Created project ${newProject} (${newProject.slug})`)
 
     // It is important that we log before the private key is set
     // in order to not log the private key
@@ -231,12 +251,17 @@ export class ProjectService {
     projectSlug: Project['slug'],
     dto: UpdateProject
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update project ${projectSlug}`
+    )
+
     // Check if the user has the authority to update the project
     let authority: Authority = Authority.UPDATE_PROJECT
 
     // Only admins can change the visibility of the project
     if (dto.accessLevel) authority = Authority.WORKSPACE_ADMIN
 
+    this.logger.log(`Checking if user has authority to update project`)
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -246,23 +271,30 @@ export class ProjectService {
 
     // Check if project with this name already exists for the user
     if (
-      (dto.name && (await this.projectExists(dto.name, user.id))) ||
+      (dto.name && (await this.projectExists(dto.name, project.workspaceId))) ||
       project.name === dto.name
-    )
+    ) {
+      this.logger.error(
+        `Project with name ${dto.name} already exists in workspace ${project.workspaceId}`
+      )
       throw new ConflictException(
         constructErrorBody(
           'Project already exists',
-          `Project with this name **${dto.name}** already exists`
+          `Project with this name ${dto.name} already exists in the workspace`
         )
       )
+    }
 
     if (dto.accessLevel) {
+      this.logger.log(`Access level specified while updating project.`)
       const currentAccessLevel = project.accessLevel
 
       if (
         currentAccessLevel !== ProjectAccessLevel.GLOBAL &&
         dto.accessLevel === ProjectAccessLevel.GLOBAL
       ) {
+        this.logger.log(`Project is being set as GLOBAL`)
+
         // If the project is being made global, the private key must be stored
         // This is because we want anyone to see the secrets in the project
         dto.storePrivateKey = true
@@ -271,6 +303,9 @@ export class ProjectService {
         // We can't make the project global if a private key isn't supplied,
         // because we need to decrypt the secrets
         if (!dto.privateKey) {
+          this.logger.error(
+            `Private key not provided while setting project as GLOBAL for project ${project.slug}`
+          )
           throw new BadRequestException(
             constructErrorBody(
               'Private key required',
@@ -282,12 +317,16 @@ export class ProjectService {
         currentAccessLevel === ProjectAccessLevel.GLOBAL &&
         dto.accessLevel !== ProjectAccessLevel.GLOBAL
       ) {
+        this.logger.log(`Project is being set as PRIVATE or INTERNAL`)
+
         dto.storePrivateKey = false
         dto.regenerateKeyPair = true
 
         // At this point, we already will have the private key since the project is global
         dto.privateKey = project.privateKey
       }
+    } else {
+      this.logger.log(`Access level not specified while updating project.`)
     }
 
     const data: Partial<Project> = {
@@ -307,6 +346,7 @@ export class ProjectService {
       dto.accessLevel !== ProjectAccessLevel.GLOBAL &&
       project.accessLevel === ProjectAccessLevel.GLOBAL
     ) {
+      this.logger.log(`Set to unlink forks of ${project.slug}`)
       data.isForked = false
       data.forkedFromId = null
     }
@@ -316,6 +356,7 @@ export class ProjectService {
     let publicKey = project.publicKey
 
     if (dto.regenerateKeyPair) {
+      this.logger.log(`Set to regenerate key pair for project ${project.slug}`)
       if (dto.privateKey || project.privateKey) {
         const { txs, newPrivateKey, newPublicKey } =
           await this.updateProjectKeyPair(
@@ -329,6 +370,9 @@ export class ProjectService {
 
         versionUpdateOps.push(...txs)
       } else {
+        this.logger.error(
+          `Private key not provided while regenerating key pair for project ${project.slug}`
+        )
         throw new BadRequestException(
           constructErrorBody(
             'Private key required',
@@ -370,7 +414,7 @@ export class ProjectService {
       this.prisma
     )
 
-    this.log.debug(`Updated project ${updatedProject.id}`)
+    this.logger.debug(`Updated project ${updatedProject.slug}`)
     return {
       ...updatedProject,
       privateKey,
@@ -394,6 +438,12 @@ export class ProjectService {
     projectSlug: Project['slug'],
     forkMetadata: ForkProject
   ) {
+    this.logger.log(`User ${user.id} attempted to fork project ${projectSlug}`)
+
+    // Check if the user has the authority to read the project
+    this.logger.log(
+      `Checking if user has authority to read project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -404,6 +454,9 @@ export class ProjectService {
     let workspaceId = null
 
     if (forkMetadata.workspaceSlug) {
+      this.logger.log(
+        `Project to be forked inside workspace ${forkMetadata.workspaceSlug}. Checking for authority`
+      )
       const workspace =
         await this.authorizationService.authorizeUserAccessToWorkspace({
           user,
@@ -413,6 +466,9 @@ export class ProjectService {
 
       workspaceId = workspace.id
     } else {
+      this.logger.log(
+        `Project to be forked in default workspace. Fetching default workspace`
+      )
       const defaultWorkspace = await this.prisma.workspaceMember.findFirst({
         where: {
           userId: user.id,
@@ -425,19 +481,27 @@ export class ProjectService {
     }
 
     const newProjectName = forkMetadata.name || project.name
+    this.logger.log(`Forking project ${projectSlug} as ${newProjectName}`)
 
     // Check if project with this name already exists for the user
-    if (await this.projectExists(newProjectName, workspaceId))
+    if (await this.projectExists(newProjectName, workspaceId)) {
+      this.logger.error(
+        `Project with name ${newProjectName} already exists in workspace ${workspaceId}`
+      )
       throw new ConflictException(
         constructErrorBody(
           'Project already exists',
           `Project with name ${newProjectName} already exists in the selected workspace`
         )
       )
+    }
 
+    this.logger.log(`Creating key pair for project ${newProjectName}`)
     const { privateKey, publicKey } = createKeyPair()
     const userId = user.id
     const newProjectId = v4()
+
+    this.logger.log(`Fetching admin role for workspace ${workspaceId}`)
     const adminRole = await this.prisma.workspaceRole.findFirst({
       where: {
         workspaceId,
@@ -522,7 +586,7 @@ export class ProjectService {
       this.prisma
     )
 
-    this.log.debug(`Created project ${newProject}`)
+    this.logger.debug(`Forked project ${newProject} (${newProject.slug})`)
     return newProject
   }
 
@@ -540,6 +604,13 @@ export class ProjectService {
     user: AuthenticatedUser,
     projectSlug: Project['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to unlink project ${projectSlug}`
+    )
+
+    this.logger.log(
+      `Checking if user has authority to unlink project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -548,6 +619,9 @@ export class ProjectService {
       })
     const projectId = project.id
 
+    this.isProjectForked(project)
+
+    this.logger.log(`Unlinking project ${projectSlug} from its parent`)
     await this.prisma.project.update({
       where: {
         id: projectId
@@ -557,6 +631,7 @@ export class ProjectService {
         forkedFromId: null
       }
     })
+    this.logger.debug(`Unlinked project ${projectSlug} from its parent`)
   }
 
   /**
@@ -577,6 +652,11 @@ export class ProjectService {
     projectSlug: Project['slug'],
     hardSync: boolean
   ) {
+    this.logger.log(`User ${user.id} attempted to sync project ${projectSlug}`)
+
+    this.logger.log(
+      `Checking if user has authority to sync project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -585,21 +665,22 @@ export class ProjectService {
       })
     const projectId = project.id
 
-    if (!project.isForked || project.forkedFromId == null) {
-      throw new BadRequestException(
-        constructErrorBody(
-          'Not a forked project',
-          `Project ${projectSlug} is not a forked project`
-        )
-      )
-    }
+    this.isProjectForked(project)
 
+    this.logger.log(`Fetching project that ${projectSlug} is forked from`)
     const forkedFromProject = await this.prisma.project.findUnique({
       where: {
         id: project.forkedFromId
       }
     })
+    this.logger.log(
+      `Project ${projectSlug} is forked from ${forkedFromProject}`
+    )
 
+    // Checking authority over the parent project
+    this.logger.log(
+      `Checking if user has authority to sync parent project ${forkedFromProject.slug}`
+    )
     const parentProject =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -607,6 +688,7 @@ export class ProjectService {
         authorities: [Authority.READ_PROJECT]
       })
 
+    this.logger.log(`Syncing project ${projectSlug} with its parent`)
     const copyProjectOp = await this.copyProjectData(
       user,
       {
@@ -621,6 +703,7 @@ export class ProjectService {
     )
 
     await this.prisma.$transaction(copyProjectOp)
+    this.logger.debug(`Synced project ${projectSlug} with its parent`)
   }
 
   /**
@@ -631,6 +714,13 @@ export class ProjectService {
    * @throws UnauthorizedException If the user does not have the authority to delete the project
    */
   async deleteProject(user: AuthenticatedUser, projectSlug: Project['slug']) {
+    this.logger.log(
+      `User ${user.id} attempted to delete project ${projectSlug}`
+    )
+
+    this.logger.log(
+      `Checking if user has authority to delete project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -680,7 +770,7 @@ export class ProjectService {
       this.prisma
     )
 
-    this.log.debug(`Deleted project ${project}`)
+    this.logger.debug(`Deleted project ${project.slug}`)
   }
 
   /**
@@ -700,6 +790,13 @@ export class ProjectService {
     page: number,
     limit: number
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all forks of project ${projectSlug}`
+    )
+
+    this.logger.log(
+      `Checking if user has authority to read project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -708,12 +805,17 @@ export class ProjectService {
       })
     const projectId = project.id
 
+    this.logger.log(`Fetching all forks of project ${projectSlug}`)
     const forks = await this.prisma.project.findMany({
       where: {
         forkedFromId: projectId
       }
     })
+    this.logger.log(`Found ${forks.length} forks of project ${projectSlug}`)
 
+    this.logger.log(
+      `Filtering forks that the user has access to for project ${projectSlug}`
+    )
     const forksAllowed = await Promise.all(
       forks.map(async (fork) => {
         const allowed =
@@ -727,6 +829,9 @@ export class ProjectService {
       })
     ).then((results) =>
       results.filter((result) => result.allowed).map((result) => result.fork)
+    )
+    this.logger.log(
+      `Found ${forksAllowed.length} forks of project ${projectSlug} that the user has access to`
     )
 
     const items = forksAllowed.slice(page * limit, (page + 1) * limit)
@@ -754,6 +859,11 @@ export class ProjectService {
    * @throws UnauthorizedException If the user does not have the authority to read the project
    */
   async getProject(user: AuthenticatedUser, projectSlug: Project['slug']) {
+    this.logger.log(`User ${user.id} attempted to get project ${projectSlug}`)
+
+    this.logger.log(
+      `Checking if user has authority to read project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -792,6 +902,13 @@ export class ProjectService {
     order: string,
     search: string
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all projects of workspace ${workspaceSlug}`
+    )
+
+    this.logger.log(
+      `Checking if user has authority to read projects of workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -800,7 +917,8 @@ export class ProjectService {
       })
     const workspaceId = workspace.id
 
-    //fetch projects with required properties
+    // Fetch projects with required properties
+    this.logger.log(`Fetching all projects of workspace ${workspaceSlug}`)
     const projects = (
       await this.prisma.project.findMany({
         skip: page * limit,
@@ -844,6 +962,9 @@ export class ProjectService {
         }
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
+    this.logger.log(
+      `Found ${projects.length} projects of workspace ${workspaceSlug}`
+    )
 
     const items = await Promise.all(
       projects.map(async (project) =>
@@ -888,6 +1009,20 @@ export class ProjectService {
     return { items, metadata }
   }
 
+  private isProjectForked(project: Project) {
+    if (!project.isForked || project.forkedFromId == null) {
+      this.logger.error(`Project ${project.slug} is not a forked project`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'Not a forked project',
+          `Project ${project.slug} is not a forked project`
+        )
+      )
+    } else {
+      this.logger.log(`Project ${project.slug} is a forked project`)
+    }
+  }
+
   /**
    * Checks if a project with a given name exists in a workspace.
    *
@@ -899,6 +1034,9 @@ export class ProjectService {
     projectName: string,
     workspaceId: Workspace['id']
   ): Promise<boolean> {
+    this.logger.log(
+      `Checking if project ${projectName} exists in workspace ${workspaceId}`
+    )
     return (
       (await this.prisma.workspaceMember.count({
         where: {
@@ -939,6 +1077,10 @@ export class ProjectService {
     // hardCopy = false: Only add those items in the toProject that are not already present in it
     hardCopy: boolean = false
   ) {
+    this.logger.log(
+      `Copying data from project ${fromProject.id} to project ${toProject.id}`
+    )
+
     // This field will be populated if hardCopy is true
     // When we are doing a hard copy, we need to delete all the
     // items in the toProject that are already present in it
@@ -958,6 +1100,10 @@ export class ProjectService {
     const toProjectVariables: Set<Variable['name']> = new Set()
 
     if (!hardCopy) {
+      this.logger.log(
+        `Soft copy operation from project ${fromProject.id} to project ${toProject.id}`
+      )
+
       const [environments, secrets, variables] = await this.prisma.$transaction(
         [
           this.prisma.environment.findMany({
@@ -978,6 +1124,10 @@ export class ProjectService {
         ]
       )
 
+      this.logger.log(
+        `Found ${environments.length} environments, ${secrets.length} secrets and ${variables.length} variables in project ${toProject.id}`
+      )
+
       environments.forEach((env) => {
         envNameToIdMap[env.name] = env.id
         toProjectEnvironments.add(env.name)
@@ -991,6 +1141,10 @@ export class ProjectService {
         toProjectVariables.add(variable.name)
       })
     } else {
+      this.logger.log(
+        `Hard copy operation from project ${fromProject.id} to project ${toProject.id}`
+      )
+
       deleteOps.push(
         this.prisma.environment.deleteMany({
           where: {
@@ -1021,6 +1175,9 @@ export class ProjectService {
     // difference operation.
     // In case of a hard copy, we would just copy all the environments
     // since toProjectEnvironments will be empty.
+    this.logger.log(
+      `Finding environments that are not present in project ${toProject.id} but are present in project ${fromProject.id}`
+    )
     const missingEnvironments = await this.prisma.environment.findMany({
       where: {
         projectId: fromProject.id,
@@ -1029,6 +1186,9 @@ export class ProjectService {
         }
       }
     })
+    this.logger.log(
+      `Found ${missingEnvironments.length} environments that are not present in project ${toProject.id}`
+    )
 
     // For all the new environments that we are creating, we want to map
     // the name of the environment to the id of the newly created environment
@@ -1059,6 +1219,9 @@ export class ProjectService {
     // Get all the secrets that belongs to the parent project and
     // replicate them for the new project. This too is a set difference
     // operation.
+    this.logger.log(
+      `Finding secrets that are not present in project ${toProject.id} but are present in project ${fromProject.id}`
+    )
     const secrets = await this.prisma.secret.findMany({
       where: {
         projectId: fromProject.id,
@@ -1121,6 +1284,9 @@ export class ProjectService {
     // replicate them for the new project
     const createVariableOps = []
 
+    this.logger.log(
+      `Finding variables that are not present in project ${toProject.id} but are present in project ${fromProject.id}`
+    )
     const variables = await this.prisma.variable.findMany({
       where: {
         projectId: fromProject.id,
@@ -1257,64 +1423,90 @@ export class ProjectService {
     project: Partial<Project>,
     user: AuthenticatedUser
   ): Promise<ProjectWithCounts> {
-    let environmentCount = 0
-    let variableCount = 0
-    let secretCount = 0
-    // When we later implement RBAC for environments, we would need to updated
-    // this code to only include environments like we do while fetching projects.
+    this.logger.log(
+      `Counting environments, variables and secrets in project ${project.slug}`
+    )
 
-    // What would be even better is, we should fetch environments directly. And then,
-    // accumulate the projects into a set of projects. And then, return that set along
-    // with the required data.
+    this.logger.log(`Fetching all environments of project ${project.slug}`)
     const allEnvs = await this.prisma.environment.findMany({
       where: { projectId: project.id }
     })
+    this.logger.log(
+      `Found ${allEnvs.length} environments in project ${project.slug}`
+    )
 
-    // This entire block will become invalid after RBAC for environments are implemented
-    const envPromises = allEnvs.map(async (env) => {
-      const hasRequiredPermission =
-        await this.authorizationService.authorizeUserAccessToEnvironment({
-          user,
-          entity: { slug: env.slug },
-          authorities:
-            project.accessLevel == ProjectAccessLevel.GLOBAL
-              ? []
-              : [
-                  Authority.READ_ENVIRONMENT,
-                  Authority.READ_SECRET,
-                  Authority.READ_VARIABLE
-                ]
-        })
-      if (hasRequiredPermission) {
-        environmentCount += 1
+    const permittedEnvironments = []
 
-        const fetchSecretCount = this.prisma.secret.count({
-          where: {
-            projectId: project.id,
-            versions: { some: { environmentId: env.id } }
-          }
-        })
+    this.logger.log(
+      `Checking access to all environments of project ${project.slug}`
+    )
+    for (const env of allEnvs) {
+      this.logger.log(
+        `Checking access to environment ${env.slug} of project ${project.slug}`
+      )
+      try {
+        const permittedEnv =
+          await this.authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            authorities:
+              project.accessLevel == ProjectAccessLevel.GLOBAL
+                ? []
+                : [
+                    Authority.READ_ENVIRONMENT,
+                    Authority.READ_SECRET,
+                    Authority.READ_VARIABLE
+                  ],
+            entity: { slug: env.slug }
+          })
 
-        const fetchVariableCount = this.prisma.variable.count({
-          where: {
-            projectId: project.id,
-            versions: { some: { environmentId: env.id } }
-          }
-        })
-
-        return this.prisma.$transaction([fetchSecretCount, fetchVariableCount])
+        this.logger.log(
+          `User has access to environment ${env.slug} of project ${project.slug}`
+        )
+        permittedEnvironments.push(permittedEnv)
+      } catch (e) {
+        this.logger.log(
+          `User does not have access to environment ${env.slug} of project ${project.slug}`
+        )
       }
-      return [0, 0]
+    }
+
+    const envPromises = permittedEnvironments.map(async (env: Environment) => {
+      const fetchSecretCount = this.prisma.secret.count({
+        where: {
+          projectId: project.id,
+          versions: { some: { environmentId: env.id } }
+        }
+      })
+
+      const fetchVariableCount = this.prisma.variable.count({
+        where: {
+          projectId: project.id,
+          versions: { some: { environmentId: env.id } }
+        }
+      })
+
+      return this.prisma.$transaction([fetchSecretCount, fetchVariableCount])
     })
+
+    this.logger.log(
+      `Fetching counts of variables and secrets in project ${project.slug}`
+    )
     const counts = await Promise.all(envPromises)
-    secretCount = counts.reduce((sum, [secretCount]) => sum + secretCount, 0)
-    variableCount = counts.reduce(
+    const secretCount = counts.reduce(
+      (sum, [secretCount]) => sum + secretCount,
+      0
+    )
+    const variableCount = counts.reduce(
       (sum, [, variableCount]) => sum + variableCount,
       0
     )
+    this.logger.log(
+      `Found ${variableCount} variables and ${secretCount} secrets in project ${project.slug}`
+    )
+
     return {
       ...project,
-      environmentCount,
+      environmentCount: permittedEnvironments.length,
       variableCount,
       secretCount
     }

@@ -18,6 +18,7 @@ import { JsonObject } from '@prisma/client/runtime/library'
 import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
 import { EventService } from '@/event/service/event.service'
 import { AuthenticatedUser } from '@/user/user.types'
+import { constructErrorBody } from './util'
 
 /**
  * Creates a new event and saves it to the database.
@@ -51,9 +52,13 @@ export const createEvent = async (
 ): Promise<void> => {
   const logger = new Logger('CreateEvent')
 
+  logger.log(`Creating event with type ${data.type}`)
+
   if (data.triggerer !== EventTriggerer.SYSTEM && !data.triggeredBy) {
+    const errorMessage = 'User must be provided for non-system events'
+    logger.error(errorMessage)
     throw new InternalServerErrorException(
-      'User must be provided for non-system events'
+      constructErrorBody('Error creating event', errorMessage)
     )
   }
 
@@ -72,7 +77,10 @@ export const createEvent = async (
     }
   })
 
+  logger.log(`Event with id ${event.id} created`)
+
   if (data.entity) {
+    logger.log(`Emitting event for entity with id ${data.entity.id}`)
     // We need to fetch all the integrations that will be triggered for this event.
     // To do that, we will need to take the following steps:
     // 1. Based on the entity, get the projectId and environmentId
@@ -142,8 +150,15 @@ export const createEvent = async (
       }
     })
 
+    logger.log(
+      `Found ${integrationEntities.length} integrations. Emitting events...`
+    )
+
     // Emit the event for each integration
     for (const integration of integrationEntities) {
+      logger.log(
+        `Emitting event for integration with id ${integration.id} and type ${integration.type}`
+      )
       const integrationInstance = IntegrationFactory.createIntegration(
         integration.type
       )
@@ -157,10 +172,9 @@ export const createEvent = async (
         },
         integration.metadata
       )
+      logger.log(`Event emitted for integration with id ${integration.id}`)
     }
   }
-
-  logger.log(`Event with id ${event.id} created`)
 }
 
 /**
@@ -181,7 +195,11 @@ export const fetchEvents = async (
   source?: EventSource,
   severity?: EventSeverity
 ): Promise<any> => {
-  return await eventService.getEvents(
+  const logger = new Logger('FetchEvents')
+
+  logger.log(`User ${user.id} fetched events for workspace ${workspaceSlug}`)
+  logger.log(`Source: ${source}, Severity: ${severity}`)
+  const events = await eventService.getEvents(
     user,
     workspaceSlug,
     0,
@@ -190,4 +208,7 @@ export const fetchEvents = async (
     severity,
     source
   )
+
+  logger.log(`Fetched ${events.metadata.totalCount} events`)
+  return events
 }

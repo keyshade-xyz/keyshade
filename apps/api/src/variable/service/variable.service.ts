@@ -31,8 +31,9 @@ import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
-import { getVariableWithValues, VariableWithValues } from '@/common/variable'
+import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
+import { VariableWithValues } from '../variable.types'
 
 @Injectable()
 export class VariableService {
@@ -62,7 +63,14 @@ export class VariableService {
     dto: CreateVariable,
     projectSlug: Project['slug']
   ): Promise<VariableWithValues> {
+    this.logger.log(
+      `User ${user.id} attempted to create variable ${dto.name} in project ${projectSlug}`
+    )
+
     // Fetch the project
+    this.logger.log(
+      `Checking if user ${user.id} has access to create variable in project ${projectSlug}`
+    )
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -75,6 +83,9 @@ export class VariableService {
     await this.variableExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
+    this.logger.log(
+      `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
+    )
 
     // Check if the user has access to the environments
     const environmentSlugToIdMap = shouldCreateRevisions
@@ -82,12 +93,12 @@ export class VariableService {
           dto,
           user,
           project,
-          this.prisma,
           this.authorizationService
         )
       : new Map<string, string>()
 
     // Create the variable
+    this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
     const variableData = await this.prisma.variable.create({
       data: {
         name: dto.name,
@@ -136,6 +147,10 @@ export class VariableService {
       }
     })
 
+    this.logger.log(
+      `Created variable ${variableData.name} in project ${project.slug}`
+    )
+
     const variable = getVariableWithValues(variableData)
 
     await createEvent(
@@ -156,8 +171,6 @@ export class VariableService {
       this.prisma
     )
 
-    this.logger.log(`User ${user.id} created variable ${variable.variable.id}`)
-
     return variable
   }
 
@@ -173,6 +186,14 @@ export class VariableService {
     variableSlug: Variable['slug'],
     dto: UpdateVariable
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update variable ${variableSlug}`
+    )
+
+    // Fetch the variable
+    this.logger.log(
+      `Checking if user ${user.id} has access to update variable ${variableSlug}`
+    )
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
@@ -184,6 +205,9 @@ export class VariableService {
     dto.name && (await this.variableExists(dto.name, variable.project))
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
+    this.logger.log(
+      `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
+    )
 
     // Check if the user has access to the environments
     const environmentSlugToIdMap = shouldCreateRevisions
@@ -191,7 +215,6 @@ export class VariableService {
           dto,
           user,
           variable.project,
-          this.prisma,
           this.authorizationService
         )
       : new Map<string, string>()
@@ -228,6 +251,9 @@ export class VariableService {
     if (shouldCreateRevisions) {
       for (const entry of dto.entries) {
         // Fetch the latest version of the variable for the environment
+        this.logger.log(
+          `Fetching latest version of variable ${variableSlug} for environment ${entry.environmentSlug}`
+        )
         const latestVersion = await this.prisma.variableVersion.findFirst({
           where: {
             variableId: variable.id,
@@ -241,6 +267,9 @@ export class VariableService {
           },
           take: 1
         })
+        this.logger.log(
+          `Latest version of variable ${variableSlug} for environment ${entry.environmentSlug} is ${latestVersion?.version}`
+        )
 
         // Create the new version
         op.push(
@@ -272,6 +301,7 @@ export class VariableService {
     const tx = await this.prisma.$transaction(op)
     const updatedVariable = tx[0]
     const updatedVersions = tx.slice(1)
+
     const result = {
       variable: updatedVariable,
       updatedVersions: updatedVersions
@@ -281,6 +311,9 @@ export class VariableService {
     if (dto.entries && dto.entries.length > 0) {
       for (const entry of dto.entries) {
         try {
+          this.logger.log(
+            `Publishing variable update to Redis for variable ${updatedVariable.slug} in environment ${entry.environmentSlug}`
+          )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
             JSON.stringify({
@@ -289,6 +322,9 @@ export class VariableService {
               value: entry.value,
               isPlaintext: true
             } as ChangeNotificationEvent)
+          )
+          this.logger.log(
+            `Published variable update to Redis for variable ${updatedVariable.slug} in environment ${entry.environmentSlug}`
           )
         } catch (error) {
           this.logger.error(
@@ -337,6 +373,14 @@ export class VariableService {
     environmentSlug: Environment['slug'],
     rollbackVersion: VariableVersion['version']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to rollback variable ${variableSlug} to version ${rollbackVersion}`
+    )
+
+    // Fetch the variable
+    this.logger.log(
+      `Checking if user has permissions to rollback variable ${variableSlug} in environment ${environmentSlug}`
+    )
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
@@ -345,6 +389,10 @@ export class VariableService {
       })
     const environmentId = environment.id
 
+    // Fetch the variable
+    this.logger.log(
+      `Checking if user has permissions to rollback variable ${variableSlug}`
+    )
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
@@ -353,33 +401,43 @@ export class VariableService {
       })
 
     // Filter the variable versions by the environment
+    this.logger.log(
+      `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
+    )
     variable.versions = variable.versions.filter(
       (version) => version.environmentId === environmentId
     )
+    this.logger.log(
+      `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
+    )
 
     if (variable.versions.length === 0) {
+      const errorMessage = `Variable ${variable} has no versions for environment ${environmentSlug}`
+      this.logger.error(errorMessage)
       throw new NotFoundException(
-        constructErrorBody(
-          'No versions found for environment',
-          `Variable ${variable} has no versions for environment ${environmentSlug}`
-        )
+        constructErrorBody('No versions found for environment', errorMessage)
       )
     }
 
     // Sorting is in ascending order of dates. So the last element is the latest version
     const maxVersion = variable.versions[variable.versions.length - 1].version
+    this.logger.log(
+      `Latest version of variable ${variableSlug} in environment ${environmentSlug} is ${maxVersion}`
+    )
 
     // Check if the rollback version is valid
     if (rollbackVersion < 1 || rollbackVersion >= maxVersion) {
+      const errorMessage = `Variable ${variableSlug} can not be rolled back to version ${rollbackVersion}`
+      this.logger.error(errorMessage)
       throw new NotFoundException(
-        constructErrorBody(
-          'Invalid rollback version',
-          `Variable ${variableSlug} can not be rolled back to version ${rollbackVersion}`
-        )
+        constructErrorBody('Invalid rollback version', errorMessage)
       )
     }
 
     // Rollback the variable
+    this.logger.log(
+      `Rolling back variable ${variableSlug} to version ${rollbackVersion}`
+    )
     const result = await this.prisma.variableVersion.deleteMany({
       where: {
         variableId: variable.id,
@@ -388,9 +446,15 @@ export class VariableService {
         }
       }
     })
+    this.logger.log(
+      `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
+    )
 
     try {
       // Notify the new variable version through Redis
+      this.logger.log(
+        `Publishing variable update to Redis for variable ${variable.slug} in environment ${environment.slug}`
+      )
       await this.redis.publish(
         CHANGE_NOTIFIER_RSC,
         JSON.stringify({
@@ -399,6 +463,9 @@ export class VariableService {
           value: variable.versions[rollbackVersion - 1].value,
           isPlaintext: true
         } as ChangeNotificationEvent)
+      )
+      this.logger.log(
+        `Published variable update to Redis for variable ${variable.slug} in environment ${environment.slug}`
       )
     } catch (error) {
       this.logger.error(`Error publishing variable update to Redis: ${error}`)
@@ -423,8 +490,6 @@ export class VariableService {
       this.prisma
     )
 
-    this.logger.log(`User ${user.id} rolled back variable ${variable.id}`)
-
     return result
   }
 
@@ -440,6 +505,14 @@ export class VariableService {
     user: AuthenticatedUser,
     variableSlug: Variable['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to delete variable ${variableSlug}`
+    )
+
+    // Check if the user has the required role
+    this.logger.log(
+      `Checking if user has permissions to delete variable ${variableSlug}`
+    )
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
@@ -448,11 +521,13 @@ export class VariableService {
       })
 
     // Delete the variable
+    this.logger.log(`Deleting variable ${variable.slug}`)
     await this.prisma.variable.delete({
       where: {
         id: variable.id
       }
     })
+    this.logger.log(`Deleted variable ${variable.slug}`)
 
     await createEvent(
       {
@@ -471,8 +546,6 @@ export class VariableService {
       },
       this.prisma
     )
-
-    this.logger.log(`User ${user.id} deleted variable ${variable.id}`)
   }
 
   /**
@@ -497,7 +570,14 @@ export class VariableService {
     order: string,
     search: string
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all variables of project ${projectSlug}`
+    )
+
     // Check if the user has the required authorities in the project
+    this.logger.log(
+      `Checking if user has permissions to get all variables of project ${projectSlug}`
+    )
     const { id: projectId } =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -505,6 +585,7 @@ export class VariableService {
         authorities: [Authority.READ_VARIABLE]
       })
 
+    this.logger.log(`Getting all variables of project ${projectSlug}`)
     const variables = await this.prisma.variable.findMany({
       where: {
         projectId,
@@ -548,6 +629,9 @@ export class VariableService {
         [sort]: order
       }
     })
+    this.logger.log(
+      `Got all variables of project ${projectSlug}. Count: ${variables.length}`
+    )
 
     const variablesWithEnvironmentalValues = new Set<{
       variable: Partial<Variable>
@@ -675,6 +759,14 @@ export class VariableService {
     limit: number,
     order: 'asc' | 'desc' = 'desc'
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to get revisions of variable ${variableSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the variable
+    this.logger.log(
+      `Checking if user has permissions to access variable ${variableSlug}`
+    )
     const { id: variableId } =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
@@ -682,6 +774,10 @@ export class VariableService {
         authorities: [Authority.READ_VARIABLE]
       })
 
+    // Check access to the environment
+    this.logger.log(
+      `Checking if user has permissions to access environment ${environmentSlug}`
+    )
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
@@ -689,6 +785,10 @@ export class VariableService {
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
+    // Fetch the variable versions
+    this.logger.log(
+      `Fetching variable versions for variable ${variableSlug} in environment ${environmentSlug}`
+    )
     const items = await this.prisma.variableVersion.findMany({
       where: {
         variableId: variableId,
@@ -701,6 +801,9 @@ export class VariableService {
         version: order
       }
     })
+    this.logger.log(
+      `Fetched ${items.length} variable versions for variable ${variableSlug} in environment ${environmentSlug}`
+    )
 
     const total = await this.prisma.variableVersion.count({
       where: {
@@ -732,7 +835,14 @@ export class VariableService {
     projectSlug: Project['slug'],
     environmentSlug: Environment['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all variables of project ${projectSlug} and environment ${environmentSlug}`
+    )
+
     // Check if the user has the required authorities in the project
+    this.logger.log(
+      `Checking if user has permissions to access project ${projectSlug}`
+    )
     const { id: projectId } =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
@@ -741,6 +851,9 @@ export class VariableService {
       })
 
     // Check if the user has the required authorities in the environment
+    this.logger.log(
+      `Checking if user has permissions to access environment ${environmentSlug}`
+    )
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
@@ -748,6 +861,10 @@ export class VariableService {
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
+    // Fetch the variables
+    this.logger.log(
+      `Fetching variables for project ${projectSlug} and environment ${environmentSlug}`
+    )
     const variables = await this.prisma.variable.findMany({
       where: {
         projectId,
@@ -785,6 +902,10 @@ export class VariableService {
       }
     })
 
+    this.logger.log(
+      `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
+    )
+
     return variables.map(
       (variable) =>
         ({
@@ -807,6 +928,10 @@ export class VariableService {
     variableName: Variable['name'],
     project: Project
   ) {
+    this.logger.log(
+      `Checking if variable ${variableName} already exists in project ${project.slug}`
+    )
+
     if (
       (await this.prisma.variable.findFirst({
         where: {
@@ -815,12 +940,15 @@ export class VariableService {
         }
       })) !== null
     ) {
+      const errorMessage = `Variable ${variableName} already exists in project ${project.slug}`
+      this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody(
-          'Variable already exists',
-          `Variable ${variableName} already exists in project ${project.slug}`
-        )
+        constructErrorBody('Variable already exists', errorMessage)
       )
     }
+
+    this.logger.log(
+      `Variable ${variableName} does not exist in project ${project.slug}`
+    )
   }
 }

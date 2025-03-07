@@ -1,5 +1,6 @@
 import { UserAuthenticatedResponse } from '@/auth/auth.types'
 import { UserWithWorkspace } from '@/user/user.types'
+import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
 import * as crypto from 'crypto'
@@ -52,30 +53,47 @@ export const generateOtp = async (
   userId: User['id'],
   prisma: PrismaClient
 ): Promise<Otp> => {
-  const otp = await prisma.otp.upsert({
-    where: {
-      userId: userId
-    },
-    update: {
-      code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
-        .toString()
-        .substring(0, 6),
-      expiresAt: new Date(new Date().getTime() + OTP_EXPIRY)
-    },
-    create: {
-      code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
-        .toString()
-        .substring(0, 6),
-      expiresAt: new Date(new Date().getTime() + OTP_EXPIRY),
-      user: {
-        connect: {
-          email: email.toLowerCase()
+  const logger = new Logger('generateOtp')
+  try {
+    logger.log(`Generating OTP for user ${userId}`)
+
+    const otp = await prisma.otp.upsert({
+      where: {
+        userId: userId
+      },
+      update: {
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
+          .toString()
+          .substring(0, 6),
+        expiresAt: new Date(new Date().getTime() + OTP_EXPIRY)
+      },
+      create: {
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
+          .toString()
+          .substring(0, 6),
+        expiresAt: new Date(new Date().getTime() + OTP_EXPIRY),
+        user: {
+          connect: {
+            email: email.toLowerCase()
+          }
         }
       }
-    }
-  })
+    })
 
-  return otp
+    logger.log(
+      `Generated OTP for user ${userId}. OTP ${otp.id} is valid until ${otp.expiresAt}`
+    )
+
+    return otp
+  } catch (error) {
+    logger.error(`Error generating OTP for user ${userId}`)
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Error generating OTP',
+        'An error occurred while generating the OTP.'
+      )
+    )
+  }
 }
 
 /**
