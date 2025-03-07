@@ -26,10 +26,13 @@ export const createWorkspace = async (
   prisma: PrismaService,
   isDefault?: boolean
 ): Promise<Workspace> => {
-  const workspaceId = v4()
   const logger = new Logger('createWorkspace')
 
-  logger.log(`Creating workspace ${dto.name} (${workspaceId})`)
+  const workspaceId = v4()
+
+  logger.log(
+    `Creating workspace ${dto.name} (${workspaceId}) for user ${user.id}`
+  )
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,

@@ -68,9 +68,10 @@ export const getCollectiveWorkspaceAuthorities = async (
 export const getCollectiveProjectAuthorities = async (
   userId: User['id'],
   project: Project,
-  prisma: PrismaClient,
-  logger: Logger
+  prisma: PrismaClient
 ): Promise<Set<Authority>> => {
+  const logger = new Logger('getCollectiveProjectAuthorities')
+
   logger.log(
     `Getting collective project authorities for userId: ${userId} and projectId: ${project.id}`
   )

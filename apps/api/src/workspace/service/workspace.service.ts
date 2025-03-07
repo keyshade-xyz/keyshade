@@ -4,17 +4,14 @@ import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { createWorkspace } from '@/common/workspace'
-import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   Logger
 } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import {
   Authority,
   Environment,
@@ -34,13 +31,11 @@ import { UpdateBlacklistedIpAddresses } from '../dto/update.blacklistedIpAddress
 
 @Injectable()
 export class WorkspaceService {
-  private readonly log = new Logger(WorkspaceService.name)
+  private readonly logger = new Logger(WorkspaceService.name)
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService,
-    private readonly jwt: JwtService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   /**
@@ -51,14 +46,11 @@ export class WorkspaceService {
    * @returns The created workspace
    */
   async createWorkspace(user: AuthenticatedUser, dto: CreateWorkspace) {
-    if (await this.existsByName(dto.name, user.id)) {
-      throw new ConflictException(
-        constructErrorBody(
-          'Workspace already exists',
-          `Workspace with name ${dto.name} already exists`
-        )
-      )
-    }
+    this.logger.log(
+      `User ${user.id} attempted to create a workspace ${dto.name}`
+    )
+
+    await this.existsByName(dto.name, user.id)
 
     return await createWorkspace(user, dto, this.prisma)
   }
@@ -76,7 +68,14 @@ export class WorkspaceService {
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update a workspace ${workspaceSlug}`
+    )
+
     // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to update workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -85,18 +84,10 @@ export class WorkspaceService {
       })
 
     // Check if a same named workspace already exists
-    if (
-      (dto.name && (await this.existsByName(dto.name, user.id))) ||
-      dto.name === workspace.name
-    ) {
-      throw new ConflictException(
-        constructErrorBody(
-          'Workspace already exists',
-          `Workspace with name ${dto.name} already exists`
-        )
-      )
-    }
+    dto.name && this.existsByName(dto.name, user.id)
 
+    // Update the workspace
+    this.logger.log(`Updating workspace ${workspace.name} (${workspace.id})`)
     const updatedWorkspace = await this.prisma.workspace.update({
       where: {
         id: workspace.id
@@ -114,7 +105,7 @@ export class WorkspaceService {
         }
       }
     })
-    this.log.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
+    this.logger.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
 
     await createEvent(
       {
@@ -145,6 +136,14 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
+    this.logger.log(
+      `User ${user.id} attempted to delete workspace ${workspaceSlug}`
+    )
+
+    // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to delete workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -153,23 +152,30 @@ export class WorkspaceService {
       })
 
     // We don't want the users to delete their default workspace
+    this.logger.log(
+      `Checking if workspace ${workspace.name} is a default workspace`
+    )
     if (workspace.isDefault) {
+      this.logger.log(`Workspace ${workspace.name} is a default workspace`)
       throw new BadRequestException(
         constructErrorBody(
           'Can not delete default workspace',
           `You can not delete the default workspace.`
         )
       )
+    } else {
+      this.logger.log(`Workspace ${workspace.name} is not a default workspace`)
     }
 
     // Delete the workspace
+    this.logger.log(`Deleting workspace ${workspace.name} (${workspace.slug})`)
     await this.prisma.workspace.delete({
       where: {
         id: workspace.id
       }
     })
 
-    this.log.debug(`Deleted workspace ${workspace.name} (${workspace.slug})`)
+    this.logger.debug(`Deleted workspace ${workspace.name} (${workspace.slug})`)
   }
 
   /**
@@ -183,6 +189,14 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<Workspace> {
+    this.logger.log(
+      `User ${user.id} attempted to get workspace ${workspaceSlug}`
+    )
+
+    // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to read workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -214,7 +228,10 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
+    this.logger.log(`User ${user.id} attempted to get workspaces of self`)
+
     // Get all workspaces of user for page with limit
+    this.logger.log(`Fetching workspaces of user ${user.id}`)
     const items = await this.prisma.workspace.findMany({
       skip: page * limit,
       take: Number(limit),
@@ -234,8 +251,16 @@ export class WorkspaceService {
       }
     })
 
+    this.logger.debug(
+      `Fetched workspaces of user ${user.id}. Count: ${items.length}`
+    )
+
+    // Parsing projects of workspaces
+    this.logger.log(`Parsing projects of workspaces of user ${user.id}`)
     for (const workspace of items) {
+      this.logger.debug(`Parsing projects of workspace ${workspace.slug}`)
       workspace['projects'] = await this.getProjectsOfWorkspace(workspace, user)
+      this.logger.debug(`Parsed projects of workspace ${workspace.slug}`)
     }
 
     // get total count of workspaces of the user
@@ -280,6 +305,14 @@ export class WorkspaceService {
    * @throws InternalServerErrorException if there is an error in the transaction
    */
   async exportData(user: AuthenticatedUser, workspaceSlug: Workspace['slug']) {
+    this.logger.log(
+      `User ${user.id} attempted to export workspace data of ${workspaceSlug}`
+    )
+
+    // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to read workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -294,6 +327,7 @@ export class WorkspaceService {
     data.icon = workspace.icon
 
     // Get all the roles of the workspace
+    this.logger.log(`Fetching roles of workspace ${workspace.slug}`)
     data.workspaceRoles = await this.prisma.workspaceRole.findMany({
       where: {
         workspaceId: workspace.id
@@ -308,6 +342,7 @@ export class WorkspaceService {
     })
 
     // Get all projects, environments, variables and secrets of the workspace
+    this.logger.log(`Fetching projects of workspace ${workspace.slug}`)
     data.projects = await this.prisma.project.findMany({
       where: {
         workspaceId: workspace.id
@@ -375,7 +410,14 @@ export class WorkspaceService {
     secrets: Partial<Secret>[]
     variables: Partial<Variable>[]
   }> {
+    this.logger.log(
+      `User ${user.id} attempted to search in workspace ${workspaceSlug}`
+    )
+
     // Check authority over workspace
+    this.logger.log(
+      `Checking if user has authority to read workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -390,9 +432,15 @@ export class WorkspaceService {
       })
 
     // Get a list of project IDs that the user has access to READ
+    this.logger.log(
+      `Fetching a list of project IDs the user has access to READ`
+    )
     const accessibleProjectIds = await this.getAccessibleProjectIds(
       user.id,
       workspace.id
+    )
+    this.logger.log(
+      `User ${user.id} has access to ${accessibleProjectIds.length} projects`
     )
 
     // Query all entities based on the search term and permissions
@@ -405,6 +453,10 @@ export class WorkspaceService {
     const variables = await this.queryVariables(
       accessibleProjectIds,
       searchTerm
+    )
+
+    this.logger.log(
+      `Found ${projects.length} projects, ${environments.length} environments, ${secrets.length} secrets and ${variables.length} variables as search results`
     )
 
     return { projects, environments, secrets, variables }
@@ -428,7 +480,10 @@ export class WorkspaceService {
     order: string,
     search: string
   ) {
-    // fetch all workspaces of user where they are not admin
+    this.logger.log(`User ${user.id} attempted to get workspace invitations`)
+
+    // Fetch all workspaces of user where they are not admin
+    this.logger.log(`Fetching workspaces of user ${user.id}`)
     const items = await this.prisma.workspaceMember.findMany({
       skip: page * limit,
       take: limitMaxItemsPerPage(Number(limit)),
@@ -476,7 +531,9 @@ export class WorkspaceService {
       }
     })
 
-    // get total count of workspaces of the user
+    this.logger.log(`Found ${items.length} workspace invitations`)
+
+    // Get total count of workspaces of the user
     const totalCount = await this.prisma.workspaceMember.count({
       where: {
         userId: user.id,
@@ -496,7 +553,7 @@ export class WorkspaceService {
       }
     })
 
-    //calculate metadata for pagination
+    // Calculate metadata for pagination
     const metadata = paginate(totalCount, `/workspace/invitations`, {
       page,
       limit: limitMaxItemsPerPage(limit),
@@ -525,6 +582,14 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
   ): Promise<string[]> {
+    this.logger.log(
+      `User ${user.id} attempted to get blacklisted IP addresses for workspace ${workspaceSlug}`
+    )
+
+    // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to read workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -548,7 +613,14 @@ export class WorkspaceService {
     workspaceSlug: Workspace['slug'],
     dto: UpdateBlacklistedIpAddresses
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update blacklisted IP addresses for workspace ${workspaceSlug}`
+    )
+
     // Fetch the workspace
+    this.logger.log(
+      `Checking if user has authority to update workspace ${workspaceSlug}`
+    )
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -566,7 +638,7 @@ export class WorkspaceService {
       }
     })
 
-    this.log.debug(
+    this.logger.debug(
       `Updated workspace blacklisted IP addresses ${workspace.name} (${workspace.id})`
     )
 
@@ -730,21 +802,31 @@ export class WorkspaceService {
    * Checks if a workspace with the given name exists for the given user.
    * @param name The name of the workspace to check for
    * @param userId The ID of the user to check for
-   * @returns True if the workspace exists, false otherwise
+   * @throws ConflictException if the workspace already exists
    * @private
    */
-  private async existsByName(
-    name: string,
-    userId: User['id']
-  ): Promise<boolean> {
-    return (
+  private async existsByName(name: string, userId: User['id']): Promise<void> {
+    this.logger.log(`Checking if workspace ${name} exists for user ${userId}`)
+
+    const workspaceExists =
       (await this.prisma.workspace.count({
         where: {
           name,
           ownerId: userId
         }
       })) > 0
-    )
+
+    if (workspaceExists) {
+      this.logger.log(`Workspace ${name} exists for user ${userId}`)
+      throw new ConflictException(
+        constructErrorBody(
+          'Workspace already exists',
+          `Workspace with name ${name} already exists`
+        )
+      )
+    }
+
+    this.logger.log(`Workspace ${name} does not exist for user ${userId}`)
   }
 
   /**
