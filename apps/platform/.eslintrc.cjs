@@ -19,7 +19,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
-    '@typescript-eslint/no-unsafe-argument': 2,
+    '@typescript-eslint/no-unsafe-argument': 1,
     'no-nested-ternary': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off'
   }
