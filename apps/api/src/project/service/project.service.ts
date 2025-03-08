@@ -69,15 +69,7 @@ export class ProjectService {
     const workspaceId = workspace.id
 
     // Check if project with this name already exists for the user
-    if (await this.projectExists(dto.name, workspaceId)) {
-      const errorMessage = `Project with name ${dto.name} already exists in workspace ${workspace.slug}`
-      this.logger.error(
-        `User ${user.id} attempted to create a project that already exists: ${errorMessage}`
-      )
-      throw new ConflictException(
-        constructErrorBody('Project already exists', errorMessage)
-      )
-    }
+    await this.projectExists(dto.name, workspaceId)
 
     // Create the public and private key pair
     this.logger.log(`Creating key pair for project ${dto.name}`)
@@ -115,6 +107,17 @@ export class ProjectService {
         hasAdminAuthority: true
       }
     })
+
+    if (!adminRole) {
+      const errorMessage = `Admin role not found for workspace ${workspace.slug}`
+      this.logger.error(
+        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
+      )
+      throw new BadRequestException(
+        constructErrorBody('Admin role not found', errorMessage)
+      )
+    }
+
     this.logger.log(
       `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
     )
@@ -226,7 +229,7 @@ export class ProjectService {
       this.prisma
     )
 
-    this.logger.debug(`Created project ${newProject} (${newProject.slug})`)
+    this.logger.debug(`Created project ${newProject.name} (${newProject.slug})`)
 
     // It is important that we log before the private key is set
     // in order to not log the private key
@@ -270,20 +273,7 @@ export class ProjectService {
       })
 
     // Check if project with this name already exists for the user
-    if (
-      (dto.name && (await this.projectExists(dto.name, project.workspaceId))) ||
-      project.name === dto.name
-    ) {
-      this.logger.error(
-        `Project with name ${dto.name} already exists in workspace ${project.workspaceId}`
-      )
-      throw new ConflictException(
-        constructErrorBody(
-          'Project already exists',
-          `Project with this name ${dto.name} already exists in the workspace`
-        )
-      )
-    }
+    dto.name && (await this.projectExists(dto.name, project.workspaceId))
 
     if (dto.accessLevel) {
       this.logger.log(`Access level specified while updating project.`)
@@ -330,10 +320,11 @@ export class ProjectService {
     }
 
     const data: Partial<Project> = {
-      name: dto.name,
-      slug: dto.name
-        ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
-        : project.slug,
+      name: dto.name === project.name ? undefined : dto.name,
+      slug:
+        dto.name === project.name
+          ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
+          : project.slug,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? dto.privateKey : null,
@@ -484,17 +475,7 @@ export class ProjectService {
     this.logger.log(`Forking project ${projectSlug} as ${newProjectName}`)
 
     // Check if project with this name already exists for the user
-    if (await this.projectExists(newProjectName, workspaceId)) {
-      this.logger.error(
-        `Project with name ${newProjectName} already exists in workspace ${workspaceId}`
-      )
-      throw new ConflictException(
-        constructErrorBody(
-          'Project already exists',
-          `Project with name ${newProjectName} already exists in the selected workspace`
-        )
-      )
-    }
+    await this.projectExists(newProjectName, workspaceId)
 
     this.logger.log(`Creating key pair for project ${newProjectName}`)
     const { privateKey, publicKey } = createKeyPair()
@@ -1033,11 +1014,12 @@ export class ProjectService {
   private async projectExists(
     projectName: string,
     workspaceId: Workspace['id']
-  ): Promise<boolean> {
+  ): Promise<void> {
     this.logger.log(
       `Checking if project ${projectName} exists in workspace ${workspaceId}`
     )
-    return (
+
+    const projectExist: boolean =
       (await this.prisma.workspaceMember.count({
         where: {
           workspaceId,
@@ -1050,7 +1032,22 @@ export class ProjectService {
           }
         }
       })) > 0
-    )
+
+    if (projectExist) {
+      this.logger.error(
+        `Project ${projectName} already exists in workspace ${workspaceId}`
+      )
+      throw new ConflictException(
+        constructErrorBody(
+          'Project already exists',
+          `Project ${projectName} already exists in the workspace`
+        )
+      )
+    } else {
+      this.logger.log(
+        `Project ${projectName} does not exist in workspace ${workspaceId}`
+      )
+    }
   }
 
   /**
