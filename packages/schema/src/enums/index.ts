@@ -100,3 +100,10 @@ export const authorityEnum = z.enum([
 ])
 
 export const projectAccessLevelEnum = z.enum(['GLOBAL', 'INTERNAL', 'PRIVATE'])
+
+export const authProviderEnum = z.enum([
+  'EMAIL_OTP',
+  'GITHUB',
+  'GOOGLE',
+  'GITLAB'
+])
