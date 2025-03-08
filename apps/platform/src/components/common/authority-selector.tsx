@@ -429,6 +429,7 @@ interface AuthoritySelectorProps {
   setSelectedPermissions: React.Dispatch<
     React.SetStateAction<Set<AuthorityEnum>>
   >
+  isSheet: boolean
 }
 
 function extractAuthoritiesFromGroupItem(
@@ -477,7 +478,8 @@ function extractAuthoritiesFromChecklistItem(
 
 export default function AuthoritySelector({
   selectedPermissions,
-  setSelectedPermissions
+  setSelectedPermissions,
+  isSheet
 }: AuthoritySelectorProps): React.JSX.Element {
   const handleGroupToggle = (groupItem: GroupItem, checked: boolean) => {
     const authorities = extractAuthoritiesFromGroupItem(groupItem, checked)
@@ -594,7 +596,7 @@ export default function AuthoritySelector({
   }
 
   return (
-    <div className="flex items-start justify-start gap-6">
+    <div className={`flex items-start justify-start ${isSheet ? "flex-col gap-y-3" : "flex-row gap-6" } `}>
       <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
