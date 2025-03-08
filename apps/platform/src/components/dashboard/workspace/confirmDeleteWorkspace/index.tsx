@@ -47,7 +47,7 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
           toast.success('Workspace deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">
-                The environment has been deleted.
+                The workspace has been deleted.
               </p>
             )
           })
