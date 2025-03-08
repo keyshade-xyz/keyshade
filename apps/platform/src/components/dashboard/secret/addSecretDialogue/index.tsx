@@ -19,14 +19,14 @@ import {
   SelectTrigger,
   SelectValue
 } from '../../../ui/select'
-import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
   environmentsOfProjectAtom,
   secretsOfProjectAtom
 } from '@/store'
-import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =

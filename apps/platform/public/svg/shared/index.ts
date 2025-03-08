@@ -12,9 +12,9 @@ import VectorSVG from './vector.svg'
 import ErrorSVG from './Error.svg'
 import TrashSVG from './trash.svg'
 import CopySVG from './copy.svg'
+import CrownSVG from './crown.svg'
 import RolesSVG from './roles.svg'
 import CheckmarkSVG from './checkmark.svg'
-
 
 export {
   DropdownSVG,
@@ -31,6 +31,7 @@ export {
   ErrorSVG,
   TrashSVG,
   CopySVG,
+  CrownSVG,
   RolesSVG,
   CheckmarkSVG
 }

@@ -334,11 +334,16 @@ describe('Project Controller Tests', () => {
     })
 
     it('should not be able to update the name of a project to an existing name', async () => {
+      await projectService.createProject(user1, workspace1.slug, {
+        name: 'Existing Project',
+        description: 'Existing Project description'
+      })
+
       const response = await app.inject({
         method: 'PUT',
         url: `/project/${project1.slug}`,
         payload: {
-          name: 'Project 1'
+          name: 'Existing Project'
         },
         headers: {
           'x-e2e-user-email': user1.email

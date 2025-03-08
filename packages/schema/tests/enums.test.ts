@@ -8,7 +8,7 @@ import {
   eventTypeEnum,
   authorityEnum,
   projectAccessLevelEnum
-} from '@//enums'
+} from '@/enums'
 
 describe('Enums Schema Tests', () => {
   describe('integrationTypeEnum Tests', () => {

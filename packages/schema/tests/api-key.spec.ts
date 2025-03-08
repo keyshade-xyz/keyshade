@@ -37,7 +37,6 @@ describe('API Key Schemas Tests', () => {
         id: 'apikey123',
         name: 'API Key Name',
         slug: 'api-key-slug',
-        value: 'api-key-value',
         expiresAt: 'invalid-date', // Should be a valid date string
         createdAt: '2024-10-09T10:00:00Z',
         updatedAt: '2024-10-09T10:00:00Z',
@@ -45,7 +44,7 @@ describe('API Key Schemas Tests', () => {
         // no userId
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(4)
+      expect(result.error?.issues).toHaveLength(3)
     })
   })
 

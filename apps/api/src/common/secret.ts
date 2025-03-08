@@ -1,17 +1,4 @@
-import { Secret } from '@prisma/client'
-
-export interface SecretWithValues {
-  secret: Secret & { lastUpdatedBy: { id: string; name: string } }
-  values: Array<{
-    environment: {
-      id: string
-      name: string
-      slug: string
-    }
-    value: string
-    version: number
-  }>
-}
+import { SecretWithValues } from '@/secret/secret.types'
 
 export function getSecretWithValues(
   secretWithVersion: SecretWithValues['secret'] & {

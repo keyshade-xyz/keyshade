@@ -1,3 +1,25 @@
+## [2.13.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.4...v2.13.0-stage.5) (2025-03-07)
+
+### 🚀 Features
+
+* **platform:** Apply Geist font to the project ([#811](https://github.com/keyshade-xyz/keyshade/issues/811)) ([13b3743](https://github.com/keyshade-xyz/keyshade/commit/13b3743cbb3322f3d28bc61892c852ebb4898554))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add extensive logging ([#812](https://github.com/keyshade-xyz/keyshade/issues/812)) ([901f063](https://github.com/keyshade-xyz/keyshade/commit/901f063bab03cde7daf16b1134d55d65cd0968e3))
+
+## [2.13.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.3...v2.13.0-stage.4) (2025-03-05)
+
+### 🚀 Features
+
+* **platform:** Create and Delete API Keys ([#726](https://github.com/keyshade-xyz/keyshade/issues/726)) ([3b1cfe7](https://github.com/keyshade-xyz/keyshade/commit/3b1cfe7ed67e7486df313a1177c403de174e359b))
+
+## [2.13.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.2...v2.13.0-stage.3) (2025-03-03)
+
+### 🚀 Features
+
+* **platform:** Add pagination & loading more functionality for [secure]s page ([#809](https://github.com/keyshade-xyz/keyshade/issues/809)) ([ab58f31](https://github.com/keyshade-xyz/keyshade/commit/ab58f314497d0084e5f0058888c44bb0f272a3a6))
+
 ## [2.13.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.1...v2.13.0-stage.2) (2025-03-01)
 
 ### 🚀 Features
