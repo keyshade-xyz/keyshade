@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import {
   authorityEnum,
+  authProviderEnum,
   eventSeverityEnum,
   eventSourceEnum,
   eventTriggererEnum,
@@ -28,3 +29,5 @@ export type RotateAfterEnum = z.infer<typeof rotateAfterEnum>
 export type ExpiresAfterEnum = z.infer<typeof expiresAfterEnum>
 
 export type IntegrationTypeEnum = z.infer<typeof integrationTypeEnum>
+
+export type AuthProviderEnum = z.infer<typeof authProviderEnum>
