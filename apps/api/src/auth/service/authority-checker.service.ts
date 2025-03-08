@@ -495,7 +495,6 @@ export class AuthorityCheckerService {
       }
     } catch (error) {
       this.logger.error(error)
-      this.logger.error(error)
       throw new InternalServerErrorException(error)
     }
 

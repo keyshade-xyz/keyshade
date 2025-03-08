@@ -1129,10 +1129,7 @@ export class SecretService {
         const errorMessage = `Project ${project.slug} does not store the private key`
         this.logger.error(errorMessage)
         throw new BadRequestException(
-          constructErrorBody(
-            'Can not decrypt secret values',
-            `Project ${project.slug} does not store the private key`
-          )
+          constructErrorBody('Can not decrypt secret values', errorMessage)
         )
       }
 
