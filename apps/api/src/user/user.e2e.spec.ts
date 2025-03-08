@@ -9,7 +9,7 @@ import { AppModule } from '@/app/app.module'
 import { AuthProvider, User } from '@prisma/client'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
-import { UserService } from './service/user.service'
+import { UserService } from './user.service'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication

@@ -5,11 +5,11 @@ import { EnvironmentWithProject } from '@/environment/environment.types'
 import { VariableWithProjectAndVersion } from '@/variable/variable.types'
 import { SecretWithProjectAndVersion } from '@/secret/secret.types'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
-import { AuthorizationParams } from '../authorization.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { AuthorizationParams } from '../auth.types'
 
 @Injectable()
 export class AuthorizationService {

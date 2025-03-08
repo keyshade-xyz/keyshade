@@ -21,26 +21,27 @@ import {
   Variable,
   Workspace
 } from '@prisma/client'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
-import { ProjectService } from './service/project.service'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
-import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
-import { UserService } from '@/user/service/user.service'
+import { ProjectService } from './project.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
+import { UserService } from '@/user/user.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { UserModule } from '@/user/user.module'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { SecretService } from '@/secret/service/secret.service'
-import { VariableService } from '@/variable/service/variable.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { SecretService } from '@/secret/secret.service'
+import { VariableService } from '@/variable/variable.service'
 import { VariableModule } from '@/variable/variable.module'
 import { SecretModule } from '@/secret/secret.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -54,6 +55,7 @@ describe('Project Controller Tests', () => {
   let environmentService: EnvironmentService
   let secretService: SecretService
   let variableService: VariableService
+  let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
@@ -93,6 +95,7 @@ describe('Project Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -202,6 +205,36 @@ describe('Project Controller Tests', () => {
       expect(response.json().privateKey).toBeDefined()
       expect(response.json().createdAt).toBeDefined()
       expect(response.json().updatedAt).toBeDefined()
+    })
+
+    it('should not be able to create projects if tier limit it reached', async () => {
+      // Create the number of projects that the tier limit allows
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getProjectTierLimit(workspace1) - 2; // Subtract 2 for the projects created above
+        x++
+      ) {
+        await projectService.createProject(user1, workspace1.slug, {
+          name: `Project ${x}`,
+          description: `Project ${x} description`,
+          storePrivateKey: true
+        })
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/project/${workspace1.slug}`,
+        payload: {
+          name: 'Project X',
+          description: 'Project 101 description',
+          storePrivateKey: true
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should have created a default environment', async () => {
@@ -1335,6 +1368,9 @@ describe('Project Controller Tests', () => {
       const forkedEnvironments = await prisma.environment.findMany({
         where: {
           projectId: forkedProject.id
+        },
+        orderBy: {
+          name: 'asc'
         }
       })
 
