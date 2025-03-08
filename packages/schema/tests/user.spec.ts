@@ -22,7 +22,7 @@ describe('User Schema Tests', () => {
         isActive: true,
         isOnboardingFinished: true,
         isAdmin: false,
-        authProvider: 'google'
+        authProvider: 'GOOGLE'
       })
       expect(result.success).toBe(true)
     })
@@ -36,7 +36,7 @@ describe('User Schema Tests', () => {
         isActive: true,
         isOnboardingFinished: true,
         isAdmin: false,
-        authProvider: 'google'
+        authProvider: 'GOOGLE'
       })
       expect(result.success).toBe(false)
       expect(result.error?.issues).toHaveLength(1)
@@ -50,7 +50,7 @@ describe('User Schema Tests', () => {
         isActive: true,
         isOnboardingFinished: true,
         isAdmin: false,
-        authProvider: 'google'
+        authProvider: 'GOOGLE'
         // Missing profilePictureUrl
       })
       expect(result.success).toBe(false)
@@ -66,7 +66,7 @@ describe('User Schema Tests', () => {
         isActive: 'true', // Should be a boolean
         isOnboardingFinished: true,
         isAdmin: false,
-        authProvider: 'google'
+        authProvider: 'GOOGLE'
       })
       expect(result.success).toBe(false)
       expect(result.error?.issues).toHaveLength(1) // Adjust the number based on incorrect types
@@ -83,7 +83,7 @@ describe('User Schema Tests', () => {
         isActive: true,
         isOnboardingFinished: false,
         isAdmin: false,
-        authProvider: 'email',
+        authProvider: 'EMAIL_OTP',
         defaultWorkspace: {
           id: 'workspace123',
           name: 'My Workspace',
@@ -140,7 +140,7 @@ describe('User Schema Tests', () => {
         profilePictureUrl: null,
         isOnboardingFinished: false,
         isAdmin: false,
-        authProvider: 'email'
+        authProvider: 'EMAIL_OTP'
       })
       expect(result.success).toBe(true)
     })
@@ -221,7 +221,7 @@ describe('User Schema Tests', () => {
         isActive: true,
         isOnboardingFinished: false,
         isAdmin: false,
-        authProvider: 'email'
+        authProvider: 'EMAIL_OTP'
       })
       expect(result.success).toBe(true)
     })

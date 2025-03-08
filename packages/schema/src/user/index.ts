@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { WorkspaceSchema } from '@/workspace'
+import { authProviderEnum } from '@/enums'
 
 export const UserSchema = z.object({
   id: z.string(),
@@ -9,7 +10,7 @@ export const UserSchema = z.object({
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
-  authProvider: z.string()
+  authProvider: authProviderEnum
 })
 
 export const GetSelfResponseSchema = UserSchema.extend({

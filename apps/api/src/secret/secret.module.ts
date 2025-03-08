@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { SecretController } from './controller/secret.controller'
-import { SecretService } from './service/secret.service'
+import { SecretController } from './secret.controller'
+import { SecretService } from './secret.service'
 
 @Module({
   controllers: [SecretController],

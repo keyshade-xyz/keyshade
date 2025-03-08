@@ -3,8 +3,8 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { ProjectService } from '@/project/service/project.service'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { ProjectService } from '@/project/project.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import {
   Environment,
   EventSeverity,
@@ -26,18 +26,19 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { VariableModule } from './variable.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { VariableService } from './service/variable.service'
-import { EventService } from '@/event/service/event.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { VariableService } from './variable.service'
+import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
 import { ValidationPipe } from '@nestjs/common'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -48,6 +49,7 @@ describe('Variable Controller Tests', () => {
   let variableService: VariableService
   let eventService: EventService
   let userService: UserService
+  let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
@@ -86,6 +88,7 @@ describe('Variable Controller Tests', () => {
     variableService = moduleRef.get(VariableService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -223,6 +226,50 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(variable).toBeDefined()
+    })
+
+    it('should not be able to create variables if tier limit is reached', async () => {
+      // Create variables until tier limit is reached
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getVariableTierLimit(project1) - 1; // Subtract 1 for the variables created above
+        x++
+      ) {
+        await variableService.createVariable(
+          user1,
+          {
+            name: `Variable ${x}`,
+            note: `Variable ${x} note`,
+            entries: [
+              {
+                value: `Variable ${x} value`,
+                environmentSlug: environment1.slug
+              }
+            ]
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}`,
+        payload: {
+          name: 'Variable X',
+          note: 'Variable X note',
+          entries: [
+            {
+              value: 'Variable X value',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should have created a variable version', async () => {
