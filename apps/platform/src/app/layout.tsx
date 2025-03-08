@@ -1,3 +1,4 @@
+import { GeistSansFont } from '../fonts/index'
 import { Toaster } from '@/components/ui/sonner'
 import './global.css'
 import JotaiProvider from '@/components/jotaiProvider'
@@ -14,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <html lang="en">
+    <html className={GeistSansFont.className} lang="en">
       <body>
         <JotaiProvider>
           <>

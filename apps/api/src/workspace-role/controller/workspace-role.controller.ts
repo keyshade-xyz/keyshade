@@ -60,22 +60,6 @@ export class WorkspaceRoleController {
     )
   }
 
-  @Get(':workspaceSlug/exists/:workspaceRoleName')
-  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
-  async checkWorkspaceRoleExists(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
-    @Param('workspaceRoleName') name: WorkspaceRole['name']
-  ) {
-    return {
-      exists: await this.workspaceRoleService.checkWorkspaceRoleExists(
-        user,
-        workspaceSlug,
-        name
-      )
-    }
-  }
-
   @Get(':workspaceRoleSlug')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE_ROLE)
   async getWorkspaceRole(

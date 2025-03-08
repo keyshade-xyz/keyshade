@@ -62,7 +62,12 @@ export class IntegrationService {
     dto: CreateIntegration,
     workspaceSlug: Workspace['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
+    )
+
     // Check if the user is permitted to create integrations in the workspace
+    this.logger.log(`Checking user access to workspace ${workspaceSlug}`)
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -79,6 +84,7 @@ export class IntegrationService {
 
     // Check if the user has READ authority over the project
     if (dto.projectSlug) {
+      this.logger.log(`Checking user access to project ${dto.projectSlug}`)
       project = await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: dto.projectSlug },
@@ -88,6 +94,9 @@ export class IntegrationService {
 
     // Check if only environmentId is provided
     if (dto.environmentSlug && !dto.projectSlug) {
+      this.logger.error(
+        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlug}`
+      )
       throw new BadRequestException(
         constructErrorBody(
           'Can not provide environment without project',
@@ -98,6 +107,9 @@ export class IntegrationService {
 
     // Check if the user has READ authority over the environment
     if (dto.environmentSlug) {
+      this.logger.log(
+        `Checking user access to environment ${dto.environmentSlug}`
+      )
       environment =
         await this.authorizationService.authorizeUserAccessToEnvironment({
           user,
@@ -107,15 +119,19 @@ export class IntegrationService {
     }
 
     // Create the integration object
+    this.logger.log(`Creating integration object of type ${dto.type}`)
     const integrationObject = IntegrationFactory.createIntegration(dto.type)
 
     // Check for permitted events
+    this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
     integrationObject.validatePermittedEvents(dto.notifyOn)
 
     // Check for authentication parameters
+    this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
     integrationObject.validateMetadataParameters(dto.metadata)
 
     // Create the integration
+    this.logger.log(`Creating integration: ${dto.name}`)
     const integration = await this.prisma.integration.create({
       data: {
         name: dto.name,
@@ -178,6 +194,11 @@ export class IntegrationService {
     dto: UpdateIntegration,
     integrationSlug: Integration['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update integration ${integrationSlug}`
+    )
+
+    this.logger.log(`Checking user access to integration ${integrationSlug}`)
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
@@ -196,6 +217,7 @@ export class IntegrationService {
 
     // If the project is being changed, check if the user has READ authority over the new project
     if (dto.projectSlug) {
+      this.logger.log(`Checking user access to project ${dto.projectSlug}`)
       project = await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: dto.projectSlug },
@@ -205,6 +227,9 @@ export class IntegrationService {
 
     // Check if only environmentId is provided, or if the integration has no project associated from prior
     if (dto.environmentSlug && !integration.projectId && !dto.projectSlug) {
+      this.logger.error(
+        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlug}`
+      )
       throw new BadRequestException(
         constructErrorBody(
           'Can not provide environment without project',
@@ -215,6 +240,9 @@ export class IntegrationService {
 
     // If the environment is being changed, check if the user has READ authority over the new environment
     if (dto.environmentSlug) {
+      this.logger.log(
+        `Checking user access to environment ${dto.environmentSlug}`
+      )
       environment =
         await this.authorizationService.authorizeUserAccessToEnvironment({
           user,
@@ -224,6 +252,7 @@ export class IntegrationService {
     }
 
     // Create the integration object
+    this.logger.log(`Creating integration object of type ${integration.type}`)
     const integrationObject = IntegrationFactory.createIntegration(
       integration.type
     )
@@ -235,6 +264,7 @@ export class IntegrationService {
     dto.metadata && integrationObject.validateMetadataParameters(dto.metadata)
 
     // Update the integration
+    this.logger.log(`Updating integration: ${integration.id}`)
     const updatedIntegration = await this.prisma.integration.update({
       where: { id: integrationId },
       data: {
@@ -283,6 +313,9 @@ export class IntegrationService {
     user: AuthenticatedUser,
     integrationSlug: Integration['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to retrieve integration ${integrationSlug}`
+    )
     return await this.authorizationService.authorizeUserAccessToIntegration({
       user,
       entity: { slug: integrationSlug },
@@ -317,6 +350,11 @@ export class IntegrationService {
     order: string,
     search: string
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to retrieve all integrations in workspace ${workspaceSlug}`
+    )
+
+    this.logger.log(`Checking user access to workspace ${workspaceSlug}`)
     // Check if the user has READ authority over the workspace
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -430,6 +468,10 @@ export class IntegrationService {
     user: AuthenticatedUser,
     integrationSlug: Integration['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to delete integration ${integrationSlug}`
+    )
+
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
@@ -473,6 +515,9 @@ export class IntegrationService {
     name: Integration['name'],
     workspace: Workspace
   ) {
+    this.logger.log(
+      `Checking if integration with name ${name} exists in workspace ${workspace.slug}`
+    )
     const workspaceId = workspace.id
 
     if (
@@ -484,12 +529,16 @@ export class IntegrationService {
           }
         }
       })) !== null
-    )
+    ) {
+      const errorMessage = `Integration with name ${name} already exists in workspace ${workspace.slug}`
+      this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody(
-          'Integration already exists',
-          `Integration with name ${name} already exists in workspace ${workspace.slug}`
-        )
+        constructErrorBody('Integration already exists', errorMessage)
       )
+    } else {
+      this.logger.log(
+        `Integration with name ${name} does not exist in workspace ${workspace.slug}`
+      )
+    }
   }
 }

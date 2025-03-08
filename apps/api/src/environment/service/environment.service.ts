@@ -60,6 +60,10 @@ export class EnvironmentService {
     dto: CreateEnvironment,
     projectSlug: Project['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to create environment ${dto.name} in project ${projectSlug}`
+    )
+
     // Check if the user has the required role to create an environment
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
@@ -77,6 +81,9 @@ export class EnvironmentService {
     await this.environmentExists(dto.name, project)
 
     // Create the environment
+    this.logger.log(
+      `Creating environment ${dto.name} in project ${project.name}`
+    )
     const environment = await this.prisma.environment.create({
       data: {
         name: dto.name,
@@ -104,6 +111,9 @@ export class EnvironmentService {
         }
       }
     })
+    this.logger.log(
+      `Environment ${environment.name} (${environment.slug}) created in project ${project.name}`
+    )
 
     await createEvent(
       {
@@ -121,10 +131,6 @@ export class EnvironmentService {
         workspaceId: project.workspaceId
       },
       this.prisma
-    )
-
-    this.logger.log(
-      `Environment ${environment.name} created in project ${project.name} (${project.id})`
     )
 
     return environment
@@ -160,6 +166,10 @@ export class EnvironmentService {
     dto: UpdateEnvironment,
     environmentSlug: Environment['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to update environment ${environmentSlug}`
+    )
+
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
@@ -175,6 +185,7 @@ export class EnvironmentService {
     dto.name && (await this.environmentExists(dto.name, environment.project))
 
     // Update the environment
+    this.logger.log(`Updating environment ${environment.slug}`)
     const updatedEnvironment = await this.prisma.environment.update({
       where: {
         id: environment.id
@@ -188,6 +199,7 @@ export class EnvironmentService {
         lastUpdatedById: user.id
       }
     })
+    this.logger.log(`Environment ${updatedEnvironment.slug} updated`)
 
     const project = environment.project
 
@@ -206,10 +218,6 @@ export class EnvironmentService {
         workspaceId: project.workspaceId
       },
       this.prisma
-    )
-
-    this.logger.log(
-      `Environment ${updatedEnvironment.name} updated in project ${project.name} (${project.id})`
     )
 
     return updatedEnvironment
@@ -232,12 +240,18 @@ export class EnvironmentService {
     user: AuthenticatedUser,
     environmentSlug: Environment['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to fetch an environment ${environmentSlug}`
+    )
+
+    this.logger.log(`Fetching environment ${environmentSlug}`)
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
         entity: { slug: environmentSlug },
         authorities: [Authority.READ_ENVIRONMENT]
       })
+    this.logger.log(`Environment ${environmentSlug} fetched`)
 
     delete environment.project
 
@@ -283,15 +297,22 @@ export class EnvironmentService {
     order: string,
     search: string
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to fetch environments of project ${projectSlug}`
+    )
+
+    this.logger.log(`Fetching project of environment ${projectSlug}`)
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: projectSlug },
         authorities: [Authority.READ_ENVIRONMENT]
       })
+    this.logger.log(`Project ${projectSlug} fetched`)
     const projectId = project.id
 
     // Get the environments for the required page
+    this.logger.log(`Fetching environments of project ${projectSlug}`)
     const items = await this.prisma.environment.findMany({
       where: {
         projectId,
@@ -321,6 +342,9 @@ export class EnvironmentService {
         [sort]: order
       }
     })
+    this.logger.log(
+      `Environments of project ${projectSlug} fetched. Count: ${items.length}`
+    )
 
     // Parse the secret and variable counts for each environment
     for (const environment of items) {
@@ -331,6 +355,9 @@ export class EnvironmentService {
     }
 
     // Calculate metadata for pagination
+    this.logger.log(
+      `Calculating metadata for environments of project ${projectSlug}`
+    )
     const totalCount = await this.prisma.environment.count({
       where: {
         projectId,
@@ -346,6 +373,9 @@ export class EnvironmentService {
       order,
       search
     })
+    this.logger.log(
+      `Metadata calculated for environments of project ${projectSlug}`
+    )
 
     return { items, metadata }
   }
@@ -371,34 +401,47 @@ export class EnvironmentService {
     user: AuthenticatedUser,
     environmentSlug: Environment['slug']
   ) {
+    this.logger.log(
+      `User ${user.id} attempted to delete environment ${environmentSlug}`
+    )
+
+    this.logger.log(`Fetching environment ${environmentSlug}`)
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
         entity: { slug: environmentSlug },
         authorities: [Authority.DELETE_ENVIRONMENT]
       })
+    this.logger.log(`Environment ${environmentSlug} fetched`)
 
     // Check if this is the only existing environment
+    this.logger.log(
+      `Checking if environment ${environmentSlug} is the last one`
+    )
     const count = await this.prisma.environment.count({
       where: {
         projectId: environment.projectId
       }
     })
+
     if (count === 1) {
+      const errorMessage = `Environment ${environmentSlug} is the only environment in the project`
+      this.logger.error(errorMessage)
       throw new BadRequestException(
-        constructErrorBody(
-          'Last environment cannot be deleted',
-          'Can not delete the last environment in the project. Please create another environment first.'
-        )
+        constructErrorBody('Last environment cannot be deleted', errorMessage)
       )
+    } else {
+      this.logger.log(`Environment ${environmentSlug} is not the last one`)
     }
 
     // Delete the environment
+    this.logger.log(`Deleting environment ${environmentSlug}`)
     await this.prisma.environment.delete({
       where: {
         id: environment.id
       }
     })
+    this.logger.log(`Environment ${environmentSlug} deleted`)
 
     await createEvent(
       {
@@ -416,10 +459,6 @@ export class EnvironmentService {
       },
       this.prisma
     )
-
-    this.logger.log(
-      `Environment ${environment.name} deleted in project ${environment.project.name} (${environment.project.id})`
-    )
   }
 
   /**
@@ -428,6 +467,10 @@ export class EnvironmentService {
    * @private
    */
   private async environmentExists(name: Environment['name'], project: Project) {
+    this.logger.log(
+      `Checking if environment ${name} exists in project ${project.slug}`
+    )
+
     const { id: projectId, slug } = project
 
     if (
@@ -440,13 +483,14 @@ export class EnvironmentService {
         }
       })) !== null
     ) {
+      const errorMessage = `Environment with name ${name} already exists in project ${slug}`
+      this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody(
-          'Environment exits',
-          `Environment with name ${name} already exists in project ${slug}`
-        )
+        constructErrorBody('Environment exits', errorMessage)
       )
     }
+
+    this.logger.log(`Environment ${name} does not exist in project ${slug}`)
   }
 
   /**
@@ -458,6 +502,8 @@ export class EnvironmentService {
   private async getSecretCount(
     environmentId: Environment['id']
   ): Promise<number> {
+    this.logger.log(`Counting secrets in environment ${environmentId}`)
+
     const secrets = await this.prisma.secretVersion.findMany({
       distinct: ['secretId'],
       where: {
@@ -465,6 +511,10 @@ export class EnvironmentService {
       }
     })
 
+    const secretCount = secrets.length
+    this.logger.log(
+      `Found ${secretCount} secrets in environment ${environmentId}`
+    )
     return secrets.length
   }
 
@@ -477,6 +527,8 @@ export class EnvironmentService {
   private async getVariableCount(
     environmentId: Environment['id']
   ): Promise<number> {
+    this.logger.log(`Counting variables in environment ${environmentId}`)
+
     const variables = await this.prisma.variableVersion.findMany({
       distinct: ['variableId'],
       where: {
@@ -484,6 +536,10 @@ export class EnvironmentService {
       }
     })
 
-    return variables.length
+    const variableCount = variables.length
+    this.logger.log(
+      `Found ${variableCount} variables in environment ${environmentId}`
+    )
+    return variableCount
   }
 }

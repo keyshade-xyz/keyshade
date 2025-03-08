@@ -1095,50 +1095,6 @@ describe('Workspace Role Controller Tests', () => {
     })
   })
 
-  describe('Check Workspace Role Exists Tests', () => {
-    it('should be able to check if the workspace role exists', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/Member`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: true
-      })
-    })
-
-    it('should be able to check if the workspace role exists(2)', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/new-stuff`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: false
-      })
-    })
-
-    it('should not be able to check if the workspace role exists for other workspace', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceBob.slug}/exists/Viewer`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(401)
-    })
-  })
-
   describe('Get All Workspace Role Tests', () => {
     it('should be able to fetch all the roles of a workspace with WORKSPACE_ADMIN role', async () => {
       const roles = await prisma.workspaceRole
