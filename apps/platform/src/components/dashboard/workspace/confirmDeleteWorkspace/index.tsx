@@ -15,13 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store'
+import { allWorkspacesAtom, deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { Input } from '@/components/ui/input'
 
 export default function ConfirmDeleteWorkspace(): React.JSX.Element {
+  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(selectedWorkspaceAtom)
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(deleteWorkspaceOpenAtom)
+
+  const [confirmWorkspaceName, setConfirmWorkspaceName] = useState('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 
@@ -32,7 +36,6 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
   );
 
   const handleDeleteWorkspace = async () => {
-    // Delete workspace logic goes here
     if (selectedWorkspace) {
       setIsLoading(true)
       toast.loading('Deleting workspace...')
@@ -49,11 +52,12 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             )
           })
 
-          // Set the selected environment to null
-          setSelectedWorkspace(null)
-          handleClose()
+          const remainingWorkspaces = allWorkspaces.filter(workspace => workspace.id !== selectedWorkspace.id);
+          setAllWorkspaces(remainingWorkspaces);
+          setSelectedWorkspace(remainingWorkspaces[0]);
         }
       } finally {
+        handleClose()
         setIsLoading(false)
         toast.dismiss()
         router.push('/')
@@ -68,7 +72,6 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
   return (
     <AlertDialog
       aria-hidden={!isDeleteWorkspaceOpen}
-      onOpenChange={handleClose}
       open={isDeleteWorkspaceOpen}
     >
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
@@ -83,6 +86,18 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             This action cannot be undone. This will permanently delete your workspace and remove your environment data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="flex w-full flex-col gap-y-5 text-sm">
+          To confirm that you really want to delete this workspace, please type in
+          the name of the workspace below.
+          <Input
+            className="w-full"
+            disabled={isLoading}
+            onChange={(e) => setConfirmWorkspaceName(e.target.value)}
+            placeholder={selectedWorkspace?.name}
+            type="text"
+            value={confirmWorkspaceName}
+          />
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
@@ -92,10 +107,10 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            disabled={isLoading}
+            disabled={isLoading || allWorkspaces.length === 1 || confirmWorkspaceName !== selectedWorkspace?.name}
             onClick={handleDeleteWorkspace}
           >
-            Yes, delete the wokspace
+            Yes, delete the workspace
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

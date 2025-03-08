@@ -8,14 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store';
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { allWorkspacesAtom, deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store';
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace';
 
 const EmojiPicker = dynamic(
@@ -29,40 +27,24 @@ interface WorkspaceSettingsPageProps {
   params: { workspace: string }
 }
 
-const billingMethods = [
-  { id: 'credit', cardType: 'Visa', cardNumber: '9876 4567 3210 1234' },
-  { id: 'paypal', cardType: 'AMEX', cardNumber: '1234 3210 9876' },
-  { id: 'bank', cardType: 'MasterCard', cardNumber: '3210 9876 4567 1234 4567' }
-];
-
 export default function WorkspaceSettingsPage({
   params
 }: WorkspaceSettingsPageProps): JSX.Element {
   const workspaceSettings = params.workspace;
+  const [allWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace] = useAtom(selectedWorkspaceAtom)
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(deleteWorkspaceOpenAtom)
   const [showPicker, setShowPicker] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>(selectedWorkspace?.icon || '😊');
   const [updatedWorkspaceName, setUpdatedWorkspaceName] = useState<string>(selectedWorkspace?.name || 'Keyshade');
-  const [billingMethod, setBillingMethod] = useState<{ id: string; cardType: string; cardNumber: string }>(billingMethods[0]);
 
   function handleEmojiSelect(emojiData: EmojiClickData) {
     setSelectedEmoji(emojiData.emoji);
     setShowPicker(false);
   }
 
-  const handleBillingMethodChange = (id: string) => {
-    const method = billingMethods.find((billMethod) => billMethod.id === id);
-    if (!method) return;
-    setBillingMethod({
-      id: method.id,
-      cardType: method.cardType,
-      cardNumber: method.cardNumber
-    });
-  };
-
   const hasChanges = () => {
-    return selectedEmoji !== selectedWorkspace?.icon || selectedWorkspace.name !== updatedWorkspaceName || billingMethod.id !== billingMethods[0].id;
+    return selectedEmoji !== selectedWorkspace?.icon || selectedWorkspace.name !== updatedWorkspaceName;
   };
 
   const handleSaveDetails = () => {
@@ -124,34 +106,6 @@ export default function WorkspaceSettingsPage({
             value={selectedWorkspace?.name}
             />
           </div>
-
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-xl" htmlFor="billing-method">Billing Method</Label>
-              <p className="text-white/60 text-sm">Billing email is used for making payments.</p>
-            </div>
-            <Select
-              onValueChange={handleBillingMethodChange}
-              value={billingMethod.id}
-            >
-              <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800">
-                <SelectGroup>
-                  {billingMethods.map((method) => (
-                    <SelectItem
-                      className="group cursor-pointer rounded-sm"
-                      key={method.id}
-                      value={method.id}
-                    >
-                      Card ending in {method.cardNumber.slice(-4)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <Button disabled={!hasChanges()} onClick={handleSaveDetails}>
@@ -164,14 +118,26 @@ export default function WorkspaceSettingsPage({
         <div className="w-[782px] py-8 px-6 flex items-center gap-4 bg-[#21191A] rounded-3xl border-2 border-[#E92D1F]">
           <div className="flex flex-col gap-2">
             <h4 className="text-[#E92D1F] font-bold text-2xl">Delete Workspace</h4>
-            <p className="text-white/60 font-medium text-lg">Your workspace will be permanently deleted and access will be lost to any of your teams and data. This action is irreversible.</p>
+            <p className="text-white/60 font-medium text-md">Your workspace will be permanently deleted and access will be lost to any of your teams and data. This action is irreversible.</p>
           </div>
-          <Button
-          className="bg-[#E92D1F] text-white hover:bg-[#E92D1F]/80"
-          onClick={() => setIsDeleteWorkspaceOpen(true)}
-          >
-            Delete
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+              <Button
+              className="bg-[#E92D1F] text-white hover:bg-[#E92D1F]/80"
+              disabled={allWorkspaces.length === 1}
+              onClick={() => setIsDeleteWorkspaceOpen(true)}
+              >
+                Delete
+              </Button>
+              </TooltipTrigger>
+              {allWorkspaces.length === 1 && (
+                <TooltipContent>
+                  <p>At least one workspace is mandatory.</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </section>
 

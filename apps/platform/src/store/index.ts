@@ -13,9 +13,12 @@ import type {
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
+export const allWorkspacesAtom = atom<
+  (Workspace & { projects: number })[]
+>([])
 export const selectedWorkspaceAtom = atom<
   (Workspace & { projects: number }) | null
->(null)
+>()
 export const selectedProjectAtom = atom<Project | null>(null)
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedSecretAtom = atom<Secret | null>(null)
