@@ -8,12 +8,12 @@ import {
   Put,
   Query
 } from '@nestjs/common'
-import { IntegrationService } from '../service/integration.service'
+import { IntegrationService } from './integration.service'
 import { CurrentUser } from '@/decorators/user.decorator'
-import { CreateIntegration } from '../dto/create.integration/create.integration'
+import { CreateIntegration } from './dto/create.integration/create.integration'
 import { Authority } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
-import { UpdateIntegration } from '../dto/update.integration/update.integration'
+import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthenticatedUser } from '@/user/user.types'
 
 @Controller('integration')

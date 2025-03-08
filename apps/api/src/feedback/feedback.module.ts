@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { FeedbackService } from './feedback.service'
-import { FeedbackController } from './controller/feedback.controller'
+import { FeedbackController } from './feedback.controller'
 
 @Module({
   providers: [FeedbackService],

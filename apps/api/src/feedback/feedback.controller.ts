@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common'
 import { Public } from '@/decorators/public.decorator'
-import { FeedbackService } from '../service/feedback.service'
+import { FeedbackService } from './feedback.service'
 
 @Controller('feedback')
 export class FeedbackController {

@@ -1368,6 +1368,9 @@ describe('Project Controller Tests', () => {
       const forkedEnvironments = await prisma.environment.findMany({
         where: {
           projectId: forkedProject.id
+        },
+        orderBy: {
+          name: 'asc'
         }
       })
 
@@ -1389,7 +1392,7 @@ describe('Project Controller Tests', () => {
       expect(forkedSecrets).toHaveLength(2)
       expect(forkedVariables).toHaveLength(2)
 
-      const [devEnvironment, defaultEnvironment] = forkedEnvironments
+      const [defaultEnvironment, devEnvironment] = forkedEnvironments
       const [secretInDefaultEnvironment, secretInDevEnvironment] = forkedSecrets
       const [variableInDefaultEnvironment, variableInDevEnvironment] =
         forkedVariables
