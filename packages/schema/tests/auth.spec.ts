@@ -90,7 +90,7 @@ describe('Auth Schema Tests', () => {
         profilePictureUrl: null,
         isOnboardingFinished: false,
         isAdmin: false,
-        authProvider: 'email'
+        authProvider: 'EMAIL_OTP'
       })
 
       expect(result.success).toBe(true)
