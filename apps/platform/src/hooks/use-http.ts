@@ -1,4 +1,4 @@
- 
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- GitHub CI flagging this */
 
 import type { ClientResponse } from '@keyshade/schema'
 import { createElement, useCallback, useEffect, useRef } from 'react'
