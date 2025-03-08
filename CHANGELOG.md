@@ -1,3 +1,17 @@
+## [2.13.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.5...v2.13.0-stage.6) (2025-03-08)
+
+### 🚀 Features
+
+* **api:** Add tier limit ([#816](https://github.com/keyshade-xyz/keyshade/issues/816)) ([4f7c079](https://github.com/keyshade-xyz/keyshade/commit/4f7c079611921d2f0ea70ee47aacc0e3e484c452))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add suggestions from [#812](https://github.com/keyshade-xyz/keyshade/issues/812) ([#813](https://github.com/keyshade-xyz/keyshade/issues/813)) ([eeec54d](https://github.com/keyshade-xyz/keyshade/commit/eeec54df3f13c6649486211e3a5066e98c555086))
+
+### 🔨 Code Refactoring
+
+* **platform:** Reorganized user profile components ([#814](https://github.com/keyshade-xyz/keyshade/issues/814)) ([276d2d8](https://github.com/keyshade-xyz/keyshade/commit/276d2d8e0179484270407b34c5e6299162571766))
+
 ## [2.13.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.4...v2.13.0-stage.5) (2025-03-07)
 
 ### 🚀 Features
