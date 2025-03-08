@@ -38,6 +38,7 @@ import {
 import { WorkspaceMembershipService } from './service/workspace-membership.service'
 import { WorkspaceMembershipModule } from './workspace-membership.module'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 const createMembership = async (
   roleId: string,
@@ -74,6 +75,7 @@ describe('Workspace Membership Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
+  let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser,
     user2: AuthenticatedUser,
@@ -115,6 +117,7 @@ describe('Workspace Membership Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -344,6 +347,59 @@ describe('Workspace Membership Controller Tests', () => {
   })
 
   describe('Invite User Tests', () => {
+    it('should not be able to invite users if tier limit is reached', async () => {
+      // Invite users until the tier limit is reached
+      for (
+        let i = 0;
+        i < tierLimitService.getMemberTierLimit(workspace1) - 1; // Subtract 1 for the user who owns the workspace
+        i++
+      ) {
+        // Create a user
+        const user = await userService.createUser({
+          email: `user${i}@example.com`,
+          name: `User ${i}`,
+          isOnboardingFinished: true
+        })
+
+        // Invite the user
+        await workspaceMembershipService.inviteUsersToWorkspace(
+          user1,
+          workspace1.slug,
+          [
+            {
+              email: user.email,
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        )
+      }
+
+      // Create another user
+      const user = await userService.createUser({
+        email: 'user@another-example.com',
+        name: 'User',
+        isActive: true,
+        isOnboardingFinished: true
+      })
+
+      // Invite the user
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/invite-users`,
+        payload: [
+          {
+            email: user.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should do nothing if null or empty array is sent for invitation of user', async () => {
       const response = await app.inject({
         method: 'POST',

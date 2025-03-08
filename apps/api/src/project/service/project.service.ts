@@ -33,6 +33,7 @@ import {
   limitMaxItemsPerPage
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class ProjectService {
@@ -40,7 +41,8 @@ export class ProjectService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -67,6 +69,9 @@ export class ProjectService {
         authorities: [Authority.CREATE_PROJECT]
       })
     const workspaceId = workspace.id
+
+    // Check if more workspaces can be created under the workspace
+    await this.tierLimitService.checkProjectLimitReached(workspace)
 
     // Check if project with this name already exists for the user
     await this.projectExists(dto.name, workspaceId)
@@ -322,7 +327,7 @@ export class ProjectService {
     const data: Partial<Project> = {
       name: dto.name === project.name ? undefined : dto.name,
       slug:
-        dto.name === project.name
+        dto.name && dto.name !== project.name
           ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
           : project.slug,
       description: dto.description,

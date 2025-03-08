@@ -42,6 +42,7 @@ import { getSecretWithValues, generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SecretWithProject, SecretWithValues } from '../secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class SecretService {
@@ -51,6 +52,7 @@ export class SecretService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -86,6 +88,9 @@ export class SecretService {
         authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
+
+    // Check if more secrets can be created in the project
+    await this.tierLimitService.checkSecretLimitReached(project)
 
     // Check if the secret with the same name already exists in the project
     await this.secretExists(dto.name, project)

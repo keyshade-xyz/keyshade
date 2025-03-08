@@ -34,6 +34,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
 import { VariableWithValues } from '../variable.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class VariableService {
@@ -43,6 +44,7 @@ export class VariableService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -78,6 +80,9 @@ export class VariableService {
         authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
+
+    // Check if more variables are allowed in the project
+    await this.tierLimitService.checkVariableLimitReached(project)
 
     // Check if a variable with the same name already exists in the project
     await this.variableExists(dto.name, project)

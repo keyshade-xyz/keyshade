@@ -28,6 +28,7 @@ import { CreateWorkspaceMember } from '../dto/create.workspace/create.workspace-
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -37,6 +38,7 @@ export class WorkspaceMembershipService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly jwt: JwtService,
+    private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService
   ) {}
 
@@ -212,6 +214,9 @@ export class WorkspaceMembershipService {
         entity: { slug: workspaceSlug },
         authorities: [Authority.ADD_USER]
       })
+
+    // Check if more members can be added to the workspace
+    await this.tierLimitService.checkMemberLimitReached(workspace)
 
     // Add users to the workspace if any
     if (members && members.length > 0) {

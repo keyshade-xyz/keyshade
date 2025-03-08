@@ -20,6 +20,7 @@ import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class EnvironmentService {
@@ -27,7 +28,8 @@ export class EnvironmentService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -76,6 +78,9 @@ export class EnvironmentService {
         ]
       })
     const projectId = project.id
+
+    // Check if more environments can be created in the project
+    await this.tierLimitService.checkEnvironmentLimitReached(project)
 
     // Check if an environment with the same name already exists
     await this.environmentExists(dto.name, project)

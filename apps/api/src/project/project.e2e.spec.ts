@@ -41,6 +41,7 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Project Controller Tests', () => {
   let app: NestFastifyApplication
@@ -54,6 +55,7 @@ describe('Project Controller Tests', () => {
   let environmentService: EnvironmentService
   let secretService: SecretService
   let variableService: VariableService
+  let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
@@ -93,6 +95,7 @@ describe('Project Controller Tests', () => {
     environmentService = moduleRef.get(EnvironmentService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -202,6 +205,36 @@ describe('Project Controller Tests', () => {
       expect(response.json().privateKey).toBeDefined()
       expect(response.json().createdAt).toBeDefined()
       expect(response.json().updatedAt).toBeDefined()
+    })
+
+    it('should not be able to create projects if tier limit it reached', async () => {
+      // Create the number of projects that the tier limit allows
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getProjectTierLimit(workspace1) - 2; // Subtract 2 for the projects created above
+        x++
+      ) {
+        await projectService.createProject(user1, workspace1.slug, {
+          name: `Project ${x}`,
+          description: `Project ${x} description`,
+          storePrivateKey: true
+        })
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/project/${workspace1.slug}`,
+        payload: {
+          name: 'Project X',
+          description: 'Project 101 description',
+          storePrivateKey: true
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should have created a default environment', async () => {
@@ -1356,7 +1389,7 @@ describe('Project Controller Tests', () => {
       expect(forkedSecrets).toHaveLength(2)
       expect(forkedVariables).toHaveLength(2)
 
-      const [defaultEnvironment, devEnvironment] = forkedEnvironments
+      const [devEnvironment, defaultEnvironment] = forkedEnvironments
       const [secretInDefaultEnvironment, secretInDevEnvironment] = forkedSecrets
       const [variableInDefaultEnvironment, variableInDevEnvironment] =
         forkedVariables
