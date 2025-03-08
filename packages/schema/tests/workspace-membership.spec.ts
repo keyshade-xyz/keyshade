@@ -390,7 +390,7 @@ describe('Workspace Membership Schema Tests', () => {
               isActive: true,
               isOnboardingFinished: true,
               isAdmin: false,
-              authProvider: 'google'
+              authProvider: 'GOOGLE'
             },
             roles: [
               {
