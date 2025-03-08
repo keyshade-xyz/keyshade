@@ -321,9 +321,10 @@ export class ProjectService {
 
     const data: Partial<Project> = {
       name: dto.name === project.name ? undefined : dto.name,
-      slug: dto.name
-        ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
-        : project.slug,
+      slug:
+        dto.name === project.name
+          ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
+          : project.slug,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
       privateKey: dto.storePrivateKey ? dto.privateKey : null,
