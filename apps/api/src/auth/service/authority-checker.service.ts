@@ -16,9 +16,9 @@ import {
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
 import { IntegrationWithWorkspace } from '@/integration/integration.types'
-import { AuthorizationParams } from '../authorization.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
+import { AuthorizationParams } from '../auth.types'
 
 @Injectable()
 export class AuthorityCheckerService {

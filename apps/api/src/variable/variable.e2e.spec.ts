@@ -3,8 +3,8 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { ProjectService } from '@/project/service/project.service'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { ProjectService } from '@/project/project.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import {
   Environment,
   EventSeverity,
@@ -26,13 +26,13 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { VariableModule } from './variable.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { VariableService } from './service/variable.service'
-import { EventService } from '@/event/service/event.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { VariableService } from './variable.service'
+import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { mockDeep } from 'jest-mock-extended'
 import { RedisClientType } from 'redis'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
