@@ -1,3 +1,9 @@
+## [2.13.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.6...v2.13.0-stage.7) (2025-03-09)
+
+### 🚀 Features
+
+* **platform:** Edit API keys in the user settings ([#815](https://github.com/keyshade-xyz/keyshade/issues/815)) ([3c4c4f9](https://github.com/keyshade-xyz/keyshade/commit/3c4c4f9e7379d04163724f91893fdef62c8f8b4c))
+
 ## [2.13.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.5...v2.13.0-stage.6) (2025-03-08)
 
 ### 🚀 Features
