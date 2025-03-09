@@ -1,3 +1,9 @@
+## [2.13.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.7...v2.13.0-stage.8) (2025-03-09)
+
+### 🐛 Bug Fixes
+
+* **platfrom:** Navigation tab render bug ([#817](https://github.com/keyshade-xyz/keyshade/issues/817)) ([15a824e](https://github.com/keyshade-xyz/keyshade/commit/15a824e4348aa1353ab2a45470a4e8816328f742))
+
 ## [2.13.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.6...v2.13.0-stage.7) (2025-03-09)
 
 ### 🚀 Features
