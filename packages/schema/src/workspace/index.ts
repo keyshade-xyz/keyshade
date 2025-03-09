@@ -13,21 +13,32 @@ export const WorkspaceSchema = z.object({
   createdAt: z.string().datetime(),
   ownerId: z.string(),
   isDefault: z.boolean(),
-  lastUpdatedById: z.string().nullable()
+  lastUpdatedById: z.string().nullable(),
+  lastUpdateBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  }),
+  ownedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable(),
+    ownedSince: z.string().datetime()
+  })
 })
 
 export const CreateWorkspaceRequestSchema = z.object({
   name: WorkspaceSchema.shape.name,
-  icon: z.string().optional(),
-  isDefault: z.boolean().optional()
+  icon: z.string().optional()
 })
 
 export const CreateWorkspaceResponseSchema = WorkspaceSchema
 
-export const UpdateWorkspaceRequestSchema =
-  CreateWorkspaceRequestSchema.partial().extend({
-    workspaceSlug: WorkspaceSchema.shape.slug
-  })
+export const UpdateWorkspaceRequestSchema = z.object({
+  name: WorkspaceSchema.shape.name.optional(),
+  icon: WorkspaceSchema.shape.icon.optional(),
+  workspaceSlug: WorkspaceSchema.shape.slug
+})
 
 export const UpdateWorkspaceResponseSchema = WorkspaceSchema
 

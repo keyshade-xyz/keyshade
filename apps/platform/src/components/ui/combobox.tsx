@@ -79,7 +79,12 @@ export function Combobox(): React.JSX.Element {
       setIsLoading(false)
       toast.dismiss()
     }
-  }, [createWorkspace, newWorkspaceName, setAllWorkspaces, setSelectedWorkspace])
+  }, [
+    createWorkspace,
+    newWorkspaceName,
+    setAllWorkspaces,
+    setSelectedWorkspace
+  ])
 
   useEffect(() => {
     getWorkspacesOfUser().then(({ success, data }) => {
@@ -102,7 +107,7 @@ export function Combobox(): React.JSX.Element {
         >
           <div className="flex gap-x-[0.88rem]">
             <div className="flex aspect-square items-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
-              🔥
+              {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
@@ -143,7 +148,7 @@ export function Combobox(): React.JSX.Element {
                           : 'opacity-0'
                       )}
                     />{' '}
-                    {workspace.name}
+                    {workspace.icon ?? '🔥'} {workspace.name}
                   </CommandItem>
                 )
               })}

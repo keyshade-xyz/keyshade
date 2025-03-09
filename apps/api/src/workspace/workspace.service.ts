@@ -3,7 +3,10 @@ import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
-import { createWorkspace } from '@/common/workspace'
+import {
+  associateWorkspaceOwnerDetails,
+  createWorkspace
+} from '@/common/workspace'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
@@ -28,6 +31,7 @@ import { CreateWorkspace } from './dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from './dto/update.workspace/update.workspace'
 import { AuthenticatedUser } from '@/user/user.types'
 import { UpdateBlacklistedIpAddresses } from './dto/update.blacklistedIpAddresses/update.blacklistedIpAddresses'
+import { WorkspaceWithLastUpdatedByAndOwner } from './workspace.types'
 
 @Injectable()
 export class WorkspaceService {
@@ -45,7 +49,10 @@ export class WorkspaceService {
    * @param dto The data to create the workspace with
    * @returns The created workspace
    */
-  async createWorkspace(user: AuthenticatedUser, dto: CreateWorkspace) {
+  async createWorkspace(
+    user: AuthenticatedUser,
+    dto: CreateWorkspace
+  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
     this.logger.log(
       `User ${user.id} attempted to create a workspace ${dto.name}`
     )
@@ -67,7 +74,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
-  ) {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
     this.logger.log(
       `User ${user.id} attempted to update a workspace ${workspaceSlug}`
     )
@@ -103,6 +110,15 @@ export class WorkspaceService {
             id: user.id
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
     this.logger.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
@@ -123,7 +139,10 @@ export class WorkspaceService {
       this.prisma
     )
 
-    return updatedWorkspace
+    return {
+      ...updatedWorkspace,
+      ownedBy: workspace.ownedBy
+    }
   }
 
   /**
@@ -188,7 +207,7 @@ export class WorkspaceService {
   async getWorkspaceBySlug(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<Workspace> {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
     this.logger.log(
       `User ${user.id} attempted to get workspace ${workspaceSlug}`
     )
@@ -248,6 +267,15 @@ export class WorkspaceService {
         name: {
           contains: search
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -288,10 +316,17 @@ export class WorkspaceService {
     })
 
     return {
-      items: items.map((item) => ({
-        ...item,
-        isDefault: item.isDefault && item.ownerId === user.id
-      })),
+      items: await Promise.all(
+        items.map(async (item) => {
+          return await associateWorkspaceOwnerDetails(
+            {
+              ...item,
+              isDefault: item.isDefault && item.ownerId === user.id
+            },
+            this.prisma
+          )
+        })
+      ),
       metadata
     }
   }

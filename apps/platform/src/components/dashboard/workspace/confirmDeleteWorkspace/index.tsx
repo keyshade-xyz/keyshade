@@ -3,8 +3,9 @@
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
-import { TrashSVG } from '@public/svg/shared'
 import { useRouter } from 'next/navigation'
+import type { Workspace } from '@keyshade/schema'
+import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,15 +16,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { allWorkspacesAtom, deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  allWorkspacesAtom,
+  deleteWorkspaceOpenAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { Input } from '@/components/ui/input'
 
 export default function ConfirmDeleteWorkspace(): React.JSX.Element {
   const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
-  const [selectedWorkspace, setSelectedWorkspace] = useAtom(selectedWorkspaceAtom)
-  const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(deleteWorkspaceOpenAtom)
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(
+    selectedWorkspaceAtom
+  )
+  const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(
+    deleteWorkspaceOpenAtom
+  )
 
   const [confirmWorkspaceName, setConfirmWorkspaceName] = useState('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -33,7 +42,7 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
     ControllerInstance.getInstance().workspaceController.deleteWorkspace({
       workspaceSlug: selectedWorkspace!.slug
     })
-  );
+  )
 
   const handleDeleteWorkspace = async () => {
     if (selectedWorkspace) {
@@ -52,9 +61,11 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             )
           })
 
-          const remainingWorkspaces = allWorkspaces.filter(workspace => workspace.id !== selectedWorkspace.id);
-          setAllWorkspaces(remainingWorkspaces);
-          setSelectedWorkspace(remainingWorkspaces[0]);
+          const remainingWorkspaces = allWorkspaces.filter(
+            (workspace) => workspace.id !== selectedWorkspace.id
+          ) as (Workspace & { projects: number })[]
+          setAllWorkspaces(remainingWorkspaces)
+          setSelectedWorkspace(remainingWorkspaces[0])
         }
       } finally {
         handleClose()
@@ -83,12 +94,13 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This action cannot be undone. This will permanently delete your workspace and remove your environment data from our servers.
+            This action cannot be undone. This will permanently delete your
+            workspace and remove your environment data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex w-full flex-col gap-y-5 text-sm">
-          To confirm that you really want to delete this workspace, please type in
-          the name of the workspace below.
+          To confirm that you really want to delete this workspace, please type
+          in the name of the workspace below.
           <Input
             className="w-full"
             disabled={isLoading}
@@ -107,7 +119,11 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
-            disabled={isLoading || allWorkspaces.length === 1 || confirmWorkspaceName !== selectedWorkspace?.name}
+            disabled={
+              isLoading ||
+              allWorkspaces.length === 1 ||
+              confirmWorkspaceName !== selectedWorkspace?.name
+            }
             onClick={handleDeleteWorkspace}
           >
             Yes, delete the workspace
