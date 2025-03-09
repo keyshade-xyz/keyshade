@@ -44,13 +44,14 @@ export default function GeneralSettings(): React.JSX.Element {
 
   useEffect(() => {
     setIsModified(userDetails.name !== user?.name)
+  }, [user?.name, userDetails])
 
+  useEffect(() => {
     if (!user?.name) return
-
     setUserDetails({
       name: user.name
     })
-  }, [user?.name, userDetails])
+  }, [user?.name])
 
   return (
     <>
