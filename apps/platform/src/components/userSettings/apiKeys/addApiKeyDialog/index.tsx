@@ -166,7 +166,6 @@ export default function AddApiKeyDialog() {
 
             <div className="h-[calc(85vh-20rem)] overflow-y-auto">
               <AuthoritySelector
-                isSheet={false}
                 selectedPermissions={selectedPermissions}
                 setSelectedPermissions={setSelectedPermissions}
               />

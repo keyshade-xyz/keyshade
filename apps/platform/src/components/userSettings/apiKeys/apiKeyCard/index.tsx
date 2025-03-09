@@ -10,7 +10,11 @@ import {
   ContextMenuItem,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-import { selectedApiKeyAtom, deleteApiKeyOpenAtom, editApiKeyOpenAtom } from '@/store'
+import {
+  selectedApiKeyAtom,
+  deleteApiKeyOpenAtom,
+  editApiKeyOpenAtom
+} from '@/store'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import {
   Tooltip,
@@ -87,10 +91,10 @@ export default function ApiKeyCard({
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem 
+        <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
           onSelect={handleEditClick}
-          >
+        >
           Edit
         </ContextMenuItem>
         <ContextMenuItem

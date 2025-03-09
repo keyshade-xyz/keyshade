@@ -429,7 +429,7 @@ interface AuthoritySelectorProps {
   setSelectedPermissions: React.Dispatch<
     React.SetStateAction<Set<AuthorityEnum>>
   >
-  isSheet: boolean
+  isSheet?: boolean
 }
 
 function extractAuthoritiesFromGroupItem(
@@ -596,7 +596,9 @@ export default function AuthoritySelector({
   }
 
   return (
-    <div className={`flex items-start justify-start ${isSheet ? "flex-col gap-y-3" : "flex-row gap-6" } `}>
+    <div
+      className={`flex items-start justify-start ${isSheet ? 'flex-col gap-y-3' : 'flex-row gap-6'} `}
+    >
       <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
