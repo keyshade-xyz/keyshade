@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import dynamic from 'next/dynamic';
 import type { EmojiClickData} from 'emoji-picker-react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { allWorkspacesAtom, deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store';
+import { deleteWorkspaceOpenAtom, selectedWorkspaceAtom } from '@/store';
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace';
 
 const EmojiPicker = dynamic(
@@ -31,9 +31,9 @@ export default function WorkspaceSettingsPage({
   params
 }: WorkspaceSettingsPageProps): JSX.Element {
   const workspaceSettings = params.workspace;
-  const [allWorkspaces] = useAtom(allWorkspacesAtom)
-  const [selectedWorkspace] = useAtom(selectedWorkspaceAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(deleteWorkspaceOpenAtom)
+
   const [showPicker, setShowPicker] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>(selectedWorkspace?.icon || '😊');
   const [updatedWorkspaceName, setUpdatedWorkspaceName] = useState<string>(selectedWorkspace?.name || 'Keyshade');
@@ -125,17 +125,15 @@ export default function WorkspaceSettingsPage({
               <TooltipTrigger>
               <Button
               className="bg-[#E92D1F] text-white hover:bg-[#E92D1F]/80"
-              disabled={allWorkspaces.length === 1}
+              disabled={selectedWorkspace?.isDefault}
               onClick={() => setIsDeleteWorkspaceOpen(true)}
               >
                 Delete
               </Button>
               </TooltipTrigger>
-              {allWorkspaces.length === 1 && (
-                <TooltipContent>
-                  <p>At least one workspace is mandatory.</p>
-                </TooltipContent>
-              )}
+              {selectedWorkspace?.isDefault ? <TooltipContent>
+                  <p>The current workspace is set as the default and cannot be deleted.</p>
+                </TooltipContent> : null}
             </Tooltip>
           </TooltipProvider>
         </div>
