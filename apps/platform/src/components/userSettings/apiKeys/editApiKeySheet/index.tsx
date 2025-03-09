@@ -75,7 +75,10 @@ export default function EditApiKeySheet(): JSX.Element {
 
   const editApiKey = useHttp(() =>
     ControllerInstance.getInstance().apiKeyController.updateApiKey({
-      name: requestData.apiKeyName.trim() || undefined,
+      name:
+        requestData.apiKeyName === selectedApiKey!.name
+          ? undefined
+          : requestData.apiKeyName.trim(),
       apiKeySlug: selectedApiKey!.slug,
       expiresAfter: requestData.expiresAfter,
       authorities: Array.from(selectedPermissions).flat()
@@ -130,12 +133,7 @@ export default function EditApiKeySheet(): JSX.Element {
   }, [selectedApiKey, requestData, handleClose, setApiKeys, editApiKey])
 
   return (
-    <Sheet
-      onOpenChange={(open) => {
-        setIsEditApiKeyOpen(open)
-      }}
-      open={isEditApiKeyOpen}
-    >
+    <Sheet onOpenChange={handleClose} open={isEditApiKeyOpen}>
       <SheetContent className="min-w-[33rem] overflow-y-auto border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">Edit API Key</SheetTitle>
@@ -202,7 +200,7 @@ export default function EditApiKeySheet(): JSX.Element {
               onClick={updateApiKey}
               variant="secondary"
             >
-              Edit API Key
+              Save changes
             </Button>
           </SheetClose>
         </SheetFooter>
