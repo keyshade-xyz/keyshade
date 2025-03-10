@@ -99,7 +99,7 @@ export default function AddApiKeyDialog() {
           <AddSVG /> Add API Key
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex h-[85vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
+      <DialogContent className="flex h-[90vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new API Key
@@ -164,10 +164,12 @@ export default function AddApiKeyDialog() {
               </Select>
             </div>
 
-            <AuthoritySelector
-              selectedPermissions={selectedPermissions}
-              setSelectedPermissions={setSelectedPermissions}
-            />
+            <div className="h-[calc(85vh-20rem)] overflow-y-auto">
+              <AuthoritySelector
+                selectedPermissions={selectedPermissions}
+                setSelectedPermissions={setSelectedPermissions}
+              />
+            </div>
 
             <div className="flex justify-end pt-4">
               <Button

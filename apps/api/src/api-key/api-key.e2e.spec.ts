@@ -9,9 +9,9 @@ import { MockMailService } from '@/mail/services/mock.service'
 import { AppModule } from '@/app/app.module'
 import { Test } from '@nestjs/testing'
 import { ApiKey, Authority } from '@prisma/client'
-import { ApiKeyService } from './service/api-key.service'
+import { ApiKeyService } from './api-key.service'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Api Key Role Controller Tests', () => {

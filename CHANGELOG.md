@@ -1,3 +1,29 @@
+## [2.13.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.7...v2.13.0-stage.8) (2025-03-09)
+
+### 🐛 Bug Fixes
+
+* **platfrom:** Navigation tab render bug ([#817](https://github.com/keyshade-xyz/keyshade/issues/817)) ([15a824e](https://github.com/keyshade-xyz/keyshade/commit/15a824e4348aa1353ab2a45470a4e8816328f742))
+
+## [2.13.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.6...v2.13.0-stage.7) (2025-03-09)
+
+### 🚀 Features
+
+* **platform:** Edit API keys in the user settings ([#815](https://github.com/keyshade-xyz/keyshade/issues/815)) ([3c4c4f9](https://github.com/keyshade-xyz/keyshade/commit/3c4c4f9e7379d04163724f91893fdef62c8f8b4c))
+
+## [2.13.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.5...v2.13.0-stage.6) (2025-03-08)
+
+### 🚀 Features
+
+* **api:** Add tier limit ([#816](https://github.com/keyshade-xyz/keyshade/issues/816)) ([4f7c079](https://github.com/keyshade-xyz/keyshade/commit/4f7c079611921d2f0ea70ee47aacc0e3e484c452))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add suggestions from [#812](https://github.com/keyshade-xyz/keyshade/issues/812) ([#813](https://github.com/keyshade-xyz/keyshade/issues/813)) ([eeec54d](https://github.com/keyshade-xyz/keyshade/commit/eeec54df3f13c6649486211e3a5066e98c555086))
+
+### 🔨 Code Refactoring
+
+* **platform:** Reorganized user profile components ([#814](https://github.com/keyshade-xyz/keyshade/issues/814)) ([276d2d8](https://github.com/keyshade-xyz/keyshade/commit/276d2d8e0179484270407b34c5e6299162571766))
+
 ## [2.13.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.4...v2.13.0-stage.5) (2025-03-07)
 
 ### 🚀 Features

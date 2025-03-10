@@ -16,7 +16,7 @@ import {
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
 import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from './util'
 

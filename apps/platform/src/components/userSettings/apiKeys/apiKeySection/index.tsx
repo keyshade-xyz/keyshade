@@ -5,9 +5,11 @@ import type { ApiKey } from '@keyshade/schema'
 import ConfirmDeleteApiKey from '../confirmDeleteApiKey'
 import AddApiKeyDialog from '../addApiKeyDialog'
 import ApiKeyCard from '../apiKeyCard'
+import EditApiKeySheet from '../editApiKeySheet'
 import {
   apiKeysOfProjectAtom,
   deleteApiKeyOpenAtom,
+  editApiKeyOpenAtom,
   selectedApiKeyAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
@@ -17,6 +19,7 @@ import InputLoading from '@/components/common/input-loading'
 export default function ApiKeySection(): React.JSX.Element {
   const [apiKeys, setApiKeys] = useAtom(apiKeysOfProjectAtom)
   const isDeleteApiKeyOpen = useAtomValue(deleteApiKeyOpenAtom)
+  const isEditApiKeyOpen = useAtomValue(editApiKeyOpenAtom)
   const selectedApiKey = useAtomValue(selectedApiKeyAtom)
 
   const searchParams = useSearchParams()
@@ -62,6 +65,9 @@ export default function ApiKeySection(): React.JSX.Element {
             {apiKeys.map((apiKey) => (
               <ApiKeyCard apiKey={apiKey} key={apiKey.id} />
             ))}
+
+            {/* Edit API key sheet */}
+            {isEditApiKeyOpen && selectedApiKey ? <EditApiKeySheet /> : null}
 
             {/* Delete API Key alert dialog */}
             {isDeleteApiKeyOpen && selectedApiKey ? (
