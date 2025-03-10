@@ -50,3 +50,5 @@ export const deleteEnvironmentOpenAtom = atom<boolean>(false)
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
+
+export const deleteAccountOpenAtom = atom<boolean>(false)
