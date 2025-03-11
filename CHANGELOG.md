@@ -1,3 +1,9 @@
+## [2.13.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.9...v2.13.0-stage.10) (2025-03-11)
+
+### 🚀 Features
+
+* **platform:** Delete account in user settings ([#819](https://github.com/keyshade-xyz/keyshade/issues/819)) ([42d4301](https://github.com/keyshade-xyz/keyshade/commit/42d43013b277a3a427643a76f78e297186079c11))
+
 ## [2.13.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.8...v2.13.0-stage.9) (2025-03-11)
 
 ### 🚀 Features
