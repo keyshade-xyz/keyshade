@@ -23,6 +23,8 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
+import EnvironmentValueEditor from '@/components/common/environment-value-editor'
+import { parseUpdatedEnvironmentValues } from '@/lib/utils'
 
 export default function EditVariablSheet() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
@@ -38,6 +40,18 @@ export default function EditVariablSheet() {
     note: selectedVariableData?.variable.note || ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [environmentValues, setEnvironmentValues] = useState<
+    Record<string, string>
+  >(
+    () =>
+      selectedVariableData?.values.reduce(
+        (acc, entry) => {
+          acc[entry.environment.slug] = entry.value
+          return acc
+        },
+        {} as Record<string, string>
+      ) || {}
+  )
 
   const updateVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.updateVariable({
@@ -48,7 +62,10 @@ export default function EditVariablSheet() {
           ? undefined
           : requestData.name,
       note: requestData.note === '' ? undefined : requestData.note,
-      entries: undefined
+      entries: parseUpdatedEnvironmentValues(
+        selectedVariableData!.values,
+        environmentValues
+      )
     })
   )
 
@@ -70,7 +87,6 @@ export default function EditVariablSheet() {
 
       try {
         const { success, data } = await updateVariable()
-
         if (success && data) {
           toast.success('Variable edited successfully', {
             description: (
@@ -79,7 +95,6 @@ export default function EditVariablSheet() {
               </p>
             )
           })
-
           // Update the variable in the store
           setVariables((prev) => {
             const newVariables = prev.map((v) => {
@@ -91,14 +106,14 @@ export default function EditVariablSheet() {
                     name: requestData.name || v.variable.name,
                     note: requestData.note || v.variable.note,
                     slug: data.variable.slug
-                  }
+                  },
+                  values: [...v.values, ...data.updatedVersions]
                 }
               }
               return v
             })
             return newVariables
           })
-
           handleClose()
         }
       } finally {
@@ -155,6 +170,10 @@ export default function EditVariablSheet() {
               value={requestData.note}
             />
           </div>
+          <EnvironmentValueEditor
+            environmentValues={environmentValues}
+            setEnvironmentValues={setEnvironmentValues}
+          />
         </div>
         <SheetFooter className="py-3">
           <SheetClose asChild>
@@ -164,7 +183,7 @@ export default function EditVariablSheet() {
               onClick={handleUpdateVariable}
               variant="secondary"
             >
-              Edit Variable
+              Save Changes
             </Button>
           </SheetClose>
         </SheetFooter>

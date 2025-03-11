@@ -34,16 +34,8 @@ describe('Event Controller Tests', () => {
       )
     ).json()) as any
     workspaceSlug = workspaceResponse.slug
-  })
 
-  afterAll(async () => {
-    // Delete the workspace
-    await client.delete(`/api/workspace/${workspaceSlug}`, {
-      'x-e2e-user-email': email
-    })
-  })
-
-  it('should fetch a Project Event', async () => {
+    // Create a project
     const projectResponse = (await (
       await client.post(
         `/api/project/${workspaceSlug}`,
@@ -56,17 +48,9 @@ describe('Event Controller Tests', () => {
         }
       )
     ).json()) as any
-
     projectSlug = projectResponse.slug
-    const events = await eventController.getEvents(
-      { workspaceSlug, source: 'PROJECT' },
-      { 'x-e2e-user-email': email }
-    )
-    expect(events.data.items[0].source).toBe(EventSource.PROJECT)
-    expect(events.data.items[0].metadata.name).toBe('Project')
-  })
 
-  it('should fetch a Environment Event', async () => {
+    // Create an environment
     const environmentResponse = (await (
       await client.post(
         `/api/environment/${projectSlug}`,
@@ -78,16 +62,33 @@ describe('Event Controller Tests', () => {
         }
       )
     ).json()) as any
+    environment = environmentResponse
+  })
+
+  afterAll(async () => {
+    // Delete the workspace
+    await client.delete(`/api/workspace/${workspaceSlug}`, {
+      'x-e2e-user-email': email
+    })
+  })
+
+  it('should fetch a Project Event', async () => {
+    const events = await eventController.getEvents(
+      { workspaceSlug, source: 'PROJECT' },
+      { 'x-e2e-user-email': email }
+    )
+    expect(events.data.items[0].source).toBe(EventSource.PROJECT)
+    expect(events.data.items[0].metadata.name).toBe('Project')
+  })
+
+  it('should fetch a Environment Event', async () => {
     const events = await eventController.getEvents(
       { workspaceSlug, source: EventSource.ENVIRONMENT },
       { 'x-e2e-user-email': email }
     )
     expect(events.data.items[0].source).toBe('ENVIRONMENT')
-    expect(events.data.items[0].metadata.environmentId).toBe(
-      environmentResponse.id
-    )
+    expect(events.data.items[0].metadata.environmentId).toBe(environment.id)
     expect(events.data.items[0].metadata.name).toBe('Dev')
-    environment = environmentResponse
   })
 
   it('should fetch a Secret Event', async () => {

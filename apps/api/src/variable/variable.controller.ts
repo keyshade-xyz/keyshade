@@ -56,6 +56,20 @@ export class VariableController {
     )
   }
 
+  @Delete(':variableSlug/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
+  async deleteEnvironmentValueOfVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.deleteEnvironmentValueOfVariable(
+      user,
+      variableSlug,
+      environmentSlug
+    )
+  }
+
   @Delete(':variableSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_VARIABLE)
   async deleteVariable(

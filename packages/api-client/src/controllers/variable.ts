@@ -3,6 +3,8 @@ import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   ClientResponse,
+  DeleteEnvironmentValueOfVariableRequest,
+  DeleteEnvironmentValueOfVariableResponse,
   GetAllVariablesOfEnvironmentRequest,
   GetAllVariablesOfEnvironmentResponse
 } from '@keyshade/schema'
@@ -51,6 +53,18 @@ export default class VariableController {
     )
 
     return await parseResponse<UpdateVariableResponse>(response)
+  }
+
+  async deleteEnvironmentValueOfVariable(
+    request: DeleteEnvironmentValueOfVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DeleteEnvironmentValueOfVariableResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/variable/${request.variableSlug}/${request.environmentSlug}`,
+      headers
+    )
+
+    return await parseResponse<DeleteVariableResponse>(response)
   }
 
   async rollbackVariable(

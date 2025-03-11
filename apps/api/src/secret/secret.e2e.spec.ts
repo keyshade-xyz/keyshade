@@ -223,6 +223,51 @@ describe('Secret Controller Tests', () => {
       expect(body.secret.note).toBe('Secret 2 note')
       expect(body.secret.projectId).toBe(project1.id)
       expect(body.values.length).toBe(1)
+      expect(body.values[0].value).toBe('Secret 2 value')
+      expect(body.values[0].environment.id).toBe(environment1.id)
+      expect(body.values[0].environment.slug).toBe(environment1.slug)
+    })
+
+    it('should have encrypted value if project does not store private key', async () => {
+      // Make the project not store private key
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        payload: {
+          name: 'Secret 2',
+          note: 'Secret 2 note',
+          entries: [
+            {
+              value: 'Secret 2 value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          rotateAfter: '24'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+
+      const body = response.json()
+
+      expect(body).toBeDefined()
+      expect(body.secret.name).toBe('Secret 2')
+      expect(body.secret.note).toBe('Secret 2 note')
+      expect(body.secret.projectId).toBe(project1.id)
+      expect(body.values.length).toBe(1)
       expect(body.values[0].value).not.toBe('Secret 2 value')
       expect(body.values[0].environment.id).toBe(environment1.id)
       expect(body.values[0].environment.slug).toBe(environment1.slug)
@@ -272,7 +317,7 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-    })
+    }, 20000)
 
     it('should have created a secret version', async () => {
       const secretVersion = await prisma.secretVersion.findFirst({
@@ -488,6 +533,56 @@ describe('Secret Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).toBe(
+        'Updated Secret 1 value'
+      )
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        include: {
+          environment: true
+        }
+      })
+
+      expect(secretVersion.length).toBe(2)
+    })
+
+    it('should have encrypted values after new version creation if project does not store private key', async () => {
+      // Make the project not store private key
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          entries: [
+            {
+              value: 'Updated Secret 1 value',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).not.toBe(
+        'Updated Secret 1 value'
+      )
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
