@@ -49,7 +49,7 @@ export default function DeleteProfileDialog({ handleDeleteSelf }: { handleDelete
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
             onClick={handleDeleteSelf}
           >
-            Yes, delete account
+            Yes, delete my account
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
