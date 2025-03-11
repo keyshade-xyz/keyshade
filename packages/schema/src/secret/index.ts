@@ -71,16 +71,30 @@ export const UpdateSecretResponseSchema = z.object({
   }),
   updatedVersions: z.array(
     z.object({
-      id: z.string().optional(),
+      id: z.string(),
+      value: z.string(),
       version: z.number(),
       environment: z.object({
         id: EnvironmentSchema.shape.id,
-        slug: EnvironmentSchema.shape.slug
+        slug: EnvironmentSchema.shape.slug,
+        name: EnvironmentSchema.shape.name
       }),
-      value: z.string()
+      createdOn: z.string().datetime(),
+      createdBy: z.object({
+        id: z.string(),
+        name: z.string(),
+        profilePictureUrl: z.string().nullable()
+      })
     })
   )
 })
+
+export const DeleteEnvironmentValueOfSecretRequestSchema = z.object({
+  secretSlug: z.string(),
+  environmentSlug: z.string()
+})
+
+export const DeleteEnvironmentValueOfSecretResponseSchema = z.void()
 
 export const DeleteSecretRequestSchema = z.object({
   secretSlug: z.string()

@@ -14,7 +14,9 @@ import {
   GetRevisionsOfSecretRequestSchema,
   GetRevisionsOfSecretResponseSchema,
   GetAllSecretsOfEnvironmentRequestSchema,
-  GetAllSecretsOfEnvironmentResponseSchema
+  GetAllSecretsOfEnvironmentResponseSchema,
+  DeleteEnvironmentValueOfSecretRequestSchema,
+  DeleteEnvironmentValueOfSecretResponseSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
@@ -26,6 +28,14 @@ export type CreateSecretResponse = z.infer<typeof CreateSecretResponseSchema>
 export type UpdateSecretRequest = z.infer<typeof UpdateSecretRequestSchema>
 
 export type UpdateSecretResponse = z.infer<typeof UpdateSecretResponseSchema>
+
+export type DeleteEnvironmentValueOfSecretRequest = z.infer<
+  typeof DeleteEnvironmentValueOfSecretRequestSchema
+>
+
+export type DeleteEnvironmentValueOfSecretResponse = z.infer<
+  typeof DeleteEnvironmentValueOfSecretResponseSchema
+>
 
 export type DeleteSecretRequest = z.infer<typeof DeleteSecretRequestSchema>
 
