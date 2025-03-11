@@ -1,5 +1,5 @@
 import { TrashSVG } from '@public/svg/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useAtom } from 'jotai'
 import {
   AlertDialog,
@@ -12,8 +12,10 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { deleteAccountOpenAtom } from '@/store'
+import { Input } from '@/components/ui/input'
 
 export default function DeleteProfileDialog({ handleDeleteSelf }: { handleDeleteSelf: () => Promise<void> }) {
+  const [confirmAccountDelete, setConfirmAccountDelete] = useState('')
   const [isDeleteAccountOpenAtom, setIsDeleteAccountOpenAtom] = useAtom(deleteAccountOpenAtom)
 
   const handleClose = useCallback(() => {
@@ -38,6 +40,16 @@ export default function DeleteProfileDialog({ handleDeleteSelf }: { handleDelete
             This action cannot be undone. This will permanently delete your account for forever and we can&apos;t help you afterwards to restore.
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="flex w-full flex-col gap-y-5 text-sm">
+          To confirm that you really want to delete your account, please type in &quot;Delete my account&quot;.
+          <Input
+            className="w-full"
+            onChange={(e) => setConfirmAccountDelete(e.target.value)}
+            placeholder='Delete my account'
+            type="text"
+            value={confirmAccountDelete}
+          />
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
@@ -47,9 +59,10 @@ export default function DeleteProfileDialog({ handleDeleteSelf }: { handleDelete
           </AlertDialogCancel>
           <AlertDialogAction
             className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
+            disabled={confirmAccountDelete !== "Delete my account"}
             onClick={handleDeleteSelf}
           >
-            Yes, delete my account
+            Yes, delete account
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
