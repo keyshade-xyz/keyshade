@@ -1,3 +1,9 @@
+## [2.13.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.8...v2.13.0-stage.9) (2025-03-11)
+
+### 🚀 Features
+
+* Multi environment config management ([#822](https://github.com/keyshade-xyz/keyshade/issues/822)) ([7502b00](https://github.com/keyshade-xyz/keyshade/commit/7502b001aac797f6f98412a62b7c3436feebe736))
+
 ## [2.13.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.7...v2.13.0-stage.8) (2025-03-09)
 
 ### 🐛 Bug Fixes
