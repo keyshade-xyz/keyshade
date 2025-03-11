@@ -82,11 +82,25 @@ export const UpdateVariableResponseSchema = z.object({
       version: z.number(),
       environment: z.object({
         id: EnvironmentSchema.shape.id,
-        slug: EnvironmentSchema.shape.slug
+        slug: EnvironmentSchema.shape.slug,
+        name: EnvironmentSchema.shape.name
+      }),
+      createdOn: z.string().datetime(),
+      createdBy: z.object({
+        id: z.string(),
+        name: z.string(),
+        profilePictureUrl: z.string().nullable()
       })
     })
   )
 })
+
+export const DeleteEnvironmentValueOfVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: z.string()
+})
+
+export const DeleteEnvironmentValueOfVariableResponseSchema = z.void()
 
 export const RollBackVariableRequestSchema = z.object({
   variableSlug: z.string(),

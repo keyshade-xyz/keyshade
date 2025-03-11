@@ -19,18 +19,25 @@ function handle500(error) {
   Sentry.captureException(error)
 }
 
+type FunctionArgs = (
+  | string
+  | number
+  | Record<string, string>
+  | Record<string, number>
+)[]
+
 export function useHttp<T, V extends ClientResponse<T>>(
-  fn: () => Promise<V>
-): () => Promise<V> {
+  fn: (...args: FunctionArgs) => Promise<V>
+): (...args: FunctionArgs) => Promise<V> {
   const fnRef = useRef(fn)
 
   useEffect(() => {
     fnRef.current = fn
   }, [fn])
 
-  return useCallback(async (): Promise<V> => {
+  return useCallback(async (...args: FunctionArgs): Promise<V> => {
     try {
-      const response = await fnRef.current()
+      const response = await fnRef.current(...args)
 
       if (response.error) {
         const statusCode = response.error.statusCode

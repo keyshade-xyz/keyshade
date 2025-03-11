@@ -546,6 +546,65 @@ describe('Secret Controller Tests', () => {
     })
   })
 
+  describe('Delete Environment Value Of Secret Tests', () => {
+    it('should be able to delete environment value of secret', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/secret/${secret1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        }
+      })
+
+      expect(secretVersion.length).toBe(0)
+    })
+
+    it('should not be able to delete environment value of secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/secret/${secret1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to delete environment value of non-existing secret', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/secret/non-existing-secret-slug/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to delete environment value of secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/secret/${secret1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+  })
+
   describe('Rollback Tests', () => {
     it('should not be able to roll back a non-existing secret', async () => {
       const response = await app.inject({

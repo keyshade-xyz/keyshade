@@ -56,6 +56,20 @@ export class SecretController {
     )
   }
 
+  @Delete(':secretSlug/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
+  async deleteEnvironmentValueOfSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.secretService.deleteEnvironmentValueOfSecret(
+      user,
+      secretSlug,
+      environmentSlug
+    )
+  }
+
   @Delete(':secretSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_SECRET)
   async deleteSecret(

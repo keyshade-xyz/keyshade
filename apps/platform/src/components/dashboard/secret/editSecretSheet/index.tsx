@@ -21,6 +21,8 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
 import { useHttp } from '@/hooks/use-http'
+import EnvironmentValueEditor from '@/components/common/environment-value-editor'
+import { parseUpdatedEnvironmentValues } from '@/lib/utils'
 
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
@@ -36,6 +38,18 @@ export default function EditSecretSheet(): JSX.Element {
     note: selectedSecretData?.secret.note || ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [environmentValues, setEnvironmentValues] = useState<
+    Record<string, string>
+  >(
+    () =>
+      selectedSecretData?.values.reduce(
+        (acc, entry) => {
+          acc[entry.environment.slug] = entry.value
+          return acc
+        },
+        {} as Record<string, string>
+      ) || {}
+  )
 
   const updateSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.updateSecret({
@@ -46,7 +60,10 @@ export default function EditSecretSheet(): JSX.Element {
           ? undefined
           : requestData.name.trim(),
       note: requestData.note?.trim() || undefined,
-      entries: undefined
+      entries: parseUpdatedEnvironmentValues(
+        selectedSecretData!.values,
+        environmentValues
+      )
     })
   )
 
@@ -82,7 +99,8 @@ export default function EditSecretSheet(): JSX.Element {
                     name: requestData.name || s.secret.name,
                     note: requestData.note || s.secret.note,
                     slug: data.secret.slug
-                  }
+                  },
+                  values: [...s.values, ...data.updatedVersions]
                 }
               }
               return s
@@ -155,6 +173,10 @@ export default function EditSecretSheet(): JSX.Element {
               value={requestData.note}
             />
           </div>
+          <EnvironmentValueEditor
+            environmentValues={environmentValues}
+            setEnvironmentValues={setEnvironmentValues}
+          />
         </div>
         <SheetFooter className="py-3">
           <SheetClose asChild>

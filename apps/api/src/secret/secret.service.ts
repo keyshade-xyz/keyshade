@@ -175,7 +175,11 @@ export class SecretService {
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const secret = getSecretWithValues(secretData)
+    const secret = await getSecretWithValues(
+      secretData,
+      project.storePrivateKey && project.privateKey !== null,
+      project.privateKey
+    )
 
     await createEvent(
       {
@@ -310,14 +314,23 @@ export class SecretService {
             },
             select: {
               id: true,
+              value: true,
+              version: true,
               environment: {
                 select: {
                   id: true,
-                  slug: true
+                  slug: true,
+                  name: true
                 }
               },
-              value: true,
-              version: true
+              createdOn: true,
+              createdBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  profilePictureUrl: true
+                }
+              }
             }
           })
         )
@@ -332,6 +345,12 @@ export class SecretService {
     const result = {
       secret: updatedSecret,
       updatedVersions: updatedVersions
+    }
+
+    if (secret.project.storePrivateKey && secret.project.privateKey) {
+      for (const version of updatedVersions) {
+        version.value = await decrypt(secret.project.privateKey, version.value)
+      }
     }
 
     // Notify the new secret version through Redis
@@ -380,6 +399,68 @@ export class SecretService {
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
     return result
+  }
+
+  async deleteEnvironmentValueOfSecret(
+    user: AuthenticatedUser,
+    secretSlug: Secret['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to delete environment value of secret ${secretSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to delete environment value of secret ${secretSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_SECRET]
+      })
+    const environmentId = environment.id
+
+    // Fetch the secret
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
+      entity: { slug: secretSlug },
+      authorities: [Authority.UPDATE_SECRET]
+    })
+
+    // Delete the environment value of the secret
+    this.logger.log(
+      `Deleting environment value of secret ${secret.slug} in environment ${environment.slug}`
+    )
+    const count = await this.prisma.secretVersion.deleteMany({
+      where: {
+        secretId: secret.id,
+        environmentId
+      }
+    })
+
+    this.logger.log(
+      `Deleted environment value of secret ${secret.slug} in environment ${environment.slug}. Deleted ${count.count} secret versions`
+    )
+
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: secret,
+        type: EventType.SECRET_UPDATED,
+        source: EventSource.SECRET,
+        title: `Secret updated`,
+        metadata: {
+          secretId: secret.id,
+          name: secret.name,
+          projectId: secret.projectId,
+          projectName: secret.project.name
+        },
+        workspaceId: secret.project.workspaceId
+      },
+      this.prisma
+    )
   }
 
   /**
