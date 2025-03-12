@@ -1,3 +1,9 @@
+## [2.13.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.10...v2.13.0-stage.11) (2025-03-12)
+
+### 🐛 Bug Fixes
+
+* **platform:** Remove unnecessary error toaster ([d8ebf85](https://github.com/keyshade-xyz/keyshade/commit/d8ebf8540a6858299e055ca3669c9e7b56991a33))
+
 ## [2.13.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.9...v2.13.0-stage.10) (2025-03-11)
 
 ### 🚀 Features
