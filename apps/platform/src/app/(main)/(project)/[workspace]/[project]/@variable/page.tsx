@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
-import { toast } from 'sonner'
 import {
   selectedProjectAtom,
   deleteVariableOpenAtom,
@@ -49,35 +48,22 @@ function VariablePage(): React.JSX.Element {
   )
 
   useEffect(() => {
-    const fetchVariables = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              Please select a project to view variables.
-            </p>
-          )
-        })
-        return
-      }
+    if (selectedProject) {
+      setIsLoading(true)
 
-      try {
-        setIsLoading(true)
-        const { data, success } = await getAllVariablesOfProject()
-        if (success && data) {
-          setVariables((prev) =>
-            page === 0 ? data.items : [...prev, ...data.items]
-          )
-          if (data.metadata.links.next === null) {
-            setHasMore(false)
+      getAllVariablesOfProject()
+        .then(({ data, success }) => {
+          if (success && data) {
+            setVariables((prev) =>
+              page === 0 ? data.items : [...prev, ...data.items]
+            )
+            if (data.metadata.links.next === null) {
+              setHasMore(false)
+            }
           }
-        }
-      } finally {
-        setIsLoading(false)
-      }
+        })
+        .finally(() => setIsLoading(false))
     }
-
-    fetchVariables()
   }, [getAllVariablesOfProject, page, selectedProject, setVariables])
 
   const handleLoadMore = () => {

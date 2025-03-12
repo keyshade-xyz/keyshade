@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue } from 'jotai'
-import { toast } from 'sonner'
 import { Accordion } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
@@ -55,35 +54,24 @@ function SecretPage(): React.JSX.Element {
   )
 
   useEffect(() => {
-    const fetchSecrets = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              Please select a project to view secrets.
-            </p>
-          )
-        })
-        return
-      }
+    if (selectedProject) {
+      setIsLoading(true)
 
-      try {
-        setIsLoading(true)
-        const { data, success } = await getAllSecretsOfProject()
-        if (success && data) {
-          setSecrets((prev) =>
-            page === 0 ? data.items : [...prev, ...data.items]
-          )
-          if (data.metadata.links.next === null) {
-            setHasMore(false)
+      getAllSecretsOfProject()
+        .then(({ data, success }) => {
+          if (success && data) {
+            setSecrets((prev) =>
+              page === 0 ? data.items : [...prev, ...data.items]
+            )
+            if (data.metadata.links.next === null) {
+              setHasMore(false)
+            }
           }
-        }
-      } finally {
-        setIsLoading(false)
-      }
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
     }
-
-    fetchSecrets()
   }, [getAllSecretsOfProject, isDecrypted, page, selectedProject, setSecrets])
 
   const handleLoadMore = () => {
