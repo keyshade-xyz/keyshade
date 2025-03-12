@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
 import { useAtom } from 'jotai'
-import { PrivatePublicKeyInput } from './private-public-key-input'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -9,6 +8,7 @@ import {
     DialogHeader,
 } from '@/components/ui/dialog'
 import { viewAndDownloadProjectKeysOpenAtom } from '@/store'
+import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 
 interface ViewAndDownloadProjectKeysDialogProps {
     projectKeys?: {
@@ -69,7 +69,7 @@ export default function ViewAndDownloadProjectKeysDialog({projectKeys}: ViewAndD
                 </div>
                 <div className="flex flex-col gap-3 overflow-auto">
                     {/* public key */}
-                    <PrivatePublicKeyInput
+                    <HiddenContent
                     isPrivateKey={false}
                     value={projectKeys?.keys.publicKey || ''}
                     />
@@ -77,7 +77,7 @@ export default function ViewAndDownloadProjectKeysDialog({projectKeys}: ViewAndD
                     {/* private key */}
                     {
                         projectKeys?.storePrivateKey ? (
-                            <PrivatePublicKeyInput
+                            <HiddenContent
                             isPrivateKey
                             value={projectKeys.keys.privateKey}
                             />

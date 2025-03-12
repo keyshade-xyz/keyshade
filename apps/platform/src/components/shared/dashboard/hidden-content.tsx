@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { copyToClipboard } from "@/lib/clipboard"
 
-interface PrivatePublicKeyInputProps {
+interface HiddenContentProps {
     isPrivateKey: boolean
     value: string
 }
 
-export function PrivatePublicKeyInput({ isPrivateKey, value }: PrivatePublicKeyInputProps) {
+export function HiddenContent({ isPrivateKey, value }: HiddenContentProps) {
     const [isVisible, setIsVisible] = useState(false)
     const [copied, setCopied] = useState(false)
 
