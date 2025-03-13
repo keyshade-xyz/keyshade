@@ -1,3 +1,13 @@
+## [2.13.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.12...v2.13.0-stage.13) (2025-03-13)
+
+### 🚀 Features
+
+* **platform:** Ability to view [secure] and variable versions ([#826](https://github.com/keyshade-xyz/keyshade/issues/826)) ([a47ce43](https://github.com/keyshade-xyz/keyshade/commit/a47ce4379d93b1a4c8f0b02b87f3c85df7adec2a))
+
+### 🔧 Miscellaneous Chores
+
+* Upgrade conventional-changelog-writer from 8.0.0 to 8.0.1 ([#824](https://github.com/keyshade-xyz/keyshade/issues/824)) ([735104d](https://github.com/keyshade-xyz/keyshade/commit/735104d9fafcb8e8f58e7384062285d52b6ffc72))
+
 ## [2.13.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.11...v2.13.0-stage.12) (2025-03-13)
 
 ### 🚀 Features
