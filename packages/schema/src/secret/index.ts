@@ -4,6 +4,22 @@ import { rotateAfterEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
 
+export const SecretVersionSchema = z.object({
+  environment: z.object({
+    id: EnvironmentSchema.shape.id,
+    name: EnvironmentSchema.shape.name,
+    slug: EnvironmentSchema.shape.slug
+  }),
+  value: z.string(),
+  version: z.number(),
+  createdOn: z.string().datetime(),
+  createdBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  })
+})
+
 export const SecretSchema = z.object({
   secret: z.object({
     id: z.string(),
@@ -21,23 +37,7 @@ export const SecretSchema = z.object({
       profilePictureUrl: z.string().nullable()
     })
   }),
-  values: z.array(
-    z.object({
-      environment: z.object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string()
-      }),
-      value: z.string(),
-      version: z.number(),
-      createdOn: z.string().datetime(),
-      createdBy: z.object({
-        id: z.string(),
-        name: z.string(),
-        profilePictureUrl: z.string().nullable()
-      })
-    })
-  )
+  values: z.array(SecretVersionSchema)
 })
 
 export const CreateSecretRequestSchema = z.object({
@@ -69,24 +69,7 @@ export const UpdateSecretResponseSchema = z.object({
     slug: true,
     note: true
   }),
-  updatedVersions: z.array(
-    z.object({
-      id: z.string(),
-      value: z.string(),
-      version: z.number(),
-      environment: z.object({
-        id: EnvironmentSchema.shape.id,
-        slug: EnvironmentSchema.shape.slug,
-        name: EnvironmentSchema.shape.name
-      }),
-      createdOn: z.string().datetime(),
-      createdBy: z.object({
-        id: z.string(),
-        name: z.string(),
-        profilePictureUrl: z.string().nullable()
-      })
-    })
-  )
+  updatedVersions: z.array(SecretVersionSchema)
 })
 
 export const DeleteEnvironmentValueOfSecretRequestSchema = z.object({
@@ -127,22 +110,8 @@ export const GetRevisionsOfSecretRequestSchema =
     decryptValue: z.boolean().optional()
   })
 
-export const GetRevisionsOfSecretResponseSchema = PageResponseSchema(
-  z.object({
-    id: z.string(),
-    value: z.string(),
-    version: z.number(),
-    secretId: z.string(),
-    createdOn: z.string().datetime(),
-    createdById: z.string().nullable(),
-    environmentId: EnvironmentSchema.shape.id,
-    createdBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
-    })
-  })
-)
+export const GetRevisionsOfSecretResponseSchema =
+  PageResponseSchema(SecretVersionSchema)
 
 export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,

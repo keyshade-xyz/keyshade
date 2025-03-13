@@ -886,9 +886,27 @@ export class VariableService {
         variableId: variableId,
         environmentId: environmentId
       },
+      select: {
+        value: true,
+        version: true,
+        createdOn: true,
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         version: order
       }

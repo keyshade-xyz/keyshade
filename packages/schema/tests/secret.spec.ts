@@ -486,10 +486,12 @@ describe('Secret Schema Tests', () => {
             id: 'revision123',
             value: 'secret-value',
             version: 1,
-            secretId: 'secret123',
+            environment: {
+              id: 'env123',
+              name: 'Development',
+              slug: 'development'
+            },
             createdOn: '2024-10-01T00:00:00Z',
-            createdById: 'user123',
-            environmentId: 'env123',
             createdBy: {
               id: 'user123',
               name: 'John Doe',

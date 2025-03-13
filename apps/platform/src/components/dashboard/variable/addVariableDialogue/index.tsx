@@ -97,7 +97,10 @@ export default function AddVariableDialogue() {
   ])
 
   return (
-    <Dialog onOpenChange={handleClose} open={isCreateVariableOpen}>
+    <Dialog
+      onOpenChange={(open) => setIsCreateVariableOpen(open)}
+      open={isCreateVariableOpen}
+    >
       <DialogTrigger asChild>
         <Button
           className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"

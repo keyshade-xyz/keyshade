@@ -32,6 +32,7 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  secretRevisionsOpenAtom,
   selectedSecretAtom,
   selectedSecretEnvironmentAtom
 } from '@/store'
@@ -56,6 +57,7 @@ export default function SecretCard({
   const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
     deleteEnvironmentValueOfSecretOpenAtom
   )
+  const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -82,6 +84,11 @@ export default function SecretCard({
     setIsDeleteEnvironmentValueOfSecretOpen(true)
   }
 
+  const handleRevisionsClick = () => {
+    setSelectedSecret(secretData)
+    setIsSecretRevisionsOpen(true)
+  }
+
   return (
     <ContextMenu>
       <AccordionItem
@@ -101,7 +108,7 @@ export default function SecretCard({
                   </span>
                   <AvatarComponent
                     name={secret.lastUpdatedBy.name}
-                    src={secret.lastUpdatedBy.profilePictureUrl}
+                    profilePictureUrl={secret.lastUpdatedBy.profilePictureUrl}
                   />
                 </div>
               </div>
@@ -188,7 +195,10 @@ export default function SecretCard({
         </AccordionContent>
       </AccordionItem>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleRevisionsClick}
+        >
           Show Version History
         </ContextMenuItem>
         <ContextMenuItem

@@ -701,12 +701,17 @@ export class SecretService {
         secretId: secretId,
         environmentId: environmentId
       },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-      orderBy: {
-        version: order
-      },
-      include: {
+      select: {
+        value: true,
+        version: true,
+        createdOn: true,
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
         createdBy: {
           select: {
             id: true,
@@ -714,6 +719,11 @@ export class SecretService {
             profilePictureUrl: true
           }
         }
+      },
+      skip: page * limit,
+      take: limitMaxItemsPerPage(limit),
+      orderBy: {
+        version: order
       }
     })
     this.logger.log(
