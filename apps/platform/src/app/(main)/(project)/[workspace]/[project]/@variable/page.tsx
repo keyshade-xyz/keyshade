@@ -1,16 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
-import { VariableSVG } from '@public/svg/dashboard'
+import { useAtom, useAtomValue } from 'jotai'
 import {
-  createVariableOpenAtom,
   selectedProjectAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
   selectedVariableAtom,
-  variablesOfProjectAtom
+  variablesOfProjectAtom,
+  deleteEnvironmentValueOfVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -21,52 +19,51 @@ import { Accordion } from '@/components/ui/accordion'
 import { useHttp } from '@/hooks/use-http'
 import VariableLoader from '@/components/dashboard/variable/variableLoader'
 import { VARIABLES_PAGE_SIZE } from '@/lib/constants'
+import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
+import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 
 function VariablePage(): React.JSX.Element {
-  const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
+  const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
+    deleteEnvironmentValueOfVariableOpenAtom
+  )
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+
   const getAllVariablesOfProject = useHttp(() =>
-    ControllerInstance.getInstance().variableController.getAllVariablesOfProject({
+    ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+      {
         projectSlug: selectedProject!.slug,
         page,
-        limit: VARIABLES_PAGE_SIZE,
-    }, {})
+        limit: VARIABLES_PAGE_SIZE
+      },
+      {}
+    )
   )
 
   useEffect(() => {
-    const fetchVariables = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: <p className="text-xs text-red-300">
-            Please select a project to view variables.
-          </p>
-        })
-        return
-      }
+    if (selectedProject) {
+      setIsLoading(true)
 
-      try {
-        setIsLoading(true)
-        const { data, success } = await getAllVariablesOfProject()
-        if (success && data) {
-          setVariables((prev) => page === 0 ? data.items : [...prev, ...data.items])
-          if (data.metadata.links.next === null) {
-            setHasMore(false)
+      getAllVariablesOfProject()
+        .then(({ data, success }) => {
+          if (success && data) {
+            setVariables((prev) =>
+              page === 0 ? data.items : [...prev, ...data.items]
+            )
+            if (data.metadata.links.next === null) {
+              setHasMore(false)
+            }
           }
-        }
-      } finally {
-        setIsLoading(false)
-      }
+        })
+        .finally(() => setIsLoading(false))
     }
-
-    fetchVariables()
   }, [getAllVariablesOfProject, page, selectedProject, setVariables])
 
   const handleLoadMore = () => {
@@ -89,25 +86,7 @@ function VariablePage(): React.JSX.Element {
     >
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
-        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-          <VariableSVG width="100" />
-
-          <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
-            <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
-              Declare your first variable
-            </p>
-            <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
-              Declare and store a variable against different environments
-            </p>
-          </div>
-
-          <Button
-            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            onClick={() => setIsCreateVariableOpen(true)}
-          >
-            Create variable
-          </Button>
-        </div>
+        <EmptyVariableListContent />
       ) : (
         // Showing this when variables are present
         <div
@@ -127,7 +106,11 @@ function VariablePage(): React.JSX.Element {
                 />
               ))}
             </Accordion>
-            {isLoading && page > 0 ? <div className="w-full"><VariableLoader /></div> : null}
+            {isLoading && page > 0 ? (
+              <div className="w-full">
+                <VariableLoader />
+              </div>
+            ) : null}
           </div>
           <Button
             className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
@@ -143,6 +126,11 @@ function VariablePage(): React.JSX.Element {
 
           {/* Edit variable sheet */}
           {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
+
+          {/* Delete environment value of variable alert dialog */}
+          {isDeleteEnvironmentValueOfVariableOpen && selectedVariable ? (
+            <ConfirmDeleteEnvironmentValueOfVariableDialog />
+          ) : null}
         </div>
       )}
     </div>

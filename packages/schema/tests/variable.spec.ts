@@ -310,7 +310,14 @@ describe('Variable Schema Tests', () => {
             version: 4,
             environment: {
               id: 'env123',
-              slug: 'development'
+              slug: 'development',
+              name: 'Development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             }
           }
         ]
@@ -334,12 +341,15 @@ describe('Variable Schema Tests', () => {
             environment: {
               id: 'env123'
               // Missing slug
+              // Missing name
             }
+            // missing createdBy
+            // missing createdOn
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(5)
     })
   })
 

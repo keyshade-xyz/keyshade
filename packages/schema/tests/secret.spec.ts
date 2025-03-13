@@ -240,7 +240,14 @@ describe('Secret Schema Tests', () => {
             id: 'version123',
             environment: {
               id: 'env123',
-              slug: 'development'
+              slug: 'development',
+              name: 'Development'
+            },
+            createdOn: '2024-10-01T00:00:00Z',
+            createdBy: {
+              id: 'user123',
+              name: 'John Doe',
+              profilePictureUrl: 'http://example.com/profile.jpg'
             },
             value: 'secret-value',
             version: 4
@@ -264,14 +271,17 @@ describe('Secret Schema Tests', () => {
             environment: {
               id: 'env123'
               // Missing slug
+              // Missing name
             },
+            // Missing createdOn
+            // Missing createdBy
             value: 'secret-value'
             // Missing version
           }
         ]
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(2)
+      expect(result.error?.issues).toHaveLength(5)
     })
   })
 

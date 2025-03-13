@@ -18,7 +18,9 @@ export const selectedWorkspaceAtom = atom<
 >(null)
 export const selectedProjectAtom = atom<Project | null>(null)
 export const selectedVariableAtom = atom<Variable | null>(null)
+export const selectedVariableEnvironmentAtom = atom<string | null>(null)
 export const selectedSecretAtom = atom<Secret | null>(null)
+export const selectedSecretEnvironmentAtom = atom<string | null>(null)
 export const selectedEnvironmentAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items'][number] | null
 >(null)
@@ -38,10 +40,12 @@ export const deleteProjectOpenAtom = atom<boolean>(false)
 export const createVariableOpenAtom = atom<boolean>(false)
 export const editVariableOpenAtom = atom<boolean>(false)
 export const deleteVariableOpenAtom = atom<boolean>(false)
+export const deleteEnvironmentValueOfVariableOpenAtom = atom<boolean>(false)
 
 export const createSecretOpenAtom = atom<boolean>(false)
 export const editSecretOpenAtom = atom<boolean>(false)
 export const deleteSecretOpenAtom = atom<boolean>(false)
+export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
@@ -50,3 +54,7 @@ export const deleteEnvironmentOpenAtom = atom<boolean>(false)
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
+
+export const deleteAccountOpenAtom = atom<boolean>(false)
+
+export const viewAndDownloadProjectKeysOpenAtom = atom<boolean>(false)
