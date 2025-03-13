@@ -80,8 +80,8 @@ function Navbar(): React.JSX.Element {
     window.location.href = '/auth'
   }, [])
 
-  const getProjectPath = (): string => 
-    selectedWorkspace?.slug && selectedProject?.slug 
+  const getProjectPath = (): string =>
+    selectedWorkspace?.slug && selectedProject?.slug
       ? `/${selectedWorkspace.slug}/${selectedProject.slug}`
       : ''
 
@@ -142,7 +142,7 @@ function Navbar(): React.JSX.Element {
                     <>
                       <AvatarComponent
                         name={user.name}
-                        src={user.profilePictureUrl || ''}
+                        profilePictureUrl={user.profilePictureUrl || ''}
                       />
                       <span>{user.name}</span>
                     </>

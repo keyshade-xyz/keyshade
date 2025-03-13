@@ -24,7 +24,10 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import {
+  mergeExistingEnvironments,
+  parseUpdatedEnvironmentValues
+} from '@/lib/utils'
 
 export default function EditVariablSheet() {
   const [isEditVariableOpen, setIsEditVariableOpen] =
@@ -107,7 +110,10 @@ export default function EditVariablSheet() {
                     note: requestData.note || v.variable.note,
                     slug: data.variable.slug
                   },
-                  values: [...v.values, ...data.updatedVersions]
+                  values: mergeExistingEnvironments(
+                    v.values,
+                    data.updatedVersions
+                  )
                 }
               }
               return v

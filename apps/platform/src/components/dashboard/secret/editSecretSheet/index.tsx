@@ -22,7 +22,10 @@ import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
 import { useHttp } from '@/hooks/use-http'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import {
+  mergeExistingEnvironments,
+  parseUpdatedEnvironmentValues
+} from '@/lib/utils'
 
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
@@ -100,7 +103,10 @@ export default function EditSecretSheet(): JSX.Element {
                     note: requestData.note || s.secret.note,
                     slug: data.secret.slug
                   },
-                  values: [...s.values, ...data.updatedVersions]
+                  values: mergeExistingEnvironments(
+                    s.values,
+                    data.updatedVersions
+                  )
                 }
               }
               return s
