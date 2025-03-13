@@ -1,8 +1,8 @@
 import type { Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
-import { useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhite } from '@public/svg/shared'
+import { EyeOpen, EyeSlash, InfoSVG, TrashWhite } from '@public/svg/shared'
 import {
   AccordionContent,
   AccordionItem,
@@ -26,12 +26,14 @@ import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger
+  TooltipTrigger,
+  TooltipArrow
 } from '@/components/ui/tooltip'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  revealSecretOpenAtom,
   selectedSecretAtom,
   selectedSecretEnvironmentAtom
 } from '@/store'
@@ -50,12 +52,15 @@ export default function SecretCard({
   const { secret, values } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
-  const setSelectedSecretEnvironment = useSetAtom(selectedSecretEnvironmentAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
   const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
     deleteEnvironmentValueOfSecretOpenAtom
   )
+  const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
+    selectedSecretEnvironmentAtom
+  )
+  const [IsSecretRevealed, setIsSecretRevealed] = useAtom(revealSecretOpenAtom)
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -64,6 +69,12 @@ export default function SecretCard({
       'Failed to copy the slug.',
       'You successfully copied the slug.'
     )
+  }
+
+  const handleRevealEnvironmentValueOfSecretClick = (environment: string) => {
+    setSelectedSecret(secretData)
+    setSelectedSecretEnvironment(environment)
+    setIsSecretRevealed(!IsSecretRevealed)
   }
 
   const handleEditClick = () => {
@@ -155,7 +166,9 @@ export default function SecretCard({
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">
-                        {isDecrypted
+                        {isDecrypted &&
+                        IsSecretRevealed &&
+                        value.environment.slug === selectedSecretEnvironment
                           ? value.value
                           : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
@@ -163,16 +176,49 @@ export default function SecretCard({
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
-                        <button
-                          onClick={() =>
-                            handleDeleteEnvironmentValueOfSecretClick(
-                              value.environment.slug
-                            )
-                          }
-                          type="button"
-                        >
-                          <TrashWhite />
-                        </button>
+                        <div className="flex gap-3">
+                          {isDecrypted ? (
+                            <button
+                              className="duration-300 hover:scale-105"
+                              onClick={() =>
+                                handleRevealEnvironmentValueOfSecretClick(
+                                  value.environment.slug
+                                )
+                              }
+                              type="button"
+                            >
+                              {!IsSecretRevealed ? <EyeOpen /> : <EyeSlash />}
+                            </button>
+                          ) : (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <InfoSVG />
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  className="w-[12rem] border-none bg-white/10 text-sm text-white"
+                                  side="bottom"
+                                  sideOffset={8}
+                                >
+                                  <TooltipArrow className="fill-white/10" />
+                                  You need to store the private key first in
+                                  order to view the value.
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                          <button
+                            className="duration-300 hover:scale-105"
+                            onClick={() =>
+                              handleDeleteEnvironmentValueOfSecretClick(
+                                value.environment.slug
+                              )
+                            }
+                            type="button"
+                          >
+                            <TrashWhite />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )
