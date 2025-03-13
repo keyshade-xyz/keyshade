@@ -1,3 +1,15 @@
+## [2.13.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.11...v2.13.0-stage.12) (2025-03-13)
+
+### 🚀 Features
+
+* **platform:** Add dialog for viewing and downloading project keys ([#823](https://github.com/keyshade-xyz/keyshade/issues/823)) ([c6e0c85](https://github.com/keyshade-xyz/keyshade/commit/c6e0c85a38188ec824c26f90a2773fc3ab2fe963))
+
+## [2.13.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.10...v2.13.0-stage.11) (2025-03-12)
+
+### 🐛 Bug Fixes
+
+* **platform:** Remove unnecessary error toaster ([d8ebf85](https://github.com/keyshade-xyz/keyshade/commit/d8ebf8540a6858299e055ca3669c9e7b56991a33))
+
 ## [2.13.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.9...v2.13.0-stage.10) (2025-03-11)
 
 ### 🚀 Features

@@ -58,3 +58,5 @@ export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
 
 export const deleteAccountOpenAtom = atom<boolean>(false)
+
+export const viewAndDownloadProjectKeysOpenAtom = atom<boolean>(false)
