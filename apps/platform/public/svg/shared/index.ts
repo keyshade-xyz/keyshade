@@ -15,9 +15,10 @@ import CopySVG from './copy.svg'
 import CrownSVG from './crown.svg'
 import RolesSVG from './roles.svg'
 import CheckmarkSVG from './checkmark.svg'
-import TrashWhite from './trash-white.svg'
-import EyeOpen from './eye.svg'
-import EyeSlash from './eye-slash.svg'
+import TrashWhiteSVG from './trash-white.svg'
+import RollbackSVG from './rollback.svg'
+import EyeOpenSVG from './eye.svg'
+import EyeSlashSVG from './eye-slash.svg'
 import InfoSVG from './info.svg'
 
 export {
@@ -38,8 +39,9 @@ export {
   CrownSVG,
   RolesSVG,
   CheckmarkSVG,
-  TrashWhite,
-  EyeOpen,
-  EyeSlash,
-  InfoSVG
+  EyeOpenSVG,
+  EyeSlashSVG,
+  InfoSVG,
+  TrashWhiteSVG,
+  RollbackSVG
 }

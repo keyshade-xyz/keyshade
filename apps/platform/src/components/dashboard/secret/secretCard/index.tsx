@@ -2,7 +2,7 @@ import type { Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
-import { EyeOpen, EyeSlash, TrashWhite } from '@public/svg/shared'
+import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
 import { useEffect, useState } from 'react'
 import {
   AccordionContent,
@@ -33,6 +33,7 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  secretRevisionsOpenAtom,
   selectedSecretAtom,
   selectedSecretEnvironmentAtom
 } from '@/store'
@@ -59,6 +60,7 @@ export default function SecretCard({
   const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
     deleteEnvironmentValueOfSecretOpenAtom
   )
+  const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
   const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
     selectedSecretEnvironmentAtom
   )
@@ -142,6 +144,11 @@ export default function SecretCard({
     setIsDeleteEnvironmentValueOfSecretOpen(true)
   }
 
+  const handleRevisionsClick = () => {
+    setSelectedSecret(secretData)
+    setIsSecretRevisionsOpen(true)
+  }
+
   return (
     <ContextMenu>
       <AccordionItem
@@ -161,7 +168,7 @@ export default function SecretCard({
                   </span>
                   <AvatarComponent
                     name={secret.lastUpdatedBy.name}
-                    src={secret.lastUpdatedBy.profilePictureUrl}
+                    profilePictureUrl={secret.lastUpdatedBy.profilePictureUrl}
                   />
                 </div>
               </div>
@@ -238,7 +245,7 @@ export default function SecretCard({
                               }
                               type="button"
                             >
-                              {!isRevealed ? <EyeOpen /> : <EyeSlash />}
+                              {!isRevealed ? <EyeOpenSVG /> : <EyeSlashSVG />}
                             </button>
                           ) : null}
                           <button
@@ -250,7 +257,7 @@ export default function SecretCard({
                             }
                             type="button"
                           >
-                            <TrashWhite />
+                            <TrashWhiteSVG />
                           </button>
                         </div>
                       </TableCell>
@@ -268,7 +275,10 @@ export default function SecretCard({
         </AccordionContent>
       </AccordionItem>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleRevisionsClick}
+        >
           Show Version History
         </ContextMenuItem>
         <ContextMenuItem

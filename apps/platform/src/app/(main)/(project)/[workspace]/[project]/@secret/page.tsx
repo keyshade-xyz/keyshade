@@ -11,6 +11,8 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  rollbackSecretOpenAtom,
+  secretRevisionsOpenAtom,
   revealSecretOpenAtom,
   secretsOfProjectAtom,
   selectedProjectAtom,
@@ -23,6 +25,8 @@ import { useHttp } from '@/hooks/use-http'
 import { SECRET_PAGE_SIZE } from '@/lib/constants'
 import EmptySecretListContent from '@/components/dashboard/secret/emptySecretListSection'
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
+import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
+import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
 
 extend(relativeTime)
 
@@ -32,6 +36,8 @@ function SecretPage(): React.JSX.Element {
   const isDeleteEnvironmentValueOfSecretOpen = useAtomValue(
     deleteEnvironmentValueOfSecretOpenAtom
   )
+  const isSecretRevisionsOpen = useAtomValue(secretRevisionsOpenAtom)
+  const isRollbackSecretOpen = useAtomValue(rollbackSecretOpenAtom)
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -139,8 +145,19 @@ function SecretPage(): React.JSX.Element {
           {/* Edit secret sheet */}
           {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
 
+          {/* Delete environment value of secret alert dialog */}
           {isDeleteEnvironmentValueOfSecretOpen && selectedSecret ? (
             <ConfirmDeleteEnvironmentValueOfSecretDialog />
+          ) : null}
+
+          {/* Secret revisions sheet */}
+          {isSecretRevisionsOpen && selectedSecret ? (
+            <SecretRevisionsSheet />
+          ) : null}
+
+          {/* Rollback secret alert dialog */}
+          {isRollbackSecretOpen && selectedSecret ? (
+            <ConfirmRollbackSecret />
           ) : null}
         </div>
       )}
