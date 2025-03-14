@@ -73,7 +73,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<RollBackSecretResponse>> {
     const response = await this.apiClient.put(
-      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
+      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}&decryptValue=${request.decryptValue}`,
       request,
       headers
     )
