@@ -1,10 +1,8 @@
-import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useState } from 'react'
-import type {
-  Environment,
-  GetRevisionsOfVariableResponse
-} from '@keyshade/schema'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useEffect, useMemo, useState } from 'react'
+import type { Environment, VariableVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
+import { RollbackSVG } from '@public/svg/shared'
 import {
   Sheet,
   SheetContent,
@@ -15,7 +13,12 @@ import {
 import {
   environmentsOfProjectAtom,
   selectedVariableAtom,
-  variableRevisionsOpenAtom
+  variableRevisionsOpenAtom,
+  selectedProjectAtom,
+  rollbackVariableOpenAtom,
+  selectedVariableEnvironmentAtom,
+  selectedVariableRollbackVersionAtom,
+  revisionsOfVariableAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -41,11 +44,22 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
   )
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const environments = useAtomValue(environmentsOfProjectAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
+  const setIsRollbackVariableOpen = useSetAtom(rollbackVariableOpenAtom)
+  const setSelectedVariableEnvironment = useSetAtom(
+    selectedVariableEnvironmentAtom
+  )
+  const setSelectedVariableRollbackVersion = useSetAtom(
+    selectedVariableRollbackVersionAtom
+  )
+  const [revisions, setRevisions] = useAtom(revisionsOfVariableAtom)
 
   const [isLoading, setIsLoading] = useState(true)
-  const [revisions, setRevisions] = useState<
-    Record<Environment['name'], GetRevisionsOfVariableResponse['items']>
-  >({})
+
+  const isDecrypted = useMemo(
+    () => selectedProject?.storePrivateKey === true || false,
+    [selectedProject]
+  )
 
   const getAllRevisionsOfVariable = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -57,6 +71,15 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
       )
   )
 
+  const handleRollbackClick = (
+    environmentSlug: Environment['slug'],
+    rollbackVersion: VariableVersion['version']
+  ) => {
+    setSelectedVariableEnvironment(environmentSlug)
+    setSelectedVariableRollbackVersion(rollbackVersion)
+    setIsRollbackVariableOpen(true)
+  }
+
   useEffect(() => {
     if (selectedVariable && environments.length > 0) {
       Promise.all(
@@ -65,21 +88,30 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
         )
       ).then((responses) => {
         const newRevisions = responses.reduce<
-          Record<Environment['name'], GetRevisionsOfVariableResponse['items']>
+          {
+            environment: {
+              name: string
+              slug: string
+            }
+            versions: VariableVersion[]
+          }[]
         >((prevRevisions, { data, success }, index) => {
           if (success && data) {
-            return {
+            return [
               ...prevRevisions,
-              [environments[index].name]: data.items
-            }
+              {
+                environment: environments[index],
+                versions: data.items
+              }
+            ]
           }
           return prevRevisions
-        }, {})
+        }, [])
         setRevisions(newRevisions)
         setIsLoading(false)
       })
     }
-  }, [environments, getAllRevisionsOfVariable, selectedVariable])
+  }, [environments, getAllRevisionsOfVariable, selectedVariable, setRevisions])
 
   return (
     <Sheet
@@ -109,46 +141,70 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
               collapsible
               type="single"
             >
-              {Object.entries(revisions).map(([environmentName, versions]) => (
-                <AccordionItem
-                  className="rounded-xl bg-white/[3%] px-5 transition-all duration-150 ease-in hover:bg-white/[5%]"
-                  key={environmentName}
-                  value={environmentName}
-                >
-                  <AccordionTrigger className="hover:no-underline">
-                    {environmentName}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    {versions.length === 0 ? (
-                      <div className="text-sm text-white/50">
-                        No versions created yet
-                      </div>
-                    ) : (
-                      versions.map((revision) => (
-                        <div
-                          className={`flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b-[1px] border-white/15' : ''}`}
-                          key={revision.version}
-                        >
-                          <div className="flex w-full flex-row justify-between">
-                            <div className="font-semibold">
-                              {revision.value}
-                            </div>
-                            <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
-                              v{revision.version}
-                            </div>
-                          </div>
-                          <div className="flex gap-x-2 text-sm">
-                            <span className="text-white/50">
-                              {dayjs(revision.createdOn).toNow(true)} ago by
-                            </span>
-                            <span>{revision.createdBy.name} </span>
-                          </div>
+              {revisions.map(
+                ({
+                  environment: { name: environmentName, slug: environmentSlug },
+                  versions
+                }) => (
+                  <AccordionItem
+                    className="rounded-xl bg-white/[3%] px-5 transition-all duration-150 ease-in hover:bg-white/[5%]"
+                    key={environmentName}
+                    value={environmentName}
+                  >
+                    <AccordionTrigger
+                      className="hover:no-underline"
+                      rightChildren={<span>{environmentSlug}</span>}
+                    >
+                      {environmentName}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {versions.length === 0 ? (
+                        <div className="text-sm text-white/50">
+                          No versions created yet
                         </div>
-                      ))
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+                      ) : (
+                        versions.map((revision, index) => (
+                          <div
+                            className={`group flex w-full flex-col gap-y-2 border-white/15 py-5 ${revision.version !== 1 ? 'border-b-[1px] border-white/15' : ''}`}
+                            key={revision.version}
+                          >
+                            <div className="flex w-full flex-row justify-between">
+                              <div className="font-semibold">
+                                {isDecrypted ? revision.value : 'Hidden'}
+                              </div>
+                              <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
+                                v{revision.version}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between gap-x-2 text-sm">
+                              <div className="flex flex-row items-center gap-x-2">
+                                <span className="text-white/50">
+                                  {dayjs(revision.createdOn).toNow(true)} ago by
+                                </span>
+                                <span>{revision.createdBy.name} </span>
+                              </div>
+                              {index !== 0 ? (
+                                <button
+                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                  onClick={() =>
+                                    handleRollbackClick(
+                                      environmentSlug,
+                                      revision.version
+                                    )
+                                  }
+                                  type="button"
+                                >
+                                  <RollbackSVG />
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                )
+              )}
             </Accordion>
           )}
         </div>

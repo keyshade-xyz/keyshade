@@ -2,7 +2,7 @@ import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhite } from '@public/svg/shared'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,
@@ -169,7 +169,7 @@ export default function VariableCard(
                           }
                           type="button"
                         >
-                          <TrashWhite />
+                          <TrashWhiteSVG />
                         </button>
                       </TableCell>
                     </TableRow>

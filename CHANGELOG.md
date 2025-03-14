@@ -1,3 +1,9 @@
+## [2.13.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.13...v2.13.0-stage.14) (2025-03-14)
+
+### 🚀 Features
+
+* **platform:** Ability to roll back [secure]s and variables ([#828](https://github.com/keyshade-xyz/keyshade/issues/828)) ([5376888](https://github.com/keyshade-xyz/keyshade/commit/53768885cdab84d0822cbaeaffc1f6a018adc9bc))
+
 ## [2.13.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.12...v2.13.0-stage.13) (2025-03-13)
 
 ### 🚀 Features

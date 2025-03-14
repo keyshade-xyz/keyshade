@@ -305,6 +305,31 @@ export class AuthorityCheckerService {
 
     let variable: VariableWithProjectAndVersion
 
+    const variableIncludeQuery = {
+      versions: {
+        select: {
+          value: true,
+          version: true,
+          createdOn: true,
+          environment: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              profilePictureUrl: true
+            }
+          }
+        }
+      },
+      project: true
+    }
+
     try {
       if (entity.slug) {
         this.logger.log(`Fetching variable by slug ${entity.slug}`)
@@ -312,10 +337,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: {
-            versions: true,
-            project: true
-          }
+          include: variableIncludeQuery
         })
       } else {
         this.logger.log(`Fetching variable by name ${entity.name}`)
@@ -324,10 +346,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             project: { workspace: { members: { some: { userId: user.id } } } }
           },
-          include: {
-            versions: true,
-            project: true
-          }
+          include: variableIncludeQuery
         })
       }
     } catch (error) {
@@ -389,6 +408,31 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
+    const secretIncludeQuery = {
+      versions: {
+        select: {
+          value: true,
+          version: true,
+          createdOn: true,
+          environment: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              profilePictureUrl: true
+            }
+          }
+        }
+      },
+      project: true
+    }
+
     try {
       if (entity.slug) {
         this.logger.log(`Fetching secret by slug ${entity.slug}`)
@@ -396,10 +440,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: {
-            versions: true,
-            project: true
-          }
+          include: secretIncludeQuery
         })
       } else {
         this.logger.log(`Fetching secret by name ${entity.name}`)
@@ -408,10 +449,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             project: { workspace: { members: { some: { userId: user.id } } } }
           },
-          include: {
-            versions: true,
-            project: true
-          }
+          include: secretIncludeQuery
         })
       }
     } catch (error) {
