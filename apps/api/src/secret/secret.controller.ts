@@ -45,14 +45,16 @@ export class SecretController {
   async rollbackSecret(
     @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
+    @Param('rollbackVersion') rollbackVersion: number,
     @Query('environmentSlug') environmentSlug: string,
-    @Param('rollbackVersion') rollbackVersion: number
+    @Query('decryptValue') decryptValue: boolean
   ) {
     return await this.secretService.rollbackSecret(
       user,
       secretSlug,
       environmentSlug,
-      rollbackVersion
+      rollbackVersion,
+      decryptValue
     )
   }
 

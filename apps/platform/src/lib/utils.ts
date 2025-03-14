@@ -1,8 +1,6 @@
 import type {
   Environment,
   SecretVersion,
-  UpdateSecretResponse,
-  UpdateVariableResponse,
   Variable,
   VariableVersion
 } from '@keyshade/schema'
@@ -57,10 +55,9 @@ export function mergeExistingEnvironments(oldValues: T, newValues: T): T {
     existingEnvironmentWithValues.set(oldValue.environment.slug, oldValue)
   }
 
-  const mergedValues:
-    | UpdateVariableResponse['updatedVersions']
-    | UpdateSecretResponse['updatedVersions'] = []
+  const mergedValues: T = []
 
+  // Parse the incoming new changes
   for (const newValue of newValues) {
     if (existingEnvironmentWithValues.has(newValue.environment.slug)) {
       const oldValue = existingEnvironmentWithValues.get(
@@ -74,6 +71,15 @@ export function mergeExistingEnvironments(oldValues: T, newValues: T): T {
     } else {
       mergedValues.push(newValue)
     }
+
+    existingEnvironmentWithValues.delete(newValue.environment.slug)
   }
+
+  // Loop through the existing ones to make sure we don't remove the
+  // ones that were not changed
+  for (const oldValue of existingEnvironmentWithValues.values()) {
+    mergedValues.push(oldValue)
+  }
+
   return mergedValues
 }

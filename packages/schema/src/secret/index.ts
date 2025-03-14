@@ -3,20 +3,21 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { rotateAfterEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
+import { UserSchema } from '@/user'
 
 export const SecretVersionSchema = z.object({
+  value: z.string(),
+  version: z.number(),
+  createdOn: z.string().datetime(),
   environment: z.object({
     id: EnvironmentSchema.shape.id,
     name: EnvironmentSchema.shape.name,
     slug: EnvironmentSchema.shape.slug
   }),
-  value: z.string(),
-  version: z.number(),
-  createdOn: z.string().datetime(),
   createdBy: z.object({
-    id: z.string(),
-    name: z.string(),
-    profilePictureUrl: z.string().nullable()
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
   })
 })
 
@@ -32,9 +33,9 @@ export const SecretSchema = z.object({
     lastUpdatedById: z.string(),
     projectId: BaseProjectSchema.shape.id,
     lastUpdatedBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
+      id: UserSchema.shape.id,
+      name: UserSchema.shape.name,
+      profilePictureUrl: UserSchema.shape.profilePictureUrl
     })
   }),
   values: z.array(SecretVersionSchema)
@@ -88,11 +89,13 @@ export const DeleteSecretResponseSchema = z.void()
 export const RollBackSecretRequestSchema = z.object({
   environmentSlug: EnvironmentSchema.shape.slug,
   version: z.number(),
-  secretSlug: z.string()
+  secretSlug: z.string(),
+  decryptValue: z.boolean().optional()
 })
 
 export const RollBackSecretResponseSchema = z.object({
-  count: z.number()
+  count: z.number(),
+  currentRevision: SecretVersionSchema
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({

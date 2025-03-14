@@ -2,20 +2,21 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
+import { UserSchema } from '@/user'
 
 export const VariableVersionSchema = z.object({
   version: z.number(),
   value: z.string(),
+  createdOn: z.string().datetime(),
   environment: z.object({
     id: EnvironmentSchema.shape.id,
     name: EnvironmentSchema.shape.name,
     slug: EnvironmentSchema.shape.slug
   }),
-  createdOn: z.string().datetime(),
   createdBy: z.object({
-    id: z.string(),
-    name: z.string(),
-    profilePictureUrl: z.string().nullable()
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
   })
 })
 
@@ -30,9 +31,9 @@ export const VariableSchema = z.object({
     lastUpdatedById: z.string(),
     projectId: BaseProjectSchema.shape.id,
     lastUpdatedBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
+      id: UserSchema.shape.id,
+      name: UserSchema.shape.name,
+      profilePictureUrl: UserSchema.shape.profilePictureUrl
     })
   }),
   values: z.array(VariableVersionSchema)
@@ -92,7 +93,8 @@ export const RollBackVariableRequestSchema = z.object({
 })
 
 export const RollBackVariableResponseSchema = z.object({
-  count: z.number()
+  count: z.number(),
+  currentRevision: VariableVersionSchema
 })
 
 export const DeleteVariableRequestSchema = z.object({
