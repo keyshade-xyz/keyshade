@@ -11,6 +11,7 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  revealSecretOpenAtom,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
@@ -34,20 +35,23 @@ function SecretPage(): React.JSX.Element {
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const isDecrypted = useAtomValue(revealSecretOpenAtom)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
+  const privateKey = useMemo(
+    () =>
+      selectedProject?.storePrivateKey
+        ? selectedProject.privateKey
+        : localStorage.getItem(`${selectedProject?.name}_pk`) || '',
     [selectedProject]
   )
-
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,
-      decryptValue: isDecrypted,
+      decryptValue: false,
       page,
       limit: SECRET_PAGE_SIZE
     })
@@ -106,6 +110,7 @@ function SecretPage(): React.JSX.Element {
                 <SecretCard
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
+                  privateKey={privateKey}
                   secretData={secretData}
                 />
               ))}

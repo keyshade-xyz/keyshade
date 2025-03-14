@@ -2,7 +2,8 @@ import type { Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
-import { EyeOpen, EyeSlash, InfoSVG, TrashWhite } from '@public/svg/shared'
+import { EyeOpen, EyeSlash, TrashWhite } from '@public/svg/shared'
+import { useEffect, useState } from 'react'
 import {
   AccordionContent,
   AccordionItem,
@@ -26,28 +27,29 @@ import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-  TooltipArrow
+  TooltipTrigger
 } from '@/components/ui/tooltip'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
-  revealSecretOpenAtom,
   selectedSecretAtom,
   selectedSecretEnvironmentAtom
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import { decrypt } from '@/lib/decrypt'
 
 interface SecretCardProps {
   secretData: Secret
   isDecrypted: boolean
+  privateKey: string | null
 }
 
 export default function SecretCard({
   secretData,
-  isDecrypted
+  isDecrypted,
+  privateKey
 }: SecretCardProps) {
   const { secret, values } = secretData
 
@@ -60,7 +62,52 @@ export default function SecretCard({
   const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
     selectedSecretEnvironmentAtom
   )
-  const [IsSecretRevealed, setIsSecretRevealed] = useAtom(revealSecretOpenAtom)
+  const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
+  const [decryptedValues, setDecryptedValues] = useState<
+    Record<string, string>
+  >({})
+
+  useEffect(() => {
+    if (!privateKey) return
+
+    const decryptValues = async () => {
+      const decryptPromises = values.map(async (value) => {
+        const shouldDecrypt =
+          isDecrypted ||
+          (isSecretRevealed &&
+            value.environment.slug === selectedSecretEnvironment)
+
+        if (shouldDecrypt) {
+          try {
+            const decrypted = await decrypt(privateKey, value.value)
+            return { id: value.environment.id, value: decrypted }
+          } catch (error) {
+            return { id: value.environment.id, value: 'Decryption failed' }
+          }
+        }
+        return null
+      })
+
+      const results = await Promise.all(decryptPromises)
+      const newValues: Record<string, string> = {}
+
+      results.forEach((result) => {
+        if (result) {
+          newValues[result.id] = result.value
+        }
+      })
+
+      setDecryptedValues(newValues)
+    }
+
+    decryptValues()
+  }, [
+    privateKey,
+    values,
+    isDecrypted,
+    isSecretRevealed,
+    selectedSecretEnvironment
+  ])
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -70,11 +117,13 @@ export default function SecretCard({
       'You successfully copied the slug.'
     )
   }
-
   const handleRevealEnvironmentValueOfSecretClick = (environment: string) => {
-    setSelectedSecret(secretData)
+    if (selectedSecretEnvironment === environment && isSecretRevealed) {
+      setIsSecretRevealed(false)
+    } else {
+      setIsSecretRevealed(true)
+    }
     setSelectedSecretEnvironment(environment)
-    setIsSecretRevealed(!IsSecretRevealed)
   }
 
   const handleEditClick = () => {
@@ -157,6 +206,10 @@ export default function SecretCard({
               </TableHeader>
               <TableBody>
                 {values.map((value) => {
+                  const isRevealed =
+                    !isDecrypted &&
+                    isSecretRevealed &&
+                    value.environment.slug === selectedSecretEnvironment
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -166,10 +219,8 @@ export default function SecretCard({
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">
-                        {isDecrypted &&
-                        IsSecretRevealed &&
-                        value.environment.slug === selectedSecretEnvironment
-                          ? value.value
+                        {isDecrypted || isRevealed
+                          ? decryptedValues[value.environment.id]
                           : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base">
@@ -177,7 +228,7 @@ export default function SecretCard({
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
-                          {isDecrypted ? (
+                          {!isDecrypted && privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
                               onClick={() =>
@@ -187,26 +238,9 @@ export default function SecretCard({
                               }
                               type="button"
                             >
-                              {!IsSecretRevealed ? <EyeOpen /> : <EyeSlash />}
+                              {!isRevealed ? <EyeOpen /> : <EyeSlash />}
                             </button>
-                          ) : (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <InfoSVG />
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  className="w-[12rem] border-none bg-white/10 text-sm text-white"
-                                  side="bottom"
-                                  sideOffset={8}
-                                >
-                                  <TooltipArrow className="fill-white/10" />
-                                  You need to store the private key first in
-                                  order to view the value.
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
+                          ) : null}
                           <button
                             className="duration-300 hover:scale-105"
                             onClick={() =>
