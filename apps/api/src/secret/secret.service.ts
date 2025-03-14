@@ -475,7 +475,8 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
-    rollbackVersion: SecretVersion['version']
+    rollbackVersion: SecretVersion['version'],
+    decryptValue: boolean
   ) {
     this.logger.log(
       `User ${user.id} attempted to rollback secret ${secretSlug} to version ${rollbackVersion}`
@@ -510,7 +511,7 @@ export class SecretService {
       `Fetching secret versions for secret ${secretSlug} in environment ${environmentSlug}`
     )
     secret.versions = secret.versions.filter(
-      (version) => version.environmentId === environmentId
+      (version) => version.environment.id === environmentId
     )
     this.logger.log(
       `Found ${secret.versions.length} versions for secret ${secretSlug} in environment ${environmentSlug}`
@@ -595,7 +596,21 @@ export class SecretService {
       this.prisma
     )
 
-    return result
+    const currentRevision = secret.versions.find(
+      (version) => version.version === rollbackVersion
+    )!
+
+    if (decryptValue && project.storePrivateKey) {
+      currentRevision.value = await decrypt(
+        project.privateKey,
+        currentRevision.value
+      )
+    }
+
+    return {
+      ...result,
+      currentRevision
+    }
   }
 
   /**

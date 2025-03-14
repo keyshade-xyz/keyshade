@@ -9,7 +9,8 @@ import {
   selectedVariableAtom,
   variablesOfProjectAtom,
   deleteEnvironmentValueOfVariableOpenAtom,
-  variableRevisionsOpenAtom
+  variableRevisionsOpenAtom,
+  rollbackVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -23,6 +24,7 @@ import { VARIABLES_PAGE_SIZE } from '@/lib/constants'
 import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
+import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
 
 function VariablePage(): React.JSX.Element {
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
@@ -31,6 +33,7 @@ function VariablePage(): React.JSX.Element {
     deleteEnvironmentValueOfVariableOpenAtom
   )
   const isVariableRevisionsOpen = useAtomValue(variableRevisionsOpenAtom)
+  const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -138,6 +141,11 @@ function VariablePage(): React.JSX.Element {
           {/* Variable revisions sheet */}
           {isVariableRevisionsOpen && selectedVariable ? (
             <VariableRevisionsSheet />
+          ) : null}
+
+          {/* Rollback variable alert dialog */}
+          {isRollbackVariableOpen && selectedVariable ? (
+            <ConfirmRollbackVariable />
           ) : null}
         </div>
       )}

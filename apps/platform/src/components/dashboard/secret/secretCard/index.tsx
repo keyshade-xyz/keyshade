@@ -2,7 +2,7 @@ import type { Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhite } from '@public/svg/shared'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   AccordionContent,
   AccordionItem,
@@ -178,7 +178,7 @@ export default function SecretCard({
                           }
                           type="button"
                         >
-                          <TrashWhite />
+                          <TrashWhiteSVG />
                         </button>
                       </TableCell>
                     </TableRow>

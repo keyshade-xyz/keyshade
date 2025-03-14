@@ -192,7 +192,7 @@ export default function EditSecretSheet(): JSX.Element {
               onClick={handleUpdateSecret}
               variant="secondary"
             >
-              Edit Secret
+              Save changes
             </Button>
           </SheetClose>
         </SheetFooter>
