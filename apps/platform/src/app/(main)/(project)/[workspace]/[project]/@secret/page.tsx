@@ -13,7 +13,7 @@ import {
   editSecretOpenAtom,
   rollbackSecretOpenAtom,
   secretRevisionsOpenAtom,
-  revealSecretOpenAtom,
+  shouldRevealSecretEnabled,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
@@ -41,7 +41,7 @@ function SecretPage(): React.JSX.Element {
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
-  const isDecrypted = useAtomValue(revealSecretOpenAtom)
+  const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -57,7 +57,7 @@ function SecretPage(): React.JSX.Element {
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,
-      decryptValue: false,
+      decryptValue: isDecrypted,
       page,
       limit: SECRET_PAGE_SIZE
     })

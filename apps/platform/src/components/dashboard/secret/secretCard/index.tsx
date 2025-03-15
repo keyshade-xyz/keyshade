@@ -1,9 +1,9 @@
-import type { Secret } from '@keyshade/schema'
+import type { Environment, Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   AccordionContent,
   AccordionItem,
@@ -66,50 +66,32 @@ export default function SecretCard({
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
   const [decryptedValues, setDecryptedValues] = useState<
-    Record<string, string>
+    Record<Environment['id'], string>
   >({})
 
-  useEffect(() => {
+  const handleDecryptValues = (environmentSlug: Environment['slug']) => {
     if (!privateKey) return
+    const targetValue = values.find(
+      (value) => value.environment.slug === environmentSlug
+    )
+    if (!targetValue) return
 
-    const decryptValues = async () => {
-      const decryptPromises = values.map(async (value) => {
-        const shouldDecrypt =
-          isDecrypted ||
-          (isSecretRevealed &&
-            value.environment.slug === selectedSecretEnvironment)
-
-        if (shouldDecrypt) {
-          try {
-            const decrypted = await decrypt(privateKey, value.value)
-            return { id: value.environment.id, value: decrypted }
-          } catch (error) {
-            return { id: value.environment.id, value: 'Decryption failed' }
-          }
-        }
-        return null
+    decrypt(privateKey, targetValue.value)
+      .then((decrypted) => {
+        setDecryptedValues((prev) => ({
+          ...prev,
+          [targetValue.environment.id]: decrypted
+        }))
       })
-
-      const results = await Promise.all(decryptPromises)
-      const newValues: Record<string, string> = {}
-
-      results.forEach((result) => {
-        if (result) {
-          newValues[result.id] = result.value
-        }
+      .catch((error) => {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Decryption error:', error)
+        setDecryptedValues((prev) => ({
+          ...prev,
+          [targetValue.environment.id]: 'Decryption failed'
+        }))
       })
-
-      setDecryptedValues(newValues)
-    }
-
-    decryptValues()
-  }, [
-    privateKey,
-    values,
-    isDecrypted,
-    isSecretRevealed,
-    selectedSecretEnvironment
-  ])
+  }
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -119,11 +101,14 @@ export default function SecretCard({
       'You successfully copied the slug.'
     )
   }
-  const handleRevealEnvironmentValueOfSecretClick = (environment: string) => {
+  const handleRevealEnvironmentValueOfSecretClick = (
+    environment: Environment['slug']
+  ) => {
     if (selectedSecretEnvironment === environment && isSecretRevealed) {
       setIsSecretRevealed(false)
     } else {
       setIsSecretRevealed(true)
+      handleDecryptValues(environment)
     }
     setSelectedSecretEnvironment(environment)
   }
@@ -138,7 +123,9 @@ export default function SecretCard({
     setIsDeleteSecretOpen(true)
   }
 
-  const handleDeleteEnvironmentValueOfSecretClick = (environment: string) => {
+  const handleDeleteEnvironmentValueOfSecretClick = (
+    environment: Environment['slug']
+  ) => {
     setSelectedSecret(secretData)
     setSelectedSecretEnvironment(environment)
     setIsDeleteEnvironmentValueOfSecretOpen(true)
@@ -226,9 +213,11 @@ export default function SecretCard({
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">
-                        {isDecrypted || isRevealed
-                          ? decryptedValues[value.environment.id]
-                          : value.value.replace(/./g, '*').substring(0, 20)}
+                        {isDecrypted
+                          ? value.value
+                          : isRevealed
+                            ? decryptedValues[value.environment.id]
+                            : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base">
                         {value.version}

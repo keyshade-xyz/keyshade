@@ -2,7 +2,7 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { InfoSVG } from '@public/svg/shared'
-import { revealSecretOpenAtom, selectedProjectAtom } from '@/store'
+import { shouldRevealSecretEnabled, selectedProjectAtom } from '@/store'
 import { Switch } from '@/components/ui/switch'
 import {
   Tooltip,
@@ -13,15 +13,15 @@ import {
 } from '@/components/ui/tooltip'
 
 export default function DecryptSecret(): React.JSX.Element {
-  const [revealSecretOpen, setRevealSecretOpen] = useAtom(revealSecretOpenAtom)
+  const [revealSecretOpen, setRevealSecretOpen] = useAtom(
+    shouldRevealSecretEnabled
+  )
   const selectedProject = useAtomValue(selectedProjectAtom)
 
-  const isPrivateKeyStored = useMemo(() => {
-    return (
-      selectedProject?.storePrivateKey === true ||
-      Boolean(localStorage.getItem(`${selectedProject?.name}_pk`))
-    )
-  }, [selectedProject])
+  const isPrivateKeyStored = useMemo(
+    () => selectedProject?.storePrivateKey === true || false,
+    [selectedProject]
+  )
 
   return (
     <div>

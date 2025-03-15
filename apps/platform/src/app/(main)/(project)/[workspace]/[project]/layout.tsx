@@ -11,7 +11,6 @@ import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
-import DecryptSecret from '@/components/dashboard/secret/decryptSecret'
 
 interface DetailedProjectPageProps {
   params: { project: string }
@@ -63,12 +62,7 @@ function DetailedProjectPage({
     <main className="flex h-full flex-col gap-4">
       <div className="flex h-[3.625rem] w-full justify-between p-3 ">
         <div className="text-3xl">{selectedProject?.name}</div>
-        {tab === 'secret' && (
-          <div className="flex items-center justify-center gap-6">
-            <DecryptSecret />
-            <AddSecretDialog />
-          </div>
-        )}
+        {tab === 'secret' && <AddSecretDialog />}
         {tab === 'variable' && <AddVariableDialogue />}
         {tab === 'environment' && <AddEnvironmentDialogue />}
       </div>
