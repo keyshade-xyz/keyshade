@@ -1,3 +1,9 @@
+## [2.13.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.14...v2.13.0-stage.15) (2025-03-16)
+
+### 🚀 Features
+
+* **platform:** Added pagination for environments screen ([#827](https://github.com/keyshade-xyz/keyshade/issues/827)) ([5b61096](https://github.com/keyshade-xyz/keyshade/commit/5b61096a92eec3923729677b53ef326f6caf1275))
+
 ## [2.13.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.13...v2.13.0-stage.14) (2025-03-14)
 
 ### 🚀 Features
