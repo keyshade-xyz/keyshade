@@ -497,7 +497,7 @@ export class VariableService {
       `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
     )
     variable.versions = variable.versions.filter(
-      (version) => version.environmentId === environmentId
+      (version) => version.environment.id === environmentId
     )
     this.logger.log(
       `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
@@ -582,7 +582,14 @@ export class VariableService {
       this.prisma
     )
 
-    return result
+    const currentRevision = variable.versions.find(
+      (version) => version.version === rollbackVersion
+    )!
+
+    return {
+      ...result,
+      currentRevision
+    }
   }
 
   /**
@@ -886,9 +893,27 @@ export class VariableService {
         variableId: variableId,
         environmentId: environmentId
       },
+      select: {
+        value: true,
+        version: true,
+        createdOn: true,
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         version: order
       }

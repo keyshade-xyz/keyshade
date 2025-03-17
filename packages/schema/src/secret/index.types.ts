@@ -16,10 +16,12 @@ import {
   GetAllSecretsOfEnvironmentRequestSchema,
   GetAllSecretsOfEnvironmentResponseSchema,
   DeleteEnvironmentValueOfSecretRequestSchema,
-  DeleteEnvironmentValueOfSecretResponseSchema
+  DeleteEnvironmentValueOfSecretResponseSchema,
+  SecretVersionSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
+export type SecretVersion = z.infer<typeof SecretVersionSchema>
 
 export type CreateSecretRequest = z.infer<typeof CreateSecretRequestSchema>
 

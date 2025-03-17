@@ -2,7 +2,7 @@ import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhite } from '@public/svg/shared'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,
@@ -28,7 +28,8 @@ import {
   deleteVariableOpenAtom,
   editVariableOpenAtom,
   selectedVariableAtom,
-  selectedVariableEnvironmentAtom
+  selectedVariableEnvironmentAtom,
+  variableRevisionsOpenAtom
 } from '@/store'
 import {
   AccordionContent,
@@ -50,6 +51,7 @@ export default function VariableCard(
   const setIsDeleteEnvironmentValueOfVariableOpen = useSetAtom(
     deleteEnvironmentValueOfVariableOpenAtom
   )
+  const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
   const { variable, values } = variableData
 
@@ -78,6 +80,11 @@ export default function VariableCard(
     setIsDeleteEnvironmentValueOfVariableOpen(true)
   }
 
+  const handleRevisionsClick = () => {
+    setSelectedVariable(variableData)
+    setIsVariableRevisionsOpen(true)
+  }
+
   return (
     <ContextMenu key={variable.id}>
       <AccordionItem
@@ -97,7 +104,7 @@ export default function VariableCard(
                   </span>
                   <AvatarComponent
                     name={variable.lastUpdatedBy.name}
-                    src={variable.lastUpdatedBy.profilePictureUrl}
+                    profilePictureUrl={variable.lastUpdatedBy.profilePictureUrl}
                   />
                 </div>
               </div>
@@ -162,7 +169,7 @@ export default function VariableCard(
                           }
                           type="button"
                         >
-                          <TrashWhite />
+                          <TrashWhiteSVG />
                         </button>
                       </TableCell>
                     </TableRow>
@@ -179,7 +186,10 @@ export default function VariableCard(
         </AccordionContent>
       </AccordionItem>
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleRevisionsClick}
+        >
           Show Version History
         </ContextMenuItem>
         <ContextMenuItem

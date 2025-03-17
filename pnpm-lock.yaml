@@ -54,8 +54,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       conventional-changelog-writer:
-        specifier: 8.0.0
-        version: 8.0.0
+        specifier: 8.0.1
+        version: 8.0.1
       framer-motion:
         specifier: ^11.2.9
         version: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5330,8 +5330,8 @@ packages:
     resolution: {integrity: sha512-eOvlTO6OcySPyyyk8pKz2dP4jjElYunj9hn9/s0OB+gapTO8zwS9UQWrZ1pmF2hFs3vw1xhonOLGcGjy/zgsuA==}
     engines: {node: '>=18'}
 
-  conventional-changelog-writer@8.0.0:
-    resolution: {integrity: sha512-TQcoYGRatlAnT2qEWDON/XSfnVG38JzA7E0wcGScu7RElQBkg9WWgZd1peCWFcWDh1xfb2CfsrcvOn1bbSzztA==}
+  conventional-changelog-writer@8.0.1:
+    resolution: {integrity: sha512-hlqcy3xHred2gyYg/zXSMXraY2mjAYYo0msUCpK+BGyaVJMFCKWVXPIHiaacGO2GGp13kvHWXFhYmxT4QQqW3Q==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -13513,7 +13513,7 @@ snapshots:
   '@semantic-release/commit-analyzer@13.0.1(semantic-release@24.2.2(typescript@5.7.3))':
     dependencies:
       conventional-changelog-angular: 8.0.0
-      conventional-changelog-writer: 8.0.0
+      conventional-changelog-writer: 8.0.1
       conventional-commits-filter: 5.0.0
       conventional-commits-parser: 6.0.0
       debug: 4.4.0(supports-color@5.5.0)
@@ -13606,7 +13606,7 @@ snapshots:
   '@semantic-release/release-notes-generator@14.0.3(semantic-release@24.2.2(typescript@5.7.3))':
     dependencies:
       conventional-changelog-angular: 8.0.0
-      conventional-changelog-writer: 8.0.0
+      conventional-changelog-writer: 8.0.1
       conventional-commits-filter: 5.0.0
       conventional-commits-parser: 6.0.0
       debug: 4.4.0(supports-color@5.5.0)
@@ -15851,9 +15851,8 @@ snapshots:
     dependencies:
       compare-func: 2.0.0
 
-  conventional-changelog-writer@8.0.0:
+  conventional-changelog-writer@8.0.1:
     dependencies:
-      '@types/semver': 7.5.8
       conventional-commits-filter: 5.0.0
       handlebars: 4.7.8
       meow: 13.2.0

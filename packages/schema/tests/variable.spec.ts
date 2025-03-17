@@ -377,7 +377,23 @@ describe('Variable Schema Tests', () => {
   describe('RollBackVariableResponseSchema Tests', () => {
     it('should validate a valid RollBackVariableResponseSchema', () => {
       const result = RollBackVariableResponseSchema.safeParse({
-        count: 1
+        count: 1,
+        currentRevision: {
+          id: 'version123',
+          environment: {
+            id: 'env123',
+            slug: 'development',
+            name: 'Development'
+          },
+          createdOn: '2024-10-01T00:00:00Z',
+          createdBy: {
+            id: 'user123',
+            name: 'John Doe',
+            profilePictureUrl: 'http://example.com/profile.jpg'
+          },
+          value: 'secret-value',
+          version: 4
+        }
       })
       expect(result.success).toBe(true)
     })
@@ -385,9 +401,10 @@ describe('Variable Schema Tests', () => {
     it('should not validate an invalid RollBackVariableResponseSchema', () => {
       const result = RollBackVariableResponseSchema.safeParse({
         count: '1' // Should be a number
+        // Missing currentRevision
       })
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
+      expect(result.error?.issues).toHaveLength(2)
     })
   })
 

@@ -8,7 +8,9 @@ import {
   editVariableOpenAtom,
   selectedVariableAtom,
   variablesOfProjectAtom,
-  deleteEnvironmentValueOfVariableOpenAtom
+  deleteEnvironmentValueOfVariableOpenAtom,
+  variableRevisionsOpenAtom,
+  rollbackVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -21,6 +23,8 @@ import VariableLoader from '@/components/dashboard/variable/variableLoader'
 import { VARIABLES_PAGE_SIZE } from '@/lib/constants'
 import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
+import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
+import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
 
 function VariablePage(): React.JSX.Element {
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
@@ -28,6 +32,8 @@ function VariablePage(): React.JSX.Element {
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
     deleteEnvironmentValueOfVariableOpenAtom
   )
+  const isVariableRevisionsOpen = useAtomValue(variableRevisionsOpenAtom)
+  const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -130,6 +136,16 @@ function VariablePage(): React.JSX.Element {
           {/* Delete environment value of variable alert dialog */}
           {isDeleteEnvironmentValueOfVariableOpen && selectedVariable ? (
             <ConfirmDeleteEnvironmentValueOfVariableDialog />
+          ) : null}
+
+          {/* Variable revisions sheet */}
+          {isVariableRevisionsOpen && selectedVariable ? (
+            <VariableRevisionsSheet />
+          ) : null}
+
+          {/* Rollback variable alert dialog */}
+          {isRollbackVariableOpen && selectedVariable ? (
+            <ConfirmRollbackVariable />
           ) : null}
         </div>
       )}
