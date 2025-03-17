@@ -28,6 +28,7 @@ import { CreateWorkspace } from './dto/create.workspace/create.workspace'
 import { UpdateWorkspace } from './dto/update.workspace/update.workspace'
 import { AuthenticatedUser } from '@/user/user.types'
 import { UpdateBlacklistedIpAddresses } from './dto/update.blacklistedIpAddresses/update.blacklistedIpAddresses'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 @Injectable()
 export class WorkspaceService {
@@ -35,7 +36,8 @@ export class WorkspaceService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -52,7 +54,13 @@ export class WorkspaceService {
 
     await this.existsByName(dto.name, user.id)
 
-    return await createWorkspace(user, dto, this.prisma)
+    const newWorkspace = await createWorkspace(user, dto, this.prisma)
+
+    return {
+      ...newWorkspace,
+      projects: await this.getProjectsOfWorkspace(newWorkspace, user),
+      ...(await this.parseWorkspaceItemLimits(newWorkspace.id))
+    }
   }
 
   /**
@@ -67,7 +75,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
-  ) {
+  ): Promise<Workspace> {
     this.logger.log(
       `User ${user.id} attempted to update a workspace ${workspaceSlug}`
     )
@@ -188,7 +196,7 @@ export class WorkspaceService {
   async getWorkspaceBySlug(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<Workspace> {
+  ) {
     this.logger.log(
       `User ${user.id} attempted to get workspace ${workspaceSlug}`
     )
@@ -206,7 +214,9 @@ export class WorkspaceService {
 
     return {
       ...workspace,
-      isDefault: workspace.isDefault && workspace.ownerId === user.id
+      isDefault: workspace.isDefault && workspace.ownerId === user.id,
+      projects: await this.getProjectsOfWorkspace(workspace, user),
+      ...(await this.parseWorkspaceItemLimits(workspace.id))
     }
   }
 
@@ -288,10 +298,13 @@ export class WorkspaceService {
     })
 
     return {
-      items: items.map((item) => ({
-        ...item,
-        isDefault: item.isDefault && item.ownerId === user.id
-      })),
+      items: await Promise.all(
+        items.map(async (item) => ({
+          ...item,
+          isDefault: item.isDefault && item.ownerId === user.id,
+          ...(await this.parseWorkspaceItemLimits(item.id))
+        }))
+      ),
       metadata
     }
   }
@@ -863,5 +876,64 @@ export class WorkspaceService {
       }
     }
     return accessibleProjectCount
+  }
+
+  /**
+   * Parses the tier limits for a given workspace and returns an object containing
+   * the maximum allowed and current total of members and projects.
+   *
+   * @param workspace The workspace to parse tier limits for.
+   * @param tierLimitService The service used to obtain tier limits.
+   * @param prisma The Prisma client for database operations.
+   * @returns A promise that resolves to an object containing the workspace with
+   * tier limits, including maximum allowed and total members and projects.
+   */
+
+  private async parseWorkspaceItemLimits(
+    workspaceId: Workspace['id']
+  ): Promise<{
+    maxAllowedProjects: number
+    totalProjects: number
+    maxAllowedMembers: number
+    totalMembers: number
+  }> {
+    this.logger.log(
+      `Parsing workspace item limits for workspace ${workspaceId}`
+    )
+
+    this.logger.log(`Getting tier limits for workspace ${workspaceId}`)
+    // Get the tier limit for the members in the workspace
+    const maxAllowedMembers =
+      this.tierLimitService.getMemberTierLimit(workspaceId)
+
+    // Get total members in the workspace
+    const totalMembers = await this.prisma.workspaceMember.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
+
+    this.logger.log(`Getting tier limits for workspace ${workspaceId}`)
+    // Get project tier limit
+    const maxAllowedProjects =
+      this.tierLimitService.getProjectTierLimit(workspaceId)
+
+    // Get total projects in the workspace
+    const totalProjects = await this.prisma.project.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(
+      `Found ${totalProjects} projects in workspace ${workspaceId}`
+    )
+
+    return {
+      maxAllowedMembers,
+      totalMembers,
+      maxAllowedProjects,
+      totalProjects
+    }
   }
 }

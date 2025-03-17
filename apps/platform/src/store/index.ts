@@ -4,24 +4,24 @@ import type {
   ApiKey,
   Environment,
   GetAllEnvironmentsOfProjectResponse,
-  Project,
-  ProjectWithCount,
+  ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  Workspace
+  WorkspaceWithTierLimitAndProjectCount
 } from '@keyshade/schema'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
-export const selectedWorkspaceAtom = atom<
-  (Workspace & { projects: number }) | null
->(null)
+export const selectedWorkspaceAtom =
+  atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
 
-export const selectedProjectAtom = atom<Project | null>(null)
-export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
+export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
+  null
+)
+export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(

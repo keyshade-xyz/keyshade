@@ -240,7 +240,10 @@ export class ProjectService {
     // in order to not log the private key
     newProject.privateKey = privateKey
 
-    return newProject
+    return {
+      ...newProject,
+      ...(await this.parseProjectItemLimits(newProject.id))
+    }
   }
 
   /**
@@ -859,10 +862,13 @@ export class ProjectService {
 
     delete project.secrets
 
-    return await this.countEnvironmentsVariablesAndSecretsInProject(
-      project,
-      user
-    )
+    return {
+      ...(await this.countEnvironmentsVariablesAndSecretsInProject(
+        project,
+        user
+      )),
+      ...(await this.parseProjectItemLimits(project.id))
+    }
   }
 
   /**
@@ -953,9 +959,13 @@ export class ProjectService {
     )
 
     const items = await Promise.all(
-      projects.map(async (project) =>
-        this.countEnvironmentsVariablesAndSecretsInProject(project, user)
-      )
+      projects.map(async (project) => ({
+        ...(await this.countEnvironmentsVariablesAndSecretsInProject(
+          project,
+          user
+        )),
+        ...(await this.parseProjectItemLimits(project.id))
+      }))
     )
 
     //calculate metadata
@@ -1511,6 +1521,80 @@ export class ProjectService {
       environmentCount: permittedEnvironments.length,
       variableCount,
       secretCount
+    }
+  }
+
+  /**
+   * Returns the project with additional information about the limits of items
+   * in the project and the current count of items.
+   *
+   * @param project The project to parse
+   * @returns The project with the following additional properties:
+   * - maxAllowedEnvironments: The maximum number of environments allowed in the project
+   * - totalEnvironments: The current number of environments in the project
+   * - maxAllowedSecrets: The maximum number of secrets allowed in the project
+   * - totalSecrets: The current number of secrets in the project
+   * - maxAllowedVariables: The maximum number of variables allowed in the project
+   * - totalVariables: The current number of variables in the project
+   */
+  private async parseProjectItemLimits(projectId: Project['id']): Promise<{
+    maxAllowedEnvironments: number
+    totalEnvironments: number
+    maxAllowedSecrets: number
+    totalSecrets: number
+    maxAllowedVariables: number
+    totalVariables: number
+  }> {
+    this.logger.log(`Parsing project item limits for project ${projectId}`)
+
+    this.logger.log(`Getting tier limits for project ${projectId}`)
+    // Get the tier limit for environments in the project
+    const maxAllowedEnvironments =
+      this.tierLimitService.getEnvironmentTierLimit(projectId)
+
+    // Get the total number of environments in the project
+    const totalEnvironments = await this.prisma.environment.count({
+      where: {
+        projectId
+      }
+    })
+    this.logger.log(
+      `Found ${totalEnvironments} environments in project ${projectId}`
+    )
+
+    this.logger.log(`Getting item counts for project ${projectId}`)
+    // Get the tier limit for secrets in the project
+    const maxAllowedSecrets =
+      this.tierLimitService.getSecretTierLimit(projectId)
+
+    // Get the total number of secrets in the project
+    const totalSecrets = await this.prisma.secret.count({
+      where: {
+        projectId
+      }
+    })
+    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
+
+    this.logger.log(`Getting item counts for project ${projectId}`)
+    // Get the tier limit for variables in the project
+    const maxAllowedVariables =
+      this.tierLimitService.getVariableTierLimit(projectId)
+
+    // Get the total number of variables in the project
+    const totalVariables = await this.prisma.variable.count({
+      where: {
+        projectId: projectId
+      }
+    })
+    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
+
+    return {
+      maxAllowedEnvironments,
+      totalEnvironments,
+      maxAllowedSecrets,
+      totalSecrets,
+      maxAllowedVariables,
+      totalVariables
     }
   }
 }
