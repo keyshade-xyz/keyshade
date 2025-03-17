@@ -82,6 +82,7 @@ export const rollbackVariableOpenAtom = atom<boolean>(false)
 
 export const createSecretOpenAtom = atom<boolean>(false)
 export const editSecretOpenAtom = atom<boolean>(false)
+export const shouldRevealSecretEnabled = atom<boolean>(false)
 export const deleteSecretOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 export const secretRevisionsOpenAtom = atom<boolean>(false)

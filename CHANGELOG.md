@@ -1,3 +1,15 @@
+## [2.13.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.15...v2.13.0-stage.16) (2025-03-17)
+
+### 🚀 Features
+
+* **platform:** Ability to reveal value of [secure] ([#825](https://github.com/keyshade-xyz/keyshade/issues/825)) ([af50c7b](https://github.com/keyshade-xyz/keyshade/commit/af50c7b1d4111bd81b4825a513fe09ab2f3a3294))
+
+## [2.13.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.14...v2.13.0-stage.15) (2025-03-16)
+
+### 🚀 Features
+
+* **platform:** Added pagination for environments screen ([#827](https://github.com/keyshade-xyz/keyshade/issues/827)) ([5b61096](https://github.com/keyshade-xyz/keyshade/commit/5b61096a92eec3923729677b53ef326f6caf1275))
+
 ## [2.13.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.13...v2.13.0-stage.14) (2025-03-14)
 
 ### 🚀 Features
