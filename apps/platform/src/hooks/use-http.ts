@@ -22,7 +22,7 @@ function handle403() {
 
   setTimeout(() => {
     isHandling403 = false
-  }, 1000)
+  }, 5000)
 }
 
 function handle500(error) {
