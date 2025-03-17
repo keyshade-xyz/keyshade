@@ -102,7 +102,7 @@ function EnvironmentPage(): React.JSX.Element {
         </div>
       ) : (
         // Showing this when environments are present
-        <div className="flex flex-col gap-y-8">
+        <div className="flex w-full flex-col gap-y-8">
           <div
             className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
           >
