@@ -17,6 +17,7 @@ import RolesSVG from './roles.svg'
 import CheckmarkSVG from './checkmark.svg'
 import TrashWhiteSVG from './trash-white.svg'
 import RollbackSVG from './rollback.svg'
+import MinusSquareSVG from './minus-square.svg'
 
 export {
   DropdownSVG,
@@ -37,5 +38,6 @@ export {
   RolesSVG,
   CheckmarkSVG,
   TrashWhiteSVG,
-  RollbackSVG
+  RollbackSVG,
+  MinusSquareSVG,
 }

@@ -95,6 +95,10 @@ export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
 
+export const createRolesOpenAtom = atom<boolean>(false)
+export const editRolesOpenAtom = atom<boolean>(false)
+export const deleteRolesOpenAtom = atom<boolean>(false)
+
 export const deleteAccountOpenAtom = atom<boolean>(false)
 
 export const viewAndDownloadProjectKeysOpenAtom = atom<boolean>(false)
