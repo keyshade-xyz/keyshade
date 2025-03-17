@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Accordion } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
@@ -11,6 +11,7 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  globalSearchDataAtom,
   rollbackSecretOpenAtom,
   secretRevisionsOpenAtom,
   secretsOfProjectAtom,
@@ -40,6 +41,7 @@ function SecretPage(): React.JSX.Element {
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -72,13 +74,21 @@ function SecretPage(): React.JSX.Element {
             if (data.metadata.links.next === null) {
               setHasMore(false)
             }
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              secrets: data.items.map((item) => ({
+                slug: item.secret.slug,
+                name: item.secret.name,
+                note: item.secret.note,
+              })),
+            }))
           }
         })
         .finally(() => {
           setIsLoading(false)
         })
     }
-  }, [getAllSecretsOfProject, isDecrypted, page, selectedProject, setSecrets])
+  }, [getAllSecretsOfProject, isDecrypted, page, selectedProject, setGlobalSearchData, setSecrets])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)

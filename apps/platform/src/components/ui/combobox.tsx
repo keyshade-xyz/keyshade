@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import type { Workspace } from '@keyshade/schema'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { Label } from './label'
 import { Input } from './input'
@@ -32,7 +32,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { selectedWorkspaceAtom } from '@/store'
+import { globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
@@ -54,6 +54,7 @@ export function Combobox(): React.JSX.Element {
     })
   )
 
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
@@ -87,11 +88,19 @@ export function Combobox(): React.JSX.Element {
   useEffect(() => {
     getWorkspacesOfUser().then(({ success, data }) => {
       if (success && data) {
+        setGlobalSearchData((prev) => ({
+          ...prev,
+          workspaces: data.items.map((workspace) => ({
+            id: workspace.id,
+            name: workspace.name,
+            slug: workspace.slug
+          }))
+        }))
         setAllWorkspaces(data.items)
         setSelectedWorkspace((prev) => (prev !== null ? prev : data.items[0]))
       }
     })
-  }, [setSelectedWorkspace, getWorkspacesOfUser])
+  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
