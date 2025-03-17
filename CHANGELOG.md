@@ -1,3 +1,9 @@
+## [2.14.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.1...v2.14.0-stage.2) (2025-03-17)
+
+### 🐛 Bug Fixes
+
+* **platform:** ui issues on otp & session expiry toasts ([#832](https://github.com/keyshade-xyz/keyshade/issues/832)) ([9d59de8](https://github.com/keyshade-xyz/keyshade/commit/9d59de8297d3f38b9876c482bea2b2b2cee3802c))
+
 ## [2.14.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0...v2.14.0-stage.1) (2025-03-17)
 
 ### 🚀 Features
