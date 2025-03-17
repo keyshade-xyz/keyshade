@@ -1,3 +1,9 @@
+## [2.14.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0...v2.14.0-stage.1) (2025-03-17)
+
+### 🚀 Features
+
+* **api:** Return tier limit for entities in projects and workspaces ([#833](https://github.com/keyshade-xyz/keyshade/issues/833)) ([6b1da04](https://github.com/keyshade-xyz/keyshade/commit/6b1da043176d1de2c7df06f95aacee8f1e694e04))
+
 ## [2.13.0](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0...v2.13.0) (2025-03-17)
 
 ### 🚀 Features

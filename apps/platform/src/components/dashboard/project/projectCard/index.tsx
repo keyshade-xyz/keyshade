@@ -1,7 +1,10 @@
 'use client'
 import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
-import type { ProjectWithCount } from '@keyshade/schema'
+import type {
+  ProjectWithCount,
+  ProjectWithTierLimitAndCount
+} from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
 import {
   SecretSVG,
@@ -27,7 +30,7 @@ import {
 import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
-  project: ProjectWithCount
+  project: ProjectWithTierLimitAndCount
 }
 
 export default function ProjectCard({
@@ -50,7 +53,13 @@ export default function ProjectCard({
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const handleCopyToClipboard = () => {
-    copyToClipboard(slug, 'You copied the slug successfully.', 'Unable to copy slug.', 'You successfully copied the slug.', 'Something went wrong while copying the slug.')
+    copyToClipboard(
+      slug,
+      'You copied the slug successfully.',
+      'Unable to copy slug.',
+      'You successfully copied the slug.',
+      'Something went wrong while copying the slug.'
+    )
   }
 
   const handleEditProject = () => {
@@ -135,10 +144,7 @@ export default function ProjectCard({
         >
           Copy link
         </ContextMenuItem>
-        <ContextMenuItem
-          inset
-          onClick={handleCopyToClipboard}
-        >
+        <ContextMenuItem inset onClick={handleCopyToClipboard}>
           Copy slug
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />

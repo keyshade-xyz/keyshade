@@ -277,7 +277,7 @@ describe('Secret Controller Tests', () => {
       // Create secrets until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getSecretTierLimit(project1) - 1; // Subtract 1 for the secrets created above
+        x < 100 + tierLimitService.getSecretTierLimit(project1.id) - 1; // Subtract 1 for the secrets created above
         x++
       ) {
         await secretService.createSecret(
