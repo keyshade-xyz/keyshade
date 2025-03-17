@@ -901,7 +901,7 @@ export class WorkspaceService {
       `Parsing workspace item limits for workspace ${workspaceId}`
     )
 
-    this.logger.log(`Getting tier limits for workspace ${workspaceId}`)
+    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
     // Get the tier limit for the members in the workspace
     const maxAllowedMembers =
       this.tierLimitService.getMemberTierLimit(workspaceId)
@@ -914,7 +914,7 @@ export class WorkspaceService {
     })
     this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
 
-    this.logger.log(`Getting tier limits for workspace ${workspaceId}`)
+    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
     // Get project tier limit
     const maxAllowedProjects =
       this.tierLimitService.getProjectTierLimit(workspaceId)
