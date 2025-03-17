@@ -1,6 +1,8 @@
 import { APIClient } from '@api-client/core/client'
 import {
   ClientResponse,
+  DeleteEnvironmentValueOfSecretRequest,
+  DeleteEnvironmentValueOfSecretResponse,
   GetAllSecretsOfEnvironmentRequest,
   GetAllSecretsOfEnvironmentResponse
 } from '@keyshade/schema'
@@ -54,12 +56,24 @@ export default class SecretController {
     return await parseResponse<UpdateSecretResponse>(response)
   }
 
+  async deleteEnvironmentValueOfSecret(
+    request: DeleteEnvironmentValueOfSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DeleteEnvironmentValueOfSecretResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/secret/${request.secretSlug}/${request.environmentSlug}`,
+      headers
+    )
+
+    return await parseResponse<DeleteEnvironmentValueOfSecretResponse>(response)
+  }
+
   async rollbackSecret(
     request: RollBackSecretRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<RollBackSecretResponse>> {
     const response = await this.apiClient.put(
-      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
+      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}&decryptValue=${request.decryptValue}`,
       request,
       headers
     )

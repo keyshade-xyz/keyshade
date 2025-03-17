@@ -288,14 +288,23 @@ export class VariableService {
             },
             select: {
               id: true,
+              value: true,
+              version: true,
               environment: {
                 select: {
                   id: true,
-                  slug: true
+                  slug: true,
+                  name: true
                 }
               },
-              value: true,
-              version: true
+              createdOn: true,
+              createdBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  profilePictureUrl: true
+                }
+              }
             }
           })
         )
@@ -363,6 +372,84 @@ export class VariableService {
   }
 
   /**
+   * Deletes the value of a variable for a specified environment.
+   *
+   * This method checks if the user has the necessary permissions to delete
+   * the environment-specific value of a variable. Upon successful deletion,
+   * an event of type `VARIABLE_UPDATED` is created with relevant metadata.
+   *
+   * @param user - The user performing the action
+   * @param variableSlug - The slug of the variable whose environment value is to be deleted
+   * @param environmentSlug - The slug of the environment from which the variable value is to be deleted
+   * @returns nothing
+   * @throws `NotFoundException` if the variable or environment does not exist
+   * @throws `ForbiddenException` if the user lacks the required authority
+   */
+
+  async deleteEnvironmentValueOfVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to delete environment value of variable ${variableSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to delete environment value of variable ${variableSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+    const environmentId = environment.id
+
+    // Fetch the variable
+    const variable =
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
+        entity: { slug: variableSlug },
+        authorities: [Authority.UPDATE_VARIABLE]
+      })
+
+    // Delete the environment value of the variable
+    this.logger.log(
+      `Deleting environment value of variable ${variable.slug} in environment ${environment.slug}`
+    )
+    const count = await this.prisma.variableVersion.deleteMany({
+      where: {
+        variableId: variable.id,
+        environmentId
+      }
+    })
+
+    this.logger.log(
+      `Deleted environment value of variable ${variable.slug} in environment ${environment.slug}. Deleted ${count.count} variable versions`
+    )
+
+    await createEvent(
+      {
+        triggeredBy: user,
+        entity: variable,
+        type: EventType.VARIABLE_UPDATED,
+        source: EventSource.VARIABLE,
+        title: `Variable updated`,
+        metadata: {
+          variableId: variable.id,
+          name: variable.name,
+          projectId: variable.projectId,
+          projectName: variable.project.name
+        },
+        workspaceId: variable.project.workspaceId
+      },
+      this.prisma
+    )
+  }
+
+  /**
    * Rollback a variable to a specific version in a given environment.
    *
    * Throws a NotFoundException if the variable does not exist or if the version is invalid.
@@ -382,7 +469,7 @@ export class VariableService {
       `User ${user.id} attempted to rollback variable ${variableSlug} to version ${rollbackVersion}`
     )
 
-    // Fetch the variable
+    // Fetch the environment
     this.logger.log(
       `Checking if user has permissions to rollback variable ${variableSlug} in environment ${environmentSlug}`
     )
@@ -410,7 +497,7 @@ export class VariableService {
       `Filtering variable versions of variable ${variableSlug} in environment ${environmentSlug}`
     )
     variable.versions = variable.versions.filter(
-      (version) => version.environmentId === environmentId
+      (version) => version.environment.id === environmentId
     )
     this.logger.log(
       `Found ${variable.versions.length} versions for variable ${variableSlug} in environment ${environmentSlug}`
@@ -495,7 +582,14 @@ export class VariableService {
       this.prisma
     )
 
-    return result
+    const currentRevision = variable.versions.find(
+      (version) => version.version === rollbackVersion
+    )!
+
+    return {
+      ...result,
+      currentRevision
+    }
   }
 
   /**
@@ -799,9 +893,27 @@ export class VariableService {
         variableId: variableId,
         environmentId: environmentId
       },
+      select: {
+        value: true,
+        version: true,
+        createdOn: true,
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         version: order
       }

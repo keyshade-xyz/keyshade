@@ -1,3 +1,49 @@
+## [2.13.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.14...v2.13.0-stage.15) (2025-03-16)
+
+### 🚀 Features
+
+* **platform:** Added pagination for environments screen ([#827](https://github.com/keyshade-xyz/keyshade/issues/827)) ([5b61096](https://github.com/keyshade-xyz/keyshade/commit/5b61096a92eec3923729677b53ef326f6caf1275))
+
+## [2.13.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.13...v2.13.0-stage.14) (2025-03-14)
+
+### 🚀 Features
+
+* **platform:** Ability to roll back [secure]s and variables ([#828](https://github.com/keyshade-xyz/keyshade/issues/828)) ([5376888](https://github.com/keyshade-xyz/keyshade/commit/53768885cdab84d0822cbaeaffc1f6a018adc9bc))
+
+## [2.13.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.12...v2.13.0-stage.13) (2025-03-13)
+
+### 🚀 Features
+
+* **platform:** Ability to view [secure] and variable versions ([#826](https://github.com/keyshade-xyz/keyshade/issues/826)) ([a47ce43](https://github.com/keyshade-xyz/keyshade/commit/a47ce4379d93b1a4c8f0b02b87f3c85df7adec2a))
+
+### 🔧 Miscellaneous Chores
+
+* Upgrade conventional-changelog-writer from 8.0.0 to 8.0.1 ([#824](https://github.com/keyshade-xyz/keyshade/issues/824)) ([735104d](https://github.com/keyshade-xyz/keyshade/commit/735104d9fafcb8e8f58e7384062285d52b6ffc72))
+
+## [2.13.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.11...v2.13.0-stage.12) (2025-03-13)
+
+### 🚀 Features
+
+* **platform:** Add dialog for viewing and downloading project keys ([#823](https://github.com/keyshade-xyz/keyshade/issues/823)) ([c6e0c85](https://github.com/keyshade-xyz/keyshade/commit/c6e0c85a38188ec824c26f90a2773fc3ab2fe963))
+
+## [2.13.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.10...v2.13.0-stage.11) (2025-03-12)
+
+### 🐛 Bug Fixes
+
+* **platform:** Remove unnecessary error toaster ([d8ebf85](https://github.com/keyshade-xyz/keyshade/commit/d8ebf8540a6858299e055ca3669c9e7b56991a33))
+
+## [2.13.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.9...v2.13.0-stage.10) (2025-03-11)
+
+### 🚀 Features
+
+* **platform:** Delete account in user settings ([#819](https://github.com/keyshade-xyz/keyshade/issues/819)) ([42d4301](https://github.com/keyshade-xyz/keyshade/commit/42d43013b277a3a427643a76f78e297186079c11))
+
+## [2.13.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.8...v2.13.0-stage.9) (2025-03-11)
+
+### 🚀 Features
+
+* Multi environment config management ([#822](https://github.com/keyshade-xyz/keyshade/issues/822)) ([7502b00](https://github.com/keyshade-xyz/keyshade/commit/7502b001aac797f6f98412a62b7c3436feebe736))
+
 ## [2.13.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0-stage.7...v2.13.0-stage.8) (2025-03-09)
 
 ### 🐛 Bug Fixes

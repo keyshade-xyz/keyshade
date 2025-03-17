@@ -1,11 +1,31 @@
-import { Project, Secret, SecretVersion } from '@prisma/client'
+import {
+  Environment,
+  Project,
+  Secret,
+  SecretVersion,
+  User
+} from '@prisma/client'
 
 export interface SecretWithValue extends Secret {
   value: string
 }
 
 export interface SecretWithVersion extends Secret {
-  versions: SecretVersion[]
+  versions: {
+    environment: {
+      id: Environment['id']
+      name: Environment['name']
+      slug: Environment['slug']
+    }
+    value: SecretVersion['value']
+    version: SecretVersion['version']
+    createdOn: SecretVersion['createdOn']
+    createdBy: {
+      id: User['id']
+      name: User['name']
+      profilePictureUrl: User['profilePictureUrl']
+    }
+  }[]
 }
 
 export interface SecretWithProject extends Secret {
