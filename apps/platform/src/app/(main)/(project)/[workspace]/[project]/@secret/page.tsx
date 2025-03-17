@@ -51,7 +51,7 @@ function SecretPage(): React.JSX.Element {
     () =>
       selectedProject?.storePrivateKey
         ? selectedProject.privateKey
-        : localStorage.getItem(`${selectedProject?.name}_pk`) || '',
+        : localStorage.getItem(`${selectedProject?.name}_pk`) || null,
     [selectedProject]
   )
   const getAllSecretsOfProject = useHttp(() =>
