@@ -6,12 +6,23 @@ import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
 
+// Add a flag to track if we've already shown the session expired toast
+let isHandling403 = false
+
 function handle403() {
+  if (isHandling403) return
+
+  isHandling403 = true
+
   toast.info('Session expired', {
-    description: 'Session expired. Please sign in again.'
+    description: createElement('p', { className: 'text-xs text-blue-300' }, 'Session expired. Please sign in again.')
   })
 
   logout()
+
+  setTimeout(() => {
+    isHandling403 = false
+  }, 1000)
 }
 
 function handle500(error) {
