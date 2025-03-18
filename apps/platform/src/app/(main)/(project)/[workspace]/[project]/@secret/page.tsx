@@ -14,6 +14,7 @@ import {
   globalSearchDataAtom,
   rollbackSecretOpenAtom,
   secretRevisionsOpenAtom,
+  shouldRevealSecretEnabled,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
@@ -42,16 +43,19 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
+  const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
+  const privateKey = useMemo(
+    () =>
+      selectedProject?.storePrivateKey
+        ? selectedProject.privateKey
+        : localStorage.getItem(`${selectedProject?.name}_pk`) || null,
     [selectedProject]
   )
-
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,
@@ -122,6 +126,7 @@ function SecretPage(): React.JSX.Element {
                 <SecretCard
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
+                  privateKey={privateKey}
                   secretData={secretData}
                 />
               ))}

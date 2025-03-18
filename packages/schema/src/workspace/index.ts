@@ -16,13 +16,28 @@ export const WorkspaceSchema = z.object({
   lastUpdatedById: z.string().nullable()
 })
 
+export const WorkspaceWithProjectCountSchema = WorkspaceSchema.extend({
+  projects: z.number()
+})
+
+export const WorkspaceWithTierLimitSchema = WorkspaceSchema.extend({
+  maxAllowedMembers: z.number(),
+  maxAllowedProjects: z.number(),
+  totalMembers: z.number(),
+  totalProjects: z.number()
+})
+
+export const WorkspaceWithTierLimitAndProjectCountSchema =
+  WorkspaceWithProjectCountSchema.and(WorkspaceWithTierLimitSchema)
+
 export const CreateWorkspaceRequestSchema = z.object({
   name: WorkspaceSchema.shape.name,
   icon: z.string().optional(),
   isDefault: z.boolean().optional()
 })
 
-export const CreateWorkspaceResponseSchema = WorkspaceSchema
+export const CreateWorkspaceResponseSchema =
+  WorkspaceWithTierLimitAndProjectCountSchema
 
 export const UpdateWorkspaceRequestSchema =
   CreateWorkspaceRequestSchema.partial().extend({
@@ -41,7 +56,8 @@ export const GetWorkspaceRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug
 })
 
-export const GetWorkspaceResponseSchema = WorkspaceSchema
+export const GetWorkspaceResponseSchema =
+  WorkspaceWithTierLimitAndProjectCountSchema
 
 export const InviteMemberRequestSchema = z.object({
   email: z.string().email(),
@@ -53,9 +69,7 @@ export const InviteMemberResponseSchema = z.void()
 export const GetAllWorkspacesOfUserRequestSchema = PageRequestSchema
 
 export const GetAllWorkspacesOfUserResponseSchema = PageResponseSchema(
-  WorkspaceSchema.extend({
-    projects: z.number()
-  })
+  WorkspaceWithTierLimitAndProjectCountSchema
 )
 
 export const ExportDataRequestSchema = z.object({

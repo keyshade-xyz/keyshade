@@ -4,20 +4,19 @@ import type {
   ApiKey,
   Environment,
   GetAllEnvironmentsOfProjectResponse,
-  Project,
-  ProjectWithCount,
+  ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  Workspace
+  WorkspaceWithTierLimitAndProjectCount
 } from '@keyshade/schema'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const globalSearchDataAtom = atom<{
-  workspaces: Partial<Project>[];
+  workspaces: Partial<ProjectWithTierLimitAndCount>[];
   secrets: { slug: string, name: string, note: string | null }[];
   variables: { slug: string, name: string, note: string | null }[];
   environments: { slug: string, name: string, description: string | null }[];
@@ -30,12 +29,13 @@ export const globalSearchDataAtom = atom<{
   projects: []
 });
 
-export const selectedWorkspaceAtom = atom<
-  (Workspace & { projects: number }) | null
->(null)
+export const selectedWorkspaceAtom =
+  atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
 
-export const selectedProjectAtom = atom<Project | null>(null)
-export const projectsOfWorkspaceAtom = atom<ProjectWithCount[]>([])
+export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
+  null
+)
+export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
@@ -96,6 +96,7 @@ export const rollbackVariableOpenAtom = atom<boolean>(false)
 
 export const createSecretOpenAtom = atom<boolean>(false)
 export const editSecretOpenAtom = atom<boolean>(false)
+export const shouldRevealSecretEnabled = atom<boolean>(false)
 export const deleteSecretOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 export const secretRevisionsOpenAtom = atom<boolean>(false)

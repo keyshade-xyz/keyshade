@@ -4,7 +4,7 @@ import { ChevronsUpDown, Check } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import type { Workspace } from '@keyshade/schema'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { useAtom, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { Label } from './label'
@@ -38,7 +38,7 @@ import { useHttp } from '@/hooks/use-http'
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [allWorkspaces, setAllWorkspaces] = useState<
-    (Workspace & { projects: number })[]
+    WorkspaceWithTierLimitAndProjectCount[]
   >([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -75,8 +75,8 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setSelectedWorkspace({ ...data, projects: 0 })
-        setAllWorkspaces((prev) => [...prev, { ...data, projects: 0 }])
+        setSelectedWorkspace(data)
+        setAllWorkspaces((prev) => [...prev, data])
         setOpen(false)
       }
     } finally {
