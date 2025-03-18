@@ -232,7 +232,7 @@ describe('Variable Controller Tests', () => {
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getVariableTierLimit(project1) - 1; // Subtract 1 for the variables created above
+        x < 100 + tierLimitService.getVariableTierLimit(project1.id) - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(
@@ -575,6 +575,65 @@ describe('Variable Controller Tests', () => {
       expect(event.type).toBe(EventType.VARIABLE_UPDATED)
       expect(event.workspaceId).toBe(workspace1.id)
       expect(event.itemId).toBeDefined()
+    })
+  })
+
+  describe('Delete Environment Value Of Variable Tests', () => {
+    it('should be able to delete environment value of variable', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/variable/${variable1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      const variableVersion = await prisma.variableVersion.findMany({
+        where: {
+          variableId: variable1.id,
+          environmentId: environment1.id
+        }
+      })
+
+      expect(variableVersion.length).toBe(0)
+    })
+
+    it('should not be able to delete environment value of variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/variable/${variable1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to delete environment value of non-existing variable', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/variable/non-existing-variable-slug/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to delete environment value of variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/variable/${variable1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
     })
   })
 

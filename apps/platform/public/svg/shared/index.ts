@@ -15,6 +15,11 @@ import CopySVG from './copy.svg'
 import CrownSVG from './crown.svg'
 import RolesSVG from './roles.svg'
 import CheckmarkSVG from './checkmark.svg'
+import TrashWhiteSVG from './trash-white.svg'
+import RollbackSVG from './rollback.svg'
+import EyeOpenSVG from './eye.svg'
+import EyeSlashSVG from './eye-slash.svg'
+import InfoSVG from './info.svg'
 
 export {
   DropdownSVG,
@@ -33,5 +38,10 @@ export {
   CopySVG,
   CrownSVG,
   RolesSVG,
-  CheckmarkSVG
+  CheckmarkSVG,
+  EyeOpenSVG,
+  EyeSlashSVG,
+  InfoSVG,
+  TrashWhiteSVG,
+  RollbackSVG
 }

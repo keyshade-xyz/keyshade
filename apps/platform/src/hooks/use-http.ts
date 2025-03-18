@@ -6,12 +6,23 @@ import { toast } from 'sonner'
 import * as Sentry from '@sentry/nextjs'
 import { logout } from '@/lib/utils'
 
+// Add a flag to track if we've already shown the session expired toast
+let isHandling403 = false
+
 function handle403() {
+  if (isHandling403) return
+
+  isHandling403 = true
+
   toast.info('Session expired', {
-    description: 'Session expired. Please sign in again.'
+    description: createElement('p', { className: 'text-xs text-blue-300' }, 'Session expired. Please sign in again.')
   })
 
   logout()
+
+  setTimeout(() => {
+    isHandling403 = false
+  }, 5000)
 }
 
 function handle500(error) {
@@ -19,18 +30,25 @@ function handle500(error) {
   Sentry.captureException(error)
 }
 
+type FunctionArgs = (
+  | string
+  | number
+  | Record<string, string>
+  | Record<string, number>
+)[]
+
 export function useHttp<T, V extends ClientResponse<T>>(
-  fn: () => Promise<V>
-): () => Promise<V> {
+  fn: (...args: FunctionArgs) => Promise<V>
+): (...args: FunctionArgs) => Promise<V> {
   const fnRef = useRef(fn)
 
   useEffect(() => {
     fnRef.current = fn
   }, [fn])
 
-  return useCallback(async (): Promise<V> => {
+  return useCallback(async (...args: FunctionArgs): Promise<V> => {
     try {
-      const response = await fnRef.current()
+      const response = await fnRef.current(...args)
 
       if (response.error) {
         const statusCode = response.error.statusCode

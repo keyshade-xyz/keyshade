@@ -162,6 +162,23 @@ describe('Secret Controller Tests', () => {
     expect(updatedSecret.data.updatedVersions.length).toBe(1)
   })
 
+  it('should be able to delete an environment value of a secret', async () => {
+    await secretController.deleteEnvironmentValueOfSecret(
+      {
+        environmentSlug,
+        secretSlug
+      },
+      { 'x-e2e-user-email': email }
+    )
+
+    const secrets = await secretController.getAllSecretsOfEnvironment(
+      { environmentSlug, projectSlug },
+      { 'x-e2e-user-email': email }
+    )
+
+    expect(secrets.data.length).toBe(0)
+  })
+
   // // RollBack a Particular Version of a Secret
   it('should roll back a version of a secret', async () => {
     // Create 2 versions of the secret
