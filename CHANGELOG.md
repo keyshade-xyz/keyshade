@@ -1,3 +1,21 @@
+## [2.14.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.2...v2.14.0-stage.3) (2025-03-18)
+
+### 🐛 Bug Fixes
+
+* **web:** Add margin for different screen size ([#820](https://github.com/keyshade-xyz/keyshade/issues/820)) ([524e741](https://github.com/keyshade-xyz/keyshade/commit/524e741dd55d83b61203679417c4e05a1882f53c))
+
+## [2.14.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.1...v2.14.0-stage.2) (2025-03-17)
+
+### 🐛 Bug Fixes
+
+* **platform:** ui issues on otp & session expiry toasts ([#832](https://github.com/keyshade-xyz/keyshade/issues/832)) ([9d59de8](https://github.com/keyshade-xyz/keyshade/commit/9d59de8297d3f38b9876c482bea2b2b2cee3802c))
+
+## [2.14.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0...v2.14.0-stage.1) (2025-03-17)
+
+### 🚀 Features
+
+* **api:** Return tier limit for entities in projects and workspaces ([#833](https://github.com/keyshade-xyz/keyshade/issues/833)) ([6b1da04](https://github.com/keyshade-xyz/keyshade/commit/6b1da043176d1de2c7df06f95aacee8f1e694e04))
+
 ## [2.13.0](https://github.com/keyshade-xyz/keyshade/compare/v2.12.0...v2.13.0) (2025-03-17)
 
 ### 🚀 Features
