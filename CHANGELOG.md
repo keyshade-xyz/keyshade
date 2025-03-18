@@ -1,3 +1,9 @@
+## [2.14.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.2...v2.14.0-stage.3) (2025-03-18)
+
+### 🐛 Bug Fixes
+
+* **web:** Add margin for different screen size ([#820](https://github.com/keyshade-xyz/keyshade/issues/820)) ([524e741](https://github.com/keyshade-xyz/keyshade/commit/524e741dd55d83b61203679417c4e05a1882f53c))
+
 ## [2.14.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.1...v2.14.0-stage.2) (2025-03-17)
 
 ### 🐛 Bug Fixes
