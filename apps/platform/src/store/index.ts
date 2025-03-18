@@ -11,7 +11,8 @@ import type {
   User,
   Variable,
   VariableVersion,
-  Workspace
+  Workspace,
+  WorkspaceRole
 } from '@keyshade/schema'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
@@ -65,6 +66,8 @@ export const selectedEnvironmentAtom = atom<
 export const environmentsOfProjectAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items']
 >([])
+
+export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
 
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])

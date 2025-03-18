@@ -1,7 +1,7 @@
 import { AddSVG, MinusSquareSVG } from '@public/svg/shared'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useState } from 'react'
-import type { AuthorityEnum, CreateWorkspaceRoleRequest as OriginalCreateWorkspaceRoleRequest, GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
+import type { AuthorityEnum, GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createRolesOpenAtom, projectsOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import { createRolesOpenAtom, projectsOfWorkspaceAtom, rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import {
   Select,
   SelectContent,
@@ -55,11 +55,10 @@ type EnvironmentWithCheck = GetAllEnvironmentsOfProjectResponse['items'][number]
   checked: boolean
 }
 
-type CreateWorkspaceRoleRequest = Omit<OriginalCreateWorkspaceRoleRequest, 'workspaceSlug' | 'authorities' | 'projectEnvironments'>
-
 export default function CreateRolesDialog() {
   const allProjects = useAtomValue(projectsOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const setRoles = useSetAtom(rolesOfWorkspaceAtom)
   const [isCreateRolesOpen, setIsCreateRolesOpen] = useAtom(createRolesOpenAtom)
   const [selectedPermissions, setSelectedPermissions] = useState<Set<AuthorityEnum>>(new Set())
   const [projectSelects, setProjectSelects] = useState<{
@@ -69,7 +68,7 @@ export default function CreateRolesDialog() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are not using selectedProjects anywhere but using its set method
   const [selectedProjects, setSelectedProjects] = useState<(string | undefined)[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [createRoleData, setCreateRoleData] = useState<CreateWorkspaceRoleRequest>({
+  const [createRoleData, setCreateRoleData] = useState({
     name: "",
     description: "",
     colorCode: "#10b981",
@@ -168,13 +167,15 @@ export default function CreateRolesDialog() {
           )
         })
 
+        // Adding the role to the store
+        setRoles((prev) => [...prev, data])
         setIsCreateRolesOpen(false)
       }
     } finally {
       setIsLoading(false)
       toast.dismiss()
     }
-  }, [createRole, createRoleData.name, setIsCreateRolesOpen])
+  }, [createRole, createRoleData.name, setIsCreateRolesOpen, setRoles])
 
   return (
     <Dialog onOpenChange={setIsCreateRolesOpen} open={isCreateRolesOpen}>
