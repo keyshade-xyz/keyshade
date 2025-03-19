@@ -73,6 +73,7 @@ export default function CreateRolesDialog() {
     description: "",
     colorCode: "#10b981",
   })
+  const [environmentCache, setEnvironmentCache] = useState<Map<string, EnvironmentWithCheck[]>>(new Map())
 
   const handleProjectSelect = async (value: string, index: number) => {
     const newSelects = [...projectSelects]
@@ -82,6 +83,16 @@ export default function CreateRolesDialog() {
       return [...newSelected, value]
     })
 
+    if (environmentCache.has(value)) {
+      const cachedEnvironments = environmentCache.get(value)!
+      newSelects[index] = {
+        projectSlug: value,
+        environments: cachedEnvironments
+      }
+      setProjectSelects(newSelects)
+      return
+    }
+
     const { success, data } = await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
         projectSlug: value
@@ -89,9 +100,12 @@ export default function CreateRolesDialog() {
     )
 
     if (success && data) {
+      const environmentsWithCheck = data.items.map(env => ({ ...env, checked: false }))
+      setEnvironmentCache(prev => new Map(prev).set(value, environmentsWithCheck))
+
       newSelects[index] = {
         projectSlug: value,
-        environments: data.items.map(env => ({ ...env, checked: false }))
+        environments: environmentsWithCheck
       }
       setProjectSelects(newSelects)
     }
@@ -174,6 +188,15 @@ export default function CreateRolesDialog() {
     } finally {
       setIsLoading(false)
       toast.dismiss()
+      setCreateRoleData({
+        name: "",
+        description: "",
+        colorCode: "#10b981",
+      })
+      setEnvironmentCache(new Map())
+      setSelectedPermissions(new Set())
+      setProjectSelects([])
+      setSelectedProjects([])
     }
   }, [createRole, createRoleData.name, setIsCreateRolesOpen, setRoles])
 
