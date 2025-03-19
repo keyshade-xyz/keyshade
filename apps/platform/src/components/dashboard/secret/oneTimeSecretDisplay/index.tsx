@@ -1,5 +1,7 @@
+'use client'
 import { useState, useEffect } from 'react'
-import { Copy, Check, X, Eye, EyeOff } from 'lucide-react'
+import { useAtom } from 'jotai'
+import { Copy, Check, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -8,18 +10,22 @@ import {
   DialogTitle,
   DialogOverlay,
 } from '@/components/ui/dialog'
+import { oneTimeSecretDisplayAtom } from '@/store'
 
 interface OneTimeSecretDisplayProps {
-  open: boolean
   secretValue: string
-  onOpenChange: (open: boolean) => void
+  title?: string
+  description?: string
+  warningMessage?: string
 }
 
 export function OneTimeSecretDisplay({
-  open,
   secretValue,
-  onOpenChange,
+  title = "API Key Created!",
+  description = "Your API key has been created. Save it for your future use, you will not be able to view it again.",
+  warningMessage = "This is the only time the API key will be shown. Make sure to copy it now!"
 }: OneTimeSecretDisplayProps) {
+  const [isOpen, setIsOpen] = useAtom(oneTimeSecretDisplayAtom)
   const [copied, setCopied] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
@@ -35,7 +41,7 @@ export function OneTimeSecretDisplay({
   }
 
   const handleClose = () => {
-    onOpenChange(false)
+    setIsOpen(false)
   }
 
   const toggleSecretVisibility = () => {
@@ -51,9 +57,9 @@ export function OneTimeSecretDisplay({
   }
 
   return (
-    <Dialog onOpenChange={handleClose} open={open}>
+    <Dialog onOpenChange={handleClose} open={isOpen}>
       <DialogOverlay className="bg-black/70" />
-      <DialogContent className="sm:max-w-[425px] bg-[#18181B] border-[#27272A] text-white z-50">
+      <DialogContent className="w-full max-w-[90%] sm:max-w-[80%] md:max-w-[70%] lg:max-w-[50%] bg-[#18181B] border-[#27272A] text-white z-50">
         <DialogHeader>
           <div className="flex justify-between items-center">
             <DialogTitle className="text-lg font-semibold">
@@ -63,29 +69,22 @@ export function OneTimeSecretDisplay({
                   <span>Your API Key is copied!</span>
                 </div>
               ) : (
-                "API Key Created!"
+                title
               )}
             </DialogTitle>
-            <Button
-              className="h-8 w-8 p-0 text-gray-400 hover:bg-[#27272A] hover:text-white"
-              onClick={handleClose}
-              size="sm"
-              variant="ghost"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-gray-300 text-sm">
-            {copied ? 
-              "Your API key has been copied to clipboard." : 
-              "Your API key has been created. Save it for your future use, you would not be able to view it again."}
+            {copied ?
+              "Your API key has been copied to clipboard." :
+              description}
           </p>
-          <div className="relative bg-[#262626] p-4 rounded-lg flex items-center">
-            <code className="break-all font-mono text-sm text-gray-300 flex-grow pr-16">
+          <div className="relative bg-[#262626] p-4 rounded-lg flex items-center max-w-full overflow-x-auto">
+            <code className="font-mono text-sm text-gray-300 pr-4 whitespace-normal md:whitespace-nowrap">
               {showSecret ? secretValue : maskSecret(secretValue)}
             </code>
+
             <div className="absolute right-2 flex space-x-1">
               <Button
                 className="text-gray-400 hover:bg-[#3F3F46]"
@@ -115,11 +114,11 @@ export function OneTimeSecretDisplay({
               </Button>
             </div>
           </div>
-          <div className="p-3 bg-red-900/20 rounded-lg border border-red-800/30">
-            <p className="text-sm text-red-400 flex items-center gap-2">
+
+          <div className="p-3  rounded-lg border ">
+            <p className="text-sm  flex items-center gap-2">
               <span>⚠️</span>
-              This is the only time the API key will be shown. Make sure to
-              copy it now!
+              {warningMessage}
             </p>
           </div>
           <div className="flex justify-end pt-4">
