@@ -1,17 +1,4 @@
-import { Variable } from '@prisma/client'
-
-export interface VariableWithValues {
-  variable: Variable & { lastUpdatedBy: { id: string; name: string } }
-  values: Array<{
-    environment: {
-      id: string
-      name: string
-      slug: string
-    }
-    value: string
-    version: number
-  }>
-}
+import { VariableWithValues } from '@/variable/variable.types'
 
 export function getVariableWithValues(
   variableWithVersion: VariableWithValues['variable'] & {

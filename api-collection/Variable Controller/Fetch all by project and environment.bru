@@ -1,0 +1,26 @@
+meta {
+  name: Fetch all by project and environment
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BASE_URL}}/api/variable/:project_slug/:environment_slug
+  body: none
+  auth: bearer
+}
+
+params:path {
+  project_slug: project-1-uzukc
+  environment_slug: alpha-l7xvp
+}
+
+auth:bearer {
+  token: {{JWT}}
+}
+
+docs {
+  ## Description
+  
+  Fetches all the variables for a particular pair of project and environment. Used by the CLI to prefetch the existing variables.
+}

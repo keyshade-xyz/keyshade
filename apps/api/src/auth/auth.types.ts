@@ -1,4 +1,4 @@
-import { UserWithWorkspace } from '@/user/user.types'
+import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { Authority, User, Workspace } from '@prisma/client'
 
 export interface UserAuthenticatedResponse extends UserWithWorkspace {
@@ -10,4 +10,10 @@ export type AuthenticatedUserContext = User & {
   isAuthViaApiKey?: boolean
   apiKeyAuthorities?: Set<Authority>
   defaultWorkspace: Workspace
+}
+
+export interface AuthorizationParams {
+  user: AuthenticatedUser
+  authorities: Authority[]
+  entity: { slug?: string; name?: string }
 }

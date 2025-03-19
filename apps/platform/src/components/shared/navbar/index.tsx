@@ -18,38 +18,34 @@ import {
 } from '@/components/ui/dropdown-menu'
 import LineTab from '@/components/ui/line-tab'
 import AvatarComponent from '@/components/common/avatar'
-import { selectedProjectAtom, userAtom } from '@/store'
+import { selectedProjectAtom, selectedWorkspaceAtom, userAtom } from '@/store'
+
+interface Tab {
+  id: string
+  label: string
+  icon?: React.ReactNode
+}
 
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isApple, setIsApple] = useState<boolean>(false)
   const user = useAtomValue(userAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const pathname = usePathname()
 
-  const settingsTabs = [
-    { id: 'profile', label: 'Profile' },
-    { id: 'billing', label: 'Billing' }
-  ]
-
-  const projectTabs = [
-    {
-      id: 'secret',
-      label: 'Secret',
-      icon: <SecretSVG />
-    },
-    {
-      id: 'variable',
-      label: 'Variable',
-      icon: <VariableSVG />
-    },
-    {
-      id: 'environment',
-      label: 'Environment',
-      icon: <EnvironmentSVG />
-    }
-  ]
+  const TAB_CONFIGS = {
+    settings: [
+      { id: 'profile', label: 'Profile' },
+      { id: 'billing', label: 'Billing' }
+    ],
+    project: [
+      { id: 'secret', label: 'Secret', icon: <SecretSVG /> },
+      { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
+      { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }
+    ]
+  }
 
   useEffect(() => {
     const down = (e: KeyboardEvent): void => {
@@ -83,6 +79,30 @@ function Navbar(): React.JSX.Element {
     // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted
     window.location.href = '/auth'
   }, [])
+
+  const getProjectPath = (): string =>
+    selectedWorkspace?.slug && selectedProject?.slug
+      ? `/${selectedWorkspace.slug}/${selectedProject.slug}`
+      : ''
+
+  const shouldRenderTab = (): boolean => {
+    const allowedPaths = ['/settings', getProjectPath()] // modify the list based on what paths you want to have tab
+    return pathname !== '/' && allowedPaths.includes(pathname)
+  }
+
+  const renderTabs = (): Tab[] => {
+    // You need to update the case if you want to have a tab for a specific path
+    switch (pathname) {
+      case `/${selectedWorkspace?.slug}/${selectedProject?.slug}`:
+        return TAB_CONFIGS.project
+
+      case '/settings':
+        return TAB_CONFIGS.settings
+
+      default:
+        return []
+    }
+  }
 
   return (
     <>
@@ -122,7 +142,7 @@ function Navbar(): React.JSX.Element {
                     <>
                       <AvatarComponent
                         name={user.name}
-                        src={user.profilePictureUrl || ''}
+                        profilePictureUrl={user.profilePictureUrl || ''}
                       />
                       <span>{user.name}</span>
                     </>
@@ -153,18 +173,9 @@ function Navbar(): React.JSX.Element {
               </DropdownMenu>
             </div>
             <div className="px-4">
-              {pathname !== '/' &&
-                (pathname === '/settings' ||
-                  pathname.split('/')[2] === selectedProject?.slug) && (
-                  <LineTab
-                    customID="linetab"
-                    tabs={
-                      pathname.split('/')[2] === selectedProject?.slug
-                        ? projectTabs
-                        : settingsTabs
-                    }
-                  />
-                )}
+              {shouldRenderTab() && (
+                <LineTab customID="linetab" tabs={renderTabs()} />
+              )}
             </div>
           </nav>
           <SearchModel isOpen={isOpen} setIsOpen={setIsOpen} />

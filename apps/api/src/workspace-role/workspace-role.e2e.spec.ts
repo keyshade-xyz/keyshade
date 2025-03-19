@@ -19,10 +19,10 @@ import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
-import { WorkspaceRoleService } from './service/workspace-role.service'
-import { UserService } from '@/user/service/user.service'
+import { WorkspaceRoleService } from './workspace-role.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
@@ -1088,50 +1088,6 @@ describe('Workspace Role Controller Tests', () => {
         url: `/workspace-role/${adminRole2.slug}`,
         headers: {
           'x-e2e-user-email': alice.email
-        }
-      })
-
-      expect(response.statusCode).toBe(401)
-    })
-  })
-
-  describe('Check Workspace Role Exists Tests', () => {
-    it('should be able to check if the workspace role exists', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/Member`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: true
-      })
-    })
-
-    it('should be able to check if the workspace role exists(2)', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/new-stuff`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: false
-      })
-    })
-
-    it('should not be able to check if the workspace role exists for other workspace', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceBob.slug}/exists/Viewer`,
-        headers: {
-          'x-e2e-user-email': charlie.email
         }
       })
 

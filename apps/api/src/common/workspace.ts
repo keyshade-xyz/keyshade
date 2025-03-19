@@ -26,9 +26,13 @@ export const createWorkspace = async (
   prisma: PrismaService,
   isDefault?: boolean
 ): Promise<Workspace> => {
-  const workspaceId = v4()
   const logger = new Logger('createWorkspace')
 
+  const workspaceId = v4()
+
+  logger.log(
+    `Creating workspace ${dto.name} (${workspaceId}) for user ${user.id}`
+  )
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,
@@ -53,8 +57,12 @@ export const createWorkspace = async (
       }
     }
   })
+  logger.log(`Created workspace ${dto.name} (${workspaceId})`)
 
   // Add the owner to the workspace
+  logger.log(
+    `Assigning ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+  )
   const assignOwnership = prisma.workspaceMember.create({
     data: {
       workspace: {
@@ -82,11 +90,21 @@ export const createWorkspace = async (
       }
     }
   })
+  logger.log(
+    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+  )
 
+  logger.log(
+    `Executing transactions for creating workspace and assigning ownership`
+  )
   const result = await prisma.$transaction([
     createNewWorkspace,
     assignOwnership
   ])
+  logger.log(
+    `Executed transactions for creating workspace and assigning ownership`
+  )
+
   const workspace = result[0]
 
   await createEvent(
@@ -104,8 +122,6 @@ export const createWorkspace = async (
     },
     prisma
   )
-
-  logger.log(`Created workspace ${dto.name} (${workspaceId})`)
 
   return workspace
 }

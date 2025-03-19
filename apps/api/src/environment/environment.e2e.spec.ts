@@ -19,20 +19,19 @@ import {
   Workspace
 } from '@prisma/client'
 import { ProjectModule } from '@/project/project.module'
-import { ProjectService } from '@/project/service/project.service'
+import { ProjectService } from '@/project/project.service'
 import { EventModule } from '@/event/event.module'
-import { EventService } from '@/event/service/event.service'
-import { EnvironmentService } from './service/environment.service'
+import { EventService } from '@/event/event.service'
+import { EnvironmentService } from './environment.service'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { ValidationPipe } from '@nestjs/common'
-// import { SecretService } from '@/secret/service/secret.service'
-// import { VariableService } from '@/variable/service/variable.service'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
 import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -43,6 +42,7 @@ describe('Environment Controller Tests', () => {
   let eventService: EventService
   // let secretService: SecretService
   // let variableService: VariableService
+  let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
@@ -77,6 +77,7 @@ describe('Environment Controller Tests', () => {
     userService = moduleRef.get(UserService)
     // secretService = moduleRef.get(SecretService)
     // variableService = moduleRef.get(VariableService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
 
@@ -183,6 +184,38 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(environmentFromDb).toBeDefined()
+    })
+
+    it('should not be able to create more environments if tier limit is reached', async () => {
+      // Create the number of environments that the tier limit allows
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getEnvironmentTierLimit(project1.id) - 2; // Subtract 2 for the environments created above
+        x++
+      ) {
+        await environmentService.createEnvironment(
+          user1,
+          {
+            name: `Environment ${x}`,
+            description: `Environment ${x} description`
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment X',
+          description: 'Environment 101 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should not be able to create an environment with an empty name', async () => {

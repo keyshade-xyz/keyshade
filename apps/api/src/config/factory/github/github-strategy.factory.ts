@@ -19,14 +19,18 @@ export class GithubOAuthStrategyFactory implements OAuthStrategyFactory {
   }
 
   public createOAuthStrategy<GithubStrategy>(): GithubStrategy | null {
+    const logger = new Logger(GithubOAuthStrategyFactory.name)
+
+    logger.log('Creating GitHub OAuth Strategy...')
     if (this.isOAuthEnabled()) {
+      logger.log('GitHub OAuth Strategy created successfully.')
       return new GithubStrategy(
         this.clientID,
         this.clientSecret,
         this.callbackURL
       ) as GithubStrategy
     } else {
-      Logger.warn(
+      logger.error(
         'GitHub Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
       )
       return null

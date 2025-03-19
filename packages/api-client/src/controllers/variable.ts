@@ -1,7 +1,13 @@
 import { APIClient } from '@api-client/core/client'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@keyshade/schema'
+import {
+  ClientResponse,
+  DeleteEnvironmentValueOfVariableRequest,
+  DeleteEnvironmentValueOfVariableResponse,
+  GetAllVariablesOfEnvironmentRequest,
+  GetAllVariablesOfEnvironmentResponse
+} from '@keyshade/schema'
 import {
   CreateVariableRequest,
   CreateVariableResponse,
@@ -47,6 +53,18 @@ export default class VariableController {
     )
 
     return await parseResponse<UpdateVariableResponse>(response)
+  }
+
+  async deleteEnvironmentValueOfVariable(
+    request: DeleteEnvironmentValueOfVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DeleteEnvironmentValueOfVariableResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/variable/${request.variableSlug}/${request.environmentSlug}`,
+      headers
+    )
+
+    return await parseResponse<DeleteVariableResponse>(response)
   }
 
   async rollbackVariable(
@@ -98,5 +116,15 @@ export default class VariableController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetRevisionsOfVariableResponse>(response)
+  }
+
+  async getAllVariablesOfEnvironment(
+    request: GetAllVariablesOfEnvironmentRequest,
+    headers: Record<string, string>
+  ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
+    const url = `/api/variable/${request.projectSlug}/${request.environmentSlug}`
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)
   }
 }
