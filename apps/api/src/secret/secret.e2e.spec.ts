@@ -3,8 +3,8 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { ProjectService } from '@/project/service/project.service'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { ProjectService } from '@/project/project.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import {
   Environment,
   EventSeverity,
@@ -26,18 +26,19 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { SecretModule } from './secret.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { SecretService } from './service/secret.service'
-import { EventService } from '@/event/service/event.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { SecretService } from './secret.service'
+import { EventService } from '@/event/event.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { mockDeep } from 'jest-mock-extended'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
 import { ValidationPipe } from '@nestjs/common'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -48,6 +49,8 @@ describe('Secret Controller Tests', () => {
   let secretService: SecretService
   let eventService: EventService
   let userService: UserService
+  let tierLimitService: TierLimitService
+
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
   let project1: Project, project2: Project
@@ -84,6 +87,7 @@ describe('Secret Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -219,10 +223,101 @@ describe('Secret Controller Tests', () => {
       expect(body.secret.note).toBe('Secret 2 note')
       expect(body.secret.projectId).toBe(project1.id)
       expect(body.values.length).toBe(1)
+      expect(body.values[0].value).toBe('Secret 2 value')
+      expect(body.values[0].environment.id).toBe(environment1.id)
+      expect(body.values[0].environment.slug).toBe(environment1.slug)
+    })
+
+    it('should have encrypted value if project does not store private key', async () => {
+      // Make the project not store private key
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        payload: {
+          name: 'Secret 2',
+          note: 'Secret 2 note',
+          entries: [
+            {
+              value: 'Secret 2 value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          rotateAfter: '24'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+
+      const body = response.json()
+
+      expect(body).toBeDefined()
+      expect(body.secret.name).toBe('Secret 2')
+      expect(body.secret.note).toBe('Secret 2 note')
+      expect(body.secret.projectId).toBe(project1.id)
+      expect(body.values.length).toBe(1)
       expect(body.values[0].value).not.toBe('Secret 2 value')
       expect(body.values[0].environment.id).toBe(environment1.id)
       expect(body.values[0].environment.slug).toBe(environment1.slug)
     })
+
+    it('should not be able to create secrets if tier limit is reached', async () => {
+      // Create secrets until tier limit is reached
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getSecretTierLimit(project1.id) - 1; // Subtract 1 for the secrets created above
+        x++
+      ) {
+        await secretService.createSecret(
+          user1,
+          {
+            name: `Secret ${x}`,
+            note: `Secret ${x} note`,
+            entries: [
+              {
+                value: `Secret ${x} value`,
+                environmentSlug: environment1.slug
+              }
+            ],
+            rotateAfter: '24'
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}`,
+        payload: {
+          name: 'Secret X',
+          note: 'Secret X note',
+          entries: [
+            {
+              value: 'Secret X value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          rotateAfter: '24'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    }, 20000)
 
     it('should have created a secret version', async () => {
       const secretVersion = await prisma.secretVersion.findFirst({
@@ -438,6 +533,56 @@ describe('Secret Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).toBe(
+        'Updated Secret 1 value'
+      )
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        include: {
+          environment: true
+        }
+      })
+
+      expect(secretVersion.length).toBe(2)
+    })
+
+    it('should have encrypted values after new version creation if project does not store private key', async () => {
+      // Make the project not store private key
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          entries: [
+            {
+              value: 'Updated Secret 1 value',
+              environmentSlug: environment1.slug
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).not.toBe(
+        'Updated Secret 1 value'
+      )
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -1158,6 +1303,104 @@ describe('Secret Controller Tests', () => {
       expect(event.workspaceId).toBe(workspace1.id)
       expect(event.itemId).toBe(secret1.id)
       expect(event.title).toBe('Secret rotated')
+    })
+  })
+
+  describe('Fetch All Secrets By Project And Environment Tests', () => {
+    it('should be able to fetch all secrets by project and environment', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${project1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().length).toBe(1)
+
+      const secret = response.json()[0]
+      expect(secret.name).toBe('Secret 1')
+      expect(secret.value).toBe('Secret 1 value')
+      expect(secret.isPlaintext).toBe(true)
+    })
+
+    it('should not be able to fetch all secrets by project and environment if project does not exists', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/non-existing-project-slug/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch all secrets by project and environment if environment does not exists', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${project1.slug}/non-existing-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch all secrets by project and environment if the user has no access to the project', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${project1.slug}/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be sending the plaintext secret if project does not store the private key', async () => {
+      // Get the first environment of project 2
+      const environment = await prisma.environment.findFirst({
+        where: {
+          projectId: project2.id
+        }
+      })
+
+      // Create a secret in project 2
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret 20',
+          entries: [
+            {
+              environmentSlug: environment.slug,
+              value: 'Secret 20 value'
+            }
+          ],
+          rotateAfter: '24',
+          note: 'Secret 20 note'
+        },
+        project2.slug
+      )
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${project2.slug}/${environment.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().length).toBe(1)
+
+      const secret = response.json()[0]
+      expect(secret.name).toBe('Secret 20')
+      expect(secret.value).not.toBe('Secret 20 value')
+      expect(secret.isPlaintext).toBe(false)
     })
   })
 })

@@ -78,12 +78,7 @@ export default class ListVariable extends BaseCommand {
         Logger.info('No variables found')
       }
     } else {
-      Logger.error(`Failed fetching variables: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching variables for project.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError(error)
     }
   }
 }

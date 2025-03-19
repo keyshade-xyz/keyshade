@@ -7,7 +7,8 @@ import {
   VariableController,
   WorkspaceController,
   WorkspaceMembershipController,
-  WorkspaceRoleController
+  WorkspaceRoleController,
+  ApiKeyController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
@@ -22,6 +23,7 @@ export default class ControllerInstance {
   private _environmentController: EnvironmentController
   private _secretController: SecretController
   private _variableController: VariableController
+  private _apiKeyController: ApiKeyController
 
   get authController(): AuthController {
     return this._authController
@@ -59,6 +61,10 @@ export default class ControllerInstance {
     return this._userController
   }
 
+  get apiKeyController(): ApiKeyController {
+    return this._apiKeyController
+  }
+
   static getInstance(): ControllerInstance {
     if (!ControllerInstance.instance) {
       ControllerInstance.instance = new ControllerInstance()
@@ -83,6 +89,9 @@ export default class ControllerInstance {
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
       ControllerInstance.instance._variableController = new VariableController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._apiKeyController = new ApiKeyController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
     }

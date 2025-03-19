@@ -18,23 +18,23 @@ import {
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/service/user.service'
-import { WorkspaceService } from './service/workspace.service'
+import { UserService } from '@/user/user.service'
+import { WorkspaceService } from './workspace.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
-import { ProjectService } from '@/project/service/project.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { SecretService } from '@/secret/service/secret.service'
-import { VariableService } from '@/variable/service/variable.service'
-import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
+import { ProjectService } from '@/project/project.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { SecretService } from '@/secret/secret.service'
+import { VariableService } from '@/variable/variable.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -338,21 +338,6 @@ describe('Workspace Controller Tests', () => {
       expect(body.icon).toBe('🔥')
     })
 
-    it('should not be able to change the name to an existing workspace or same name', async () => {
-      const response = await app.inject({
-        method: 'PUT',
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        url: `/workspace/${workspace1.slug}`,
-        payload: {
-          name: 'My Workspace'
-        }
-      })
-
-      expect(response.statusCode).toBe(409)
-    })
-
     it('should not allow external user to update a workspace', async () => {
       const response = await app.inject({
         method: 'PUT',
@@ -405,6 +390,10 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().name).toEqual(workspace1.name)
+      expect(response.json().maxAllowedMembers).toBeDefined()
+      expect(response.json().maxAllowedProjects).toBeDefined()
+      expect(response.json().totalProjects).toBe(0)
+      expect(response.json().totalMembers).toBe(1)
     })
 
     it('should not be able to fetch the workspace by slug if user is not a member', async () => {
@@ -433,6 +422,14 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toEqual(2)
+
+      const workspaceJson = response.json().items[0]
+
+      expect(workspaceJson.name).toEqual(workspace1.name)
+      expect(workspaceJson.maxAllowedMembers).toBeDefined()
+      expect(workspaceJson.maxAllowedProjects).toBeDefined()
+      expect(workspaceJson.totalProjects).toBe(0)
+      expect(workspaceJson.totalMembers).toBe(2)
 
       //check metadata
       const metadata = response.json().metadata

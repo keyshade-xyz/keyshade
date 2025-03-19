@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
-import { FeedbackService } from '@/feedback/service/feedback.service'
+import { FeedbackService } from '@/feedback/feedback.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import {
   FastifyAdapter,

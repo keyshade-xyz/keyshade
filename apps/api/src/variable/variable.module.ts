@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { VariableController } from './controller/variable.controller'
-import { VariableService } from './service/variable.service'
+import { VariableController } from './variable.controller'
+import { VariableService } from './variable.service'
 
 @Module({
   controllers: [VariableController],

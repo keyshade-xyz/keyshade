@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import * as eccrypto from 'eccrypto'
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 /**
  * Decrypts a given encrypted data using a given private key.
@@ -13,6 +12,7 @@ export const decrypt = async (
   privateKey: string,
   data: string
 ): Promise<string> => {
+  const eccrypto = require('eccrypto')
   const parsed = JSON.parse(data)
 
   const eicesData = {

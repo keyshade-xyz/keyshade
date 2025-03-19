@@ -3,9 +3,9 @@ import {
   NestFastifyApplication
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
-import { UserService } from '@/user/service/user.service'
-import { IntegrationService } from './service/integration.service'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { UserService } from '@/user/user.service'
+import { IntegrationService } from './integration.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import { Test } from '@nestjs/testing'
 import { UserModule } from '@/user/user.module'
 import { WorkspaceModule } from '@/workspace/workspace.module'
@@ -19,12 +19,12 @@ import {
   Project,
   Workspace
 } from '@prisma/client'
-import { ProjectService } from '@/project/service/project.service'
+import { ProjectService } from '@/project/project.service'
 import { ProjectModule } from '@/project/project.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { EnvironmentModule } from '@/environment/environment.module'
-import { EnvironmentService } from '@/environment/service/environment.service'
+import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 

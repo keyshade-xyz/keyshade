@@ -20,14 +20,18 @@ export class GoogleOAuthStrategyFactory implements OAuthStrategyFactory {
   }
 
   public createOAuthStrategy<GoogleStrategy>(): GoogleStrategy | null {
+    const logger = new Logger(GoogleOAuthStrategyFactory.name)
+
+    logger.log('Creating Google OAuth Strategy...')
     if (this.isOAuthEnabled()) {
+      logger.log('GitLab OAuth Strategy created')
       return new GoogleStrategy(
         this.clientID,
         this.clientSecret,
         this.callbackURL
       ) as GoogleStrategy
     } else {
-      Logger.warn(
+      logger.error(
         'Google Auth is not enabled in this environment. Refer to the https://docs.keyshade.xyz/contributing-to-keyshade/environment-variables if you would like to set it up.'
       )
       return null

@@ -2,6 +2,23 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
+import { UserSchema } from '@/user'
+
+export const VariableVersionSchema = z.object({
+  version: z.number(),
+  value: z.string(),
+  createdOn: z.string().datetime(),
+  environment: z.object({
+    id: EnvironmentSchema.shape.id,
+    name: EnvironmentSchema.shape.name,
+    slug: EnvironmentSchema.shape.slug
+  }),
+  createdBy: z.object({
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
+  })
+})
 
 export const VariableSchema = z.object({
   variable: z.object({
@@ -14,28 +31,12 @@ export const VariableSchema = z.object({
     lastUpdatedById: z.string(),
     projectId: BaseProjectSchema.shape.id,
     lastUpdatedBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
+      id: UserSchema.shape.id,
+      name: UserSchema.shape.name,
+      profilePictureUrl: UserSchema.shape.profilePictureUrl
     })
   }),
-  values: z.array(
-    z.object({
-      version: z.number(),
-      value: z.string(),
-      environment: z.object({
-        id: EnvironmentSchema.shape.id,
-        name: EnvironmentSchema.shape.name,
-        slug: EnvironmentSchema.shape.slug
-      }),
-      createdOn: z.string().datetime(),
-      createdBy: z.object({
-        id: z.string(),
-        name: z.string(),
-        profilePictureUrl: z.string().nullable()
-      })
-    })
-  )
+  values: z.array(VariableVersionSchema)
 })
 
 export const CreateVariableRequestSchema = z.object({
@@ -75,18 +76,15 @@ export const UpdateVariableResponseSchema = z.object({
     slug: true,
     note: true
   }),
-  updatedVersions: z.array(
-    z.object({
-      id: z.string(),
-      value: z.string(),
-      version: z.number(),
-      environment: z.object({
-        id: EnvironmentSchema.shape.id,
-        slug: EnvironmentSchema.shape.slug
-      })
-    })
-  )
+  updatedVersions: z.array(VariableVersionSchema)
 })
+
+export const DeleteEnvironmentValueOfVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: z.string()
+})
+
+export const DeleteEnvironmentValueOfVariableResponseSchema = z.void()
 
 export const RollBackVariableRequestSchema = z.object({
   variableSlug: z.string(),
@@ -95,7 +93,8 @@ export const RollBackVariableRequestSchema = z.object({
 })
 
 export const RollBackVariableResponseSchema = z.object({
-  count: z.number()
+  count: z.number(),
+  currentRevision: VariableVersionSchema
 })
 
 export const DeleteVariableRequestSchema = z.object({
@@ -118,18 +117,18 @@ export const GetRevisionsOfVariableRequestSchema =
   })
 
 export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
+  VariableVersionSchema
+)
+
+export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const GetAllVariablesOfEnvironmentResponseSchema = z.array(
   z.object({
-    id: z.string(),
+    name: z.string(),
     value: z.string(),
-    version: z.number(),
-    variableId: z.string(),
-    createdOn: z.string().datetime(),
-    createdById: z.string(),
-    environmentId: EnvironmentSchema.shape.id,
-    createdBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
-    })
+    isPlaintext: z.boolean()
   })
 )

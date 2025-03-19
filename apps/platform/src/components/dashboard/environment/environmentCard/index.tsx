@@ -15,7 +15,7 @@ import {
   editEnvironmentOpenAtom,
   selectedEnvironmentAtom
 } from '@/store'
-import Slug from '@/components/common/slug'
+import CopyToClipboard from '@/components/common/copy-to-clipboard'
 
 interface EnvironmentCardProps {
   environment: GetAllEnvironmentsOfProjectResponse['items'][number]
@@ -49,7 +49,7 @@ export default function EnvironmentCard({
           <div className="flex flex-col gap-y-2 px-6 py-4">
             <div className="flex w-full flex-row flex-wrap items-center justify-between gap-4">
               <div className="text-2xl">{environment.name}</div>
-              <Slug text={environment.slug} />
+              <CopyToClipboard text={environment.slug} />
             </div>
             {environment.description ? (
               <div className="text-sm font-semibold text-white/50">

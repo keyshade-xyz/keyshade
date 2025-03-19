@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common'
 import { AuthService } from './service/auth.service'
-import { AuthController } from './controller/auth.controller'
+import { AuthController } from './auth.controller'
 import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from '@/user/user.module'
 import { GithubStrategy } from '@/config/oauth-strategy/github/github.strategy'

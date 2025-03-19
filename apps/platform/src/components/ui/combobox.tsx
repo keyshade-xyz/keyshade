@@ -4,10 +4,11 @@ import { ChevronsUpDown, Check } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import type { Workspace } from '@keyshade/schema'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { Button } from './button'
+import { Label } from './label'
+import { Input } from './input'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +17,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from './dialog'
-import { Input } from './input'
-import { Label } from './label'
+import { Button } from './button'
 import { cn } from '@/lib/utils'
 import {
   Popover,
@@ -38,7 +38,7 @@ import { useHttp } from '@/hooks/use-http'
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [allWorkspaces, setAllWorkspaces] = useState<
-    (Workspace & { projects: number })[]
+    WorkspaceWithTierLimitAndProjectCount[]
   >([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -74,7 +74,8 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setSelectedWorkspace({ ...data, projects: 0 })
+        setSelectedWorkspace(data)
+        setAllWorkspaces((prev) => [...prev, data])
         setOpen(false)
       }
     } finally {
@@ -157,7 +158,7 @@ export function Combobox(): React.JSX.Element {
                 <AddSVG /> New workspace
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-[#1E1E1F]">
               <DialogHeader>
                 <DialogTitle>Make a new workspace</DialogTitle>
                 <DialogDescription>
