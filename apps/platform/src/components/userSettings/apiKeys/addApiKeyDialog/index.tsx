@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import type { CreateApiKeyRequest, AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,12 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import ControllerInstance from '@/lib/controller-instance'
-import { createApiKeyOpenAtom, apiKeysOfProjectAtom } from '@/store'
+import {
+  createApiKeyOpenAtom,
+  apiKeysOfProjectAtom,
+  oneTimeSecretDisplayAtom,
+  oneTimeSecretValueAtom
+} from '@/store'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { useHttp } from '@/hooks/use-http'
 import AuthoritySelector from '@/components/common/authority-selector'
-import CopyToClipboard from '@/components/common/copy-to-clipboard'
+import { OneTimeSecretDisplay } from '@/components/dashboard/secret/oneTimeSecretDisplay'
 
 export default function AddApiKeyDialog() {
   const [isLoading, setIsLoading] = useState(false)
@@ -35,6 +40,9 @@ export default function AddApiKeyDialog() {
     name: '',
     expiresAfter: '24'
   })
+  const [, setOneTimeSecretOpen] = useAtom(oneTimeSecretDisplayAtom)
+  const [, setOneTimeSecretValue] = useAtom(oneTimeSecretValueAtom)
+  const oneTimeSecretValue = useAtomValue(oneTimeSecretValueAtom);
 
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<AuthorityEnum>
@@ -61,18 +69,13 @@ export default function AddApiKeyDialog() {
 
       if (success && data) {
         setApiKeys((prev) => [...prev, data])
-        toast.success(`Created API Key`, {
-          description: (
-            <div className="mt-1 flex flex-col gap-y-2 text-green-300">
-              <p>
-                Your API key just got created. Make sure to copy it and store it
-                securely. You will not be able to see it again.
-              </p>
-              <CopyToClipboard text={data.value} />
-            </div>
-          ),
-          className: 'w-fit absolute bottom-0 right-0'
-        })
+
+        // Show the one-time secret display
+        setOneTimeSecretValue(data.value)
+        setOneTimeSecretOpen(true)
+
+        // Close the create dialog
+        setIsCreateApiKeyOpen(false)
       }
     } finally {
       toast.dismiss()
@@ -81,25 +84,26 @@ export default function AddApiKeyDialog() {
         name: '',
         expiresAfter: 'never'
       })
-      setIsCreateApiKeyOpen(false)
       setSelectedPermissions(new Set())
     }
-  }, [newApiKeyData.name, createApiKey, setApiKeys, setIsCreateApiKeyOpen])
+  }, [newApiKeyData.name, createApiKey, setApiKeys, setIsCreateApiKeyOpen, setOneTimeSecretOpen, setOneTimeSecretValue])
+
 
   return (
-    <Dialog
-      onOpenChange={() => setIsCreateApiKeyOpen(!isCreateApiKeyOpen)}
-      open={isCreateApiKeyOpen}
-    >
-      <DialogTrigger asChild>
-        <Button
-          className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
-          variant="outline"
-        >
-          <AddSVG /> Add API Key
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex h-[90vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
+    <>
+      <Dialog
+        onOpenChange={() => setIsCreateApiKeyOpen(!isCreateApiKeyOpen)}
+        open={isCreateApiKeyOpen}
+      >
+        <DialogTrigger asChild>
+          <Button
+            className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+            variant="outline"
+          >
+            <AddSVG /> Add API Key
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="flex h-[90vh] min-w-[42rem] flex-col bg-[#18181B] text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new API Key
@@ -184,5 +188,8 @@ export default function AddApiKeyDialog() {
         </div>
       </DialogContent>
     </Dialog>
+
+    <OneTimeSecretDisplay secretValue={oneTimeSecretValue} />
+    </>
   )
 }
