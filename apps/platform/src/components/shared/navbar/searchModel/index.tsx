@@ -1,8 +1,12 @@
+ 
 'use client'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
-import { useAtomValue, useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { CommandDialogProps } from '@/components/ui/command'
 import {
   CommandDialog,
@@ -13,7 +17,7 @@ import {
   CommandList,
   CommandSeparator
 } from '@/components/ui/command'
-import { globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
+import { globalSearchDataAtom, selectedProjectAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { useDebounce } from '@/hooks/use-debounce'
@@ -41,12 +45,14 @@ function SearchModel({
   setIsOpen,
   ...props
 }: SearchModelProps): React.JSX.Element {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedValue, setDebouncedValue] = useState('')
   const [isSearching, setIsSearching] = useState<boolean>(false)
 
   const [globalSearchData, setGlobalSearchData] = useAtom(globalSearchDataAtom)
-  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(selectedWorkspaceAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const getGlobalSearchData = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.globalSearch({
@@ -64,9 +70,10 @@ function SearchModel({
     variables: new Fuse(globalSearchData.variables, searchOptions)
   }), [globalSearchData])
 
+  // Search for results based on the current search query
   const searchResults = useMemo(() => {
     if (!searchQuery) {
-      return globalSearchData
+      return globalSearchData;
     }
 
     return {
@@ -94,22 +101,29 @@ function SearchModel({
       getGlobalSearchData()
         .then(({ data, success }) => {
           if (success && data) {
-            setGlobalSearchData((prev) => ({
-              ...prev,
+            setGlobalSearchData({
+              workspaces: [],
               secrets: data.secrets,
               projects: data.projects,
               environments: data.environments,
               variables: data.variables
-            }));
+            });
           }
         })
         .finally(() => setIsSearching(false));
     }
   }, [hasNoResults, debouncedValue, getGlobalSearchData, setGlobalSearchData]);
 
+  // Update the search results when the search query changes
   useEffect(() => {
     debouncedSetValue(searchQuery)
   }, [debouncedSetValue, searchQuery])
+
+  const handleChangeWorkspace = (workspace: WorkspaceWithTierLimitAndProjectCount) => {
+    const newWorkspace = {...workspace, projects: 0}
+    setSelectedWorkspace(newWorkspace)
+    router.push("/")
+  }
 
   return (
     <CommandDialog onOpenChange={setIsOpen} open={isOpen} {...props}>
@@ -129,7 +143,10 @@ function SearchModel({
               <>
                 <CommandGroup heading="Workspaces">
                   {searchResults.workspaces.map(workspace => (
-                    <CommandItem key={workspace.id}>
+                    <CommandItem
+                    key={workspace.id}
+                    onClick={() => handleChangeWorkspace(workspace)}
+                    >
                       <span>{workspace.name}</span>
                       {workspace.slug ? <span className="text-sm text-gray-500 ml-2">
                           ({workspace.slug})
@@ -145,12 +162,17 @@ function SearchModel({
               <>
                 <CommandGroup heading="Secrets">
                   {searchResults.secrets.map(secret => (
-                    <CommandItem key={secret.slug}>
-                      <span>{secret.name}</span>
-                      {secret.slug ? <span className="text-sm text-gray-500 ml-2">
-                          ({secret.slug})
-                        </span> : null}
-                    </CommandItem>
+                    <Link
+                    href={`/${selectedWorkspace!.slug}/${secret.project?.slug ?? selectedProject?.slug}?tab=secret&highlight=${secret.slug}`}
+                    key={secret.slug}
+                    >
+                      <CommandItem>
+                        <span>{secret.slug}</span>
+                        {secret.slug ? <span className="text-sm text-gray-500 ml-2">
+                            ({secret.slug})
+                          </span> : null}
+                      </CommandItem>
+                    </Link>
                   ))}
                 </CommandGroup>
                 <CommandSeparator />
@@ -161,12 +183,17 @@ function SearchModel({
               <>
                 <CommandGroup heading="Projects">
                   {searchResults.projects.map(project => (
-                    <CommandItem key={project.slug}>
-                      <span>{project.name}</span>
-                      {project.description ? <span className="text-sm text-gray-500 ml-2">
-                          {project.description}
-                        </span> : null}
-                    </CommandItem>
+                    <Link
+                    href={`/${selectedWorkspace!.slug}/${project.slug}?tab=secret`}
+                    key={project.slug}
+                    >
+                      <CommandItem key={project.slug}>
+                        <span>{project.slug}</span>
+                        {project.description ? <span className="text-sm text-gray-500 ml-2">
+                            {project.description}
+                          </span> : null}
+                      </CommandItem>
+                    </Link>
                   ))}
                 </CommandGroup>
                 <CommandSeparator />
@@ -177,12 +204,17 @@ function SearchModel({
               <>
                 <CommandGroup heading="Environments">
                   {searchResults.environments.map(environment => (
-                    <CommandItem key={environment.slug}>
-                      <span>{environment.name}</span>
-                      {environment.description ? <span className="text-sm text-gray-500 ml-2">
-                          {environment.description}
-                        </span> : null}
-                    </CommandItem>
+                    <Link
+                    href={`/${selectedWorkspace!.slug}/${environment.project?.slug ?? selectedProject?.slug}?tab=environment&highlight=${environment.slug}`}
+                    key={environment.slug}
+                    >
+                      <CommandItem>
+                        <span>{environment.slug}</span>
+                        {environment.description ? <span className="text-sm text-gray-500 ml-2">
+                            {environment.description}
+                          </span> : null}
+                      </CommandItem>
+                    </Link>
                   ))}
                 </CommandGroup>
                 <CommandSeparator />
@@ -192,12 +224,17 @@ function SearchModel({
             {searchResults.variables.length > 0 && (
               <CommandGroup heading="Variables">
                 {searchResults.variables.map(variable => (
-                  <CommandItem key={variable.slug}>
-                    <span>{variable.name}</span>
-                    {variable.note ? <span className="text-sm text-gray-500 ml-2">
-                        {variable.note}
-                      </span> : null}
-                  </CommandItem>
+                  <Link
+                  href={`/${selectedWorkspace!.slug}/${variable.project?.slug ?? selectedProject?.slug}?tab=variable&highlight=${variable.slug}`}
+                  key={variable.slug}
+                  >
+                    <CommandItem>
+                      <span>{variable.name}</span>
+                      {variable.note ? <span className="text-sm text-gray-500 ml-2">
+                          {variable.note}
+                        </span> : null}
+                    </CommandItem>
+                  </Link>
                 ))}
               </CommandGroup>
             )}

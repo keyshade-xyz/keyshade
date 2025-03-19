@@ -16,10 +16,10 @@ import type {
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const globalSearchDataAtom = atom<{
-  workspaces: Partial<ProjectWithTierLimitAndCount>[];
-  secrets: { slug: string, name: string, note: string | null }[];
-  variables: { slug: string, name: string, note: string | null }[];
-  environments: { slug: string, name: string, description: string | null }[];
+  workspaces: WorkspaceWithTierLimitAndProjectCount[];
+  secrets: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
+  variables: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
+  environments: { slug: string, name: string, description: string | null, project?: { slug: string} }[];
   projects: { slug: string, name: string, description: string }[];
 }>({
   workspaces: [],
