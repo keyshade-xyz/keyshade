@@ -1,3 +1,4 @@
+// eslint-disable-next-line prettier/prettier
 import { getCollectiveProjectAuthorities } from '@/common/collective-authorities'
 import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
@@ -756,7 +757,12 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, description: true }
+      select: {
+        slug: true,
+        name: true,
+        description: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
@@ -782,7 +788,12 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, note: true }
+      select: {
+        slug: true,
+        name: true,
+        note: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
@@ -807,7 +818,12 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, note: true }
+      select: {
+        slug: true,
+        name: true,
+        note: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
