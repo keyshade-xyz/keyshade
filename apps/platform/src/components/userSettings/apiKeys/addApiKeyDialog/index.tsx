@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { useHttp } from '@/hooks/use-http'
 import AuthoritySelector from '@/components/common/authority-selector'
-import { OneTimeSecretDisplay } from '@/components/dashboard/secret/oneTimeSecretDisplay'
+import { OneTimeSecretDisplay } from '@/components/dashboard/secret/OneTimeSecretDisplay'
 
 export default function AddApiKeyDialog() {
   const [isLoading, setIsLoading] = useState(false)
