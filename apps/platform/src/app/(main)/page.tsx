@@ -13,7 +13,8 @@ import {
   projectsOfWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
-  userAtom
+  userAtom,
+  globalSearchDataAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
@@ -24,6 +25,7 @@ export default function Index(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(true)
 
   const setUser = useSetAtom(userAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
@@ -49,6 +51,14 @@ export default function Index(): JSX.Element {
         .then(({ data, success }) => {
           if (success && data) {
             setProjects(data.items)
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              projects: data.items.map((project) => ({
+                name: project.name,
+                slug: project.slug,
+                description: project.description
+              }))
+            }))
           }
         })
         .finally(() => {
@@ -60,7 +70,7 @@ export default function Index(): JSX.Element {
         setUser(data)
       }
     })
-  }, [getAllProjects, selectedWorkspace, setProjects, getSelf, setUser])
+  }, [getAllProjects, selectedWorkspace, setProjects, getSelf, setUser, setGlobalSearchData])
 
   return (
     <div className="flex flex-col gap-4">

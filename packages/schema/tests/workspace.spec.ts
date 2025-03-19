@@ -482,21 +482,30 @@ describe('Workspace Schema Tests', () => {
           {
             slug: 'environment-slug',
             name: 'Environment Name',
-            description: 'Environment Description'
+            description: 'Environment Description',
+            project: {
+              slug: 'project-slug'
+            }
           }
         ],
         secrets: [
           {
             slug: 'secret-slug',
             name: 'Secret Name',
-            note: 'Secret Note'
+            note: 'Secret Note',
+            project: {
+              slug: 'project-slug'
+            }
           }
         ],
         variables: [
           {
             slug: 'variable-slug',
             name: 'Variable Name',
-            note: 'Variable Note'
+            note: 'Variable Note',
+            project: {
+              slug: 'project-slug'
+            }
           }
         ]
       })

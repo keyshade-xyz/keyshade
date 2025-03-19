@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   selectedProjectAtom,
   deleteVariableOpenAtom,
@@ -10,7 +10,8 @@ import {
   variablesOfProjectAtom,
   deleteEnvironmentValueOfVariableOpenAtom,
   variableRevisionsOpenAtom,
-  rollbackVariableOpenAtom
+  rollbackVariableOpenAtom,
+  globalSearchDataAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -37,6 +38,7 @@ function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -66,11 +68,19 @@ function VariablePage(): React.JSX.Element {
             if (data.metadata.links.next === null) {
               setHasMore(false)
             }
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              variables: data.items.map((item) => ({
+                slug: item.variable.slug,
+                name: item.variable.name,
+                note: item.variable.note,
+              }))
+            }))
           }
         })
         .finally(() => setIsLoading(false))
     }
-  }, [getAllVariablesOfProject, page, selectedProject, setVariables])
+  }, [getAllVariablesOfProject, page, selectedProject, setGlobalSearchData, setVariables])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)

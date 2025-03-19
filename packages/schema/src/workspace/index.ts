@@ -148,21 +148,30 @@ export const GlobalSearchResponseSchema = z.object({
     z.object({
       slug: EnvironmentSchema.shape.slug,
       name: EnvironmentSchema.shape.name,
-      description: EnvironmentSchema.shape.description
+      description: EnvironmentSchema.shape.description,
+      project: z.object({
+        slug: z.string()
+      })
     })
   ),
   secrets: z.array(
     z.object({
       slug: z.string(),
       name: z.string(),
-      note: z.string()
+      note: z.string(),
+      project: z.object({
+        slug: z.string()
+      })
     })
   ),
   variables: z.array(
     z.object({
       slug: z.string(),
       name: z.string(),
-      note: z.string()
+      note: z.string(),
+      project: z.object({
+        slug: z.string()
+      })
     })
   )
 })
