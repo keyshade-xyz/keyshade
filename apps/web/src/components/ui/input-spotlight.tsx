@@ -4,10 +4,12 @@ import React, { useRef, useState } from 'react'
 
 interface InputBorderSpotlightProps {
   setEmail: Dispatch<SetStateAction<string>>
+  onSubmit: ( e: React.FormEvent) => void
 }
 
 export function InputBorderSpotlight({
-  setEmail
+  setEmail,
+  onSubmit
 }: InputBorderSpotlightProps): React.JSX.Element {
   const divRef = useRef<HTMLInputElement>(null)
   const [isFocused, setIsFocused] = useState(false)
@@ -50,16 +52,14 @@ export function InputBorderSpotlight({
         id="mce-EMAIL"
         name="EMAIL"
         onBlur={handleBlur}
-        onChange={(e) => {
-          setEmail(e.target.value)
-        }}
+        onChange={(e) => setEmail(e.target.value)}
         onFocus={handleFocus}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
         placeholder="Enter your email address"
         size={25}
-        type="email"
+        type="text"
       />
       <input
         aria-hidden="true"
