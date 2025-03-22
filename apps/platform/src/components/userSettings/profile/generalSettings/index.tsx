@@ -56,42 +56,44 @@ export default function GeneralSettings(): React.JSX.Element {
   return (
     <>
       {/* Avatar */}
-      <div className="flex gap-4">
+      <div className="flex items-center gap-4">
+        <div className="aspect-square w-[60px] rounded-full bg-gray-600" />
+        {/* This is will be replaced by an image tag */}
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Avatar</div>
           <span className="text-sm text-white/70">
             Upload a picture to change your avatar across Keyshade.
           </span>
         </div>
-        <div className="aspect-square w-[5rem] rounded-full bg-gray-600" />
-        {/* //! This is will be replaced by an image tag */}
       </div>
       {/* Name */}
-      <div className="flex max-w-[20vw] flex-col gap-2">
+      <div className="inline-flex w-fit backdrop:flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Name</div>
           <span className="text-sm text-white/70">
             Your name is how you&apos;re identified across Keyshade.
           </span>
         </div>
-        <Input
-          disabled={isLoading}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setIsModified(true)
-            setUserDetails((prev) => ({ ...prev, name: e.target.value }))
-          }}
-          placeholder="John Doe"
-          value={userDetails.name || ''}
-        />
         <div>
-          <Button
-            className="mt-4"
-            disabled={!isModified}
-            onClick={handleUpdateSelf}
-            variant="secondary"
-          >
-            Save Changes
-          </Button>
+          <Input
+            disabled={isLoading}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setIsModified(true)
+              setUserDetails((prev) => ({ ...prev, name: e.target.value }))
+            }}
+            placeholder="John Doe"
+            value={userDetails.name || ''}
+          />
+          <div>
+            <Button
+              className="mt-4"
+              disabled={!isModified || isLoading}
+              onClick={handleUpdateSelf}
+              variant="secondary"
+            >
+              Save Changes
+            </Button>
+          </div>
         </div>
       </div>
     </>

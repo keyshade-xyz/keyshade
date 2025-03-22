@@ -1,18 +1,14 @@
-import type { AuthProviderEnum } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { GithubSVG, GitlabSVG, GoogleSVG } from '@public/svg/auth'
+import { AuthProviderCard } from '../authProviderCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
-import { userAtom } from '@/store'
 import { logout } from '@/lib/utils'
-
-const getFormattedAuthProvider = (authProvider: AuthProviderEnum): string => {
-  const provider = authProvider.toLowerCase()
-  return provider.charAt(0).toUpperCase() + provider.slice(1)
-}
+import { userAtom } from '@/store'
 
 export default function EmailSettings(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
@@ -98,26 +94,15 @@ export default function EmailSettings(): React.JSX.Element {
     setEmail(user.email)
   }, [user?.email])
 
-  return (
-    <>
-      {user ? (
-        <div className="flex max-w-[20vw] flex-col gap-2">
-          <div className="flex flex-col gap-2">
-            <div className="text-xl font-semibold">Email</div>
-            <span className="text-sm text-white/70">
-              This is the email that you use to sign in to your account.
-            </span>
-            {user.authProvider !== 'EMAIL_OTP' && (
-              <span className="text-sm text-amber-600">
-                You are using {getFormattedAuthProvider(user.authProvider!)} as
-                your authentication provider. You can not change your email.
-              </span>
-            )}
-          </div>
+  const renderAuthProviderUI = () => {
+    if (user?.authProvider === 'EMAIL_OTP') {
+      return (
+        <>
+          <span className="text-sm text-white/70">
+            This is the email that you use to sign in to your account.
+          </span>
           <Input
-            disabled={
-              user.authProvider !== 'EMAIL_OTP' || isLoading || wasEmailSent
-            }
+            disabled={isLoading || wasEmailSent}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setEmail(e.target.value)
             }
@@ -128,21 +113,20 @@ export default function EmailSettings(): React.JSX.Element {
             <div className="flex flex-col gap-2">
               <Input
                 disabled={isLoading}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setOtp(e.target.value)
-                }
+                onChange={(e) => setOtp(e.target.value)}
                 placeholder="Enter OTP"
                 value={otp}
               />
               <div className="mt-4 flex items-end justify-between gap-2">
-                <button
-                  className="text-sm text-white/50 underline"
+                <Button
+                  className="w-max text-sm text-white/50 underline"
                   onClick={handleResendEmailChangeOTP}
                   type="button"
                 >
                   Resend OTP
-                </button>
+                </Button>
                 <Button
+                  className="w-max"
                   disabled={isLoading || otp === ''}
                   onClick={handleValidateEmailChangeOTP}
                 >
@@ -150,17 +134,59 @@ export default function EmailSettings(): React.JSX.Element {
                 </Button>
               </div>
             </div>
-          ) : null}
-          {!wasEmailSent ? (
+          ) : (
             <Button
-              className="mt-4"
+              className="w-max"
               disabled={isLoading || user.email === email || email === ''}
               onClick={handleUpdateSelf}
               variant="secondary"
             >
               Send OTP
             </Button>
-          ) : null}
+          )}
+        </>
+      )
+    }
+
+    // For Google, GitHub, GitLab
+    return (
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {user?.authProvider === 'GOOGLE' && (
+            <AuthProviderCard
+              email={user.email ?? ''}
+              icon={GoogleSVG}
+              isActive={user.isActive ?? false}
+              provider='GOOGLE'
+            />
+          )}
+          {user?.authProvider === 'GITHUB' && (
+            <AuthProviderCard
+              email={user.email ?? ''}
+              icon={GithubSVG}
+              isActive={user.isActive ?? false}
+              provider='GITHUB'
+            />
+          )}
+          {user?.authProvider === 'GITLAB' && (
+            <AuthProviderCard
+              email={user.email ?? ''}
+              icon={GitlabSVG}
+              isActive={user.isActive ?? false}
+              provider='GITLAB'
+            />
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {user ? (
+        <div className="w-fit flex flex-col gap-4">
+          <div className="text-xl font-semibold">Login method</div>
+          {renderAuthProviderUI()}
         </div>
       ) : null}
     </>
