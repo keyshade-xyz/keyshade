@@ -31,6 +31,12 @@ function ProfilePage(): React.JSX.Element {
 
   return (
     <main className="flex flex-col gap-y-10">
+      <div className="pt-4">
+        <h1 className="text-2xl font-bold">Profile</h1>
+        <p className="font-medium text-white/60 mt-2.5">
+          Changes made to your profile will be applied to all of your workspaces.
+        </p>
+      </div>
       <GeneralSettings />
       <EmailSettings />
       <Separator className="w-full bg-white/15" />
