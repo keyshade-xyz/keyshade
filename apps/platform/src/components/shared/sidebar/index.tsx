@@ -24,10 +24,10 @@ function Sidebar(): JSX.Element {
       matchTo: '/'
     },
     {
-      name: 'Teams',
+      name: 'Members',
       icon: <TeamSVG />,
-      link: '/teams',
-      matchTo: '/teams'
+      link: '/members',
+      matchTo: '/members'
     },
     {
       name: 'Roles',

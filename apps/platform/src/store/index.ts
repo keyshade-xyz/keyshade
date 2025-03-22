@@ -4,6 +4,7 @@ import type {
   ApiKey,
   Environment,
   GetAllEnvironmentsOfProjectResponse,
+  GetMembersResponse,
   ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
@@ -22,6 +23,8 @@ export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
   null
 )
 export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
+
+export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
