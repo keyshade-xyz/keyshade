@@ -10,7 +10,6 @@ import type {
   User,
   Variable,
   VariableVersion,
-  Workspace,
   WorkspaceRole,
   WorkspaceWithTierLimitAndProjectCount
 } from '@keyshade/schema'

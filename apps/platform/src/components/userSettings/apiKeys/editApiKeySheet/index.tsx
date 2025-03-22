@@ -134,12 +134,12 @@ export default function EditApiKeySheet(): JSX.Element {
 
   return (
     <Sheet onOpenChange={handleClose} open={isEditApiKeyOpen}>
-      <SheetContent className="min-w-[33rem] overflow-y-auto border-white/15 bg-[#222425]">
-        <SheetHeader>
+      <SheetContent className="min-w-[33rem] overflow-y-auto border-white/15 bg-[#222425] p-0">
+        <SheetHeader className="mx-5 mt-10">
           <SheetTitle className="text-white">Edit API Key</SheetTitle>
           <SheetDescription className="text-white/60" />
         </SheetHeader>
-        <div className="grid gap-x-4 gap-y-6 py-8">
+        <div className="m-5 flex flex-col items-start justify-start gap-x-4 gap-y-6">
           <div className="flex flex-col items-start gap-x-4 gap-y-3">
             <Label className="text-right" htmlFor="name">
               API Key Name
@@ -184,15 +184,14 @@ export default function EditApiKeySheet(): JSX.Element {
             </Select>
           </div>
 
-          <div className="h-[300px] overflow-y-auto">
-            <AuthoritySelector
-              isSheet
-              selectedPermissions={selectedPermissions}
-              setSelectedPermissions={setSelectedPermissions}
-            />
-          </div>
+          <AuthoritySelector
+            isSheet
+            parent="API_KEY"
+            selectedPermissions={selectedPermissions}
+            setSelectedPermissions={setSelectedPermissions}
+          />
         </div>
-        <SheetFooter className="sticky bottom-0 bg-[#222425] py-3">
+        <SheetFooter className="sticky bottom-0 m-0 bg-[#222425] p-5">
           <SheetClose asChild>
             <Button
               className="font-semibold"

@@ -1,8 +1,8 @@
-import { AddSVG, MinusSquareSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import React, { useCallback, useState } from 'react'
-import type { AuthorityEnum, GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
+import React, { useCallback, useEffect, useState } from 'react'
+import type { AuthorityEnum, Environment, Project } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { AddSVG, MinusSquareSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,7 +14,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createRolesOpenAtom, projectsOfWorkspaceAtom, rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  createRolesOpenAtom,
+  rolesOfWorkspaceAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import {
   Select,
   SelectContent,
@@ -51,112 +55,155 @@ const COLORS_LIST = [
   }
 ]
 
-type EnvironmentWithCheck = GetAllEnvironmentsOfProjectResponse['items'][number] & {
-  checked: boolean
-}
+type ProjectEnvironmentComboType = Record<
+  Project['slug'],
+  {
+    project: Project
+    environments: Set<Environment>
+  }
+>
 
 export default function CreateRolesDialog() {
-  const allProjects = useAtomValue(projectsOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const setRoles = useSetAtom(rolesOfWorkspaceAtom)
   const [isCreateRolesOpen, setIsCreateRolesOpen] = useAtom(createRolesOpenAtom)
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<AuthorityEnum>>(new Set())
-  const [projectSelects, setProjectSelects] = useState<{
-    projectSlug: string | undefined
-    environments: EnvironmentWithCheck[] | undefined
-  }[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are not using selectedProjects anywhere but using its set method
-  const [selectedProjects, setSelectedProjects] = useState<(string | undefined)[]>([]);
+  const setRoles = useSetAtom(rolesOfWorkspaceAtom)
+
+  const [selectedPermissions, setSelectedPermissions] = useState<
+    Set<AuthorityEnum>
+  >(new Set())
+  const [projectEnvironmentSelection, setProjectEnvironmentSelection] =
+    useState<ProjectEnvironmentComboType>({})
+  const [projectEnvironmentCombinations, setProjectEnvironmentCombinations] =
+    useState<ProjectEnvironmentComboType>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [createRoleData, setCreateRoleData] = useState({
-    name: "",
-    description: "",
-    colorCode: "#10b981",
+    name: '',
+    description: '',
+    colorCode: '#10b981'
   })
-  const [environmentCache, setEnvironmentCache] = useState<Map<string, EnvironmentWithCheck[]>>(new Map())
+  const [projectSelectDropdowns, setProjectSelectDropdowns] =
+    useState<number>(0)
 
-  const handleProjectSelect = async (value: string, index: number) => {
-    const newSelects = [...projectSelects]
-
-    setSelectedProjects(prev => {
-      const newSelected = prev.filter(p => p !== value)
-      return [...newSelected, value]
-    })
-
-    if (environmentCache.has(value)) {
-      const cachedEnvironments = environmentCache.get(value)!
-      newSelects[index] = {
-        projectSlug: value,
-        environments: cachedEnvironments
-      }
-      setProjectSelects(newSelects)
-      return
-    }
-
-    const { success, data } = await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-      {
-        projectSlug: value
-      }
-    )
-
-    if (success && data) {
-      const environmentsWithCheck = data.items.map(env => ({ ...env, checked: false }))
-      setEnvironmentCache(prev => new Map(prev).set(value, environmentsWithCheck))
-
-      newSelects[index] = {
-        projectSlug: value,
-        environments: environmentsWithCheck
-      }
-      setProjectSelects(newSelects)
-    }
-  }
-
-  const handleEnvironmentSelect = (environment: string, index: number) => {
-    const newSelects = [...projectSelects]
-    const currentEnvironments = newSelects[index].environments
-
-    if (!currentEnvironments) {
-      return
-    }
-
-    if (currentEnvironments.some(env => env.slug === environment)) {
-      newSelects[index] = {
-        ...newSelects[index],
-        environments: currentEnvironments.map(env =>
-          env.slug === environment ? { ...env, checked: !env.checked } : env
-        )
-      }
-    }
-
-    setProjectSelects(newSelects)
-  }
-
-  const removeProjectSelection = (index: number) => {
-    const newSelects = [...projectSelects]
-    newSelects[index] = { ...newSelects[index], projectSlug: undefined, environments: undefined }
-    setProjectSelects(newSelects)
-  }
-
-  const createRole = useHttp(() =>
-    ControllerInstance.getInstance().workspaceRoleController.createWorkspaceRole({
-      name: createRoleData.name,
+  const getAllProjectsOfWorkspace = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getAllProjects({
       workspaceSlug: currentWorkspace!.slug,
-      authorities: Array.from(selectedPermissions).flat(),
-      description: createRoleData.description,
-      colorCode: createRoleData.colorCode,
-      projectEnvironments: projectSelects
-        .filter(select => select.projectSlug && select.environments)
-        .map(select => ({
-          projectSlug: select.projectSlug!,
-          environmentSlugs: select.environments!
-            .filter(env => env.checked)
-            .map(env => env.slug)
-        }))
+      limit: 100 // Assumption that workspace has less than 100 projects
     })
   )
 
+  const getAllEnvironmentsOfProject = useHttp((projectSlug: Project['slug']) =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug,
+        limit: 100
+      }
+    )
+  )
+
+  const createRole = useHttp(() =>
+    ControllerInstance.getInstance().workspaceRoleController.createWorkspaceRole(
+      {
+        ...createRoleData,
+        workspaceSlug: currentWorkspace!.slug,
+        projectEnvironments: Object.entries(projectEnvironmentSelection).map(
+          ([projectSlug, { environments }]) => ({
+            projectSlug,
+            environmentSlugs: Array.from(environments).map((env) => env.slug)
+          })
+        )
+      }
+    )
+  )
+
+  // Pre-fetch projects and its environments. Store it for future use
+  useEffect(() => {
+    if (!currentWorkspace) return
+
+    getAllProjectsOfWorkspace().then(({ data, success }) => {
+      if (!success || !data) return
+
+      const projects = data.items
+
+      projects.map(async (project) => {
+        const { data: envData, success: envSuccess } =
+          await getAllEnvironmentsOfProject(project.slug)
+        if (envSuccess && envData) {
+          const environments: Environment[] = envData.items.map((env) => ({
+            id: env.id,
+            name: env.name,
+            createdAt: env.createdAt,
+            description: env.description,
+            lastUpdatedById: env.lastUpdatedBy.id,
+            projectId: project.id,
+            slug: env.slug,
+            updatedAt: env.updatedAt
+          }))
+
+          setProjectEnvironmentCombinations((prev) => {
+            prev[project.slug] = {
+              project,
+              environments: new Set(environments)
+            }
+            return prev
+          })
+        }
+      })
+    })
+  }, [currentWorkspace, getAllEnvironmentsOfProject, getAllProjectsOfWorkspace])
+
+  const handleAddProjectSelection = useCallback((project: Project) => {
+    setProjectSelectDropdowns((prev) => prev - 1)
+    setProjectEnvironmentSelection((prev) => {
+      prev[project.slug] = {
+        project,
+        environments: new Set()
+      }
+      return prev
+    })
+  }, [])
+
+  const handleRemoveProjectSelection = useCallback((project: Project) => {
+    setProjectEnvironmentSelection((prev) => {
+      const { [project.slug]: _, ...rest } = prev
+      return rest
+    })
+  }, [])
+
+  const handleToggleEnvironmentSelect = useCallback(
+    (project: Project, environment: Environment) => {
+      const projectSlug = project.slug
+      setProjectEnvironmentSelection((prev) => {
+        const selectedEnvironments = prev[projectSlug].environments
+        if (selectedEnvironments.has(environment)) {
+          selectedEnvironments.delete(environment)
+        } else {
+          selectedEnvironments.add(environment)
+        }
+        prev[projectSlug] = {
+          project,
+          environments: selectedEnvironments
+        }
+        return prev
+      })
+    },
+    []
+  )
+
+  const handleCleanup = useCallback(() => {
+    setIsLoading(false)
+    setCreateRoleData({
+      name: '',
+      description: '',
+      colorCode: '#10b981'
+    })
+    setSelectedPermissions(new Set())
+    setProjectEnvironmentSelection({})
+    setProjectSelectDropdowns(0)
+    toast.dismiss()
+  }, [])
+
   const handleCreateRole = useCallback(async () => {
-    if (createRoleData.name.trim() === "") {
+    if (createRoleData.name.trim() === '') {
       toast.error('Role name is required', {
         description: (
           <p className="text-xs text-red-300">
@@ -186,28 +233,31 @@ export default function CreateRolesDialog() {
         setIsCreateRolesOpen(false)
       }
     } finally {
-      setIsLoading(false)
-      toast.dismiss()
-      setCreateRoleData({
-        name: "",
-        description: "",
-        colorCode: "#10b981",
-      })
-      setEnvironmentCache(new Map())
-      setSelectedPermissions(new Set())
-      setProjectSelects([])
-      setSelectedProjects([])
+      handleCleanup()
+      setIsCreateRolesOpen(false)
     }
-  }, [createRole, createRoleData.name, setIsCreateRolesOpen, setRoles])
+  }, [
+    createRole,
+    createRoleData.name,
+    handleCleanup,
+    setIsCreateRolesOpen,
+    setRoles
+  ])
 
   return (
-    <Dialog onOpenChange={setIsCreateRolesOpen} open={isCreateRolesOpen}>
+    <Dialog
+      onOpenChange={() => {
+        setIsCreateRolesOpen((prev) => !prev)
+        handleCleanup()
+      }}
+      open={isCreateRolesOpen}
+    >
       <DialogTrigger>
         <Button>
           <AddSVG /> Add Role
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[39.5rem] min-w-[42rem] rounded-[12px] border bg-[#1E1E1F] ">
+      <DialogContent className="h-[80vh] min-w-[42rem] overflow-auto rounded-[12px] border bg-[#1E1E1F]">
         <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
           <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
             Create Role
@@ -217,8 +267,8 @@ export default function CreateRolesDialog() {
             Create a new role for your workspace
           </DialogDescription>
         </div>
-        <div className="flex flex-col gap-y-8 overflow-auto">
-          <div className="flex h-[29.125rem] w-full flex-col gap-[1rem] py-[1rem] ">
+        <div className="flex flex-col gap-y-8">
+          <div className="flex h-full w-full flex-col gap-[1rem] py-[1rem] ">
             {/* NAME */}
             <div className="flex h-[2.25rem] w-full items-center justify-start gap-[1rem]">
               <Label
@@ -230,7 +280,12 @@ export default function CreateRolesDialog() {
               <Input
                 className="col-span-3 h-[2.25rem] w-[20rem] "
                 id="name"
-                onChange={(e) => setCreateRoleData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setCreateRoleData((prev) => ({
+                    ...prev,
+                    name: e.target.value
+                  }))
+                }
                 placeholder="Enter the name"
                 value={createRoleData.name}
               />
@@ -247,7 +302,12 @@ export default function CreateRolesDialog() {
               <Textarea
                 className="col-span-3 h-[5.625rem] w-[20rem] resize-none gap-[0.25rem]"
                 id="description"
-                onChange={(e) => setCreateRoleData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setCreateRoleData((prev) => ({
+                    ...prev,
+                    description: e.target.value
+                  }))
+                }
                 placeholder="Short description about the role"
                 value={createRoleData.description}
               />
@@ -263,9 +323,14 @@ export default function CreateRolesDialog() {
               <Select
                 onValueChange={(value) => {
                   const selectedColor = COLORS_LIST[Number(value)].color
-                  setCreateRoleData(prev => ({ ...prev, colorCode: selectedColor }))
+                  setCreateRoleData((prev) => ({
+                    ...prev,
+                    colorCode: selectedColor
+                  }))
                 }}
-                value={COLORS_LIST.findIndex(color => color.color === createRoleData.colorCode).toString()}
+                value={COLORS_LIST.findIndex(
+                  (color) => color.color === createRoleData.colorCode
+                ).toString()}
               >
                 <SelectTrigger className="h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
                   <SelectValue placeholder="Select color" />
@@ -290,55 +355,78 @@ export default function CreateRolesDialog() {
               </Select>
             </div>
             <AuthoritySelector
+              parent="ROLES"
               selectedPermissions={selectedPermissions}
               setSelectedPermissions={setSelectedPermissions}
             />
             <Separator />
-            <div className='flex flex-col gap-y-5'>
+            <div className="flex flex-col gap-y-5">
               <div>
-                <h2 className='font-semibold text-base text-white'>
+                <h2 className="text-base font-semibold text-white">
                   Projects and Environments
                 </h2>
-                <p className='text-sm text-neutral-300'>
+                <p className="text-sm text-neutral-300">
                   Projects and environment this role would have access to
                 </p>
               </div>
-              {projectSelects.map((selection, index) => (
-                selection.projectSlug ? (
-                  <SelectedProjectComponent
-                    allProjects={allProjects}
-                    environments={selection.environments}
-                    handleEnvironmentSelect={handleEnvironmentSelect}
-                    index={index}
-                    key={selection.projectSlug}
-                    projectSlug={selection.projectSlug}
-                    removeProjectSelection={removeProjectSelection}
-                  />
-                ) : (
-                  // eslint-disable-next-line react/no-array-index-key -- we need to use keys here
-                  <Select key={index} onValueChange={(value) => handleProjectSelect(value, index)}>
-                    <SelectTrigger className="h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
-                      <SelectValue placeholder="Select project" />
-                    </SelectTrigger>
-                    <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
-                      {allProjects.map(project => (
-                        <SelectItem
-                          disabled={projectSelects.some(select => select.projectSlug === project.slug)}
-                          key={project.id}
-                          value={project.slug}
-                        >
-                          {project.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )
+
+              {/* Render dropdowns */}
+              {projectSelectDropdowns > 0 &&
+                Array.from({ length: projectSelectDropdowns }).map(
+                  (_, index) => (
+                    <Select
+                      // eslint-disable-next-line react/no-array-index-key -- ok
+                      key={index}
+                      onValueChange={(value) => {
+                        const project = JSON.parse(value) as Project
+                        handleAddProjectSelection(project)
+                      }}
+                    >
+                      <SelectTrigger className="h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5">
+                        <SelectValue placeholder="Select project" />
+                      </SelectTrigger>
+                      <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
+                        {Object.values(projectEnvironmentCombinations)
+                          .filter(
+                            ({ project }) =>
+                              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this is a false positive
+                              !projectEnvironmentSelection[project.slug]
+                          )
+                          .map(({ project }) => (
+                            <SelectItem
+                              key={project.id}
+                              value={JSON.stringify(project)}
+                            >
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )
+                )}
+
+              {/* Render all the selected projects */}
+              {Object.values(projectEnvironmentSelection).map(({ project }) => (
+                <SelectedProjectComponent
+                  handleRemoveProjectSelection={handleRemoveProjectSelection}
+                  handleToggleEnvironmentSelect={handleToggleEnvironmentSelect}
+                  key={project.id}
+                  project={project}
+                  projectEnvironmentCombinations={
+                    projectEnvironmentCombinations
+                  }
+                  projectEnvironmentSelection={projectEnvironmentSelection}
+                />
               ))}
+
               <Button
-                className='w-[9rem] bg-neutral-800 flex justify-between items-center px-4 gap-x-2 border border-white/10'
-                onClick={() => {
-                  setProjectSelects(prev => [...prev, { projectSlug: undefined, environments: [] }])
-                }}
+                className="flex w-[9rem] items-center justify-between gap-x-2 border border-white/10 bg-neutral-800 px-4"
+                disabled={
+                  Object.entries(projectEnvironmentCombinations).length ===
+                  Object.entries(projectEnvironmentSelection).length +
+                    projectSelectDropdowns
+                }
+                onClick={() => setProjectSelectDropdowns((prev) => prev + 1)}
               >
                 <AddSVG />
                 Add Project
@@ -361,29 +449,76 @@ export default function CreateRolesDialog() {
   )
 }
 
-function SelectedProjectComponent({ projectSlug, allProjects, index, environments, removeProjectSelection, handleEnvironmentSelect }) {
+function SelectedProjectComponent({
+  projectEnvironmentCombinations,
+  projectEnvironmentSelection,
+  project,
+  handleToggleEnvironmentSelect,
+  handleRemoveProjectSelection
+}: {
+  projectEnvironmentCombinations: ProjectEnvironmentComboType
+  projectEnvironmentSelection: ProjectEnvironmentComboType
+  project: Project
+  handleToggleEnvironmentSelect: (
+    project: Project,
+    environment: Environment
+  ) => void
+  handleRemoveProjectSelection: (project: Project) => void
+}) {
+  const [isChecked, setIsChecked] = useState<
+    Record<Environment['slug'], boolean>
+  >({})
+
+  useEffect(() => {
+    const selectedEnvironmentsOfProject =
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this is a false positive
+      projectEnvironmentSelection[project.slug].environments || new Set()
+    const environmentsOfProject = Object.values(
+      projectEnvironmentCombinations[project.slug].environments
+    )
+
+    const checklistData: Record<Environment['slug'], boolean> = {}
+
+    for (const env of environmentsOfProject) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- this is a false positive
+      checklistData[env.slug] = selectedEnvironmentsOfProject.has(env)
+    }
+
+    setIsChecked(checklistData)
+  }, [
+    project.slug,
+    projectEnvironmentCombinations,
+    projectEnvironmentSelection
+  ])
+
   return (
-    <div className="flex flex-col items-center justify-between w-[20rem] px-3 py-2 gap-y-5 rounded-[0.375rem] border-[0.013rem] border-white/10 bg-neutral-800 text-white">
-      <div className="w-full flex justify-between items-center gap-4">
-        <span className="text-sm font-medium">
-          {allProjects.find((p) => p.slug === projectSlug)?.name}
-        </span>
-        <button onClick={() => removeProjectSelection(index)} type='button' >
+    <div className="flex w-[20rem] flex-col items-center justify-between gap-y-5 rounded-[0.375rem] border-[0.013rem] border-white/10 bg-neutral-800 px-3 py-2 text-white">
+      <div className="flex w-full items-center justify-between gap-4">
+        <span className="text-sm font-medium">{project.name}</span>
+        <button
+          onClick={() => handleRemoveProjectSelection(project)}
+          type="button"
+        >
           <MinusSquareSVG />
         </button>
       </div>
-      <div className="w-full flex flex-wrap justify-start items-center gap-y-3 gap-x-10">
-        {environments?.map(env => (
-          <div className='flex items-center gap-x-3' key={env.slug} >
+      <div className="flex w-full flex-wrap items-center justify-start gap-x-10 gap-y-3">
+        {Array.from(
+          projectEnvironmentCombinations[project.slug].environments
+        ).map((env: Environment) => (
+          <div className="flex items-center gap-x-3" key={env.slug}>
             <Checkbox
-              checked={env.checked}
-              className="h-5 w-5 accent-white bg-transparent border-white/30 rounded"
+              checked={isChecked[env.slug]}
+              className="h-5 w-5 rounded border-white/30 bg-transparent accent-white"
               id={env.slug}
-              onCheckedChange={() => handleEnvironmentSelect(env.slug, index)}
+              onCheckedChange={() =>
+                handleToggleEnvironmentSelect(project, env)
+              }
             />
             <label
-              className="flex items-center gap-1.5 cursor-pointer"
-              htmlFor={env.slug}>
+              className="flex cursor-pointer items-center gap-1.5"
+              htmlFor={env.slug}
+            >
               <span className="text-sm">{env.name}</span>
             </label>
           </div>
