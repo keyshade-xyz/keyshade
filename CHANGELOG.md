@@ -1,3 +1,9 @@
+## [2.14.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.3...v2.14.0-stage.4) (2025-03-21)
+
+### 🐛 Bug Fixes
+
+* **platform:** Redirect to dashboard after updating profile details ([#840](https://github.com/keyshade-xyz/keyshade/issues/840)) ([daa3e07](https://github.com/keyshade-xyz/keyshade/commit/daa3e0797fe6a70fce224d7531ac6e53f605c7eb))
+
 ## [2.14.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.2...v2.14.0-stage.3) (2025-03-18)
 
 ### 🐛 Bug Fixes
