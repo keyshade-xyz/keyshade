@@ -16,6 +16,9 @@ import type {
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
+export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
+  []
+)
 export const selectedWorkspaceAtom =
   atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
 
@@ -94,6 +97,7 @@ export const rollbackSecretOpenAtom = atom<boolean>(false)
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
+export const deleteWorkspaceOpenAtom = atom<boolean>(false)
 
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)

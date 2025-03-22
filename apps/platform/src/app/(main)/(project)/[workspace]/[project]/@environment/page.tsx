@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { EnvironmentSVG } from '@public/svg/dashboard'
+import { useAtom, useAtomValue } from 'jotai'
 import {
-  createEnvironmentOpenAtom,
   selectedProjectAtom,
   deleteEnvironmentOpenAtom,
   editEnvironmentOpenAtom,
@@ -19,13 +17,13 @@ import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
 import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
+import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 
 function EnvironmentPage(): React.JSX.Element {
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
   const isEditEnvironmentOpen = useAtomValue(editEnvironmentOpenAtom)
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
@@ -81,28 +79,10 @@ function EnvironmentPage(): React.JSX.Element {
     >
       {/* Showing this when there are no environments present */}
       {environments.length === 0 ? (
-        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-          <EnvironmentSVG width={100} />
-
-          <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
-            <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
-              Declare your first environment
-            </p>
-            <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
-              Declare and store a environment against different environments
-            </p>
-          </div>
-
-          <Button
-            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            onClick={() => setIsCreateEnvironmentOpen(true)}
-          >
-            Create environment
-          </Button>
-        </div>
+        <EmptyEnvironmentListContent />
       ) : (
         // Showing this when environments are present
-        <div className="flex flex-col gap-y-8">
+        <div className="flex w-full flex-col gap-y-8">
           <div
             className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
           >

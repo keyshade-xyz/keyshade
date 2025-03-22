@@ -1,7 +1,6 @@
 'use client'
 
 import type { GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
-import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
 import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import {
@@ -16,13 +15,10 @@ import {
   selectedEnvironmentAtom
 } from '@/store'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
+import { formatDate } from '@/lib/utils'
 
 interface EnvironmentCardProps {
   environment: GetAllEnvironmentsOfProjectResponse['items'][number]
-}
-
-const formatDate = (date: string): string => {
-  return dayjs(date).format('D MMMM, YYYY')
 }
 
 export default function EnvironmentCard({

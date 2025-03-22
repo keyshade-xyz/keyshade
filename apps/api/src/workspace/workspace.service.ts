@@ -3,7 +3,10 @@ import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
-import { createWorkspace } from '@/common/workspace'
+import {
+  associateWorkspaceOwnerDetails,
+  createWorkspace
+} from '@/common/workspace'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import {
@@ -75,7 +78,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
-  ): Promise<Workspace> {
+  ) {
     this.logger.log(
       `User ${user.id} attempted to update a workspace ${workspaceSlug}`
     )
@@ -111,6 +114,15 @@ export class WorkspaceService {
             id: user.id
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
     this.logger.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
@@ -131,7 +143,10 @@ export class WorkspaceService {
       this.prisma
     )
 
-    return updatedWorkspace
+    return {
+      ...updatedWorkspace,
+      ownedBy: workspace.ownedBy
+    }
   }
 
   /**
@@ -258,6 +273,15 @@ export class WorkspaceService {
         name: {
           contains: search
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -299,11 +323,16 @@ export class WorkspaceService {
 
     return {
       items: await Promise.all(
-        items.map(async (item) => ({
-          ...item,
-          isDefault: item.isDefault && item.ownerId === user.id,
-          ...(await this.parseWorkspaceItemLimits(item.id))
-        }))
+        items.map(async (item) => {
+          return await associateWorkspaceOwnerDetails(
+            {
+              ...item,
+              isDefault: item.isDefault && item.ownerId === user.id,
+              ...(await this.parseWorkspaceItemLimits(item.id))
+            },
+            this.prisma
+          )
+        })
       ),
       metadata
     }

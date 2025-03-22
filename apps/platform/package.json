@@ -35,6 +35,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "dayjs": "^1.11.11",
+    "emoji-picker-react": "^4.12.0",
     "eccrypto": "^1.1.6",
     "env-cmd": "^10.1.0",
     "framer-motion": "^11.1.7",
