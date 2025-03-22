@@ -187,7 +187,16 @@ describe('Project Schema Tests', () => {
         isForked: false,
         lastUpdatedById: 'user123',
         workspaceId: 'workspace123',
-        forkedFromId: null
+        forkedFromId: null,
+        maxAllowedEnvironments: 0,
+        maxAllowedSecrets: 0,
+        maxAllowedVariables: 0,
+        totalEnvironments: 0,
+        totalSecrets: 0,
+        totalVariables: 0,
+        environmentCount: 0,
+        secretCount: 0,
+        variableCount: 0
       })
 
       expect(result.success).toBe(true)
@@ -201,7 +210,7 @@ describe('Project Schema Tests', () => {
       })
 
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(14)
+      expect(result.error?.issues).toHaveLength(23)
     })
   })
 
@@ -345,7 +354,13 @@ describe('Project Schema Tests', () => {
         forkedFromId: null,
         environmentCount: 0,
         secretCount: 0,
-        variableCount: 0
+        variableCount: 0,
+        maxAllowedEnvironments: 0,
+        maxAllowedSecrets: 0,
+        maxAllowedVariables: 0,
+        totalEnvironments: 0,
+        totalSecrets: 0,
+        totalVariables: 0
       })
 
       expect(result.success).toBe(true)
@@ -359,7 +374,7 @@ describe('Project Schema Tests', () => {
       })
 
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(17)
+      expect(result.error?.issues).toHaveLength(23)
     })
   })
 
@@ -634,7 +649,13 @@ describe('Project Schema Tests', () => {
             forkedFromId: null,
             environmentCount: 0,
             secretCount: 0,
-            variableCount: 0
+            variableCount: 0,
+            maxAllowedEnvironments: 0,
+            maxAllowedSecrets: 0,
+            maxAllowedVariables: 0,
+            totalEnvironments: 0,
+            totalSecrets: 0,
+            totalVariables: 0
           }
         ],
         metadata: {

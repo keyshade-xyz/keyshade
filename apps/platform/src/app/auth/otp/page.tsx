@@ -25,7 +25,6 @@ export default function AuthOTPPage(): React.JSX.Element {
 
   const [otp, setOtp] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false)
 
   const router = useRouter()
 
@@ -80,7 +79,6 @@ export default function AuthOTPPage(): React.JSX.Element {
     }
 
     setIsLoading(true)
-    setIsLoadingRefresh(true)
     toast.loading('Verifying OTP...')
 
     try {
@@ -104,7 +102,6 @@ export default function AuthOTPPage(): React.JSX.Element {
       }
     } finally {
       setIsLoading(false)
-      setIsLoadingRefresh(false)
       toast.dismiss()
     }
   }
@@ -115,7 +112,6 @@ export default function AuthOTPPage(): React.JSX.Element {
     }
 
     setIsLoading(true)
-    setIsLoadingRefresh(true)
     toast.loading('Sending OTP...')
 
     try {
@@ -126,7 +122,6 @@ export default function AuthOTPPage(): React.JSX.Element {
       }
     } finally {
       setIsLoading(false)
-      setIsLoadingRefresh(false)
       toast.dismiss()
     }
   }
@@ -180,24 +175,16 @@ export default function AuthOTPPage(): React.JSX.Element {
             >
               {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
             </Button>
-            <div className="space-x-reverse-2 flex items-center justify-center text-[#71717A]">
+            <div className="gap-2 flex items-center justify-center text-[#71717A]">
               <span>Didn’t receive OTP?</span>
-              <span>
-                {isLoadingRefresh ? (
-                  <span>
-                    <LoadingSVG className="h-10 w-10" />
-                  </span>
-                ) : (
-                  <Button
-                    className="text-[#71717A]"
-                    disabled={isLoading}
-                    onClick={handleResendOtp}
-                    variant="link"
-                  >
-                    Resend OTP
-                  </Button>
-                )}
-              </span>
+              <Button
+                className="text-[#71717A]"
+                disabled={isLoading}
+                onClick={handleResendOtp}
+                variant="link"
+              >
+                Resend OTP
+              </Button>
             </div>
           </form>
         </div>

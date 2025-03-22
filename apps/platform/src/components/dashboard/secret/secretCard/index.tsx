@@ -1,8 +1,9 @@
-import type { Secret } from '@keyshade/schema'
+import type { Environment, Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
-import { useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
-import { TrashWhiteSVG } from '@public/svg/shared'
+import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
+import { useState } from 'react'
 import {
   AccordionContent,
   AccordionItem,
@@ -38,26 +39,59 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import { decrypt } from '@/lib/decrypt'
 
 interface SecretCardProps {
   secretData: Secret
   isDecrypted: boolean
+  privateKey: string | null
 }
 
 export default function SecretCard({
   secretData,
-  isDecrypted
+  isDecrypted,
+  privateKey
 }: SecretCardProps) {
   const { secret, values } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
-  const setSelectedSecretEnvironment = useSetAtom(selectedSecretEnvironmentAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
   const setIsDeleteSecretOpen = useSetAtom(deleteSecretOpenAtom)
   const setIsDeleteEnvironmentValueOfSecretOpen = useSetAtom(
     deleteEnvironmentValueOfSecretOpenAtom
   )
   const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
+  const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
+    selectedSecretEnvironmentAtom
+  )
+  const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
+  const [decryptedValues, setDecryptedValues] = useState<
+    Record<Environment['id'], string>
+  >({})
+
+  const handleDecryptValues = (environmentSlug: Environment['slug']) => {
+    if (!privateKey) return
+    const targetValue = values.find(
+      (value) => value.environment.slug === environmentSlug
+    )
+    if (!targetValue) return
+
+    decrypt(privateKey, targetValue.value)
+      .then((decrypted) => {
+        setDecryptedValues((prev) => ({
+          ...prev,
+          [targetValue.environment.id]: decrypted
+        }))
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Decryption error:', error)
+        setDecryptedValues((prev) => ({
+          ...prev,
+          [targetValue.environment.id]: 'Decryption failed'
+        }))
+      })
+  }
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -66,6 +100,17 @@ export default function SecretCard({
       'Failed to copy the slug.',
       'You successfully copied the slug.'
     )
+  }
+  const handleRevealEnvironmentValueOfSecretClick = (
+    environment: Environment['slug']
+  ) => {
+    if (selectedSecretEnvironment === environment && isSecretRevealed) {
+      setIsSecretRevealed(false)
+    } else {
+      setIsSecretRevealed(true)
+      handleDecryptValues(environment)
+    }
+    setSelectedSecretEnvironment(environment)
   }
 
   const handleEditClick = () => {
@@ -78,7 +123,9 @@ export default function SecretCard({
     setIsDeleteSecretOpen(true)
   }
 
-  const handleDeleteEnvironmentValueOfSecretClick = (environment: string) => {
+  const handleDeleteEnvironmentValueOfSecretClick = (
+    environment: Environment['slug']
+  ) => {
     setSelectedSecret(secretData)
     setSelectedSecretEnvironment(environment)
     setIsDeleteEnvironmentValueOfSecretOpen(true)
@@ -153,6 +200,10 @@ export default function SecretCard({
               </TableHeader>
               <TableBody>
                 {values.map((value) => {
+                  const isRevealed =
+                    !isDecrypted &&
+                    isSecretRevealed &&
+                    value.environment.slug === selectedSecretEnvironment
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -164,22 +215,40 @@ export default function SecretCard({
                       <TableCell className="h-full text-base">
                         {isDecrypted
                           ? value.value
-                          : value.value.replace(/./g, '*').substring(0, 20)}
+                          : isRevealed
+                            ? decryptedValues[value.environment.id]
+                            : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base">
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
-                        <button
-                          onClick={() =>
-                            handleDeleteEnvironmentValueOfSecretClick(
-                              value.environment.slug
-                            )
-                          }
-                          type="button"
-                        >
-                          <TrashWhiteSVG />
-                        </button>
+                        <div className="flex gap-3">
+                          {!isDecrypted && privateKey ? (
+                            <button
+                              className="duration-300 hover:scale-105"
+                              onClick={() =>
+                                handleRevealEnvironmentValueOfSecretClick(
+                                  value.environment.slug
+                                )
+                              }
+                              type="button"
+                            >
+                              {!isRevealed ? <EyeOpenSVG /> : <EyeSlashSVG />}
+                            </button>
+                          ) : null}
+                          <button
+                            className="duration-300 hover:scale-105"
+                            onClick={() =>
+                              handleDeleteEnvironmentValueOfSecretClick(
+                                value.environment.slug
+                              )
+                            }
+                            type="button"
+                          >
+                            <TrashWhiteSVG />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )

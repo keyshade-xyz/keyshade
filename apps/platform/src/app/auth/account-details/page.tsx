@@ -59,6 +59,11 @@ export default function AuthDetailsPage(): React.JSX.Element {
         )
 
         setUser(data)
+
+        /**
+         * redirect to dashboard after updating the profile details
+         */
+        router.push('/')
       }
     } finally {
       toast.dismiss()

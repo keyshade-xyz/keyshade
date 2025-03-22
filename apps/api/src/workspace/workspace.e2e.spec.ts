@@ -390,6 +390,10 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().name).toEqual(workspace1.name)
+      expect(response.json().maxAllowedMembers).toBeDefined()
+      expect(response.json().maxAllowedProjects).toBeDefined()
+      expect(response.json().totalProjects).toBe(0)
+      expect(response.json().totalMembers).toBe(1)
     })
 
     it('should not be able to fetch the workspace by slug if user is not a member', async () => {
@@ -418,6 +422,14 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toEqual(2)
+
+      const workspaceJson = response.json().items[0]
+
+      expect(workspaceJson.name).toEqual(workspace1.name)
+      expect(workspaceJson.maxAllowedMembers).toBeDefined()
+      expect(workspaceJson.maxAllowedProjects).toBeDefined()
+      expect(workspaceJson.totalProjects).toBe(0)
+      expect(workspaceJson.totalMembers).toBe(2)
 
       //check metadata
       const metadata = response.json().metadata

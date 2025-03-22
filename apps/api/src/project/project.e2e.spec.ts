@@ -211,7 +211,7 @@ describe('Project Controller Tests', () => {
       // Create the number of projects that the tier limit allows
       for (
         let x = 100;
-        x < 100 + tierLimitService.getProjectTierLimit(workspace1) - 2; // Subtract 2 for the projects created above
+        x < 100 + tierLimitService.getProjectTierLimit(workspace1.id) - 2; // Subtract 2 for the projects created above
         x++
       ) {
         await projectService.createProject(user1, workspace1.slug, {
@@ -460,7 +460,13 @@ describe('Project Controller Tests', () => {
         updatedAt: expect.any(String),
         environmentCount: 1,
         secretCount: 0,
-        variableCount: 0
+        variableCount: 0,
+        maxAllowedEnvironments: expect.any(Number),
+        maxAllowedSecrets: expect.any(Number),
+        maxAllowedVariables: expect.any(Number),
+        totalEnvironments: expect.any(Number),
+        totalSecrets: expect.any(Number),
+        totalVariables: expect.any(Number)
       })
     })
 
@@ -517,6 +523,14 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items.length).toEqual(2)
+
+      const projectJson = response.json().items[0]
+      expect(projectJson).toHaveProperty('maxAllowedEnvironments')
+      expect(projectJson).toHaveProperty('maxAllowedVariables')
+      expect(projectJson).toHaveProperty('maxAllowedSecrets')
+      expect(projectJson).toHaveProperty('totalEnvironments')
+      expect(projectJson).toHaveProperty('totalVariables')
+      expect(projectJson).toHaveProperty('totalSecrets')
 
       //check metadata
       const metadata = response.json().metadata
@@ -898,6 +912,12 @@ describe('Project Controller Tests', () => {
         environmentCount: 1,
         secretCount: 0,
         variableCount: 0,
+        maxAllowedEnvironments: expect.any(Number),
+        maxAllowedSecrets: expect.any(Number),
+        maxAllowedVariables: expect.any(Number),
+        totalEnvironments: expect.any(Number),
+        totalSecrets: expect.any(Number),
+        totalVariables: expect.any(Number),
         createdAt: expect.any(String),
         updatedAt: expect.any(String)
       })
@@ -920,7 +940,13 @@ describe('Project Controller Tests', () => {
         updatedAt: expect.any(String),
         environmentCount: 1,
         secretCount: 0,
-        variableCount: 0
+        variableCount: 0,
+        maxAllowedEnvironments: expect.any(Number),
+        maxAllowedSecrets: expect.any(Number),
+        maxAllowedVariables: expect.any(Number),
+        totalEnvironments: expect.any(Number),
+        totalSecrets: expect.any(Number),
+        totalVariables: expect.any(Number)
       })
     })
 
@@ -1133,7 +1159,13 @@ describe('Project Controller Tests', () => {
       updatedAt: expect.any(String),
       environmentCount: 1,
       secretCount: 0,
-      variableCount: 0
+      variableCount: 0,
+      maxAllowedEnvironments: expect.any(Number),
+      maxAllowedSecrets: expect.any(Number),
+      maxAllowedVariables: expect.any(Number),
+      totalEnvironments: expect.any(Number),
+      totalSecrets: expect.any(Number),
+      totalVariables: expect.any(Number)
     })
   })
 

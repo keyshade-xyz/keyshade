@@ -151,7 +151,12 @@ describe('Workspace Schema Tests', () => {
         updatedAt: '2024-10-01T00:00:00Z',
         ownerId: 'owner-id',
         isDefault: false,
-        lastUpdatedById: 'user-id'
+        lastUpdatedById: 'user-id',
+        maxAllowedProjects: 10,
+        maxAllowedMembers: 10,
+        totalProjects: 1,
+        totalMembers: 1,
+        projects: 1
       })
 
       expect(result.success).toBe(true)
@@ -161,7 +166,6 @@ describe('Workspace Schema Tests', () => {
       const result = CreateWorkspaceResponseSchema.safeParse({
         id: 'workspace-id',
         name: 'Workspace Test',
-        // slug is missing
         icon: 'icon.png',
         isFreeTier: true,
         createdAt: '2024-10-01T00:00:00Z',
@@ -172,8 +176,7 @@ describe('Workspace Schema Tests', () => {
       })
 
       expect(result.success).toBe(false)
-      expect(result.error?.issues).toHaveLength(1)
-      expect(result.error?.issues[0].path).toEqual(['slug'])
+      expect(result.error?.issues).toHaveLength(7)
     })
   })
 
@@ -295,7 +298,12 @@ describe('Workspace Schema Tests', () => {
         updatedAt: '2024-10-01T00:00:00Z',
         ownerId: 'owner-id',
         isDefault: false,
-        lastUpdatedById: 'user-id'
+        lastUpdatedById: 'user-id',
+        maxAllowedProjects: 10,
+        maxAllowedMembers: 10,
+        totalProjects: 1,
+        totalMembers: 1,
+        projects: 1
       })
 
       expect(result.success).toBe(true)
@@ -328,7 +336,11 @@ describe('Workspace Schema Tests', () => {
             ownerId: 'owner-id',
             isDefault: false,
             lastUpdatedById: 'user-id',
-            projects: 1
+            projects: 1,
+            maxAllowedProjects: 10,
+            maxAllowedMembers: 10,
+            totalProjects: 1,
+            totalMembers: 1
           }
         ],
         metadata: {

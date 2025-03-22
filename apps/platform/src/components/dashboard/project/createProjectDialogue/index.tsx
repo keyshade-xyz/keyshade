@@ -40,7 +40,10 @@ export default function CreateProjectDialogue(): JSX.Element {
     createProjectOpenAtom
   )
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const [isViewAndDownloadProjectKeysDialogOpen, setIsViewAndDownloadProjectKeysDialogOpen] = useAtom(viewAndDownloadProjectKeysOpenAtom)
+  const [
+    isViewAndDownloadProjectKeysDialogOpen,
+    setIsViewAndDownloadProjectKeysDialogOpen
+  ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
 
   const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
 
@@ -59,7 +62,11 @@ export default function CreateProjectDialogue(): JSX.Element {
     accessLevel: 'PRIVATE'
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [projectKeys, setProjectKeys] = useState<{ projectName: string, storePrivateKey: boolean, keys: {publicKey: string; privateKey: string} }>();
+  const [projectKeys, setProjectKeys] = useState<{
+    projectName: string
+    storePrivateKey: boolean
+    keys: { publicKey: string; privateKey: string }
+  }>()
 
   const createProject = useHttp(() =>
     ControllerInstance.getInstance().projectController.createProject({
@@ -86,17 +93,7 @@ export default function CreateProjectDialogue(): JSX.Element {
         const { data, success } = await createProject()
 
         if (success && data) {
-          setProjects([
-            ...projects,
-            {
-              ...data,
-              environmentCount: newProjectData.environments
-                ? newProjectData.environments.length
-                : 0,
-              secretCount: 0,
-              variableCount: 0
-            }
-          ])
+          setProjects([...projects, data])
           setProjectKeys({
             projectName: data.name,
             storePrivateKey: data.storePrivateKey,
@@ -112,17 +109,21 @@ export default function CreateProjectDialogue(): JSX.Element {
         toast.dismiss()
       }
     }
-  }, [selectedWorkspace, newProjectData.name, newProjectData.environments, createProject, setProjects, projects, setIsCreateProjectDialogOpen])
+  }, [
+    selectedWorkspace,
+    newProjectData.name,
+    createProject,
+    setProjects,
+    projects,
+    setIsCreateProjectDialogOpen
+  ])
 
-  const toggleDialog = useCallback(
-    () => {
-      setIsCreateProjectDialogOpen((prev) => !prev)
-      if (!isCreateProjectDialogOpen) {
-        setNewProjectData((prev) => ({ ...prev, storePrivateKey: false })) // Reset switch state
-      }
-    },
-    [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen]
-  )
+  const toggleDialog = useCallback(() => {
+    setIsCreateProjectDialogOpen((prev) => !prev)
+    if (!isCreateProjectDialogOpen) {
+      setNewProjectData((prev) => ({ ...prev, storePrivateKey: false })) // Reset switch state
+    }
+  }, [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen])
 
   useEffect(() => {
     if (newProjectData.storePrivateKey && privateKeyWarningRef.current) {
@@ -132,9 +133,9 @@ export default function CreateProjectDialogue(): JSX.Element {
 
   useEffect(() => {
     if (projectKeys) {
-      setIsViewAndDownloadProjectKeysDialogOpen(true);
+      setIsViewAndDownloadProjectKeysDialogOpen(true)
     }
-  }, [projectKeys, setIsViewAndDownloadProjectKeysDialogOpen]);
+  }, [projectKeys, setIsViewAndDownloadProjectKeysDialogOpen])
 
   return (
     <>
@@ -217,8 +218,9 @@ export default function CreateProjectDialogue(): JSX.Element {
                   onChange={(e) => {
                     setNewProjectData((prev) => ({
                       ...prev,
-                      environments: (prev.environments || []).map((env, index) =>
-                        index === 0 ? { ...env, name: e.target.value } : env
+                      environments: (prev.environments || []).map(
+                        (env, index) =>
+                          index === 0 ? { ...env, name: e.target.value } : env
                       )
                     }))
                   }}
@@ -240,10 +242,11 @@ export default function CreateProjectDialogue(): JSX.Element {
                   onChange={(e) => {
                     setNewProjectData((prev) => ({
                       ...prev,
-                      environments: (prev.environments || []).map((env, index) =>
-                        index === 0
-                          ? { ...env, description: e.target.value }
-                          : env
+                      environments: (prev.environments || []).map(
+                        (env, index) =>
+                          index === 0
+                            ? { ...env, description: e.target.value }
+                            : env
                       )
                     }))
                   }}
@@ -263,7 +266,10 @@ export default function CreateProjectDialogue(): JSX.Element {
                   onValueChange={(currValue) => {
                     setNewProjectData((prevData) => ({
                       ...prevData,
-                      accessLevel: currValue as 'GLOBAL' | 'INTERNAL' | 'PRIVATE'
+                      accessLevel: currValue as
+                        | 'GLOBAL'
+                        | 'INTERNAL'
+                        | 'PRIVATE'
                     }))
                   }}
                   value={newProjectData.accessLevel}
@@ -311,13 +317,20 @@ export default function CreateProjectDialogue(): JSX.Element {
                     />
                   </div>
                 </div>
-                {
-                  newProjectData.storePrivateKey ? (
-                    <div className="p-4 border border-yellow-300 rounded-lg" ref={privateKeyWarningRef}>
-                      <p className="text-[0.8rem] font-normal text-[#A1A1AA]">Enabling this would save the private key in our database. This would allow all permissible members to read your secrets. In the unnatural event of a data breach, your secrets might be exposed to attackers. We recommend you to not save your private key.</p>
-                    </div>
-                  ) : null
-                }
+                {newProjectData.storePrivateKey ? (
+                  <div
+                    className="rounded-lg border border-yellow-300 p-4"
+                    ref={privateKeyWarningRef}
+                  >
+                    <p className="text-[0.8rem] font-normal text-[#A1A1AA]">
+                      Enabling this would save the private key in our database.
+                      This would allow all permissible members to read your
+                      secrets. In the unnatural event of a data breach, your
+                      secrets might be exposed to attackers. We recommend you to
+                      not save your private key.
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
@@ -333,11 +346,9 @@ export default function CreateProjectDialogue(): JSX.Element {
           </div>
         </DialogContent>
       </Dialog>
-      {
-        isViewAndDownloadProjectKeysDialogOpen ? (
-          <ViewAndDownloadProjectKeysDialog projectKeys={projectKeys} />
-        ) : null
-      }
+      {isViewAndDownloadProjectKeysDialogOpen ? (
+        <ViewAndDownloadProjectKeysDialog projectKeys={projectKeys} />
+      ) : null}
     </>
   )
 }

@@ -351,7 +351,7 @@ describe('Workspace Membership Controller Tests', () => {
       // Invite users until the tier limit is reached
       for (
         let i = 0;
-        i < tierLimitService.getMemberTierLimit(workspace1) - 1; // Subtract 1 for the user who owns the workspace
+        i < tierLimitService.getMemberTierLimit(workspace1.id) - 1; // Subtract 1 for the user who owns the workspace
         i++
       ) {
         // Create a user

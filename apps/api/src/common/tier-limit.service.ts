@@ -18,23 +18,23 @@ export class TierLimitService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  getProjectTierLimit(workspace: Workspace) {
+  getProjectTierLimit(workspaceId: Workspace['id']) {
     return FreeTierLimit.MAX_PROJECTS_PER_WORKSPACE
   }
 
-  getEnvironmentTierLimit(project: Project) {
+  getEnvironmentTierLimit(projectId: Project['id']) {
     return FreeTierLimit.MAX_ENVIRONMENTS_PER_PROJECT
   }
 
-  getSecretTierLimit(project: Project) {
+  getSecretTierLimit(projectId: Project['id']) {
     return FreeTierLimit.MAX_SECRETS_PER_PROJECT
   }
 
-  getVariableTierLimit(project: Project) {
+  getVariableTierLimit(projectId: Project['id']) {
     return FreeTierLimit.MAX_VARIABLES_PER_PROJECT
   }
 
-  getMemberTierLimit(workspace: Workspace) {
+  getMemberTierLimit(workspaceId: Workspace['id']) {
     return FreeTierLimit.MAX_MEMBERS_PER_WORKSPACE
   }
 
@@ -61,7 +61,7 @@ export class TierLimitService {
       `Fetched ${projects.length} projects of workspace ${workspace.id}`
     )
 
-    const tierLimit = this.getProjectTierLimit(workspace)
+    const tierLimit = this.getProjectTierLimit(workspace.id)
     this.logger.log(
       `Tier limit for projects in workspace ${workspace.slug} is ${tierLimit}`
     )
@@ -107,7 +107,7 @@ export class TierLimitService {
       `Fetched ${environments.length} environments of project ${project.id}`
     )
 
-    const tierLimit = this.getEnvironmentTierLimit(project)
+    const tierLimit = this.getEnvironmentTierLimit(project.id)
     this.logger.log(
       `Tier limit for environments in project ${project.slug} is ${tierLimit}`
     )
@@ -153,7 +153,7 @@ export class TierLimitService {
       `Fetched ${secrets.length} secrets of project ${project.id}`
     )
 
-    const tierLimit = this.getSecretTierLimit(project)
+    const tierLimit = this.getSecretTierLimit(project.id)
     this.logger.log(
       `Tier limit for secrets in project ${project.slug} is ${tierLimit}`
     )
@@ -199,7 +199,7 @@ export class TierLimitService {
       `Fetched ${variables.length} variables of project ${project.id}`
     )
 
-    const tierLimit = this.getVariableTierLimit(project)
+    const tierLimit = this.getVariableTierLimit(project.id)
     this.logger.log(
       `Tier limit for variables in project ${project.slug} is ${tierLimit}`
     )
@@ -245,7 +245,7 @@ export class TierLimitService {
       `Fetched ${members.length} members of workspace ${workspace.id}`
     )
 
-    const tierLimit = this.getMemberTierLimit(workspace)
+    const tierLimit = this.getMemberTierLimit(workspace.id)
     this.logger.log(
       `Tier limit for members in workspace ${workspace.slug} is ${tierLimit}`
     )

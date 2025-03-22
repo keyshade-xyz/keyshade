@@ -232,7 +232,7 @@ describe('Variable Controller Tests', () => {
       // Create variables until tier limit is reached
       for (
         let x = 100;
-        x < 100 + tierLimitService.getVariableTierLimit(project1) - 1; // Subtract 1 for the variables created above
+        x < 100 + tierLimitService.getVariableTierLimit(project1.id) - 1; // Subtract 1 for the variables created above
         x++
       ) {
         await variableService.createVariable(
