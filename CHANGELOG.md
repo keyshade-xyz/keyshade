@@ -1,3 +1,9 @@
+## [2.14.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.4...v2.14.0-stage.5) (2025-03-22)
+
+### 🚀 Features
+
+* **platform:** Create roles  ([#831](https://github.com/keyshade-xyz/keyshade/issues/831)) ([e07dac4](https://github.com/keyshade-xyz/keyshade/commit/e07dac45d68eb5fc7268daab23edf9e7a22c4ee6))
+
 ## [2.14.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.3...v2.14.0-stage.4) (2025-03-21)
 
 ### 🐛 Bug Fixes
