@@ -125,13 +125,6 @@ export class WorkspaceRoleService {
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
-          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
-            throw new BadRequestException(
-              constructErrorBody(
-                'Environment slugs in the project are required',
-                `Environment slugs in the project ${pe.projectSlug} are required`
-              )
-            )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
             const project = await this.prisma.project.findFirst({
