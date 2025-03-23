@@ -14,7 +14,7 @@ export function AuthProviderCard({ provider, email, isActive, icon: Icon }: Auth
             <div className="flex items-center gap-2.5">
                 <div className="flex items-center gap-2">
                     <Icon />
-                    <span>{provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase()}</span>
+                    <span>{provider}</span>
                 </div>
                 {isActive ? <span className="w-14 h-5 flex items-center justify-center text-xs text-[#6EE7B7] bg-[#052E16] rounded-md">
                     Active

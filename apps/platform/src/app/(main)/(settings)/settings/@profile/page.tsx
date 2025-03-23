@@ -10,6 +10,7 @@ import GeneralSettings from '@/components/userSettings/profile/generalSettings'
 import EmailSettings from '@/components/userSettings/profile/emailSettings'
 import DeleteProfile from '@/components/userSettings/profile/deleteProfile'
 import ApiKeySection from '@/components/userSettings/apiKeys/apiKeySection'
+import AuthProvider from '@/components/userSettings/profile/authProvider'
 
 function ProfilePage(): React.JSX.Element {
   const setUser = useSetAtom(userAtom)
@@ -39,6 +40,7 @@ function ProfilePage(): React.JSX.Element {
       </div>
       <GeneralSettings />
       <EmailSettings />
+      <AuthProvider />
       <Separator className="w-full bg-white/15" />
       <ApiKeySection />
       <Separator className="w-full bg-white/15" />
