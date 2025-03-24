@@ -17,6 +17,7 @@ import RolesSVG from './roles.svg'
 import CheckmarkSVG from './checkmark.svg'
 import TrashWhiteSVG from './trash-white.svg'
 import RollbackSVG from './rollback.svg'
+import MinusSquareSVG from './minus-square.svg'
 import EyeOpenSVG from './eye.svg'
 import EyeSlashSVG from './eye-slash.svg'
 import InfoSVG from './info.svg'
@@ -43,5 +44,6 @@ export {
   EyeSlashSVG,
   InfoSVG,
   TrashWhiteSVG,
-  RollbackSVG
+  RollbackSVG,
+  MinusSquareSVG,
 }

@@ -167,6 +167,7 @@ export default function AddApiKeyDialog() {
 
             <div className="h-[calc(85vh-20rem)] overflow-y-auto">
               <AuthoritySelector
+                parent="API_KEY"
                 selectedPermissions={selectedPermissions}
                 setSelectedPermissions={setSelectedPermissions}
               />
