@@ -71,8 +71,8 @@ export function Combobox(): React.JSX.Element {
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setSelectedWorkspace({ ...data, projects: 0 })
-        setAllWorkspaces((prev) => [...prev, { ...data, projects: 0 }])
+        setSelectedWorkspace(data)
+        setAllWorkspaces((prev) => [...prev, data])
         setOpen(false)
       }
     } finally {

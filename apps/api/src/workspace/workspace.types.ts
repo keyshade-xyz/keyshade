@@ -17,3 +17,8 @@ export interface WorkspaceWithLastUpdatedByAndOwner
     ownedSince: WorkspaceMember['createdOn']
   }
 }
+
+export interface WorkspaceWithLastUpdatedByAndOwnerAndProjects
+  extends WorkspaceWithLastUpdatedByAndOwner {
+  projects: number
+}
