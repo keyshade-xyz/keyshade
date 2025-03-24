@@ -42,10 +42,10 @@ function Sidebar(): JSX.Element {
       matchTo: '/integrations'
     },
     {
-      name: 'Workspace Settings',
+      name: 'Settings',
       icon: <SettingsSVG />,
-      link: `/${selectedWorkspace?.slug}/settings`,
-      matchTo: `/${selectedWorkspace?.slug}/settings`
+      link: `/${selectedWorkspace?.slug}`,
+      matchTo: `/${selectedWorkspace?.slug}`
     }
   ]
 
