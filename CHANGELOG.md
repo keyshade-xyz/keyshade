@@ -1,3 +1,9 @@
+## [2.14.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.5...v2.14.0-stage.6) (2025-03-24)
+
+### 🚀 Features
+
+* **platform:** Added workspace settings page ([#808](https://github.com/keyshade-xyz/keyshade/issues/808)) ([c62304c](https://github.com/keyshade-xyz/keyshade/commit/c62304c301c51eb6c8e2c899372bdc3bd0e87f9d))
+
 ## [2.14.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.4...v2.14.0-stage.5) (2025-03-22)
 
 ### 🚀 Features
