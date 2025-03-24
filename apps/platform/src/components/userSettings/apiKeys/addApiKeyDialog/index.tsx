@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react'
 import type { CreateApiKeyRequest, AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { ApiKeyOneTimeDisplayDialog } from '../apiKeyOneTimeDisplayDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,7 +17,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   createApiKeyOpenAtom,
   apiKeysOfProjectAtom,
-  oneTimeSecretDisplayAtom,
+  apiKeyOneTimeDisplayDialogOpenAtom,
   oneTimeSecretValueAtom
 } from '@/store'
 import {
@@ -29,7 +30,6 @@ import {
 } from '@/components/ui/dialog'
 import { useHttp } from '@/hooks/use-http'
 import AuthoritySelector from '@/components/common/authority-selector'
-import { OneTimeSecretDisplay } from '@/components/dashboard/secret/OneTimeSecretDisplay'
 
 export default function AddApiKeyDialog() {
   const [isLoading, setIsLoading] = useState(false)
@@ -40,9 +40,8 @@ export default function AddApiKeyDialog() {
     name: '',
     expiresAfter: '24'
   })
-  const [, setOneTimeSecretOpen] = useAtom(oneTimeSecretDisplayAtom)
+  const [, setApiKeyOneTimeDisplayOpen] = useAtom(apiKeyOneTimeDisplayDialogOpenAtom)
   const [, setOneTimeSecretValue] = useAtom(oneTimeSecretValueAtom)
-  const oneTimeSecretValue = useAtomValue(oneTimeSecretValueAtom);
 
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<AuthorityEnum>
@@ -70,11 +69,9 @@ export default function AddApiKeyDialog() {
       if (success && data) {
         setApiKeys((prev) => [...prev, data])
 
-        // Show the one-time secret display
         setOneTimeSecretValue(data.value)
-        setOneTimeSecretOpen(true)
+        setApiKeyOneTimeDisplayOpen(true)
 
-        // Close the create dialog
         setIsCreateApiKeyOpen(false)
       }
     } finally {
@@ -86,7 +83,7 @@ export default function AddApiKeyDialog() {
       })
       setSelectedPermissions(new Set())
     }
-  }, [newApiKeyData.name, createApiKey, setApiKeys, setIsCreateApiKeyOpen, setOneTimeSecretOpen, setOneTimeSecretValue])
+  }, [newApiKeyData.name, createApiKey, setApiKeys, setIsCreateApiKeyOpen, setApiKeyOneTimeDisplayOpen, setOneTimeSecretValue])
 
 
   return (
@@ -189,7 +186,7 @@ export default function AddApiKeyDialog() {
       </DialogContent>
     </Dialog>
 
-    <OneTimeSecretDisplay secretValue={oneTimeSecretValue} />
+    <ApiKeyOneTimeDisplayDialog />
     </>
   )
 }
