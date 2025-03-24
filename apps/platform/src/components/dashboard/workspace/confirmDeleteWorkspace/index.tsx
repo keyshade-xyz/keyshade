@@ -4,7 +4,6 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
-import type { Workspace } from '@keyshade/schema'
 import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
@@ -63,7 +62,7 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
 
           const remainingWorkspaces = allWorkspaces.filter(
             (workspace) => workspace.id !== selectedWorkspace.id
-          ) as (Workspace & { projects: number })[]
+          )
           setAllWorkspaces(remainingWorkspaces)
           setSelectedWorkspace(remainingWorkspaces[0])
         }
