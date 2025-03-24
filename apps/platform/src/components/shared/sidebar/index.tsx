@@ -24,12 +24,6 @@ function Sidebar(): JSX.Element {
       matchTo: '/'
     },
     {
-      name: 'Overview',
-      icon: <SettingsSVG />,
-      link: `/${selectedWorkspace?.slug}`,
-      matchTo: `/${selectedWorkspace?.slug}`
-    },
-    {
       name: 'Teams',
       icon: <TeamSVG />,
       link: '/teams',
@@ -46,6 +40,12 @@ function Sidebar(): JSX.Element {
       icon: <IntegrationSVG />,
       link: '/',
       matchTo: '/integrations'
+    },
+    {
+      name: 'Settings',
+      icon: <SettingsSVG />,
+      link: `/${selectedWorkspace?.slug}`,
+      matchTo: `/${selectedWorkspace?.slug}`
     }
   ]
 

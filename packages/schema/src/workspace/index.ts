@@ -14,11 +14,13 @@ export const WorkspaceSchema = z.object({
   ownerId: z.string(),
   isDefault: z.boolean(),
   lastUpdatedById: z.string().nullable(),
-  lastUpdateBy: z.object({
-    id: z.string(),
-    name: z.string(),
-    profilePictureUrl: z.string().nullable()
-  }),
+  lastUpdateBy: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
+    .optional(),
   ownedBy: z.object({
     id: z.string(),
     name: z.string(),
