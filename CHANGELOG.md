@@ -1,3 +1,13 @@
+## [2.14.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.6...v2.14.0-stage.7) (2025-03-25)
+
+### 🚀 Features
+
+* **api:** Return workspace membership creation date ([#842](https://github.com/keyshade-xyz/keyshade/issues/842)) ([cf60c35](https://github.com/keyshade-xyz/keyshade/commit/cf60c35ab68e0fa4a98563cd51f146db04c8fa5c))
+
+### 🔨 Code Refactoring
+
+* **platform:** Add auth provider card in profile settings ([#841](https://github.com/keyshade-xyz/keyshade/issues/841)) ([8e79b9d](https://github.com/keyshade-xyz/keyshade/commit/8e79b9d3037cbe875916b168c5787cd63ba6ff00))
+
 ## [2.14.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.5...v2.14.0-stage.6) (2025-03-24)
 
 ### 🚀 Features
