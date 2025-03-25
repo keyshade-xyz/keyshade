@@ -94,6 +94,8 @@ export const GetMembersResponseSchema = PageResponseSchema(
           )
         })
       })
-    )
+    ),
+    invitationAccepted: z.boolean(),
+    createdOn: z.string().datetime()
   })
 )

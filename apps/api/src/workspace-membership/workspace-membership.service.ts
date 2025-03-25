@@ -544,7 +544,8 @@ export class WorkspaceMembershipService {
             }
           }
         },
-        invitationAccepted: true
+        invitationAccepted: true,
+        createdOn: true
       }
     })
 
