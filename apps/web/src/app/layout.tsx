@@ -8,11 +8,14 @@ const name = 'keyshade'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://keyshade.xyz/'),
+
   title: {
     default: name,
     template: `%s | ${name}`
   },
+
   description,
+
   keywords: [
     'Keyshade',
     'secrets integration',
@@ -47,7 +50,9 @@ export const metadata: Metadata = {
     'codebase encryption',
     'team-based secrets management'
   ],
+
   applicationName: name,
+
   openGraph: {
     title: name,
     description,
@@ -55,6 +60,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: 'https://keyshade.xyz/thumbnail.png'
   },
+
   twitter: {
     card: 'summary_large_image',
     title: name,
@@ -62,6 +68,7 @@ export const metadata: Metadata = {
     creator: '@keyshade_xyz',
     creatorId: '1738929014016966656'
   },
+
   robots: {
     index: true,
     follow: true,
