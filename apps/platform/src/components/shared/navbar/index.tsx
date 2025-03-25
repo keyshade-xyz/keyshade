@@ -5,7 +5,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAtomValue } from 'jotai'
-import { SecretSVG, VariableSVG, EnvironmentSVG } from '@public/svg/dashboard'
+import {
+  SecretSVG,
+  VariableSVG,
+  EnvironmentSVG,
+  FolderSVG
+} from '@public/svg/dashboard'
 import { DropdownSVG } from '@public/svg/shared'
 import SearchModel from './searchModel'
 import {
@@ -41,6 +46,7 @@ function Navbar(): React.JSX.Element {
       { id: 'billing', label: 'Billing' }
     ],
     project: [
+      { id: 'overview', label: 'Overview', icon: <FolderSVG /> },
       { id: 'secret', label: 'Secret', icon: <SecretSVG /> },
       { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
       { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }

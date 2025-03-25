@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue } from 'jotai'
@@ -16,7 +16,8 @@ import {
   shouldRevealSecretEnabled,
   secretsOfProjectAtom,
   selectedProjectAtom,
-  selectedSecretAtom
+  selectedSecretAtom,
+  projectPrivateKey
 } from '@/store'
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
@@ -47,13 +48,15 @@ function SecretPage(): React.JSX.Element {
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const privateKey = useMemo(
-    () =>
-      selectedProject?.storePrivateKey
-        ? selectedProject.privateKey
-        : localStorage.getItem(`${selectedProject?.name}_pk`) || null,
-    [selectedProject]
-  )
+  const [privateKey, setPrivateKey] = useAtom(projectPrivateKey)
+
+  useEffect(() => {
+    const key = selectedProject?.storePrivateKey
+      ? selectedProject.privateKey
+      : localStorage.getItem(`${selectedProject?.name}_pk`) || null
+    setPrivateKey(key)
+  }, [selectedProject, setPrivateKey])
+
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,

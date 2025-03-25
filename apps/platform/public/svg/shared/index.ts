@@ -20,6 +20,9 @@ import RollbackSVG from './rollback.svg'
 import EyeOpenSVG from './eye.svg'
 import EyeSlashSVG from './eye-slash.svg'
 import InfoSVG from './info.svg'
+import LockSVG from './lock.svg'
+import RegenerateSVG from './regenerate.svg'
+import TickCircleSVG from './tick-circle.svg'
 
 export {
   DropdownSVG,
@@ -43,5 +46,8 @@ export {
   EyeSlashSVG,
   InfoSVG,
   TrashWhiteSVG,
-  RollbackSVG
+  RollbackSVG,
+  LockSVG,
+  RegenerateSVG,
+  TickCircleSVG
 }
