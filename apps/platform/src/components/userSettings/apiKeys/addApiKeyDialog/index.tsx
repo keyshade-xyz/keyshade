@@ -40,8 +40,8 @@ export default function AddApiKeyDialog() {
     name: '',
     expiresAfter: '24'
   })
-  const [, setApiKeyOneTimeDisplayOpen] = useAtom(apiKeyOneTimeDisplayDialogOpenAtom)
-  const [, setOneTimeSecretValue] = useAtom(oneTimeSecretValueAtom)
+  const setApiKeyOneTimeDisplayOpen = useSetAtom(apiKeyOneTimeDisplayDialogOpenAtom)
+  const setOneTimeSecretValue = useSetAtom(oneTimeSecretValueAtom)
 
   const [selectedPermissions, setSelectedPermissions] = useState<
     Set<AuthorityEnum>
