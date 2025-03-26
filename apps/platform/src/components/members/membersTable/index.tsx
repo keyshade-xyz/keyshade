@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import dayjs from 'dayjs'
 import {
   Table,
   TableBody,
@@ -23,39 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-
-// const data: Payment[] = [
-//   {
-//     id: 'm5gr84i9',
-//     amount: 316,
-//     status: 'success',
-//     email: 'ken99@yahoo.com'
-//   },
-//   {
-//     id: '3u1reuv4',
-//     amount: 242,
-//     status: 'success',
-//     email: 'Abe45@gmail.com'
-//   },
-//   {
-//     id: 'derv1ws0',
-//     amount: 837,
-//     status: 'processing',
-//     email: 'Monserrat44@gmail.com'
-//   },
-//   {
-//     id: '5kma53ae',
-//     amount: 874,
-//     status: 'success',
-//     email: 'Silas22@gmail.com'
-//   },
-//   {
-//     id: 'bhqecj4p',
-//     amount: 721,
-//     status: 'failed',
-//     email: 'carmella@hotmail.com'
-//   }
-// ]
 
 export interface Payment {
   id: string
@@ -137,7 +105,7 @@ export default function MembersTable(): React.JSX.Element {
                     </div>
                   </TableCell>
                   <TableCell className='text-left w-[30%]'>
-                    March 20, 2025
+                    {dayjs(member.createdOn).format('MMM D, YYYY')}
                   </TableCell>
                   <TableCell className="text-left w-[40%]">
                     <div className='w-[8rem] py-3 flex justify-center items-center rounded-md bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC]'>{member.roles[0].role.name}</div>
