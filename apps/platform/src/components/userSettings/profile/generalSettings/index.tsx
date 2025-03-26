@@ -2,12 +2,12 @@ import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { User } from 'lucide-react'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
+import AvatarComponent from '@/components/common/avatar'
 
 export default function GeneralSettings(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
@@ -61,12 +61,9 @@ export default function GeneralSettings(): React.JSX.Element {
       <div className="flex items-center gap-4">
         <div className="aspect-square w-[60px] rounded-full" >
           {user?.profilePictureUrl ? (
-            <Image
-              alt="Profile Picture"
-              className="rounded-full"
-              height={60}
-              src={user.profilePictureUrl}
-              width={60}
+            <AvatarComponent
+              name={user.name || 'User'}
+              profilePictureUrl={user.profilePictureUrl}
             />
           ) : (
             <div className='h-full w-full flex justify-center items-center border-2 border-white/70 rounded-full'>
