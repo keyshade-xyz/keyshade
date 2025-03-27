@@ -1,6 +1,4 @@
 'use client'
-
-import { useEffect, useState } from 'react'
 import { useAtom } from 'jotai'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,29 +8,21 @@ import {
   DialogTitle,
   DialogOverlay,
 } from '@/components/ui/dialog'
-import { 
-  apiKeyOneTimeDisplayDialogOpenAtom, 
-  oneTimeSecretValueAtom 
+import {
+  apiKeyOneTimeDisplayDialogOpenAtom,
+  oneTimeSecretValueAtom
 } from '@/store'
 import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 
 export function ApiKeyOneTimeDisplayDialog() {
   const [isOpen, setIsOpen] = useAtom(apiKeyOneTimeDisplayDialogOpenAtom)
   const [apiKeyValue, setApiKeyValue] = useAtom(oneTimeSecretValueAtom)
-  const [hasMounted, setHasMounted] = useState(false)
 
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
-
-  if (!hasMounted) {
-    return null 
-  }
 
   const handleClose = (open: boolean) => {
     setIsOpen(open)
     if (!open) {
-      setApiKeyValue("") 
+      setApiKeyValue("")
     }
   }
 
