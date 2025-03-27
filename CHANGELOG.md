@@ -1,3 +1,9 @@
+## [2.14.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.7...v2.14.0-stage.8) (2025-03-27)
+
+### 🐛 Bug Fixes
+
+* **platform:** Added profile picture in the user settings with proper fallback ([#845](https://github.com/keyshade-xyz/keyshade/issues/845)) ([f32d90e](https://github.com/keyshade-xyz/keyshade/commit/f32d90eafb8f8fb2fa822df72ca3225600d12b1c))
+
 ## [2.14.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.6...v2.14.0-stage.7) (2025-03-25)
 
 ### 🚀 Features
