@@ -1,18 +1,101 @@
 'use client'
 import { AddSVG } from '@public/svg/shared'
+import React, { useCallback, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { useAtomValue } from 'jotai'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
+
+interface SelectedRoles {
+  name: string;
+  roleSlug: string;
+}
 
 export default function MembersHeader(): React.JSX.Element {
+  const [email, setEmail] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [selectedRoles, setSelectedRoles] = useState<SelectedRoles[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const roles = useAtomValue(rolesOfWorkspaceAtom)
+  const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+
+  const toggleRole = (role: SelectedRoles) => {
+    setSelectedRoles(prev =>
+      prev.includes(role)
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    )
+  }
+
+  const inviteMember = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.inviteUsers({
+      workspaceSlug: currentWorkspace!.slug,
+      members: [{
+        email,
+        roleSlugs: selectedRoles.map(role => role.roleSlug)
+      }]
+    })
+  )
+
+  const handleClose = useCallback(() => {
+    setIsDropdownOpen(false)
+    setEmail("")
+    setSelectedRoles([])
+  }, [])
+
+  const handleInviteMembers = useCallback(async () => {
+    if (email.trim() === '') {
+      toast.error('Email is required')
+      return
+    }
+
+    if (selectedRoles.length === 0) {
+      toast.error("Please select atleast one role")
+      return
+    }
+
+    setIsLoading(true)
+    toast.loading('Sending invite...')
+
+    try {
+      const { success } = await inviteMember()
+
+      if (success) {
+        toast.success('Invite sent successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              Member will be added once they accept the invite.
+            </p>
+          )
+        })
+
+        handleClose()
+      }
+    } finally {
+      toast.dismiss()
+      setIsLoading(false)
+    }
+  }, [
+    email,
+    selectedRoles.length,
+    handleClose,
+    inviteMember
+  ])
+
   return (
     <div className="flex justify-between">
       <div className="text-3xl font-medium">Members</div>
@@ -24,45 +107,77 @@ export default function MembersHeader(): React.JSX.Element {
               <AddSVG /> Add Member
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a new secret</DialogTitle>
-              <DialogDescription>
-                Add a new secret to the project. This secret will be encrypted
-                and stored securely.
-              </DialogDescription>
+          <DialogContent className='p-6'>
+            <DialogHeader className='border-b border-white/20 pt-2 pb-6'>
+              <DialogTitle>Share this project with new members</DialogTitle>
             </DialogHeader>
-            <div>
-              <div className="flex flex-col gap-y-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Key
-                  </Label>
+            <div className='flex flex-col gap-4'>
+              <div className="flex flex-col gap-2">
+                <Label className="block text-white text-sm font-medium mb-2">Email</Label>
+                <div className='flex flex-row gap-1'>
                   <Input
-                    className="col-span-3"
-                    id="username"
-                    // onChange={(e) => {
-                    //   setKey(e.target.value)
-                    // }}
-                    placeholder="Enter the name of the secret"
+                    className="bg-white/5 w-3/4 text-white outline-none"
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    value={email}
                   />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right" htmlFor="username">
-                    Value
-                  </Label>
-                  <Input
-                    className="col-span-3"
-                    id="username"
-                    // onChange={(e) => {
-                    //   setValue(e.target.value)
-                    // }}
-                    placeholder="Enter the value of the secret"
-                  />
+                  <Button
+                    className="w-1/4 px-4 py-2 bg-[#262626] border border-white/10 text-white/55"
+                    disabled={isLoading}
+                    onClick={handleInviteMembers}
+                  >
+                    Invite Member
+                  </Button>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end">
-                <Button variant="secondary">Add Key</Button>
+
+              {/* Roles */}
+              <div className="flex flex-col gap-2 mt-5 relative">
+                <Label className="block text-white text-sm font-medium mb-2">Role(s)</Label>
+                <Button
+                  className="w-3/4 px-3 py-2 flex items-center justify-between bg-white/5 hover:bg-white/5"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  variant="outline"
+                >
+                  <div className="flex gap-2 items-center flex-1 mr-2">
+                    {selectedRoles.length === 0 ? (
+                      <span className="text-gray-400">Select roles</span>
+                    ) : (
+                      <>
+                        {selectedRoles.slice(0, 2).map((role) => (
+                          <span
+                            className="bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC] text-xs p-2 rounded-md"
+                            key={role.roleSlug}
+                          >
+                            {role.name}
+                          </span>
+                        ))}
+                        {selectedRoles.length > 2 && (
+                          <span className="text-[#A5F3FC] text-xs p-2">
+                            +{selectedRoles.length - 2} more
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <ChevronDown className={`transition-transform flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                </Button>
+
+                {isDropdownOpen ? <div className="absolute top-full left-0 right-0 mt-1 w-3/4 bg-[#27272A] hover:bg-[#27272A] rounded-md shadow-lg overflow-hidden z-50">
+                  {roles.map((role) => (
+                    <Label
+                      className="flex items-center px-3 py-2 hover:bg-[#3C3C3C] cursor-pointer"
+                      key={role.id}
+                    >
+                      <Checkbox
+                        checked={selectedRoles.includes({ name: role.name, roleSlug: role.slug })}
+                        className="mr-2 rounded-sm data-[state=checked]:text-black data-[state=checked]:border-none border-none data-[state=checked]:bg-white bg-gray-400"
+                        onCheckedChange={() => toggleRole({ name: role.name, roleSlug: role.slug })}
+                      />
+                      <span className="text-white">{role.name}</span>
+                    </Label>
+                  ))}
+                </div> : null}
               </div>
             </div>
           </DialogContent>
