@@ -1,3 +1,15 @@
+## [2.14.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.8...v2.14.0-stage.9) (2025-03-28)
+
+### 🚀 Features
+
+* **platform:** One-Time Secret Display for API Key ([#771](https://github.com/keyshade-xyz/keyshade/issues/771)) ([#799](https://github.com/keyshade-xyz/keyshade/issues/799)) ([88e3ad9](https://github.com/keyshade-xyz/keyshade/commit/88e3ad94e41b65a89bcfa84b04d0ad8a1ce02fb2))
+
+## [2.14.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.7...v2.14.0-stage.8) (2025-03-27)
+
+### 🐛 Bug Fixes
+
+* **platform:** Added profile picture in the user settings with proper fallback ([#845](https://github.com/keyshade-xyz/keyshade/issues/845)) ([f32d90e](https://github.com/keyshade-xyz/keyshade/commit/f32d90eafb8f8fb2fa822df72ca3225600d12b1c))
+
 ## [2.14.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.6...v2.14.0-stage.7) (2025-03-25)
 
 ### 🚀 Features
