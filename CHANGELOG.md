@@ -1,3 +1,43 @@
+## [2.14.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.8...v2.14.0-stage.9) (2025-03-28)
+
+### 🚀 Features
+
+* **platform:** One-Time Secret Display for API Key ([#771](https://github.com/keyshade-xyz/keyshade/issues/771)) ([#799](https://github.com/keyshade-xyz/keyshade/issues/799)) ([88e3ad9](https://github.com/keyshade-xyz/keyshade/commit/88e3ad94e41b65a89bcfa84b04d0ad8a1ce02fb2))
+
+## [2.14.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.7...v2.14.0-stage.8) (2025-03-27)
+
+### 🐛 Bug Fixes
+
+* **platform:** Added profile picture in the user settings with proper fallback ([#845](https://github.com/keyshade-xyz/keyshade/issues/845)) ([f32d90e](https://github.com/keyshade-xyz/keyshade/commit/f32d90eafb8f8fb2fa822df72ca3225600d12b1c))
+
+## [2.14.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.6...v2.14.0-stage.7) (2025-03-25)
+
+### 🚀 Features
+
+* **api:** Return workspace membership creation date ([#842](https://github.com/keyshade-xyz/keyshade/issues/842)) ([cf60c35](https://github.com/keyshade-xyz/keyshade/commit/cf60c35ab68e0fa4a98563cd51f146db04c8fa5c))
+
+### 🔨 Code Refactoring
+
+* **platform:** Add auth provider card in profile settings ([#841](https://github.com/keyshade-xyz/keyshade/issues/841)) ([8e79b9d](https://github.com/keyshade-xyz/keyshade/commit/8e79b9d3037cbe875916b168c5787cd63ba6ff00))
+
+## [2.14.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.5...v2.14.0-stage.6) (2025-03-24)
+
+### 🚀 Features
+
+* **platform:** Added workspace settings page ([#808](https://github.com/keyshade-xyz/keyshade/issues/808)) ([c62304c](https://github.com/keyshade-xyz/keyshade/commit/c62304c301c51eb6c8e2c899372bdc3bd0e87f9d))
+
+## [2.14.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.4...v2.14.0-stage.5) (2025-03-22)
+
+### 🚀 Features
+
+* **platform:** Create roles  ([#831](https://github.com/keyshade-xyz/keyshade/issues/831)) ([e07dac4](https://github.com/keyshade-xyz/keyshade/commit/e07dac45d68eb5fc7268daab23edf9e7a22c4ee6))
+
+## [2.14.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.3...v2.14.0-stage.4) (2025-03-21)
+
+### 🐛 Bug Fixes
+
+* **platform:** Redirect to dashboard after updating profile details ([#840](https://github.com/keyshade-xyz/keyshade/issues/840)) ([daa3e07](https://github.com/keyshade-xyz/keyshade/commit/daa3e0797fe6a70fce224d7531ac6e53f605c7eb))
+
 ## [2.14.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.2...v2.14.0-stage.3) (2025-03-18)
 
 ### 🐛 Bug Fixes

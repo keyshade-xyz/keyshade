@@ -1,16 +1,14 @@
-import {
-  Authority,
-  EventSource,
-  EventType,
-  User,
-  Workspace
-} from '@prisma/client'
+import { Authority, EventSource, EventType, User } from '@prisma/client'
 import { CreateWorkspace } from '@/workspace/dto/create.workspace/create.workspace'
 import { PrismaService } from '@/prisma/prisma.service'
 import { Logger } from '@nestjs/common'
 import { v4 } from 'uuid'
 import generateEntitySlug from './slug-generator'
 import { createEvent } from './event'
+import {
+  WorkspaceWithLastUpdateBy,
+  WorkspaceWithLastUpdatedByAndOwner
+} from '@/workspace/workspace.types'
 
 /**
  * Creates a new workspace and adds the user as the owner.
@@ -25,7 +23,7 @@ export const createWorkspace = async (
   dto: CreateWorkspace,
   prisma: PrismaService,
   isDefault?: boolean
-): Promise<Workspace> => {
+): Promise<WorkspaceWithLastUpdatedByAndOwner> => {
   const logger = new Logger('createWorkspace')
 
   const workspaceId = v4()
@@ -53,6 +51,15 @@ export const createWorkspace = async (
               colorCode: '#FF0000'
             }
           ]
+        }
+      }
+    },
+    include: {
+      lastUpdatedBy: {
+        select: {
+          id: true,
+          name: true,
+          profilePictureUrl: true
         }
       }
     }
@@ -123,5 +130,72 @@ export const createWorkspace = async (
     prisma
   )
 
-  return workspace
+  return {
+    ...workspace,
+    lastUpdatedBy: {
+      id: user.id,
+      name: user.name,
+      profilePictureUrl: user.profilePictureUrl
+    },
+    ownedBy: {
+      id: user.id,
+      name: user.name,
+      profilePictureUrl: user.profilePictureUrl,
+      ownedSince: result[1].createdOn
+    }
+  }
+}
+
+/**
+ * Adds the owner's details to the workspace, including the owner's ID,
+ * name, profile picture URL, and when they became the owner.
+ *
+ * @param workspace The workspace to get the owner's details for
+ * @returns The workspace with the owner's details
+ */
+export async function associateWorkspaceOwnerDetails(
+  workspace: WorkspaceWithLastUpdateBy,
+  prisma: PrismaService
+): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  const logger = new Logger('associateWorkspaceOwnerDetails')
+
+  logger.log(`Associating owner details for workspace ${workspace.slug}`)
+
+  // Get owner
+  logger.log(`Fetching owner for workspace ${workspace.slug}`)
+  const owner = await prisma.user.findUnique({
+    where: {
+      id: workspace.ownerId
+    },
+    select: {
+      id: true,
+      name: true,
+      profilePictureUrl: true
+    }
+  })
+  logger.log(`User ${owner.id} is the owner of workspace ${workspace.slug}`)
+
+  // Get membership
+  logger.log(`Fetching membership for workspace ${workspace.slug}`)
+  const membership = await prisma.workspaceMember.findUnique({
+    where: {
+      workspaceId_userId: {
+        workspaceId: workspace.id,
+        userId: owner.id
+      }
+    }
+  })
+  logger.log(
+    `User ${owner.id} is the owner of workspace ${workspace.slug} since ${membership.createdOn}`
+  )
+
+  return {
+    ...workspace,
+    ownedBy: {
+      id: owner.id,
+      name: owner.name,
+      profilePictureUrl: owner.profilePictureUrl,
+      ownedSince: membership.createdOn
+    }
+  }
 }

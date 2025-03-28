@@ -430,6 +430,7 @@ interface AuthoritySelectorProps {
     React.SetStateAction<Set<AuthorityEnum>>
   >
   isSheet?: boolean
+  parent: 'API_KEY' | 'ROLES'
 }
 
 function extractAuthoritiesFromGroupItem(
@@ -479,7 +480,8 @@ function extractAuthoritiesFromChecklistItem(
 export default function AuthoritySelector({
   selectedPermissions,
   setSelectedPermissions,
-  isSheet
+  isSheet,
+  parent
 }: AuthoritySelectorProps): React.JSX.Element {
   const handleGroupToggle = (groupItem: GroupItem, checked: boolean) => {
     const authorities = extractAuthoritiesFromGroupItem(groupItem, checked)
@@ -554,38 +556,38 @@ export default function AuthoritySelector({
           </div>
           <div className="grid grid-cols-2 gap-4 pt-3">
             {group.permissions
-              ? group.permissions.map((permission) => (
-                  <div
-                    className="mb-2 ml-4 flex flex-col rounded-[4px] p-2 transition-all duration-150 hover:bg-white/10"
-                    key={String(permission.id)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={isItemSelected(permission.id)}
-                        className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
-                        data-state={
-                          isItemSelected(permission.id)
-                            ? 'checked'
-                            : 'unchecked'
-                        }
-                        id={String(permission.id)}
-                        onCheckedChange={(checked) =>
-                          handleChecklistItemToggle(
-                            permission,
-                            checked === true
-                          )
-                        }
-                      />
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        {permission.label}
-                      </label>
-                    </div>
-                    <p className="ml-6 text-xs text-zinc-400">
-                      {permission.description}
-                    </p>
+              ?.filter((permission) => {
+                if (permission.explicitToApiKey) {
+                  return parent === 'API_KEY'
+                }
+                return true
+              })
+              .map((permission) => (
+                <div
+                  className="mb-2 ml-4 flex flex-col rounded-[4px] p-2 transition-all duration-150 hover:bg-white/10"
+                  key={String(permission.id)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={isItemSelected(permission.id)}
+                      className="rounded-[4px] border border-[#18181B] bg-[#71717A] data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+                      data-state={
+                        isItemSelected(permission.id) ? 'checked' : 'unchecked'
+                      }
+                      id={String(permission.id)}
+                      onCheckedChange={(checked) =>
+                        handleChecklistItemToggle(permission, checked === true)
+                      }
+                    />
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {permission.label}
+                    </label>
                   </div>
-                ))
-              : null}
+                  <p className="ml-6 text-xs text-zinc-400">
+                    {permission.description}
+                  </p>
+                </div>
+              ))}
           </div>
         </div>
         {group.subgroups?.map((subgroup) =>
@@ -597,15 +599,20 @@ export default function AuthoritySelector({
 
   return (
     <div
-      className={`flex items-start justify-start ${isSheet ? 'flex-col gap-y-3' : 'flex-row gap-6'} `}
+      className={`flex items-start justify-start ${isSheet ? 'flex-col gap-y-3' : 'flex-row gap-6'} h-full`}
     >
       <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
-      <div className="custom-scrollbar mt-2 h-[50vh] w-full space-y-4 overflow-y-auto">
-        {authorityGroups.map((group) =>
-          renderAuthorityGroupsRecursively(0, group)
-        )}
+      <div className="mt-2 h-full w-full space-y-4">
+        {authorityGroups
+          .filter((group) => {
+            if (group.explicitToApiKey) {
+              return parent === 'API_KEY'
+            }
+            return true
+          })
+          .map((group) => renderAuthorityGroupsRecursively(0, group))}
       </div>
     </div>
   )
