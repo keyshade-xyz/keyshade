@@ -27,9 +27,7 @@ function LocalKeySetup({
 
         <div className="flex gap-2">
           <div
-            className={`flex ${
-              isRevealed ? 'w-[20rem]' : 'w-[16rem]'
-            } items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]`}
+            className="flex w-full items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]"
           >
             <span className="w-full break-all text-[14px] font-[700]">
               {isRevealed

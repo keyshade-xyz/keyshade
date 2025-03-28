@@ -46,7 +46,7 @@ function OverviewPage(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-full w-full gap-5 pt-5">
+    <div className="flex w-full gap-5 pt-2">
       <div className="rounded-5 flex-1 bg-white/5 p-6 drop-shadow-[0px_1px_2px_rgba(16,24,40,0.06)]">
         <div className="flex items-start justify-between pb-5">
           <div className="flex flex-col gap-2">
@@ -163,6 +163,7 @@ function OverviewPage(): React.JSX.Element {
                 the risk of accidental leaks.
               </p>
             </div>
+            J
             <ServerKeySetup
               isStoredOnServer={isKeyStoredOnServer}
               onOpenStoreDialog={() => setShowAddKeyDialog(true)}

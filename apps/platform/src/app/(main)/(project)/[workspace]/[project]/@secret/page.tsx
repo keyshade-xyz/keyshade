@@ -17,7 +17,7 @@ import {
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom,
-  projectPrivateKey
+  selectedProjectPrivateKeyAtom
 } from '@/store'
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
@@ -48,7 +48,7 @@ function SecretPage(): React.JSX.Element {
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const [privateKey, setPrivateKey] = useAtom(projectPrivateKey)
+  const [privateKey, setPrivateKey] = useAtom(selectedProjectPrivateKeyAtom)
 
   useEffect(() => {
     const key = selectedProject?.storePrivateKey

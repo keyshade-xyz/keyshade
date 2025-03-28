@@ -44,7 +44,7 @@ function ServerKeySetup({
         <div className="flex flex-col gap-4">
           <div className="flex gap-2">
             <div
-              className={`flex ${isRevealed ? 'w-[20rem]' : 'w-[16rem]'} items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]`}
+              className="flex w-full items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]"
             >
               <span className="w-full break-all text-[14px] font-[700]">
                 {isRevealed
@@ -74,28 +74,26 @@ function ServerKeySetup({
           </div> */}
         </div>
       )
-    } 
-      return (
-        <button
-          className="flex w-[12rem] cursor-pointer items-center justify-center rounded-[8px] border border-black/30 bg-black/20 p-[16px] text-[14px] font-[700] text-white"
-          onClick={handleStorePrivateKey}
-          type="button"
-        >
-          Store Private Key
-        </button>
-      )
-    
-  } 
+    }
     return (
       <button
         className="flex w-[12rem] cursor-pointer items-center justify-center rounded-[8px] border border-black/30 bg-black/20 p-[16px] text-[14px] font-[700] text-white"
-        onClick={onOpenStoreDialog}
+        onClick={handleStorePrivateKey}
         type="button"
       >
         Store Private Key
       </button>
     )
-  
+  }
+  return (
+    <button
+      className="flex w-[12rem] cursor-pointer items-center justify-center rounded-[8px] border border-black/30 bg-black/20 p-[16px] text-[14px] font-[700] text-white"
+      onClick={onOpenStoreDialog}
+      type="button"
+    >
+      Store Private Key
+    </button>
+  )
 }
 
 export default ServerKeySetup
