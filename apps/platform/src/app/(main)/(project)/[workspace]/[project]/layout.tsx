@@ -64,7 +64,6 @@ function DetailedProjectPage({
       {tab !== 'overview' && (
         <div className="flex h-[3.625rem] w-full justify-between p-3 ">
           <div className="text-3xl">{selectedProject?.name}</div>
-
           {tab === 'secret' && <AddSecretDialog />}
           {tab === 'variable' && <AddVariableDialogue />}
           {tab === 'environment' && <AddEnvironmentDialogue />}

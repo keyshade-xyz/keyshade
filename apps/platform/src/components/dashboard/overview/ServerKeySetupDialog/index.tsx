@@ -12,28 +12,39 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { selectedProjectPrivateKeyAtom } from '@/store'
-import { setKeyLocally } from '@/lib/utils'
+import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
 
-interface SetupLocalKeyDialogProps {
+interface ServerKeySetupDialogProps {
   isOpen: boolean
   onClose: () => void
-  currentProject: string
+  currentProjectSlug: string
 }
 
-function SetupLocalKeyDialog({
+function ServerKeySetupDialog({
   isOpen,
   onClose,
-  currentProject
-}: SetupLocalKeyDialogProps): React.JSX.Element {
+  currentProjectSlug
+}: ServerKeySetupDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
   const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
 
-  const handleSaveChanges = useCallback(() => {
-    setProjectPrivateKey(keyValue)
-    setKeyLocally(`${currentProject}_pk`, keyValue)
-    toast.success('Key saved successfully!')
+  const SavePrivateKey = useHttp((key: string) =>
+    ControllerInstance.getInstance().projectController.updateProject({
+      projectSlug: currentProjectSlug,
+      regenerateKeyPair: true,
+      privateKey: key
+    })
+  )
+
+  const handleSaveChanges = useCallback(async () => {
+    const response = await SavePrivateKey(keyValue)
+    if (!response.error) {
+      setProjectPrivateKey(keyValue)
+      toast.success('Key saved successfully!')
+    }
     onClose()
-  }, [keyValue, onClose, setProjectPrivateKey, currentProject])
+  }, [keyValue, onClose, setProjectPrivateKey, SavePrivateKey])
 
   const handleClose = useCallback(() => {
     onClose()
@@ -44,11 +55,13 @@ function SetupLocalKeyDialog({
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-semibold">
-            Setup Private Key Locally
+            Save the private key to the server
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            Enter your key below to save it on browser to safely setting up you
-            secret.
+            Storing the private key with us will enable you and your team to
+            easily view the secrets of this project without needing the hassle
+            of setting the key up in their browsers. Although, this comes with
+            the downside of accidental leaks.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="p-4">
@@ -79,4 +92,4 @@ function SetupLocalKeyDialog({
   )
 }
 
-export default SetupLocalKeyDialog
+export default ServerKeySetupDialog

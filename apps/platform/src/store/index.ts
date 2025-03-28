@@ -68,8 +68,7 @@ export const environmentsOfProjectAtom = atom<
 
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
-
-export const projectPrivateKey = atom<string | null>(null)
+export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)

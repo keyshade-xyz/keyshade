@@ -12,28 +12,39 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { selectedProjectPrivateKeyAtom } from '@/store'
-import { setKeyLocally } from '@/lib/utils'
+import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
 
-interface SetupLocalKeyDialogProps {
+interface RegenerateKeyDialogProps {
   isOpen: boolean
   onClose: () => void
-  currentProject: string
+  currentProjectSlug: string
 }
 
-function SetupLocalKeyDialog({
+function RegenerateKeyDialog({
   isOpen,
   onClose,
-  currentProject
-}: SetupLocalKeyDialogProps): React.JSX.Element {
+  currentProjectSlug
+}: RegenerateKeyDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
   const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
 
-  const handleSaveChanges = useCallback(() => {
-    setProjectPrivateKey(keyValue)
-    setKeyLocally(`${currentProject}_pk`, keyValue)
-    toast.success('Key saved successfully!')
+  const RegeneratePrivateKey = useHttp((key: string) =>
+    ControllerInstance.getInstance().projectController.updateProject({
+      projectSlug: currentProjectSlug,
+      regenerateKeyPair: true,
+      privateKey: key
+    })
+  )
+
+  const handleSaveChanges = useCallback(async () => {
+    const response = await RegeneratePrivateKey(keyValue)
+    if (!response.error) {
+      setProjectPrivateKey(keyValue)
+      toast.success('Private key regenerated successfully!')
+    }
     onClose()
-  }, [keyValue, onClose, setProjectPrivateKey, currentProject])
+  }, [keyValue, onClose, setProjectPrivateKey, RegeneratePrivateKey])
 
   const handleClose = useCallback(() => {
     onClose()
@@ -44,11 +55,13 @@ function SetupLocalKeyDialog({
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-semibold">
-            Setup Private Key Locally
+            Regenerate Project Private Key
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            Enter your key below to save it on browser to safely setting up you
-            secret.
+            Regenerating the private key will re-encrypt all of your secrets
+            with a new private key. If you think your existing private key has
+            landed in the wrong hands, this is the best way to make sure you
+            stay secure.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="p-4">
@@ -79,4 +92,4 @@ function SetupLocalKeyDialog({
   )
 }
 
-export default SetupLocalKeyDialog
+export default RegenerateKeyDialog
