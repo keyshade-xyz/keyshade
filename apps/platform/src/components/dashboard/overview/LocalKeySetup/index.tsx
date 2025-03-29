@@ -1,5 +1,6 @@
-import { AddSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
 import React, { useState } from 'react'
+import { AddSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
+import { Button } from '@/components/ui/button'
 
 interface LocalKeySetupProps {
   privateKey: string | null
@@ -19,16 +20,14 @@ function LocalKeySetup({
   if (privateKey && !isStoredOnServer) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-center rounded-[8px] border border-[#93C5FD] p-[10px]">
+        <div className="flex items-center justify-center rounded-lg border border-[#93C5FD] p-[10px]">
           <p className="text-[16px] font-[400] text-[#93C5FD]">
             We are using your private key from the browser.
           </p>
         </div>
 
         <div className="flex gap-2">
-          <div
-            className="flex w-full items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]"
-          >
+          <div className="flex w-full items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]">
             <span className="w-full break-all text-[14px] font-[700]">
               {isRevealed
                 ? privateKey
@@ -36,7 +35,7 @@ function LocalKeySetup({
             </span>
           </div>
           <button
-            className="flex items-center justify-center rounded-[8px] border border-black/30 bg-black/20 p-[16px] duration-300 hover:scale-105"
+            className="flex items-center justify-center rounded-[8px] border border-black/30 bg-black/20 px-4 py-2 duration-300 hover:scale-105"
             onClick={handleToggleReveal}
             type="button"
           >
@@ -46,29 +45,16 @@ function LocalKeySetup({
       </div>
     )
   }
-
-  if (privateKey && isStoredOnServer) {
-    return (
-      <button
-        className="flex w-[12rem] cursor-not-allowed items-center justify-center gap-[10px] rounded-[8px] border border-black/30 bg-black/20 p-[16px] text-white/50"
-        disabled
-        type="button"
-      >
-        <AddSVG />
-        <div className="text-[14px] font-[700]">Setup Private Key</div>
-      </button>
-    )
-  }
-
   return (
-    <button
-      className="flex w-[12rem] items-center justify-center gap-[10px] rounded-[8px] border border-black/30 bg-black/20 p-[16px] hover:bg-black/30"
+    <Button
+      className="w-fit px-4 py-6"
+      disabled={Boolean(privateKey !== null && isStoredOnServer)}
       onClick={onOpenSetupDialog}
       type="button"
     >
       <AddSVG />
-      <div className="text-[14px] font-[700]">Setup Private Key</div>
-    </button>
+      <div className="font-semibold">Setup Private Key</div>
+    </Button>
   )
 }
 

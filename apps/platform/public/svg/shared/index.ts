@@ -50,6 +50,6 @@ export {
   RollbackSVG,
   LockSVG,
   RegenerateSVG,
-  TickCircleSVG
-  MinusSquareSVG,
+  TickCircleSVG,
+  MinusSquareSVG
 }

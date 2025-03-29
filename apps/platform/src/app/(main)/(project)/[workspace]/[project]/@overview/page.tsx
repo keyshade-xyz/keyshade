@@ -120,12 +120,12 @@ function OverviewPage(): React.JSX.Element {
         )}
 
         <div className="flex flex-col gap-3 py-2">
-          <div className="flex flex-1 flex-col gap-3 rounded-[8px] bg-white/10 p-5">
+          <div className="flex flex-1 flex-col gap-3 rounded-lg bg-white/10 p-5">
             <div className="flex flex-col gap-[4px]">
-              <p className="text-[20px] font-[500]">
+              <p className="text-lg font-semibold">
                 Do you want to setup private key?
               </p>
-              <p className="text-[16px] font-[400] text-[#C9C9C9]">
+              <p className="text-sm text-white/60">
                 Storing your private key in the browser is the safest way to
                 browse through the secrets of your project
               </p>
@@ -163,7 +163,6 @@ function OverviewPage(): React.JSX.Element {
                 the risk of accidental leaks.
               </p>
             </div>
-            J
             <ServerKeySetup
               isStoredOnServer={isKeyStoredOnServer}
               onOpenStoreDialog={() => setShowAddKeyDialog(true)}
