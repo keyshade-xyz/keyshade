@@ -18,7 +18,8 @@ import {
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
 
 interface EnvironmentCardProps {
-  environment: GetAllEnvironmentsOfProjectResponse['items'][number]
+  environment: GetAllEnvironmentsOfProjectResponse['items'][number],
+  className?: string
 }
 
 const formatDate = (date: string): string => {
@@ -26,7 +27,8 @@ const formatDate = (date: string): string => {
 }
 
 export default function EnvironmentCard({
-  environment
+  environment,
+  className
 }: EnvironmentCardProps): React.JSX.Element {
   const setSelectedEnvironment = useSetAtom(selectedEnvironmentAtom)
   const setIsEditEnvironmentOpen = useSetAtom(editEnvironmentOpenAtom)
@@ -45,7 +47,7 @@ export default function EnvironmentCard({
   return (
     <ContextMenu key={environment.id}>
       <ContextMenuTrigger className="w-full">
-        <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
+        <div className={`flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%] ${className}`}>
           <div className="flex flex-col gap-y-2 px-6 py-4">
             <div className="flex w-full flex-row flex-wrap items-center justify-between gap-4">
               <div className="text-2xl">{environment.name}</div>

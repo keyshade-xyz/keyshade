@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { EnvironmentSVG } from '@public/svg/dashboard'
+import { useSearchParams } from 'next/navigation'
 import {
   createEnvironmentOpenAtom,
   selectedProjectAtom,
@@ -19,11 +20,15 @@ import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
 import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
+import { cn } from '@/lib/utils'
 
 function EnvironmentPage(): React.JSX.Element {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isHighlighted, setIsHighlighted] = useState(false)
 
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
@@ -64,6 +69,22 @@ function EnvironmentPage(): React.JSX.Element {
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)
   }
+
+  useEffect(() => {
+    if (highlightSlug) {
+      // Find and scroll to the element
+      const element = document.getElementById(`secret-${highlightSlug}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setIsHighlighted(true)
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          setIsHighlighted(false)
+        }, 2000)
+      }
+    }
+  }, [highlightSlug, environments])
 
   if (isLoading && page === 0) {
     return (
@@ -107,7 +128,13 @@ function EnvironmentPage(): React.JSX.Element {
             className={`grid h-fit w-full grid-cols-1 gap-8  p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
           >
             {environments.map((environment) => (
-              <EnvironmentCard environment={environment} key={environment.id} />
+              <EnvironmentCard
+              className={cn(
+                highlightSlug === environment.slug && isHighlighted && 'animate-highlight'
+              )}
+              environment={environment}
+              key={environment.id}
+              />
             ))}
 
             {/* Delete environment alert dialog */}
