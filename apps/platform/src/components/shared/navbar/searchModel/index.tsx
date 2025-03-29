@@ -1,4 +1,3 @@
- 
 'use client'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -46,13 +45,15 @@ function SearchModel({
   ...props
 }: SearchModelProps): React.JSX.Element {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedValue, setDebouncedValue] = useState('')
-  const [isSearching, setIsSearching] = useState<boolean>(false)
 
   const [globalSearchData, setGlobalSearchData] = useAtom(globalSearchDataAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(selectedWorkspaceAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedValue, setDebouncedValue] = useState('')
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+  const [hasNoResults, setHasNoResults] = useState<boolean>(false)
 
   const getGlobalSearchData = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.globalSearch({
@@ -93,26 +94,32 @@ function SearchModel({
     setDebouncedValue(value)
   }, 500)
 
-  const hasNoResults = Object.values(searchResults).every((results: unknown) => Array.isArray(results) && results.length === 0)
+  // Check if there are no results after search
+  useEffect(() => {
+    const noResults = Object.values(searchResults).every((results: unknown) => Array.isArray(results) && results.length === 0)
+    setHasNoResults(noResults && searchQuery.length > 0)
+  }, [searchResults, searchQuery])
 
+  // Handle API search
   useEffect(() => {
     if (hasNoResults && debouncedValue) {
       setIsSearching(true);
       getGlobalSearchData()
         .then(({ data, success }) => {
           if (success && data) {
-            setGlobalSearchData({
+            const newData = {
               workspaces: [],
               secrets: data.secrets,
               projects: data.projects,
               environments: data.environments,
               variables: data.variables
-            });
+            };
+            setGlobalSearchData(newData);
           }
         })
         .finally(() => setIsSearching(false));
     }
-  }, [hasNoResults, debouncedValue, getGlobalSearchData, setGlobalSearchData]);
+  }, [debouncedValue, getGlobalSearchData, setGlobalSearchData, hasNoResults]);
 
   // Update the search results when the search query changes
   useEffect(() => {
