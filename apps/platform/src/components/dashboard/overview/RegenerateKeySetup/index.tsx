@@ -3,6 +3,7 @@ import React from 'react'
 import { toast } from 'sonner'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { Button } from '@/components/ui/button'
 
 interface RegenerateKeyProps {
   projectSlug: string
@@ -35,14 +36,14 @@ function RegenerateKeySetup({
   }
 
   return (
-    <button
-      className="flex w-[12rem] items-center justify-center gap-[10px] rounded-[8px] border border-black/30 bg-black/20 p-[16px]"
+    <Button
+      className="flex w-fit items-center justify-center gap-2 px-4 py-6"
       onClick={handleClick}
       type="button"
     >
       <RegenerateSVG />
-      <div className="text-[14px] font-[700]">Regenerate Key</div>
-    </button>
+      <div className="font-bold">Regenerate Key</div>
+    </Button>
   )
 }
 

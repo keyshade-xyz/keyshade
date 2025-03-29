@@ -20,22 +20,22 @@ function LocalKeySetup({
   if (privateKey && !isStoredOnServer) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-center rounded-lg border border-[#93C5FD] p-[10px]">
-          <p className="text-[16px] font-[400] text-[#93C5FD]">
+        <div className="flex items-center justify-center rounded-lg border border-[#93C5FD] p-2">
+          <p className="text-[#93C5FD]">
             We are using your private key from the browser.
           </p>
         </div>
 
         <div className="flex gap-2">
-          <div className="flex w-full items-center rounded-[8px] border border-black/30 bg-black/20 p-[16px]">
-            <span className="w-full break-all text-[14px] font-[700]">
+          <div className="flex w-full items-center rounded-lg border border-black/30 bg-black/20 p-2">
+            <span className="w-full break-all font-bold">
               {isRevealed
                 ? privateKey
                 : privateKey.replace(/./g, '*').substring(0, 20)}
             </span>
           </div>
           <button
-            className="flex items-center justify-center rounded-[8px] border border-black/30 bg-black/20 px-4 py-2 duration-300 hover:scale-105"
+            className="flex items-center justify-center rounded-lg border border-black/30 bg-black/20 px-4 py-2 duration-300 hover:scale-105"
             onClick={handleToggleReveal}
             type="button"
           >
@@ -53,7 +53,7 @@ function LocalKeySetup({
       type="button"
     >
       <AddSVG />
-      <div className="font-semibold">Setup Private Key</div>
+      <div className="font-bold">Setup Private Key</div>
     </Button>
   )
 }
