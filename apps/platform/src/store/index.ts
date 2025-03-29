@@ -10,13 +10,14 @@ import type {
   User,
   Variable,
   VariableVersion,
+  WorkspaceRole,
   WorkspaceWithTierLimitAndProjectCount
 } from '@keyshade/schema'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const globalSearchDataAtom = atom<{
-  workspaces: WorkspaceWithTierLimitAndProjectCount[];
+  workspaces:  { id: string, slug: string, name: string}[];
   secrets: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
   variables: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
   environments: { slug: string, name: string, description: string | null, project?: { slug: string} }[];
@@ -28,7 +29,9 @@ export const globalSearchDataAtom = atom<{
   environments: [],
   projects: []
 });
-
+export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
+  []
+)
 export const selectedWorkspaceAtom =
   atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
 
@@ -80,6 +83,8 @@ export const environmentsOfProjectAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items']
 >([])
 
+export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
+
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
 
@@ -105,10 +110,17 @@ export const rollbackSecretOpenAtom = atom<boolean>(false)
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
+export const deleteWorkspaceOpenAtom = atom<boolean>(false)
 
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
+export const apiKeyOneTimeDisplayDialogOpenAtom = atom<boolean>(false)
+export const oneTimeSecretValueAtom = atom<string>("")
+
+export const createRolesOpenAtom = atom<boolean>(false)
+export const editRolesOpenAtom = atom<boolean>(false)
+export const deleteRolesOpenAtom = atom<boolean>(false)
 
 export const deleteAccountOpenAtom = atom<boolean>(false)
 

@@ -4,7 +4,6 @@ import { ChevronsUpDown, Check } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { useAtom, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import { Label } from './label'
@@ -32,14 +31,11 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
+import { allWorkspacesAtom, globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspaces, setAllWorkspaces] = useState<
-    WorkspaceWithTierLimitAndProjectCount[]
-  >([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
@@ -55,6 +51,7 @@ export function Combobox(): React.JSX.Element {
   )
 
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
+  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
@@ -83,7 +80,12 @@ export function Combobox(): React.JSX.Element {
       setIsLoading(false)
       toast.dismiss()
     }
-  }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
+  }, [
+    createWorkspace,
+    newWorkspaceName,
+    setAllWorkspaces,
+    setSelectedWorkspace
+  ])
 
   useEffect(() => {
     getWorkspacesOfUser().then(({ success, data }) => {
@@ -97,10 +99,10 @@ export function Combobox(): React.JSX.Element {
           }))
         }))
         setAllWorkspaces(data.items)
-        setSelectedWorkspace((prev) => (prev !== null ? prev : data.items[0]))
+        setSelectedWorkspace(data.items[0])
       }
     })
-  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData])
+  }, [setSelectedWorkspace, setAllWorkspaces, getWorkspacesOfUser, setGlobalSearchData])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -114,7 +116,7 @@ export function Combobox(): React.JSX.Element {
         >
           <div className="flex gap-x-[0.88rem]">
             <div className="flex aspect-square items-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
-              🔥
+              {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
@@ -155,7 +157,7 @@ export function Combobox(): React.JSX.Element {
                           : 'opacity-0'
                       )}
                     />{' '}
-                    {workspace.name}
+                    {workspace.icon ?? '🔥'} {workspace.name}
                   </CommandItem>
                 )
               })}
