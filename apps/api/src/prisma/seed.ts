@@ -108,7 +108,7 @@ async function main() {
         createdAt: new Date(),
         publicKey: faker.string.alphanumeric(32),
         privateKey: faker.string.alphanumeric(32),
-        storePrivateKey: true,
+        storePrivateKey: false,
         isDisabled: false,
         workspaceId: workspace.id,
         accessLevel: ProjectAccessLevel.GLOBAL,
@@ -142,11 +142,7 @@ async function main() {
 
   // Create secrets and variables for each project
   for (const project of projects) {
-    const projectEnvironments = environments.filter((env) =>
-      ['development', 'staging', 'production'].includes(env.name)
-    )
-
-    for (const env of projectEnvironments) {
+    for (const env of environments) {
       // Create 5 secrets for each environment
       for (let i = 0; i < 5; i++) {
         const secretName = faker.word.words(2)
