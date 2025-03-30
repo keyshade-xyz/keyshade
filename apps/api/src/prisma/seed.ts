@@ -124,12 +124,12 @@ async function main() {
   // Create environments for each project
   const environments = await Promise.all(
     projects.flatMap((project) =>
-      ['development', 'staging', 'production'].map(async (envName) => {
+      ['development', 'staging', 'production'].map(async (envName, index) => {
         return prisma.environment.create({
           data: {
             id: faker.string.uuid(),
             name: envName,
-            slug: envName,
+            slug: `${envName}-${index}`,
             description: `${envName} environment for ${project.name}`,
             createdAt: new Date(),
             lastUpdatedById: user.id,
@@ -142,7 +142,10 @@ async function main() {
 
   // Create secrets and variables for each project
   for (const project of projects) {
-    for (const env of environments) {
+    const projectEnvironments = environments.filter(
+      (env) => env.projectId === project.id
+    )
+    for (const env of projectEnvironments) {
       // Create 5 secrets for each environment
       for (let i = 0; i < 5; i++) {
         const secretName = faker.word.words(2)
