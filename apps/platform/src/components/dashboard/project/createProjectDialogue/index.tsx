@@ -154,7 +154,7 @@ export default function CreateProjectDialogue(): JSX.Element {
 
   const handleEnvironmentChange = useCallback((index: number, field: 'name' | 'description', value: string) => {
     setNewProjectData((prev) => {
-      const updatedEnvironments = prev.environments?.map((env) => ({ ...env })) || []
+      const updatedEnvironments = prev.environments || []
       updatedEnvironments[index] = {
         ...updatedEnvironments[index],
         [field]: value
@@ -190,7 +190,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="h-[39.5rem] w-[756px] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
+        <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
           <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
             <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
               Create Project
