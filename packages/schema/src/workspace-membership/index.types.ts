@@ -21,7 +21,9 @@ import {
   IsMemberRequestSchema,
   IsMemberResponseSchema,
   GetMembersRequestSchema,
-  GetMembersResponseSchema
+  GetMembersResponseSchema,
+  ResendInvitationRequestSchema,
+  ResendInvitationResponseSchema
 } from './'
 
 export type CreateWorkspaceMember = z.infer<typeof CreateWorkspaceMemberSchema>
@@ -83,6 +85,14 @@ export type LeaveWorkspaceResponse = z.infer<
 export type IsMemberRequest = z.infer<typeof IsMemberRequestSchema>
 
 export type IsMemberResponse = z.infer<typeof IsMemberResponseSchema>
+
+export type ResendInvitationRequest = z.infer<
+  typeof ResendInvitationRequestSchema
+>
+
+export type ResendInvitationResponse = z.infer<
+  typeof ResendInvitationResponseSchema
+>
 
 export type GetMembersRequest = z.infer<typeof GetMembersRequestSchema>
 
