@@ -88,6 +88,14 @@ export default function CreateProjectDialogue(): JSX.Element {
       }
 
       setIsLoading(true)
+
+      if (newProjectData.environments?.some((env) => env.name.trim() === '')) {
+        toast.error('Environment name cannot be empty')
+        setIsLoading(false)
+        toast.dismiss()
+        return
+      }
+
       toast.loading('Creating project...')
 
       try {
@@ -113,6 +121,7 @@ export default function CreateProjectDialogue(): JSX.Element {
   }, [
     selectedWorkspace,
     newProjectData.name,
+    newProjectData.environments,
     createProject,
     setProjects,
     projects,
