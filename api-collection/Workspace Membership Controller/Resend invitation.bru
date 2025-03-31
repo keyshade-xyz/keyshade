@@ -1,0 +1,16 @@
+meta {
+  name: Resend invitation
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{BASE_URL}}/api/workspace-membership/:workspaceSlug/resend-invitation/:inviteeEmail
+  body: none
+  auth: none
+}
+
+params:path {
+  workspaceSlug: abcd-1
+  inviteeEmail: agentR47@gmail.com
+}

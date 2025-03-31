@@ -140,6 +140,20 @@ export class WorkspaceMembershipController {
     )
   }
 
+  @Put(':workspaceSlug/resend-invitation/:userEmail')
+  @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE, Authority.ADD_USER)
+  async resendInvitation(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('userEmail') userEmail: User['email']
+  ) {
+    return this.workspaceMembershipService.resendInvitation(
+      user,
+      userEmail,
+      workspaceSlug
+    )
+  }
+
   @Get(':workspaceSlug/members')
   @RequiredApiKeyAuthorities(Authority.READ_WORKSPACE)
   async getMembers(
