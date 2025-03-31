@@ -141,7 +141,7 @@ export default class WorkspaceMembershipController {
     request: ResendInvitationRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<ResendInvitationResponse>> {
-    const response = await this.apiClient.post(
+    const response = await this.apiClient.put(
       `/api/workspace-membership/${request.workspaceSlug}/resend-invitation/${request.userEmail}`,
       request,
       headers

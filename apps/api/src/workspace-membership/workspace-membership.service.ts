@@ -829,7 +829,7 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug']
   ): Promise<void> {
     this.log.log(
-      `User ${user.id} requested to resend invitation to workspace ${workspaceSlug}`
+      `User ${user.id} requested to resend invitation to workspace ${workspaceSlug} for user ${inviteeEmail}`
     )
 
     // Fetch the invitee user
@@ -843,31 +843,32 @@ export class WorkspaceMembershipService {
       })
 
     this.log.log(
-      `Checking if user ${user.id} is a member of workspace ${workspace.id}`
+      `Checking if user ${member.id} is a member of workspace ${workspace.id}`
     )
     // Check if the membership exists
     const membership = await this.prisma.workspaceMember.findFirst({
       where: {
         workspaceId: workspace.id,
-        userId: user.id
+        userId: member.id,
+        invitationAccepted: false
       }
     })
 
     if (!membership) {
       this.log.error(
-        `User ${user.id} is not a member of workspace ${workspace.id}`
+        `User ${member.id} is not a member of workspace ${workspace.id}`
       )
       throw new BadRequestException(
         constructErrorBody(
           'Membership not found',
-          'You are not a member of the workspace'
+          'You are trying to invite someone who has not been invited before'
         )
       )
     }
 
     // Resend the invitation
     this.log.log(
-      `Resending invitation to user ${user.id} for workspace ${workspace.id}`
+      `Resending invitation to user ${member.id} for workspace ${workspace.id}`
     )
     this.mailService.invitedToWorkspace(
       member.email,
@@ -879,7 +880,7 @@ export class WorkspaceMembershipService {
     )
 
     this.log.log(
-      `Invitation resent to user ${user.id} for workspace ${workspace.id}`
+      `Invitation resent to user ${member.id} for workspace ${workspace.id}`
     )
   }
 
