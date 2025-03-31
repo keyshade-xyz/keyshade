@@ -25,7 +25,7 @@ function OverviewPage(): React.JSX.Element {
   useEffect(() => {
     const key = selectedProject?.storePrivateKey
       ? selectedProject.privateKey
-      : localStorage.getItem(`${selectedProject?.name}_pk`) || null
+      : localStorage.getItem(`${selectedProject?.slug}_pk`) || null
 
     setPrivateKey(key)
     setIsLoading(false)
@@ -176,7 +176,7 @@ function OverviewPage(): React.JSX.Element {
       </div>
 
       <SetupLocalKeyDialog
-        currentProject={selectedProject.name}
+        currentProject={selectedProject.slug}
         isOpen={showAddLocalKeyDialog}
         onClose={() => setShowAddLocalKeyDialog(false)}
       />

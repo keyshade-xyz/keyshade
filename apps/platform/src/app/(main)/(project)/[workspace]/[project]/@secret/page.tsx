@@ -53,7 +53,7 @@ function SecretPage(): React.JSX.Element {
   useEffect(() => {
     const key = selectedProject?.storePrivateKey
       ? selectedProject.privateKey
-      : localStorage.getItem(`${selectedProject?.name}_pk`) || null
+      : localStorage.getItem(`${selectedProject?.slug}_pk`) || null
     setPrivateKey(key)
   }, [selectedProject, setPrivateKey])
 
