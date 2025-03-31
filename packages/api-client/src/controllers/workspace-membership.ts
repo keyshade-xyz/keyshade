@@ -21,7 +21,9 @@ import {
   IsMemberRequest,
   IsMemberResponse,
   GetMembersRequest,
-  GetMembersResponse
+  GetMembersResponse,
+  ResendInvitationRequest,
+  ResendInvitationResponse
 } from '@keyshade/schema'
 import { ClientResponse } from '@keyshade/schema'
 
@@ -133,6 +135,19 @@ export default class WorkspaceMembershipController {
       headers
     )
     return await parseResponse<IsMemberResponse>(response)
+  }
+
+  async resendInvitation(
+    request: ResendInvitationRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ResendInvitationResponse>> {
+    const response = await this.apiClient.post(
+      `/api/workspace-membership/${request.workspaceSlug}/resend-invitation/${request.userEmail}`,
+      request,
+      headers
+    )
+
+    return await parseResponse<ResendInvitationResponse>(response)
   }
 
   async getMembers(
