@@ -41,12 +41,12 @@ function SetupLocalKeyDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B]">
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-black/70">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold">
+          <AlertDialogTitle className="text-xl font-semibold">
             Setup Private Key Locally
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
+          <AlertDialogDescription className="text-sm font-normal leading-5 text-gray-400">
             Enter your key below to save it on browser to safely setting up you
             secret.
           </AlertDialogDescription>
@@ -55,20 +55,20 @@ function SetupLocalKeyDialog({
           <input
             className="w-full rounded-md border border-gray-300 bg-gray-800 p-2 text-white"
             onChange={(e) => setKeyValue(e.target.value)}
-            placeholder="Enter key..."
+            placeholder="Enter your private key"
             type="text"
             value={keyValue}
           />
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="rounded-md border border-[#F4F4F5] text-[#F4F4F5] hover:border-[#F4F4F5]/80"
+            className="textwhite/60 rounded-md border border-white/60 hover:border-white/80"
             onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80"
+            className="rounded-md bg-white/60 text-black hover:bg-white/80"
             onClick={handleSaveChanges}
           >
             Save Changes

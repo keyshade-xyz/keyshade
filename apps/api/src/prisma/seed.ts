@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   const logger = new Logger('DB Seeder')
-  if (process.env.NODE_ENV === 'dev') {
+  if ((process.env.NODE_ENV as string) === 'dev') {
     logger.log('Database seeding started')
 
     const userEmail = process.env.FEEDBACK_FORWARD_EMAIL

@@ -20,8 +20,8 @@ function LocalKeySetup({
   if (privateKey && !isStoredOnServer) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-center rounded-lg border border-[#93C5FD] p-2">
-          <p className="text-[#93C5FD]">
+        <div className="flex items-center justify-center rounded-lg border border-sky-300 p-2">
+          <p className="text-sky-300">
             We are using your private key from the browser.
           </p>
         </div>

@@ -52,12 +52,12 @@ function ServerKeySetupDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B]">
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-black/70">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold">
-            Save the private key to the server
+          <AlertDialogTitle className="text-xl font-semibold">
+            Save the private key on our server
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
+          <AlertDialogDescription className="text-sm font-normal leading-5 text-gray-400">
             Storing the private key with us will enable you and your team to
             easily view the secrets of this project without needing the hassle
             of setting the key up in their browsers. Although, this comes with
@@ -68,20 +68,20 @@ function ServerKeySetupDialog({
           <input
             className="w-full rounded-md border border-gray-300 bg-gray-800 p-2 text-white"
             onChange={(e) => setKeyValue(e.target.value)}
-            placeholder="Enter key..."
+            placeholder="Enter your private key"
             type="text"
             value={keyValue}
           />
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="rounded-md border border-[#F4F4F5] text-[#F4F4F5] hover:border-[#F4F4F5]/80"
+            className="rounded-md border border-white/60 text-white/60 hover:border-white/80"
             onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80"
+            className="rounded-md bg-white/60 text-black hover:bg-white/80"
             onClick={handleSaveChanges}
           >
             Save Changes

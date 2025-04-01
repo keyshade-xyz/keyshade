@@ -57,7 +57,7 @@ function OverviewPage(): React.JSX.Element {
             <div className="text-base">{selectedProject.description}</div>
           </div>
 
-          <div className="rounded-md bg-[#D9F7FF14] p-1.5 text-xs text-white">
+          <div className="rounded-md bg-white/10 p-1.5 text-xs text-white">
             {dayjs(selectedProject.updatedAt).toNow(true)} ago
           </div>
         </div>
@@ -70,7 +70,7 @@ function OverviewPage(): React.JSX.Element {
                 See all the secrets of the project!
               </p>
             </div>
-            <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
+            <div className="flex gap-2 rounded-lg bg-black/40 p-2">
               <SecretSVG width={16} />
               {selectedProject.secretCount}
             </div>
@@ -111,8 +111,8 @@ function OverviewPage(): React.JSX.Element {
         </div>
 
         {!privateKey && (
-          <div className="flex  items-center justify-center rounded-lg border border-[#FDE047] p-[10px]">
-            <p className="font-semibold text-[#FDE047]">
+          <div className="flex  items-center justify-center rounded-lg border border-yellow-300 p-2.5">
+            <p className="font-semibold text-yellow-300">
               You have not stored any private key with us, so secret values can
               not be decrypted.
             </p>
@@ -121,7 +121,7 @@ function OverviewPage(): React.JSX.Element {
 
         <div className="flex flex-col gap-3 py-2">
           <div className="flex flex-1 flex-col gap-3 rounded-lg bg-white/10 p-5">
-            <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-col gap-1">
               <p className="text-lg font-semibold">
                 Do you want to setup private key?
               </p>
