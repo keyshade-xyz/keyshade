@@ -20,7 +20,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleWithProjects } from './workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { paginate, PaginatedMetadata } from '@/common/paginate'
+import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
@@ -570,7 +570,7 @@ export class WorkspaceRoleService {
     sort: string,
     order: string,
     search: string
-  ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
+  ) {
     const { id: workspaceId } =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -590,6 +590,27 @@ export class WorkspaceRoleService {
 
       orderBy: {
         [sort]: order
+      },
+
+      include: {
+        projects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
+          }
+        }
       }
     })
 

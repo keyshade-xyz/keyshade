@@ -87,6 +87,5 @@ export const GetWorkspaceRolesOfWorkspaceRequestSchema =
     })
   )
 
-export const GetWorkspaceRolesOfWorkspaceResponseSchema = PageResponseSchema(
-  WorkspaceRoleSchema.omit({ projects: true })
-)
+export const GetWorkspaceRolesOfWorkspaceResponseSchema =
+  PageResponseSchema(WorkspaceRoleSchema)
