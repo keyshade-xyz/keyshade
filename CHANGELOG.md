@@ -1,3 +1,25 @@
+## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
+
+### 🐛 Bug Fixes
+
+* **api:** Error in running the API locally ([88809ea](https://github.com/keyshade-xyz/keyshade/commit/88809ea6f575d6218e795830f973fbe9398f687d))
+
+## [2.14.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.10...v2.14.0-stage.11) (2025-03-31)
+
+### 🚀 Features
+
+* **api:** Resend workspace invitation ([#850](https://github.com/keyshade-xyz/keyshade/issues/850)) ([e2e9c0f](https://github.com/keyshade-xyz/keyshade/commit/e2e9c0f0abf535130ba222dbff41fe78de53c344))
+
+## [2.14.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.9...v2.14.0-stage.10) (2025-03-31)
+
+### 🚀 Features
+
+* **platform:** Add environment management to project creation dialog ([#848](https://github.com/keyshade-xyz/keyshade/issues/848)) ([720d4fb](https://github.com/keyshade-xyz/keyshade/commit/720d4fb143dec5b97aa5b646b458ff0bb323f0ae))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add database seeding script and related commands ([#849](https://github.com/keyshade-xyz/keyshade/issues/849)) ([fe8fa45](https://github.com/keyshade-xyz/keyshade/commit/fe8fa454107fc468f3bb2439e3e4d456c8e5d7f1))
+
 ## [2.14.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.8...v2.14.0-stage.9) (2025-03-28)
 
 ### 🚀 Features

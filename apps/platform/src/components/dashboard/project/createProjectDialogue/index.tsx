@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { Plus, Trash2 } from 'lucide-react'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -87,6 +88,14 @@ export default function CreateProjectDialogue(): JSX.Element {
       }
 
       setIsLoading(true)
+
+      if (newProjectData.environments?.some((env) => env.name.trim() === '')) {
+        toast.error('Environment name cannot be empty')
+        setIsLoading(false)
+        toast.dismiss()
+        return
+      }
+
       toast.loading('Creating project...')
 
       try {
@@ -112,6 +121,7 @@ export default function CreateProjectDialogue(): JSX.Element {
   }, [
     selectedWorkspace,
     newProjectData.name,
+    newProjectData.environments,
     createProject,
     setProjects,
     projects,
@@ -137,6 +147,45 @@ export default function CreateProjectDialogue(): JSX.Element {
     }
   }, [projectKeys, setIsViewAndDownloadProjectKeysDialogOpen])
 
+  // Functions related to environments
+  const handleCreateNewEnvironment = useCallback(() => {
+    setNewProjectData((prev) => ({
+      ...prev,
+      environments: [
+        ...prev.environments || [],
+        {
+          name: '',
+          description: ''
+        }
+      ]
+    }))
+  }, [setNewProjectData])
+
+  const handleEnvironmentChange = useCallback((index: number, field: 'name' | 'description', value: string) => {
+    setNewProjectData((prev) => {
+      const updatedEnvironments = prev.environments || []
+      updatedEnvironments[index] = {
+        ...updatedEnvironments[index],
+        [field]: value
+      }
+
+      return {
+        ...prev,
+        environments: updatedEnvironments
+      }
+    })
+  },[setNewProjectData])
+
+  const handleDeleteEnvironment = useCallback((index: number) => {
+      setNewProjectData((prev) => {
+        const updatedEnvs = prev.environments?.filter((_, i) => i !== index)
+        return {
+          ...prev,
+          environments: updatedEnvs
+        }
+      })
+    },[setNewProjectData])
+
   return (
     <>
       <Dialog
@@ -150,7 +199,7 @@ export default function CreateProjectDialogue(): JSX.Element {
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="h-[39.5rem] w-full rounded-[12px] border bg-[#1E1E1F] ">
+        <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
           <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
             <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
               Create Project
@@ -161,9 +210,9 @@ export default function CreateProjectDialogue(): JSX.Element {
             </DialogDescription>
           </div>
           <div className="flex flex-col gap-y-8 overflow-auto">
-            <div className="flex h-[29.125rem] w-full flex-col gap-[1rem] py-[1rem] ">
+            <div className="flex h-[29.125rem] w-full flex-col gap-4 py-4">
               {/* NAME */}
-              <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
+              <div className="flex h-[2.25rem] w-full items-center gap-7">
                 <Label
                   className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                   htmlFor="name"
@@ -184,7 +233,7 @@ export default function CreateProjectDialogue(): JSX.Element {
               </div>
 
               {/* DESCRIPTION */}
-              <div className="flex h-[5.625rem] w-full items-center justify-between gap-[1rem]">
+              <div className="flex h-[5.625rem] w-full items-center gap-7">
                 <Label
                   className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                   htmlFor="name"
@@ -200,62 +249,12 @@ export default function CreateProjectDialogue(): JSX.Element {
                       description: e.target.value
                     }))
                   }}
-                  placeholder="Enter the name"
-                />
-              </div>
-
-              {/* ENV. NAME */}
-              <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
-                <Label
-                  className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
-                  htmlFor="envName"
-                >
-                  Env. Name
-                </Label>
-                <Input
-                  className="col-span-3 h-[2.25rem] w-[20rem] "
-                  id="envName"
-                  onChange={(e) => {
-                    setNewProjectData((prev) => ({
-                      ...prev,
-                      environments: (prev.environments || []).map(
-                        (env, index) =>
-                          index === 0 ? { ...env, name: e.target.value } : env
-                      )
-                    }))
-                  }}
-                  placeholder="Your project default environment name"
-                />
-              </div>
-
-              {/* ENV. DESCRIPTION */}
-              <div className="flex h-[4.875rem] w-full items-center justify-between gap-[1rem]">
-                <Label
-                  className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500]"
-                  htmlFor="envDescription"
-                >
-                  Env. Description
-                </Label>
-                <Textarea
-                  className="col-span-3 h-[4.875rem] w-[20rem] resize-none"
-                  id="envDescription"
-                  onChange={(e) => {
-                    setNewProjectData((prev) => ({
-                      ...prev,
-                      environments: (prev.environments || []).map(
-                        (env, index) =>
-                          index === 0
-                            ? { ...env, description: e.target.value }
-                            : env
-                      )
-                    }))
-                  }}
-                  placeholder="Detailed description about your environment"
+                  placeholder="Short description about your whole project"
                 />
               </div>
 
               {/* ACCESS LEVEL */}
-              <div className="flex h-[2.25rem] w-full items-center justify-between gap-[1rem]">
+              <div className="flex h-[2.25rem] w-full items-center gap-4">
                 <Label
                   className="font-geist h-[0.875rem] w-[5.5rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
                   htmlFor="accessLevel"
@@ -294,15 +293,15 @@ export default function CreateProjectDialogue(): JSX.Element {
               </div>
 
               {/* SWITCH */}
-              <div className="flex flex-col gap-y-4 pb-4">
+              <div className="flex flex-col gap-y-4">
                 <div className="flex h-[4.875rem] w-full items-center justify-between gap-[1rem]">
                   <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
                     <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
                       Should the private key be saved or not?
                     </h1>
-                    <h1 className="font-inter h-[1.25rem] w-[16.563rem] text-[0.8rem] font-normal text-[#A1A1AA] ">
+                    <p className="h-[1.25rem] text-sm text-[#A1A1AA] ">
                       Choose if you want to save your private key
-                    </h1>
+                    </p>
                   </div>
 
                   <div className="p-[0.125rem]">
@@ -322,7 +321,7 @@ export default function CreateProjectDialogue(): JSX.Element {
                     className="rounded-lg border border-yellow-300 p-4"
                     ref={privateKeyWarningRef}
                   >
-                    <p className="text-[0.8rem] font-normal text-[#A1A1AA]">
+                    <p className="text-sm text-[#A1A1AA]">
                       Enabling this would save the private key in our database.
                       This would allow all permissible members to read your
                       secrets. In the unnatural event of a data breach, your
@@ -331,6 +330,58 @@ export default function CreateProjectDialogue(): JSX.Element {
                     </p>
                   </div>
                 ) : null}
+              </div>
+
+              {/* ENVIRONMENTS */}
+              <div className="flex flex-col gap-4">
+                <Label className="text-base font-semibold">
+                  Environments
+                </Label>
+
+                <div className="flex flex-col gap-5">
+                  {/* Environment List */}
+                  <div className="flex flex-col gap-4">
+                    {newProjectData.environments?.map((env, index) => (
+                      <div
+                        className="flex flex-col gap-4"
+                        key={`env-${index + 1}`}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <Input
+                            className="w-[20rem]"
+                            name="name"
+                            onChange={(e) => handleEnvironmentChange(index, 'name', e.target.value)}
+                            placeholder="Name"
+                            value={env.name}
+                          />
+                          <Input
+                            className="w-[20rem] resize-none"
+                            name="description"
+                            onChange={(e) => handleEnvironmentChange(index, 'description', e.target.value)}
+                            placeholder="Description"
+                            value={env.description}
+                          />
+                          <Button
+                            className="w-9 h-9 bg-[#DC2626]/40 text-[#DC2626] rounded-lg hover:bg-[#DC2626]/40 hover:text-[#DC2626]"
+                            onClick={() => handleDeleteEnvironment(index)}
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    className="w-max flex items-center gap-1 text-sm font-medium"
+                    onClick={handleCreateNewEnvironment}
+                    variant="secondary"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
