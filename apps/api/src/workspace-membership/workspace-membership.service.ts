@@ -544,7 +544,8 @@ export class WorkspaceMembershipService {
             }
           }
         },
-        invitationAccepted: true
+        invitationAccepted: true,
+        createdOn: true
       }
     })
 
@@ -820,6 +821,67 @@ export class WorkspaceMembershipService {
       })
 
     return await this.memberExistsInWorkspace(workspace.id, otherUser.id)
+  }
+
+  async resendInvitation(
+    user: AuthenticatedUser,
+    inviteeEmail: User['email'],
+    workspaceSlug: Workspace['slug']
+  ): Promise<void> {
+    this.log.log(
+      `User ${user.id} requested to resend invitation to workspace ${workspaceSlug} for user ${inviteeEmail}`
+    )
+
+    // Fetch the invitee user
+    const member = await getUserByEmailOrId(inviteeEmail, this.prisma)
+
+    const workspace =
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.READ_WORKSPACE, Authority.ADD_USER]
+      })
+
+    this.log.log(
+      `Checking if user ${member.id} is a member of workspace ${workspace.id}`
+    )
+    // Check if the membership exists
+    const membership = await this.prisma.workspaceMember.findFirst({
+      where: {
+        workspaceId: workspace.id,
+        userId: member.id,
+        invitationAccepted: false
+      }
+    })
+
+    if (!membership) {
+      this.log.error(
+        `User ${member.id} is not a member of workspace ${workspace.id}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Membership not found',
+          'You are trying to invite someone who has not been invited before'
+        )
+      )
+    }
+
+    // Resend the invitation
+    this.log.log(
+      `Resending invitation to user ${member.id} for workspace ${workspace.id}`
+    )
+    this.mailService.invitedToWorkspace(
+      member.email,
+      workspace.name,
+      `${process.env.WORKSPACE_FRONTEND_URL}/workspace/${workspace.slug}/join`,
+      user.name,
+      membership.createdOn.toISOString(),
+      true
+    )
+
+    this.log.log(
+      `Invitation resent to user ${member.id} for workspace ${workspace.id}`
+    )
   }
 
   private async getWorkspaceAdminRole(

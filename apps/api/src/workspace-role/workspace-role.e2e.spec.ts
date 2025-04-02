@@ -1101,6 +1101,26 @@ describe('Workspace Role Controller Tests', () => {
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>
@@ -1157,6 +1177,26 @@ describe('Workspace Role Controller Tests', () => {
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>

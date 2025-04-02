@@ -20,7 +20,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { WorkspaceRoleWithProjects } from './workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { paginate, PaginatedMetadata } from '@/common/paginate'
+import { paginate } from '@/common/paginate'
 import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
@@ -125,13 +125,6 @@ export class WorkspaceRoleService {
       for (const pe of dto.projectEnvironments) {
         const projectId = projectSlugToIdMap.get(pe.projectSlug)
         if (projectId) {
-          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
-            throw new BadRequestException(
-              constructErrorBody(
-                'Environment slugs in the project are required',
-                `Environment slugs in the project ${pe.projectSlug} are required`
-              )
-            )
           if (pe.environmentSlugs) {
             //Check if all environments are part of the project
             const project = await this.prisma.project.findFirst({
@@ -577,7 +570,7 @@ export class WorkspaceRoleService {
     sort: string,
     order: string,
     search: string
-  ): Promise<{ items: WorkspaceRole[]; metadata: PaginatedMetadata }> {
+  ) {
     const { id: workspaceId } =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
@@ -597,6 +590,27 @@ export class WorkspaceRoleService {
 
       orderBy: {
         [sort]: order
+      },
+
+      include: {
+        projects: {
+          select: {
+            project: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            },
+            environments: {
+              select: {
+                id: true,
+                slug: true,
+                name: true
+              }
+            }
+          }
+        }
       }
     })
 

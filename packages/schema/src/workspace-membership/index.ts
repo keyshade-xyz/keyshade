@@ -70,6 +70,13 @@ export const IsMemberRequestSchema = z.object({
 
 export const IsMemberResponseSchema = z.boolean()
 
+export const ResendInvitationRequestSchema = z.object({
+  workspaceSlug: WorkspaceSchema.shape.slug,
+  userEmail: UserSchema.shape.email
+})
+
+export const ResendInvitationResponseSchema = z.void()
+
 export const GetMembersRequestSchema = PageRequestSchema.extend({
   workspaceSlug: WorkspaceSchema.shape.slug
 })
@@ -94,6 +101,8 @@ export const GetMembersResponseSchema = PageResponseSchema(
           )
         })
       })
-    )
+    ),
+    invitationAccepted: z.boolean(),
+    createdOn: z.string().datetime()
   })
 )
