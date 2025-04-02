@@ -41,7 +41,7 @@ function SetupLocalKeyDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-black/70">
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
             Setup Private Key Locally

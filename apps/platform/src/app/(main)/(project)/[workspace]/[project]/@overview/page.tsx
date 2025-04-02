@@ -13,6 +13,7 @@ import SetupLocalKeyDialog from '@/components/dashboard/overview/SetupLocalKeyDi
 import ServerKeySetupDialog from '@/components/dashboard/overview/ServerKeySetupDialog'
 import RegenerateKeyDialog from '@/components/dashboard/overview/RegenerateKeyDialog'
 import RegenerateKeySetup from '@/components/dashboard/overview/RegenerateKeySetup'
+import WarningCard from '@/components/shared/warning-card'
 
 function OverviewPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true)
@@ -111,23 +112,23 @@ function OverviewPage(): React.JSX.Element {
         </div>
 
         {!privateKey && (
-          <div className="flex  items-center justify-center rounded-lg border border-yellow-300 p-2.5">
-            <p className="font-semibold text-yellow-300">
-              You have not stored any private key with us, so secret values can
-              not be decrypted.
-            </p>
-          </div>
+          <WarningCard>
+            You have not stored any private key with us, so secret values can
+            not be decrypted.
+          </WarningCard>
         )}
 
         <div className="flex flex-col gap-3 py-2">
           <div className="flex flex-1 flex-col gap-3 rounded-lg bg-white/10 p-5">
             <div className="flex flex-col gap-1">
               <p className="text-lg font-semibold">
-                Do you want to setup private key?
+                Set up private key in memory?
               </p>
               <p className="text-sm text-white/60">
-                Storing your private key in the browser is the safest way to
-                browse through the secrets of your project
+                Storing your private key in the memory is the safest way to
+                browse through the secrets of your project. It gets stored in
+                your browser&apos;s state, and never makes it to any persistent
+                store.
               </p>
             </div>
             <LocalKeySetup
