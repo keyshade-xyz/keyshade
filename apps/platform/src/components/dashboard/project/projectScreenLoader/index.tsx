@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ProjectScreenLoader() {
   return (
-    <div className="bg-background dark min-h-screen p-8">
+    <div className="bg-background dark h-full p-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
           <div
