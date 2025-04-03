@@ -1,3 +1,9 @@
+## [2.14.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.12...v2.14.0-stage.13) (2025-04-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** Scrollbar issue  ([#839](https://github.com/keyshade-xyz/keyshade/issues/839)) ([0627a6e](https://github.com/keyshade-xyz/keyshade/commit/0627a6e6e7d893d1c04cf275355120eef37a4efe))
+
 ## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
 
 ### 🐛 Bug Fixes
