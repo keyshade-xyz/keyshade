@@ -1,9 +1,10 @@
 'use client'
-import { AddSVG } from '@public/svg/shared'
+import { AddSVG, CloseCircleSVG } from '@public/svg/shared'
 import React, { useCallback, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
+import type { User } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,30 +16,36 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import { pendingMemberInvitationOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { Separator } from '@/components/ui/separator'
+import AvatarComponent from '@/components/common/avatar'
 
 interface SelectedRoles {
   name: string;
   roleSlug: string;
 }
 
-export default function MembersHeader(): React.JSX.Element {
+export default function MembersHeader({
+  members,
+  roles
+}): React.JSX.Element {
   const [email, setEmail] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedRoles, setSelectedRoles] = useState<SelectedRoles[]>([])
+  const [pendingMemberInvitation, setPendingMemberInvitation] = useAtom<User['email'][]>(pendingMemberInvitationOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  const roles = useAtomValue(rolesOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const toggleRole = (role: SelectedRoles) => {
-    setSelectedRoles(prev =>
-      prev.includes(role)
-        ? prev.filter(r => r !== role)
-        : [...prev, role]
-    )
+    setSelectedRoles(prev => {
+      const isSelected = prev.some(r => r.roleSlug === role.roleSlug);
+      return isSelected
+        ? prev.filter(r => r.roleSlug !== role.roleSlug)
+        : [...prev, role];
+    });
   }
 
   const inviteMember = useHttp(() =>
@@ -51,7 +58,15 @@ export default function MembersHeader(): React.JSX.Element {
     })
   )
 
+  const cancelInvitation = useHttp((userEmail: User['email']) =>
+    ControllerInstance.getInstance().workspaceMembershipController.cancelInvitation({
+      workspaceSlug: currentWorkspace!.slug,
+      userEmail
+    })
+  )
+
   const handleClose = useCallback(() => {
+    setIsDialogOpen(false)
     setIsDropdownOpen(false)
     setEmail("")
     setSelectedRoles([])
@@ -64,13 +79,12 @@ export default function MembersHeader(): React.JSX.Element {
     }
 
     if (selectedRoles.length === 0) {
-      toast.error("Please select atleast one role")
+      toast.error("Please select at least one role")
       return
     }
 
     setIsLoading(true)
     toast.loading('Sending invite...')
-
     try {
       const { success } = await inviteMember()
 
@@ -82,7 +96,7 @@ export default function MembersHeader(): React.JSX.Element {
             </p>
           )
         })
-
+        setPendingMemberInvitation([...pendingMemberInvitation, email])
         handleClose()
       }
     } finally {
@@ -93,16 +107,41 @@ export default function MembersHeader(): React.JSX.Element {
     email,
     selectedRoles.length,
     handleClose,
-    inviteMember
+    inviteMember,
+    pendingMemberInvitation,
+    setPendingMemberInvitation,
   ])
+
+  const handleCancelInvite = useCallback(async (userEmail: string) => {
+    setIsLoading(true)
+    toast.loading('Revoking invite...')
+    try {
+      const { success } = await cancelInvitation(userEmail)
+
+      if (success) {
+        toast.success('Invite revoked successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              Member will not be added to the workspace.
+            </p>
+          )
+        })
+
+        handleClose()
+      }
+    } finally {
+      toast.dismiss()
+      setIsLoading(false)
+    }
+  }, [cancelInvitation, handleClose])
 
   return (
     <div className="flex justify-between">
       <div className="text-3xl font-medium">Members</div>
       <div className="flex gap-x-4">
-        <Dialog>
-          <DialogTrigger>
-            <Button>
+        <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setIsDialogOpen(true)}>
               {' '}
               <AddSVG /> Add Member
             </Button>
@@ -170,7 +209,7 @@ export default function MembersHeader(): React.JSX.Element {
                       key={role.id}
                     >
                       <Checkbox
-                        checked={selectedRoles.includes({ name: role.name, roleSlug: role.slug })}
+                        checked={selectedRoles.some(r => r.roleSlug === role.slug)}
                         className="mr-2 rounded-sm data-[state=checked]:text-black data-[state=checked]:border-none border-none data-[state=checked]:bg-white bg-gray-400"
                         onCheckedChange={() => toggleRole({ name: role.name, roleSlug: role.slug })}
                       />
@@ -178,6 +217,38 @@ export default function MembersHeader(): React.JSX.Element {
                     </Label>
                   ))}
                 </div> : null}
+              </div>
+
+              {/* Sent Invites */}
+              <div className='flex flex-col gap-y-5'>
+                <Separator className='bg-white/20 mt-3' />
+                <Label className="block text-white text-sm font-medium mb-2">People Invited</Label>
+                {members
+                  .filter(member => !member.invitationAccepted)
+                  .map(member => (
+                    <div className="flex items-center justify-between w-full" key={member.user.email} >
+                      <div className="flex items-center gap-2">
+                        {member.user.profilePictureUrl ? (
+                          <AvatarComponent
+                            className="w-6 h-6 rounded-full"
+                            name={member.user.email}
+                            profilePictureUrl={member.user.profilePictureUrl}
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-xs">
+                            {member.user.email[0].toUpperCase()}
+                          </div>
+                        )}
+                        <span className="text-[#71717A] underline text-sm font-normal">{member.user.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        <span className='text-[#BFDBFE] text-sm font-medium'>Resend</span>
+                        <Button className='bg-transparent hover:bg-transparent border-none' onClick={() => handleCancelInvite(member.user.email as string)}>
+                          <CloseCircleSVG />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </DialogContent>

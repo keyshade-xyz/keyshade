@@ -21,6 +21,10 @@ import MinusSquareSVG from './minus-square.svg'
 import EyeOpenSVG from './eye.svg'
 import EyeSlashSVG from './eye-slash.svg'
 import InfoSVG from './info.svg'
+import CloseCircleSVG from './close-circle.svg'
+import EditTwoSVG from './edit-2.svg'
+import MedalStarSVG from './medal-star.svg'
+import UserRemoveSVG from './user-remove.svg'
 
 export {
   DropdownSVG,
@@ -46,4 +50,8 @@ export {
   TrashWhiteSVG,
   RollbackSVG,
   MinusSquareSVG,
+  CloseCircleSVG,
+  EditTwoSVG,
+  MedalStarSVG,
+  UserRemoveSVG,
 }

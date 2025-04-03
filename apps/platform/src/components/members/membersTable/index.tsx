@@ -1,9 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { useAtom, useAtomValue } from 'jotai'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import dayjs from 'dayjs'
+import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,
@@ -12,9 +12,6 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { membersOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
 import AvatarComponent from '@/components/common/avatar'
 import {
   Select,
@@ -25,56 +22,21 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 
-export interface Payment {
-  id: string
-  amount: number
-  status: 'pending' | 'processing' | 'success' | 'failed'
-  email: string
-}
-
-export interface Member {
-  id: string
-  user: {
-    name: string
-    email: string
-    profilePicture: string
-  }
-  joiningDate: string
-  roles: string[]
-}
-
-export default function MembersTable(): React.JSX.Element {
-  const [members, setMembers] = useAtom(membersOfWorkspaceAtom)
-  const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
+export default function MembersTable({
+  members,
+}): React.JSX.Element {
   const [currentPage, setCurrentPage] = React.useState(1)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
 
-  const getAllMembers = useHttp(() =>
-    ControllerInstance.getInstance().workspaceMembershipController.getMembers(
-      {
-        workspaceSlug: currentWorkspace!.slug
-      },
-      {}
-    )
-  )
+  // Filter members where invitationAccepted is true
+  const acceptedMembers = members.filter(member => member.invitationAccepted === true)
 
-  // Calculate pagination values
-  const totalMembers = members.length
+  // Calculate pagination values using filtered members
+  const totalMembers = acceptedMembers.length
   const totalPages = Math.ceil(totalMembers / rowsPerPage)
   const startIndex = (currentPage - 1) * rowsPerPage
   const endIndex = startIndex + rowsPerPage
-  const currentMembers = members.slice(startIndex, endIndex)
-
-  React.useEffect(() => {
-    getAllMembers()
-      .then(({ data, success }) => {
-        if (success && data) {
-          // eslint-disable-next-line no-console -- Need to log this
-          console.log("data: ", data)
-          setMembers(data.items)
-        }
-      })
-  }, [getAllMembers, setMembers])
+  const currentMembers = acceptedMembers.slice(startIndex, endIndex)
 
   return (
     <div className="h-full w-full">
@@ -85,17 +47,18 @@ export default function MembersTable(): React.JSX.Element {
               <TableHead className='text-sm font-medium text-white text-left'>Name</TableHead>
               <TableHead className='text-sm font-medium text-white text-left'>Joining Date</TableHead>
               <TableHead className='text-sm font-medium text-white text-left'>Roles</TableHead>
+              <TableHead className='w-[10%]' />
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentMembers.length > 0 ? (
               currentMembers.map((member) => (
-                <TableRow className='hover:bg-transparent' key={member.id}>
+                <TableRow className='hover:bg-transparent group' key={member.id}>
                   <TableCell className='text-left w-[30%]'>
                     <div className="flex items-center">
                       <AvatarComponent
                         className='h-10 w-10'
-                        name={member.user.name}
+                        name={member.user.name || ''}
                         profilePictureUrl={member.user.profilePictureUrl}
                       />
                       <div className="ml-3">
@@ -105,17 +68,24 @@ export default function MembersTable(): React.JSX.Element {
                     </div>
                   </TableCell>
                   <TableCell className='text-left w-[30%]'>
-                    {dayjs(member.createdOn).format('MMM D, YYYY')}
+                    {dayjs(member.createdOn as string).format('MMM D, YYYY')}
                   </TableCell>
                   <TableCell className="text-left w-[40%]">
                     <div className='w-[8rem] py-3 flex justify-center items-center rounded-md bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC]'>{member.roles[0].role.name}</div>
+                  </TableCell>
+                  <TableCell className=" opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-left">
+                    <div className="flex gap-2 justify-start">
+                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><UserRemoveSVG /></Button>
+                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><EditTwoSVG /></Button>
+                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><MedalStarSVG /></Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             ) : null}
           </TableBody>
         </Table>
-        
+
         {/* Pagination Footer */}
         <div className="flex items-center justify-between mt-4 py-7 px-[5.5rem]">
           <div className="text-sm text-[#A1A1AA] font-normal">
