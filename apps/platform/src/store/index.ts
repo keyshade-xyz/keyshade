@@ -29,7 +29,6 @@ export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
 export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
-export const pendingMemberInvitationOfWorkspaceAtom = atom<User['email'][]>([])
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(

@@ -2,7 +2,7 @@
 import { AddSVG, CloseCircleSVG } from '@public/svg/shared'
 import React, { useCallback, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import type { User } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { pendingMemberInvitationOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import { membersOfWorkspaceAtom, rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Separator } from '@/components/ui/separator'
@@ -27,17 +27,16 @@ interface SelectedRoles {
   roleSlug: string;
 }
 
-export default function MembersHeader({
-  members,
-  roles
-}): React.JSX.Element {
+export default function MembersHeader(): React.JSX.Element {
   const [email, setEmail] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedRoles, setSelectedRoles] = useState<SelectedRoles[]>([])
-  const [pendingMemberInvitation, setPendingMemberInvitation] = useAtom<User['email'][]>(pendingMemberInvitationOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const roles = useAtomValue(rolesOfWorkspaceAtom)
+  const members = useAtomValue(membersOfWorkspaceAtom)
+  const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const toggleRole = (role: SelectedRoles) => {
     setSelectedRoles(prev => {
@@ -60,6 +59,13 @@ export default function MembersHeader({
 
   const cancelInvitation = useHttp((userEmail: User['email']) =>
     ControllerInstance.getInstance().workspaceMembershipController.cancelInvitation({
+      workspaceSlug: currentWorkspace!.slug,
+      userEmail
+    })
+  )
+
+  const resendInvitation = useHttp((userEmail: User['email']) =>
+    ControllerInstance.getInstance().workspaceMembershipController.resendInvitation({
       workspaceSlug: currentWorkspace!.slug,
       userEmail
     })
@@ -96,7 +102,6 @@ export default function MembersHeader({
             </p>
           )
         })
-        setPendingMemberInvitation([...pendingMemberInvitation, email])
         handleClose()
       }
     } finally {
@@ -107,9 +112,7 @@ export default function MembersHeader({
     email,
     selectedRoles.length,
     handleClose,
-    inviteMember,
-    pendingMemberInvitation,
-    setPendingMemberInvitation,
+    inviteMember
   ])
 
   const handleCancelInvite = useCallback(async (userEmail: string) => {
@@ -134,6 +137,29 @@ export default function MembersHeader({
       setIsLoading(false)
     }
   }, [cancelInvitation, handleClose])
+
+  const handleResendInvite = useCallback(async (userEmail: string) => {
+    setIsLoading(true)
+    toast.loading('Resending invite...')
+    try {
+      const { success } = await resendInvitation(userEmail)
+
+      if (success) {
+        toast.success('Invite resent successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              Members will be added once they accept the invite.
+            </p>
+          )
+        })
+
+        handleClose()
+      }
+    } finally {
+      toast.dismiss()
+      setIsLoading(false)
+    }
+  }, [resendInvitation, handleClose])
 
   return (
     <div className="flex justify-between">
@@ -242,8 +268,8 @@ export default function MembersHeader({
                         <span className="text-[#71717A] underline text-sm font-normal">{member.user.email}</span>
                       </div>
                       <div className="flex items-center gap-2 cursor-pointer">
-                        <span className='text-[#BFDBFE] text-sm font-medium'>Resend</span>
-                        <Button className='bg-transparent hover:bg-transparent border-none' onClick={() => handleCancelInvite(member.user.email as string)}>
+                        <Button className='text-[#BFDBFE] bg-transparent px-0 border-none text-sm font-medium' onClick={() => handleResendInvite(member.user.email)}>Resend</Button>
+                        <Button className='bg-transparent hover:bg-transparent border-none' onClick={() => handleCancelInvite(member.user.email)}>
                           <CloseCircleSVG />
                         </Button>
                       </div>

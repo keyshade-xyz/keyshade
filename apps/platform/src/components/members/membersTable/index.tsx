@@ -4,6 +4,7 @@ import * as React from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import dayjs from 'dayjs'
 import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
+import { useAtomValue } from 'jotai'
 import {
   Table,
   TableBody,
@@ -21,19 +22,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { membersOfWorkspaceAtom } from '@/store'
 
-export default function MembersTable({
-  members,
-}): React.JSX.Element {
+export default function MembersTable(): React.JSX.Element {
+  const members = useAtomValue(membersOfWorkspaceAtom)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
 
   // Filter members where invitationAccepted is true
-  const acceptedMembers = members.filter(member => member.invitationAccepted === true)
+  const acceptedMembers = members.filter(member => member.invitationAccepted)
 
   // Calculate pagination values using filtered members
-  const totalMembers = acceptedMembers.length
-  const totalPages = Math.ceil(totalMembers / rowsPerPage)
+  const totalPages = Math.ceil(members.length / rowsPerPage)
   const startIndex = (currentPage - 1) * rowsPerPage
   const endIndex = startIndex + rowsPerPage
   const currentMembers = acceptedMembers.slice(startIndex, endIndex)
@@ -68,7 +68,7 @@ export default function MembersTable({
                     </div>
                   </TableCell>
                   <TableCell className='text-left w-[30%]'>
-                    {dayjs(member.createdOn as string).format('MMM D, YYYY')}
+                    {dayjs(member.createdOn).format('MMM D, YYYY')}
                   </TableCell>
                   <TableCell className="text-left w-[40%]">
                     <div className='w-[8rem] py-3 flex justify-center items-center rounded-md bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC]'>{member.roles[0].role.name}</div>
@@ -89,7 +89,7 @@ export default function MembersTable({
         {/* Pagination Footer */}
         <div className="flex items-center justify-between mt-4 py-7 px-[5.5rem]">
           <div className="text-sm text-[#A1A1AA] font-normal">
-            0 out of {totalMembers} row(s) selected
+            0 out of {members.length} row(s) selected
           </div>
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
