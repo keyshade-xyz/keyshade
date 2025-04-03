@@ -1,11 +1,13 @@
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
+import AvatarComponent from '@/components/common/avatar'
 
 export default function GeneralSettings(): React.JSX.Element {
   const [user, setUser] = useAtom(userAtom)
@@ -57,7 +59,18 @@ export default function GeneralSettings(): React.JSX.Element {
     <>
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="aspect-square w-[60px] rounded-full bg-gray-600" />
+        <div className="aspect-square w-[60px] rounded-full" >
+          {user?.profilePictureUrl ? (
+            <AvatarComponent
+              name={user.name || 'User'}
+              profilePictureUrl={user.profilePictureUrl}
+            />
+          ) : (
+            <div className='h-full w-full flex justify-center items-center border-2 border-white/70 rounded-full'>
+              <User className='h-[60%] w-[60%]' />
+            </div>
+          )}
+        </div>
         {/* This is will be replaced by an image tag */}
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Avatar</div>

@@ -1,3 +1,37 @@
+## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
+
+### 🐛 Bug Fixes
+
+* **api:** Error in running the API locally ([88809ea](https://github.com/keyshade-xyz/keyshade/commit/88809ea6f575d6218e795830f973fbe9398f687d))
+
+## [2.14.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.10...v2.14.0-stage.11) (2025-03-31)
+
+### 🚀 Features
+
+* **api:** Resend workspace invitation ([#850](https://github.com/keyshade-xyz/keyshade/issues/850)) ([e2e9c0f](https://github.com/keyshade-xyz/keyshade/commit/e2e9c0f0abf535130ba222dbff41fe78de53c344))
+
+## [2.14.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.9...v2.14.0-stage.10) (2025-03-31)
+
+### 🚀 Features
+
+* **platform:** Add environment management to project creation dialog ([#848](https://github.com/keyshade-xyz/keyshade/issues/848)) ([720d4fb](https://github.com/keyshade-xyz/keyshade/commit/720d4fb143dec5b97aa5b646b458ff0bb323f0ae))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add database seeding script and related commands ([#849](https://github.com/keyshade-xyz/keyshade/issues/849)) ([fe8fa45](https://github.com/keyshade-xyz/keyshade/commit/fe8fa454107fc468f3bb2439e3e4d456c8e5d7f1))
+
+## [2.14.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.8...v2.14.0-stage.9) (2025-03-28)
+
+### 🚀 Features
+
+* **platform:** One-Time Secret Display for API Key ([#771](https://github.com/keyshade-xyz/keyshade/issues/771)) ([#799](https://github.com/keyshade-xyz/keyshade/issues/799)) ([88e3ad9](https://github.com/keyshade-xyz/keyshade/commit/88e3ad94e41b65a89bcfa84b04d0ad8a1ce02fb2))
+
+## [2.14.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.7...v2.14.0-stage.8) (2025-03-27)
+
+### 🐛 Bug Fixes
+
+* **platform:** Added profile picture in the user settings with proper fallback ([#845](https://github.com/keyshade-xyz/keyshade/issues/845)) ([f32d90e](https://github.com/keyshade-xyz/keyshade/commit/f32d90eafb8f8fb2fa822df72ca3225600d12b1c))
+
 ## [2.14.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.6...v2.14.0-stage.7) (2025-03-25)
 
 ### 🚀 Features
