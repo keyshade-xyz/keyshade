@@ -1,3 +1,9 @@
+## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
+
+### 🐛 Bug Fixes
+
+* **api:** Error in running the API locally ([88809ea](https://github.com/keyshade-xyz/keyshade/commit/88809ea6f575d6218e795830f973fbe9398f687d))
+
 ## [2.14.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.10...v2.14.0-stage.11) (2025-03-31)
 
 ### 🚀 Features
