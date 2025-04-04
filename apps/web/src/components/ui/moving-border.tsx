@@ -89,7 +89,7 @@ export function MovingBorder({
   [key: string]: any
 }): React.JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ok
-  const pathRef = useRef<any>()
+  const pathRef = useRef<any>(undefined)
   const progress = useMotionValue<number>(0)
 
   useAnimationFrame((time) => {

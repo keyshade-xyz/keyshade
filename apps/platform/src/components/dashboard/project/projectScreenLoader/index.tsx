@@ -7,6 +7,7 @@ export default function ProjectScreenLoader() {
         {[...Array(6)].map((_, i) => (
           <div
             className="flex h-[7rem] items-center space-x-4 rounded-xl bg-white/5 p-4"
+            // eslint-disable-next-line react/no-array-index-key -- since this is a skeleton, using index as key is acceptable
             key={i}
           >
             <Skeleton className="h-12 w-12 rounded-full bg-white/15" />
