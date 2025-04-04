@@ -1,3 +1,9 @@
+## [2.14.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.14...v2.14.0-stage.15) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Return lastUpdatedBy data ([e665d12](https://github.com/keyshade-xyz/keyshade/commit/e665d124efb4f5c94497140d93ff91b4a305c5f0))
+
 ## [2.14.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.13...v2.14.0-stage.14) (2025-04-04)
 
 ### 🚀 Features
