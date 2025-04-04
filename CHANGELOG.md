@@ -1,3 +1,9 @@
+## [2.14.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.18...v2.14.0-stage.19) (2025-04-04)
+
+### 🚀 Features
+
+* **web:** Migrated from nextjs 13 to 15 ([#844](https://github.com/keyshade-xyz/keyshade/issues/844)) ([3212d47](https://github.com/keyshade-xyz/keyshade/commit/3212d47204b673080995579903ea7d7cbcc2626d))
+
 ## [2.14.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.17...v2.14.0-stage.18) (2025-04-04)
 
 ### 🐛 Bug Fixes
