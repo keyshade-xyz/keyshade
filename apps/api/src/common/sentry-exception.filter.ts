@@ -1,4 +1,9 @@
-import { Catch, ArgumentsHost, HttpException } from '@nestjs/common'
+import {
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  InternalServerErrorException
+} from '@nestjs/common'
 import { BaseExceptionFilter } from '@nestjs/core'
 import * as Sentry from '@sentry/node'
 import { constructErrorBody } from './util'
@@ -10,7 +15,10 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
     const response = ctx.getResponse()
     const request = ctx.getRequest()
     try {
-      if (request && response && exception.getStatus() === 500) {
+      if (
+        exception instanceof InternalServerErrorException ||
+        exception.name === 'Error'
+      ) {
         Sentry.withScope((scope) => {
           scope.addEventProcessor((event) => {
             event.request = {
@@ -29,20 +37,21 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
           message: constructErrorBody(
             'Internal Server Error',
             'Something went wrong on our end. If the error persists, please get in touch with us at support@keyshade.xyz'
-          )
+          ),
+          statusCode: 500,
+          error: 'InternalServerException'
         })
-      } else {
-        super.catch(exception, host)
+        return
       }
     } catch (filterError) {
+      console.log('filter: ', filterError)
       Sentry.captureException(filterError)
       Sentry.captureException(exception)
-    } finally {
-      response.json({
-        message: exception['message'],
-        error: exception['name'],
-        statusCode: exception['status']
-      })
     }
+    response.json({
+      message: exception['message'],
+      error: exception['name'],
+      statusCode: exception['status']
+    })
   }
 }
