@@ -4,7 +4,10 @@ import * as React from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import dayjs from 'dayjs'
 import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
+import type { GetMembersResponse } from '@keyshade/schema'
+import TransferOwnershipDialog from '../transferOwnershipDialog'
+import RemoveMemberDialog from '../removeMemberDialog'
 import {
   Table,
   TableBody,
@@ -22,10 +25,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { membersOfWorkspaceAtom } from '@/store'
+import { membersOfWorkspaceAtom, removeMemberOpenAtom, selectedMemberAtom, transferOwnershipOpenAtom } from '@/store'
 
 export default function MembersTable(): React.JSX.Element {
   const members = useAtomValue(membersOfWorkspaceAtom)
+  const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
+  const [isRemoveMemberOpen, setIsRemoveMemberOpen] = useAtom(removeMemberOpenAtom)
+  const [isTransferOwnershipOpen, setIsTransferOwnershipOpen] = useAtom(transferOwnershipOpenAtom)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
 
@@ -37,6 +43,16 @@ export default function MembersTable(): React.JSX.Element {
   const startIndex = (currentPage - 1) * rowsPerPage
   const endIndex = startIndex + rowsPerPage
   const currentMembers = acceptedMembers.slice(startIndex, endIndex)
+
+  const handleRemoveClick = (member: GetMembersResponse['items'][number]) => {
+    setSelectedMember(member)
+    setIsRemoveMemberOpen(true)
+  }
+
+  const handleTransferOwnership = (member: GetMembersResponse['items'][number]) => {
+    setSelectedMember(member)
+    setIsTransferOwnershipOpen(true)
+  }
 
   return (
     <div className="h-full w-full">
@@ -71,13 +87,22 @@ export default function MembersTable(): React.JSX.Element {
                     {dayjs(member.createdOn).format('MMM D, YYYY')}
                   </TableCell>
                   <TableCell className="text-left w-[40%]">
-                    <div className='w-[8rem] py-3 flex justify-center items-center rounded-md bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC]'>{member.roles[0].role.name}</div>
+                    <div className='w-[8rem] px-4 py-2 flex justify-center items-center rounded-full border bg-[#3B0764] border-purple-200 text-purple-200'>{member.roles[0].role.name}</div>
                   </TableCell>
                   <TableCell className=" opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-left">
                     <div className="flex gap-2 justify-start">
-                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><UserRemoveSVG /></Button>
+                      <Button
+                        className="p-1 bg-transparent hover:bg-transparent border-none"
+                        onClick={() => handleRemoveClick(member)}>
+                        <UserRemoveSVG />
+                      </Button>
                       <Button className="p-1 bg-transparent hover:bg-transparent border-none"><EditTwoSVG /></Button>
-                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><MedalStarSVG /></Button>
+                      <Button
+                        className="p-1 bg-transparent hover:bg-transparent border-none"
+                        onClick={() => handleTransferOwnership(member)}
+                      >
+                        <MedalStarSVG />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -148,6 +173,16 @@ export default function MembersTable(): React.JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* Remove member alert dialog */}
+      {isRemoveMemberOpen && selectedMember ? (
+        <RemoveMemberDialog />
+      ) : null}
+
+      {/* Transfer ownership alert dialog */}
+      {isTransferOwnershipOpen && selectedMember ? (
+        <TransferOwnershipDialog />
+      ) : null}
     </div>
   )
 }

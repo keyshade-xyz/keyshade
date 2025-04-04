@@ -172,7 +172,7 @@ export default function MembersHeader(): React.JSX.Element {
               <AddSVG /> Add Member
             </Button>
           </DialogTrigger>
-          <DialogContent className='p-6'>
+          <DialogContent className="p-6">
             <DialogHeader className='border-b border-white/20 pt-2 pb-6'>
               <DialogTitle>Share this project with new members</DialogTitle>
             </DialogHeader>
@@ -211,7 +211,7 @@ export default function MembersHeader(): React.JSX.Element {
                       <>
                         {selectedRoles.slice(0, 2).map((role) => (
                           <span
-                            className="bg-[#083344] border border-[#A5F3FC] text-[#A5F3FC] text-xs p-2 rounded-md"
+                            className="bg-[#3B0764] border-purple-200 text-purple-200 border text-xs px-4 py-2 rounded-full"
                             key={role.roleSlug}
                           >
                             {role.name}
@@ -228,10 +228,10 @@ export default function MembersHeader(): React.JSX.Element {
                   <ChevronDown className={`transition-transform flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} size={16} />
                 </Button>
 
-                {isDropdownOpen ? <div className="absolute top-full left-0 right-0 mt-1 w-3/4 bg-[#27272A] hover:bg-[#27272A] rounded-md shadow-lg overflow-hidden z-50">
+                {isDropdownOpen ? <div className="top-full left-0 right-0 mt-1 w-3/4 bg-zinc-800 hover:bg-[#27272A] rounded-md shadow-lg overflow-hidden z-50">
                   {roles.map((role) => (
                     <Label
-                      className="flex items-center px-3 py-2 hover:bg-[#3C3C3C] cursor-pointer"
+                      className="flex items-center px-3 py-2 cursor-pointer"
                       key={role.id}
                     >
                       <Checkbox
