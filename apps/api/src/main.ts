@@ -15,7 +15,7 @@ import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
 import { SentryExceptionFilter } from './common/sentry-exception.filter'
 
-export const sentryEnv = process.env.SENTRY_ENV || 'production'
+export const sentryEnv = process.env.SENTRY_API_ENVIRONMENT || 'production'
 
 async function initializeSentry() {
   const logger = new CustomLoggerService()
