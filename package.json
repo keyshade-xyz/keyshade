@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.14.0-stage.4",
+  "version": "2.14.0-stage.15",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -128,8 +128,8 @@
     "test:web": "turbo run test --filter=@keyshade/web",
     "test:platform": "turbo run test --filter=@keyshade/platform",
     "test:api-client": "pnpm run --filter=@keyshade/api-client test",
-    "test:schema": "pnpm run --filter=schema test",
     "test:secret-scan": "pnpm run --filter=secret-scan test",
+    "db:seed": "pnpm run --filter=@keyshade/api db:seed",
     "db:generate-types": "pnpm run --filter=@keyshade/api db:generate-types",
     "db:generate-migrations": "pnpm run --filter=@keyshade/api db:generate-migrations",
     "db:deploy-migrations": "pnpm run --filter=@keyshade/api db:deploy-migrations",

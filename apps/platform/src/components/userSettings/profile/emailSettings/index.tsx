@@ -1,13 +1,13 @@
-import type { AuthProviderEnum } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import type { AuthProviderEnum } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
-import { userAtom } from '@/store'
 import { logout } from '@/lib/utils'
+import { userAtom } from '@/store'
 
 const getFormattedAuthProvider = (authProvider: AuthProviderEnum): string => {
   const provider = authProvider.toLowerCase()
@@ -135,13 +135,13 @@ export default function EmailSettings(): React.JSX.Element {
                 value={otp}
               />
               <div className="mt-4 flex items-end justify-between gap-2">
-                <button
+                <Button
                   className="text-sm text-white/50 underline"
                   onClick={handleResendEmailChangeOTP}
                   type="button"
                 >
                   Resend OTP
-                </button>
+                </Button>
                 <Button
                   disabled={isLoading || otp === ''}
                   onClick={handleValidateEmailChangeOTP}
@@ -153,7 +153,7 @@ export default function EmailSettings(): React.JSX.Element {
           ) : null}
           {!wasEmailSent ? (
             <Button
-              className="mt-4"
+              className="mt-2"
               disabled={isLoading || user.email === email || email === ''}
               onClick={handleUpdateSelf}
               variant="secondary"

@@ -1,4 +1,4 @@
-import { Workspace, Authority, ProjectAccessLevel } from '@prisma/client'
+import { Authority, ProjectAccessLevel } from '@prisma/client'
 import { VariableWithProjectAndVersion } from '@/variable/variable.types'
 import {
   Injectable,
@@ -19,6 +19,11 @@ import { IntegrationWithWorkspace } from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
+import {
+  WorkspaceWithLastUpdateBy,
+  WorkspaceWithLastUpdatedByAndOwner
+} from '@/workspace/workspace.types'
+import { associateWorkspaceOwnerDetails } from '@/common/workspace'
 
 @Injectable()
 export class AuthorityCheckerService {
@@ -37,13 +42,13 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverWorkspace(
     params: AuthorizationParams
-  ): Promise<Workspace> {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over workspace for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
     )
 
-    let workspace: Workspace
+    let workspace: WorkspaceWithLastUpdateBy
 
     try {
       if (entity.slug) {
@@ -51,6 +56,15 @@ export class AuthorityCheckerService {
         workspace = await this.prisma.workspace.findUnique({
           where: {
             slug: entity.slug
+          },
+          include: {
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       } else if (entity.name) {
@@ -59,6 +73,15 @@ export class AuthorityCheckerService {
           where: {
             name: entity.name,
             members: { some: { userId: user.id } }
+          },
+          include: {
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       }
@@ -93,7 +116,8 @@ export class AuthorityCheckerService {
     this.logger.log(
       `User ${user.id} is cleared to access workspace ${workspace.slug} for authorities ${authorities}`
     )
-    return workspace
+
+    return await associateWorkspaceOwnerDetails(workspace, this.prisma)
   }
 
   /**
@@ -123,7 +147,14 @@ export class AuthorityCheckerService {
             slug: entity.slug
           },
           include: {
-            secrets: true
+            secrets: true,
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       } else {
@@ -134,7 +165,14 @@ export class AuthorityCheckerService {
             workspace: { members: { some: { userId: user.id } } }
           },
           include: {
-            secrets: true
+            secrets: true,
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       }
