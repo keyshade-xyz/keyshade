@@ -1,3 +1,9 @@
+## [2.14.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.13...v2.14.0-stage.14) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Fixed bugs with regenerating and storing private key ([c8f7cc6](https://github.com/keyshade-xyz/keyshade/commit/c8f7cc68573fe64b1e3d2032029e5da65d8c7b54))
+
 ## [2.14.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.12...v2.14.0-stage.13) (2025-04-03)
 
 ### 🐛 Bug Fixes
