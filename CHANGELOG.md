@@ -1,3 +1,21 @@
+## [2.14.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.14...v2.14.0-stage.15) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Return lastUpdatedBy data ([e665d12](https://github.com/keyshade-xyz/keyshade/commit/e665d124efb4f5c94497140d93ff91b4a305c5f0))
+
+## [2.14.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.13...v2.14.0-stage.14) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Fixed bugs with regenerating and storing private key ([c8f7cc6](https://github.com/keyshade-xyz/keyshade/commit/c8f7cc68573fe64b1e3d2032029e5da65d8c7b54))
+
+## [2.14.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.12...v2.14.0-stage.13) (2025-04-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** Scrollbar issue  ([#839](https://github.com/keyshade-xyz/keyshade/issues/839)) ([0627a6e](https://github.com/keyshade-xyz/keyshade/commit/0627a6e6e7d893d1c04cf275355120eef37a4efe))
+
 ## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
 
 ### 🐛 Bug Fixes
