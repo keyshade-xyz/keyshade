@@ -2,8 +2,7 @@
 import { useEffect, useState } from 'react'
 import { LockSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue } from 'jotai'
-import { SecretSVG } from '@public/svg/dashboard'
-import dayjs from 'dayjs'
+import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import Avvvatars from 'avvvatars-react'
 import OverviewLoader from '@/components/dashboard/overview/overviewLoader'
 import { selectedProjectPrivateKeyAtom, selectedProjectAtom } from '@/store'
@@ -14,6 +13,7 @@ import ServerKeySetupDialog from '@/components/dashboard/overview/ServerKeySetup
 import RegenerateKeyDialog from '@/components/dashboard/overview/RegenerateKeyDialog'
 import RegenerateKeySetup from '@/components/dashboard/overview/RegenerateKeySetup'
 import WarningCard from '@/components/shared/warning-card'
+import { formatDate } from '@/lib/utils'
 
 function OverviewPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true)
@@ -50,16 +50,22 @@ function OverviewPage(): React.JSX.Element {
     <div className="flex w-full gap-5 pt-2">
       <div className="flex-1 rounded-md bg-white/5 p-6 drop-shadow-[0px_1px_2px_rgba(16,24,40,0.06)]">
         <div className="flex items-start justify-between pb-5">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <Avvvatars size={50} style="shape" value={selectedProject.id} />
-              <p className="text-2xl font-bold">{selectedProject.name}</p>
+          <div className="flex w-full flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avvvatars size={50} style="shape" value={selectedProject.id} />
+                <p className="text-2xl font-bold">{selectedProject.name}</p>
+              </div>
+              <div className="flex flex-row gap-x-1 text-sm text-white/50">
+                <span>Last updated on</span>
+                <span className="font-semibold text-white/90">
+                  {formatDate(
+                    selectedProject.updatedAt || selectedProject.createdAt
+                  )}
+                </span>
+              </div>
             </div>
-            <div className="text-base">{selectedProject.description}</div>
-          </div>
-
-          <div className="rounded-md bg-white/10 p-1.5 text-xs text-white">
-            {dayjs(selectedProject.updatedAt).toNow(true)} ago
+            <p className="text-white/70">{selectedProject.description}</p>
           </div>
         </div>
 
@@ -85,7 +91,7 @@ function OverviewPage(): React.JSX.Element {
               </p>
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
-              <SecretSVG width={16} />
+              <VariableSVG width={16} />
               {selectedProject.variableCount}
             </div>
           </div>
@@ -98,7 +104,7 @@ function OverviewPage(): React.JSX.Element {
               </p>
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
-              <SecretSVG width={16} />
+              <EnvironmentSVG width={16} />
               {selectedProject.environmentCount}
             </div>
           </div>
