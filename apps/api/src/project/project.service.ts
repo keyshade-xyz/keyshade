@@ -145,6 +145,15 @@ export class ProjectService {
             id: userId
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -420,6 +429,15 @@ export class ProjectService {
       data: {
         ...data,
         lastUpdatedById: user.id
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -548,6 +566,15 @@ export class ProjectService {
         forkedFromId: project.id,
         workspaceId,
         lastUpdatedById: userId
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -980,6 +1007,15 @@ export class ProjectService {
                   }
                 }
               }
+            }
+          }
+        },
+        include: {
+          lastUpdatedBy: {
+            select: {
+              id: true,
+              name: true,
+              profilePictureUrl: true
             }
           }
         }
