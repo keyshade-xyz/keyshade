@@ -1,3 +1,9 @@
+## [2.14.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.17...v2.14.0-stage.18) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Updated error handling ([8dc6e1f](https://github.com/keyshade-xyz/keyshade/commit/8dc6e1f6c7c60418f310bea53276b5ebb5c3c677))
+
 ## [2.14.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.16...v2.14.0-stage.17) (2025-04-04)
 
 ### 🐛 Bug Fixes
