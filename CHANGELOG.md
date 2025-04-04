@@ -1,3 +1,18 @@
+## [2.14.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.15...v2.14.0-stage.16) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Updated sentry env name ([660d327](https://github.com/keyshade-xyz/keyshade/commit/660d3275f9e39c0846277baefe3df2cbc8382db5))
+
+### 📚 Documentation
+
+* Update .env.example ([0de7b66](https://github.com/keyshade-xyz/keyshade/commit/0de7b66d1c69ecb27b6ab403b33dac97c606944c))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** HTTP 500 gets caught by sentry ([a8a39c1](https://github.com/keyshade-xyz/keyshade/commit/a8a39c1fd392ab55c1e78707fa25bf47c7a600b6))
+* **api:** Report only 500 errors ([1740690](https://github.com/keyshade-xyz/keyshade/commit/17406902c394dd2616ebef7069132052f78d8653))
+
 ## [2.14.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.14...v2.14.0-stage.15) (2025-04-04)
 
 ### 🚀 Features
