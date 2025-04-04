@@ -2,11 +2,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function ProjectScreenLoader() {
   return (
-    <div className="bg-background dark min-h-screen p-8">
+    <div className="bg-background dark h-full p-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
           <div
             className="flex h-[7rem] items-center space-x-4 rounded-xl bg-white/5 p-4"
+            // eslint-disable-next-line react/no-array-index-key -- since this is a skeleton, using index as key is acceptable
             key={i}
           >
             <Skeleton className="h-12 w-12 rounded-full bg-white/15" />

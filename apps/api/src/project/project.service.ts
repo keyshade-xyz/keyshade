@@ -145,6 +145,15 @@ export class ProjectService {
             id: userId
           }
         }
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -283,6 +292,37 @@ export class ProjectService {
     // Check if project with this name already exists for the user
     dto.name && (await this.projectExists(dto.name, project.workspaceId))
 
+    // Check if the private key is to be stored but, either the project
+    // already stores the key, or the key to be stored is not specified
+    if (dto.storePrivateKey) {
+      if (project.storePrivateKey === true && project.privateKey) {
+        this.logger.log(
+          `Project ${project.slug} already stores the private key`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Private key already stored',
+            'The project already stores the private key'
+          )
+        )
+      } else if (!dto.privateKey) {
+        this.logger.log(
+          `Private key to store not specified while updating project ${project.slug}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Private key missing',
+            'You did not specify the private key to store'
+          )
+        )
+      }
+    }
+
+    if (!dto.storePrivateKey && !dto.regenerateKeyPair) {
+      // Explicitly set dto.privateKey to null to avoid db issues
+      dto.privateKey = null
+    }
+
     if (dto.accessLevel) {
       this.logger.log(`Access level specified while updating project.`)
       const currentAccessLevel = project.accessLevel
@@ -361,7 +401,7 @@ export class ProjectService {
           await this.updateProjectKeyPair(
             project,
             dto.privateKey || project.privateKey,
-            dto.storePrivateKey
+            project.storePrivateKey || dto.storePrivateKey
           )
 
         privateKey = newPrivateKey
@@ -389,6 +429,15 @@ export class ProjectService {
       data: {
         ...data,
         lastUpdatedById: user.id
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -517,6 +566,15 @@ export class ProjectService {
         forkedFromId: project.id,
         workspaceId,
         lastUpdatedById: userId
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -949,6 +1007,15 @@ export class ProjectService {
                   }
                 }
               }
+            }
+          }
+        },
+        include: {
+          lastUpdatedBy: {
+            select: {
+              id: true,
+              name: true,
+              profilePictureUrl: true
             }
           }
         }
@@ -1394,8 +1461,8 @@ export class ProjectService {
         updatedVersions.push({
           id: version.id,
           value: await encrypt(
-            await decrypt(oldPrivateKey, version.value),
-            newPrivateKey
+            newPublicKey,
+            await decrypt(oldPrivateKey, version.value)
           )
         })
       }
