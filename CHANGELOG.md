@@ -1,3 +1,9 @@
+## [2.14.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.16...v2.14.0-stage.17) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Update schema for sentry env ([fb56520](https://github.com/keyshade-xyz/keyshade/commit/fb56520591e4e17b9896acc2b81cf2e32d23925b))
+
 ## [2.14.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.15...v2.14.0-stage.16) (2025-04-04)
 
 ### 🐛 Bug Fixes
