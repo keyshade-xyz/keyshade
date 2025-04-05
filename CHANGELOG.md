@@ -1,3 +1,9 @@
+## [2.14.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.20...v2.14.0-stage.21) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Delete role functionality ([#856](https://github.com/keyshade-xyz/keyshade/issues/856)) ([c2010fa](https://github.com/keyshade-xyz/keyshade/commit/c2010fa926e1faafd4053752b15962c299fcfcf6))
+
 ## [2.14.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.19...v2.14.0-stage.20) (2025-04-05)
 
 ### 🚀 Features
