@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
-import RoleListItem from '../roleListItem'
+import RoleCard from '../roleCard'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
@@ -82,7 +82,7 @@ export default function RoleList(): React.JSX.Element {
       </TableHeader>
       <TableBody>
         {roles.map((value) => (
-          <RoleListItem key={value.id} role={value} />
+          <RoleCard key={value.id} role={value} />
         ))}
       </TableBody>
     </Table>

@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  createRolesOpenAtom,
+  createRoleOpenAtom,
   rolesOfWorkspaceAtom,
   selectedWorkspaceAtom
 } from '@/store'
@@ -65,7 +65,7 @@ type ProjectEnvironmentComboType = Record<
 
 export default function CreateRolesDialog() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const [isCreateRolesOpen, setIsCreateRolesOpen] = useAtom(createRolesOpenAtom)
+  const [isCreateRolesOpen, setIsCreateRolesOpen] = useAtom(createRoleOpenAtom)
   const setRoles = useSetAtom(rolesOfWorkspaceAtom)
 
   const [selectedPermissions, setSelectedPermissions] = useState<

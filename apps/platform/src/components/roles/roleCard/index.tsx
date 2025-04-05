@@ -3,7 +3,9 @@ import dayjs from 'dayjs'
 import { Copy, Pen } from 'lucide-react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { useSetAtom } from 'jotai'
 import { TrashWhiteSVG } from '@public/svg/shared'
+import { NoteIconSVG } from '@public/svg/secret'
 import AvatarComponent from '@/components/common/avatar'
 import { TableCell, TableRow } from '@/components/ui/table'
 import {
@@ -13,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { deleteRoleOpenAtom, selectedRoleAtom } from '@/store'
 
 interface RoleListItemProps {
   role: WorkspaceRole
@@ -53,9 +56,17 @@ function ProjectsAndEnvironmentsTooltip({
   )
 }
 
-export default function RoleListItem({
+export default function RoleCard({
   role
 }: RoleListItemProps): React.JSX.Element {
+  const setSelectedRole = useSetAtom(selectedRoleAtom)
+  const setIsDeleteRoleOpen = useSetAtom(deleteRoleOpenAtom)
+
+  const handleDeleteRole = useCallback(() => {
+    setSelectedRole(role)
+    setIsDeleteRoleOpen(true)
+  }, [role, setIsDeleteRoleOpen, setSelectedRole])
+
   const copySlugToClipboard = useCallback(() => {
     navigator.clipboard.writeText(role.slug)
     toast.success('Copied to clipboard!', {
@@ -67,6 +78,10 @@ export default function RoleListItem({
     })
   }, [role.slug])
 
+  const isAdminRole = role.authorities.some(
+    (authority) => authority === 'WORKSPACE_ADMIN'
+  )
+
   return (
     <TableRow className="group h-fit w-full hover:bg-white/5" key={role.id}>
       <TableCell className="flex w-[10.25rem] flex-row items-center gap-x-2 text-base">
@@ -75,6 +90,18 @@ export default function RoleListItem({
           style={{ background: role.colorCode ? role.colorCode : 'blue' }}
         />
         {role.name}
+        {role.description ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <NoteIconSVG className="w-7" />
+              </TooltipTrigger>
+              <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                <p>{role.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : null}
       </TableCell>
       <TableCell className="h-full">
         <div className="flex h-full flex-wrap">
@@ -104,9 +131,7 @@ export default function RoleListItem({
                   <div className="flex flex-col items-end">
                     <div className="text-sm text-white/60">Joined</div>
                     <div className="text-sm text-white/60">
-                      {dayjs(member.memberSince).format(
-                        'MMM D, YYYY'
-                      )}
+                      {dayjs(member.memberSince).format('MMM D, YYYY')}
                     </div>
                   </div>
                   <TooltipArrow className="fill-zinc-700" />
@@ -163,9 +188,29 @@ export default function RoleListItem({
         <button type="button">
           <Pen size={20} />
         </button>
-        <button type="button">
-          <TrashWhiteSVG />
-        </button>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <button
+                disabled={isAdminRole}
+                onClick={handleDeleteRole}
+                type="button"
+              >
+                <TrashWhiteSVG />
+              </button>
+            </TooltipTrigger>
+            {isAdminRole ? (
+              <TooltipContent
+                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                sideOffset={8}
+              >
+                You can not delete a workspace admin role
+                <TooltipArrow className="fill-zinc-700" />
+              </TooltipContent>
+            ) : null}
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
     </TableRow>
   )

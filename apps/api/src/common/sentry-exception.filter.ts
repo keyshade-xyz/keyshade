@@ -51,10 +51,10 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
       Sentry.captureException(exception)
     }
     this.logger.error(exception)
-    response.json({
+    response.status(exception['status'] || 500).json({
       message: exception['message'],
       error: exception['name'],
-      statusCode: exception['status']
+      statusCode: exception['status'] || 500
     })
   }
 }
