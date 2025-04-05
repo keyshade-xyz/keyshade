@@ -34,7 +34,7 @@ Here's the description of the environment variables used in the project. You can
 - **GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your Google account's cloud platform. Please note that it's not mandatory, until and unless you want to support Google OAuth.
 - **GITLAB_CLIENT_ID, GITLAB_CLIENT_SECRET, GITLAB_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your GitLab account's application section. Please note that it's not mandatory, until and unless you want to support GitLab OAuth.
 - **SENTRY_ORG**: The organization ID associated with your Sentry account.
-- **SENTRY_ENV**: The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration.
+- **SENTRY_API_ENVIRONMENT, NEXT_PUBLIC_SENTRY_ENVIRONMENT**: The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" environment for the sentry configuration.
 - **SENTRY_API_DSN**: The Data Source Name (DSN) for Sentry API, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
 - **SENTRY_API_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry API. It determines the percentage of transactions to capture traces for.
 - **SENTRY_API_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry API. It determines the percentage of requests to capture performance profiles for.
