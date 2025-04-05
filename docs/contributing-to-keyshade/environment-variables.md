@@ -21,7 +21,7 @@ Here's the description of the environment variables used in the project. You can
 - **SMTP_EMAIL_ADDRESS:** The email address you want to be sending out the emails from.
 - **SMTP_PASSWORD:** The app password for your email account. &#x20;
 - **JWT_SECRET**: The secret used to sign the JWT tokens. It is insignificant in the development environment.
-- **WEB_FRONTEND_URL, WORKSPACE_FRONTEND_URL**: The URLs of the web and workspace frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
+- **WEB_FRONTEND_URL, PLATFORM_FRONTEND_URL**: The URLs of the web and platform frontend respectively. These are used in the emails sometimes and in other spaces of the application too.
 - **API_PORT**: The environmental variable that specifies the port number on which the API server should listen for incoming connections. If not explicitly set, it defaults to port 4200.
 - **REDIS_URL**: The required parameter URL that is used by the API to connect to the Redis instance.
 - **FEEDBACK_FORWARD_EMAIL**: Feedbacks submitted by the user would be sent to this email address for the concerned authorities to view it. Ideally, in development environment, this would be your personal email address
@@ -33,12 +33,20 @@ Here's the description of the environment variables used in the project. You can
 - **GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your GitHub account's developer section. Please note that it's not mandatory, until and unless you want to support GitHub OAuth.
 - **GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your Google account's cloud platform. Please note that it's not mandatory, until and unless you want to support Google OAuth.
 - **GITLAB_CLIENT_ID, GITLAB_CLIENT_SECRET, GITLAB_CALLBACK_URL:** These settings can be configured by adding an OAuth app in your GitLab account's application section. Please note that it's not mandatory, until and unless you want to support GitLab OAuth.
-- **SENTRY_DSN**: The Data Source Name (DSN) for Sentry, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
 - **SENTRY_ORG**: The organization ID associated with your Sentry account.
-- **SENTRY_PROJECT**: The project ID within your Sentry organization where events will be reported.
-- **SENTRY_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry. It determines the percentage of transactions to capture traces for.
-- **SENTRY_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry. It determines the percentage of requests to capture performance profiles for.
 - **SENTRY_ENV**: The environment in which the app is running. It can be either 'development', 'production', or 'test'. Please note that it's not mandatory, it will default to "production" enviroment for the sentry configuration.
+- **SENTRY_API_DSN**: The Data Source Name (DSN) for Sentry API, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
+- **SENTRY_API_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry API. It determines the percentage of transactions to capture traces for.
+- **SENTRY_API_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry API. It determines the percentage of requests to capture performance profiles for.
+- **NEXT_PUBLIC_SENTRY_WEB_DSN**: The Data Source Name (DSN) for Sentry WEB, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
+- **NEXT_PUBLIC_SENTRY_WEB_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry WEB. It determines the percentage of transactions to capture traces for.
+- **NEXT_PUBLIC_SENTRY_WEB_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry WEB. It determines the percentage of requests to capture performance profiles for.
+- **NEXT_PUBLIC_SENTRY_PLATFORM_DSN**: The Data Source Name (DSN) for Sentry PLATFORM, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
+- **NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry PLATFORM. It determines the percentage of transactions to capture traces for.
+- **NEXT_PUBLIC_SENTRY_PLATFORM_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry PLATFORM. It determines the percentage of requests to capture performance profiles for.
+- **SENTRY_CLI_DSN**: The Data Source Name (DSN) for Sentry CLI, a platform for monitoring, troubleshooting, and resolving issues in real-time. This is used to configure error tracking in the project.
+- **SENTRY_CLI_TRACES_SAMPLE_RATE**: The sample rate for collecting transaction traces in Sentry CLI. It determines the percentage of transactions to capture traces for.
+- **SENTRY_CLI_PROFILES_SAMPLE_RATE**: The sample rate for collecting performance profiles in Sentry CLI. It determines the percentage of requests to capture performance profiles for.
 - **MINIO_ENDPOINT**: This is the endpoint of the Minio server. Minio is an open-source object storage server.
 - **MINIO_PORT**: The port on which the Minio server is running.
 - **MINIO_ACCESS_KEY**: The access key to the Minio server.
