@@ -8,6 +8,7 @@ import { useAtom, useAtomValue } from 'jotai'
 import type { GetMembersResponse } from '@keyshade/schema'
 import TransferOwnershipDialog from '../transferOwnershipDialog'
 import RemoveMemberDialog from '../removeMemberDialog'
+import EditMemberDialog from '../editMemberDialog'
 import {
   Table,
   TableBody,
@@ -25,13 +26,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { membersOfWorkspaceAtom, removeMemberOpenAtom, selectedMemberAtom, transferOwnershipOpenAtom } from '@/store'
+import { editMemberOpenAtom, membersOfWorkspaceAtom, removeMemberOpenAtom, selectedMemberAtom, transferOwnershipOpenAtom } from '@/store'
 
 export default function MembersTable(): React.JSX.Element {
   const members = useAtomValue(membersOfWorkspaceAtom)
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
   const [isRemoveMemberOpen, setIsRemoveMemberOpen] = useAtom(removeMemberOpenAtom)
   const [isTransferOwnershipOpen, setIsTransferOwnershipOpen] = useAtom(transferOwnershipOpenAtom)
+  const [isEditMemberOpen, setIsEditMemberOpen] = useAtom(editMemberOpenAtom)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
 
@@ -52,6 +54,11 @@ export default function MembersTable(): React.JSX.Element {
   const handleTransferOwnership = (member: GetMembersResponse['items'][number]) => {
     setSelectedMember(member)
     setIsTransferOwnershipOpen(true)
+  }
+
+  const handleEditMember = (member: GetMembersResponse['items'][number]) => {
+    setSelectedMember(member)
+    setIsEditMemberOpen(true)
   }
 
   return (
@@ -96,7 +103,12 @@ export default function MembersTable(): React.JSX.Element {
                         onClick={() => handleRemoveClick(member)}>
                         <UserRemoveSVG />
                       </Button>
-                      <Button className="p-1 bg-transparent hover:bg-transparent border-none"><EditTwoSVG /></Button>
+                      <Button
+                        className="p-1 bg-transparent hover:bg-transparent border-none"
+                        onClick={() => handleEditMember(member)}
+                      >
+                        <EditTwoSVG />
+                      </Button>
                       <Button
                         className="p-1 bg-transparent hover:bg-transparent border-none"
                         onClick={() => handleTransferOwnership(member)}
@@ -182,6 +194,11 @@ export default function MembersTable(): React.JSX.Element {
       {/* Transfer ownership alert dialog */}
       {isTransferOwnershipOpen && selectedMember ? (
         <TransferOwnershipDialog />
+      ) : null}
+
+      {/* Edit member dialog */}
+      {isEditMemberOpen && selectedMember ? (
+        <EditMemberDialog />
       ) : null}
     </div>
   )

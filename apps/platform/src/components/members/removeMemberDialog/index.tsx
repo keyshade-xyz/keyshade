@@ -17,7 +17,6 @@ import { membersOfWorkspaceAtom, removeMemberOpenAtom, selectedMemberAtom, selec
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 
-
 export default function RemoveMemberDialog() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
