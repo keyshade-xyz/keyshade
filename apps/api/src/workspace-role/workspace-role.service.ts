@@ -781,6 +781,8 @@ export class WorkspaceRoleService {
       )!.createdOn
     }))
 
+    delete workspaceRole.workspaceMembers
+
     return {
       ...workspaceRole,
       members
