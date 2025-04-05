@@ -3,6 +3,7 @@
 import React from 'react'
 import CreateRolesDialog from '@/components/roles/createRolesDialog'
 import RoleList from '@/components/roles/rolesList'
+import ConfirmDeleteRole from '@/components/roles/confirmDeleteRole'
 
 function RolesPage(): React.JSX.Element {
   return (
@@ -12,6 +13,7 @@ function RolesPage(): React.JSX.Element {
         <CreateRolesDialog />
       </div>
       <RoleList />
+      <ConfirmDeleteRole />
     </div>
   )
 }
