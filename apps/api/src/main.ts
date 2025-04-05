@@ -13,8 +13,9 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
+import { SentryExceptionFilter } from './common/sentry-exception.filter'
 
-export const sentryEnv = process.env.SENTRY_ENV || 'production'
+export const sentryEnv = process.env.SENTRY_API_ENVIRONMENT || 'production'
 
 async function initializeSentry() {
   const logger = new CustomLoggerService()
@@ -31,7 +32,11 @@ async function initializeSentry() {
     environment: sentryEnv,
     tracesSampleRate: process.env.SENTRY_API_TRACES_SAMPLE_RATE,
     profilesSampleRate: process.env.SENTRY_API_PROFILES_SAMPLE_RATE,
-    integrations: [nodeProfilingIntegration()],
+    integrations: [
+      nodeProfilingIntegration(),
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Express()
+    ],
     debug: false
   }
   try {
@@ -83,6 +88,7 @@ async function initializeNestApp() {
   const domain = process.env.DOMAIN
   const isHttp = domain.includes('localhost')
   app.use(Sentry.Handlers.errorHandler())
+  app.useGlobalFilters(new SentryExceptionFilter())
   await app.listen(port)
   logger.log(
     `🚀 Application is running on: ${isHttp ? 'http' : 'https'}://${domain}:${port}/${globalPrefix}`

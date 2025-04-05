@@ -71,7 +71,7 @@ const devSchema = z.object({
   SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
     'SENTRY_API_PROFILES_SAMPLE_RATE'
   ),
-  SENTRY_ENVIRONMENT: z.string().optional(),
+  SENTRY_API_ENVIRONMENT: z.string().optional(),
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
@@ -143,7 +143,7 @@ const prodSchema = z.object({
   SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
     'SENTRY_API_PROFILES_SAMPLE_RATE'
   ),
-  SENTRY_ENVIRONMENT: z.string().min(1),
+  SENTRY_API_ENVIRONMENT: z.string().min(1),
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.string().min(1),
