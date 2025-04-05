@@ -1,3 +1,13 @@
+## [2.14.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.19...v2.14.0-stage.20) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Add role listing ([#855](https://github.com/keyshade-xyz/keyshade/issues/855)) ([c326337](https://github.com/keyshade-xyz/keyshade/commit/c326337cb40b0de3aaf3cb9198afc8420a194ab8))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Return role slug in members response ([c719f16](https://github.com/keyshade-xyz/keyshade/commit/c719f16b2b01ab75c924b2c5b8bfe3516e799bea))
+
 ## [2.14.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.18...v2.14.0-stage.19) (2025-04-04)
 
 ### 🚀 Features
