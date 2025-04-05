@@ -78,9 +78,9 @@ export default function RoleCard({
     })
   }, [role.slug])
 
-  const isAdminRole =
-    role.authorities.find((authority) => authority === 'WORKSPACE_ADMIN') !==
-    undefined
+  const isAdminRole = role.authorities.some(
+    (authority) => authority === 'WORKSPACE_ADMIN'
+  )
 
   return (
     <TableRow className="group h-fit w-full hover:bg-white/5" key={role.id}>
@@ -131,9 +131,7 @@ export default function RoleCard({
                   <div className="flex flex-col items-end">
                     <div className="text-sm text-white/60">Joined</div>
                     <div className="text-sm text-white/60">
-                      {dayjs(member.memberSince).format(
-                        'MMM D, YYYY'
-                      )}
+                      {dayjs(member.memberSince).format('MMM D, YYYY')}
                     </div>
                   </div>
                   <TooltipArrow className="fill-zinc-700" />
