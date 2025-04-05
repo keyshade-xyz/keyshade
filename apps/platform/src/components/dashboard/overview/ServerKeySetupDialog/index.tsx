@@ -14,6 +14,7 @@ import {
 import { selectedProjectPrivateKeyAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { Input } from '@/components/ui/input'
 
 interface ServerKeySetupDialogProps {
   isOpen: boolean
@@ -32,8 +33,8 @@ function ServerKeySetupDialog({
   const SavePrivateKey = useHttp((key: string) =>
     ControllerInstance.getInstance().projectController.updateProject({
       projectSlug: currentProjectSlug,
-      regenerateKeyPair: true,
-      privateKey: key
+      privateKey: key,
+      storePrivateKey: true
     })
   )
 
@@ -52,7 +53,7 @@ function ServerKeySetupDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-black/70">
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
             Save the private key on our server
@@ -64,24 +65,20 @@ function ServerKeySetupDialog({
             the downside of accidental leaks.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="p-4">
-          <input
-            className="w-full rounded-md border border-gray-300 bg-gray-800 p-2 text-white"
-            onChange={(e) => setKeyValue(e.target.value)}
-            placeholder="Enter your private key"
-            type="text"
-            value={keyValue}
-          />
-        </div>
+        <Input
+          onChange={(e) => setKeyValue(e.target.value)}
+          placeholder="Enter your private key"
+          value={keyValue}
+        />
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="rounded-md border border-white/60 text-white/60 hover:border-white/80"
+            className="rounded-md border border-white/60 text-white/80"
             onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="rounded-md bg-white/60 text-black hover:bg-white/80"
+            className="rounded-md bg-white/80 text-black hover:bg-white/60"
             onClick={handleSaveChanges}
           >
             Save Changes

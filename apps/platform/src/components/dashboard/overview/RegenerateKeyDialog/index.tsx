@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { useSetAtom } from 'jotai'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,23 +10,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { selectedProjectPrivateKeyAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { Input } from '@/components/ui/input'
 
 interface RegenerateKeyDialogProps {
   isOpen: boolean
   onClose: () => void
   currentProjectSlug: string
+  onRegenerated: (keys: {
+    projectName: string
+    storePrivateKey: boolean
+    keys: { publicKey: string; privateKey: string }
+  }) => void
 }
 
 function RegenerateKeyDialog({
   isOpen,
   onClose,
-  currentProjectSlug
+  currentProjectSlug,
+  onRegenerated
 }: RegenerateKeyDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
-  const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
 
   const RegeneratePrivateKey = useHttp((key: string) =>
     ControllerInstance.getInstance().projectController.updateProject({
@@ -38,13 +42,25 @@ function RegenerateKeyDialog({
   )
 
   const handleSaveChanges = useCallback(async () => {
-    const response = await RegeneratePrivateKey(keyValue)
-    if (!response.error) {
-      setProjectPrivateKey(keyValue)
-      toast.success('Private key regenerated successfully!')
+    if (!keyValue) {
+      toast.error('Please enter your current private key first.')
+      return
     }
-    onClose()
-  }, [keyValue, onClose, setProjectPrivateKey, RegeneratePrivateKey])
+    const { data, success } = await RegeneratePrivateKey(keyValue)
+    if (success && data) {
+      const newKeys = {
+        projectName: data.name,
+        storePrivateKey: data.storePrivateKey,
+        keys: {
+          publicKey: data.publicKey,
+          privateKey: data.privateKey
+        }
+      }
+      onRegenerated(newKeys)
+      toast.success('Key regenerated successfully!')
+      onClose()
+    }
+  }, [keyValue, onClose, RegeneratePrivateKey, onRegenerated])
 
   const handleClose = useCallback(() => {
     onClose()
@@ -52,7 +68,7 @@ function RegenerateKeyDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-black/70">
+      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
             Regenerate Project Private Key
@@ -64,24 +80,20 @@ function RegenerateKeyDialog({
             stay secure.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="p-4">
-          <input
-            className="w-full rounded-md border border-gray-300 bg-gray-800 p-2 text-white"
-            onChange={(e) => setKeyValue(e.target.value)}
-            placeholder="Enter your private key"
-            type="text"
-            value={keyValue}
-          />
-        </div>
+        <Input
+          onChange={(e) => setKeyValue(e.target.value)}
+          placeholder="Enter your private key"
+          value={keyValue}
+        />
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="rounded-md border border-white/60 text-white/60 hover:border-white/80"
+            className="rounded-md border border-white/60 text-white/80"
             onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="rounded-md bg-white/60 text-black hover:bg-white/80"
+            className="rounded-md bg-white/80 text-black hover:bg-white/60"
             onClick={handleSaveChanges}
           >
             Save Changes

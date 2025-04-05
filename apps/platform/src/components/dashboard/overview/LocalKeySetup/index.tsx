@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
-import { AddSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
+import { AddSVG, EyeOpenSVG, EyeSlashSVG, TrashSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 
 interface LocalKeySetupProps {
   privateKey: string | null
   isStoredOnServer: boolean
   onOpenSetupDialog: () => void
+  onDelete: () => void
 }
 
 function LocalKeySetup({
   privateKey,
   isStoredOnServer,
-  onOpenSetupDialog
+  onOpenSetupDialog,
+  onDelete
 }: LocalKeySetupProps): React.JSX.Element {
   const [isRevealed, setIsRevealed] = useState<boolean>(false)
 
@@ -19,29 +21,28 @@ function LocalKeySetup({
 
   if (privateKey && !isStoredOnServer) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-center rounded-lg border border-sky-300 p-2">
-          <p className="text-sky-300">
-            We are using your private key from the browser.
-          </p>
+      <div className="flex gap-1">
+        <div className="flex w-full items-center rounded-lg border border-[#FAFAFA]/10 bg-[#26282C] p-2">
+          <span className="w-full break-all">
+            {isRevealed
+              ? privateKey
+              : privateKey.replace(/./g, '*').substring(0, 20)}
+          </span>
         </div>
-
-        <div className="flex gap-2">
-          <div className="flex w-full items-center rounded-lg border border-black/30 bg-black/20 p-2">
-            <span className="w-full break-all font-bold">
-              {isRevealed
-                ? privateKey
-                : privateKey.replace(/./g, '*').substring(0, 20)}
-            </span>
-          </div>
-          <button
-            className="flex items-center justify-center rounded-lg border border-black/30 bg-black/20 px-4 py-2 duration-300 hover:scale-105"
-            onClick={handleToggleReveal}
-            type="button"
-          >
-            {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
-          </button>
-        </div>
+        <Button
+          className="flex items-center justify-center px-4 py-6"
+          onClick={handleToggleReveal}
+          type="button"
+        >
+          {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
+        </Button>
+        <Button
+          className="flex items-center justify-center px-4 py-6"
+          onClick={onDelete}
+          type="button"
+        >
+          <TrashSVG />
+        </Button>
       </div>
     )
   }

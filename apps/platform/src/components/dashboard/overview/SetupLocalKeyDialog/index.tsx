@@ -11,8 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { selectedProjectPrivateKeyAtom } from '@/store'
-import { setKeyLocally } from '@/lib/utils'
+import { localProjectPrivateKeyAtom } from '@/store'
+import { Input } from '@/components/ui/input'
 
 interface SetupLocalKeyDialogProps {
   isOpen: boolean
@@ -26,14 +26,16 @@ function SetupLocalKeyDialog({
   currentProject
 }: SetupLocalKeyDialogProps): React.JSX.Element {
   const [keyValue, setKeyValue] = useState<string>('')
-  const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
+  const setLocalProjectPrivateKey = useSetAtom(localProjectPrivateKeyAtom)
 
   const handleSaveChanges = useCallback(() => {
-    setProjectPrivateKey(keyValue)
-    setKeyLocally(`${currentProject}_pk`, keyValue)
+    setLocalProjectPrivateKey((prevKeys) => {
+      const filtered = prevKeys.filter((pair) => pair.slug !== currentProject)
+      return [...filtered, { slug: currentProject, key: keyValue }]
+    })
     toast.success('Key saved successfully!')
     onClose()
-  }, [keyValue, onClose, setProjectPrivateKey, currentProject])
+  }, [keyValue, onClose, currentProject, setLocalProjectPrivateKey])
 
   const handleClose = useCallback(() => {
     onClose()
@@ -41,34 +43,30 @@ function SetupLocalKeyDialog({
 
   return (
     <AlertDialog onOpenChange={handleClose} open={isOpen}>
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
+      <AlertDialogContent className="rounded-lg border border-white/20 bg-[#1E1E1F]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
-            Setup Private Key Locally
+            Setup private key locally
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-gray-400">
             Enter your key below to save it on browser to safely setting up you
             secret.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="p-4">
-          <input
-            className="w-full rounded-md border border-gray-300 bg-gray-800 p-2 text-white"
-            onChange={(e) => setKeyValue(e.target.value)}
-            placeholder="Enter your private key"
-            type="text"
-            value={keyValue}
-          />
-        </div>
+        <Input
+          onChange={(e) => setKeyValue(e.target.value)}
+          placeholder="Enter your private key"
+          value={keyValue}
+        />
         <AlertDialogFooter>
           <AlertDialogCancel
-            className="textwhite/60 rounded-md border border-white/60 hover:border-white/80"
+            className="rounded-md border border-white/60 text-white/80"
             onClick={handleClose}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="rounded-md bg-white/60 text-black hover:bg-white/80"
+            className="rounded-md bg-white/80 text-black hover:bg-white/60"
             onClick={handleSaveChanges}
           >
             Save Changes

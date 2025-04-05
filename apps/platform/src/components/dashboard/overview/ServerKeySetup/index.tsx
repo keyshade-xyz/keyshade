@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
+import { EyeOpenSVG, EyeSlashSVG, TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -10,20 +10,24 @@ interface ServerKeySetupProps {
   isStoredOnServer: boolean
   projectSlug: string
   onOpenStoreDialog: () => void
+  onDelete: () => void
+  onKeyStored: () => void
 }
 
 function ServerKeySetup({
   privateKey,
   isStoredOnServer,
   projectSlug,
-  onOpenStoreDialog
+  onOpenStoreDialog,
+  onDelete,
+  onKeyStored
 }: ServerKeySetupProps): React.JSX.Element {
   const [isRevealed, setIsRevealed] = useState<boolean>(false)
 
   const updatePrivateKey = useHttp((key: string) =>
     ControllerInstance.getInstance().projectController.updateProject({
       projectSlug,
-      regenerateKeyPair: true,
+      storePrivateKey: true,
       privateKey: key
     })
   )
@@ -32,6 +36,7 @@ function ServerKeySetup({
     if (privateKey && !isStoredOnServer) {
       const response = await updatePrivateKey(privateKey)
       if (!response.error) {
+        onKeyStored()
         toast.success('Private Key stored successfully!')
       }
     } else {
@@ -43,23 +48,28 @@ function ServerKeySetup({
 
   if (privateKey && isStoredOnServer) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <div className="flex w-full items-center rounded-lg border border-black/30 bg-black/20 p-4">
-            <span className="w-full break-all text-sm font-bold">
-              {isRevealed
-                ? privateKey
-                : privateKey.replace(/./g, '*').substring(0, 20)}
-            </span>
-          </div>
-          <button
-            className="flex items-center justify-center rounded-lg border border-black/30 bg-black/20 p-4 duration-300 hover:scale-105"
-            onClick={handleToggleReveal}
-            type="button"
-          >
-            {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
-          </button>
+      <div className="flex gap-1">
+        <div className="flex w-full items-center rounded-lg border border-[#FAFAFA]/10 bg-[#26282C] p-2">
+          <span className="w-full break-all">
+            {isRevealed
+              ? privateKey
+              : privateKey.replace(/./g, '*').substring(0, 20)}
+          </span>
         </div>
+        <Button
+          className="flex items-center justify-center px-4 py-6"
+          onClick={handleToggleReveal}
+          type="button"
+        >
+          {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
+        </Button>
+        <Button
+          className="flex items-center justify-center px-4 py-6"
+          onClick={onDelete}
+          type="button"
+        >
+          <TrashSVG />
+        </Button>
       </div>
     )
   }

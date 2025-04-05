@@ -88,7 +88,3 @@ export function mergeExistingEnvironments(oldValues: T, newValues: T): T {
 
   return mergedValues
 }
-
-export function setKeyLocally(key: string, value: string) {
-  localStorage.setItem(key, value)
-}

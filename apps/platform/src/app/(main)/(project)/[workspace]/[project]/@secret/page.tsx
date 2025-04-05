@@ -17,7 +17,8 @@ import {
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom,
-  selectedProjectPrivateKeyAtom
+  selectedProjectPrivateKeyAtom,
+  localProjectPrivateKeyAtom
 } from '@/store'
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
@@ -43,6 +44,7 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
+  const localKeys = useAtomValue(localProjectPrivateKeyAtom)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -51,11 +53,16 @@ function SecretPage(): React.JSX.Element {
   const [privateKey, setPrivateKey] = useAtom(selectedProjectPrivateKeyAtom)
 
   useEffect(() => {
-    const key = selectedProject?.storePrivateKey
-      ? selectedProject.privateKey
-      : localStorage.getItem(`${selectedProject?.slug}_pk`) || null
+    const localKey =
+      selectedProject &&
+      localKeys.find((pair) => pair.slug === selectedProject.slug)?.key
+    const key =
+      (selectedProject?.storePrivateKey && selectedProject.privateKey) ||
+      localKey ||
+      null
     setPrivateKey(key)
-  }, [selectedProject, setPrivateKey])
+    setIsLoading(false)
+  }, [selectedProject, localKeys, setPrivateKey])
 
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({

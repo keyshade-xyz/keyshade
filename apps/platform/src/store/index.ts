@@ -75,6 +75,12 @@ export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
 export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
+export const localProjectPrivateKeyAtom = atom<
+  {
+    slug: Environment['slug']
+    key: string
+  }[]
+>([])
 
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
@@ -104,7 +110,7 @@ export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
 export const apiKeyOneTimeDisplayDialogOpenAtom = atom<boolean>(false)
-export const oneTimeSecretValueAtom = atom<string>("")
+export const oneTimeSecretValueAtom = atom<string>('')
 
 export const createRolesOpenAtom = atom<boolean>(false)
 export const editRolesOpenAtom = atom<boolean>(false)
