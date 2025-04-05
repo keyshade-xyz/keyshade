@@ -31,6 +31,14 @@ export const WorkspaceRoleSchema = z.object({
         })
       )
     })
+  ),
+  members: z.array(
+    z.object({
+      name: z.string(),
+      email: z.string().email(),
+      profilePictureUrl: z.string().nullable(),
+      memberSince: z.string().datetime()
+    })
   )
 })
 
