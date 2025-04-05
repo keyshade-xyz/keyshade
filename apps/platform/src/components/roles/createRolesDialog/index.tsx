@@ -110,7 +110,8 @@ export default function CreateRolesDialog() {
             projectSlug,
             environmentSlugs: Array.from(environments).map((env) => env.slug)
           })
-        )
+        ),
+        authorities: Array.from(selectedPermissions)
       }
     )
   )
