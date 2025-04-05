@@ -59,7 +59,6 @@ function SecrectSection(): React.JSX.Element {
         </h2>
         {/* <span>Built for your Seamless Secret Integration</span> */}
       </div>
-
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:gap-9">
         {cardData.map((card, index) => {
           const { heading, description, svg } = card
@@ -72,11 +71,11 @@ function SecrectSection(): React.JSX.Element {
                 <span className="text-base text-[#9394A1]">{description}</span>
               </div>
             </Card>
-          )
+          );
         })}
       </div>
     </section>
-  )
+  );
 }
 
 export default SecrectSection
