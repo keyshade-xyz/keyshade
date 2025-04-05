@@ -7,9 +7,7 @@ import Avvvatars from 'avvvatars-react'
 import Link from 'next/link'
 import OverviewLoader from '@/components/dashboard/overview/overviewLoader'
 import {
-  selectedProjectPrivateKeyAtom,
   selectedProjectAtom,
-  localProjectPrivateKeyAtom,
   viewAndDownloadProjectKeysOpenAtom
 } from '@/store'
 import LocalKeySetup from '@/components/dashboard/overview/LocalKeySetup'
@@ -24,41 +22,28 @@ import AvatarComponent from '@/components/common/avatar'
 import InformationCard from '@/components/shared/information-card'
 import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDeleteKey'
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 function OverviewPage(): React.JSX.Element {
-  const [isLoading, setIsLoading] = useState(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
-  const [privateKey, setPrivateKey] = useAtom(selectedProjectPrivateKeyAtom)
-  const localKeys = useAtomValue(localProjectPrivateKeyAtom)
-  const [showAddLocalKeyDialog, setShowAddLocalKeyDialog] = useState(false)
-  const [isKeyStoredOnServer, setIsKeyStoredOnServer] = useState(false)
-  const [showAddKeyDialog, setShowAddKeyDialog] = useState(false)
-  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
-  const [showDeleteKeyDialog, setShowDeleteKeyDialog] = useState(false)
   const [
     isViewAndDownloadProjectKeysDialogOpen,
     setIsViewAndDownloadProjectKeysDialogOpen
   ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
+
+  const [localKeyDialogOpen, setLocalKeyDialogOpen] = useState<boolean>(false)
+  const [serverKeyDialogOpen, setServerKeyDialogOpen] = useState<boolean>(false)
+  const [regenerateKeyDialogOpen, setRegenerateKeyDialogOpen] =
+    useState<boolean>(false)
+  const [deleteKeyDialogOpen, setDeleteKeyDialogOpen] = useState<boolean>(false)
   const [regeneratedKeys, setRegeneratedKeys] = useState<{
     projectName: string
     storePrivateKey: boolean
     keys: { publicKey: string; privateKey: string }
   }>()
 
-  useEffect(() => {
-    const localKey =
-      selectedProject &&
-      localKeys.find((pair) => pair.slug === selectedProject.slug)?.key
-    const key =
-      (selectedProject?.storePrivateKey && selectedProject.privateKey) ||
-      localKey ||
-      null
-    setPrivateKey(key)
-    setIsKeyStoredOnServer(
-      Boolean(selectedProject?.storePrivateKey && selectedProject.privateKey)
-    )
-    setIsLoading(false)
-  }, [selectedProject, localKeys, setPrivateKey])
+  const { privateKey, hasServerStoredKey, setHasServerStoredKey, loading } =
+    useProjectPrivateKey()
 
   useEffect(() => {
     if (regeneratedKeys) {
@@ -66,7 +51,7 @@ function OverviewPage(): React.JSX.Element {
     }
   }, [regeneratedKeys, setIsViewAndDownloadProjectKeysDialogOpen])
 
-  if (isLoading || !selectedProject) {
+  if (loading || !selectedProject) {
     return (
       <div className="space-y-4">
         <OverviewLoader />
@@ -173,7 +158,7 @@ function OverviewPage(): React.JSX.Element {
         {privateKey ? (
           <InformationCard>
             We are using your private key from{' '}
-            {isKeyStoredOnServer ? 'database' : 'browser'}
+            {hasServerStoredKey ? 'database' : 'browser'}
           </InformationCard>
         ) : (
           <WarningCard>
@@ -197,9 +182,9 @@ function OverviewPage(): React.JSX.Element {
               </p>
             </div>
             <LocalKeySetup
-              isStoredOnServer={isKeyStoredOnServer}
-              onDelete={() => setShowDeleteKeyDialog(true)}
-              onOpenSetupDialog={() => setShowAddLocalKeyDialog(true)}
+              isStoredOnServer={hasServerStoredKey}
+              onDelete={() => setDeleteKeyDialogOpen(true)}
+              onOpenSetupDialog={() => setLocalKeyDialogOpen(true)}
               privateKey={privateKey}
             />
           </div>
@@ -215,7 +200,7 @@ function OverviewPage(): React.JSX.Element {
               </p>
             </div>
             <RegenerateKeySetup
-              onOpenRegenerateDialog={() => setShowRegenerateKeyDialog(true)}
+              onOpenRegenerateDialog={() => setRegenerateKeyDialogOpen(true)}
               onRegenerated={(keys) => setRegeneratedKeys(keys)}
               privateKey={privateKey}
               projectSlug={selectedProject.slug}
@@ -234,10 +219,10 @@ function OverviewPage(): React.JSX.Element {
               </p>
             </div>
             <ServerKeySetup
-              isStoredOnServer={isKeyStoredOnServer}
-              onDelete={() => setShowDeleteKeyDialog(true)}
-              onKeyStored={() => setIsKeyStoredOnServer(true)}
-              onOpenStoreDialog={() => setShowAddKeyDialog(true)}
+              isStoredOnServer={hasServerStoredKey}
+              onDelete={() => setDeleteKeyDialogOpen(true)}
+              onKeyStored={() => setHasServerStoredKey(true)}
+              onOpenStoreDialog={() => setServerKeyDialogOpen(true)}
               privateKey={privateKey}
               projectSlug={selectedProject.slug}
             />
@@ -245,28 +230,36 @@ function OverviewPage(): React.JSX.Element {
         </div>
       </div>
 
+      {/* Local key setup dialog */}
       <SetupLocalKeyDialog
         currentProject={selectedProject.slug}
-        isOpen={showAddLocalKeyDialog}
-        onClose={() => setShowAddLocalKeyDialog(false)}
+        isOpen={localKeyDialogOpen}
+        onClose={() => setLocalKeyDialogOpen(false)}
       />
+
+      {/* Server key setup dialog */}
       <ServerKeySetupDialog
         currentProjectSlug={selectedProject.slug}
-        isOpen={showAddKeyDialog}
-        onClose={() => setShowAddKeyDialog(false)}
+        isOpen={serverKeyDialogOpen}
+        onClose={() => setServerKeyDialogOpen(false)}
       />
+
+      {/* Regenerate key dialog */}
       <RegenerateKeyDialog
         currentProjectSlug={selectedProject.slug}
-        isOpen={showRegenerateKeyDialog}
-        onClose={() => setShowRegenerateKeyDialog(false)}
+        isOpen={regenerateKeyDialogOpen}
+        onClose={() => setRegenerateKeyDialogOpen(false)}
         onRegenerated={(keys) => setRegeneratedKeys(keys)}
       />
+
+      {/* Delete secret alert dialog */}
       <ConfirmDeleteKeyDialog
         currentProject={selectedProject.slug}
-        isOpen={showDeleteKeyDialog}
-        isStoredOnServer={isKeyStoredOnServer}
-        onClose={() => setShowDeleteKeyDialog(false)}
+        isOpen={deleteKeyDialogOpen}
+        isStoredOnServer={hasServerStoredKey}
+        onClose={() => setDeleteKeyDialogOpen(false)}
       />
+      {/* View and download project keys dialog */}
       {isViewAndDownloadProjectKeysDialogOpen ? (
         <ViewAndDownloadProjectKeysDialog projectKeys={regeneratedKeys} />
       ) : null}

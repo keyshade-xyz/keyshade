@@ -16,9 +16,7 @@ import {
   shouldRevealSecretEnabled,
   secretsOfProjectAtom,
   selectedProjectAtom,
-  selectedSecretAtom,
-  selectedProjectPrivateKeyAtom,
-  localProjectPrivateKeyAtom
+  selectedSecretAtom
 } from '@/store'
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
@@ -29,6 +27,7 @@ import EmptySecretListContent from '@/components/dashboard/secret/emptySecretLis
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
 import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
 import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 extend(relativeTime)
 
@@ -44,25 +43,12 @@ function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
-  const localKeys = useAtomValue(localProjectPrivateKeyAtom)
 
-  const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState<number>(0)
+  const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const [privateKey, setPrivateKey] = useAtom(selectedProjectPrivateKeyAtom)
-
-  useEffect(() => {
-    const localKey =
-      selectedProject &&
-      localKeys.find((pair) => pair.slug === selectedProject.slug)?.key
-    const key =
-      (selectedProject?.storePrivateKey && selectedProject.privateKey) ||
-      localKey ||
-      null
-    setPrivateKey(key)
-    setIsLoading(false)
-  }, [selectedProject, localKeys, setPrivateKey])
+  const { privateKey } = useProjectPrivateKey()
 
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
@@ -84,7 +70,7 @@ function SecretPage(): React.JSX.Element {
               page === 0 ? data.items : [...prev, ...data.items]
             )
             if (data.metadata.links.next === null) {
-              setHasMore(false)
+              setHasMoreSecret(false)
             }
           }
         })
@@ -141,7 +127,7 @@ function SecretPage(): React.JSX.Element {
 
           <Button
             className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            disabled={isLoading || !hasMore}
+            disabled={isLoading || !hasMoreSecret}
             onClick={handleLoadMore}
           >
             Load more

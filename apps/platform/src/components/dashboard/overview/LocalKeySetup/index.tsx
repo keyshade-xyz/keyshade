@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { AddSVG, EyeOpenSVG, EyeSlashSVG, TrashSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface LocalKeySetupProps {
   privateKey: string | null
@@ -22,13 +23,16 @@ function LocalKeySetup({
   if (privateKey && !isStoredOnServer) {
     return (
       <div className="flex gap-1">
-        <div className="flex w-full items-center rounded-lg border border-[#FAFAFA]/10 bg-[#26282C] p-2">
-          <span className="w-full break-all">
-            {isRevealed
+        <Input
+          className="bg-[#26282C] px-4 py-6"
+          readOnly
+          type="text"
+          value={
+            isRevealed
               ? privateKey
-              : privateKey.replace(/./g, '*').substring(0, 20)}
-          </span>
-        </div>
+              : privateKey.replace(/./g, '*').substring(0, 20)
+          }
+        />
         <Button
           className="flex items-center justify-center px-4 py-6"
           onClick={handleToggleReveal}
