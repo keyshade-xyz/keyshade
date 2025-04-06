@@ -78,7 +78,7 @@ export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 export const localProjectPrivateKeyAtom = atom<
   {
     slug: Environment['slug']
-    key: string
+    key: ProjectWithTierLimitAndCount['privateKey']
   }[]
 >([])
 

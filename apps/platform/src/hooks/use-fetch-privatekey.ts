@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
+import type { ProjectWithTierLimitAndCount } from '@keyshade/schema'
 import {
   selectedProjectPrivateKeyAtom,
   selectedProjectAtom,
@@ -7,16 +8,18 @@ import {
 } from '@/store'
 
 export interface UseProjectPrivateKeyResult {
-  privateKey: string | null
+  projectPrivateKey: ProjectWithTierLimitAndCount['privateKey'] | null
   hasServerStoredKey: boolean
   setHasServerStoredKey: React.Dispatch<React.SetStateAction<boolean>>
   loading: boolean
 }
 
 export function useProjectPrivateKey(): UseProjectPrivateKeyResult {
-  const [privateKey, setPrivateKey] = useAtom(selectedProjectPrivateKeyAtom)
+  const [projectPrivateKey, setprojectPrivateKey] = useAtom(
+    selectedProjectPrivateKeyAtom
+  )
   const selectedProject = useAtomValue(selectedProjectAtom)
-  const localKeys = useAtomValue(localProjectPrivateKeyAtom)
+  const localProjectPrivateKey = useAtomValue(localProjectPrivateKeyAtom)
 
   const [hasServerStoredKey, setHasServerStoredKey] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
@@ -24,23 +27,29 @@ export function useProjectPrivateKey(): UseProjectPrivateKeyResult {
   useEffect(() => {
     setLoading(true)
     if (!selectedProject) {
-      setPrivateKey(null)
+      setprojectPrivateKey(null)
       setHasServerStoredKey(false)
       return
     }
 
     if (selectedProject.storePrivateKey && selectedProject.privateKey) {
       setHasServerStoredKey(true)
-      setPrivateKey(selectedProject.privateKey)
+      setprojectPrivateKey(selectedProject.privateKey)
     } else {
       const localKey =
-        localKeys.find((pair) => pair.slug === selectedProject.slug)?.key ??
-        null
+        localProjectPrivateKey.find(
+          (pair) => pair.slug === selectedProject.slug
+        )?.key ?? null
       setHasServerStoredKey(false)
-      setPrivateKey(localKey)
+      setprojectPrivateKey(localKey)
     }
     setLoading(false)
-  }, [selectedProject, localKeys, setPrivateKey])
+  }, [selectedProject, localProjectPrivateKey, setprojectPrivateKey])
 
-  return { privateKey, hasServerStoredKey, setHasServerStoredKey, loading }
+  return {
+    projectPrivateKey,
+    hasServerStoredKey,
+    setHasServerStoredKey,
+    loading
+  }
 }

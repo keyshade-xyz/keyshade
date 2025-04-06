@@ -37,12 +37,8 @@ function SetupLocalKeyDialog({
     onClose()
   }, [keyValue, onClose, currentProject, setLocalProjectPrivateKey])
 
-  const handleClose = useCallback(() => {
-    onClose()
-  }, [onClose])
-
   return (
-    <AlertDialog onOpenChange={handleClose} open={isOpen}>
+    <AlertDialog onOpenChange={onClose} open={isOpen}>
       <AlertDialogContent className="rounded-lg border border-white/20 bg-[#1E1E1F]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
@@ -61,7 +57,7 @@ function SetupLocalKeyDialog({
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md border border-white/60 text-white/80"
-            onClick={handleClose}
+            onClick={onClose}
           >
             Cancel
           </AlertDialogCancel>

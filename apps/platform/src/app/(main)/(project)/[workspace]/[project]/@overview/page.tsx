@@ -42,8 +42,12 @@ function OverviewPage(): React.JSX.Element {
     keys: { publicKey: string; privateKey: string }
   }>()
 
-  const { privateKey, hasServerStoredKey, setHasServerStoredKey, loading } =
-    useProjectPrivateKey()
+  const {
+    projectPrivateKey,
+    hasServerStoredKey,
+    setHasServerStoredKey,
+    loading
+  } = useProjectPrivateKey()
 
   useEffect(() => {
     if (regeneratedKeys) {
@@ -155,7 +159,7 @@ function OverviewPage(): React.JSX.Element {
           <p className="text-lg font-bold">Security Settings</p>
         </div>
 
-        {privateKey ? (
+        {projectPrivateKey ? (
           <InformationCard>
             We are using your private key from{' '}
             {hasServerStoredKey ? 'database' : 'browser'}
@@ -185,7 +189,7 @@ function OverviewPage(): React.JSX.Element {
               isStoredOnServer={hasServerStoredKey}
               onDelete={() => setDeleteKeyDialogOpen(true)}
               onOpenSetupDialog={() => setLocalKeyDialogOpen(true)}
-              privateKey={privateKey}
+              privateKey={projectPrivateKey}
             />
           </div>
 
@@ -202,7 +206,7 @@ function OverviewPage(): React.JSX.Element {
             <RegenerateKeySetup
               onOpenRegenerateDialog={() => setRegenerateKeyDialogOpen(true)}
               onRegenerated={(keys) => setRegeneratedKeys(keys)}
-              privateKey={privateKey}
+              privateKey={projectPrivateKey}
               projectSlug={selectedProject.slug}
             />
           </div>
@@ -223,7 +227,7 @@ function OverviewPage(): React.JSX.Element {
               onDelete={() => setDeleteKeyDialogOpen(true)}
               onKeyStored={() => setHasServerStoredKey(true)}
               onOpenStoreDialog={() => setServerKeyDialogOpen(true)}
-              privateKey={privateKey}
+              privateKey={projectPrivateKey}
               projectSlug={selectedProject.slug}
             />
           </div>

@@ -49,8 +49,8 @@ export default function DecryptSecret(): React.JSX.Element {
               side="left"
               sideOffset={8}
             >
-              Fetches plain text secrets from the backend, making your browser
-              lag a little less
+              Uses your private key to decrypt your secrets on the fly, reducing
+              the stress on your browser
               <TooltipArrow className="fill-white/10" />
             </TooltipContent>
           </Tooltip>

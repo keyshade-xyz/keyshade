@@ -48,7 +48,7 @@ function SecretPage(): React.JSX.Element {
   const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { privateKey } = useProjectPrivateKey()
+  const { projectPrivateKey } = useProjectPrivateKey()
 
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
@@ -112,7 +112,7 @@ function SecretPage(): React.JSX.Element {
                 <SecretCard
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
-                  privateKey={privateKey}
+                  privateKey={projectPrivateKey}
                   secretData={secretData}
                 />
               ))}

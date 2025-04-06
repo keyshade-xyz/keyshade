@@ -193,6 +193,8 @@ export default function CreateProjectDialogue(): JSX.Element {
     [setNewProjectData]
   )
 
+  const hasNoEnvironments = newProjectData.environments?.length === 0
+
   return (
     <>
       <Dialog
@@ -341,7 +343,7 @@ export default function CreateProjectDialogue(): JSX.Element {
                 <div className="flex flex-col gap-5">
                   {/* Environment List */}
                   <div className="flex flex-col gap-4">
-                    {newProjectData.environments?.length === 0 ? (
+                    {hasNoEnvironments ? (
                       <div className="text-sm text-white/60">
                         No environments specified. An environment named{' '}
                         <span className="rounded-md bg-white/10 p-1 font-mono text-sm">

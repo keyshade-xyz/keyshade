@@ -34,7 +34,7 @@ function ConfirmDeleteKeyDialog({
 }: ConfirmDeleteKeyDialogProps): React.JSX.Element {
   const setProjectPrivateKey = useSetAtom(selectedProjectPrivateKeyAtom)
   const setLocalProjectPrivateKey = useSetAtom(localProjectPrivateKeyAtom)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const deletePrivateKey = useHttp(() =>
     ControllerInstance.getInstance().projectController.updateProject({
@@ -54,6 +54,7 @@ function ConfirmDeleteKeyDialog({
     }
     setProjectPrivateKey(null)
     toast.success('Private key is deleted successfully!')
+    setIsLoading(false)
     onClose()
   }, [
     onClose,
@@ -64,12 +65,8 @@ function ConfirmDeleteKeyDialog({
     deletePrivateKey
   ])
 
-  const handleClose = useCallback(() => {
-    onClose()
-  }, [onClose])
-
   return (
-    <AlertDialog onOpenChange={handleClose} open={isOpen}>
+    <AlertDialog onOpenChange={onClose} open={isOpen}>
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F] ">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-semibold">
@@ -84,7 +81,7 @@ function ConfirmDeleteKeyDialog({
         <AlertDialogFooter>
           <AlertDialogCancel
             className="rounded-md border border-white/60 text-white/80"
-            onClick={handleClose}
+            onClick={onClose}
           >
             Cancel
           </AlertDialogCancel>
