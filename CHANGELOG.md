@@ -1,3 +1,9 @@
+## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
+
+### 🚀 Features
+
+* **cli:** Resend workspace invitation command ([#854](https://github.com/keyshade-xyz/keyshade/issues/854)) ([4c716ac](https://github.com/keyshade-xyz/keyshade/commit/4c716ac7399f45e7ea8958f75b4efa3cf01044e5))
+
 ## [2.14.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.20...v2.14.0-stage.21) (2025-04-05)
 
 ### 🚀 Features
