@@ -90,6 +90,7 @@ export const GetMembersResponseSchema = PageResponseSchema(
         id: z.string(),
         role: z.object({
           id: z.string(),
+          slug: z.string(),
           name: z.string(),
           description: z.string().nullable(),
           colorCode: z.string().nullable(),
