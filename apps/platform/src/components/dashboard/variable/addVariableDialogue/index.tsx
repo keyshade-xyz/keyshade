@@ -109,7 +109,7 @@ export default function AddVariableDialogue() {
           <AddSVG /> Add Variable
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[25rem] w-[31.625rem] bg-[#18181B] text-white ">
+      <DialogContent className="w-[31.625rem] bg-[#18181B] text-white ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add a new variable
