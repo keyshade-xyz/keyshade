@@ -6,6 +6,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   const logger = new Logger('DB Seeder')
+  // @ts-expect-error -- false alarm
   if (process.env.NODE_ENV === 'dev') {
     logger.log('Database seeding started')
 

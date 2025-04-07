@@ -6,6 +6,7 @@ import GetAllMembersOfWorkspaceCommand from './membership/get-all-members.member
 import InviteUserCommand from './membership/invite.membership'
 import { LeaveWorkspaceCommand } from './membership/leave.membership'
 import RemoveUserCommand from './membership/remove.membership'
+import ResendInvitationCommand from './membership/resend-invitation.membership'
 import TransferOwnershipCommand from './membership/transfer-ownership.membership copy'
 import UpdateRolesCommand from './membership/update-role.membership'
 
@@ -28,7 +29,8 @@ export default class WorkspaceMembershipCommand extends BaseCommand {
       new LeaveWorkspaceCommand(),
       new RemoveUserCommand(),
       new TransferOwnershipCommand(),
-      new UpdateRolesCommand()
+      new UpdateRolesCommand(),
+      new ResendInvitationCommand()
     ]
   }
 }
