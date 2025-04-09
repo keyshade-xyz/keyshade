@@ -1,18 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Button } from './button'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 
 interface PaginatedResponse<T> {
   success: boolean
   data: {
     items: T[]
-    metadata?: {
-      totalCount: number
-    }
+    metadata?: { totalCount: number }
   }
-  error?: {
-    message: string
-  }
+  error?: { message: string }
 }
 
 interface PaginatedListProps<T> {
@@ -34,94 +29,118 @@ export function PaginatedList<T>({
   className = ''
 }: PaginatedListProps<T>) {
   const [items, setItems] = useState<T[]>([])
-  const [page, setPage] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const effectiveLimit = page * itemsPerPage
-        const response = await fetchFunction({
-          page: 1,
-          limit: effectiveLimit
+  const pageRef = useRef(0)
+  const hasMoreRef = useRef(true)
+  const loadingRef = useRef(false)
+  const observer = useRef<IntersectionObserver | null>(null)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const loadData = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current) return
+
+    loadingRef.current = true
+    setLoading(true)
+
+    try {
+      const currentPage = pageRef.current
+      const {
+        success,
+        data,
+        error: err
+      } = await fetchFunction({
+        page: currentPage,
+        limit: itemsPerPage
+      })
+      if (!success) throw new Error(err?.message || 'Fetch failed')
+
+      const fetched = data.items
+      const total = data.metadata?.totalCount ?? 0
+
+      setItems((prev) => {
+        const newItems = fetched.filter((item) => {
+          return !prev.some((x) => itemKey(x) === itemKey(item))
         })
+        const countAfter = prev.length + newItems.length
+        const more = newItems.length > 0 && countAfter < total
 
-        if (!response.success) {
-          throw new Error(response.error?.message || 'Failed to fetch data')
+        hasMoreRef.current = more
+        if (more) pageRef.current = currentPage + 1
+
+        return [...prev, ...newItems]
+      })
+
+      setError(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unknown error')
+      hasMoreRef.current = false
+    } finally {
+      loadingRef.current = false
+      setLoading(false)
+    }
+  }, [fetchFunction, itemsPerPage, itemKey])
+
+  useEffect(() => {
+    setItems([])
+    setError(null)
+    pageRef.current = 0
+    hasMoreRef.current = true
+    loadingRef.current = false
+
+    loadData()
+  }, [fetchFunction, itemsPerPage, loadData])
+
+  const lastItemRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observer.current) observer.current.disconnect()
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (
+            entries[0].isIntersecting &&
+            hasMoreRef.current &&
+            !loadingRef.current
+          ) {
+            loadData()
+          }
+        },
+        {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.1
         }
-
-        const fetchedItems = response.data.items
-        setItems(fetchedItems)
-
-        const total = response.data.metadata?.totalCount || fetchedItems.length
-        setTotalItems(total)
-        setTotalPages(Math.ceil(total / itemsPerPage))
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [page, itemsPerPage, fetchFunction])
-
-  const handleLoadMore = () => {
-    if (page < totalPages) {
-      setPage((prev) => prev + 1)
-    }
-  }
+      )
+      if (node) observer.current.observe(node)
+    },
+    [loadData]
+  )
 
   if (loading && items.length === 0) {
-    return (
-      <div>
-        <div className="flex justify-center p-4">Loading...</div>
-      </div>
-    )
+    return <div className="flex justify-center p-4">Loading...</div>
   }
-
-  if (error) {
-    return (
-      <div>
-        <div className="p-4 text-center text-red-500">Error: {error}</div>
-      </div>
-    )
+  if (error && items.length === 0) {
+    return <div className="p-4 text-center text-red-500">Error: {error}</div>
   }
-
   if (items.length === 0) {
-    return (
-      <div>
-        <div className="p-4 text-center text-gray-500">No items found</div>
-      </div>
-    )
+    return <div className="p-4 text-center text-gray-500">No items found</div>
   }
 
   return (
-    <div>
-      <div className={cn(className)}>
-        {items.map((item) => (
-          <div key={itemKey(item)}>{itemComponent(item)}</div>
-        ))}
-      </div>
-      <div className="mx-4 mt-4 flex items-center justify-between">
-        <span className="mb-2 text-sm text-white/70">
-          Showing {items.length} of {totalItems}
-        </span>
-        {page < totalPages && (
-          <Button
-            className="rounded border px-3 py-1"
-            disabled={loading}
-            onClick={handleLoadMore}
-          >
-            {loading ? 'Loading...' : 'Load More'}
-          </Button>
-        )}
-      </div>
+    <div className={cn(className)} ref={containerRef}>
+      {items.map((item, i) => (
+        <div
+          key={itemKey(item)}
+          ref={i === items.length - 1 ? lastItemRef : null}
+        >
+          {itemComponent(item)}
+        </div>
+      ))}
+
+      {loading && items.length > 0 ? <div className="flex justify-center p-4">
+          <div className="text-sm text-white/70">Loading more…</div>
+        </div> : null}
     </div>
   )
 }

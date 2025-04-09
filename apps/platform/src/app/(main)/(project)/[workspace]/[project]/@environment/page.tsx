@@ -75,12 +75,18 @@ function EnvironmentPage(): React.JSX.Element {
           <div>
             <PaginatedList<GetAllEnvironmentsOfProjectResponse['items'][number]>
               className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''}`}
-              fetchFunction={async ({ page, limit }) => {
+              fetchFunction={async ({
+                page,
+                limit
+              }: {
+                page: number
+                limit: number
+              }) => {
                 const response =
                   await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
                     {
                       projectSlug: selectedProject!.slug,
-                      page: page - 1,
+                      page,
                       limit
                     }
                   )
