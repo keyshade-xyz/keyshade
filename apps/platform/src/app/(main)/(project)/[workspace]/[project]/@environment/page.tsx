@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import type { GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'

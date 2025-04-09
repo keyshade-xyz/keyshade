@@ -138,9 +138,11 @@ export function PaginatedList<T>({
         </div>
       ))}
 
-      {loading && items.length > 0 ? <div className="flex justify-center p-4">
+      {loading && items.length > 0 ? (
+        <div className="flex justify-center p-4">
           <div className="text-sm text-white/70">Loading more…</div>
-        </div> : null}
+        </div>
+      ) : null}
     </div>
   )
 }

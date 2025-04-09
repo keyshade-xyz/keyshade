@@ -1,8 +1,6 @@
 'use client'
-
-import { ChevronsUpDown, Check } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
@@ -19,7 +17,7 @@ import {
 } from './dialog'
 import { Button } from './button'
 import { PaginatedList } from './paginatedlist'
-import { cn } from '@/lib/utils'
+import { WorkspaceListItem } from './workspace-list-item'
 import {
   Popover,
   PopoverContent,
@@ -29,39 +27,16 @@ import {
   Command,
   CommandEmpty,
   CommandInput,
-  CommandItem,
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
-interface WorkspaceItemProps {
-  workspace: WorkspaceWithTierLimitAndProjectCount
-  isSelected: boolean
-  onSelect: () => void
-}
-
-function WorkspaceItem({
-  workspace,
-  isSelected,
-  onSelect
-}: WorkspaceItemProps) {
-  return (
-    <CommandItem onSelect={onSelect}>
-      <Check
-        className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')}
-      />
-      {workspace.icon ?? '🔥'} {workspace.name}
-    </CommandItem>
-  )
-}
-
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const router = useRouter()
 
   const getWorkspacesOfUser = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
@@ -140,19 +115,11 @@ export function Combobox(): React.JSX.Element {
     []
   )
 
-  const renderWorkspaceItem = useCallback(
+  const renderWorkspaceListItem = useCallback(
     (workspace: WorkspaceWithTierLimitAndProjectCount) => (
-      <WorkspaceItem
-        isSelected={selectedWorkspace?.name === workspace.name}
-        onSelect={() => {
-          setSelectedWorkspace(workspace)
-          router.refresh()
-          setOpen(false)
-        }}
-        workspace={workspace}
-      />
+      <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
     ),
-    [selectedWorkspace, setSelectedWorkspace, router]
+    [setOpen]
   )
 
   return (
@@ -192,7 +159,7 @@ export function Combobox(): React.JSX.Element {
               <div className="max-h-[10rem] overflow-auto">
                 <PaginatedList<WorkspaceWithTierLimitAndProjectCount>
                   fetchFunction={fetchWorkspaces}
-                  itemComponent={renderWorkspaceItem}
+                  itemComponent={renderWorkspaceListItem}
                   itemKey={(workspace) => workspace.id}
                   itemsPerPage={4}
                 />
