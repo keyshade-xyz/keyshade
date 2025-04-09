@@ -30,21 +30,20 @@ export function InfiniteScrollList<T>({
   className = ''
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
   const pageRef = useRef(0)
   const hasMoreRef = useRef(true)
   const loadingRef = useRef(false)
   const observer = useRef<IntersectionObserver | null>(null)
-
   const containerRef = useRef<HTMLDivElement>(null)
 
   const loadData = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) return
 
     loadingRef.current = true
-    setLoading(true)
+    setIsLoading(true)
 
     try {
       const currentPage = pageRef.current
@@ -80,7 +79,7 @@ export function InfiniteScrollList<T>({
       hasMoreRef.current = false
     } finally {
       loadingRef.current = false
-      setLoading(false)
+      setIsLoading(false)
     }
   }, [fetchFunction, itemsPerPage, itemKey])
 
@@ -118,7 +117,7 @@ export function InfiniteScrollList<T>({
     [loadData]
   )
 
-  if (loading && items.length === 0) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="flex justify-center p-4">
         <Loader2 className="h-5 w-5 animate-spin text-white/70" />
@@ -143,7 +142,7 @@ export function InfiniteScrollList<T>({
         </div>
       ))}
 
-      {loading && items.length > 0 ? (
+      {isLoading && items.length > 0 ? (
         <div className="flex justify-center p-4">
           <Loader2 className="h-5 w-5 animate-spin text-white/70" />
         </div>

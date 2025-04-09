@@ -27,6 +27,7 @@ function EnvironmentItemComponent(
 
 function EnvironmentPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true)
+
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
   const isEditEnvironmentOpen = useAtomValue(editEnvironmentOpenAtom)
   const [environments, setEnvironments] = useAtom(environmentsOfProjectAtom)
@@ -46,8 +47,7 @@ function EnvironmentPage(): React.JSX.Element {
     if (selectedProject) {
       setIsLoading(true)
 
-      getAllEnvironmentsOfProject()
-      setIsLoading(false)
+      getAllEnvironmentsOfProject().finally(() => setIsLoading(false))
     }
   }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
 

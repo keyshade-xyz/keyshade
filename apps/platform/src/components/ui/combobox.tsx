@@ -77,14 +77,6 @@ export function Combobox(): React.JSX.Element {
     }
   }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
 
-  useEffect(() => {
-    getWorkspacesOfUser().then(({ success, data }) => {
-      if (success && data) {
-        setSelectedWorkspace(data.items[0])
-      }
-    })
-  }, [setSelectedWorkspace, getWorkspacesOfUser])
-
   const fetchWorkspaces = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
       try {
@@ -121,6 +113,14 @@ export function Combobox(): React.JSX.Element {
     ),
     [setOpen]
   )
+
+  useEffect(() => {
+    getWorkspacesOfUser().then(({ success, data }) => {
+      if (success && data) {
+        setSelectedWorkspace(data.items[0])
+      }
+    })
+  }, [setSelectedWorkspace, getWorkspacesOfUser])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
