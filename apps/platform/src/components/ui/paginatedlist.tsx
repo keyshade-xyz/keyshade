@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PaginatedResponse<T> {
@@ -118,7 +119,11 @@ export function PaginatedList<T>({
   )
 
   if (loading && items.length === 0) {
-    return <div className="flex justify-center p-4">Loading...</div>
+    return (
+      <div className="flex justify-center p-4">
+        <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+      </div>
+    )
   }
   if (error && items.length === 0) {
     return <div className="p-4 text-center text-red-500">Error: {error}</div>
@@ -140,7 +145,7 @@ export function PaginatedList<T>({
 
       {loading && items.length > 0 ? (
         <div className="flex justify-center p-4">
-          <div className="text-sm text-white/70">Loading more…</div>
+          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
         </div>
       ) : null}
     </div>

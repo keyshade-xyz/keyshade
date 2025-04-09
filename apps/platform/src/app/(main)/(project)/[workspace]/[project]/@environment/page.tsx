@@ -103,7 +103,7 @@ function EnvironmentPage(): React.JSX.Element {
               }}
               itemComponent={EnvironmentItemComponent}
               itemKey={(item) => item.id}
-              itemsPerPage={3}
+              itemsPerPage={5}
             />
 
             {/* Delete environment alert dialog */}
