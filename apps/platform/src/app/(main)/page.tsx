@@ -19,7 +19,7 @@ import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 import { useHttp } from '@/hooks/use-http'
-import { PaginatedList } from '@/components/ui/paginatedlist'
+import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -78,7 +78,7 @@ export default function Index(): JSX.Element {
       {loading ? (
         <ProjectScreenLoader />
       ) : !isProjectsEmpty ? (
-        <PaginatedList<GetAllProjectsResponse['items'][number]>
+        <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
           className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
           fetchFunction={async ({
             page,

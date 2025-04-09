@@ -17,7 +17,7 @@ import { useHttp } from '@/hooks/use-http'
 import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
 import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
-import { PaginatedList } from '@/components/ui/paginatedlist'
+import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 
 function EnvironmentItemComponent(
   item: GetAllEnvironmentsOfProjectResponse['items'][number]
@@ -72,7 +72,9 @@ function EnvironmentPage(): React.JSX.Element {
         // Showing this when environments are present
         <div className="flex w-full flex-col gap-y-8">
           <div>
-            <PaginatedList<GetAllEnvironmentsOfProjectResponse['items'][number]>
+            <InfiniteScrollList<
+              GetAllEnvironmentsOfProjectResponse['items'][number]
+            >
               className={`grid h-fit w-full grid-cols-1 gap-8 p-3 text-white md:grid-cols-2 xl:grid-cols-3 ${isDeleteEnvironmentOpen ? 'inert' : ''}`}
               fetchFunction={async ({
                 page,

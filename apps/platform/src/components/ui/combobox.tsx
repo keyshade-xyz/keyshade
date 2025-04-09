@@ -16,7 +16,7 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { PaginatedList } from './paginatedlist'
+import { InfiniteScrollList } from './infinite-scroll-list'
 import { WorkspaceListItem } from './workspace-list-item'
 import {
   Popover,
@@ -157,7 +157,7 @@ export function Combobox(): React.JSX.Element {
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
               <div className="max-h-[10rem] overflow-auto">
-                <PaginatedList<WorkspaceWithTierLimitAndProjectCount>
+                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
                   fetchFunction={fetchWorkspaces}
                   itemComponent={renderWorkspaceListItem}
                   itemKey={(workspace) => workspace.id}

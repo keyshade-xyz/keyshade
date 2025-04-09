@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface PaginatedResponse<T> {
+interface InfiniteScrollListResponse<T> {
   success: boolean
   data: {
     items: T[]
@@ -11,24 +11,24 @@ interface PaginatedResponse<T> {
   error?: { message: string }
 }
 
-interface PaginatedListProps<T> {
+interface InfiniteScrollListProps<T> {
   itemKey: (item: T) => string | number
   itemComponent: (item: T) => React.ReactNode
   itemsPerPage: number
   fetchFunction: (params: {
     page: number
     limit: number
-  }) => Promise<PaginatedResponse<T>>
+  }) => Promise<InfiniteScrollListResponse<T>>
   className?: string
 }
 
-export function PaginatedList<T>({
+export function InfiniteScrollList<T>({
   itemKey,
   itemComponent,
   itemsPerPage,
   fetchFunction,
   className = ''
-}: PaginatedListProps<T>) {
+}: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
