@@ -74,6 +74,7 @@ export const environmentsOfProjectAtom = atom<
   GetAllEnvironmentsOfProjectResponse['items']
 >([])
 
+export const selectedRoleAtom = atom<WorkspaceRole | null>(null)
 export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
 
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
@@ -107,11 +108,11 @@ export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
 export const deleteApiKeyOpenAtom = atom<boolean>(false)
 export const apiKeyOneTimeDisplayDialogOpenAtom = atom<boolean>(false)
-export const oneTimeSecretValueAtom = atom<string>("")
+export const oneTimeSecretValueAtom = atom<string>('')
 
-export const createRolesOpenAtom = atom<boolean>(false)
-export const editRolesOpenAtom = atom<boolean>(false)
-export const deleteRolesOpenAtom = atom<boolean>(false)
+export const createRoleOpenAtom = atom<boolean>(false)
+export const editRoleOpenAtom = atom<boolean>(false)
+export const deleteRoleOpenAtom = atom<boolean>(false)
 
 export const removeMemberOpenAtom = atom<boolean>(false)
 export const transferOwnershipOpenAtom = atom<boolean>(false)

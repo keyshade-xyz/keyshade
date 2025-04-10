@@ -7,6 +7,18 @@ interface AvatarProps {
   className?: string
 }
 
+const getInitials = (name: string): string => {
+  const [firstName, lastName] = name.split(' ')
+
+  const lastNameInitial =
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- False positive
+    lastName !== undefined
+      ? lastName.charAt(0).toUpperCase()
+      : firstName.charAt(1).toLowerCase()
+
+  return firstName.charAt(0).toUpperCase() + lastNameInitial
+}
+
 export default function AvatarComponent({
   name,
   className,
@@ -18,7 +30,7 @@ export default function AvatarComponent({
         src={profilePictureUrl === null ? undefined : profilePictureUrl}
       />
       <AvatarFallback className="font-semibold">
-        {name.charAt(0).toUpperCase() + name.slice(1, 2).toLowerCase()}
+        {getInitials(name)}
       </AvatarFallback>
     </Avatar>
   )

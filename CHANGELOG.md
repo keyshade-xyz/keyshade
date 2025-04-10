@@ -1,3 +1,25 @@
+## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
+
+### 🚀 Features
+
+* **cli:** Resend workspace invitation command ([#854](https://github.com/keyshade-xyz/keyshade/issues/854)) ([4c716ac](https://github.com/keyshade-xyz/keyshade/commit/4c716ac7399f45e7ea8958f75b4efa3cf01044e5))
+
+## [2.14.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.20...v2.14.0-stage.21) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Delete role functionality ([#856](https://github.com/keyshade-xyz/keyshade/issues/856)) ([c2010fa](https://github.com/keyshade-xyz/keyshade/commit/c2010fa926e1faafd4053752b15962c299fcfcf6))
+
+## [2.14.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.19...v2.14.0-stage.20) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Add role listing ([#855](https://github.com/keyshade-xyz/keyshade/issues/855)) ([c326337](https://github.com/keyshade-xyz/keyshade/commit/c326337cb40b0de3aaf3cb9198afc8420a194ab8))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Return role slug in members response ([c719f16](https://github.com/keyshade-xyz/keyshade/commit/c719f16b2b01ab75c924b2c5b8bfe3516e799bea))
+
 ## [2.14.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.18...v2.14.0-stage.19) (2025-04-04)
 
 ### 🚀 Features

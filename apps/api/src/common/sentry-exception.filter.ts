@@ -2,7 +2,8 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  InternalServerErrorException
+  InternalServerErrorException,
+  Logger
 } from '@nestjs/common'
 import { BaseExceptionFilter } from '@nestjs/core'
 import * as Sentry from '@sentry/node'
@@ -10,6 +11,8 @@ import { constructErrorBody } from './util'
 
 @Catch()
 export class SentryExceptionFilter extends BaseExceptionFilter {
+  private readonly logger = new Logger(SentryExceptionFilter.name)
+
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse()
@@ -44,14 +47,14 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
         return
       }
     } catch (filterError) {
-      console.log('filter: ', filterError)
       Sentry.captureException(filterError)
       Sentry.captureException(exception)
     }
-    response.json({
+    this.logger.error(exception)
+    response.status(exception['status'] || 500).json({
       message: exception['message'],
       error: exception['name'],
-      statusCode: exception['status']
+      statusCode: exception['status'] || 500
     })
   }
 }

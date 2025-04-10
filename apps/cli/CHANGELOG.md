@@ -91,3 +91,9 @@
 ## 2.5.2
 
 - Update error logging
+
+## 2.5.3-stage
+
+### Minor Changes
+
+- Added `keyshade workspace resend-invitation` command to resend an invitation to a user to join a workspace.
