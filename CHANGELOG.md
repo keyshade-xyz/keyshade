@@ -1,3 +1,9 @@
+## [2.14.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.22...v2.14.0-stage.23) (2025-04-11)
+
+### 🚀 Features
+
+* **platform:** Project overview tab ([#843](https://github.com/keyshade-xyz/keyshade/issues/843)) ([1c3b198](https://github.com/keyshade-xyz/keyshade/commit/1c3b198467de4117b86739dc3af2e631d3a44a2f))
+
 ## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
 
 ### 🚀 Features
