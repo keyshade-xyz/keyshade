@@ -411,7 +411,9 @@ describe('Workspace Controller Tests', () => {
 
   describe('Get All Workspace Of User Tests', () => {
     it('should be able to fetch all the workspaces the user is a member of', async () => {
+      // Create the invitation, but don't accept it.
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
       const response = await app.inject({
         method: 'GET',
         headers: {
@@ -421,7 +423,7 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items.length).toEqual(2)
+      expect(response.json().items.length).toEqual(1)
 
       const workspaceJson = response.json().items[0]
 
@@ -429,7 +431,7 @@ describe('Workspace Controller Tests', () => {
       expect(workspaceJson.maxAllowedMembers).toBeDefined()
       expect(workspaceJson.maxAllowedProjects).toBeDefined()
       expect(workspaceJson.totalProjects).toBe(0)
-      expect(workspaceJson.totalMembers).toBe(2)
+      expect(workspaceJson.totalMembers).toBe(1)
 
       //check metadata
       const metadata = response.json().metadata
@@ -473,6 +475,9 @@ describe('Workspace Controller Tests', () => {
 
     it('should be able to fetch the 2nd page of the workspaces the user is a member of', async () => {
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+      // Accept the invitation
+      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
+
       const response = await app.inject({
         method: 'GET',
         headers: {

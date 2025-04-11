@@ -25,6 +25,9 @@ import CloseCircleSVG from './close-circle.svg'
 import EditTwoSVG from './edit-2.svg'
 import MedalStarSVG from './medal-star.svg'
 import UserRemoveSVG from './user-remove.svg'
+import LockSVG from './lock.svg'
+import RegenerateSVG from './regenerate.svg'
+import TickCircleSVG from './tick-circle.svg'
 
 export {
   DropdownSVG,
@@ -54,4 +57,8 @@ export {
   EditTwoSVG,
   MedalStarSVG,
   UserRemoveSVG,
+  LockSVG,
+  RegenerateSVG,
+  TickCircleSVG,
+  MinusSquareSVG,
 }

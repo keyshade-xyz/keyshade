@@ -79,6 +79,13 @@ export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
 
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
+export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
+export const localProjectPrivateKeyAtom = atom<
+  {
+    slug: Environment['slug']
+    key: ProjectWithTierLimitAndCount['privateKey']
+  }[]
+>([])
 
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
