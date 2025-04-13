@@ -1073,6 +1073,80 @@ describe('Workspace Membership Controller Tests', () => {
     })
   })
 
+  describe('Resend Invitation Tests', () => {
+    it('should be able to resend the invitation if user has not accepted the invitation', async () => {
+      // Send the invitation
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
+
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user2.email}`
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+
+    it('should not be able to resend the invitation if user is not a member', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user1.email}`
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to resend invitation if workspace does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/ks_1234567890/resend-invitation/${user2.email}`
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to invite a user that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/ks_1234567890`
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to invite a user that is already a member', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user1.email}`
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+  })
+
   describe('Get All Members Tests', () => {
     it('should be able to get all the members of the workspace', async () => {
       const response = await app.inject({

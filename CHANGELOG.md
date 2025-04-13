@@ -1,3 +1,104 @@
+## [2.14.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.22...v2.14.0-stage.23) (2025-04-11)
+
+### 🚀 Features
+
+* **platform:** Project overview tab ([#843](https://github.com/keyshade-xyz/keyshade/issues/843)) ([1c3b198](https://github.com/keyshade-xyz/keyshade/commit/1c3b198467de4117b86739dc3af2e631d3a44a2f))
+
+## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
+
+### 🚀 Features
+
+* **cli:** Resend workspace invitation command ([#854](https://github.com/keyshade-xyz/keyshade/issues/854)) ([4c716ac](https://github.com/keyshade-xyz/keyshade/commit/4c716ac7399f45e7ea8958f75b4efa3cf01044e5))
+
+## [2.14.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.20...v2.14.0-stage.21) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Delete role functionality ([#856](https://github.com/keyshade-xyz/keyshade/issues/856)) ([c2010fa](https://github.com/keyshade-xyz/keyshade/commit/c2010fa926e1faafd4053752b15962c299fcfcf6))
+
+## [2.14.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.19...v2.14.0-stage.20) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Add role listing ([#855](https://github.com/keyshade-xyz/keyshade/issues/855)) ([c326337](https://github.com/keyshade-xyz/keyshade/commit/c326337cb40b0de3aaf3cb9198afc8420a194ab8))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Return role slug in members response ([c719f16](https://github.com/keyshade-xyz/keyshade/commit/c719f16b2b01ab75c924b2c5b8bfe3516e799bea))
+
+## [2.14.0-stage.19](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.18...v2.14.0-stage.19) (2025-04-04)
+
+### 🚀 Features
+
+* **web:** Migrated from nextjs 13 to 15 ([#844](https://github.com/keyshade-xyz/keyshade/issues/844)) ([3212d47](https://github.com/keyshade-xyz/keyshade/commit/3212d47204b673080995579903ea7d7cbcc2626d))
+
+## [2.14.0-stage.18](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.17...v2.14.0-stage.18) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Updated error handling ([8dc6e1f](https://github.com/keyshade-xyz/keyshade/commit/8dc6e1f6c7c60418f310bea53276b5ebb5c3c677))
+
+## [2.14.0-stage.17](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.16...v2.14.0-stage.17) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Update schema for sentry env ([fb56520](https://github.com/keyshade-xyz/keyshade/commit/fb56520591e4e17b9896acc2b81cf2e32d23925b))
+
+## [2.14.0-stage.16](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.15...v2.14.0-stage.16) (2025-04-04)
+
+### 🐛 Bug Fixes
+
+* **api:** Updated sentry env name ([660d327](https://github.com/keyshade-xyz/keyshade/commit/660d3275f9e39c0846277baefe3df2cbc8382db5))
+
+### 📚 Documentation
+
+* Update .env.example ([0de7b66](https://github.com/keyshade-xyz/keyshade/commit/0de7b66d1c69ecb27b6ab403b33dac97c606944c))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** HTTP 500 gets caught by sentry ([a8a39c1](https://github.com/keyshade-xyz/keyshade/commit/a8a39c1fd392ab55c1e78707fa25bf47c7a600b6))
+* **api:** Report only 500 errors ([1740690](https://github.com/keyshade-xyz/keyshade/commit/17406902c394dd2616ebef7069132052f78d8653))
+
+## [2.14.0-stage.15](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.14...v2.14.0-stage.15) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Return lastUpdatedBy data ([e665d12](https://github.com/keyshade-xyz/keyshade/commit/e665d124efb4f5c94497140d93ff91b4a305c5f0))
+
+## [2.14.0-stage.14](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.13...v2.14.0-stage.14) (2025-04-04)
+
+### 🚀 Features
+
+* **project:** Fixed bugs with regenerating and storing private key ([c8f7cc6](https://github.com/keyshade-xyz/keyshade/commit/c8f7cc68573fe64b1e3d2032029e5da65d8c7b54))
+
+## [2.14.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.12...v2.14.0-stage.13) (2025-04-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** Scrollbar issue  ([#839](https://github.com/keyshade-xyz/keyshade/issues/839)) ([0627a6e](https://github.com/keyshade-xyz/keyshade/commit/0627a6e6e7d893d1c04cf275355120eef37a4efe))
+
+## [2.14.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.11...v2.14.0-stage.12) (2025-04-02)
+
+### 🐛 Bug Fixes
+
+* **api:** Error in running the API locally ([88809ea](https://github.com/keyshade-xyz/keyshade/commit/88809ea6f575d6218e795830f973fbe9398f687d))
+
+## [2.14.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.10...v2.14.0-stage.11) (2025-03-31)
+
+### 🚀 Features
+
+* **api:** Resend workspace invitation ([#850](https://github.com/keyshade-xyz/keyshade/issues/850)) ([e2e9c0f](https://github.com/keyshade-xyz/keyshade/commit/e2e9c0f0abf535130ba222dbff41fe78de53c344))
+
+## [2.14.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.9...v2.14.0-stage.10) (2025-03-31)
+
+### 🚀 Features
+
+* **platform:** Add environment management to project creation dialog ([#848](https://github.com/keyshade-xyz/keyshade/issues/848)) ([720d4fb](https://github.com/keyshade-xyz/keyshade/commit/720d4fb143dec5b97aa5b646b458ff0bb323f0ae))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add database seeding script and related commands ([#849](https://github.com/keyshade-xyz/keyshade/issues/849)) ([fe8fa45](https://github.com/keyshade-xyz/keyshade/commit/fe8fa454107fc468f3bb2439e3e4d456c8e5d7f1))
+
 ## [2.14.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.8...v2.14.0-stage.9) (2025-03-28)
 
 ### 🚀 Features

@@ -147,7 +147,14 @@ export class AuthorityCheckerService {
             slug: entity.slug
           },
           include: {
-            secrets: true
+            secrets: true,
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       } else {
@@ -158,7 +165,14 @@ export class AuthorityCheckerService {
             workspace: { members: { some: { userId: user.id } } }
           },
           include: {
-            secrets: true
+            secrets: true,
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       }

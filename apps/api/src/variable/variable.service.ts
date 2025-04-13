@@ -109,15 +109,19 @@ export class VariableService {
         name: dto.name,
         slug: await generateEntitySlug(dto.name, 'VARIABLE', this.prisma),
         note: dto.note,
-        versions: shouldCreateRevisions && {
-          createMany: {
-            data: dto.entries.map((entry) => ({
-              value: entry.value,
-              createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
-            }))
-          }
-        },
+        versions: shouldCreateRevisions
+          ? {
+              createMany: {
+                data: dto.entries.map((entry) => ({
+                  value: entry.value,
+                  createdById: user.id,
+                  environmentId: environmentSlugToIdMap.get(
+                    entry.environmentSlug
+                  )
+                }))
+              }
+            }
+          : undefined,
         project: {
           connect: {
             id: projectId

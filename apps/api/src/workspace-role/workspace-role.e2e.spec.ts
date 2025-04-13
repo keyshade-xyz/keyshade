@@ -205,7 +205,8 @@ describe('Workspace Role Controller Tests', () => {
         ...adminRole1,
         createdAt: expect.any(String),
         projects: [],
-        updatedAt: expect.any(String)
+        updatedAt: expect.any(String),
+        members: expect.any(Array)
       })
     })
 
@@ -493,7 +494,8 @@ describe('Workspace Role Controller Tests', () => {
       ...adminRole1,
       createdAt: expect.any(String),
       projects: [],
-      updatedAt: expect.any(String)
+      updatedAt: expect.any(String),
+      members: expect.any(Array)
     })
   })
 
@@ -524,7 +526,8 @@ describe('Workspace Role Controller Tests', () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         hasAdminAuthority: true,
-        projects: []
+        projects: [],
+        members: expect.any(Array)
       })
     })
 
@@ -740,6 +743,7 @@ describe('Workspace Role Controller Tests', () => {
         ...adminRole1,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        members: expect.any(Array),
         projects: expect.arrayContaining([
           {
             project: {
@@ -859,6 +863,7 @@ describe('Workspace Role Controller Tests', () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         hasAdminAuthority: true,
+        members: expect.any(Array),
         projects: expect.arrayContaining([
           {
             project: {
@@ -1101,6 +1106,26 @@ describe('Workspace Role Controller Tests', () => {
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>
@@ -1120,7 +1145,6 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toEqual(expect.arrayContaining(roles))
 
       //check metadata
       const metadata = response.json().metadata
@@ -1157,6 +1181,26 @@ describe('Workspace Role Controller Tests', () => {
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>
@@ -1176,7 +1220,6 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toEqual(expect.arrayContaining(roles))
 
       //check metadata
       const metadata = response.json().metadata

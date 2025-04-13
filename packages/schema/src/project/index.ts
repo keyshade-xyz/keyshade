@@ -19,6 +19,11 @@ export const BaseProjectSchema = z.object({
   pendingCreation: z.boolean(),
   isForked: z.boolean(),
   lastUpdatedById: z.string(),
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  }),
   workspaceId: WorkspaceSchema.shape.id,
   forkedFromId: z.string().nullable()
 })
