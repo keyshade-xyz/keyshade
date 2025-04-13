@@ -119,18 +119,22 @@ export class SecretService {
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
         rotateAfter: +dto.rotateAfter,
-        versions: shouldCreateRevisions && {
-          createMany: {
-            data: await Promise.all(
-              dto.entries.map(async (entry) => ({
-                value: await encrypt(project.publicKey, entry.value),
-                version: 1,
-                createdById: user.id,
-                environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
-              }))
-            )
-          }
-        },
+        versions: shouldCreateRevisions
+          ? {
+              createMany: {
+                data: await Promise.all(
+                  dto.entries.map(async (entry) => ({
+                    value: await encrypt(project.publicKey, entry.value),
+                    version: 1,
+                    createdById: user.id,
+                    environmentId: environmentSlugToIdMap.get(
+                      entry.environmentSlug
+                    )
+                  }))
+                )
+              }
+            }
+          : undefined,
         project: {
           connect: {
             id: projectId
@@ -944,7 +948,6 @@ export class SecretService {
       })
     }
 
-    // console.log(secretsWithEnvironmentalValues)
     const items = Array.from(secretsWithEnvironmentalValues.values())
 
     // Calculate pagination metadata

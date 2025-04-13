@@ -15,7 +15,11 @@ function handle403() {
   isHandling403 = true
 
   toast.info('Session expired', {
-    description: createElement('p', { className: 'text-xs text-blue-300' }, 'Session expired. Please sign in again.')
+    description: createElement(
+      'p',
+      { className: 'text-xs text-blue-300' },
+      'Session expired. Please sign in again.'
+    )
   })
 
   logout()
@@ -49,7 +53,6 @@ export function useHttp<T, V extends ClientResponse<T>>(
   return useCallback(async (...args: FunctionArgs): Promise<V> => {
     try {
       const response = await fnRef.current(...args)
-
       if (response.error) {
         const statusCode = response.error.statusCode
 

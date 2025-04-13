@@ -11,9 +11,9 @@
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
-    "@next/mdx": "^14.2.3",
-    "@next/third-parties": "^15.1.5",
-    "@sentry/nextjs": "^8",
+    "@next/mdx": "15.2.3",
+    "@next/third-parties": "15.2.3",
+    "@sentry/nextjs": "^9.8.0",
     "@tsparticles/engine": "^3.3.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.3.0",
@@ -22,24 +22,32 @@
     "env-cmd": "^10.1.0",
     "framer-motion": "^11.2.9",
     "geist": "^1.2.2",
-    "next": "^13.5.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "import-in-the-middle": "^1.13.1",
+    "next": "15.2.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "require-in-the-middle": "^7.5.2",
     "sharp": "^0.33.3",
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^13.4.19",
+    "@next/eslint-plugin-next": "15.2.3",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/forms": "^0.5.7",
-    "@types/react": "^18.0.22",
-    "@types/react-dom": "^18.0.7",
+    "@types/react": "19.0.12",
+    "@types/react-dom": "19.0.4",
     "autoprefixer": "^10.4.16",
     "eslint-config-custom": "workspace:*",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
     "tsconfig": "workspace:*"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.12",
+      "@types/react-dom": "19.0.4"
+    }
   }
 }

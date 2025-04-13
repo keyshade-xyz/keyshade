@@ -14,7 +14,7 @@ export function FollowerPointerCard({
 }: {
   children: React.ReactNode
   className?: string
-  title?: string | React.ReactNode
+  title?: string
 }): React.JSX.Element {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -69,7 +69,7 @@ export function FollowPointer({
 }: {
   x: any
   y: any
-  title?: string | React.ReactNode
+  title?: string 
 }): React.JSX.Element {
   const colors = [
     'var(--sky-500)',
@@ -131,7 +131,7 @@ export function FollowPointer({
           backgroundColor: colors[Math.floor(Math.random() * colors.length)]
         }}
       >
-        {title || `William Shakespeare`}
+        {title || `Heisenberg`}
       </motion.div>
     </motion.div>
   )
