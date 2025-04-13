@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -29,6 +29,7 @@ import EmptySecretListContent from '@/components/dashboard/secret/emptySecretLis
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
 import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
 import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { cn } from '@/lib/utils'
 
 extend(relativeTime)
@@ -54,13 +55,8 @@ function SecretPage(): React.JSX.Element {
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
 
-  const privateKey = useMemo(
-    () =>
-      selectedProject?.storePrivateKey
-        ? selectedProject.privateKey
-        : localStorage.getItem(`${selectedProject?.name}_pk`) || null,
-    [selectedProject]
-  )
+  const { projectPrivateKey } = useProjectPrivateKey()
+
   const getAllSecretsOfProject = useHttp(() =>
     ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
       projectSlug: selectedProject!.slug,
@@ -154,7 +150,7 @@ function SecretPage(): React.JSX.Element {
                   )}
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
-                  privateKey={privateKey}
+                  privateKey={projectPrivateKey}
                   secretData={secretData}
                 />
               ))}

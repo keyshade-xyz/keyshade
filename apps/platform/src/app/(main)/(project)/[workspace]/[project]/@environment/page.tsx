@@ -71,7 +71,7 @@ function EnvironmentPage(): React.JSX.Element {
   useEffect(() => {
     if (highlightSlug) {
       // Find and scroll to the element
-      const element = document.getElementById(`secret-${highlightSlug}`)
+      const element = document.getElementById(`environment-${highlightSlug}`)
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' })
         setIsHighlighted(true)

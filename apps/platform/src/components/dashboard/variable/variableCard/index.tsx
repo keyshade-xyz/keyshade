@@ -94,6 +94,7 @@ export default function VariableCard({
     <ContextMenu key={variable.id}>
       <AccordionItem
         className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`variable-${variable.slug}`}
         key={variable.id}
         value={variable.id}
       >
