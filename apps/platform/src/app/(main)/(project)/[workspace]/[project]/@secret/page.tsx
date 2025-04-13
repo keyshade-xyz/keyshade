@@ -29,8 +29,8 @@ import EmptySecretListContent from '@/components/dashboard/secret/emptySecretLis
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
 import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
 import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
-import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { cn } from '@/lib/utils'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 extend(relativeTime)
 
@@ -38,7 +38,7 @@ function SecretPage(): React.JSX.Element {
   const searchParams = useSearchParams()
   const highlightSlug = searchParams.get('highlight')
   const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
+  const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isHighlighted, setIsHighlighted] = useState(false)
 
@@ -81,7 +81,7 @@ function SecretPage(): React.JSX.Element {
               page === 0 ? data.items : [...prev, ...data.items]
             )
             if (data.metadata.links.next === null) {
-              setHasMore(false)
+              setHasMoreSecret(false)
             }
             setGlobalSearchData((prev) => ({
               ...prev,
@@ -165,7 +165,7 @@ function SecretPage(): React.JSX.Element {
 
           <Button
             className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            disabled={isLoading || !hasMore}
+            disabled={isLoading || !hasMoreSecret}
             onClick={handleLoadMore}
           >
             Load more

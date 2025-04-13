@@ -274,7 +274,8 @@ export class WorkspaceService {
       where: {
         members: {
           some: {
-            userId: user.id
+            userId: user.id,
+            invitationAccepted: true
           }
         },
 
