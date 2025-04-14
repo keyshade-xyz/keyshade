@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import React, { useState } from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import dayjs from 'dayjs'
 import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
@@ -34,8 +34,8 @@ export default function MembersTable(): React.JSX.Element {
   const [isRemoveMemberOpen, setIsRemoveMemberOpen] = useAtom(removeMemberOpenAtom)
   const [isTransferOwnershipOpen, setIsTransferOwnershipOpen] = useAtom(transferOwnershipOpenAtom)
   const [isEditMemberOpen, setIsEditMemberOpen] = useAtom(editMemberOpenAtom)
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const [rowsPerPage, setRowsPerPage] = React.useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
   // Filter members where invitationAccepted is true
   const acceptedMembers = members.filter(member => member.invitationAccepted)
@@ -46,17 +46,17 @@ export default function MembersTable(): React.JSX.Element {
   const endIndex = startIndex + rowsPerPage
   const currentMembers = acceptedMembers.slice(startIndex, endIndex)
 
-  const handleRemoveClick = (member: GetMembersResponse['items'][number]) => {
+  const handleRemoveClick = (member: GetMembersResponse['items'][number]): void => {
     setSelectedMember(member)
     setIsRemoveMemberOpen(true)
   }
 
-  const handleTransferOwnership = (member: GetMembersResponse['items'][number]) => {
+  const handleTransferOwnership = (member: GetMembersResponse['items'][number]): void => {
     setSelectedMember(member)
     setIsTransferOwnershipOpen(true)
   }
 
-  const handleEditMember = (member: GetMembersResponse['items'][number]) => {
+  const handleEditMember = (member: GetMembersResponse['items'][number]): void => {
     setSelectedMember(member)
     setIsEditMemberOpen(true)
   }

@@ -37,12 +37,13 @@ export default function EditMemberDialog() {
   const [selectedRoles, setSelectedRoles] = useState<SelectedRoles[]>([])
   const roles = useAtomValue(rolesOfWorkspaceAtom)
 
-  const toggleRole = (role: SelectedRoles) => {
+  const toggleRole = (role: SelectedRoles): void => {
     setSelectedRoles(prev => {
       const isSelected = prev.some(r => r.roleSlug === role.roleSlug)
-      return isSelected
-        ? prev.filter(r => r.roleSlug !== role.roleSlug)
-        : [...prev, role]
+      if (isSelected) {
+        return prev.filter(r => r.roleSlug !== role.roleSlug)
+      }
+      return [...prev, role]
     })
   }
 

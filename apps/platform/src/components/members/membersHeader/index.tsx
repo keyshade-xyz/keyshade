@@ -28,23 +28,24 @@ interface SelectedRoles {
 }
 
 export default function MembersHeader(): React.JSX.Element {
-  const [email, setEmail] = useState('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [email, setEmail] = useState<string>('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false)
   const [selectedRoles, setSelectedRoles] = useState<SelectedRoles[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
   const roles = useAtomValue(rolesOfWorkspaceAtom)
   const members = useAtomValue(membersOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
 
-  const toggleRole = (role: SelectedRoles) => {
+  const toggleRole = (role: SelectedRoles): void => {
     setSelectedRoles(prev => {
-      const isSelected = prev.some(r => r.roleSlug === role.roleSlug);
-      return isSelected
-        ? prev.filter(r => r.roleSlug !== role.roleSlug)
-        : [...prev, role];
-    });
+      const isSelected = prev.some(r => r.roleSlug === role.roleSlug)
+      if (isSelected) {
+        return prev.filter(r => r.roleSlug !== role.roleSlug)
+      }
+      return [...prev, role]
+    })
   }
 
   const inviteMember = useHttp(() =>
