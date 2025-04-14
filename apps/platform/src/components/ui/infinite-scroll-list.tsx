@@ -33,9 +33,9 @@ export function InfiniteScrollList<T>({
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  const pageRef = useRef(0)
-  const hasMoreRef = useRef(true)
-  const loadingRef = useRef(false)
+  const pageRef = useRef<number>(0)
+  const hasMoreRef = useRef<boolean>(true)
+  const loadingRef = useRef<boolean>(false)
   const observer = useRef<IntersectionObserver | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { FolderSVG } from '@public/svg/dashboard'
@@ -43,6 +43,30 @@ export default function Index(): JSX.Element {
     })
   )
 
+  const fetchProjects = async ({
+    page,
+    limit
+  }: {
+    page: number
+    limit: number
+  }) => {
+    const response =
+      await ControllerInstance.getInstance().projectController.getAllProjects({
+        workspaceSlug: selectedWorkspace!.slug,
+        page,
+        limit
+      })
+
+    return {
+      success: response.success,
+      error: response.error ? { message: response.error.message } : undefined,
+      data: response.data ?? {
+        items: [],
+        metadata: { totalCount: 0 }
+      }
+    }
+  }
+
   const getSelf = useHttp(() =>
     ControllerInstance.getInstance().userController.getSelf()
   )
@@ -80,33 +104,7 @@ export default function Index(): JSX.Element {
       ) : !isProjectsEmpty ? (
         <InfiniteScrollList<GetAllProjectsResponse['items'][number]>
           className="grid grid-cols-1 gap-5 p-2 md:grid-cols-2 xl:grid-cols-3"
-          fetchFunction={async ({
-            page,
-            limit
-          }: {
-            page: number
-            limit: number
-          }) => {
-            const response =
-              await ControllerInstance.getInstance().projectController.getAllProjects(
-                {
-                  workspaceSlug: selectedWorkspace!.slug,
-                  page,
-                  limit
-                }
-              )
-
-            return {
-              success: response.success,
-              error: response.error
-                ? { message: response.error.message }
-                : undefined,
-              data: response.data ?? {
-                items: [],
-                metadata: { totalCount: 0 }
-              }
-            }
-          }}
+          fetchFunction={fetchProjects}
           itemComponent={ProjectItemComponent}
           itemKey={(item) => item.id}
           itemsPerPage={10}
