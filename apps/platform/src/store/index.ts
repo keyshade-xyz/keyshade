@@ -4,6 +4,7 @@ import type {
   ApiKey,
   Environment,
   GetAllEnvironmentsOfProjectResponse,
+  GetMembersResponse,
   ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
@@ -39,6 +40,9 @@ export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
   null
 )
 export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
+
+export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
+export const selectedMemberAtom = atom<GetMembersResponse['items'][number] | null>(null)
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
@@ -129,6 +133,10 @@ export const oneTimeSecretValueAtom = atom<string>('')
 export const createRoleOpenAtom = atom<boolean>(false)
 export const editRoleOpenAtom = atom<boolean>(false)
 export const deleteRoleOpenAtom = atom<boolean>(false)
+
+export const removeMemberOpenAtom = atom<boolean>(false)
+export const transferOwnershipOpenAtom = atom<boolean>(false)
+export const editMemberOpenAtom = atom<boolean>(false)
 
 export const deleteAccountOpenAtom = atom<boolean>(false)
 
