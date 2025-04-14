@@ -60,5 +60,4 @@ export {
   LockSVG,
   RegenerateSVG,
   TickCircleSVG,
-  MinusSquareSVG,
 }
