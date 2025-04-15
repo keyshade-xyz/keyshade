@@ -1,3 +1,15 @@
+## [2.14.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.24...v2.14.0-stage.25) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Members Tab ([#846](https://github.com/keyshade-xyz/keyshade/issues/846)) ([edb88b5](https://github.com/keyshade-xyz/keyshade/commit/edb88b5d05449280f32eafbffda656bc6e4f4592))
+
+## [2.14.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.23...v2.14.0-stage.24) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Paginated List Component ([#852](https://github.com/keyshade-xyz/keyshade/issues/852)) ([41d2266](https://github.com/keyshade-xyz/keyshade/commit/41d2266049b71af8e9784329cdf151e3937dc83a))
+
 ## [2.14.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.22...v2.14.0-stage.23) (2025-04-11)
 
 ### 🚀 Features

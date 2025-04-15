@@ -1,11 +1,10 @@
 'use client'
-
-import { ChevronsUpDown, Check } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { Label } from './label'
 import { Input } from './input'
 import {
@@ -17,7 +16,8 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { cn } from '@/lib/utils'
+import { InfiniteScrollList } from './infinite-scroll-list'
+import { WorkspaceListItem } from './workspace-list-item'
 import {
   Popover,
   PopoverContent,
@@ -27,18 +27,16 @@ import {
   Command,
   CommandEmpty,
   CommandInput,
-  CommandItem,
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { allWorkspacesAtom, selectedWorkspaceAtom } from '@/store'
+import { selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const router = useRouter()
 
   const getWorkspacesOfUser = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
@@ -50,7 +48,6 @@ export function Combobox(): React.JSX.Element {
     })
   )
 
-  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
@@ -72,28 +69,58 @@ export function Combobox(): React.JSX.Element {
       if (success && data) {
         toast.success('Workspace created successfully')
         setSelectedWorkspace(data)
-        setAllWorkspaces((prev) => [...prev, data])
         setOpen(false)
       }
     } finally {
       setIsLoading(false)
       toast.dismiss()
     }
-  }, [
-    createWorkspace,
-    newWorkspaceName,
-    setAllWorkspaces,
-    setSelectedWorkspace
-  ])
+  }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
+
+  const fetchWorkspaces = useCallback(
+    async ({ page, limit }: { page: number; limit: number }) => {
+      try {
+        const response =
+          await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+            {
+              page,
+              limit
+            }
+          )
+        return {
+          success: response.success,
+          error: response.error
+            ? { message: response.error.message }
+            : undefined,
+          data: response.data ?? { items: [], metadata: { totalCount: 0 } }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          data: { items: [], metadata: { totalCount: 0 } },
+          error: {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }
+        }
+      }
+    },
+    []
+  )
+
+  const renderWorkspaceListItem = useCallback(
+    (workspace: WorkspaceWithTierLimitAndProjectCount) => (
+      <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
+    ),
+    [setOpen]
+  )
 
   useEffect(() => {
     getWorkspacesOfUser().then(({ success, data }) => {
       if (success && data) {
-        setAllWorkspaces(data.items)
         setSelectedWorkspace(data.items[0])
       }
     })
-  }, [setSelectedWorkspace, setAllWorkspaces, getWorkspacesOfUser])
+  }, [setSelectedWorkspace, getWorkspacesOfUser])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -129,29 +156,14 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspaces.map((workspace) => {
-                return (
-                  <CommandItem
-                    key={workspace.id}
-                    onSelect={() => {
-                      setSelectedWorkspace(workspace)
-                      router.refresh()
-                      setOpen(false)
-                    }}
-                  >
-                    {' '}
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        selectedWorkspace?.name === workspace.name
-                          ? 'opacity-100'
-                          : 'opacity-0'
-                      )}
-                    />{' '}
-                    {workspace.icon ?? '🔥'} {workspace.name}
-                  </CommandItem>
-                )
-              })}
+              <div className="max-h-[10rem] overflow-auto">
+                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
+                  fetchFunction={fetchWorkspaces}
+                  itemComponent={renderWorkspaceListItem}
+                  itemKey={(workspace) => workspace.id}
+                  itemsPerPage={4}
+                />
+              </div>
             </CommandList>
           </Command>
           <Dialog>
