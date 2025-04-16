@@ -95,7 +95,7 @@ function Hero(): React.JSX.Element {
 
           <form onSubmit={onSubmit}>
             <div className="flex flex-col items-center gap-[1rem] md:flex-row">
-              <InputBorderSpotlight setEmail={setEmail} />
+              <InputBorderSpotlight email={email} setEmail={setEmail} />
               <div className="border-brandBlue/[8%] rounded-full border p-[0.31rem] ">
                 <EncryptButton
                   TARGET_TEXT="Join Waitlist"

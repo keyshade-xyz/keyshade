@@ -3,10 +3,12 @@ import type { Dispatch, SetStateAction } from 'react'
 import React, { useRef, useState } from 'react'
 
 interface InputBorderSpotlightProps {
+  email: string
   setEmail: Dispatch<SetStateAction<string>>
 }
 
 export function InputBorderSpotlight({
+  email,
   setEmail
 }: InputBorderSpotlightProps): React.JSX.Element {
   const divRef = useRef<HTMLInputElement>(null)
@@ -60,6 +62,7 @@ export function InputBorderSpotlight({
         placeholder="Enter your email address"
         size={25}
         type="email"
+        value={email}
       />
       <input
         aria-hidden="true"
