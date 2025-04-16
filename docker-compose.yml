@@ -31,6 +31,47 @@ services:
       - '9001:9001'
     volumes:
       - minio:/data
+    networks:
+      - keyshade-dev
+
+  sentry:
+    image: getsentry/sentry:22.1.0
+    ports:
+      - "9002:9000"
+    environment:
+      SENTRY_SECRET_KEY: 'changeme'
+      SENTRY_EMAIL_HOST: 'smtp'
+      SENTRY_EMAIL_PORT: 1025
+      SENTRY_DB_NAME: 'sentry'
+      SENTRY_DB_USER: 'sentry'
+      SENTRY_DB_PASSWORD: 'sentry'
+      SENTRY_REDIS_HOST: 'sentry-redis'
+      SENTRY_POSTGRES_HOST: 'sentry-postgres'
+    depends_on:
+      - sentry-postgres
+      - sentry-redis
+    volumes:
+      - sentry-data:/var/lib/sentry/files
+    networks:
+      - keyshade-dev
+
+  sentry-postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: sentry
+      POSTGRES_PASSWORD: sentry
+      POSTGRES_DB: sentry
+    volumes:
+      - sentry-postgres-data:/var/lib/postgresql/data
+    networks:
+      - keyshade-dev
+
+  sentry-redis:
+    image: redis:7
+    volumes:
+      - sentry-redis-data:/data
+    networks:
+      - keyshade-dev
 
 networks:
   keyshade-dev:
@@ -40,3 +81,6 @@ volumes:
   db:
   redis:
   minio:
+  sentry-data:
+  sentry-postgres-data:
+  sentry-redis-data:
