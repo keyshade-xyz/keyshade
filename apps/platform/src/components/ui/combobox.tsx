@@ -1,17 +1,12 @@
 'use client'
-
-import { ChevronsUpDown, Check } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { ChevronsUpDown } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { AddSVG } from '@public/svg/shared'
-import type {
-  GetAllWorkspacesOfUserResponse,
-  Workspace
-} from '@keyshade/schema'
 import { useAtom } from 'jotai'
-import { Input } from './input'
+import { AddSVG } from '@public/svg/shared'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { Label } from './label'
+import { Input } from './input'
 import {
   Dialog,
   DialogContent,
@@ -21,7 +16,8 @@ import {
   DialogTrigger
 } from './dialog'
 import { Button } from './button'
-import { cn } from '@/lib/utils'
+import { InfiniteScrollList } from './infinite-scroll-list'
+import { WorkspaceListItem } from './workspace-list-item'
 import {
   Popover,
   PopoverContent,
@@ -31,101 +27,100 @@ import {
   Command,
   CommandEmpty,
   CommandInput,
-  CommandItem,
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
-
-async function getAllWorkspace(): Promise<
-  GetAllWorkspacesOfUserResponse['items'] | undefined
-> {
-  try {
-    const { data, success, error } =
-      await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
-        {},
-        {}
-      )
-
-    if (error) {
-      toast.error('Something went wrong!', {
-        description: (
-          <p className="text-xs text-red-300">
-            Something went wrong while fetching workspaces. Check console for
-            more info.
-          </p>
-        )
-      })
-      // eslint-disable-next-line no-console -- we need to log the error
-      throw error
-    }
-
-    if (success && data) {
-      return data.items
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console -- we need to log the error
-    console.error(error)
-  }
-}
+import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
-  const [isNameEmpty, setIsNameEmpty] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const [selectedWorkspace, setselectedWorkspace] = useAtom(
+  const getWorkspacesOfUser = useHttp(() =>
+    ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
+  )
+
+  const createWorkspace = useHttp(() =>
+    ControllerInstance.getInstance().workspaceController.createWorkspace({
+      name: newWorkspaceName
+    })
+  )
+
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
-  const router = useRouter()
-
-  async function createWorkspace(name: string): Promise<void> {
-    if (name === '') {
-      setIsNameEmpty(true)
+  const handleCreateWorkspace = useCallback(async () => {
+    if (newWorkspaceName.trim() === '') {
+      toast.error('Workspace name is empty', {
+        description: 'Please enter a workspace name'
+      })
       return
     }
-    setIsNameEmpty(false)
-    try {
-      const { data, error, success } =
-        await ControllerInstance.getInstance().workspaceController.createWorkspace(
-          {
-            name
-          },
-          {}
-        )
 
-      if (error) {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-        return
-      }
+    setIsLoading(true)
+    toast.loading('Creating workspace...')
+
+    try {
+      const { success, data } = await createWorkspace()
 
       if (success && data) {
         toast.success('Workspace created successfully')
-        setselectedWorkspace({ ...data, projects: 0 })
+        setSelectedWorkspace(data)
         setOpen(false)
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(error)
+    } finally {
+      setIsLoading(false)
+      toast.dismiss()
     }
-  }
+  }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
+
+  const fetchWorkspaces = useCallback(
+    async ({ page, limit }: { page: number; limit: number }) => {
+      try {
+        const response =
+          await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+            {
+              page,
+              limit
+            }
+          )
+        return {
+          success: response.success,
+          error: response.error
+            ? { message: response.error.message }
+            : undefined,
+          data: response.data ?? { items: [], metadata: { totalCount: 0 } }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          data: { items: [], metadata: { totalCount: 0 } },
+          error: {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }
+        }
+      }
+    },
+    []
+  )
+
+  const renderWorkspaceListItem = useCallback(
+    (workspace: WorkspaceWithTierLimitAndProjectCount) => (
+      <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
+    ),
+    [setOpen]
+  )
 
   useEffect(() => {
-    getAllWorkspace()
-      .then((data) => {
-        if (data) {
-          setAllWorkspaces(data)
-          setselectedWorkspace(data[0])
-        }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error('error:', error)
-      })
-  }, [setselectedWorkspace])
+    getWorkspacesOfUser().then(({ success, data }) => {
+      if (success && data) {
+        setSelectedWorkspace(data.items[0])
+      }
+    })
+  }, [setSelectedWorkspace, getWorkspacesOfUser])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -139,7 +134,7 @@ export function Combobox(): React.JSX.Element {
         >
           <div className="flex gap-x-[0.88rem]">
             <div className="flex aspect-square items-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
-              🔥
+              {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-col items-start">
               <div className="text-lg text-white">
@@ -161,29 +156,14 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspaces.map((workspace) => {
-                return (
-                  <CommandItem
-                    key={workspace.id}
-                    onSelect={() => {
-                      setselectedWorkspace(workspace)
-                      router.refresh()
-                      setOpen(false)
-                    }}
-                  >
-                    {' '}
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        selectedWorkspace?.name === workspace.name
-                          ? 'opacity-100'
-                          : 'opacity-0'
-                      )}
-                    />{' '}
-                    {workspace.name}
-                  </CommandItem>
-                )
-              })}
+              <div className="max-h-[10rem] overflow-auto">
+                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
+                  fetchFunction={fetchWorkspaces}
+                  itemComponent={renderWorkspaceListItem}
+                  itemKey={(workspace) => workspace.id}
+                  itemsPerPage={4}
+                />
+              </div>
             </CommandList>
           </Command>
           <Dialog>
@@ -192,7 +172,7 @@ export function Combobox(): React.JSX.Element {
                 <AddSVG /> New workspace
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-[#1E1E1F]">
               <DialogHeader>
                 <DialogTitle>Make a new workspace</DialogTitle>
                 <DialogDescription>
@@ -214,32 +194,12 @@ export function Combobox(): React.JSX.Element {
                       placeholder="Enter the name"
                     />
                   </div>
-                  {isNameEmpty ? (
-                    <span className="ml-[3.5rem] mt-1 text-red-500">
-                      Name cannot be empty
-                    </span>
-                  ) : null}
                 </div>
 
                 <div className="flex w-full justify-end">
                   <Button
-                    onClick={() => {
-                      createWorkspace(newWorkspaceName)
-                        .then(() => {
-                          toast.success('User details updated successfully')
-                          router.refresh()
-                        })
-                        .catch(() => {
-                          toast.error('Something went wrong!', {
-                            description: (
-                              <p className="text-xs text-red-300">
-                                Failed to update the user details. Check console
-                                for more info.
-                              </p>
-                            )
-                          })
-                        })
-                    }}
+                    disabled={isLoading}
+                    onClick={handleCreateWorkspace}
                     variant="secondary"
                   >
                     Add workspace

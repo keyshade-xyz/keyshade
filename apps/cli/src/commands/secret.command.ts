@@ -5,7 +5,6 @@ import ListSecret from '@/commands/secret/list.secret'
 import FetchSecretRevisions from '@/commands/secret/revisions.secret'
 import UpdateSecret from '@/commands/secret/update.secret'
 import RollbackSecret from '@/commands/secret/rollback.secret'
-import GetSecret from '@/commands/secret/get.secret'
 
 export default class SecretCommand extends BaseCommand {
   getName(): string {
@@ -20,7 +19,6 @@ export default class SecretCommand extends BaseCommand {
     return [
       new CreateSecret(),
       new DeleteSecret(),
-      new GetSecret(),
       new ListSecret(),
       new FetchSecretRevisions(),
       new UpdateSecret(),

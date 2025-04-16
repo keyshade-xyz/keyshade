@@ -39,10 +39,22 @@ export default class UpdateVariable extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
-        description: 'An array of values for the variable.'
+        long: '--entry [entries...]',
+        description:
+          'An array of values for the variable. If specified, should be in the form <environment slug>=<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade variable update <variable slug> [options]
+    
+  Update variable's name and note
+  keyshade variable update variable-1 --name "My variable" --note "This is a variable"
+  
+  Add more entries to a variable
+  keyshade variable update apikey-1 --entry "dev=super" "prod=variable"
+    `
   }
 
   canMakeHttpRequests(): boolean {
@@ -56,7 +68,7 @@ export default class UpdateVariable extends BaseCommand {
       await ControllerInstance.getInstance().variableController.updateVariable(
         {
           variableSlug,
-          ...options
+          ...(await this.parseInput(options))
         },
         this.headers
       )
@@ -64,10 +76,49 @@ export default class UpdateVariable extends BaseCommand {
     if (success) {
       Logger.info('Variable updated successfully!')
     } else {
-      Logger.error(`Failed to update variable: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to update variable.\n' + JSON.stringify(error))
+      this.logError(error)
+    }
+  }
+
+  private async parseInput(options: any): Promise<{
+    name?: string
+    note?: string
+    entries?: Array<{ value: string; environmentSlug: string }>
+  }> {
+    const { name, note, entry: rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
+
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
       }
+    }
+
+    return {
+      name,
+      note,
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }

@@ -1,14 +1,8 @@
 import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
-import { MessageSVG } from '@public/svg/shared'
-import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
 import { useSetAtom } from 'jotai'
 import dayjs from 'dayjs'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@/components/ui/collapsible'
+import { NoteIconSVG } from '@public/svg/secret'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,
@@ -29,21 +23,46 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
+  deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedVariableAtom
+  selectedVariableAtom,
+  selectedVariableEnvironmentAtom,
+  variableRevisionsOpenAtom
 } from '@/store'
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
+import AvatarComponent from '@/components/common/avatar'
+import { copyToClipboard } from '@/lib/clipboard'
 
 export default function VariableCard(
   variableData: GetAllVariablesOfProjectResponse['items'][number]
 ) {
   const setSelectedVariable = useSetAtom(selectedVariableAtom)
+  const setSelectedVariableEnvironment = useSetAtom(
+    selectedVariableEnvironmentAtom
+  )
   const setIsEditVariableOpen = useSetAtom(editVariableOpenAtom)
   const setIsDeleteVariableOpen = useSetAtom(deleteVariableOpenAtom)
+  const setIsDeleteEnvironmentValueOfVariableOpen = useSetAtom(
+    deleteEnvironmentValueOfVariableOpenAtom
+  )
+  const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
   const { variable, values } = variableData
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(
+      variable.slug,
+      'You copied the slug successfully.',
+      'Failed to copy the slug.',
+      'You successfully copied the slug.'
+    )
+  }
 
   const handleEditClick = () => {
     setSelectedVariable(variableData)
@@ -55,43 +74,49 @@ export default function VariableCard(
     setIsDeleteVariableOpen(true)
   }
 
-  // Holds the currently open section ID
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set())
+  const handleDeleteEnvironmentValueOfVariableClick = (environment: string) => {
+    setSelectedVariable(variableData)
+    setSelectedVariableEnvironment(environment)
+    setIsDeleteEnvironmentValueOfVariableOpen(true)
+  }
 
-  //Environments table toggle logic
-  const toggleSection = (id: string) => {
-    setOpenSections((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(id)) {
-        newSet.delete(id)
-      } else {
-        newSet.add(id)
-      }
-      return newSet
-    })
+  const handleRevisionsClick = () => {
+    setSelectedVariable(variableData)
+    setIsVariableRevisionsOpen(true)
   }
 
   return (
     <ContextMenu key={variable.id}>
-      <ContextMenuTrigger className="w-full">
-        <Collapsible
-          className="w-full"
-          key={variable.id}
-          onOpenChange={() => toggleSection(variable.id)}
-          open={openSections.has(variable.id)}
-        >
-          <CollapsibleTrigger
-            className={`flex h-[6.75rem] w-full items-center justify-between gap-24 ${openSections.has(variable.id) ? 'rounded-t-xl' : 'rounded-xl'} bg-[#232424] px-4 py-2 text-left`}
+      <AccordionItem
+        className="rounded-xl bg-white/5 px-5"
+        key={variable.id}
+        value={variable.id}
+      >
+        <ContextMenuTrigger>
+          <AccordionTrigger
+            className="hover:no-underline"
+            rightChildren={
+              <div className="flex items-center gap-x-4 text-xs text-white/50">
+                {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
+                <div className="flex items-center gap-x-2">
+                  <span className="text-white">
+                    {variable.lastUpdatedBy.name}
+                  </span>
+                  <AvatarComponent
+                    name={variable.lastUpdatedBy.name}
+                    profilePictureUrl={variable.lastUpdatedBy.profilePictureUrl}
+                  />
+                </div>
+              </div>
+            }
           >
-            <div className="flex h-[2.375rem] items-center justify-center gap-4">
-              <span className="h-[2.375rem] text-2xl font-normal text-zinc-100">
-                {variable.name}
-              </span>
+            <div className="flex gap-x-5">
+              <div className="flex items-center gap-x-4">{variable.name}</div>
               {variable.note ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <MessageSVG height="40" width="40" />
+                      <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
                       <p>{variable.note}</p>
@@ -100,63 +125,78 @@ export default function VariableCard(
                 </TooltipProvider>
               ) : null}
             </div>
-            <div className="flex h-[6.5rem] w-[18.188rem] items-center justify-center gap-x-[3.125rem]">
-              <div className="flex h-[2.063rem] w-[13.563rem] items-center justify-center gap-x-3">
-                <div className="flex h-[2.063rem] w-[7.438rem] items-center justify-center text-base font-normal text-white text-opacity-50">
-                  {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
-                </div>
-                <div className="flex h-[2.063rem] w-[5.375rem] items-center justify-center gap-x-[0.375rem]">
-                  <div className="flex h-[2.063rem] w-[3.5rem] items-center justify-center text-base font-medium text-white">
-                    {variable.lastUpdatedBy.name.split(' ')[0]}
-                  </div>
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage />
-                    <AvatarFallback>
-                      {variable.lastUpdatedBy.name.charAt(0).toUpperCase() +
-                        variable.lastUpdatedBy.name.slice(1, 2).toLowerCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </div>
-              <ChevronDown
-                className={`h-[1.5rem] w-[1.5rem] text-zinc-400 transition-transform ${openSections.has(variable.id) ? 'rotate-180' : ''}`}
-              />
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="h-full w-full gap-y-24 rounded-b-lg bg-[#232424] p-4">
+          </AccordionTrigger>
+        </ContextMenuTrigger>
+        <AccordionContent>
+          {values.length > 0 ? (
             <Table className="h-full w-full">
-              <TableHeader className="h-[3.125rem] w-full">
-                <TableRow className="h-[3.125rem] w-full hover:bg-[#232424]">
-                  <TableHead className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
+              <TableHeader className="h-[3.125rem] w-full ">
+                <TableRow className="h-full w-full bg-white/10 ">
+                  <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
                     Environment
                   </TableHead>
-                  <TableHead className="h-full border-2 border-white/30 text-base font-normal text-white">
+                  <TableHead className="h-full text-base font-normal text-white/50">
                     Value
                   </TableHead>
+                  <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                    Version
+                  </TableHead>
+                  <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {values.map((env) => (
-                  <TableRow
-                    className="h-[3.125rem] w-full hover:cursor-pointer hover:bg-[#232424]"
-                    key={env.environment.id}
-                  >
-                    <TableCell className="h-full w-[10.25rem] border-2 border-white/30 text-base font-bold text-white">
-                      {env.environment.name}
-                    </TableCell>
-                    <TableCell className="h-full border-2 border-white/30 text-base font-normal text-white">
-                      {env.value}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {values.map((value) => {
+                  return (
+                    <TableRow
+                      className="group h-[3.125rem] w-full hover:bg-white/5"
+                      key={value.environment.id}
+                    >
+                      <TableCell className="h-full w-[10.25rem] text-base">
+                        {value.environment.name}
+                      </TableCell>
+                      <TableCell className="h-full text-base">
+                        {value.value}
+                      </TableCell>
+                      <TableCell className="h-full px-8 py-4 text-base">
+                        {value.version}
+                      </TableCell>
+                      <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
+                        <button
+                          onClick={() =>
+                            handleDeleteEnvironmentValueOfVariableClick(
+                              value.environment.slug
+                            )
+                          }
+                          type="button"
+                        >
+                          <TrashWhiteSVG />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
-          </CollapsibleContent>
-        </Collapsible>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="flex h-[6.375rem] w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+          ) : (
+            <div className="flex items-center justify-center py-8 text-sm text-white/50">
+              You have not added any values for any environment to this variable
+              yet. Edit the variable to add values.
+            </div>
+          )}
+        </AccordionContent>
+      </AccordionItem>
+      <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleRevisionsClick}
+        >
           Show Version History
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="w-[15.938rem] border-b-[0.025rem] border-white/65 py-2 text-xs font-semibold tracking-wide"
+          onSelect={handleCopyToClipboard}
+        >
+          Copy slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"

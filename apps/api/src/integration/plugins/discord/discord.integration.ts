@@ -91,6 +91,8 @@ export class DiscordIntegration extends BaseIntegration {
       this.logger.error(
         `Failed to emit event to Discord: ${response.status} ${response.statusText}`
       )
+    } else {
+      this.logger.log(`Successfully emitted event to Discord: ${data.title}`)
     }
   }
 }

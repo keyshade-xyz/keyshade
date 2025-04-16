@@ -11,13 +11,17 @@ import {
   DeleteVariableResponseSchema,
   GetAllVariablesOfProjectRequestSchema,
   GetAllVariablesOfProjectResponseSchema,
+  GetRevisionsOfVariableRequestSchema,
+  GetRevisionsOfVariableResponseSchema,
   GetAllVariablesOfEnvironmentRequestSchema,
   GetAllVariablesOfEnvironmentResponseSchema,
-  GetRevisionsOfVariableRequestSchema,
-  GetRevisionsOfVariableResponseSchema
+  DeleteEnvironmentValueOfVariableRequestSchema,
+  DeleteEnvironmentValueOfVariableResponseSchema,
+  VariableVersionSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
+export type VariableVersion = z.infer<typeof VariableVersionSchema>
 
 export type CreateVariableRequest = z.infer<typeof CreateVariableRequestSchema>
 
@@ -29,6 +33,14 @@ export type UpdateVariableRequest = z.infer<typeof UpdateVariableRequestSchema>
 
 export type UpdateVariableResponse = z.infer<
   typeof UpdateVariableResponseSchema
+>
+
+export type DeleteEnvironmentValueOfVariableRequest = z.infer<
+  typeof DeleteEnvironmentValueOfVariableRequestSchema
+>
+
+export type DeleteEnvironmentValueOfVariableResponse = z.infer<
+  typeof DeleteEnvironmentValueOfVariableResponseSchema
 >
 
 export type RollBackVariableRequest = z.infer<
@@ -53,18 +65,18 @@ export type GetAllVariablesOfProjectResponse = z.infer<
   typeof GetAllVariablesOfProjectResponseSchema
 >
 
-export type GetAllVariablesOfEnvironmentRequest = z.infer<
-  typeof GetAllVariablesOfEnvironmentRequestSchema
->
-
-export type GetAllVariablesOfEnvironmentResponse = z.infer<
-  typeof GetAllVariablesOfEnvironmentResponseSchema
->
-
 export type GetRevisionsOfVariableRequest = z.infer<
   typeof GetRevisionsOfVariableRequestSchema
 >
 
 export type GetRevisionsOfVariableResponse = z.infer<
   typeof GetRevisionsOfVariableResponseSchema
+>
+
+export type GetAllVariablesOfEnvironmentRequest = z.infer<
+  typeof GetAllVariablesOfEnvironmentRequestSchema
+>
+
+export type GetAllVariablesOfEnvironmentResponse = z.infer<
+  typeof GetAllVariablesOfEnvironmentResponseSchema
 >

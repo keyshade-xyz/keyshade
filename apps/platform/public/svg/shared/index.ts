@@ -11,6 +11,23 @@ import MessageSVG from './message.svg'
 import VectorSVG from './vector.svg'
 import ErrorSVG from './Error.svg'
 import TrashSVG from './trash.svg'
+import CopySVG from './copy.svg'
+import CrownSVG from './crown.svg'
+import RolesSVG from './roles.svg'
+import CheckmarkSVG from './checkmark.svg'
+import TrashWhiteSVG from './trash-white.svg'
+import RollbackSVG from './rollback.svg'
+import MinusSquareSVG from './minus-square.svg'
+import EyeOpenSVG from './eye.svg'
+import EyeSlashSVG from './eye-slash.svg'
+import InfoSVG from './info.svg'
+import CloseCircleSVG from './close-circle.svg'
+import EditTwoSVG from './edit-2.svg'
+import MedalStarSVG from './medal-star.svg'
+import UserRemoveSVG from './user-remove.svg'
+import LockSVG from './lock.svg'
+import RegenerateSVG from './regenerate.svg'
+import TickCircleSVG from './tick-circle.svg'
 
 export {
   DropdownSVG,
@@ -25,5 +42,22 @@ export {
   MessageSVG,
   VectorSVG,
   ErrorSVG,
-  TrashSVG
+  TrashSVG,
+  CopySVG,
+  CrownSVG,
+  RolesSVG,
+  CheckmarkSVG,
+  EyeOpenSVG,
+  EyeSlashSVG,
+  InfoSVG,
+  TrashWhiteSVG,
+  RollbackSVG,
+  MinusSquareSVG,
+  CloseCircleSVG,
+  EditTwoSVG,
+  MedalStarSVG,
+  UserRemoveSVG,
+  LockSVG,
+  RegenerateSVG,
+  TickCircleSVG,
 }

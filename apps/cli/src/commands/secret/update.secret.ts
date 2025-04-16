@@ -46,10 +46,25 @@ export default class UpdateSecret extends BaseCommand {
       },
       {
         short: '-e',
-        long: '--entries [entries...]',
-        description: 'An array of values for the secret.'
+        long: '--entry [entries...]',
+        description:
+          'An array of values for the secret. If specified, should be in the form <environment slug>=<value>'
       }
     ]
+  }
+
+  getUsage(): string {
+    return `keyshade secret update <secret slug> [options]
+    
+  Update secret's name and note
+  keyshade secret update secret-1 --name "My Secret" --note "This is a secret"
+  
+  Update the rotation time of a secret
+  keyshade secret update secret-1 --rotate-after "24"
+  
+  Add more entries to a secret
+  keyshade secret update apikey-1 --entry "dev=super" "prod=secret"
+    `
   }
 
   canMakeHttpRequests(): boolean {
@@ -63,7 +78,7 @@ export default class UpdateSecret extends BaseCommand {
       await ControllerInstance.getInstance().secretController.updateSecret(
         {
           secretSlug,
-          ...options
+          ...(await this.parseInput(options))
         },
         this.headers
       )
@@ -71,10 +86,51 @@ export default class UpdateSecret extends BaseCommand {
     if (success) {
       Logger.info('Secret updated successfully')
     } else {
-      Logger.error(`Failed to update secret: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to update secret.\n' + JSON.stringify(error))
+      this.logError(error)
+    }
+  }
+
+  private async parseInput(options: any): Promise<{
+    name?: string
+    note?: string
+    rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
+    entries?: Array<{ value: string; environmentSlug: string }>
+  }> {
+    const { name, note, rotateAfter, entry: rawEntries } = options
+
+    const entries: Array<{ value: string; environmentSlug: string }> = []
+
+    if (rawEntries) {
+      for (const entry of rawEntries) {
+        // Check for entry format
+        if (!entry.match(/^[a-zA-Z0-9\-_+:[a-zA-Z0-9_\-!@#$%^&*()_+=[ ]+$/)) {
+          Logger.warn(
+            `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+          )
+        } else {
+          const [environmentSlug, value] = entry
+            .split('=')
+            .map((s: string) => s.trim())
+
+          if (!environmentSlug || !value) {
+            Logger.warn(
+              `Invalid entry format. Expected <environment slug>:<value> but got ${entry}`
+            )
+          }
+
+          entries.push({
+            value,
+            environmentSlug
+          })
+        }
       }
+    }
+
+    return {
+      name,
+      note,
+      rotateAfter,
+      entries: entries.length !== 0 ? entries : undefined
     }
   }
 }

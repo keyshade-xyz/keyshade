@@ -5,7 +5,6 @@ import ListVariable from '@/commands/variable/list.variable'
 import FetchVariableRevisions from '@/commands/variable/revisions.variable'
 import UpdateVariable from '@/commands/variable/update.variable'
 import RollbackVariable from '@/commands/variable/rollback.variable'
-import GetVariable from '@/commands/variable/get.variable'
 
 export default class VariableCommand extends BaseCommand {
   getName(): string {
@@ -23,8 +22,7 @@ export default class VariableCommand extends BaseCommand {
       new ListVariable(),
       new FetchVariableRevisions(),
       new UpdateVariable(),
-      new RollbackVariable(),
-      new GetVariable()
+      new RollbackVariable()
     ]
   }
 }

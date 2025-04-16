@@ -2,29 +2,43 @@
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
-import { useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import Cookies from 'js-cookie'
+import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
 import { GeistSansFont, NunitoSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { authEmailAtom } from '@/store'
+import { userAtom } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AuthDetailsPage(): React.JSX.Element {
-  const email = useAtomValue(authEmailAtom)
-  const [name, setName] = useState<string>('')
+  const [user, setUser] = useAtom(userAtom)
+
+  const [name, setName] = useState<string>(user?.name ?? '')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
   const router = useRouter()
 
+  const updateSelf = useHttp(() =>
+    ControllerInstance.getInstance().userController.updateSelf({
+      name,
+      isOnboardingFinished: true
+    })
+  )
+
   useEffect(() => {
-    if (email === '') {
+    if (!user?.email) {
       router.push('/auth')
     }
-  }, [email, router])
 
-  const handleDoneUpdateSubmit = async (userName: string): Promise<void> => {
-    const resultName = z.string().safeParse(userName)
+    setName(user?.name ?? '')
+  }, [router, user?.email, user?.name])
+
+  const handleDoneUpdateSubmit = async (): Promise<void> => {
+    const resultName = z.string().safeParse(name)
 
     if (!resultName.success) {
       setIsLoading(false)
@@ -32,25 +46,27 @@ export default function AuthDetailsPage(): React.JSX.Element {
     }
     setIsLoading(true)
 
+    toast.loading('Updating profile details...')
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
-        {
-          method: 'PUT',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name: userName, isOnboardingFinished: true })
-        }
-      )
-      if (response.status === 200) {
-        Cookies.set('isOnboardingFinished', 'true')
+      const { success, data } = await updateSelf()
+
+      if (success && data) {
+        toast.success('Profile details successfully updated')
+
+        Cookies.set(
+          'isOnboardingFinished',
+          data.isOnboardingFinished ? 'true' : 'false'
+        )
+
+        setUser(data)
+
+        /**
+         * redirect to dashboard after updating the profile details
+         */
         router.push('/')
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console -- we need to log the error
-      console.error(`Failed to update user details: ${error}`)
+    } finally {
+      toast.dismiss()
       setIsLoading(false)
     }
   }
@@ -83,27 +99,14 @@ export default function AuthDetailsPage(): React.JSX.Element {
                   setName(e.target.value)
                 }}
                 placeholder="Enter your name"
+                value={name}
               />
             </div>
-            {/* <div>
-              <span className={`${NunitoSansFont.className} text-sm`}>
-                Your Workspace Name
-              </span>
-              <Input placeholder="Enter your workspace name" />
-            </div> */}
-            {/* <div>
-              <span className={`${NunitoSansFont.className} text-sm`}>
-                Organization Mail
-              </span>
-              <Input placeholder="Enter your mail" type="email" />
-            </div> */}
           </div>
           <Button
             className="w-full"
             disabled={isLoading}
-            onClick={() => {
-              void handleDoneUpdateSubmit(name)
-            }}
+            onClick={handleDoneUpdateSubmit}
           >
             {isLoading ? <LoadingSVG className="w-10" /> : 'Done'}
           </Button>

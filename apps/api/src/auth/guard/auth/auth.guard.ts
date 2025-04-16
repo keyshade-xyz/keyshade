@@ -15,6 +15,8 @@ import { EnvSchema } from '@/common/env/env.schema'
 import { CacheService } from '@/cache/cache.service'
 import { toSHA256 } from '@/common/cryptography'
 import { getUserByEmailOrId } from '@/common/user'
+import { Request } from 'express'
+import { constructErrorBody } from '@/common/util'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -51,8 +53,8 @@ export class AuthGuard implements CanActivate {
       return true
     }
 
-    let user: AuthenticatedUserContext | null = null
-    const request = context.switchToHttp().getRequest()
+    let userContext: AuthenticatedUserContext | null = null
+    const request = context.switchToHttp().getRequest<Request>()
     const authType = this.getAuthType(request)
     const parsedEnv = EnvSchema.safeParse(process.env)
     let nodeEnv
@@ -71,15 +73,17 @@ export class AuthGuard implements CanActivate {
     // else we want to authenticate the user using the JWT token.
 
     if (authType !== 'API_KEY' && nodeEnv === 'e2e') {
-      const email = request.headers[X_E2E_USER_EMAIL]
+      const email = request.headers[X_E2E_USER_EMAIL] as string
       if (!email) {
         throw new ForbiddenException()
       }
+      const user = await getUserByEmailOrId(email, this.prisma)
 
-      user = await getUserByEmailOrId(email, this.prisma)
+      userContext = {
+        ...user,
+        ipAddress: request.ip
+      }
     } else {
-      const request = context.switchToHttp().getRequest()
-
       if (authType === 'API_KEY') {
         const apiKeyValue = this.extractApiKeyFromHeader(request)
         if (!apiKeyValue) {
@@ -106,12 +110,13 @@ export class AuthGuard implements CanActivate {
           }
         })
 
-        user = {
+        userContext = {
           ...apiKey.user,
-          defaultWorkspace
+          defaultWorkspace,
+          ipAddress: request.ip
         }
-        user.isAuthViaApiKey = true
-        user.apiKeyAuthorities = new Set(apiKey.authorities)
+        userContext.isAuthViaApiKey = true
+        userContext.apiKeyAuthorities = new Set(apiKey.authorities)
       } else if (authType === 'JWT') {
         const token = this.extractTokenFromCookies(request)
         if (!token) {
@@ -123,9 +128,18 @@ export class AuthGuard implements CanActivate {
           })
 
           const cachedUser = await this.cache.getUser(payload['id'])
-          if (cachedUser) user = cachedUser
-          else {
-            user = await getUserByEmailOrId(payload['id'], this.prisma)
+          if (cachedUser) {
+            userContext = {
+              ...cachedUser,
+              ipAddress: request.ip
+            }
+          } else {
+            const user = await getUserByEmailOrId(payload['id'], this.prisma)
+
+            userContext = {
+              ...user,
+              ipAddress: request.ip
+            }
           }
         } catch {
           throw new ForbiddenException()
@@ -136,13 +150,18 @@ export class AuthGuard implements CanActivate {
     }
 
     // If the user is not found, we throw a ForbiddenException.
-    if (!user) {
+    if (!userContext) {
       throw new ForbiddenException()
     }
 
     // If the user is not active, we throw an UnauthorizedException.
-    if (!user.isActive) {
-      throw new UnauthorizedException('User is not active')
+    if (!userContext.isActive) {
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'User not active',
+          'Please contact us if you think this is a mistake'
+        )
+      )
     }
 
     const onboardingBypassed =
@@ -152,12 +171,17 @@ export class AuthGuard implements CanActivate {
       ]) ?? false
 
     // If the onboarding is not finished, we throw an UnauthorizedException.
-    if (!onboardingBypassed && !user.isOnboardingFinished) {
-      throw new UnauthorizedException('Onboarding not finished')
+    if (!onboardingBypassed && !userContext.isOnboardingFinished) {
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Onboarding not finished',
+          'Please complete the onboarding'
+        )
+      )
     }
 
     // We attach the user to the request object.
-    request['user'] = user
+    request['user'] = userContext
     return true
   }
 

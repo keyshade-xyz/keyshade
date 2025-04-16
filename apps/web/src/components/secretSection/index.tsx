@@ -50,7 +50,7 @@ const cardData = [
 
 function SecrectSection(): React.JSX.Element {
   return (
-    <section className="mt-[10vw] flex flex-col items-center gap-y-[5rem] md:gap-y-[9.69rem]">
+    <section className="mt-[10vw] flex min-h-[50vh] w-full flex-col items-center gap-y-[5rem] p-6 sm:mt-[1vh] md:gap-y-[9.69rem] landscape:mt-[30vh]">
       <div className="text-brandBlue/80 flex flex-col gap-y-[0.81rem]">
         <h2
           className={`${GeistSans.className}  text-center text-4xl md:text-5xl`}
@@ -59,7 +59,6 @@ function SecrectSection(): React.JSX.Element {
         </h2>
         {/* <span>Built for your Seamless Secret Integration</span> */}
       </div>
-
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:gap-9">
         {cardData.map((card, index) => {
           const { heading, description, svg } = card
@@ -72,11 +71,11 @@ function SecrectSection(): React.JSX.Element {
                 <span className="text-base text-[#9394A1]">{description}</span>
               </div>
             </Card>
-          )
+          );
         })}
       </div>
     </section>
-  )
+  );
 }
 
 export default SecrectSection

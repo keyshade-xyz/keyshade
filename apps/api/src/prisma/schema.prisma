@@ -429,6 +429,7 @@ model Variable {
 model ApiKey {
   id          String      @id @default(cuid())
   name        String
+  preview     String      @default("ks_******")
   slug        String      @unique
   value       String      @unique
   expiresAt   DateTime?
@@ -456,15 +457,16 @@ model Otp {
 }
 
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  isFreeTier  Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  ownerId     String
-  isDefault   Boolean  @default(false)
-  icon        String?
+  id                      String   @id @default(cuid())
+  name                    String
+  slug                    String   @unique
+  isFreeTier              Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  ownerId                 String
+  isDefault               Boolean  @default(false)
+  icon                    String?
+  blacklistedIpAddresses  String[]
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?

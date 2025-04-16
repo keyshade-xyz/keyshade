@@ -71,10 +71,15 @@ const devSchema = z.object({
   SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
     'SENTRY_API_PROFILES_SAMPLE_RATE'
   ),
-  SENTRY_ENVIRONMENT: z.string().optional(),
+  SENTRY_API_ENVIRONMENT: z.string().optional(),
 
   SMTP_HOST: z.string(),
   SMTP_PORT: z.string(),
+  SMTP_SECURE: z
+    .string()
+    .default('false')
+    .transform((val) => val === 'true')
+    .pipe(z.boolean()),
   SMTP_EMAIL_ADDRESS: z.string().email(),
   SMTP_PASSWORD: z.string(),
   FROM_EMAIL: z
@@ -138,10 +143,15 @@ const prodSchema = z.object({
   SENTRY_API_PROFILES_SAMPLE_RATE: sampleRateSchema(
     'SENTRY_API_PROFILES_SAMPLE_RATE'
   ),
-  SENTRY_ENVIRONMENT: z.string().min(1),
+  SENTRY_API_ENVIRONMENT: z.string().min(1),
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.string().min(1),
+  SMTP_SECURE: z
+    .string()
+    .default('true')
+    .transform((val) => val === 'true')
+    .pipe(z.boolean()),
   SMTP_EMAIL_ADDRESS: z.string().email().min(5),
   SMTP_PASSWORD: z.string().min(1),
   FROM_EMAIL: z

@@ -24,6 +24,14 @@ export default class DeleteSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret delete <secret slug>
+
+  Delete a secret
+  keyshade secret delete secret-1
+    `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
@@ -42,10 +50,7 @@ export default class DeleteSecret extends BaseCommand {
     if (success) {
       Logger.info(`Secret ${secretSlug} deleted successfully!`)
     } else {
-      Logger.error(`Failed to delete secret: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to delete secret.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

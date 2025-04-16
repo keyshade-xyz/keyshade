@@ -1,10 +1,13 @@
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '@/commands/base.command'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+import { PAGINATION_OPTION } from '@/util/pagination-options'
+import formatDate from '@/util/date-formatter'
 
 export default class ListVariable extends BaseCommand {
   getName(): string {
@@ -13,6 +16,10 @@ export default class ListVariable extends BaseCommand {
 
   getDescription(): string {
     return 'List all variable under a project'
+  }
+
+  getOptions(): CommandOption[] {
+    return PAGINATION_OPTION
   }
 
   getArguments(): CommandArgument[] {
@@ -24,16 +31,28 @@ export default class ListVariable extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade variable list <project slug> [options]
+  
+  List all variables under a project
+  keyshade variable list project-1
+  
+  Pagination options
+  keyshade variable list project-1 --page 1 --limit 10
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
         {
-          projectSlug
+          projectSlug,
+          ...options
         },
         this.headers
       )
@@ -43,22 +62,23 @@ export default class ListVariable extends BaseCommand {
       if (variables.length > 0) {
         variables.forEach(({ variable, values }) => {
           Logger.info(`- ${variable.name} (${variable.slug})`)
-          values.forEach(({ environment, value }) => {
-            Logger.info(
-              `  |_ ${environment.name} (${environment.slug}): ${value}`
-            )
-          })
+          values.forEach(
+            ({ environment, value, version, createdOn, createdBy }) => {
+              Logger.info(
+                `  | ${environment.name} (${environment.slug}): ${value} (version ${version})`
+              )
+              Logger.info(
+                `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
+              )
+              Logger.info('')
+            }
+          )
         })
       } else {
         Logger.info('No variables found')
       }
     } else {
-      Logger.error(`Failed fetching variables: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report(
-          'Failed fetching variables for project.\n' + JSON.stringify(error)
-        )
-      }
+      this.logError(error)
     }
   }
 }

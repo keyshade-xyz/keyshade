@@ -11,7 +11,7 @@ put {
 }
 
 params:path {
-  api_key_slug: my-key-2
+  api_key_slug: test-key-0
 }
 
 auth:bearer {
@@ -20,18 +20,7 @@ auth:bearer {
 
 body:json {
   {
-      "authorities": [
-          "READ_API_KEY",
-          "READ_WORKSPACE",
-          "READ_PROJECT",
-          "READ_ENVIRONMENT",
-          "READ_VARIABLE",
-          "READ_SECRET",
-          "CREATE_WORKSPACE",
-          "UPDATE_WORKSPACE",
-          "DELETE_WORKSPACE",
-          "WORKSPACE_ADMIN"
-      ]
+    "expiresAfter": "never"
   }
 }
 

@@ -37,7 +37,9 @@ function startAPI(): Promise<void> {
         DATABASE_URL: 'postgresql://prisma:prisma@localhost:5432/tests',
         REDIS_URL: 'redis://localhost:6379',
         JWT_SECRET: 'secret',
-        NODE_ENV: 'e2e'
+        NODE_ENV: 'e2e',
+        DOMAIN: 'localhost',
+        API_PORT: '4200'
       }
     })
 

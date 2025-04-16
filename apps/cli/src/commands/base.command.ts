@@ -37,6 +37,7 @@ export default abstract class BaseCommand {
     const command = program
       .command(this.getName())
       .description(this.getDescription())
+      .usage(this.getUsage())
       .action(async (...data) => {
         try {
           const globalOptions = program.optsWithGlobals()
@@ -147,6 +148,52 @@ export default abstract class BaseCommand {
    */
   getSubCommands(): BaseCommand[] {
     return []
+  }
+
+  /**
+   * Returns a string representing the usage information for the command.
+   * This method should be overridden by subclasses to provide specific usage
+   * instructions for each command.
+   */
+  getUsage(): string {
+    return ''
+  }
+
+  /**
+   * Logs the error
+   * @param message The error message
+   * @param error The error object containing details about the error
+   */
+  protected logError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }): void {
+    const { header, body } = this.extractError(error)
+
+    Logger.error(`${header}: ${body}`)
+    if (this.metricsEnabled && error?.statusCode === 500) {
+      Logger.report(`${header}.\n` + JSON.stringify(error))
+    }
+  }
+
+  private extractError(error: {
+    message: string
+    error: string
+    statusCode: number
+  }) {
+    try {
+      const { header, body } = JSON.parse(error.message) as {
+        header: string
+        body: string
+      }
+      return { header, body }
+    } catch {
+      return {
+        header: 'Faced an error processing the request',
+        body: error.message
+      }
+    }
   }
 
   private async setGlobalContextFields(

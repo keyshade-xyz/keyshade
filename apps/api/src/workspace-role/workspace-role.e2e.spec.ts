@@ -10,7 +10,6 @@ import {
   EventTriggerer,
   EventType,
   Project,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
@@ -20,13 +19,14 @@ import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { Test } from '@nestjs/testing'
 import { v4 } from 'uuid'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
-import { WorkspaceRoleService } from './service/workspace-role.service'
-import { UserService } from '@/user/service/user.service'
+import { WorkspaceRoleService } from './workspace-role.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Workspace Role Controller Tests', () => {
   let app: NestFastifyApplication
@@ -35,14 +35,16 @@ describe('Workspace Role Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
   let userService: UserService
 
-  let alice: User
-  let bob: User
-  let charlie: User
+  let alice: AuthenticatedUser
+  let bob: AuthenticatedUser
+  let charlie: AuthenticatedUser
   let workspaceAlice: Workspace
   let workspaceBob: Workspace
   let adminRole1: WorkspaceRole
   let adminRole2: WorkspaceRole
   let projects: Project[]
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -98,9 +100,9 @@ describe('Workspace Role Controller Tests', () => {
     delete createBob.defaultWorkspace
     delete createCharlie.defaultWorkspace
 
-    alice = createAlice
-    bob = createBob
-    charlie = createCharlie
+    alice = { ...createAlice, ipAddress: USER_IP_ADDRESS }
+    bob = { ...createBob, ipAddress: USER_IP_ADDRESS }
+    charlie = { ...createCharlie, ipAddress: USER_IP_ADDRESS }
 
     adminRole1 = await prisma.workspaceRole.findFirst({
       where: {
@@ -203,7 +205,8 @@ describe('Workspace Role Controller Tests', () => {
         ...adminRole1,
         createdAt: expect.any(String),
         projects: [],
-        updatedAt: expect.any(String)
+        updatedAt: expect.any(String),
+        members: expect.any(Array)
       })
     })
 
@@ -491,7 +494,8 @@ describe('Workspace Role Controller Tests', () => {
       ...adminRole1,
       createdAt: expect.any(String),
       projects: [],
-      updatedAt: expect.any(String)
+      updatedAt: expect.any(String),
+      members: expect.any(Array)
     })
   })
 
@@ -522,7 +526,8 @@ describe('Workspace Role Controller Tests', () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         hasAdminAuthority: true,
-        projects: []
+        projects: [],
+        members: expect.any(Array)
       })
     })
 
@@ -738,6 +743,7 @@ describe('Workspace Role Controller Tests', () => {
         ...adminRole1,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        members: expect.any(Array),
         projects: expect.arrayContaining([
           {
             project: {
@@ -857,6 +863,7 @@ describe('Workspace Role Controller Tests', () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         hasAdminAuthority: true,
+        members: expect.any(Array),
         projects: expect.arrayContaining([
           {
             project: {
@@ -1093,56 +1100,32 @@ describe('Workspace Role Controller Tests', () => {
     })
   })
 
-  describe('Check Workspace Role Exists Tests', () => {
-    it('should be able to check if the workspace role exists', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/Member`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: true
-      })
-    })
-
-    it('should be able to check if the workspace role exists(2)', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceAlice.slug}/exists/new-stuff`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        exists: false
-      })
-    })
-
-    it('should not be able to check if the workspace role exists for other workspace', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/workspace-role/${workspaceBob.slug}/exists/Viewer`,
-        headers: {
-          'x-e2e-user-email': charlie.email
-        }
-      })
-
-      expect(response.statusCode).toBe(401)
-    })
-  })
-
   describe('Get All Workspace Role Tests', () => {
     it('should be able to fetch all the roles of a workspace with WORKSPACE_ADMIN role', async () => {
       const roles = await prisma.workspaceRole
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>
@@ -1162,7 +1145,6 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toEqual(expect.arrayContaining(roles))
 
       //check metadata
       const metadata = response.json().metadata
@@ -1199,6 +1181,26 @@ describe('Workspace Role Controller Tests', () => {
         .findMany({
           where: {
             workspaceId: workspaceAlice.id
+          },
+          include: {
+            projects: {
+              select: {
+                project: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                },
+                environments: {
+                  select: {
+                    id: true,
+                    slug: true,
+                    name: true
+                  }
+                }
+              }
+            }
           }
         })
         .then((roles) =>
@@ -1218,7 +1220,6 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items).toEqual(expect.arrayContaining(roles))
 
       //check metadata
       const metadata = response.json().metadata

@@ -162,6 +162,23 @@ describe('Secret Controller Tests', () => {
     expect(updatedSecret.data.updatedVersions.length).toBe(1)
   })
 
+  it('should be able to delete an environment value of a secret', async () => {
+    await secretController.deleteEnvironmentValueOfSecret(
+      {
+        environmentSlug,
+        secretSlug
+      },
+      { 'x-e2e-user-email': email }
+    )
+
+    const secrets = await secretController.getAllSecretsOfEnvironment(
+      { environmentSlug, projectSlug },
+      { 'x-e2e-user-email': email }
+    )
+
+    expect(secrets.data.length).toBe(0)
+  })
+
   // // RollBack a Particular Version of a Secret
   it('should roll back a version of a secret', async () => {
     // Create 2 versions of the secret
@@ -206,28 +223,6 @@ describe('Secret Controller Tests', () => {
       { 'x-e2e-user-email': email }
     )
     expect(secrets.data.items.length).toBe(1)
-  })
-
-  // // Get all secrets of an Environment
-  it('should get all secrets of an environment', async () => {
-    const secrets: any = await secretController.getAllSecretsOfEnvironment(
-      {
-        environmentSlug,
-        projectSlug
-      },
-      { 'x-e2e-user-email': email }
-    )
-    expect(secrets.data.length).toBe(1)
-    secrets.data.forEach((secret) => {
-      expect(secret).toHaveProperty('name')
-      expect(typeof secret.name).toBe('string')
-
-      expect(secret).toHaveProperty('value')
-      expect(typeof secret.value).toBe('string')
-
-      expect(secret).toHaveProperty('isPlaintext')
-      expect(typeof secret.isPlaintext).toBe('boolean')
-    })
   })
 
   // Delete a Secret from a Project

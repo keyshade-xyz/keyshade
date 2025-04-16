@@ -4,7 +4,6 @@ import {
   Injectable,
   Logger,
   LoggerService,
-  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
@@ -14,7 +13,7 @@ import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
 import { CacheService } from '@/cache/cache.service'
-import { generateOtp } from '@/common/util'
+import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
@@ -38,9 +37,16 @@ export class AuthService {
    * @param email The email address to send the login code to
    */
   async sendOtp(email: string): Promise<void> {
+    this.logger.log(`Attempting to send login code to ${email}`)
+
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
-      throw new BadRequestException('Please enter a valid email address')
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid email address',
+          'Please enter a valid email address'
+        )
+      )
     }
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
@@ -56,6 +62,18 @@ export class AuthService {
    * @param email The email address to resend the login code to
    */
   async resendOtp(email: string): Promise<void> {
+    this.logger.log(`Attempting to resend login code to ${email}`)
+
+    if (!email || !email.includes('@')) {
+      this.logger.error(`Invalid email address: ${email}`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid email address',
+          'Please enter a valid email address'
+        )
+      )
+    }
+
     const user = await getUserByEmailOrId(email, this.prisma)
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
@@ -74,12 +92,11 @@ export class AuthService {
     email: string,
     otp: string
   ): Promise<UserAuthenticatedResponse> {
-    const user = await getUserByEmailOrId(email, this.prisma)
-    if (!user) {
-      this.logger.error(`User not found: ${email}`)
-      throw new NotFoundException('User not found')
-    }
+    this.logger.log(`Validating login code for ${email}`)
 
+    const user = await getUserByEmailOrId(email, this.prisma)
+
+    this.logger.log(`Checking if OTP is valid for ${email}`)
     const isOtpValid =
       (await this.prisma.otp.findUnique({
         where: {
@@ -95,9 +112,16 @@ export class AuthService {
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
-      throw new UnauthorizedException('Invalid login code')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'Please enter a valid 6 digit alphanumeric OTP.'
+        )
+      )
     }
+    this.logger.log(`OTP is valid for ${email}`)
 
+    this.logger.log(`Deleting OTP for ${email}`)
     await this.prisma.otp.delete({
       where: {
         userCode: {
@@ -106,6 +130,8 @@ export class AuthService {
         }
       }
     })
+    this.logger.log(`OTP deleted for ${email}`)
+
     this.cache.setUser(user) // Save user to cache
     this.logger.log(`User logged in: ${email}`)
 
@@ -132,6 +158,10 @@ export class AuthService {
     profilePictureUrl: string,
     oauthProvider: AuthProvider
   ): Promise<UserAuthenticatedResponse> {
+    this.logger.log(
+      `Handling OAuth login. Email: ${email}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}, OAuthProvider: ${oauthProvider}`
+    )
+
     // We need to create the user if it doesn't exist yet
     const user = await this.createUserIfNotExists(
       email,
@@ -141,6 +171,9 @@ export class AuthService {
     )
 
     const token = await this.generateToken(user.id)
+
+    this.cache.setUser(user) // Save user to cache
+    this.logger.log(`User logged in: ${email}`)
 
     return {
       ...user,
@@ -155,6 +188,7 @@ export class AuthService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
+    this.logger.log('Cleaning up expired OTPs...')
     try {
       const timeNow = new Date()
       await this.prisma.otp.deleteMany({
@@ -187,8 +221,13 @@ export class AuthService {
     name?: string,
     profilePictureUrl?: string
   ) {
+    this.logger.log(
+      `Creating user if not exists. Email: ${email}, AuthProvider: ${authProvider}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}`
+    )
+
     let user: UserWithWorkspace | null
 
+    this.logger.log(`Checking if user exists with email: ${email}`)
     try {
       user = await getUserByEmailOrId(email, this.prisma)
     } catch (ignored) {}
@@ -226,6 +265,7 @@ export class AuthService {
    * @param res The response object
    */
   async logout(res: Response): Promise<void> {
+    this.logger.log('Logging out user and clearing token cookie.')
     res.clearCookie('token', {
       domain: process.env.DOMAIN ?? 'localhost'
     })

@@ -24,6 +24,14 @@ export default class DeleteVariable extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade variable delete <variable slug>
+
+  Delete a variable
+  keyshade variable delete variable-1
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
@@ -42,10 +50,7 @@ export default class DeleteVariable extends BaseCommand {
     if (success) {
       Logger.info(`Variable ${variableSlug} deleted successfully!`)
     } else {
-      Logger.error(`Failed to delete variable: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to delete variable.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

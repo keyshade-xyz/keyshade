@@ -58,6 +58,11 @@ jobs:
         run: |
           pnpm i
 
+      - name: Build deps
+        run: |
+          pnpm build:schema
+          pnpm build:api-client
+
       - name: Lint
         run: |
           pnpm run lint:platform

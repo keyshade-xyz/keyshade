@@ -41,6 +41,14 @@ export default class RollbackSecret extends BaseCommand {
     ]
   }
 
+  getUsage(): string {
+    return `keyshade secret rollback <secret slug> [options]
+
+  Rollback a secret
+  keyshade secret rollback secret-1 --version 2 --environment dev
+  `
+  }
+
   canMakeHttpRequests(): boolean {
     return true
   }
@@ -62,10 +70,7 @@ export default class RollbackSecret extends BaseCommand {
     if (success) {
       Logger.info(`Secret rolled back by ${data.count} versions successfully.`)
     } else {
-      Logger.error(`Failed to rollback secret: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to rollback secret.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 
@@ -74,6 +79,16 @@ export default class RollbackSecret extends BaseCommand {
     version: number
   }> {
     const { environment, version } = options
+
+    if (!environment) {
+      Logger.error('Environment slug is required')
+      process.exit(1)
+    }
+
+    if (!version) {
+      Logger.error('Version is required')
+      process.exit(1)
+    }
 
     return {
       environment,

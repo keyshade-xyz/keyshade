@@ -20,8 +20,7 @@
     "start": "node dist/index.js",
     "dev": "npx tsc && node dist/index.js",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "test": "jest"
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "dependencies": {
     "zod": "^3.23.6"

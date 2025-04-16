@@ -43,6 +43,34 @@ To install the dependencies, run the following command:
 pnpm install
 ```
 
+## Building all the required packages
+
+To make sure all the things work fine, build all these packages by running the following commands:
+
+- Build the secret-scan package:
+
+```bash
+pnpm build:secret-scan
+```
+
+- Build the schema:
+
+```bash
+pnpm build:schema
+```
+
+- Build the api-client:
+
+```bash
+pnpm build:api-client
+```
+
+Or, want to save your precious time? Run all three commands in one go by running this command:
+
+```bash
+pnpm build:packages
+```
+
 ## Installing Turbo
 
 The final step involves installing our monorepo management tool. We have transitioned to using Turbo to streamline our development process. To install Turbo, run the following command:

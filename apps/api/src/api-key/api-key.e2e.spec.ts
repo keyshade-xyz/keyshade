@@ -8,20 +8,26 @@ import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { AppModule } from '@/app/app.module'
 import { Test } from '@nestjs/testing'
-import { ApiKey, Authority, User } from '@prisma/client'
-import { ApiKeyService } from './service/api-key.service'
+import { ApiKey, Authority } from '@prisma/client'
+import { ApiKeyService } from './api-key.service'
+import { UserModule } from '@/user/user.module'
+import { UserService } from '@/user/user.service'
+import { AuthenticatedUser } from '@/user/user.types'
 
 describe('Api Key Role Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
   let apiKeyService: ApiKeyService
+  let userService: UserService
 
-  let user: User
+  let user: AuthenticatedUser
   let apiKey: ApiKey
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, ApiKeyModule]
+      imports: [AppModule, ApiKeyModule, UserModule]
     })
       .overrideProvider(MAIL_SERVICE)
       .useClass(MockMailService)
@@ -31,21 +37,22 @@ describe('Api Key Role Controller Tests', () => {
     )
     prisma = moduleRef.get(PrismaService)
     apiKeyService = moduleRef.get(ApiKeyService)
+    userService = moduleRef.get(UserService)
 
     await app.init()
     await app.getHttpAdapter().getInstance().ready()
   })
 
   beforeEach(async () => {
-    user = await prisma.user.create({
-      data: {
-        email: 'john@keyshade.xyz',
-        name: 'John',
-        isActive: true,
-        isAdmin: false,
-        isOnboardingFinished: true
-      }
+    const createUser = await userService.createUser({
+      email: 'johndoe@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
     })
+
+    delete createUser.defaultWorkspace
+
+    user = { ...createUser, ipAddress: USER_IP_ADDRESS }
 
     apiKey = await apiKeyService.createApiKey(user, {
       name: 'Test Key',
@@ -85,7 +92,12 @@ describe('Api Key Role Controller Tests', () => {
       expect(response.json().name).toBe('Test')
       expect(response.json().slug).toBeDefined()
       expect(response.json().value).toMatch(/^ks_*/)
+      expect(response.json().preview).toMatch(/^ks_*/)
       expect(response.json().authorities).toEqual(['READ_API_KEY'])
+
+      const last4CharsOfValue = response.json().value.slice(-4)
+      const last4CharsOfPreview = response.json().preview.slice(-4)
+      expect(last4CharsOfValue).toBe(last4CharsOfPreview)
 
       const apiKey = await prisma.apiKey.findUnique({
         where: {
@@ -254,6 +266,7 @@ describe('Api Key Role Controller Tests', () => {
         id: apiKey.id,
         name: 'Test Key',
         slug: apiKey.slug,
+        preview: apiKey.preview,
         authorities: ['READ_API_KEY', 'CREATE_ENVIRONMENT'],
         expiresAt: expect.any(String),
         createdAt: expect.any(String),

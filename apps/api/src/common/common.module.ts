@@ -1,11 +1,11 @@
 import { Global, Module } from '@nestjs/common'
-import { AuthorityCheckerService } from './authority-checker.service'
 import { CustomLoggerService } from './logger.service'
+import { TierLimitService } from './tier-limit.service'
 
 @Global()
 @Module({
   imports: [],
-  providers: [AuthorityCheckerService, CustomLoggerService],
-  exports: [AuthorityCheckerService, CustomLoggerService]
+  providers: [CustomLoggerService, TierLimitService],
+  exports: [CustomLoggerService, TierLimitService]
 })
 export class CommonModule {}

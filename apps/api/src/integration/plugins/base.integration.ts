@@ -1,6 +1,7 @@
 import { EventType, IntegrationType } from '@prisma/client'
 import { IntegrationMetadata, IntegrationEventData } from '../integration.types'
 import { BadRequestException } from '@nestjs/common'
+import { constructErrorBody } from '@/common/util'
 
 /**
  * The integration abstract class that every integration must extend.
@@ -35,7 +36,10 @@ export abstract class BaseIntegration {
     events.forEach((event) => {
       if (!this.getPermittedEvents().has(event)) {
         throw new BadRequestException(
-          `Event ${event} is not permitted for this ${this.integrationType.toString()} integration`
+          constructErrorBody(
+            'Event not supported by integration',
+            `Event ${event} is not permitted for ${this.integrationType.toString()} integration`
+          )
         )
       }
     })
@@ -46,7 +50,10 @@ export abstract class BaseIntegration {
     this.getRequiredMetadataParameters().forEach((param) => {
       if (!metadata[param] || metadata[param] === '') {
         throw new BadRequestException(
-          `Missing required parameter ${param} for ${this.integrationType.toString()} integration`
+          constructErrorBody(
+            'Missing metadata parameter',
+            `Missing required parameter ${param} for ${this.integrationType.toString()} integration`
+          )
         )
       }
     })

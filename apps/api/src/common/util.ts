@@ -1,7 +1,9 @@
 import { UserAuthenticatedResponse } from '@/auth/auth.types'
 import { UserWithWorkspace } from '@/user/user.types'
+import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
+import * as crypto from 'crypto'
 
 /**
  * Limits the given limit to a maximum number of items per page.
@@ -51,30 +53,47 @@ export const generateOtp = async (
   userId: User['id'],
   prisma: PrismaClient
 ): Promise<Otp> => {
-  const otp = await prisma.otp.upsert({
-    where: {
-      userId: userId
-    },
-    update: {
-      code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
-        .toString()
-        .substring(0, 6),
-      expiresAt: new Date(new Date().getTime() + OTP_EXPIRY)
-    },
-    create: {
-      code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
-        .toString()
-        .substring(0, 6),
-      expiresAt: new Date(new Date().getTime() + OTP_EXPIRY),
-      user: {
-        connect: {
-          email
+  const logger = new Logger('generateOtp')
+  try {
+    logger.log(`Generating OTP for user ${userId}`)
+
+    const otp = await prisma.otp.upsert({
+      where: {
+        userId: userId
+      },
+      update: {
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
+          .toString()
+          .substring(0, 6),
+        expiresAt: new Date(new Date().getTime() + OTP_EXPIRY)
+      },
+      create: {
+        code: BigInt(`0x${crypto.randomUUID().replace(/-/g, '')}`)
+          .toString()
+          .substring(0, 6),
+        expiresAt: new Date(new Date().getTime() + OTP_EXPIRY),
+        user: {
+          connect: {
+            email: email.toLowerCase()
+          }
         }
       }
-    }
-  })
+    })
 
-  return otp
+    logger.log(
+      `Generated OTP for user ${userId}. OTP ${otp.id} is valid until ${otp.expiresAt}`
+    )
+
+    return otp
+  } catch (error) {
+    logger.error(`Error generating OTP for user ${userId}`)
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Error generating OTP',
+        'An error occurred while generating the OTP.'
+      )
+    )
+  }
 }
 
 /**
@@ -97,10 +116,25 @@ export const excludeFields = <T, K extends keyof T>(
  * @param hours The number of hours to add to the current date
  * @returns The new date with the given number of hours added, or undefined if the hours is 'never'
  */
-export const addHoursToDate = (hours?: string | number): Date | undefined => {
-  if (!hours || hours === 'never') return undefined
+export const addHoursToDate = (hours?: string | number): Date | null => {
+  if (!hours || hours === 'never') return null
 
   const date = new Date()
   date.setHours(date.getHours() + +hours)
   return date
+}
+
+/**
+ * Constructs a JSON string representing an error body with a header and body.
+ *
+ * @param header - The header for the error message.
+ * @param body - The body of the error message.
+ * @returns A JSON string containing the header and body.
+ */
+
+export const constructErrorBody = (header: string, body: string): string => {
+  return JSON.stringify({
+    header,
+    body
+  })
 }

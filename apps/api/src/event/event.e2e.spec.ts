@@ -9,7 +9,6 @@ import {
   EventType,
   Project,
   ProjectAccessLevel,
-  User,
   Variable,
   Workspace
 } from '@prisma/client'
@@ -20,19 +19,22 @@ import { AppModule } from '@/app/app.module'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { EventModule } from './event.module'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
-import { ProjectService } from '@/project/service/project.service'
-import { SecretService } from '@/secret/service/secret.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
+import { ProjectService } from '@/project/project.service'
+import { SecretService } from '@/secret/secret.service'
 import { SecretModule } from '@/secret/secret.module'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
-import { VariableService } from '@/variable/service/variable.service'
+import { VariableService } from '@/variable/variable.service'
 import { VariableModule } from '@/variable/variable.module'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { createEvent } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
+import { UserModule } from '@/user/user.module'
+import { UserService } from '@/user/user.service'
 
 describe('Event Controller Tests', () => {
   let app: NestFastifyApplication
@@ -44,8 +46,11 @@ describe('Event Controller Tests', () => {
   let projectService: ProjectService
   let secretService: SecretService
   let variableService: VariableService
+  let userService: UserService
 
-  let user: User
+  let user: AuthenticatedUser
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -57,7 +62,8 @@ describe('Event Controller Tests', () => {
         SecretModule,
         ProjectModule,
         EnvironmentModule,
-        VariableModule
+        VariableModule,
+        UserModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -74,6 +80,7 @@ describe('Event Controller Tests', () => {
     projectService = moduleRef.get(ProjectService)
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
+    userService = moduleRef.get(UserService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -82,13 +89,13 @@ describe('Event Controller Tests', () => {
   })
 
   beforeEach(async () => {
-    user = await prisma.user.create({
-      data: {
-        email: 'johndoe@keyshade.xyz',
-        name: 'John Doe',
-        isOnboardingFinished: true
-      }
+    const createUser = await userService.createUser({
+      email: 'johndoe@keyshade.xyz',
+      name: 'John Doe',
+      isOnboardingFinished: true
     })
+
+    user = { ...createUser, ipAddress: USER_IP_ADDRESS }
   })
 
   it('should be defined', async () => {

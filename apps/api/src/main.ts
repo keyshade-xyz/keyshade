@@ -13,37 +13,37 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { RedisIoAdapter } from './socket/redis.adapter'
 import { CustomLoggerService } from './common/logger.service'
 import cookieParser from 'cookie-parser'
+import { SentryExceptionFilter } from './common/sentry-exception.filter'
 
-export const sentryEnv = process.env.SENTRY_ENV || 'production'
+export const sentryEnv = process.env.SENTRY_API_ENVIRONMENT || 'production'
 
 async function initializeSentry() {
   const logger = new CustomLoggerService()
 
+  logger.log('Initializing Sentry...')
   if (!process.env.SENTRY_API_DSN) {
     logger.warn('Missing Sentry DSN. Skipping initialization...')
     return
   }
 
-  const enabled = sentryEnv !== 'test' && sentryEnv !== 'e2e'
+  const sentryConfig = {
+    dsn: process.env.SENTRY_API_DSN,
+    enabled: sentryEnv !== 'test' && sentryEnv !== 'e2e',
+    environment: sentryEnv,
+    tracesSampleRate: process.env.SENTRY_API_TRACES_SAMPLE_RATE,
+    profilesSampleRate: process.env.SENTRY_API_PROFILES_SAMPLE_RATE,
+    integrations: [
+      nodeProfilingIntegration(),
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Express()
+    ],
+    debug: false
+  }
   try {
-    Sentry.init({
-      dsn: process.env.SENTRY_API_DSN,
-      enabled,
-      environment: sentryEnv,
-      tracesSampleRate: process.env.SENTRY_API_TRACES_SAMPLE_RATE,
-      profilesSampleRate: process.env.SENTRY_API_PROFILES_SAMPLE_RATE,
-      integrations: [nodeProfilingIntegration()],
-      debug: false
-    })
+    Sentry.init(sentryConfig)
 
     logger.log('Sentry initialized with the following configuration:')
-    logger.log(`Sentry Environment: ${sentryEnv}`)
-    logger.log(
-      `Sentry Traces Sample Rate: ${process.env.SENTRY_TRACES_SAMPLE_RATE}`
-    )
-    logger.log(
-      `Sentry Profiles Sample Rate: ${process.env.SENTRY_PROFILES_SAMPLE_RATE}`
-    )
+    logger.log(JSON.stringify(sentryConfig, null, 2))
   } catch (error) {
     logger.error(`Failed to initialize Sentry: ${error.message}`)
     Sentry.captureException(error)
@@ -52,12 +52,15 @@ async function initializeSentry() {
 
 async function initializeNestApp() {
   const logger = new CustomLoggerService()
+
+  logger.log('Initializing Nest App...')
   const app = await NestFactory.create(AppModule, {
     logger
   })
   app.use(Sentry.Handlers.requestHandler())
   app.use(Sentry.Handlers.tracingHandler())
 
+  logger.log('Connecting to Redis...')
   const redisIpoAdapter = new RedisIoAdapter(app)
   await redisIpoAdapter.connectToRedis()
   app.useWebSocketAdapter(redisIpoAdapter)
@@ -85,9 +88,10 @@ async function initializeNestApp() {
   const domain = process.env.DOMAIN
   const isHttp = domain.includes('localhost')
   app.use(Sentry.Handlers.errorHandler())
+  app.useGlobalFilters(new SentryExceptionFilter())
   await app.listen(port)
   logger.log(
-    `🚀 Application is running on: ${isHttp}://${domain}:${port}/${globalPrefix}`
+    `🚀 Application is running on: ${isHttp ? 'http' : 'https'}://${domain}:${port}/${globalPrefix}`
   )
 }
 
