@@ -1,3 +1,13 @@
+## [2.14.0-stage.26](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.25...v2.14.0-stage.26) (2025-04-17)
+
+### 🚀 Features
+
+* **platform:** Edit Roles ([#862](https://github.com/keyshade-xyz/keyshade/issues/862)) ([24985cc](https://github.com/keyshade-xyz/keyshade/commit/24985cc6bd9de04c0b199cffb14e2c1008542dcd))
+
+### 🔧 Miscellaneous Chores
+
+* **docker:** Add self-hosted Sentry support to docker-compose ([#860](https://github.com/keyshade-xyz/keyshade/issues/860)) ([163a365](https://github.com/keyshade-xyz/keyshade/commit/163a3656b8177af4deda1d5f9b3b9dbe99c3d082))
+
 ## [2.14.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.24...v2.14.0-stage.25) (2025-04-14)
 
 ### 🚀 Features
