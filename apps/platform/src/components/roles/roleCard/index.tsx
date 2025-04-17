@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { deleteRoleOpenAtom, selectedRoleAtom } from '@/store'
+import { deleteRoleOpenAtom, editRoleOpenAtom, selectedRoleAtom } from '@/store'
 
 interface RoleListItemProps {
   role: WorkspaceRole
@@ -61,11 +61,17 @@ export default function RoleCard({
 }: RoleListItemProps): React.JSX.Element {
   const setSelectedRole = useSetAtom(selectedRoleAtom)
   const setIsDeleteRoleOpen = useSetAtom(deleteRoleOpenAtom)
+  const setIsEditRoleOpen = useSetAtom(editRoleOpenAtom)
 
   const handleDeleteRole = useCallback(() => {
     setSelectedRole(role)
     setIsDeleteRoleOpen(true)
   }, [role, setIsDeleteRoleOpen, setSelectedRole])
+
+  const handleEditRole = useCallback(() => {
+    setSelectedRole(role)
+    setIsEditRoleOpen(true)
+  }, [role, setIsEditRoleOpen, setSelectedRole])
 
   const copySlugToClipboard = useCallback(() => {
     navigator.clipboard.writeText(role.slug)
@@ -185,7 +191,7 @@ export default function RoleCard({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <button type="button">
+        <button onClick={handleEditRole} type="button">
           <Pen size={20} />
         </button>
 
