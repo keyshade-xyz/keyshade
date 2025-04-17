@@ -19,7 +19,7 @@ export const BaseProjectSchema = z.object({
   pendingCreation: z.boolean(),
   isForked: z.boolean(),
   lastUpdatedById: z.string(),
-  lastUpdateBy: z.object({
+  lastUpdatedBy: z.object({
     id: z.string(),
     name: z.string(),
     profilePictureUrl: z.string().nullable()
