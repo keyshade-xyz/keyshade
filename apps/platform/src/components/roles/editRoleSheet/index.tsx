@@ -128,21 +128,23 @@ export default function EditRoleSheet() {
     }
 
     setIsLoading(true)
-    toast.loading('Creating role...')
+    toast.loading('Updating role...')
     try {
       const { success, data } = await updateRole()
 
       if (success && data) {
-        toast.success('Role editd successfully', {
+        toast.success('Role updated successfully', {
           description: (
             <p className="text-xs text-green-300">
-              You editd a new environment
+              You have successfully updated the role.
             </p>
           )
         })
 
         // Adding the role to the store
-        setRoles((prev) => [...prev, data])
+        setRoles((prev) =>
+          prev.map((role) => (role.id === data.id ? data : role))
+        )
         setSelectedRole(data)
         setIsEditRolesOpen(false)
       }
