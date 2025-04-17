@@ -1,3 +1,33 @@
+## [2.14.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.24...v2.14.0-stage.25) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Members Tab ([#846](https://github.com/keyshade-xyz/keyshade/issues/846)) ([edb88b5](https://github.com/keyshade-xyz/keyshade/commit/edb88b5d05449280f32eafbffda656bc6e4f4592))
+
+## [2.14.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.23...v2.14.0-stage.24) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Paginated List Component ([#852](https://github.com/keyshade-xyz/keyshade/issues/852)) ([41d2266](https://github.com/keyshade-xyz/keyshade/commit/41d2266049b71af8e9784329cdf151e3937dc83a))
+
+## [2.14.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.22...v2.14.0-stage.23) (2025-04-11)
+
+### 🚀 Features
+
+* **platform:** Project overview tab ([#843](https://github.com/keyshade-xyz/keyshade/issues/843)) ([1c3b198](https://github.com/keyshade-xyz/keyshade/commit/1c3b198467de4117b86739dc3af2e631d3a44a2f))
+
+## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
+
+### 🚀 Features
+
+* **cli:** Resend workspace invitation command ([#854](https://github.com/keyshade-xyz/keyshade/issues/854)) ([4c716ac](https://github.com/keyshade-xyz/keyshade/commit/4c716ac7399f45e7ea8958f75b4efa3cf01044e5))
+
+## [2.14.0-stage.21](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.20...v2.14.0-stage.21) (2025-04-05)
+
+### 🚀 Features
+
+* **platform:** Delete role functionality ([#856](https://github.com/keyshade-xyz/keyshade/issues/856)) ([c2010fa](https://github.com/keyshade-xyz/keyshade/commit/c2010fa926e1faafd4053752b15962c299fcfcf6))
+
 ## [2.14.0-stage.20](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.19...v2.14.0-stage.20) (2025-04-05)
 
 ### 🚀 Features
