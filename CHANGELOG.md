@@ -1,3 +1,9 @@
+## [2.14.0-stage.27](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.26...v2.14.0-stage.27) (2025-04-17)
+
+### 🐛 Bug Fixes
+
+* **api:** Prisma crashing ([21489f0](https://github.com/keyshade-xyz/keyshade/commit/21489f0b4962222f3fbea6c41972ae8e4b256057))
+
 ## [2.14.0-stage.26](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.25...v2.14.0-stage.26) (2025-04-17)
 
 ### 🚀 Features
