@@ -10,6 +10,7 @@ import { render } from '@react-email/render'
 import WorkspaceInvitationEmail from '../emails/workspace-invitation'
 import OTPEmailTemplate from '../emails/otp-email-template'
 import { constructErrorBody } from '@/common/util'
+import WelcomeEmail from '../emails/welcome-email'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -73,23 +74,15 @@ export class MailService implements IMailService {
 
     await this.sendEmail(email, subject, body)
   }
-  async accountLoginEmail(email: string): Promise<void> {
-    const subject = 'LogIn Invitation Accepted'
-    const body = `<!DOCTYPE html>
-        <html>
-        <head>
-           <title>LogIn Invitaion</title>
-        </head>
-        <body>
-           <h1>Welcome to keyshade!</h1>
-           <p>Hello there!</p>
-           <p>Your account has been setup. Please login to your account for further process.</p>
-           <p>Thank you for choosing us.</p>
-           <p>Best Regards,</p>
-           <p>keyshade Team</p>
-        </body>
-        </html>
-        `
+  async accountLoginEmail(email: string, username: string): Promise<void> {
+    const subject = 'Welcome to Keyshade - Your secure key management solution'
+
+    const body = await render(
+      WelcomeEmail({
+        username
+      })
+    )
+
     await this.sendEmail(email, subject, body)
   }
 
