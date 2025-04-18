@@ -74,12 +74,17 @@ export class MailService implements IMailService {
 
     await this.sendEmail(email, subject, body)
   }
-  async accountLoginEmail(email: string, username: string): Promise<void> {
+  async accountLoginEmail(
+    email: string,
+    username: string,
+    actionUrl: string
+  ): Promise<void> {
     const subject = 'Welcome to Keyshade - Your secure key management solution'
 
     const body = await render(
       WelcomeEmail({
-        username
+        username,
+        actionUrl
       })
     )
 

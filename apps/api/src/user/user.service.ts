@@ -388,7 +388,8 @@ export class UserService {
 
     await this.mailService.accountLoginEmail(
       createdUser.email,
-      createdUser.name
+      createdUser.name,
+      process.env.PLATFORM_FRONTEND_URL
     )
     this.log.log(`Sent login email to ${createdUser.email}`)
 

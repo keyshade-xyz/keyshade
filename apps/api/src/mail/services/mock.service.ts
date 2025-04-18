@@ -28,8 +28,14 @@ export class MockMailService implements IMailService {
     this.log.log(`OTP for ${email} is ${otp}`)
   }
 
-  async accountLoginEmail(email: string, username: string): Promise<void> {
-    this.log.log(`Account Login Email for ${email} and username ${username}`)
+  async accountLoginEmail(
+    email: string,
+    username: string,
+    actionUrl: string
+  ): Promise<void> {
+    this.log.log(
+      `Account Login Email for ${email}, username ${username} and action URL ${actionUrl}`
+    )
   }
 
   async feedbackEmail(email: string, feedback: string): Promise<void> {

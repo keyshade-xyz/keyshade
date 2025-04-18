@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { Link, Section, Text } from '@react-email/components'
+import { Button, Link, Section, Text } from '@react-email/components'
 import BaseEmailTemplate from './components/base-email-template'
 import {
   ctaButton,
@@ -10,9 +10,10 @@ import {
 
 interface WelcomeEmailProps {
   username: string
+  actionUrl: string
 }
 
-export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
+export const WelcomeEmail = ({ username, actionUrl }: WelcomeEmailProps) => {
   return (
     <BaseEmailTemplate
       previewText="Welcome to Keyshade - Your secure key management solution"
@@ -24,7 +25,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
         have you on board and help you manage your secrets and API keys
         securely.
       </Text>
-
       <Text
         style={{
           ...text,
@@ -35,7 +35,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
       >
         Here's what you can do with Keyshade:
       </Text>
-
       <Section style={workspaceDetails}>
         <Text style={{ ...workspaceInfo, fontWeight: '600' }}>
           🔐 Secure Key Management
@@ -45,7 +44,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           location with end-to-end encryption.
         </Text>
       </Section>
-
       <Section style={workspaceDetails}>
         <Text style={{ ...workspaceInfo, fontWeight: '600' }}>
           👥 Team Collaboration
@@ -55,7 +53,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           controls and permissions.
         </Text>
       </Section>
-
       <Section style={workspaceDetails}>
         <Text style={{ ...workspaceInfo, fontWeight: '600' }}>
           🔄 Versioning
@@ -65,7 +62,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           detailed analysis
         </Text>
       </Section>
-
       <Section style={workspaceDetails}>
         <Text style={{ ...workspaceInfo, fontWeight: '600' }}>
           🔍 Auditing and Alerting
@@ -75,7 +71,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           Notifications.
         </Text>
       </Section>
-
       <Section style={workspaceDetails}>
         <Text style={{ ...workspaceInfo, fontWeight: '600' }}>
           🔑 Role Based Access Control
@@ -84,11 +79,10 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           Safeguard Your Data with Granular Access Control and Permissions
         </Text>
       </Section>
-
       <Section style={{ textAlign: 'center', marginBottom: '10px' }}>
-        <Link href={process.env.PLATFORM_FRONTEND_URL} style={ctaButton}>
+        <Button href={actionUrl} style={ctaButton}>
           Get Started
-        </Link>
+        </Button>
       </Section>
     </BaseEmailTemplate>
   )
