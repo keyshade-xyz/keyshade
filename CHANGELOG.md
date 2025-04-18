@@ -1,3 +1,9 @@
+## [2.14.0-stage.28](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.27...v2.14.0-stage.28) (2025-04-18)
+
+### 🐛 Bug Fixes
+
+* **api:** React dom version mismatch ([ed3614c](https://github.com/keyshade-xyz/keyshade/commit/ed3614c1eb09928a3a865c4ca372e3d960e323e8))
+
 ## [2.14.0-stage.27](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.26...v2.14.0-stage.27) (2025-04-17)
 
 ### 🐛 Bug Fixes
