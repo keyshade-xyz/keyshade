@@ -24,7 +24,7 @@ import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
 }
-export default function Index(): JSX.Element {
+export default function Index(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true)
 
   const setUser = useSetAtom(userAtom)
