@@ -299,7 +299,7 @@ jobs:
             ${{ runner.os }}-platform-next-
 
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:platform
 
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
