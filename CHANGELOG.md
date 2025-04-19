@@ -1,3 +1,9 @@
+## [2.14.0-stage.29](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.28...v2.14.0-stage.29) (2025-04-19)
+
+### 🚀 Features
+
+* add welcome email template and update account login email service ([#864](https://github.com/keyshade-xyz/keyshade/issues/864)) ([e795e78](https://github.com/keyshade-xyz/keyshade/commit/e795e786e2d76b973aa15f2bfaa71ad596707e71))
+
 ## [2.14.0-stage.28](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.27...v2.14.0-stage.28) (2025-04-18)
 
 ### 🐛 Bug Fixes
