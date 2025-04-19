@@ -73,10 +73,10 @@ export default function RoleList(): React.JSX.Element {
           <TableHead className="h-full w-2/12 text-base font-normal text-white/50">
             Member(s)
           </TableHead>
-          <TableHead className="h-full w-4/12 rounded-tr-xl text-base font-normal text-white/50">
+          <TableHead className="h-full w-4/12 text-base font-normal text-white/50">
             Permissions
           </TableHead>
-          <TableHead className="h-full w-2/12 rounded-tr-xl text-base font-normal text-white/50" />
+          <TableHead className="h-full w-2/12 text-base font-normal text-white/50" />
           <TableHead className="h-full w-1/12 rounded-tr-xl text-base font-normal text-white/50" />
         </TableRow>
       </TableHeader>

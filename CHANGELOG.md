@@ -1,3 +1,49 @@
+## [2.14.0-stage.29](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.28...v2.14.0-stage.29) (2025-04-19)
+
+### 🚀 Features
+
+* add welcome email template and update account login email service ([#864](https://github.com/keyshade-xyz/keyshade/issues/864)) ([e795e78](https://github.com/keyshade-xyz/keyshade/commit/e795e786e2d76b973aa15f2bfaa71ad596707e71))
+
+## [2.14.0-stage.28](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.27...v2.14.0-stage.28) (2025-04-18)
+
+### 🐛 Bug Fixes
+
+* **api:** React dom version mismatch ([ed3614c](https://github.com/keyshade-xyz/keyshade/commit/ed3614c1eb09928a3a865c4ca372e3d960e323e8))
+
+## [2.14.0-stage.27](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.26...v2.14.0-stage.27) (2025-04-17)
+
+### 🐛 Bug Fixes
+
+* **api:** Prisma crashing ([21489f0](https://github.com/keyshade-xyz/keyshade/commit/21489f0b4962222f3fbea6c41972ae8e4b256057))
+
+## [2.14.0-stage.26](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.25...v2.14.0-stage.26) (2025-04-17)
+
+### 🚀 Features
+
+* **platform:** Edit Roles ([#862](https://github.com/keyshade-xyz/keyshade/issues/862)) ([24985cc](https://github.com/keyshade-xyz/keyshade/commit/24985cc6bd9de04c0b199cffb14e2c1008542dcd))
+
+### 🔧 Miscellaneous Chores
+
+* **docker:** Add self-hosted Sentry support to docker-compose ([#860](https://github.com/keyshade-xyz/keyshade/issues/860)) ([163a365](https://github.com/keyshade-xyz/keyshade/commit/163a3656b8177af4deda1d5f9b3b9dbe99c3d082))
+
+## [2.14.0-stage.25](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.24...v2.14.0-stage.25) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Members Tab ([#846](https://github.com/keyshade-xyz/keyshade/issues/846)) ([edb88b5](https://github.com/keyshade-xyz/keyshade/commit/edb88b5d05449280f32eafbffda656bc6e4f4592))
+
+## [2.14.0-stage.24](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.23...v2.14.0-stage.24) (2025-04-14)
+
+### 🚀 Features
+
+* **platform:** Paginated List Component ([#852](https://github.com/keyshade-xyz/keyshade/issues/852)) ([41d2266](https://github.com/keyshade-xyz/keyshade/commit/41d2266049b71af8e9784329cdf151e3937dc83a))
+
+## [2.14.0-stage.23](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.22...v2.14.0-stage.23) (2025-04-11)
+
+### 🚀 Features
+
+* **platform:** Project overview tab ([#843](https://github.com/keyshade-xyz/keyshade/issues/843)) ([1c3b198](https://github.com/keyshade-xyz/keyshade/commit/1c3b198467de4117b86739dc3af2e631d3a44a2f))
+
 ## [2.14.0-stage.22](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.21...v2.14.0-stage.22) (2025-04-06)
 
 ### 🚀 Features
