@@ -36,6 +36,8 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
           Sentry.captureException(exception)
         })
 
+        this.logger.error(exception)
+
         response.status(500).json({
           message: constructErrorBody(
             'Internal Server Error',
