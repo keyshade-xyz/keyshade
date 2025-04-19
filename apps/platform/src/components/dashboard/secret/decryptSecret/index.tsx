@@ -28,7 +28,7 @@ export default function DecryptSecret(): React.JSX.Element {
       <TooltipProvider>
         <div className="flex items-center justify-center gap-4">
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <div className="flex items-center gap-x-2">
                 <Switch
                   checked={revealSecretOpen}

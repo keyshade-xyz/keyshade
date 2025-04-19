@@ -21,10 +21,10 @@ export default function RootLayout({
           <>
             <OnlineStatusHandler />
             {children}
+            <Toaster richColors />
           </>
         </JotaiProvider>
       </body>
-      <Toaster richColors />
     </html>
   )
 }

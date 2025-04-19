@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { FolderSVG } from '@public/svg/dashboard'
+import { FolderIconSVG } from '@public/svg/dashboard'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
@@ -111,7 +111,7 @@ export default function Index(): React.JSX.Element {
         />
       ) : (
         <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
-          <FolderSVG width="150" />
+          <FolderIconSVG width="100" />
           <div className="text-4xl">Start your First Project</div>
           <div>
             Create a project and start setting up your variables and secret keys

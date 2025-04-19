@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
 import SecretPage from './@secret/page'
@@ -13,13 +13,8 @@ import AddVariableDialogue from '@/components/dashboard/variable/addVariableDial
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
 
-interface DetailedProjectPageProps {
-  params: { project: string }
-}
-
-function DetailedProjectPage({
-  params
-}: DetailedProjectPageProps): JSX.Element {
+function DetailedProjectPage(): JSX.Element {
+  const { project: projectSlug } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
@@ -28,7 +23,7 @@ function DetailedProjectPage({
 
   const getProject = useHttp(() =>
     ControllerInstance.getInstance().projectController.getProject({
-      projectSlug: params.project
+      projectSlug
     })
   )
 
@@ -48,7 +43,7 @@ function DetailedProjectPage({
         throw new Error(JSON.stringify(error))
       }
     })
-  }, [getProject, params.project, setSelectedProject])
+  }, [getProject, projectSlug, setSelectedProject])
 
   useEffect(() => {
     selectedProject &&
