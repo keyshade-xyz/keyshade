@@ -50,3 +50,16 @@ body {
 *::-webkit-scrollbar-thumb:active {
   @apply bg-[#a3a3a3];
 }
+
+@keyframes highlight {
+  0%, 100% {
+    border: transparent;
+  }
+  50% {
+    border: 1px solid #f6e05e;
+  }
+}
+
+.animate-highlight {
+  animation: highlight 1s ease-in-out 2;
+}

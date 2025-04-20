@@ -45,12 +45,14 @@ interface SecretCardProps {
   secretData: Secret
   isDecrypted: boolean
   privateKey: string | null
+  className?: string
 }
 
 export default function SecretCard({
   secretData,
   isDecrypted,
-  privateKey
+  privateKey,
+  className
 }: SecretCardProps) {
   const { secret, values } = secretData
 
@@ -139,7 +141,8 @@ export default function SecretCard({
   return (
     <ContextMenu>
       <AccordionItem
-        className="rounded-xl bg-white/5 px-5"
+        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`secret-${secretData.secret.slug}`}
         key={secret.id}
         value={secret.id}
       >
