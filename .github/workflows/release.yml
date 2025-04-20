@@ -26,6 +26,14 @@ jobs:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
@@ -122,6 +130,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+
       - name: Install PNPM
         run: npm i -g pnpm
 
@@ -145,11 +162,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache API Build
+        uses: actions/cache@v3
+        with:
+          path: apps/api/dist
+          key: ${{ runner.os }}-api-dist-${{ hashFiles('apps/api/src/**/*', 'apps/api/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-dist-
 
       - name: Build
         run: pnpm build:api
@@ -243,14 +276,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
 
+      - name: Cache Platform Build
+        uses: actions/cache@v3
+        with:
+          path: apps/platform/.next
+          key: ${{ runner.os }}-platform-next-${{ hashFiles('apps/platform/**/*.[jt]s*', 'apps/platform/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-platform-next-
+
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:platform
 
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
@@ -348,11 +397,27 @@ jobs:
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache Web Build
+        uses: actions/cache@v3
+        with:
+          path: apps/web/.next
+          key: ${{ runner.os }}-web-next-${{ hashFiles('apps/web/**/*.[jt]s*', 'apps/web/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-web-next-
 
       - name: Build
         run: pnpm build:api
@@ -414,9 +479,27 @@ jobs:
         if: steps.check-versions.outputs.skip_publish != 'true'
         run: npm i -g pnpm
 
+      - name: Cache PNPM store
+        if: steps.check-versions.outputs.skip_publish != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         if: steps.check-versions.outputs.skip_publish != 'true'
         run: pnpm install
+
+      - name: Cache CLI Build
+        if: steps.check-versions.outputs.skip_publish != 'true'
+        uses: actions/cache@v3
+        with:
+          path: apps/cli/dist
+          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-dist-
 
       - name: Build
         if: steps.check-versions.outputs.skip_publish != 'true'
@@ -449,11 +532,27 @@ jobs:
           node-version: 22.x
           registry-url: https://registry.npmjs.org
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache CLI Build
+        uses: actions/cache@v3
+        with:
+          path: apps/cli/dist
+          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-dist-
 
       - name: Build
         run: pnpm build:api
