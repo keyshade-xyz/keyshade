@@ -1,3 +1,86 @@
+## [2.14.0](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0...v2.14.0) (2025-04-20)
+
+### 🚀 Features
+
+* add welcome email template and update account login email service ([#864](https://github.com/keyshade-xyz/keyshade/issues/864)) ([e795e78](https://github.com/keyshade-xyz/keyshade/commit/e795e786e2d76b973aa15f2bfaa71ad596707e71))
+* **api:** Resend workspace invitation ([#850](https://github.com/keyshade-xyz/keyshade/issues/850)) ([e2e9c0f](https://github.com/keyshade-xyz/keyshade/commit/e2e9c0f0abf535130ba222dbff41fe78de53c344))
+* **api:** Return tier limit for entities in projects and workspaces ([#833](https://github.com/keyshade-xyz/keyshade/issues/833)) ([6b1da04](https://github.com/keyshade-xyz/keyshade/commit/6b1da043176d1de2c7df06f95aacee8f1e694e04))
+* **api:** Return workspace membership creation date ([#842](https://github.com/keyshade-xyz/keyshade/issues/842)) ([cf60c35](https://github.com/keyshade-xyz/keyshade/commit/cf60c35ab68e0fa4a98563cd51f146db04c8fa5c))
+* **cli:** Resend workspace invitation command ([#854](https://github.com/keyshade-xyz/keyshade/issues/854)) ([4c716ac](https://github.com/keyshade-xyz/keyshade/commit/4c716ac7399f45e7ea8958f75b4efa3cf01044e5))
+* **platform:** Add environment management to project creation dialog ([#848](https://github.com/keyshade-xyz/keyshade/issues/848)) ([720d4fb](https://github.com/keyshade-xyz/keyshade/commit/720d4fb143dec5b97aa5b646b458ff0bb323f0ae))
+* **platform:** Add role listing ([#855](https://github.com/keyshade-xyz/keyshade/issues/855)) ([c326337](https://github.com/keyshade-xyz/keyshade/commit/c326337cb40b0de3aaf3cb9198afc8420a194ab8))
+* **platform:** Added workspace settings page ([#808](https://github.com/keyshade-xyz/keyshade/issues/808)) ([c62304c](https://github.com/keyshade-xyz/keyshade/commit/c62304c301c51eb6c8e2c899372bdc3bd0e87f9d))
+* **platform:** Create roles  ([#831](https://github.com/keyshade-xyz/keyshade/issues/831)) ([e07dac4](https://github.com/keyshade-xyz/keyshade/commit/e07dac45d68eb5fc7268daab23edf9e7a22c4ee6))
+* **platform:** Delete role functionality ([#856](https://github.com/keyshade-xyz/keyshade/issues/856)) ([c2010fa](https://github.com/keyshade-xyz/keyshade/commit/c2010fa926e1faafd4053752b15962c299fcfcf6))
+* **platform:** Edit Roles ([#862](https://github.com/keyshade-xyz/keyshade/issues/862)) ([24985cc](https://github.com/keyshade-xyz/keyshade/commit/24985cc6bd9de04c0b199cffb14e2c1008542dcd))
+* **platform:** Members Tab ([#846](https://github.com/keyshade-xyz/keyshade/issues/846)) ([edb88b5](https://github.com/keyshade-xyz/keyshade/commit/edb88b5d05449280f32eafbffda656bc6e4f4592))
+* **platform:** One-Time Secret Display for API Key ([#771](https://github.com/keyshade-xyz/keyshade/issues/771)) ([#799](https://github.com/keyshade-xyz/keyshade/issues/799)) ([88e3ad9](https://github.com/keyshade-xyz/keyshade/commit/88e3ad94e41b65a89bcfa84b04d0ad8a1ce02fb2))
+* **platform:** Paginated List Component ([#852](https://github.com/keyshade-xyz/keyshade/issues/852)) ([41d2266](https://github.com/keyshade-xyz/keyshade/commit/41d2266049b71af8e9784329cdf151e3937dc83a))
+* **platform:** Project overview tab ([#843](https://github.com/keyshade-xyz/keyshade/issues/843)) ([1c3b198](https://github.com/keyshade-xyz/keyshade/commit/1c3b198467de4117b86739dc3af2e631d3a44a2f))
+* **project:** Fixed bugs with regenerating and storing private key ([c8f7cc6](https://github.com/keyshade-xyz/keyshade/commit/c8f7cc68573fe64b1e3d2032029e5da65d8c7b54))
+* **project:** Return lastUpdatedBy data ([e665d12](https://github.com/keyshade-xyz/keyshade/commit/e665d124efb4f5c94497140d93ff91b4a305c5f0))
+* **web:** Migrated from nextjs 13 to 15 ([#844](https://github.com/keyshade-xyz/keyshade/issues/844)) ([3212d47](https://github.com/keyshade-xyz/keyshade/commit/3212d47204b673080995579903ea7d7cbcc2626d))
+
+### 🐛 Bug Fixes
+
+* **api:** Error in running the API locally ([88809ea](https://github.com/keyshade-xyz/keyshade/commit/88809ea6f575d6218e795830f973fbe9398f687d))
+* **api:** Prisma crashing ([21489f0](https://github.com/keyshade-xyz/keyshade/commit/21489f0b4962222f3fbea6c41972ae8e4b256057))
+* **api:** React dom version mismatch ([ed3614c](https://github.com/keyshade-xyz/keyshade/commit/ed3614c1eb09928a3a865c4ca372e3d960e323e8))
+* **api:** Update schema for sentry env ([fb56520](https://github.com/keyshade-xyz/keyshade/commit/fb56520591e4e17b9896acc2b81cf2e32d23925b))
+* **api:** Updated error handling ([8dc6e1f](https://github.com/keyshade-xyz/keyshade/commit/8dc6e1f6c7c60418f310bea53276b5ebb5c3c677))
+* **api:** Updated sentry env name ([660d327](https://github.com/keyshade-xyz/keyshade/commit/660d3275f9e39c0846277baefe3df2cbc8382db5))
+* **platform:** Added profile picture in the user settings with proper fallback ([#845](https://github.com/keyshade-xyz/keyshade/issues/845)) ([f32d90e](https://github.com/keyshade-xyz/keyshade/commit/f32d90eafb8f8fb2fa822df72ca3225600d12b1c))
+* **platform:** Redirect to dashboard after updating profile details ([#840](https://github.com/keyshade-xyz/keyshade/issues/840)) ([daa3e07](https://github.com/keyshade-xyz/keyshade/commit/daa3e0797fe6a70fce224d7531ac6e53f605c7eb))
+* **platform:** Scrollbar issue  ([#839](https://github.com/keyshade-xyz/keyshade/issues/839)) ([0627a6e](https://github.com/keyshade-xyz/keyshade/commit/0627a6e6e7d893d1c04cf275355120eef37a4efe))
+* **platform:** ui issues on otp & session expiry toasts ([#832](https://github.com/keyshade-xyz/keyshade/issues/832)) ([9d59de8](https://github.com/keyshade-xyz/keyshade/commit/9d59de8297d3f38b9876c482bea2b2b2cee3802c))
+* **web:** Add margin for different screen size ([#820](https://github.com/keyshade-xyz/keyshade/issues/820)) ([524e741](https://github.com/keyshade-xyz/keyshade/commit/524e741dd55d83b61203679417c4e05a1882f53c))
+
+### 📚 Documentation
+
+* Update .env.example ([0de7b66](https://github.com/keyshade-xyz/keyshade/commit/0de7b66d1c69ecb27b6ab403b33dac97c606944c))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Add database seeding script and related commands ([#849](https://github.com/keyshade-xyz/keyshade/issues/849)) ([fe8fa45](https://github.com/keyshade-xyz/keyshade/commit/fe8fa454107fc468f3bb2439e3e4d456c8e5d7f1))
+* **api:** HTTP 500 gets caught by sentry ([a8a39c1](https://github.com/keyshade-xyz/keyshade/commit/a8a39c1fd392ab55c1e78707fa25bf47c7a600b6))
+* **api:** Report only 500 errors ([1740690](https://github.com/keyshade-xyz/keyshade/commit/17406902c394dd2616ebef7069132052f78d8653))
+* **api:** Return role slug in members response ([c719f16](https://github.com/keyshade-xyz/keyshade/commit/c719f16b2b01ab75c924b2c5b8bfe3516e799bea))
+* **ci:** Add PNPM and build caching to speed up workflow ([#866](https://github.com/keyshade-xyz/keyshade/issues/866)) ([2f8bd9d](https://github.com/keyshade-xyz/keyshade/commit/2f8bd9dbed9cd316f30df21532f84d5cb7ffc854))
+* **docker:** Add self-hosted Sentry support to docker-compose ([#860](https://github.com/keyshade-xyz/keyshade/issues/860)) ([163a365](https://github.com/keyshade-xyz/keyshade/commit/163a3656b8177af4deda1d5f9b3b9dbe99c3d082))
+* **release:** 2.14.0-stage.1 [skip ci] ([c9318af](https://github.com/keyshade-xyz/keyshade/commit/c9318af146ce4d9b2ef8a1e9f6aac0b6922524c7))
+* **release:** 2.14.0-stage.10 [skip ci] ([f2d2cb0](https://github.com/keyshade-xyz/keyshade/commit/f2d2cb0a031b6b5aea1352280f8ea4af228c3295))
+* **release:** 2.14.0-stage.11 [skip ci] ([8e2abea](https://github.com/keyshade-xyz/keyshade/commit/8e2abeaee7db22c0555120ca0e575742e6d5d878))
+* **release:** 2.14.0-stage.12 [skip ci] ([838e775](https://github.com/keyshade-xyz/keyshade/commit/838e77512d95d1cff56b6265744b76e2cf55fa3c))
+* **release:** 2.14.0-stage.13 [skip ci] ([37901ab](https://github.com/keyshade-xyz/keyshade/commit/37901ab42470c5c326ca0c2258b1a3648fcbb91f))
+* **release:** 2.14.0-stage.14 [skip ci] ([a0956e7](https://github.com/keyshade-xyz/keyshade/commit/a0956e77373ef26b65001b6278983d28796dee30))
+* **release:** 2.14.0-stage.15 [skip ci] ([df842d1](https://github.com/keyshade-xyz/keyshade/commit/df842d1c542a71ac8e1ea541187ba838264e65ad))
+* **release:** 2.14.0-stage.16 [skip ci] ([bd6dac1](https://github.com/keyshade-xyz/keyshade/commit/bd6dac13ab315a90a1c6836f1e41c11d31c7cd25))
+* **release:** 2.14.0-stage.17 [skip ci] ([91dcaca](https://github.com/keyshade-xyz/keyshade/commit/91dcaca9922622227bd76370588309ab3967e99b))
+* **release:** 2.14.0-stage.18 [skip ci] ([179cd49](https://github.com/keyshade-xyz/keyshade/commit/179cd49ab748584ffdef715d3b308e71c251a5a4))
+* **release:** 2.14.0-stage.19 [skip ci] ([66011f3](https://github.com/keyshade-xyz/keyshade/commit/66011f3e575711d5dc6c46b09329eee9b4bbd1e8))
+* **release:** 2.14.0-stage.2 [skip ci] ([0c0e510](https://github.com/keyshade-xyz/keyshade/commit/0c0e510528cb107b41d51e0ba0cc92eddebb06e4))
+* **release:** 2.14.0-stage.20 [skip ci] ([4a29665](https://github.com/keyshade-xyz/keyshade/commit/4a29665e6bd9b35b4b20438088081011191dcfba))
+* **release:** 2.14.0-stage.21 [skip ci] ([78991e3](https://github.com/keyshade-xyz/keyshade/commit/78991e305f06056811825f1bf70ab1f4a6963279))
+* **release:** 2.14.0-stage.22 [skip ci] ([b8e352a](https://github.com/keyshade-xyz/keyshade/commit/b8e352a3d625f6e2aec891843e3f2c265557ce95))
+* **release:** 2.14.0-stage.23 [skip ci] ([60752fc](https://github.com/keyshade-xyz/keyshade/commit/60752fc603aa4f8d8114eff1c8b681e2c5c19f5b))
+* **release:** 2.14.0-stage.24 [skip ci] ([e729dcc](https://github.com/keyshade-xyz/keyshade/commit/e729dcc59c482d1f99ec2bb2e40b509c9298e07c))
+* **release:** 2.14.0-stage.25 [skip ci] ([4866192](https://github.com/keyshade-xyz/keyshade/commit/48661925c2365e0d493db01512f71bbd33ec3e3b))
+* **release:** 2.14.0-stage.26 [skip ci] ([423782e](https://github.com/keyshade-xyz/keyshade/commit/423782ec5fef46fb7c7457609b66e2814e7b3db3))
+* **release:** 2.14.0-stage.27 [skip ci] ([c0e1519](https://github.com/keyshade-xyz/keyshade/commit/c0e151938d306ace3a31d1649df0af46fd4d0912))
+* **release:** 2.14.0-stage.28 [skip ci] ([4ad6159](https://github.com/keyshade-xyz/keyshade/commit/4ad6159477a106112f6e85708572d07ec641cace))
+* **release:** 2.14.0-stage.29 [skip ci] ([8a22781](https://github.com/keyshade-xyz/keyshade/commit/8a22781de75623dbaca499ce5197ea1409e8004a))
+* **release:** 2.14.0-stage.3 [skip ci] ([677211c](https://github.com/keyshade-xyz/keyshade/commit/677211c07dcf19638c203750913928b1bab057fd))
+* **release:** 2.14.0-stage.4 [skip ci] ([ed82199](https://github.com/keyshade-xyz/keyshade/commit/ed821997a32c4f98e9cf4f42ca363fe908e0c08b))
+* **release:** 2.14.0-stage.5 [skip ci] ([890979e](https://github.com/keyshade-xyz/keyshade/commit/890979e4e2d69ec05ceb92d785612453e714af70))
+* **release:** 2.14.0-stage.6 [skip ci] ([9ab7b8e](https://github.com/keyshade-xyz/keyshade/commit/9ab7b8eb66ce040bfcd142cbb001e29771291073))
+* **release:** 2.14.0-stage.7 [skip ci] ([b615721](https://github.com/keyshade-xyz/keyshade/commit/b6157215398aba76fe918a6c076e5d539f297d3a))
+* **release:** 2.14.0-stage.8 [skip ci] ([f6ac8bf](https://github.com/keyshade-xyz/keyshade/commit/f6ac8bfe71c29b76e127e64bcd336523aea29cc8))
+* **release:** 2.14.0-stage.9 [skip ci] ([ff97183](https://github.com/keyshade-xyz/keyshade/commit/ff971835c48add78d54cb42814cbf3b6d4043b8e))
+
+### 🔨 Code Refactoring
+
+* **platform:** Add auth provider card in profile settings ([#841](https://github.com/keyshade-xyz/keyshade/issues/841)) ([8e79b9d](https://github.com/keyshade-xyz/keyshade/commit/8e79b9d3037cbe875916b168c5787cd63ba6ff00))
+
 ## [2.14.0-stage.29](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.28...v2.14.0-stage.29) (2025-04-19)
 
 ### 🚀 Features
