@@ -1,3 +1,19 @@
+## [2.14.0-stage.30](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.29...v2.14.0-stage.30) (2025-04-20)
+
+### 🚀 Features
+
+* **platform:** Updated search component ([#834](https://github.com/keyshade-xyz/keyshade/issues/834)) ([b904092](https://github.com/keyshade-xyz/keyshade/commit/b90409200e170bc47d16bca16ab777241469f963))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Add PNPM and build caching to speed up workflow ([#866](https://github.com/keyshade-xyz/keyshade/issues/866)) ([2f8bd9d](https://github.com/keyshade-xyz/keyshade/commit/2f8bd9dbed9cd316f30df21532f84d5cb7ffc854))
+* **cli:** Bump version to 2.5.3 ([6f5d543](https://github.com/keyshade-xyz/keyshade/commit/6f5d543a398382011f0b8e96403b786a5fc6f677))
+* **release:** 2.14.0 [skip ci] ([b22060e](https://github.com/keyshade-xyz/keyshade/commit/b22060e335890dda1f1a53ef02c4cb91eb7b7389))
+
+### 🔨 Code Refactoring
+
+* **platform:** Update switch component styles for checked state ([#870](https://github.com/keyshade-xyz/keyshade/issues/870)) ([15759f7](https://github.com/keyshade-xyz/keyshade/commit/15759f7eaacbf96f59760f06134c041e91744baf))
+
 ## [2.14.0](https://github.com/keyshade-xyz/keyshade/compare/v2.13.0...v2.14.0) (2025-04-20)
 
 ### 🚀 Features

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
+import { useSearchParams } from 'next/navigation'
 import type { GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
 import {
   selectedProjectAtom,
@@ -18,15 +19,34 @@ import { ENVIRONMENTS_PAGE_SIZE } from '@/lib/constants'
 import { EnvironmentLoader } from '@/components/dashboard/environment/environmentLoader'
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
+import { cn } from '@/lib/utils'
 
 function EnvironmentItemComponent(
-  item: GetAllEnvironmentsOfProjectResponse['items'][number]
+  { item, highlightSlug, isHighlighted }: {
+    item: GetAllEnvironmentsOfProjectResponse['items'][number],
+    highlightSlug: string | null,
+    isHighlighted: boolean
+  }
 ) {
-  return <EnvironmentCard environment={item} />
+  return <EnvironmentCard className={cn(
+    highlightSlug === item.slug && isHighlighted && 'animate-highlight'
+  )} environment={item} />
+}
+
+/**
+ *
+ * This will prevent React from treating it as a new component on every render,
+ * which can lead to performance issues and loss of state.
+ */
+function renderEnvironmentItemComponent(item: GetAllEnvironmentsOfProjectResponse['items'][number], highlightSlug: string | null, isHighlighted: boolean) {
+  return <EnvironmentItemComponent highlightSlug={highlightSlug} isHighlighted={isHighlighted} item={item} />;
 }
 
 function EnvironmentPage(): React.JSX.Element {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isHighlighted, setIsHighlighted] = useState(false)
 
   const isDeleteEnvironmentOpen = useAtomValue(deleteEnvironmentOpenAtom)
   const isEditEnvironmentOpen = useAtomValue(editEnvironmentOpenAtom)
@@ -50,6 +70,22 @@ function EnvironmentPage(): React.JSX.Element {
       getAllEnvironmentsOfProject().finally(() => setIsLoading(false))
     }
   }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+
+  useEffect(() => {
+    if (highlightSlug) {
+      // Find and scroll to the element
+      const element = document.getElementById(`environment-${highlightSlug}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setIsHighlighted(true)
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          setIsHighlighted(false)
+        }, 2000)
+      }
+    }
+  }, [highlightSlug, environments])
 
   if (isLoading) {
     return (
@@ -103,7 +139,7 @@ function EnvironmentPage(): React.JSX.Element {
                   }
                 }
               }}
-              itemComponent={EnvironmentItemComponent}
+              itemComponent={(item) => renderEnvironmentItemComponent(item, highlightSlug, isHighlighted)}
               itemKey={(item) => item.id}
               itemsPerPage={5}
             />

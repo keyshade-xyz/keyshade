@@ -8,7 +8,7 @@ import EnvironmentPage from './@environment/page'
 import OverviewPage from './@overview/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
+import { selectedProjectAtom, environmentsOfProjectAtom, globalSearchDataAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
@@ -17,6 +17,7 @@ function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
@@ -52,9 +53,17 @@ function DetailedProjectPage(): JSX.Element {
       getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
+          setGlobalSearchData((prev) => ({
+            ...prev,
+            environments: data.items.map((env) => ({
+              name: env.name,
+              slug: env.slug,
+              description: env.description
+            }))
+          }))
         }
       })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments, setGlobalSearchData])
 
   return (
     <main className="flex h-full flex-col gap-4">
