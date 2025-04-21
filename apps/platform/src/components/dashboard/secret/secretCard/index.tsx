@@ -172,7 +172,7 @@ export default function SecretCard({
               {secret.note ? (
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
