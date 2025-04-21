@@ -177,7 +177,7 @@ export default function RoleCard({
       <TableCell className="flex justify-end gap-x-4 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <button onClick={copySlugToClipboard} type="button">
                 <Copy size={20} />
               </button>
@@ -197,7 +197,7 @@ export default function RoleCard({
 
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <button
                 disabled={isAdminRole}
                 onClick={handleDeleteRole}
