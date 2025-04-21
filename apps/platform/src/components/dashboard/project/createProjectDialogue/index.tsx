@@ -10,7 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
+  DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -201,7 +201,7 @@ export default function CreateProjectDialogue(): JSX.Element {
         onOpenChange={setIsCreateProjectDialogOpen}
         open={isCreateProjectDialogOpen}
       >
-        <DialogTrigger>
+        <DialogTrigger asChild>
           {isProjectsEmpty ? null : (
             <Button onClick={toggleDialog}>
               <AddSVG /> Create a new Project
@@ -210,9 +210,9 @@ export default function CreateProjectDialogue(): JSX.Element {
         </DialogTrigger>
         <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
           <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
-            <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
+            <DialogTitle className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
               Create Project
-            </DialogHeader>
+            </DialogTitle>
 
             <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
               Create your new project

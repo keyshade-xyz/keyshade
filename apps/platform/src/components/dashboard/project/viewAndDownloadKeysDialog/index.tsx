@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useAtom } from 'jotai'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { viewAndDownloadProjectKeysOpenAtom } from '@/store'
 import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 import { Label } from '@/components/ui/label'
@@ -61,9 +61,9 @@ export default function ViewAndDownloadProjectKeysDialog({
     >
       <DialogContent className="w-full rounded-[12px] border bg-[#1E1E1F] ">
         <div className="flex w-full flex-col items-start justify-center gap-2">
-          <DialogHeader className="text-center text-lg font-semibold text-white ">
+          <DialogTitle className="text-center text-lg font-semibold text-white ">
             Download project keys?
-          </DialogHeader>
+          </DialogTitle>
         </div>
         <div className="flex flex-col gap-3 overflow-auto">
           {/* public key */}

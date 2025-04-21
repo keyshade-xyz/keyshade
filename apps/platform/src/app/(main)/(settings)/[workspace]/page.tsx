@@ -304,9 +304,9 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           </div>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger className="w-2/5">
+              <TooltipTrigger asChild>
                 <Button
-                  className="flex w-full items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
+                  className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
                   disabled={isLoading || selectedWorkspace?.isDefault}
                   onClick={() => setIsDeleteWorkspaceOpen(true)}
                   role="button"

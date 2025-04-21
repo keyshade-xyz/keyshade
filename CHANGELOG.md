@@ -1,3 +1,9 @@
+## [2.14.0-stage.31](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.30...v2.14.0-stage.31) (2025-04-21)
+
+### 🚀 Features
+
+* **platform:** Upgrade to Next 15.2.3 ([#869](https://github.com/keyshade-xyz/keyshade/issues/869)) ([73b8cda](https://github.com/keyshade-xyz/keyshade/commit/73b8cda5cad4aadaf5ee47ec4bd02ca2a1e71a1d))
+
 ## [2.14.0-stage.30](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.29...v2.14.0-stage.30) (2025-04-20)
 
 ### 🚀 Features

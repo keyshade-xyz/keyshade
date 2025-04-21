@@ -178,7 +178,7 @@ export function Combobox(): React.JSX.Element {
             </CommandList>
           </Command>
           <Dialog>
-            <DialogTrigger className="w-full">
+            <DialogTrigger asChild className="w-full">
               <Button className="mt-5 w-full">
                 <AddSVG /> New workspace
               </Button>
