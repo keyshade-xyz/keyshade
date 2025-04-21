@@ -24,7 +24,7 @@ function LocalKeySetup({
     return (
       <div className="flex gap-1">
         <Input
-          className="bg-[#26282C] px-4 py-6"
+          className="px-4 py-6"
           readOnly
           type="text"
           value={
@@ -34,14 +34,14 @@ function LocalKeySetup({
           }
         />
         <Button
-          className="flex items-center justify-center px-4 py-6"
+          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
           onClick={handleToggleReveal}
           type="button"
         >
           {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
         </Button>
         <Button
-          className="flex items-center justify-center px-4 py-6"
+          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
           onClick={onDelete}
           type="button"
         >
@@ -56,6 +56,7 @@ function LocalKeySetup({
       disabled={Boolean(privateKey !== null && isStoredOnServer)}
       onClick={onOpenSetupDialog}
       type="button"
+      variant="secondary"
     >
       <AddSVG />
       <div className="font-bold">Setup Private Key</div>

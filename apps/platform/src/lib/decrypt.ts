@@ -1,4 +1,4 @@
-import eccrypto from 'eccrypto'
+import { decrypt as decryptModule } from 'eccrypto'
 
 interface EncryptedData {
   iv: Buffer
@@ -20,24 +20,47 @@ interface ParsedData {
  * @param data - The encrypted data as a JSON string
  * @returns Promise resolving to the decrypted string
  */
-export const decrypt = (privateKey: string, data: string): Promise<string> => {
+export const decrypt = async (
+  privateKey: string,
+  data: string
+): Promise<string> => {
   try {
     const parsed = JSON.parse(data) as ParsedData
 
-    const eicesData: EncryptedData = {
-      iv: Buffer.from(parsed.iv),
-      ephemPublicKey: Buffer.from(parsed.ephemPublicKey),
-      ciphertext: Buffer.from(parsed.ciphertext),
-      mac: Buffer.from(parsed.mac)
+    // Helper to normalize into a Buffer
+    const toBuffer = (
+      input: string | number[] | Buffer,
+      encoding: BufferEncoding = 'hex'
+    ): Buffer => {
+      if (Buffer.isBuffer(input)) {
+        return input
+      } else if (Array.isArray(input)) {
+        return Buffer.from(input)
+      }
+      // string case: assume hex-encoded by default
+      return Buffer.from(input, encoding)
     }
 
-    return eccrypto
-      .decrypt(Buffer.from(privateKey, 'hex'), eicesData)
-      .then((decrypted) => decrypted.toString())
+    const encrypted: EncryptedData = {
+      iv: toBuffer(parsed.iv),
+      ephemPublicKey: toBuffer(parsed.ephemPublicKey),
+      ciphertext: toBuffer(parsed.ciphertext),
+      mac: toBuffer(parsed.mac)
+    }
+
+    // decrypt with the private key (hex → Buffer)
+    const decrypted = await decryptModule(
+      Buffer.from(privateKey, 'hex'),
+      encrypted
+    )
+
+    return decrypted.toString()
   } catch (error) {
     return Promise.reject(
       new Error(
-        `Decryption failed: ${error instanceof Error ? error.message : String(error)}`
+        `Decryption failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       )
     )
   }
