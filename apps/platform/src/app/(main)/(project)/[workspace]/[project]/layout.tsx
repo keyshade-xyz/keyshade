@@ -14,7 +14,7 @@ import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnviro
 import { useHttp } from '@/hooks/use-http'
 
 function DetailedProjectPage(): JSX.Element {
-  const { project: projectSlug } = useParams()
+  const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
@@ -36,6 +36,8 @@ function DetailedProjectPage(): JSX.Element {
   )
 
   useEffect(() => {
+    if (!projectSlug) return
+
     getProject().then(({ data, success, error }) => {
       if (success && data) {
         setSelectedProject(data)
