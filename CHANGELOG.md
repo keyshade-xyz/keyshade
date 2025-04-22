@@ -1,3 +1,9 @@
+## [2.14.0-stage.32](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.31...v2.14.0-stage.32) (2025-04-22)
+
+### 🐛 Bug Fixes
+
+* Update lockfile ([dae332f](https://github.com/keyshade-xyz/keyshade/commit/dae332f6528b232449b23d122ed7599ecd6cbb5a))
+
 ## [2.14.0-stage.31](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.30...v2.14.0-stage.31) (2025-04-21)
 
 ### 🚀 Features
