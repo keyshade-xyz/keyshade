@@ -51,7 +51,7 @@ function ServerKeySetup({
     return (
       <div className="flex gap-1">
         <Input
-          className="bg-[#26282C] px-4 py-6"
+          className="px-4 py-6"
           readOnly
           type="text"
           value={
@@ -61,14 +61,14 @@ function ServerKeySetup({
           }
         />
         <Button
-          className="flex items-center justify-center px-4 py-6"
+          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
           onClick={handleToggleReveal}
           type="button"
         >
           {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
         </Button>
         <Button
-          className="flex items-center justify-center px-4 py-6"
+          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
           onClick={onDelete}
           type="button"
         >
@@ -79,9 +79,10 @@ function ServerKeySetup({
   }
   return (
     <Button
-      className="w-fit px-4 py-6"
+      className="w-fit px-8 py-6 font-bold"
       onClick={handleStorePrivateKey}
       type="button"
+      variant="secondary"
     >
       Store Private Key
     </Button>

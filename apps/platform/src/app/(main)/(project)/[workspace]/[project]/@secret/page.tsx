@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useSearchParams } from 'next/navigation'
 import { Accordion } from '@/components/ui/accordion'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
@@ -11,6 +12,7 @@ import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  globalSearchDataAtom,
   rollbackSecretOpenAtom,
   secretRevisionsOpenAtom,
   shouldRevealSecretEnabled,
@@ -27,11 +29,19 @@ import EmptySecretListContent from '@/components/dashboard/secret/emptySecretLis
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
 import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
 import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
+import { cn } from '@/lib/utils'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 extend(relativeTime)
 
 function SecretPage(): React.JSX.Element {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
+  const [page, setPage] = useState(0)
+  const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isHighlighted, setIsHighlighted] = useState(false)
+
   const isEditSecretOpen = useAtomValue(editSecretOpenAtom)
   const isDeleteSecretOpen = useAtomValue(deleteSecretOpenAtom)
   const isDeleteEnvironmentValueOfSecretOpen = useAtomValue(
@@ -42,11 +52,8 @@ function SecretPage(): React.JSX.Element {
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
-
-  const [page, setPage] = useState<number>(0)
-  const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const { projectPrivateKey } = useProjectPrivateKey()
 
@@ -61,6 +68,10 @@ function SecretPage(): React.JSX.Element {
 
   useEffect(() => {
     if (selectedProject) {
+      if (secrets.length > 0) {
+        return;
+      }
+
       setIsLoading(true)
 
       getAllSecretsOfProject()
@@ -72,17 +83,41 @@ function SecretPage(): React.JSX.Element {
             if (data.metadata.links.next === null) {
               setHasMoreSecret(false)
             }
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              secrets: data.items.map((item) => ({
+                slug: item.secret.slug,
+                name: item.secret.name,
+                note: item.secret.note,
+              })),
+            }))
           }
         })
         .finally(() => {
           setIsLoading(false)
         })
     }
-  }, [getAllSecretsOfProject, isDecrypted, page, selectedProject, setSecrets])
+  }, [getAllSecretsOfProject, page, secrets, selectedProject, setGlobalSearchData, setSecrets])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)
   }
+
+  useEffect(() => {
+    if (highlightSlug) {
+      // Find and scroll to the element
+      const element = document.getElementById(`secret-${highlightSlug}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setIsHighlighted(true)
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          setIsHighlighted(false)
+        }, 2000)
+      }
+    }
+  }, [highlightSlug, secrets])
 
   if (isLoading && page === 0) {
     return (
@@ -110,6 +145,9 @@ function SecretPage(): React.JSX.Element {
             >
               {secrets.map((secretData) => (
                 <SecretCard
+                  className={cn(
+                    highlightSlug === secretData.secret.slug && isHighlighted && 'animate-highlight'
+                  )}
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
                   privateKey={projectPrivateKey}

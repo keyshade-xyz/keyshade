@@ -1,7 +1,7 @@
+import path, { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { type SentryBuildOptions, withSentryConfig } from '@sentry/nextjs'
 import createMDX from '@next/mdx'
-import path, { dirname } from 'path'
-import { fileURLToPath } from 'url'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {

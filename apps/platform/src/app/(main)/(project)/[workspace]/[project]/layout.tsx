@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
 import SecretPage from './@secret/page'
@@ -8,27 +8,23 @@ import EnvironmentPage from './@environment/page'
 import OverviewPage from './@overview/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
+import { selectedProjectAtom, environmentsOfProjectAtom, globalSearchDataAtom } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
 
-interface DetailedProjectPageProps {
-  params: { project: string }
-}
-
-function DetailedProjectPage({
-  params
-}: DetailedProjectPageProps): JSX.Element {
+function DetailedProjectPage(): JSX.Element {
+  const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
   const getProject = useHttp(() =>
     ControllerInstance.getInstance().projectController.getProject({
-      projectSlug: params.project
+      projectSlug
     })
   )
 
@@ -41,6 +37,8 @@ function DetailedProjectPage({
   )
 
   useEffect(() => {
+    if (!projectSlug) return
+
     getProject().then(({ data, success, error }) => {
       if (success && data) {
         setSelectedProject(data)
@@ -48,16 +46,24 @@ function DetailedProjectPage({
         throw new Error(JSON.stringify(error))
       }
     })
-  }, [getProject, params.project, setSelectedProject])
+  }, [getProject, projectSlug, setSelectedProject])
 
   useEffect(() => {
     selectedProject &&
       getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
+          setGlobalSearchData((prev) => ({
+            ...prev,
+            environments: data.items.map((env) => ({
+              name: env.name,
+              slug: env.slug,
+              description: env.description
+            }))
+          }))
         }
       })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments])
+  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments, setGlobalSearchData])
 
   return (
     <main className="flex h-full flex-col gap-4">

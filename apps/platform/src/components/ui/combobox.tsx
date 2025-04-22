@@ -2,7 +2,7 @@
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { Label } from './label'
@@ -30,7 +30,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { selectedWorkspaceAtom } from '@/store'
+import { allWorkspacesAtom, globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
@@ -48,6 +48,8 @@ export function Combobox(): React.JSX.Element {
     })
   )
 
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
+  const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
@@ -117,10 +119,19 @@ export function Combobox(): React.JSX.Element {
   useEffect(() => {
     getWorkspacesOfUser().then(({ success, data }) => {
       if (success && data) {
+        setGlobalSearchData((prev) => ({
+          ...prev,
+          workspaces: data.items.map((workspace) => ({
+            id: workspace.id,
+            name: workspace.name,
+            slug: workspace.slug
+          }))
+        }))
+        setAllWorkspaces(data.items)
         setSelectedWorkspace(data.items[0])
       }
     })
-  }, [setSelectedWorkspace, getWorkspacesOfUser])
+  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData, setAllWorkspaces])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -167,7 +178,7 @@ export function Combobox(): React.JSX.Element {
             </CommandList>
           </Command>
           <Dialog>
-            <DialogTrigger className="w-full">
+            <DialogTrigger asChild className="w-full">
               <Button className="mt-5 w-full">
                 <AddSVG /> New workspace
               </Button>

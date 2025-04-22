@@ -386,7 +386,11 @@ export class UserService {
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 
-    await this.mailService.accountLoginEmail(createdUser.email)
+    await this.mailService.accountLoginEmail(
+      createdUser.email,
+      createdUser.name,
+      process.env.PLATFORM_FRONTEND_URL
+    )
     this.log.log(`Sent login email to ${createdUser.email}`)
 
     return createdUser

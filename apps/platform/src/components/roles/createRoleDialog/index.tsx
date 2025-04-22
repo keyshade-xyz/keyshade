@@ -152,7 +152,7 @@ export default function CreateRoleDialog() {
       }}
       open={isCreateRolesOpen}
     >
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button>
           <AddSVG /> Add Role
         </Button>

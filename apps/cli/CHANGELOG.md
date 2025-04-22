@@ -92,7 +92,7 @@
 
 - Update error logging
 
-## 2.5.3-stage
+## 2.5.3
 
 ### Minor Changes
 
