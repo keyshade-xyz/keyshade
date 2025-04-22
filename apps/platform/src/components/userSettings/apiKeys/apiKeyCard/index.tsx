@@ -26,9 +26,10 @@ import {
 type ApiKey = Omit<OriginalApiKey, 'value' | 'userId'>
 
 const formatDate = (date: string): string => {
-  return dayjs(dayjs()).diff(date, 'day') >= 1
-    ? `${dayjs(dayjs()).diff(date, 'day')} days`
-    : `${dayjs(dayjs()).diff(date, 'hour')} hours`
+  const now = dayjs();
+  return now.diff(date, 'day') >= 1
+    ? `${now.diff(date, 'day')} days`
+    : `${now.diff(date, 'hour')} hours`
 }
 
 export default function ApiKeyCard({
