@@ -5,12 +5,12 @@ import type {
 } from '@/types/command/command.types'
 import type { ProfileConfig } from '@/types/index.types'
 import { fetchProfileConfig, writeProfileConfig } from '@/util/configuration'
-import { API_BASE_URL } from '@/util/constants'
 import { intro, outro, confirm, spinner, text } from '@clack/prompts'
 import { z } from 'zod'
 
 export default class CreateProfile extends BaseCommand {
   private profiles: ProfileConfig
+  private static readonly API_BASE_URL = 'https://api.keyshade.xyz'
 
   getName(): string {
     return 'create'
@@ -36,7 +36,7 @@ export default class CreateProfile extends BaseCommand {
         short: '-b',
         long: '--base-url <string>',
         description: 'Base URL for the keyshade server',
-        defaultValue: API_BASE_URL
+        defaultValue: CreateProfile.API_BASE_URL
       },
       {
         short: '',
@@ -101,9 +101,9 @@ export default class CreateProfile extends BaseCommand {
 
       baseUrl =
         (await text({
-          message: `Enter the base URL for the keyshade server (default: ${API_BASE_URL})`,
-          placeholder: API_BASE_URL
-        })) || API_BASE_URL
+          message: `Enter the base URL for the keyshade server (default: ${CreateProfile.API_BASE_URL})`,
+          placeholder: CreateProfile.API_BASE_URL
+        })) || CreateProfile.API_BASE_URL
 
       setDefault = await confirm({
         message: 'Set the profile as the default profile?',
