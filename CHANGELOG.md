@@ -1,3 +1,9 @@
+## [2.14.0-stage.34](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.33...v2.14.0-stage.34) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **sidebar:** update label from BETA to ALPHA ([#876](https://github.com/keyshade-xyz/keyshade/issues/876)) ([9bdf47c](https://github.com/keyshade-xyz/keyshade/commit/9bdf47c62e15ef65cc2ae712e068d552b372e5c4))
+
 ## [2.14.0-stage.33](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.32...v2.14.0-stage.33) (2025-04-23)
 
 ### 🐛 Bug Fixes

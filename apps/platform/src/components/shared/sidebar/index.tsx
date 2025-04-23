@@ -57,7 +57,7 @@ function Sidebar(): JSX.Element {
             <KeyshadeLogoSVG /> Keyshade
           </div>
           <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
-            BETA
+            ALPHA
           </div>
         </div>
         <Combobox />
