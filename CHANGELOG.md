@@ -1,3 +1,9 @@
+## [2.14.0-stage.36](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.35...v2.14.0-stage.36) (2025-04-23)
+
+### 🚀 Features
+
+* **platform:** OAuth login failure toast ([dc32cca](https://github.com/keyshade-xyz/keyshade/commit/dc32ccac890ccd04eabe27c529855674c1f2c51b))
+
 ## [2.14.0-stage.35](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.34...v2.14.0-stage.35) (2025-04-23)
 
 ### 🐛 Bug Fixes
