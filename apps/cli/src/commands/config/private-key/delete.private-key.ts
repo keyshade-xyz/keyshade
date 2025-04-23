@@ -3,7 +3,6 @@ import {
   type CommandActionData,
   type CommandOption
 } from '@/types/command/command.types'
-import { type PrivateKeyConfig } from '@/types/index.types'
 import {
   fetchPrivateKeyConfig,
   writePrivateKeyConfig
@@ -48,18 +47,9 @@ export default class DeletePrivateKey extends BaseCommand {
       )
     }
 
-    const filteredKeys: PrivateKeyConfig = Object.entries(privateKeys)
-      .filter(([key]) => {
-        if (key !== `${workspace}_${project}`) {
-          return true
-        }
-        return false
-      })
-      .reduce((acc: PrivateKeyConfig, [key, value]) => {
-        acc[key] = value
-        return acc
-      }, {})
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete privateKeys[`${workspace}_${project}`]
 
-    await writePrivateKeyConfig(filteredKeys)
+    await writePrivateKeyConfig(privateKeys)
   }
 }
