@@ -1,3 +1,9 @@
+## [2.14.0-stage.38](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.37...v2.14.0-stage.38) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **docker:** update next.config file extension from mjs to ts ([#880](https://github.com/keyshade-xyz/keyshade/issues/880)) ([bd5f26a](https://github.com/keyshade-xyz/keyshade/commit/bd5f26a53e45c7f4a2bd084ea19d08c7faf20ebb))
+
 ## [2.14.0-stage.37](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.36...v2.14.0-stage.37) (2025-04-23)
 
 ### 🚀 Features
