@@ -1,3 +1,9 @@
+## [2.14.0-stage.35](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.34...v2.14.0-stage.35) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **navbar:** update keyboard shortcut display to include '+' for users ([#877](https://github.com/keyshade-xyz/keyshade/issues/877)) ([e42c233](https://github.com/keyshade-xyz/keyshade/commit/e42c23370719a9767b5a238a09f4e5eb312f7769))
+
 ## [2.14.0-stage.34](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.33...v2.14.0-stage.34) (2025-04-23)
 
 ### 🐛 Bug Fixes
