@@ -58,11 +58,12 @@ export default class RunCommand extends BaseCommand {
     const { environment, project, workspace, quitOnDecryptionFailure } =
       await fetchProjectRootConfig()
     const privateKeyConfig = await fetchPrivateKeyConfig()
-    const privateKey =
-      privateKeyConfig[`${workspace}_${project}_${environment}`]
+    const privateKey = privateKeyConfig[`${workspace}_${project}`]
 
     if (!privateKey) {
-      throw new Error('Private key not found. Please run `keyshade init`')
+      throw new Error(
+        'Private key not found for this project and workspace combo. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
+      )
     }
 
     return {
