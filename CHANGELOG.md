@@ -1,3 +1,9 @@
+## [2.14.0-stage.33](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.32...v2.14.0-stage.33) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **platform:** UI improvements in profile and workspace settings ([#874](https://github.com/keyshade-xyz/keyshade/issues/874)) ([6b9a85e](https://github.com/keyshade-xyz/keyshade/commit/6b9a85ee773aaf749fa1d2a3746b3910d1665b43))
+
 ## [2.14.0-stage.32](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.31...v2.14.0-stage.32) (2025-04-22)
 
 ### 🐛 Bug Fixes
