@@ -1,3 +1,9 @@
+## [2.14.0-stage.39](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.38...v2.14.0-stage.39) (2025-04-23)
+
+### 🚀 Features
+
+* **cli:** Add commands to update keyshade.json and private keys ([#882](https://github.com/keyshade-xyz/keyshade/issues/882)) ([db6fc32](https://github.com/keyshade-xyz/keyshade/commit/db6fc32cc9323e0c1274df8fbd8860ccebe7ddec))
+
 ## [2.14.0-stage.38](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.37...v2.14.0-stage.38) (2025-04-23)
 
 ### 🐛 Bug Fixes
