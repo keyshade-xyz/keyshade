@@ -1,3 +1,9 @@
+## [2.14.0-stage.37](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.36...v2.14.0-stage.37) (2025-04-23)
+
+### 🚀 Features
+
+* **layout:** add TopBanner component for alpha launch ([#878](https://github.com/keyshade-xyz/keyshade/issues/878)) ([edfcc5d](https://github.com/keyshade-xyz/keyshade/commit/edfcc5d0eb910d42c79ce60dab53caf8f21fee4f))
+
 ## [2.14.0-stage.36](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.35...v2.14.0-stage.36) (2025-04-23)
 
 ### 🚀 Features
