@@ -6,10 +6,10 @@ function TopBanner() {
       Keyshade Alpha is launching April 30th 5:00 PM IST —{' '}
       <a
         className="text-brandBlue font-medium"
-        href="https://discord.gg/tUcVq9vbjZ"
+        href="https://lu.ma/08j3uc8f"
       >
         {' '}
-        Join Our Discord →{' '}
+        Join our Launch Party  →{' '}
       </a>
     </div>
   )
