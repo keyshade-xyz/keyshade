@@ -6,12 +6,14 @@ interface SettingsLayoutProps {
   // params: { slug: string }
   billing: React.ReactNode
   profile: React.ReactNode
+  invites: React.ReactNode
 }
 
 function SettingsLayout({
   // params,
   billing,
-  profile
+  profile,
+  invites
 }: SettingsLayoutProps): React.JSX.Element {
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
@@ -19,6 +21,7 @@ function SettingsLayout({
     <main>
       {tab === 'profile' && profile}
       {tab === 'billing' && billing}
+      {tab === 'invites' && invites}
     </main>
   )
 }
