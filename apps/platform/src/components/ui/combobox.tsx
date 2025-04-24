@@ -1,21 +1,9 @@
 'use client'
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
 import { useAtom, useSetAtom } from 'jotai'
-import { AddSVG } from '@public/svg/shared'
 import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
-import { Label } from './label'
-import { Input } from './input'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from './dialog'
-import { Button } from './button'
+import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
 import { InfiniteScrollList } from './infinite-scroll-list'
 import { WorkspaceListItem } from './workspace-list-item'
 import {
@@ -30,22 +18,18 @@ import {
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { allWorkspacesAtom, globalSearchDataAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  allWorkspacesAtom,
+  globalSearchDataAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
 export function Combobox(): React.JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
-  const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const getWorkspacesOfUser = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
-  )
-
-  const createWorkspace = useHttp(() =>
-    ControllerInstance.getInstance().workspaceController.createWorkspace({
-      name: newWorkspaceName
-    })
   )
 
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
@@ -53,31 +37,6 @@ export function Combobox(): React.JSX.Element {
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
-
-  const handleCreateWorkspace = useCallback(async () => {
-    if (newWorkspaceName.trim() === '') {
-      toast.error('Workspace name is empty', {
-        description: 'Please enter a workspace name'
-      })
-      return
-    }
-
-    setIsLoading(true)
-    toast.loading('Creating workspace...')
-
-    try {
-      const { success, data } = await createWorkspace()
-
-      if (success && data) {
-        toast.success('Workspace created successfully')
-        setSelectedWorkspace(data)
-        setOpen(false)
-      }
-    } finally {
-      setIsLoading(false)
-      toast.dismiss()
-    }
-  }, [createWorkspace, newWorkspaceName, setSelectedWorkspace])
 
   const fetchWorkspaces = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
@@ -131,7 +90,12 @@ export function Combobox(): React.JSX.Element {
         setSelectedWorkspace(data.items[0])
       }
     })
-  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData, setAllWorkspaces])
+  }, [
+    setSelectedWorkspace,
+    getWorkspacesOfUser,
+    setGlobalSearchData,
+    setAllWorkspaces
+  ])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -172,53 +136,12 @@ export function Combobox(): React.JSX.Element {
                   fetchFunction={fetchWorkspaces}
                   itemComponent={renderWorkspaceListItem}
                   itemKey={(workspace) => workspace.id}
-                  itemsPerPage={4}
+                  itemsPerPage={10}
                 />
               </div>
             </CommandList>
           </Command>
-          <Dialog>
-            <DialogTrigger asChild className="w-full">
-              <Button className="mt-5 w-full">
-                <AddSVG /> New workspace
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#1E1E1F]">
-              <DialogHeader>
-                <DialogTitle>Make a new workspace</DialogTitle>
-                <DialogDescription>
-                  Create a new workspace to organize your projects.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-y-8">
-                <div className="flex w-full flex-col">
-                  <div className="flex flex-row items-center gap-4">
-                    <Label className="text-right" htmlFor="name">
-                      Name
-                    </Label>
-                    <Input
-                      className="col-span-3"
-                      id="name"
-                      onChange={(e) => {
-                        setNewWorkspaceName(e.target.value)
-                      }}
-                      placeholder="Enter the name"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex w-full justify-end">
-                  <Button
-                    disabled={isLoading}
-                    onClick={handleCreateWorkspace}
-                    variant="secondary"
-                  >
-                    Add workspace
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AddWorkspaceDialog />
         </div>
       </PopoverContent>
     </Popover>
