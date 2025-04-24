@@ -1,3 +1,13 @@
+## [2.14.0-stage.42](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.41...v2.14.0-stage.42) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** UseEffectEvent Build error fix ([#884](https://github.com/keyshade-xyz/keyshade/issues/884)) ([c314cb8](https://github.com/keyshade-xyz/keyshade/commit/c314cb89c62b0d8ce744b48b1b998b1e7dd0ebd8))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Update release to deploy to prod ([7232d4c](https://github.com/keyshade-xyz/keyshade/commit/7232d4c96201f0a50a94324e0c9be2eeaca39220))
+
 ## [2.14.0-stage.41](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.40...v2.14.0-stage.41) (2025-04-24)
 
 ### 🐛 Bug Fixes
