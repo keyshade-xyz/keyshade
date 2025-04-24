@@ -149,7 +149,7 @@ jobs:
         run: |
           # Run migrations
           pnpm db:generate-types
-          pnpm db:deploy-migrations
+          DATABASE_URL=$DATABASE_URL pnpm db:deploy-migrations
 
   release-sentry-api:
     name: Sentry API
