@@ -134,7 +134,7 @@ function Navbar(): React.JSX.Element {
                   <span className={isApple ? 'text-base leading-[0px]' : ''}>
                     {isApple ? '⌘' : 'ctrl'}
                   </span>{' '}
-                  K
+                  + K
                 </kbd>
               </button>
               <DropdownMenu>
