@@ -1,26 +1,32 @@
 'use client'
+import React, { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import React from 'react'
 
 interface SettingsLayoutProps {
-  // params: { slug: string }
   billing: React.ReactNode
   profile: React.ReactNode
 }
 
-function SettingsLayout({
-  // params,
-  billing,
-  profile
-}: SettingsLayoutProps): React.JSX.Element {
+function SettingsTabs({ billing, profile }: SettingsLayoutProps) {
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
   return (
-    <main>
+    <>
       {tab === 'profile' && profile}
       {tab === 'billing' && billing}
-    </main>
+    </>
   )
 }
 
-export default SettingsLayout
+export default function SettingsLayout({
+  billing,
+  profile
+}: SettingsLayoutProps): React.JSX.Element {
+  return (
+    <main>
+      <Suspense fallback={null}>
+        <SettingsTabs billing={billing} profile={profile} />
+      </Suspense>
+    </main>
+  )
+}
