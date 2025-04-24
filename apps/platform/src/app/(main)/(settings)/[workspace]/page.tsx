@@ -2,8 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import dynamic from 'next/dynamic'
-import type { EmojiClickData } from 'emoji-picker-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
@@ -26,13 +24,17 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-
-const EmojiPicker = dynamic(
-  () => {
-    return import('emoji-picker-react')
-  },
-  { ssr: false }
-)
+import {
+  EmojiPicker,
+  EmojiPickerSearch,
+  EmojiPickerContent,
+  EmojiPickerFooter,
+} from "@/components/ui/emoji-picker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
@@ -56,10 +58,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     icon: selectedWorkspace?.icon || '🔥'
   })
 
-  function handleEmojiSelect(emojiData: EmojiClickData) {
+  function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
       ...workspaceData,
-      icon: emojiData.emoji
+      icon: emojiData
     })
     setShowPicker(false)
   }
@@ -253,20 +255,23 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             </span>
           </div>
           <div className="flex flex-row justify-end gap-x-4">
-            <span
-              aria-label="emoji"
-              className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl"
-              onClick={() => setShowPicker(!showPicker)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setShowPicker(!showPicker)
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              {workspaceData.icon}
-            </span>
+            <Popover onOpenChange={setShowPicker} open={showPicker}>
+              <PopoverTrigger asChild>
+                <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl cursor-pointer">
+                  {workspaceData.icon}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit p-0">
+                <EmojiPicker
+                  className="h-[342px]"
+                  onEmojiSelect={({ emoji }) => handleEmojiSelect(emoji)}
+                >
+                  <EmojiPickerSearch />
+                  <EmojiPickerContent />
+                  <EmojiPickerFooter />
+                </EmojiPicker>
+              </PopoverContent>
+            </Popover>
           </div>
         </section>
 
@@ -338,8 +343,6 @@ export default function WorkspaceSettingsPage(): JSX.Element {
       {isDeleteWorkspaceOpen && selectedWorkspace ? (
         <ConfirmDeleteWorkspace />
       ) : null}
-
-      {showPicker ? <EmojiPicker onEmojiClick={handleEmojiSelect} /> : null}
     </main>
   )
 }

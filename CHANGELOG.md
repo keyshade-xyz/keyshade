@@ -1,3 +1,57 @@
+## [2.14.0-stage.41](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.40...v2.14.0-stage.41) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** Multiple API calls During add workspace ([#883](https://github.com/keyshade-xyz/keyshade/issues/883)) ([dd985be](https://github.com/keyshade-xyz/keyshade/commit/dd985be2deb228eac2d2c628e141ba219db82337))
+
+## [2.14.0-stage.40](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.39...v2.14.0-stage.40) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** Update command group headings to uppercase and adjust text color ([#881](https://github.com/keyshade-xyz/keyshade/issues/881)) ([ea8fb67](https://github.com/keyshade-xyz/keyshade/commit/ea8fb67867aba024984be782664d02f981068bcd))
+
+## [2.14.0-stage.39](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.38...v2.14.0-stage.39) (2025-04-23)
+
+### 🚀 Features
+
+* **cli:** Add commands to update keyshade.json and private keys ([#882](https://github.com/keyshade-xyz/keyshade/issues/882)) ([db6fc32](https://github.com/keyshade-xyz/keyshade/commit/db6fc32cc9323e0c1274df8fbd8860ccebe7ddec))
+
+## [2.14.0-stage.38](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.37...v2.14.0-stage.38) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **docker:** update next.config file extension from mjs to ts ([#880](https://github.com/keyshade-xyz/keyshade/issues/880)) ([bd5f26a](https://github.com/keyshade-xyz/keyshade/commit/bd5f26a53e45c7f4a2bd084ea19d08c7faf20ebb))
+
+## [2.14.0-stage.37](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.36...v2.14.0-stage.37) (2025-04-23)
+
+### 🚀 Features
+
+* **layout:** add TopBanner component for alpha launch ([#878](https://github.com/keyshade-xyz/keyshade/issues/878)) ([edfcc5d](https://github.com/keyshade-xyz/keyshade/commit/edfcc5d0eb910d42c79ce60dab53caf8f21fee4f))
+
+## [2.14.0-stage.36](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.35...v2.14.0-stage.36) (2025-04-23)
+
+### 🚀 Features
+
+* **platform:** OAuth login failure toast ([dc32cca](https://github.com/keyshade-xyz/keyshade/commit/dc32ccac890ccd04eabe27c529855674c1f2c51b))
+
+## [2.14.0-stage.35](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.34...v2.14.0-stage.35) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **navbar:** update keyboard shortcut display to include '+' for users ([#877](https://github.com/keyshade-xyz/keyshade/issues/877)) ([e42c233](https://github.com/keyshade-xyz/keyshade/commit/e42c23370719a9767b5a238a09f4e5eb312f7769))
+
+## [2.14.0-stage.34](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.33...v2.14.0-stage.34) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **sidebar:** update label from BETA to ALPHA ([#876](https://github.com/keyshade-xyz/keyshade/issues/876)) ([9bdf47c](https://github.com/keyshade-xyz/keyshade/commit/9bdf47c62e15ef65cc2ae712e068d552b372e5c4))
+
+## [2.14.0-stage.33](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.32...v2.14.0-stage.33) (2025-04-23)
+
+### 🐛 Bug Fixes
+
+* **platform:** UI improvements in profile and workspace settings ([#874](https://github.com/keyshade-xyz/keyshade/issues/874)) ([6b9a85e](https://github.com/keyshade-xyz/keyshade/commit/6b9a85ee773aaf749fa1d2a3746b3910d1665b43))
+
 ## [2.14.0-stage.32](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.31...v2.14.0-stage.32) (2025-04-22)
 
 ### 🐛 Bug Fixes

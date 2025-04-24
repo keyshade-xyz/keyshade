@@ -138,7 +138,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-
       - name: Install PNPM
         run: npm i -g pnpm
 
@@ -442,7 +441,6 @@ jobs:
     needs: release
     name: Publish CLI
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     outputs:
       skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
@@ -511,7 +509,15 @@ jobs:
 
       - name: Publish
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: cd apps/cli && npm publish --provenance --access public
+        run: |
+          ## Determine release tag
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            release_tag=latest
+          else
+            release_tag=stage
+          fi
+
+          cd apps/cli && npm publish --provenance --access public --tag $release_tag
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

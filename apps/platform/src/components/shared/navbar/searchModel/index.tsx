@@ -148,14 +148,14 @@ function SearchModel({
           <>
             {searchResults.workspaces.length > 0 && (
               <>
-                <CommandGroup heading="Workspaces">
+                <CommandGroup heading="WORKSPACES">
                   {searchResults.workspaces.map(workspace => (
                     <CommandItem
                     key={workspace.id}
                     onClick={() => handleChangeWorkspace(workspace)}
                     >
                       <span>{workspace.name}</span>
-                      {workspace.slug ? <span className="text-sm text-gray-500 ml-2">
+                      {workspace.slug ? <span className="text-sm text-gray-200 ml-2">
                           ({workspace.slug})
                         </span> : null}
                     </CommandItem>
@@ -167,7 +167,7 @@ function SearchModel({
 
             {searchResults.secrets.length > 0 && (
               <>
-                <CommandGroup heading="Secrets">
+                <CommandGroup heading="SECRETS">
                   {searchResults.secrets.map(secret => (
                     <Link
                     href={`/${selectedWorkspace!.slug}/${secret.project?.slug ?? selectedProject?.slug}?tab=secret&highlight=${secret.slug}`}
@@ -175,7 +175,7 @@ function SearchModel({
                     >
                       <CommandItem>
                         <span>{secret.slug}</span>
-                        {secret.slug ? <span className="text-sm text-gray-500 ml-2">
+                        {secret.slug ? <span className="text-sm text-gray-200 ml-2">
                             ({secret.slug})
                           </span> : null}
                       </CommandItem>
@@ -188,7 +188,7 @@ function SearchModel({
 
             {searchResults.projects.length > 0 && (
               <>
-                <CommandGroup heading="Projects">
+                <CommandGroup heading="PROJECTS">
                   {searchResults.projects.map(project => (
                     <Link
                     href={`/${selectedWorkspace!.slug}/${project.slug}?tab=secret`}
@@ -196,7 +196,7 @@ function SearchModel({
                     >
                       <CommandItem key={project.slug}>
                         <span>{project.slug}</span>
-                        {project.description ? <span className="text-sm text-gray-500 ml-2">
+                        {project.description ? <span className="text-sm text-gray-200 ml-2">
                             {project.description}
                           </span> : null}
                       </CommandItem>
@@ -209,7 +209,7 @@ function SearchModel({
 
             {searchResults.environments.length > 0 && (
               <>
-                <CommandGroup heading="Environments">
+                <CommandGroup heading="ENVIRONMENTS">
                   {searchResults.environments.map(environment => (
                     <Link
                     href={`/${selectedWorkspace!.slug}/${environment.project?.slug ?? selectedProject?.slug}?tab=environment&highlight=${environment.slug}`}
@@ -217,7 +217,7 @@ function SearchModel({
                     >
                       <CommandItem>
                         <span>{environment.slug}</span>
-                        {environment.description ? <span className="text-sm text-gray-500 ml-2">
+                        {environment.description ? <span className="text-sm text-gray-200 ml-2">
                             {environment.description}
                           </span> : null}
                       </CommandItem>
@@ -229,7 +229,7 @@ function SearchModel({
             )}
 
             {searchResults.variables.length > 0 && (
-              <CommandGroup heading="Variables">
+              <CommandGroup heading="VARIABLES">
                 {searchResults.variables.map(variable => (
                   <Link
                   href={`/${selectedWorkspace!.slug}/${variable.project?.slug ?? selectedProject?.slug}?tab=variable&highlight=${variable.slug}`}
@@ -237,7 +237,7 @@ function SearchModel({
                   >
                     <CommandItem>
                       <span>{variable.name}</span>
-                      {variable.note ? <span className="text-sm text-gray-500 ml-2">
+                      {variable.note ? <span className="text-sm text-gray-200 ml-2">
                           {variable.note}
                         </span> : null}
                     </CommandItem>
