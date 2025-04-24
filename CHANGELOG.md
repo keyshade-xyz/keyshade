@@ -1,3 +1,44 @@
+## [2.15.0](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0...v2.15.0) (2025-04-24)
+
+### 🚀 Features
+
+* **cli:** Add commands to update keyshade.json and private keys ([#882](https://github.com/keyshade-xyz/keyshade/issues/882)) ([55e4c15](https://github.com/keyshade-xyz/keyshade/commit/55e4c15b06171e45d3bb3dbfed9fc92489dbd1d0))
+* **layout:** add TopBanner component for alpha launch ([#878](https://github.com/keyshade-xyz/keyshade/issues/878)) ([a6072fb](https://github.com/keyshade-xyz/keyshade/commit/a6072fb363d4a3fe202645df09e46ed36bc7920f))
+* **platform:** OAuth login failure toast ([21e0b6c](https://github.com/keyshade-xyz/keyshade/commit/21e0b6c3d76885051ebcbc81bb855cdb2b906c1e))
+* **platform:** Updated search component ([#834](https://github.com/keyshade-xyz/keyshade/issues/834)) ([24f0ec1](https://github.com/keyshade-xyz/keyshade/commit/24f0ec1846f1f93c68896f8375f4cd957fa6f4db))
+* **platform:** Upgrade to Next 15.2.3 ([#869](https://github.com/keyshade-xyz/keyshade/issues/869)) ([78020a6](https://github.com/keyshade-xyz/keyshade/commit/78020a64c9b2767dc59915fd580d88431d1d3b02))
+
+### 🐛 Bug Fixes
+
+* **docker:** update next.config file extension from mjs to ts ([#880](https://github.com/keyshade-xyz/keyshade/issues/880)) ([6b2c349](https://github.com/keyshade-xyz/keyshade/commit/6b2c349f26db056961469ba05cfbd867a3f7691b))
+* **navbar:** update keyboard shortcut display to include '+' for users ([#877](https://github.com/keyshade-xyz/keyshade/issues/877)) ([83ec331](https://github.com/keyshade-xyz/keyshade/commit/83ec3318f534e9b427de7b3637517c9d6eac0970))
+* **platform:** Multiple API calls During add workspace ([#883](https://github.com/keyshade-xyz/keyshade/issues/883)) ([666a453](https://github.com/keyshade-xyz/keyshade/commit/666a453a2d9913d3a4db8e3a91532e6dbb1184df))
+* **platform:** UI improvements in profile and workspace settings ([#874](https://github.com/keyshade-xyz/keyshade/issues/874)) ([9eb4497](https://github.com/keyshade-xyz/keyshade/commit/9eb4497500bc0b71ba63c5271c333783bda25a5c))
+* **platform:** Update command group headings to uppercase and adjust text color ([#881](https://github.com/keyshade-xyz/keyshade/issues/881)) ([2be9199](https://github.com/keyshade-xyz/keyshade/commit/2be9199f327c2643a91d279d3bbb130c279e7557))
+* **sidebar:** update label from BETA to ALPHA ([#876](https://github.com/keyshade-xyz/keyshade/issues/876)) ([f65efb0](https://github.com/keyshade-xyz/keyshade/commit/f65efb0955179f4e7ea6af71bf790f2917500c91))
+* Update lockfile ([8138219](https://github.com/keyshade-xyz/keyshade/commit/813821992e8b8a7b143b44f0c5678bdefc806a49))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Update release to deploy to prod ([31abdf9](https://github.com/keyshade-xyz/keyshade/commit/31abdf9565da912ebbd9d1f4cd2a7f0d6618e17d))
+* **cli:** Bump version to 2.5.3 ([241576e](https://github.com/keyshade-xyz/keyshade/commit/241576e21c3855794b4095978cd66140b4d38561))
+* **release:** 2.14.0-stage.30 [skip ci] ([8578c4e](https://github.com/keyshade-xyz/keyshade/commit/8578c4e953b9eba1865f04baf1f5d1c5182738bc))
+* **release:** 2.14.0-stage.31 [skip ci] ([084590f](https://github.com/keyshade-xyz/keyshade/commit/084590f3657a880a2eaeec76e674e49cffb327c8))
+* **release:** 2.14.0-stage.32 [skip ci] ([a99ad13](https://github.com/keyshade-xyz/keyshade/commit/a99ad137d2de2e4f7023467af33c406b49a8da8a))
+* **release:** 2.14.0-stage.33 [skip ci] ([4213f5b](https://github.com/keyshade-xyz/keyshade/commit/4213f5b9c5f37b4cb56ab7d8a6d46c23722d7307))
+* **release:** 2.14.0-stage.34 [skip ci] ([0101d11](https://github.com/keyshade-xyz/keyshade/commit/0101d11cc74c48b15d02817141574db2f005c199))
+* **release:** 2.14.0-stage.35 [skip ci] ([496ad3c](https://github.com/keyshade-xyz/keyshade/commit/496ad3c1ae7d1349d88fba0a0b2d3147adfdfcd5))
+* **release:** 2.14.0-stage.36 [skip ci] ([ea92298](https://github.com/keyshade-xyz/keyshade/commit/ea92298b80f62d87ff1c13f353ae442550ba9531))
+* **release:** 2.14.0-stage.37 [skip ci] ([b9ef749](https://github.com/keyshade-xyz/keyshade/commit/b9ef7498fbbb8d09454e04f66cd6fe28cb0450b0))
+* **release:** 2.14.0-stage.38 [skip ci] ([2a240b8](https://github.com/keyshade-xyz/keyshade/commit/2a240b8aff43719c0505e650118659a4b9c76189))
+* **release:** 2.14.0-stage.39 [skip ci] ([2c397cc](https://github.com/keyshade-xyz/keyshade/commit/2c397ccb374d2791e136e63663ec76af280c960d))
+* **release:** 2.14.0-stage.40 [skip ci] ([73195ac](https://github.com/keyshade-xyz/keyshade/commit/73195aca0756b58fce21313214994743295ba744))
+* **release:** 2.14.0-stage.41 [skip ci] ([508e51b](https://github.com/keyshade-xyz/keyshade/commit/508e51b89a48e4d405cdd021f5b8e6cc3a29b75e))
+
+### 🔨 Code Refactoring
+
+* **platform:** Update switch component styles for checked state ([#870](https://github.com/keyshade-xyz/keyshade/issues/870)) ([2bd11f0](https://github.com/keyshade-xyz/keyshade/commit/2bd11f0a079779855d6a7db5e9b7ba7986ea3517))
+
 ## [2.14.0-stage.41](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.40...v2.14.0-stage.41) (2025-04-24)
 
 ### 🐛 Bug Fixes
