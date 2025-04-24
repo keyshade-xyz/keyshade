@@ -1,3 +1,9 @@
+## [2.14.0-stage.41](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.40...v2.14.0-stage.41) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** Multiple API calls During add workspace ([#883](https://github.com/keyshade-xyz/keyshade/issues/883)) ([dd985be](https://github.com/keyshade-xyz/keyshade/commit/dd985be2deb228eac2d2c628e141ba219db82337))
+
 ## [2.14.0-stage.40](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.39...v2.14.0-stage.40) (2025-04-24)
 
 ### 🐛 Bug Fixes
