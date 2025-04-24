@@ -1,3 +1,13 @@
+## [2.15.1](https://github.com/keyshade-xyz/keyshade/compare/v2.15.0...v2.15.1) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** UseEffectEvent Build error fix ([#884](https://github.com/keyshade-xyz/keyshade/issues/884)) ([d26bd48](https://github.com/keyshade-xyz/keyshade/commit/d26bd48ad583b6b0ed14926d11b9638e2ade9cd1))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.14.0-stage.42 [skip ci] ([66cef35](https://github.com/keyshade-xyz/keyshade/commit/66cef35347ca194ba6024164ea68b3c8440b6e67))
+
 ## [2.15.0](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0...v2.15.0) (2025-04-24)
 
 ### 🚀 Features
