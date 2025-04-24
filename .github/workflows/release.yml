@@ -12,7 +12,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+      environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'stage' }}
       version: ${{ steps.fetch-tag.outputs.version }}
     steps:
       - name: Checkout
@@ -69,7 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy API
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -208,7 +207,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Platform
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -324,7 +322,6 @@ jobs:
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Web
     needs: release
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
