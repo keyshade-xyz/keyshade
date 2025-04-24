@@ -1,18 +1,16 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from "react"
-import { useAtom } from "jotai"
+import type { GetWorkspaceInvitationsResponse } from "@keyshade/schema"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useHttp } from "@/hooks/use-http"
 import ControllerInstance from "@/lib/controller-instance"
-import { workspaceInvitationsAtom } from "@/store"
 
 function InvitesPage(): React.JSX.Element {
-  const [workspaceInvitations, setWorkspaceInvitations] = useAtom(workspaceInvitationsAtom)
-
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [workspaceInvitations, setWorkspaceInvitations] = useState<GetWorkspaceInvitationsResponse['items']>([])
 
   const getAllWorkspaceInvites = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.getWorkspaceInvitations({})
@@ -93,7 +91,7 @@ function InvitesPage(): React.JSX.Element {
                 <div className="mb-3 sm:mb-0">
                   <h3 className="text-lg font-semibold">{invitation.workspace.name}</h3>
                   <p className="text-text-secondary text-sm">
-                    {invitation.workspace.name} invited you to join {invitation.workspace.name}
+                    You were invited to join {invitation.workspace.name}
                   </p>
                 </div>
 

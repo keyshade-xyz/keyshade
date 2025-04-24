@@ -5,7 +5,6 @@ import type {
   Environment,
   GetAllEnvironmentsOfProjectResponse,
   GetMembersResponse,
-  GetWorkspaceInvitationsResponse,
   ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
@@ -142,5 +141,3 @@ export const editMemberOpenAtom = atom<boolean>(false)
 export const deleteAccountOpenAtom = atom<boolean>(false)
 
 export const viewAndDownloadProjectKeysOpenAtom = atom<boolean>(false)
-
-export const workspaceInvitationsAtom = atom<GetWorkspaceInvitationsResponse['items']>([])
