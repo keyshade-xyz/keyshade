@@ -33,7 +33,14 @@ export class SentryExceptionFilter extends BaseExceptionFilter {
             return event
           })
 
-          Sentry.captureException(exception)
+          const { header, body } = JSON.parse(exception.message) as {
+            header: string
+            body: string
+          }
+
+          Sentry.captureException(
+            new InternalServerErrorException(`${header}: ${body}`)
+          )
         })
 
         this.logger.error(exception)
