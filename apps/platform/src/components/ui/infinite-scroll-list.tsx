@@ -65,7 +65,7 @@ export function InfiniteScrollList<T>({
           return !prev.some((x) => itemKey(x) === itemKey(item))
         })
         const countAfter = prev.length + newItems.length
-        const more = newItems.length > 0 && countAfter < total
+        const more = countAfter < total
 
         hasMoreRef.current = more
         if (more) pageRef.current = currentPage + 1
@@ -91,7 +91,7 @@ export function InfiniteScrollList<T>({
     loadingRef.current = false
 
     loadData()
-  }, [fetchFunction, itemsPerPage, loadData])
+  }, [loadData])
 
   const lastItemRef = useCallback(
     (node: HTMLDivElement | null) => {

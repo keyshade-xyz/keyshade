@@ -79,14 +79,20 @@ function VariablePage(): React.JSX.Element {
               variables: data.items.map((item) => ({
                 slug: item.variable.slug,
                 name: item.variable.name,
-                note: item.variable.note,
+                note: item.variable.note
               }))
             }))
           }
         })
         .finally(() => setIsLoading(false))
     }
-  }, [getAllVariablesOfProject, page, selectedProject, setGlobalSearchData, setVariables])
+  }, [
+    getAllVariablesOfProject,
+    page,
+    selectedProject,
+    setGlobalSearchData,
+    setVariables
+  ])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)
@@ -139,7 +145,9 @@ function VariablePage(): React.JSX.Element {
               {variables.map((variableData) => (
                 <VariableCard
                   className={cn(
-                    highlightSlug === variableData.variable.slug && isHighlighted && 'animate-highlight'
+                    highlightSlug === variableData.variable.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
                   )}
                   key={variableData.variable.id}
                   variableData={variableData}

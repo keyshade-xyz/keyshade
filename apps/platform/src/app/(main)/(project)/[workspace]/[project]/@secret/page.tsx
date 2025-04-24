@@ -23,7 +23,6 @@ import {
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
-import { useHttp } from '@/hooks/use-http'
 import { SECRET_PAGE_SIZE } from '@/lib/constants'
 import EmptySecretListContent from '@/components/dashboard/secret/emptySecretListSection'
 import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
@@ -34,9 +33,10 @@ import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 extend(relativeTime)
 
-function SecretPage(): React.JSX.Element {
+export default function SecretPage(): React.JSX.Element {
   const searchParams = useSearchParams()
   const highlightSlug = searchParams.get('highlight')
+
   const [page, setPage] = useState(0)
   const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -54,68 +54,64 @@ function SecretPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
-
   const { projectPrivateKey } = useProjectPrivateKey()
 
-  const getAllSecretsOfProject = useHttp(() =>
-    ControllerInstance.getInstance().secretController.getAllSecretsOfProject({
-      projectSlug: selectedProject!.slug,
-      decryptValue: isDecrypted,
-      page,
-      limit: SECRET_PAGE_SIZE
-    })
-  )
-
   useEffect(() => {
-    if (selectedProject) {
-      if (secrets.length > 0) {
-        return;
-      }
+    if (!selectedProject) return
 
-      setIsLoading(true)
+    setIsLoading(true)
 
-      getAllSecretsOfProject()
-        .then(({ data, success }) => {
-          if (success && data) {
-            setSecrets((prev) =>
-              page === 0 ? data.items : [...prev, ...data.items]
-            )
-            if (data.metadata.links.next === null) {
-              setHasMoreSecret(false)
-            }
-            setGlobalSearchData((prev) => ({
-              ...prev,
-              secrets: data.items.map((item) => ({
-                slug: item.secret.slug,
-                name: item.secret.name,
-                note: item.secret.note,
-              })),
-            }))
-          }
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
-    }
-  }, [getAllSecretsOfProject, page, secrets, selectedProject, setGlobalSearchData, setSecrets])
+    ControllerInstance.getInstance()
+      .secretController.getAllSecretsOfProject({
+        projectSlug: selectedProject.slug,
+        decryptValue: isDecrypted,
+        page,
+        limit: SECRET_PAGE_SIZE
+      })
+      .then(({ data, success }) => {
+        if (!success || !data) return
+
+        setSecrets((prev) =>
+          page === 0 ? data.items : [...prev, ...data.items]
+        )
+
+        const nextLink = data.metadata.links.next
+        setHasMoreSecret(nextLink !== null)
+
+        setGlobalSearchData((prev) => ({
+          ...prev,
+          secrets:
+            page === 0
+              ? data.items.map((item) => ({
+                  slug: item.secret.slug,
+                  name: item.secret.name,
+                  note: item.secret.note
+                }))
+              : [
+                  ...prev.secrets,
+                  ...data.items.map((item) => ({
+                    slug: item.secret.slug,
+                    name: item.secret.name,
+                    note: item.secret.note
+                  }))
+                ]
+        }))
+      })
+      .finally(() => setIsLoading(false))
+  }, [selectedProject, page, isDecrypted, setGlobalSearchData, setSecrets])
 
   const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1)
+    setPage((prev) => prev + 1)
   }
 
   useEffect(() => {
-    if (highlightSlug) {
-      // Find and scroll to the element
-      const element = document.getElementById(`secret-${highlightSlug}`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        setIsHighlighted(true)
+    if (!highlightSlug || secrets.length === 0) return
 
-        // Remove highlight after animation
-        setTimeout(() => {
-          setIsHighlighted(false)
-        }, 2000)
-      }
+    const element = document.getElementById(`secret-${highlightSlug}`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setIsHighlighted(true)
+      setTimeout(() => setIsHighlighted(false), 2000)
     }
   }, [highlightSlug, secrets])
 
@@ -130,12 +126,15 @@ function SecretPage(): React.JSX.Element {
   }
 
   return (
-    <div className={`flex h-full w-full justify-center `}>
+    <div className="flex h-full w-full justify-center">
       {secrets.length === 0 ? (
         <EmptySecretListContent />
       ) : (
         <div
-          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteSecretOpen ? 'inert' : ''} `}
+          className={cn(
+            'flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white',
+            isDeleteSecretOpen && 'inert'
+          )}
         >
           <div className="flex h-fit w-full flex-col gap-4">
             <Accordion
@@ -146,7 +145,9 @@ function SecretPage(): React.JSX.Element {
               {secrets.map((secretData) => (
                 <SecretCard
                   className={cn(
-                    highlightSlug === secretData.secret.slug && isHighlighted && 'animate-highlight'
+                    highlightSlug === secretData.secret.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
                   )}
                   isDecrypted={isDecrypted}
                   key={secretData.secret.id}
@@ -171,25 +172,16 @@ function SecretPage(): React.JSX.Element {
             Load more
           </Button>
 
-          {/* Delete secret alert dialog */}
           {isDeleteSecretOpen && selectedSecret ? (
             <ConfirmDeleteSecret />
           ) : null}
-
-          {/* Edit secret sheet */}
           {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
-
-          {/* Delete environment value of secret alert dialog */}
           {isDeleteEnvironmentValueOfSecretOpen && selectedSecret ? (
             <ConfirmDeleteEnvironmentValueOfSecretDialog />
           ) : null}
-
-          {/* Secret revisions sheet */}
           {isSecretRevisionsOpen && selectedSecret ? (
             <SecretRevisionsSheet />
           ) : null}
-
-          {/* Rollback secret alert dialog */}
           {isRollbackSecretOpen && selectedSecret ? (
             <ConfirmRollbackSecret />
           ) : null}
@@ -198,5 +190,3 @@ function SecretPage(): React.JSX.Element {
     </div>
   )
 }
-
-export default SecretPage
