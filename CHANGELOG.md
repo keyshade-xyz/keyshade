@@ -1,3 +1,9 @@
+## [2.14.0-stage.40](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.39...v2.14.0-stage.40) (2025-04-24)
+
+### 🐛 Bug Fixes
+
+* **platform:** Update command group headings to uppercase and adjust text color ([#881](https://github.com/keyshade-xyz/keyshade/issues/881)) ([ea8fb67](https://github.com/keyshade-xyz/keyshade/commit/ea8fb67867aba024984be782664d02f981068bcd))
+
 ## [2.14.0-stage.39](https://github.com/keyshade-xyz/keyshade/compare/v2.14.0-stage.38...v2.14.0-stage.39) (2025-04-23)
 
 ### 🚀 Features
