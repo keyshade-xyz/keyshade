@@ -20,6 +20,7 @@ import { EnvironmentLoader } from '@/components/dashboard/environment/environmen
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import { cn } from '@/lib/utils'
+import { PageTitle } from '@/components/common/page-title'
 
 function EnvironmentItemComponent({
   item,
@@ -118,6 +119,7 @@ function EnvironmentPage(): React.JSX.Element {
     <div
       className={`flex h-full w-full ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
     >
+      <PageTitle title={`${selectedProject?.name} | Environments`} />
       {/* Showing this when there are no environments present */}
       {environments.length === 0 ? (
         <EmptyEnvironmentListContent />
