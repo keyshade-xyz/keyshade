@@ -137,3 +137,7 @@
 - Hardcoded API base URL
 - Updated pipeline to release stage builds. Can be installed using `pnpm add @keyshade/cli@stage`
 - Add logging to denote config file creation
+
+## 3.0.1
+
+- Critical release to make CI pass. No changes were introduced
