@@ -108,7 +108,7 @@ export default function Index(): React.JSX.Element {
   ])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         {!isProjectsEmpty && (
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
