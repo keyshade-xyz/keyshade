@@ -453,7 +453,12 @@ jobs:
         id: check-versions
         run: |
           current_version=`jq -r '.version' apps/cli/package.json`
-          published_version=`npm show @keyshade/cli version`
+
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            published_version=`npm show @keyshade/cli version`
+          else
+            published_version=`npm show @keyshade/cli@stage version`
+          fi
 
           echo "Current version: $current_version"
           echo "Published version: $published_version"
