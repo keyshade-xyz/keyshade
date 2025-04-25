@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 import { useHttp } from '@/hooks/use-http'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
+import { PageTitle } from '@/components/common/page-title'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -109,6 +110,7 @@ export default function Index(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageTitle title={`${selectedWorkspace?.name} | Dashboard`} />
       <div className="flex items-center justify-between">
         {!isProjectsEmpty && (
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
