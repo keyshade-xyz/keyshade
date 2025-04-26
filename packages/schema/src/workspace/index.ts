@@ -193,6 +193,7 @@ export const GetWorkspaceInvitationsRequest = PageRequestSchema
 
 export const GetWorkspaceInvitationsResponse = PageResponseSchema(
   z.object({
+    invitationAccepted: z.boolean(),
     workspace: z.object({
       id: z.string(),
       name: z.string(),
