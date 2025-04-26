@@ -28,7 +28,6 @@ import {
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 
-// Move MemberRow component outside of MembersTable
 function MemberRow({
   member,
   onRemoveClick,
@@ -192,6 +191,7 @@ export default function MembersTable(): React.JSX.Element {
             <InfiniteScrollList
               className="contents w-full [&>div]:contents"
               fetchFunction={fetchMembers}
+              inTable
               itemComponent={renderMemberRow}
               itemKey={(member) => member.id}
               itemsPerPage={10}
