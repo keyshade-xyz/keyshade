@@ -103,23 +103,21 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     if (!selectedWorkspace) return
     
     setIsLeavingWorkspace(true)
-    toast.loading('Leaving workspace...')
+    const loadingToast = toast.loading('Leaving workspace...')
     
     try {
       const { success } = await leaveWorkspace()
       
       if (success) {
-        toast.success('Successfully left the workspace')
-        
         setAllWorkspaces((prev) => prev.filter(w => w.id !== selectedWorkspace.id))
-        
         router.push('/')
+        toast.success('Successfully left the workspace')
       }
     } catch (error) {
       toast.error('Failed to leave the workspace')
     } finally {
       setIsLeavingWorkspace(false)
-      toast.dismiss()
+      toast.dismiss(loadingToast)
     }
   }, [leaveWorkspace, router, selectedWorkspace, setAllWorkspaces])
 
