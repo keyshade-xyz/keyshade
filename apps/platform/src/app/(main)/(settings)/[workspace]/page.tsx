@@ -1,13 +1,15 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
   allWorkspacesAtom,
   deleteWorkspaceOpenAtom,
-  selectedWorkspaceAtom
+  selectedWorkspaceAtom,
+  membersOfWorkspaceAtom,
+  userAtom
 } from '@/store'
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
@@ -46,6 +48,8 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(
     deleteWorkspaceOpenAtom
   )
+  const members = useAtomValue(membersOfWorkspaceAtom)
+  const user = useAtomValue(userAtom)
 
   const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
 
@@ -58,6 +62,16 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     name: selectedWorkspace?.name || '',
     icon: selectedWorkspace?.icon || '🔥'
   })
+
+  const [isLeavingWorkspace, setIsLeavingWorkspace] = useState<boolean>(false)
+
+  const leaveWorkspace = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.leaveWorkspace({
+      workspaceSlug: selectedWorkspace!.slug
+    })
+  )
+
+  const isOnlyMember = members.length === 1
 
   function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
@@ -84,6 +98,30 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           : workspaceData.name
     })
   )
+
+  const handleLeaveWorkspace = useCallback(async () => {
+    if (!selectedWorkspace) return
+    
+    setIsLeavingWorkspace(true)
+    toast.loading('Leaving workspace...')
+    
+    try {
+      const { success } = await leaveWorkspace()
+      
+      if (success) {
+        toast.success('Successfully left the workspace')
+        
+        setAllWorkspaces((prev) => prev.filter(w => w.id !== selectedWorkspace.id))
+        
+        router.push('/')
+      }
+    } catch (error) {
+      toast.error('Failed to leave the workspace')
+    } finally {
+      setIsLeavingWorkspace(false)
+      toast.dismiss()
+    }
+  }, [leaveWorkspace, router, selectedWorkspace, setAllWorkspaces])
 
   const handleSaveDetails = useCallback(async () => {
     if (selectedWorkspace) {
@@ -290,6 +328,52 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           <div className="w-2/5 rounded-lg border-[1px] border-white/50 px-4 py-3 text-center">
             Coming Soon
           </div>
+        </section>
+
+        <Separator className="bg-white/20" />
+
+        {/* Leave Workspace */}
+        <section className="my-5 flex w-full flex-row items-center rounded-lg border-[1px] border-yellow-500 bg-yellow-500/10 p-5">
+          <div className="flex w-3/5 flex-col gap-y-2">
+            <span className="text-lg font-semibold text-yellow-500">
+              Leave Workspace
+            </span>
+            <span className="text-sm text-white/60">
+              Remove yourself from this workspace. You will no longer have access to its resources.
+            </span>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="flex w-2/5 items-center gap-x-2 bg-yellow-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-yellow-500"
+                  disabled={
+                    isLeavingWorkspace || 
+                    selectedWorkspace?.isDefault || 
+                    isOnlyMember ||
+                    user?.email === selectedWorkspace?.ownedBy.email
+                  }
+                  onClick={handleLeaveWorkspace}
+                  role="button"
+                >
+                  <span>Leave workspace</span>
+                </Button>
+              </TooltipTrigger>
+              {selectedWorkspace?.isDefault ? (
+                <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                  <p>This is your default workspace. You can't leave it.</p>
+                </TooltipContent>
+              ) : isOnlyMember ? (
+                <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                  <p>You can't leave a workspace where you are the only member.</p>
+                </TooltipContent>
+              ) : user?.email === selectedWorkspace?.ownedBy.email ? (
+                <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
+                  <p>You can't leave a workspace you own. Transfer ownership first.</p>
+                </TooltipContent>
+              ) : null}
+            </Tooltip>
+          </TooltipProvider>
         </section>
 
         <Separator className="bg-white/20" />

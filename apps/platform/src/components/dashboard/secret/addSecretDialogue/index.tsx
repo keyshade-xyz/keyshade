@@ -26,7 +26,7 @@ import EnvironmentValueEditor from '@/components/common/environment-value-editor
 export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =
     useAtom(createSecretOpenAtom)
-  const selectedProject = useAtomValue(selectedProjectAtom)
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
 
   const [requestData, setRequestData] = useState({
@@ -44,6 +44,12 @@ export default function AddSecretDialog() {
       projectSlug: selectedProject!.slug,
       note: requestData.note,
       entries: parseUpdatedEnvironmentValues([], environmentValues)
+    })
+  )
+  
+  const refreshProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getProject({
+      projectSlug: selectedProject!.slug
     })
   )
 
@@ -80,6 +86,12 @@ export default function AddSecretDialog() {
 
           // Add the new secret to the list of secrets
           setSecrets((prev) => [...prev, data])
+          
+          // Refresh the project data to update counts
+          const projectResponse = await refreshProject()
+          if (projectResponse.success && projectResponse.data) {
+            setSelectedProject(projectResponse.data)
+          }
 
           handleClose()
         }
@@ -88,7 +100,7 @@ export default function AddSecretDialog() {
         setIsLoading(false)
       }
     }
-  }, [selectedProject, requestData.name, createSecret, setSecrets, handleClose])
+  }, [selectedProject, requestData.name, createSecret, setSecrets, refreshProject, setSelectedProject, handleClose])
 
   return (
     <div className="flex items-center justify-center gap-6">
