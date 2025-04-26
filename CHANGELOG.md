@@ -1,3 +1,15 @@
+## [2.16.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0-stage.2...v2.16.0-stage.3) (2025-04-26)
+
+### 🐛 Bug Fixes
+
+* **platform:** Close search model after selecting a link ([#896](https://github.com/keyshade-xyz/keyshade/issues/896)) ([496d3f9](https://github.com/keyshade-xyz/keyshade/commit/496d3f9f0e39ed4ca9215da9ac2f25238bc51419))
+
+## [2.16.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0-stage.1...v2.16.0-stage.2) (2025-04-26)
+
+### 🐛 Bug Fixes
+
+* **platform:** Roles tab breaking ([#893](https://github.com/keyshade-xyz/keyshade/issues/893)) ([a72250c](https://github.com/keyshade-xyz/keyshade/commit/a72250c3d62e25bc225665776ea93f545cf5e6f5))
+
 ## [2.16.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.15.1...v2.16.0-stage.1) (2025-04-25)
 
 ### 🚀 Features
