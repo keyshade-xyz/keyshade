@@ -117,7 +117,7 @@ export default function RoleCard({
                 <TooltipTrigger>
                   <AvatarComponent
                     className="ml-[-0.3rem]"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                 </TooltipTrigger>
@@ -127,7 +127,7 @@ export default function RoleCard({
                 >
                   <AvatarComponent
                     className="h-10 w-10"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                   <div className="ml-2 mr-5 flex flex-col">
