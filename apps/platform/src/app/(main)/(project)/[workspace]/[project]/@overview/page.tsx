@@ -23,6 +23,7 @@ import InformationCard from '@/components/shared/information-card'
 import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDeleteKey'
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { PageTitle } from '@/components/common/page-title'
 
 function OverviewPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -67,6 +68,7 @@ function OverviewPage(): React.JSX.Element {
 
   return (
     <div className="flex w-full gap-5 pt-2">
+      <PageTitle title={`${selectedProject.name} | Overview`} />
       <div className="flex-1 rounded-md bg-white/5 p-6 drop-shadow-[0px_1px_2px_rgba(16,24,40,0.06)]">
         <div className="flex items-start justify-between pb-5">
           <div className="flex w-full flex-col gap-3">

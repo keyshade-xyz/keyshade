@@ -1,3 +1,17 @@
+## [2.16.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.15.1...v2.16.0-stage.1) (2025-04-25)
+
+### 🚀 Features
+
+* **platform:** Added PageTitle component and update page titles across the app ([#891](https://github.com/keyshade-xyz/keyshade/issues/891)) ([572f2b1](https://github.com/keyshade-xyz/keyshade/commit/572f2b1418045f78d9e6d048416d80091c901eeb))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Prettified sentry error logs ([651ae7d](https://github.com/keyshade-xyz/keyshade/commit/651ae7d7687037d1dee14f425739528228dcb5c0))
+* **ci:** Add database URL env in migration command ([0add290](https://github.com/keyshade-xyz/keyshade/commit/0add29071638678248d93a903d530daf282a6153))
+* **cli:** Bump version to 3.0.0 ([1cf0ce8](https://github.com/keyshade-xyz/keyshade/commit/1cf0ce84af1fece125536433b242422b4300172e))
+* **cli:** Bump version to 3.0.1 ([65d6dad](https://github.com/keyshade-xyz/keyshade/commit/65d6dadedf0afbc028436e631bf52408a4c7536b))
+* **cli:** Fix release script ([4fe9067](https://github.com/keyshade-xyz/keyshade/commit/4fe90671c968d22232b0bc960e8e7b39f19a8ffc))
+
 ## [2.15.1](https://github.com/keyshade-xyz/keyshade/compare/v2.15.0...v2.15.1) (2025-04-24)
 
 ### 🐛 Bug Fixes
