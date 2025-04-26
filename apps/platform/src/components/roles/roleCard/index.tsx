@@ -117,21 +117,23 @@ export default function RoleCard({
                 <TooltipTrigger>
                   <AvatarComponent
                     className="ml-[-0.3rem]"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                 </TooltipTrigger>
                 <TooltipContent
-                  className="flex w-fit items-start justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                  className="flex w-fit items-center justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
                   sideOffset={8}
                 >
                   <AvatarComponent
                     className="h-10 w-10"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                   <div className="ml-2 mr-5 flex flex-col">
-                    <div className="font-semibold">{member.name}</div>
+                    {
+                      member.name ? <div className="font-semibold">{member.name}</div> : null
+                    }
                     <div className="text-sm">{member.email}</div>
                   </div>
                   <div className="flex flex-col items-end">
