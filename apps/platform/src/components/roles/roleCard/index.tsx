@@ -122,7 +122,7 @@ export default function RoleCard({
                   />
                 </TooltipTrigger>
                 <TooltipContent
-                  className="flex w-fit items-start justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                  className="flex w-fit items-center justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
                   sideOffset={8}
                 >
                   <AvatarComponent
@@ -131,7 +131,9 @@ export default function RoleCard({
                     profilePictureUrl={member.profilePictureUrl}
                   />
                   <div className="ml-2 mr-5 flex flex-col">
-                    <div className="font-semibold">{member.name}</div>
+                    {
+                      member.name ? <div className="font-semibold">{member.name}</div> : null
+                    }
                     <div className="text-sm">{member.email}</div>
                   </div>
                   <div className="flex flex-col items-end">
