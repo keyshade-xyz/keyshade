@@ -35,6 +35,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PageTitle } from '@/components/common/page-title'
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
@@ -160,6 +161,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
   return (
     <main>
+      <PageTitle title={`${selectedWorkspace?.name} | Settings`} />
       <div className="flex w-full flex-col gap-4 px-10 py-7 lg:w-[80vw] xl:w-[50vw]">
         {/* Header */}
         <section className="mb-5 flex flex-col gap-y-5">

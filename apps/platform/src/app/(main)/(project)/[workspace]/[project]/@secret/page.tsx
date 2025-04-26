@@ -30,6 +30,7 @@ import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSh
 import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
 import { cn } from '@/lib/utils'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { PageTitle } from '@/components/common/page-title'
 
 extend(relativeTime)
 
@@ -127,6 +128,7 @@ export default function SecretPage(): React.JSX.Element {
 
   return (
     <div className="flex h-full w-full justify-center">
+      <PageTitle title={`${selectedProject?.name} | Secrets`} />
       {secrets.length === 0 ? (
         <EmptySecretListContent />
       ) : (

@@ -11,6 +11,7 @@ import {
   rolesOfWorkspaceAtom,
   selectedWorkspaceAtom
 } from '@/store'
+import { PageTitle } from '@/components/common/page-title'
 
 function TeamPage(): React.JSX.Element {
   const setMembers = useSetAtom(membersOfWorkspaceAtom)
@@ -34,6 +35,7 @@ function TeamPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-y-10">
+      <PageTitle title={`${currentWorkspace?.name} | Members`} />
       <MembersHeader />
       <MembersTable />
     </div>
