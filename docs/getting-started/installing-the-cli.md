@@ -4,7 +4,7 @@ description: A walkthrough of how to install the Keyshade CLI
 
 # Installing the CLI
 
-The Keyshade CLI servers as the entrypoint for your projects and apps to use keyshade. Currently, our CLI binary is hosted over npm registry, and it can be installed by running the following command:
+The Keyshade CLI serves as the entrypoint for your projects and apps to use keyshade. Currently, our CLI binary is hosted over npm registry, and it can be installed by running the following command:
 
 ```sh
 npm i -g @keyshade/cli

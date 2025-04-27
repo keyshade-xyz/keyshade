@@ -15,6 +15,7 @@ So, let's get started!
 ## Creating a new project
 
 Head over to https://app.keyshade.xyz. This is where you get to access our platform. Log in with your email, or your favourite OAuth provider. Once inside, you should be greeted with a similar page like this:
+
 ![Dashboard](../../blob/dashboard.png)
 
 Now, we can start creating our project.

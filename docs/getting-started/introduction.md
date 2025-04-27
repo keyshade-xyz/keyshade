@@ -12,4 +12,4 @@ Here's the list of contents, feel free to skip to any section you like.
 - [Installing the CLI](installing-the-cli.md)
 - [Setting up your profile](setting-up-your-profile.md)
 - [Add keyshade to your project](add-keyshade-to-your-project.md)
-- [Run your app](run-your-app.md)
+- [Running your app](running-your-app.md)

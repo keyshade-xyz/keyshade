@@ -9,7 +9,7 @@
 - [Installing the CLI](getting-started/installing-the-cli.md)
 - [Setting up your profile](getting-started/setting-up-your-profile.md)
 - [Add keyshade to your project](getting-started/add-keyshade-to-your-project.md)
-- [Run your app](getting-started/run-your-app.md)
+- [Running your app](getting-started/running-your-app.md)
 
 ## CLI
 
