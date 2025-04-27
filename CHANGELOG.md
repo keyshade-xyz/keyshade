@@ -1,3 +1,9 @@
+## [2.17.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0...v2.17.0-stage.1) (2025-04-27)
+
+### 🚀 Features
+
+* **platform:** Implement InfiniteScroll To memberTab ([#892](https://github.com/keyshade-xyz/keyshade/issues/892)) ([ec71121](https://github.com/keyshade-xyz/keyshade/commit/ec711215c76fe7ab3b3c2b5631e6c1927438d2d4))
+
 ## [2.16.0](https://github.com/keyshade-xyz/keyshade/compare/v2.15.1...v2.16.0) (2025-04-27)
 
 ### 🚀 Features
