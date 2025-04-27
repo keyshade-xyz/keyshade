@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -15,7 +15,7 @@ import {
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 
-function TierLimit() {
+function Tiers() {
   const [loading, setLoading] = useState<boolean>(true)
   const [projectCount, setProjectCount] = useAtom<number>(
     workspaceProjectCountAtom
@@ -103,4 +103,10 @@ function TierLimit() {
   )
 }
 
-export default TierLimit
+export default function TierLimit() {
+  return (
+    <Suspense fallback={null}>
+      <Tiers />
+    </Suspense>
+  )
+}
