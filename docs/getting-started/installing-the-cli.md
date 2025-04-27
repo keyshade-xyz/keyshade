@@ -20,5 +20,3 @@ keyshade --version
 
 This should print the version of the Keyshade CLI that you have installed.
 ![keyshade-cli](../../blob/keyshade-version.png) At the time of creating this blog, the latest version of the CLI is `3.0.1`
-
-> **Note:** If you would like to opt in for beta testing, we also maintain a separate version of the CLI. You can install that using `npm i -g @keyshade/cli@stage`
