@@ -1,3 +1,9 @@
+## [2.17.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.2...v2.17.0-stage.3) (2025-04-27)
+
+### 🚀 Features
+
+* **platform:** Show Tier Limits ([#900](https://github.com/keyshade-xyz/keyshade/issues/900)) ([69ceab7](https://github.com/keyshade-xyz/keyshade/commit/69ceab76e66aa422b01bddca515493804a004663))
+
 ## [2.17.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.1...v2.17.0-stage.2) (2025-04-27)
 
 ### 🚀 Features
