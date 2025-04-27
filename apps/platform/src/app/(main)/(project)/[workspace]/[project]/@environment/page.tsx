@@ -20,17 +20,25 @@ import { EnvironmentLoader } from '@/components/dashboard/environment/environmen
 import EmptyEnvironmentListContent from '@/components/dashboard/environment/emptyEnvironmentListContent'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import { cn } from '@/lib/utils'
+import { PageTitle } from '@/components/common/page-title'
 
-function EnvironmentItemComponent(
-  { item, highlightSlug, isHighlighted }: {
-    item: GetAllEnvironmentsOfProjectResponse['items'][number],
-    highlightSlug: string | null,
-    isHighlighted: boolean
-  }
-) {
-  return <EnvironmentCard className={cn(
-    highlightSlug === item.slug && isHighlighted && 'animate-highlight'
-  )} environment={item} />
+function EnvironmentItemComponent({
+  item,
+  highlightSlug,
+  isHighlighted
+}: {
+  item: GetAllEnvironmentsOfProjectResponse['items'][number]
+  highlightSlug: string | null
+  isHighlighted: boolean
+}) {
+  return (
+    <EnvironmentCard
+      className={cn(
+        highlightSlug === item.slug && isHighlighted && 'animate-highlight'
+      )}
+      environment={item}
+    />
+  )
 }
 
 /**
@@ -38,8 +46,18 @@ function EnvironmentItemComponent(
  * This will prevent React from treating it as a new component on every render,
  * which can lead to performance issues and loss of state.
  */
-function renderEnvironmentItemComponent(item: GetAllEnvironmentsOfProjectResponse['items'][number], highlightSlug: string | null, isHighlighted: boolean) {
-  return <EnvironmentItemComponent highlightSlug={highlightSlug} isHighlighted={isHighlighted} item={item} />;
+function renderEnvironmentItemComponent(
+  item: GetAllEnvironmentsOfProjectResponse['items'][number],
+  highlightSlug: string | null,
+  isHighlighted: boolean
+) {
+  return (
+    <EnvironmentItemComponent
+      highlightSlug={highlightSlug}
+      isHighlighted={isHighlighted}
+      item={item}
+    />
+  )
 }
 
 function EnvironmentPage(): React.JSX.Element {
@@ -101,6 +119,7 @@ function EnvironmentPage(): React.JSX.Element {
     <div
       className={`flex h-full w-full ${isDeleteEnvironmentOpen ? 'inert' : ''} `}
     >
+      <PageTitle title={`${selectedProject?.name} | Environments`} />
       {/* Showing this when there are no environments present */}
       {environments.length === 0 ? (
         <EmptyEnvironmentListContent />
@@ -139,9 +158,15 @@ function EnvironmentPage(): React.JSX.Element {
                   }
                 }
               }}
-              itemComponent={(item) => renderEnvironmentItemComponent(item, highlightSlug, isHighlighted)}
+              itemComponent={(item) =>
+                renderEnvironmentItemComponent(
+                  item,
+                  highlightSlug,
+                  isHighlighted
+                )
+              }
               itemKey={(item) => item.id}
-              itemsPerPage={5}
+              itemsPerPage={10}
             />
 
             {/* Delete environment alert dialog */}

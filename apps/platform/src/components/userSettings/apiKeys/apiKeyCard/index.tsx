@@ -26,9 +26,10 @@ import {
 type ApiKey = Omit<OriginalApiKey, 'value' | 'userId'>
 
 const formatDate = (date: string): string => {
-  return dayjs(date).diff(dayjs(), 'day') >= 1
-    ? `${dayjs(date).diff(dayjs(), 'day')} days`
-    : `${dayjs(date).diff(dayjs(), 'hour')} hours`
+  const now = dayjs();
+  return now.diff(date, 'day') >= 1
+    ? `${now.diff(date, 'day')} days`
+    : `${now.diff(date, 'hour')} hours`
 }
 
 export default function ApiKeyCard({
@@ -55,7 +56,7 @@ export default function ApiKeyCard({
       <ContextMenuTrigger className="w-full">
         <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
           <div className="flex flex-col gap-y-6 px-6 py-4">
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row flex-wrap justify-between gap-2">
               <div className="text-2xl font-normal"> {apiKey.name} </div>
               <CopyToClipboard text={apiKey.slug} />
             </div>

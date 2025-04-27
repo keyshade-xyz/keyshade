@@ -28,6 +28,7 @@ import EmptyVariableListContent from '@/components/dashboard/variable/emptyVaria
 import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
 import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
 import { cn } from '@/lib/utils'
+import { PageTitle } from '@/components/common/page-title'
 
 function VariablePage(): React.JSX.Element {
   const searchParams = useSearchParams()
@@ -79,14 +80,20 @@ function VariablePage(): React.JSX.Element {
               variables: data.items.map((item) => ({
                 slug: item.variable.slug,
                 name: item.variable.name,
-                note: item.variable.note,
+                note: item.variable.note
               }))
             }))
           }
         })
         .finally(() => setIsLoading(false))
     }
-  }, [getAllVariablesOfProject, page, selectedProject, setGlobalSearchData, setVariables])
+  }, [
+    getAllVariablesOfProject,
+    page,
+    selectedProject,
+    setGlobalSearchData,
+    setVariables
+  ])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)
@@ -122,6 +129,7 @@ function VariablePage(): React.JSX.Element {
     <div
       className={` flex h-full w-full ${isDeleteVariableOpen ? 'inert' : ''} `}
     >
+      <PageTitle title={`${selectedProject?.name} | Variables`} />
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
         <EmptyVariableListContent />
@@ -139,7 +147,9 @@ function VariablePage(): React.JSX.Element {
               {variables.map((variableData) => (
                 <VariableCard
                   className={cn(
-                    highlightSlug === variableData.variable.slug && isHighlighted && 'animate-highlight'
+                    highlightSlug === variableData.variable.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
                   )}
                   key={variableData.variable.id}
                   variableData={variableData}

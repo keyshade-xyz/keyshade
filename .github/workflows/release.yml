@@ -12,7 +12,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+      environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'stage' }}
       version: ${{ steps.fetch-tag.outputs.version }}
     steps:
       - name: Checkout
@@ -69,7 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy API
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -138,7 +137,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-
       - name: Install PNPM
         run: npm i -g pnpm
 
@@ -151,7 +149,7 @@ jobs:
         run: |
           # Run migrations
           pnpm db:generate-types
-          pnpm db:deploy-migrations
+          DATABASE_URL=$DATABASE_URL pnpm db:deploy-migrations
 
   release-sentry-api:
     name: Sentry API
@@ -209,7 +207,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Platform
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -325,7 +322,6 @@ jobs:
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Web
     needs: release
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -442,7 +438,6 @@ jobs:
     needs: release
     name: Publish CLI
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     outputs:
       skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
@@ -458,7 +453,12 @@ jobs:
         id: check-versions
         run: |
           current_version=`jq -r '.version' apps/cli/package.json`
-          published_version=`npm show @keyshade/cli version`
+
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            published_version=`npm show @keyshade/cli version`
+          else
+            published_version=`npm show @keyshade/cli@stage version`
+          fi
 
           echo "Current version: $current_version"
           echo "Published version: $published_version"
@@ -511,7 +511,15 @@ jobs:
 
       - name: Publish
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: cd apps/cli && npm publish --provenance --access public
+        run: |
+          ## Determine release tag
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            release_tag=latest
+          else
+            release_tag=stage
+          fi
+
+          cd apps/cli && npm publish --provenance --access public --tag $release_tag
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

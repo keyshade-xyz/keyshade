@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
 
     if (!isServer) {
       config.resolve.alias['@public'] = path.join(__dirname, 'public')
+      config.resolve.alias['@radix-ui/react-use-effect-event'] = path.resolve(
+        __dirname,
+        'stubs/use-effect-event.js'
+      )
     }
 
     return config
