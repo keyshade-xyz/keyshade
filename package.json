@@ -164,7 +164,8 @@
     "ts-jest": "^29.1.0",
     "tsconfig": "workspace:*",
     "tsconfig-paths": "^4.2.0",
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.3",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@changesets/cli": "^2.27.11",
@@ -186,11 +187,13 @@
     "framer-motion": "^11.2.9",
     "million": "^3.0.5",
     "moment": "^2.30.1",
+    "next": "15.2.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "sharp": "^0.33.3",
     "tailwind-merge": "^2.3.0",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
-    "typescript": "^5.5.2",
     "typescript-transform-paths": "^3.5.0",
     "zod": "^3.23.6"
   }
