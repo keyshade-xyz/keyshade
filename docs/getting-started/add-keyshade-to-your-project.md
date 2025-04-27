@@ -80,7 +80,7 @@ keyshade run "npm run dev"
 Once you run this, you would see the following output:
 ![output](../../blob/keyshade-run.png)
 
-As you can see, there are some additional logs stating that keyshade was succssfully set up.
+As you can see, there are some additional logs stating that keyshade was successfully set up.
 
 You can also see the following line:
 
