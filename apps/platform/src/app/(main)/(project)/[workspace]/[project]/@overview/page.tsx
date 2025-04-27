@@ -24,6 +24,8 @@ import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDelet
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { PageTitle } from '@/components/common/page-title'
+import CopyToClipboard from '@/components/common/copy-to-clipboard';
+
 
 function OverviewPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -214,25 +216,34 @@ function OverviewPage(): React.JSX.Element {
           </div>
 
           <div className="flex flex-1 flex-col gap-3 rounded-lg bg-white/10 p-5">
-            <div className="flex flex-col gap-1">
-              <p className="text-xl font-semibold">
-                Store private key with us?
-              </p>
-              <p className="ext-sm text-white/60">
-                This allows you and your team to access project secrets without
-                setup, making collaboration easier. However, it also increases
-                the risk of accidental leaks.
-              </p>
-            </div>
-            <ServerKeySetup
-              isStoredOnServer={hasServerStoredKey}
-              onDelete={() => setDeleteKeyDialogOpen(true)}
-              onKeyStored={() => setHasServerStoredKey(true)}
-              onOpenStoreDialog={() => setServerKeyDialogOpen(true)}
-              privateKey={projectPrivateKey}
-              projectSlug={selectedProject.slug}
-            />
-          </div>
+  <div className="flex flex-col gap-1">
+    <p className="text-xl font-semibold">
+      Store private key with us?
+    </p>
+    <p className="text-sm text-white/60">
+      This allows you and your team to access project secrets without
+      setup, making collaboration easier. However, it also increases
+      the risk of accidental leaks.
+    </p>
+  </div>
+
+ 
+  {projectPrivateKey ? <div className="flex items-center gap-2">
+      <CopyToClipboard text={projectPrivateKey} />
+      <span className="text-xs text-white/50">Copy private key</span>
+    </div> : null}
+
+ 
+  <ServerKeySetup
+    isStoredOnServer={hasServerStoredKey}
+    onDelete={() => setDeleteKeyDialogOpen(true)}
+    onKeyStored={() => setHasServerStoredKey(true)}
+    onOpenStoreDialog={() => setServerKeyDialogOpen(true)}
+    privateKey={projectPrivateKey}
+    projectSlug={selectedProject.slug}
+  />
+</div>
+
         </div>
       </div>
 
