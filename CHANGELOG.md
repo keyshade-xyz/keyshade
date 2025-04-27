@@ -1,3 +1,15 @@
+## [2.17.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.4...v2.17.0-stage.5) (2025-04-27)
+
+### 🚀 Features
+
+* **web:** Remove Pricing page from Web navbar ([#903](https://github.com/keyshade-xyz/keyshade/issues/903)) ([200cf83](https://github.com/keyshade-xyz/keyshade/commit/200cf8370544d12fddf2c05ace67e92a99c22d28))
+
+## [2.17.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.3...v2.17.0-stage.4) (2025-04-27)
+
+### 🚀 Features
+
+* **platform:** Platform Build Fix ([#901](https://github.com/keyshade-xyz/keyshade/issues/901)) ([e2fe54a](https://github.com/keyshade-xyz/keyshade/commit/e2fe54a5c3777baa74431d655a8497c71f461a04))
+
 ## [2.17.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.2...v2.17.0-stage.3) (2025-04-27)
 
 ### 🚀 Features
