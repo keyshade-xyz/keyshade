@@ -560,6 +560,7 @@ export class WorkspaceService {
         }
       },
       select: {
+        invitationAccepted: true,
         workspace: {
           select: {
             id: true,

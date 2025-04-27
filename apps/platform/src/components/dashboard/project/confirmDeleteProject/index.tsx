@@ -5,7 +5,8 @@ import { TrashSVG } from '@public/svg/shared'
 import {
   deleteProjectOpenAtom,
   projectsOfWorkspaceAtom,
-  selectedProjectAtom
+  selectedProjectAtom,
+  workspaceProjectCountAtom
 } from '@/store'
 import {
   AlertDialog,
@@ -25,6 +26,7 @@ function ConfirmDeleteProject(): React.JSX.Element {
     deleteProjectOpenAtom
   )
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const setWorkspaceProjectCount = useSetAtom(workspaceProjectCountAtom)
   const setProjects = useSetAtom(projectsOfWorkspaceAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -48,6 +50,7 @@ function ConfirmDeleteProject(): React.JSX.Element {
         const { success } = await deleteProject()
 
         if (success) {
+          setWorkspaceProjectCount((count) => count - 1)
           toast.success('Project deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">

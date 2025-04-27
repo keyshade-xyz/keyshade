@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import {
   deleteSecretOpenAtom,
+  projectSecretCountAtom,
   secretsOfProjectAtom,
   selectedSecretAtom
 } from '@/store'
@@ -25,6 +26,7 @@ function ConfirmDeleteSecret() {
   const [isDeleteSecretOpen, setIsDeleteSecretOpen] =
     useAtom(deleteSecretOpenAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
+  const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -47,6 +49,7 @@ function ConfirmDeleteSecret() {
         const { success } = await deleteSecret()
 
         if (success) {
+          setProjectSecretCount((prev) => prev - 1)
           toast.success('Secret deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -70,7 +73,14 @@ function ConfirmDeleteSecret() {
         handleClose()
       }
     }
-  }, [selectedSecret, deleteSecret, setSecrets, setSelectedSecret, handleClose])
+  }, [
+    selectedSecret,
+    deleteSecret,
+    setSecrets,
+    setSelectedSecret,
+    handleClose,
+    setProjectSecretCount
+  ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
   const cleanup = useCallback(() => {

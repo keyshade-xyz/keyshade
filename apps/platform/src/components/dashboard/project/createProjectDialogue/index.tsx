@@ -1,7 +1,7 @@
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Plus, Trash2 } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
@@ -30,7 +30,8 @@ import {
   createProjectOpenAtom,
   selectedWorkspaceAtom,
   projectsOfWorkspaceAtom,
-  viewAndDownloadProjectKeysOpenAtom
+  viewAndDownloadProjectKeysOpenAtom,
+  workspaceProjectCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import WarningCard from '@/components/shared/warning-card'
@@ -38,6 +39,7 @@ import WarningCard from '@/components/shared/warning-card'
 export default function CreateProjectDialogue(): JSX.Element {
   const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
+  const setWorkspaceProjectCount = useSetAtom(workspaceProjectCountAtom)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
     createProjectOpenAtom
   )
@@ -104,6 +106,7 @@ export default function CreateProjectDialogue(): JSX.Element {
 
         if (success && data) {
           setProjects([...projects, data])
+          setWorkspaceProjectCount((prev) => prev + 1)
           setProjectKeys({
             projectName: data.name,
             storePrivateKey: data.storePrivateKey,
@@ -126,7 +129,8 @@ export default function CreateProjectDialogue(): JSX.Element {
     createProject,
     setProjects,
     projects,
-    setIsCreateProjectDialogOpen
+    setIsCreateProjectDialogOpen,
+    setWorkspaceProjectCount
   ])
 
   const toggleDialog = useCallback(() => {
