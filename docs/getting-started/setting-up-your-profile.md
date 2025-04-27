@@ -10,7 +10,7 @@ In order to use the CLI with your applications, or to use the CLI to manage your
 
 First, we need to create an API key in order to be able to add it to our profile.
 
-- Head over to [https://app.keyshade.xyz](https://app.keyshade.xyz)
+- Head over to [user settings](https://app.keyshade.xyz/settings?tab=profile)
 - Click on your name at the top right
 - Navigate to **User Settings** -> **API Keys**
 - Click on **Add API Key**
