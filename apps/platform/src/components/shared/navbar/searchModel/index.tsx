@@ -153,7 +153,7 @@ function SearchModel({
                     <CommandItem
                     key={workspace.id}
                       onClick={() => {
-                        handleChangeWorkspace(workspace)
+                        handleChangeWorkspace(workspace as WorkspaceWithTierLimitAndProjectCount)
                         setIsOpen(false)
                       }}
                     >
