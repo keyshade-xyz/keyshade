@@ -6,15 +6,10 @@ import MembersHeader from '@/components/members/membersHeader'
 import MembersTable from '@/components/members/membersTable'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
-import {
-  membersOfWorkspaceAtom,
-  rolesOfWorkspaceAtom,
-  selectedWorkspaceAtom
-} from '@/store'
+import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import { PageTitle } from '@/components/common/page-title'
 
 function TeamPage(): React.JSX.Element {
-  const setMembers = useSetAtom(membersOfWorkspaceAtom)
   const setRoles = useSetAtom(rolesOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
 
@@ -31,7 +26,7 @@ function TeamPage(): React.JSX.Element {
         setRoles(data.items)
       }
     })
-  }, [setMembers, getAllRoles, setRoles])
+  }, [getAllRoles, setRoles])
 
   return (
     <div className="flex flex-col gap-y-10">
