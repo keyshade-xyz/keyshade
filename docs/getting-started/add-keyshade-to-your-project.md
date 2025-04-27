@@ -68,35 +68,3 @@ You would notice that the `keyshade.json` file has been created in your project 
 ```
 
 Your project's private key has been added into `~/.keyshade/private-keys.json`. This approach makes it impossible for you to mistakenly commit your private key to your repository.
-
-## Running your app
-
-Generally we run NextJS apps using the `npm run dev` command. But to make keyshade work, we will need to run it using this command:
-
-```bash
-keyshade run "npm run dev"
-```
-
-Once you run this, you would see the following output:
-![output](../../blob/keyshade-run.png)
-
-As you can see, there are some additional logs stating that keyshade was successfully set up.
-
-You can also see the following line:
-
-```bash
-[INFO] 2025-04-27 17:25:03 - Fetched 2 configurations (1 secrets, 1 variables)
-```
-
-This states that keyshade was able to fetch 2 configurations - 1 secret and 1 variable.
-
-## Seeing the results
-
-We have successfully added keyshade to our project. Now, let's see the results.
-
-Head over to http://localhost:3000 and you should see the following:
-![output](../../blob/next-output.png)
-
-The app has fetched the secret and variable from keyshade and injected them into the app.
-
-That's it! You have successfully added keyshade to your project.

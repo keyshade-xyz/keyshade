@@ -21,13 +21,15 @@ Now, we can start creating our project.
 
 - Click on **Create Project**
 - Enter your project name
-- Store the private key in the project **(not recommended in production projects)**
+- Optionally, you can store the private key in the project **(not recommended in production projects)**
 - Edit or add environments if your want to
 - Finally, click on **Create Project**
 
-If the creation was successful, you should be greeted with a dialog like this: ![Success](../../blob/create-project-success.png) You can hit on **Close** for now.
+If the creation was successful, you should be greeted with a dialog like this:
+![Success](../../blob/create-project-success.png) You can hit on **Close** for now.
 
 Your project should now show up in your dashboard:
+
 ![Dashboard](../../blob/dashboard-with-project.png)
 
 ## Creating a secret
@@ -40,7 +42,9 @@ Now, let's create our first secret.
 - Specify a value for the `dev` environment we created. We would use `ks_1234`.
 - Hit on **Add Secret**.
 
-If created successfully, you secret should look like this: ![Success](../../blob/secret.png)
+If created successfully, you secret should look like this:
+
+![Success](../../blob/secret.png)
 
 ## Creating a variable
 
@@ -51,7 +55,9 @@ Lastly, let's create our first variable.
 - Specify a value for the `dev` environment we created. We would use `3000`.
 - Hit on **Add Variable**.
 
-If created successfully, you variable should look like this: ![Success](../../blob/variable.png)
+If created successfully, you variable should look like this:
+
+![Success](../../blob/variable.png)
 
 ## That's it!
 
