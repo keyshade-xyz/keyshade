@@ -152,7 +152,10 @@ function SearchModel({
                   {searchResults.workspaces.map(workspace => (
                     <CommandItem
                     key={workspace.id}
-                    onClick={() => handleChangeWorkspace(workspace)}
+                      onClick={() => {
+                        handleChangeWorkspace(workspace)
+                        setIsOpen(false)
+                      }}
                     >
                       <span>{workspace.name}</span>
                       {workspace.slug ? <span className="text-sm text-gray-200 ml-2">
@@ -172,6 +175,7 @@ function SearchModel({
                     <Link
                     href={`/${selectedWorkspace!.slug}/${secret.project?.slug ?? selectedProject?.slug}?tab=secret&highlight=${secret.slug}`}
                     key={secret.slug}
+                    onClick={() => setIsOpen(false)}
                     >
                       <CommandItem>
                         <span>{secret.slug}</span>
@@ -193,6 +197,7 @@ function SearchModel({
                     <Link
                     href={`/${selectedWorkspace!.slug}/${project.slug}?tab=secret`}
                     key={project.slug}
+                    onClick={() => setIsOpen(false)}
                     >
                       <CommandItem key={project.slug}>
                         <span>{project.slug}</span>
@@ -214,6 +219,7 @@ function SearchModel({
                     <Link
                     href={`/${selectedWorkspace!.slug}/${environment.project?.slug ?? selectedProject?.slug}?tab=environment&highlight=${environment.slug}`}
                     key={environment.slug}
+                    onClick={() => setIsOpen(false)}
                     >
                       <CommandItem>
                         <span>{environment.slug}</span>
@@ -234,6 +240,7 @@ function SearchModel({
                   <Link
                   href={`/${selectedWorkspace!.slug}/${variable.project?.slug ?? selectedProject?.slug}?tab=variable&highlight=${variable.slug}`}
                   key={variable.slug}
+                  onClick={() => setIsOpen(false)}
                   >
                     <CommandItem>
                       <span>{variable.name}</span>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { User } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
 interface AvatarProps {
@@ -30,7 +31,7 @@ export default function AvatarComponent({
         src={profilePictureUrl === null ? undefined : profilePictureUrl}
       />
       <AvatarFallback className="font-semibold">
-        {getInitials(name)}
+        {name ? getInitials(name) : <User size={16} />}
       </AvatarFallback>
     </Avatar>
   )
