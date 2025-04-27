@@ -20,6 +20,7 @@ interface InfiniteScrollListProps<T> {
     limit: number
   }) => Promise<InfiniteScrollListResponse<T>>
   className?: string
+  inTable?: boolean
 }
 
 export function InfiniteScrollList<T>({
@@ -27,7 +28,8 @@ export function InfiniteScrollList<T>({
   itemComponent,
   itemsPerPage,
   fetchFunction,
-  className = ''
+  className = '',
+  inTable = false
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -118,19 +120,60 @@ export function InfiniteScrollList<T>({
   )
 
   if (isLoading && items.length === 0) {
-    return (
+    return inTable ? (
+      <tr>
+        <td className="flex justify-center p-4" colSpan={3}>
+          <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+        </td>
+      </tr>
+    ) : (
       <div className="flex justify-center p-4">
         <Loader2 className="h-5 w-5 animate-spin text-white/70" />
       </div>
     )
   }
   if (error && items.length === 0) {
-    return <div className="p-4 text-center text-red-500">Error: {error}</div>
+    return inTable ? (
+      <tr>
+        <td className="p-4 text-center text-red-500" colSpan={3}>
+          Error: {error}
+        </td>
+      </tr>
+    ) : (
+      <div className="p-4 text-center text-red-500">Error: {error}</div>
+    )
   }
   if (items.length === 0) {
-    return <div className="p-4 text-center text-gray-500">No items found</div>
+    return inTable ? (
+      <tr>
+        <td className="p-4 text-center text-gray-500" colSpan={3}>
+          No items found
+        </td>
+      </tr>
+    ) : (
+      <div className="p-4 text-center text-gray-500">No items found</div>
+    )
   }
 
+  if (inTable) {
+    return (
+      <>
+        {items.map((item, i) => (
+          <React.Fragment key={itemKey(item)}>
+            {itemComponent(item)}
+            {i === items.length - 1 && hasMoreRef.current ? <tr>
+                <td colSpan={3} ref={lastItemRef} />
+              </tr> : null}
+          </React.Fragment>
+        ))}
+        {isLoading ? <tr>
+            <td className="flex justify-center p-4" colSpan={3}>
+              <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+            </td>
+          </tr> : null}
+      </>
+    )
+  }
   return (
     <div className={cn(className)} ref={containerRef}>
       {items.map((item, i) => (

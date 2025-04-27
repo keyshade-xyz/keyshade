@@ -43,7 +43,8 @@ function Navbar(): React.JSX.Element {
   const TAB_CONFIGS = {
     settings: [
       { id: 'profile', label: 'Profile' },
-      { id: 'billing', label: 'Billing' }
+      { id: 'billing', label: 'Billing' },
+      { id: 'invites', label: 'Invites' }
     ],
     project: [
       { id: 'overview', label: 'Overview', icon: <FolderSVG /> },
@@ -163,6 +164,9 @@ function Navbar(): React.JSX.Element {
                   </Link>
                   <Link href="/settings?tab=billing">
                     <DropdownMenuItem>Billing</DropdownMenuItem>
+                  </Link>
+                  <Link href="/settings?tab=invites">
+                    <DropdownMenuItem>View Invites</DropdownMenuItem>
                   </Link>
                   <Link href="/teams">
                     <DropdownMenuItem>Team</DropdownMenuItem>

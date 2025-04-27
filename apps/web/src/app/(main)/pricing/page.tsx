@@ -1,13 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import AnimatedTab from '@/components/ui/animated-tabs'
+import { useEffect, useState } from 'react'
 import { ColorBGSVG } from '@public/hero'
+import { useRouter } from 'next/navigation'
+import AnimatedTab from '@/components/ui/animated-tabs'
 import PriceCard from '@/components/pricing/card'
 import { PriceCardsData, tabsData } from '@/constants/pricing'
 
 function About(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<string>(tabsData[0].id)
+  const router = useRouter()
+  useEffect(() => {
+    router.push('/')
+  }, [router])
 
   return (
     <div className="relative flex flex-col items-center justify-center ">

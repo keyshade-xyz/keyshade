@@ -17,7 +17,8 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
-  secretsOfProjectAtom
+  secretsOfProjectAtom,
+  projectSecretCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import { parseUpdatedEnvironmentValues } from '@/lib/utils'
@@ -26,7 +27,7 @@ import EnvironmentValueEditor from '@/components/common/environment-value-editor
 export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =
     useAtom(createSecretOpenAtom)
-  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+     const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
 
   const [requestData, setRequestData] = useState({
@@ -76,6 +77,7 @@ export default function AddSecretDialog() {
         const { success, data } = await createSecret()
 
         if (success && data) {
+          setProjectSecretCount((prev) => prev + 1)
           toast.success('Secret added successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -100,6 +102,7 @@ export default function AddSecretDialog() {
         setIsLoading(false)
       }
     }
+
   }, [selectedProject, requestData.name, createSecret, setSecrets, refreshProject, setSelectedProject, handleClose])
 
   return (

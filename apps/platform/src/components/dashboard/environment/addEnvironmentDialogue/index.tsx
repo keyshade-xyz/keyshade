@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import {
   createEnvironmentOpenAtom,
   environmentsOfProjectAtom,
+  projectEnvironmentCountAtom,
   selectedProjectAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
@@ -26,6 +27,7 @@ export default function AddEnvironmentDialogue() {
   )
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
   const [newEnvironmentData, setNewEnvironmentData] = useState({
     environmentName: '',
@@ -67,6 +69,7 @@ export default function AddEnvironmentDialogue() {
         const { success, data } = await createEnvironment()
 
         if (success && data) {
+          setProjectEnvironmentCount((prev) => prev + 1)
           toast.success('Environment added successfully', {
             description: (
               <p className="text-xs text-green-300">

@@ -1,10 +1,9 @@
 'use client'
-import { AddSVG, CloseCircleSVG } from '@public/svg/shared'
+import { AddSVG } from '@public/svg/shared'
 import React, { useCallback, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import type { User } from '@keyshade/schema'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,11 +15,9 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { membersOfWorkspaceAtom, rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
+import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
-import { Separator } from '@/components/ui/separator'
-import AvatarComponent from '@/components/common/avatar'
 
 interface SelectedRoles {
   name: string;
@@ -35,7 +32,6 @@ export default function MembersHeader(): React.JSX.Element {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
   const roles = useAtomValue(rolesOfWorkspaceAtom)
-  const members = useAtomValue(membersOfWorkspaceAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const toggleRole = (role: SelectedRoles): void => {
@@ -55,20 +51,6 @@ export default function MembersHeader(): React.JSX.Element {
         email,
         roleSlugs: selectedRoles.map(role => role.roleSlug)
       }]
-    })
-  )
-
-  const cancelInvitation = useHttp((userEmail: User['email']) =>
-    ControllerInstance.getInstance().workspaceMembershipController.cancelInvitation({
-      workspaceSlug: currentWorkspace!.slug,
-      userEmail
-    })
-  )
-
-  const resendInvitation = useHttp((userEmail: User['email']) =>
-    ControllerInstance.getInstance().workspaceMembershipController.resendInvitation({
-      workspaceSlug: currentWorkspace!.slug,
-      userEmail
     })
   )
 
@@ -115,52 +97,6 @@ export default function MembersHeader(): React.JSX.Element {
     handleClose,
     inviteMember
   ])
-
-  const handleCancelInvite = useCallback(async (userEmail: string) => {
-    setIsLoading(true)
-    toast.loading('Revoking invite...')
-    try {
-      const { success } = await cancelInvitation(userEmail)
-
-      if (success) {
-        toast.success('Invite revoked successfully', {
-          description: (
-            <p className="text-xs text-emerald-300">
-              Member will not be added to the workspace.
-            </p>
-          )
-        })
-
-        handleClose()
-      }
-    } finally {
-      toast.dismiss()
-      setIsLoading(false)
-    }
-  }, [cancelInvitation, handleClose])
-
-  const handleResendInvite = useCallback(async (userEmail: string) => {
-    setIsLoading(true)
-    toast.loading('Resending invite...')
-    try {
-      const { success } = await resendInvitation(userEmail)
-
-      if (success) {
-        toast.success('Invite resent successfully', {
-          description: (
-            <p className="text-xs text-emerald-300">
-              Members will be added once they accept the invite.
-            </p>
-          )
-        })
-
-        handleClose()
-      }
-    } finally {
-      toast.dismiss()
-      setIsLoading(false)
-    }
-  }, [resendInvitation, handleClose])
 
   return (
     <div className="flex justify-between">
@@ -244,38 +180,6 @@ export default function MembersHeader(): React.JSX.Element {
                     </Label>
                   ))}
                 </div> : null}
-              </div>
-
-              {/* Sent Invites */}
-              <div className='flex flex-col gap-y-5'>
-                <Separator className='bg-white/20 mt-3' />
-                <Label className="block text-white text-sm font-medium mb-2">People Invited</Label>
-                {members
-                  .filter(member => !member.invitationAccepted)
-                  .map(member => (
-                    <div className="flex items-center justify-between w-full" key={member.user.email} >
-                      <div className="flex items-center gap-2">
-                        {member.user.profilePictureUrl ? (
-                          <AvatarComponent
-                            className="w-6 h-6 rounded-full"
-                            name={member.user.email}
-                            profilePictureUrl={member.user.profilePictureUrl}
-                          />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-xs">
-                            {member.user.email[0].toUpperCase()}
-                          </div>
-                        )}
-                        <span className="text-[#71717A] underline text-sm font-normal">{member.user.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 cursor-pointer">
-                        <Button className='text-[#BFDBFE] bg-transparent px-0 border-none text-sm font-medium' onClick={() => handleResendInvite(member.user.email)}>Resend</Button>
-                        <Button className='bg-transparent hover:bg-transparent border-none' onClick={() => handleCancelInvite(member.user.email)}>
-                          <CloseCircleSVG />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
               </div>
             </div>
           </DialogContent>

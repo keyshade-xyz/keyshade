@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createVariableOpenAtom,
+  projectVariableCountAtom,
   selectedProjectAtom,
   variablesOfProjectAtom
 } from '@/store'
@@ -28,6 +29,7 @@ export default function AddVariableDialogue() {
   )
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
+  const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
 
   const [requestData, setRequestData] = useState({
     name: '',
@@ -76,6 +78,7 @@ export default function AddVariableDialogue() {
         const { success, data } = await createVariable()
 
         if (success && data) {
+          setProjectVariableCount((prev) => prev + 1)
           toast.success('Variable added successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -108,6 +111,7 @@ export default function AddVariableDialogue() {
     refreshProject,
     setSelectedProject,
     handleClose
+
   ])
 
   return (
