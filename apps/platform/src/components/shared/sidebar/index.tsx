@@ -10,8 +10,10 @@ import {
   TeamSVG
 } from '@public/svg/shared'
 import SidebarTab from './sidebarTab'
+import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
+import { Button } from '@/components/ui/button'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -73,6 +75,15 @@ function Sidebar(): JSX.Element {
               />
             )
           })}
+        </div>
+        <div className="absolute bottom-10 w-[17rem] rounded-lg border border-white/10 bg-white/5 p-4">
+          <div className="mb-5 flex items-center gap-3">
+            <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
+              Free
+            </Button>
+          </div>
+
+          <TierLimit />
         </div>
       </div>
     </aside>

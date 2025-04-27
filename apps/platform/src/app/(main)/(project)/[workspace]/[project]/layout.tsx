@@ -8,7 +8,14 @@ import EnvironmentPage from './@environment/page'
 import OverviewPage from './@overview/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { selectedProjectAtom, environmentsOfProjectAtom, globalSearchDataAtom } from '@/store'
+import {
+  selectedProjectAtom,
+  environmentsOfProjectAtom,
+  globalSearchDataAtom,
+  projectEnvironmentCountAtom,
+  projectSecretCountAtom,
+  projectVariableCountAtom
+} from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
 import { useHttp } from '@/hooks/use-http'
@@ -16,6 +23,9 @@ import { useHttp } from '@/hooks/use-http'
 function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const setEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
+  const setSecretCount = useSetAtom(projectSecretCountAtom)
+  const setVariableCount = useSetAtom(projectVariableCountAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
@@ -42,11 +52,21 @@ function DetailedProjectPage(): JSX.Element {
     getProject().then(({ data, success, error }) => {
       if (success && data) {
         setSelectedProject(data)
+        setEnvironmentCount(data.totalEnvironments)
+        setSecretCount(data.totalSecrets)
+        setVariableCount(data.totalVariables)
       } else {
         throw new Error(JSON.stringify(error))
       }
     })
-  }, [getProject, projectSlug, setSelectedProject])
+  }, [
+    getProject,
+    projectSlug,
+    setSelectedProject,
+    setEnvironmentCount,
+    setSecretCount,
+    setVariableCount
+  ])
 
   useEffect(() => {
     selectedProject &&
@@ -63,7 +83,12 @@ function DetailedProjectPage(): JSX.Element {
           }))
         }
       })
-  }, [getAllEnvironmentsOfProject, selectedProject, setEnvironments, setGlobalSearchData])
+  }, [
+    getAllEnvironmentsOfProject,
+    selectedProject,
+    setEnvironments,
+    setGlobalSearchData
+  ])
 
   return (
     <main className="flex h-full flex-col gap-4">
