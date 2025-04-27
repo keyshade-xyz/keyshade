@@ -27,7 +27,8 @@ Now, we can start creating our project.
 - Finally, click on **Create Project**
 
 If the creation was successful, you should be greeted with a dialog like this:
-![Success](../../blob/create-project-success.png) You can hit on **Close** for now.
+![Success](../../blob/create-project-success.png) 
+You can download the private and public key then hit on **Close**.
 
 Your project should now show up in your dashboard:
 
