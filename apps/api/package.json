@@ -22,6 +22,7 @@
     "unit": "pnpm db:generate-types && jest --config=jest.config.ts"
   },
   "dependencies": {
+    "@logtail/node": "^0.5.4",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.0",
     "@nestjs/core": "^10.0.0",
