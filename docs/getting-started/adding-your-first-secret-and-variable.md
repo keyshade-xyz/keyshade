@@ -57,7 +57,7 @@ Lastly, let's create our first variable.
 - Hit on **Add Variable**.
 
 If created successfully, you variable should look like this:
-
+<br/>
 <img src="../../blob/variable.png" width="100%" alt="Success" />
 
 ## That's it!
