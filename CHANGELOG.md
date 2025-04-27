@@ -1,3 +1,27 @@
+## [2.16.0](https://github.com/keyshade-xyz/keyshade/compare/v2.15.1...v2.16.0) (2025-04-27)
+
+### 🚀 Features
+
+* **platform:** Added PageTitle component and update page titles across the app ([#891](https://github.com/keyshade-xyz/keyshade/issues/891)) ([572f2b1](https://github.com/keyshade-xyz/keyshade/commit/572f2b1418045f78d9e6d048416d80091c901eeb))
+
+### 🐛 Bug Fixes
+
+* **platform:** Close search model after selecting a link ([#896](https://github.com/keyshade-xyz/keyshade/issues/896)) ([496d3f9](https://github.com/keyshade-xyz/keyshade/commit/496d3f9f0e39ed4ca9215da9ac2f25238bc51419))
+* **platform:** Roles tab breaking ([#893](https://github.com/keyshade-xyz/keyshade/issues/893)) ([a72250c](https://github.com/keyshade-xyz/keyshade/commit/a72250c3d62e25bc225665776ea93f545cf5e6f5))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Added BetterStack logging ([#898](https://github.com/keyshade-xyz/keyshade/issues/898)) ([3de080e](https://github.com/keyshade-xyz/keyshade/commit/3de080e5080454d18d2942a2cce8217a319a0891))
+* **api:** Prettified sentry error logs ([651ae7d](https://github.com/keyshade-xyz/keyshade/commit/651ae7d7687037d1dee14f425739528228dcb5c0))
+* **api:** Remove redundant file ([d8f9479](https://github.com/keyshade-xyz/keyshade/commit/d8f947978d36a969773306e25b1d1351c87a2a9a))
+* **ci:** Add database URL env in migration command ([0add290](https://github.com/keyshade-xyz/keyshade/commit/0add29071638678248d93a903d530daf282a6153))
+* **cli:** Bump version to 3.0.0 ([1cf0ce8](https://github.com/keyshade-xyz/keyshade/commit/1cf0ce84af1fece125536433b242422b4300172e))
+* **cli:** Bump version to 3.0.1 ([65d6dad](https://github.com/keyshade-xyz/keyshade/commit/65d6dadedf0afbc028436e631bf52408a4c7536b))
+* **cli:** Fix release script ([4fe9067](https://github.com/keyshade-xyz/keyshade/commit/4fe90671c968d22232b0bc960e8e7b39f19a8ffc))
+* **release:** 2.16.0-stage.1 [skip ci] ([0222bb9](https://github.com/keyshade-xyz/keyshade/commit/0222bb9e251fe66eb4869f26a567ad217fe3a229))
+* **release:** 2.16.0-stage.2 [skip ci] ([cc3fa8c](https://github.com/keyshade-xyz/keyshade/commit/cc3fa8c6e596d7e9cbba43f6c3caa9a59df151a1))
+* **release:** 2.16.0-stage.3 [skip ci] ([6265982](https://github.com/keyshade-xyz/keyshade/commit/626598262c1a07c12fe727c8dbbe5ab7febabf51))
+
 ## [2.16.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0-stage.2...v2.16.0-stage.3) (2025-04-26)
 
 ### 🐛 Bug Fixes
