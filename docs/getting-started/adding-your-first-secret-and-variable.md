@@ -2,7 +2,7 @@
 description: Get to know about our platform
 ---
 
-# Introduction
+# Adding your first secret and variable
 
 Our app is the place where you manage all of your secrets and variables. This can also be done using the CLI, but we want to keep it as simple as possible for now. Here's a list of things that we will be doing in this tutorial:
 

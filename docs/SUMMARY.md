@@ -7,7 +7,7 @@
 - [Introduction](getting-started/introduction.md)
 - [Adding your first secret and variable](getting-started/adding-your-first-secret-and-variable.md)
 - [Installing the CLI](getting-started/installing-the-cli.md)
-- [Seting up your profile](getting-started/setting-up-your-profile.md)
+- [Setting up your profile](getting-started/setting-up-your-profile.md)
 - [Add keyshade to your project](getting-started/add-keyshade-to-your-project.md)
 - [Run your app](getting-started/run-your-app.md)
 
