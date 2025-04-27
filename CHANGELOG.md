@@ -1,3 +1,9 @@
+## [2.17.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.1...v2.17.0-stage.2) (2025-04-27)
+
+### 🚀 Features
+
+* **platform:** Add workspace invitations management and update UI ([#897](https://github.com/keyshade-xyz/keyshade/issues/897)) ([5621d4b](https://github.com/keyshade-xyz/keyshade/commit/5621d4bf372d03f50ad825cdf1d3f2fc74ebc03c))
+
 ## [2.17.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0...v2.17.0-stage.1) (2025-04-27)
 
 ### 🚀 Features
