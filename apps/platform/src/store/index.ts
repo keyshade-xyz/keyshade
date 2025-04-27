@@ -18,18 +18,33 @@ import type {
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const globalSearchDataAtom = atom<{
-  workspaces:  { id: string, slug: string, name: string}[];
-  secrets: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
-  variables: { slug: string, name: string, note: string | null, project?: { slug: string} }[];
-  environments: { slug: string, name: string, description: string | null, project?: { slug: string} }[];
-  projects: { slug: string, name: string, description: string }[];
+  workspaces: { id: string; slug: string; name: string }[]
+  secrets: {
+    slug: string
+    name: string
+    note: string | null
+    project?: { slug: string }
+  }[]
+  variables: {
+    slug: string
+    name: string
+    note: string | null
+    project?: { slug: string }
+  }[]
+  environments: {
+    slug: string
+    name: string
+    description: string | null
+    project?: { slug: string }
+  }[]
+  projects: { slug: string; name: string; description: string }[]
 }>({
   workspaces: [],
   secrets: [],
   variables: [],
   environments: [],
   projects: []
-});
+})
 export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
   []
 )
@@ -42,7 +57,9 @@ export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
 export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
-export const selectedMemberAtom = atom<GetMembersResponse['items'][number] | null>(null)
+export const selectedMemberAtom = atom<
+  GetMembersResponse['items'][number] | null
+>(null)
 
 export const selectedVariableAtom = atom<Variable | null>(null)
 export const selectedVariableEnvironmentAtom = atom<Environment['slug'] | null>(
@@ -99,6 +116,12 @@ export const localProjectPrivateKeyAtom = atom<
     key: ProjectWithTierLimitAndCount['privateKey']
   }[]
 >([])
+
+export const workspaceProjectCountAtom = atom<number>(0)
+export const workspaceMemberCountAtom = atom<number>(0)
+export const projectEnvironmentCountAtom = atom<number>(0)
+export const projectSecretCountAtom = atom<number>(0)
+export const projectVariableCountAtom = atom<number>(0)
 
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
