@@ -267,7 +267,11 @@ function OverviewPage(): React.JSX.Element {
       />
       {/* View and download project keys dialog */}
       {isViewAndDownloadProjectKeysDialogOpen ? (
-        <ViewAndDownloadProjectKeysDialog projectKeys={regeneratedKeys} />
+        <ViewAndDownloadProjectKeysDialog
+          isCreated={false}
+          projectKeys={regeneratedKeys}
+          projectSlug={selectedProject.slug}
+        />
       ) : null}
     </div>
   )

@@ -1,3 +1,14 @@
+## [2.17.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.6...v2.17.0-stage.7) (2025-04-28)
+
+### 🚀 Features
+
+* **platform:** CLI command suggestion on view and download key component ([#910](https://github.com/keyshade-xyz/keyshade/issues/910)) ([e43e4ee](https://github.com/keyshade-xyz/keyshade/commit/e43e4ee2312cfdd2cd25dc483dbb2497160e9e64))
+
+### 📚 Documentation
+
+* Add Getting Started ([#906](https://github.com/keyshade-xyz/keyshade/issues/906)) ([a92144d](https://github.com/keyshade-xyz/keyshade/commit/a92144df903c3509855cef740eef4baa8f29e837))
+* Updated the README.md ([b944b64](https://github.com/keyshade-xyz/keyshade/commit/b944b64b16fb75b4a8a76ea641b828853382da7b))
+
 ## [2.17.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.5...v2.17.0-stage.6) (2025-04-27)
 
 ### 🐛 Bug Fixes
