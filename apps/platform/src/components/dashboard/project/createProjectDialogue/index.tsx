@@ -66,8 +66,10 @@ export default function CreateProjectDialogue(): JSX.Element {
     accessLevel: 'PRIVATE'
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [projectSlug, setProjectSlug] = useState<string>('')
   const [projectKeys, setProjectKeys] = useState<{
     projectName: string
+    environmentSlug: string
     storePrivateKey: boolean
     keys: { publicKey: string; privateKey: string }
   }>()
@@ -80,6 +82,15 @@ export default function CreateProjectDialogue(): JSX.Element {
         newProjectData.environments?.filter((env) => env.name.trim() !== '') ||
         []
     })
+  )
+
+  // Function to fetch all environments of the new project
+  const getProjectEnvironment = useHttp((newProjectSlug: string) =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: newProjectSlug
+      }
+    )
   )
 
   // Function to create a new project
@@ -107,14 +118,23 @@ export default function CreateProjectDialogue(): JSX.Element {
         if (success && data) {
           setProjects([...projects, data])
           setWorkspaceProjectCount((prev) => prev + 1)
-          setProjectKeys({
-            projectName: data.name,
-            storePrivateKey: data.storePrivateKey,
-            keys: {
-              publicKey: data.publicKey,
-              privateKey: data.privateKey
+
+          await getProjectEnvironment(data.slug).then(
+            ({ data: envData, success: envSuccess }) => {
+              if (envSuccess && envData) {
+                setProjectKeys({
+                  projectName: data.name,
+                  environmentSlug: envData.items[0].slug,
+                  storePrivateKey: data.storePrivateKey,
+                  keys: {
+                    publicKey: data.publicKey,
+                    privateKey: data.privateKey
+                  }
+                })
+                setProjectSlug(data.slug)
+              }
             }
-          })
+          )
         }
       } finally {
         setIsCreateProjectDialogOpen(false)
@@ -130,7 +150,8 @@ export default function CreateProjectDialogue(): JSX.Element {
     setProjects,
     projects,
     setIsCreateProjectDialogOpen,
-    setWorkspaceProjectCount
+    setWorkspaceProjectCount,
+    getProjectEnvironment
   ])
 
   const toggleDialog = useCallback(() => {
@@ -426,7 +447,11 @@ export default function CreateProjectDialogue(): JSX.Element {
         </DialogContent>
       </Dialog>
       {isViewAndDownloadProjectKeysDialogOpen ? (
-        <ViewAndDownloadProjectKeysDialog projectKeys={projectKeys} />
+        <ViewAndDownloadProjectKeysDialog
+          isCreated
+          projectKeys={projectKeys}
+          projectSlug={projectSlug}
+        />
       ) : null}
     </>
   )
