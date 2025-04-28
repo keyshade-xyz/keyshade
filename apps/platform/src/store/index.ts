@@ -45,6 +45,7 @@ export const globalSearchDataAtom = atom<{
   environments: [],
   projects: []
 })
+
 export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
   []
 )
