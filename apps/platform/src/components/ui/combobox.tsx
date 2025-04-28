@@ -21,11 +21,14 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   allWorkspacesAtom,
   globalSearchDataAtom,
-  selectedWorkspaceAtom
+  selectedWorkspaceAtom,
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
+import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage();
+
   const [open, setOpen] = useState<boolean>(false)
 
   const getWorkspacesOfUser = useHttp(() =>
@@ -33,13 +36,26 @@ export function Combobox(): React.JSX.Element {
   )
 
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
+  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
   const fetchWorkspaces = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
+      // Check if workspaces are already loaded
+      if (allWorkspaces.length > 0 && allWorkspaces.length > page * limit) {
+        return {
+          success: true,
+          error: undefined,
+          data: {
+            items: allWorkspaces,
+            metadata: { totalCount: allWorkspaces.length }
+          }
+        };
+      }
+
+      // If not loaded, fetch from API
       try {
         const response =
           await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
@@ -65,7 +81,7 @@ export function Combobox(): React.JSX.Element {
         }
       }
     },
-    []
+    [allWorkspaces]
   )
 
   const renderWorkspaceListItem = useCallback(
@@ -76,26 +92,39 @@ export function Combobox(): React.JSX.Element {
   )
 
   useEffect(() => {
-    getWorkspacesOfUser().then(({ success, data }) => {
-      if (success && data) {
-        setGlobalSearchData((prev) => ({
-          ...prev,
-          workspaces: data.items.map((workspace) => ({
-            id: workspace.id,
-            name: workspace.name,
-            slug: workspace.slug
+    if (allWorkspaces.length === 0) {
+
+      getWorkspacesOfUser().then(({ success, data }) => {
+        if (success && data) {
+          setGlobalSearchData((prev) => ({
+            ...prev,
+            workspaces: data.items.map((workspace) => ({
+              id: workspace.id,
+              name: workspace.name,
+              slug: workspace.slug
+            }))
           }))
-        }))
-        setAllWorkspaces(data.items)
-        setSelectedWorkspace(data.items[0])
-      }
-    })
-  }, [
-    setSelectedWorkspace,
-    getWorkspacesOfUser,
-    setGlobalSearchData,
-    setAllWorkspaces
-  ])
+          setAllWorkspaces(data.items)
+
+          /**
+           * If workspace stored in local storage is not found in the list of workspaces,
+           * then set the selected workspace to the first one in the list.
+           * This is to ensure that the selected workspace is always valid and belongs to the currently logged in user
+           */
+          const existingWorkspace = data.items.find(item => item.id === workspaceFromStorage?.id && item.ownerId === workspaceFromStorage.ownerId);
+          // eslint-disable-next-line no-console -- debug
+          console.log('existingWorkspace', existingWorkspace)
+          if (!existingWorkspace) {
+            const newSelectedWorkspace = data.items[0];
+            setSelectedWorkspace(newSelectedWorkspace);
+            setSelectedWorkspaceToStorage(newSelectedWorkspace);
+          } else {
+            setSelectedWorkspace(existingWorkspace);
+          }
+        }
+      })
+    }
+  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData, setAllWorkspaces, allWorkspaces, workspaceFromStorage])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
