@@ -24,7 +24,8 @@ import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDelet
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { PageTitle } from '@/components/common/page-title'
-import CopyToClipboard from '@/components/common/copy-to-clipboard';
+import HiddenContent from '@/components/shared/dashboard/hidden-content'
+
 
 
 function OverviewPage(): React.JSX.Element {
@@ -228,10 +229,10 @@ function OverviewPage(): React.JSX.Element {
   </div>
 
  
-  {projectPrivateKey ? <div className="flex items-center gap-2">
-      <CopyToClipboard text={projectPrivateKey} />
-      <span className="text-xs text-white/50">Copy private key</span>
-    </div> : null}
+  {projectPrivateKey ? (
+  <HiddenContent text={projectPrivateKey} />
+) : null}
+
 
  
   <ServerKeySetup

@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { AddSVG, EyeOpenSVG, EyeSlashSVG, TrashSVG } from '@public/svg/shared'
+import React from 'react'
+import { AddSVG, TrashSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import HiddenContent from '@/components/shared/dashboard/hidden-content'
+
 
 interface LocalKeySetupProps {
   privateKey: string | null
@@ -16,30 +17,11 @@ function LocalKeySetup({
   onOpenSetupDialog,
   onDelete
 }: LocalKeySetupProps): React.JSX.Element {
-  const [isRevealed, setIsRevealed] = useState<boolean>(false)
-
-  const handleToggleReveal = () => setIsRevealed((prev) => !prev)
-
+  
   if (privateKey && !isStoredOnServer) {
     return (
-      <div className="flex gap-1">
-        <Input
-          className="px-4 py-6"
-          readOnly
-          type="text"
-          value={
-            isRevealed
-              ? privateKey
-              : privateKey.replace(/./g, '*').substring(0, 20)
-          }
-        />
-        <Button
-          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
-          onClick={handleToggleReveal}
-          type="button"
-        >
-          {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
-        </Button>
+      <div className="flex flex-col gap-3">
+        <HiddenContent text={privateKey} />
         <Button
           className="flex items-center justify-center bg-neutral-800 px-4 py-6"
           onClick={onDelete}
@@ -50,6 +32,7 @@ function LocalKeySetup({
       </div>
     )
   }
+  
   return (
     <Button
       className="w-fit px-4 py-6"
