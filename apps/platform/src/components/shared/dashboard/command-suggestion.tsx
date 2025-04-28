@@ -16,7 +16,7 @@ export function CommandSuggestion({
 }: CommandSuggestionProps) {
   const [copied, setCopied] = useState(false)
 
-  const command = `${value}+' '+${privatekey}`
+  const command = `${value} ${privatekey}`
   const handleCopyToClipboard = () => {
     copyToClipboard(
       command,
@@ -27,7 +27,7 @@ export function CommandSuggestion({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const maskedCommand = `${value}+ ' ' +${privatekey.slice(0, 40).replace(/./g, '•')}`
+  const maskedCommand = `${value} ${privatekey.slice(0, 40).replace(/./g, '•')}`
 
   return (
     <div className="relative flex items-center">
