@@ -112,8 +112,6 @@ export function Combobox(): React.JSX.Element {
            * This is to ensure that the selected workspace is always valid and belongs to the currently logged in user
            */
           const existingWorkspace = data.items.find(item => item.id === workspaceFromStorage?.id && item.ownerId === workspaceFromStorage.ownerId);
-          // eslint-disable-next-line no-console -- debug
-          console.log('existingWorkspace', existingWorkspace)
           if (!existingWorkspace) {
             const newSelectedWorkspace = data.items[0];
             setSelectedWorkspace(newSelectedWorkspace);
