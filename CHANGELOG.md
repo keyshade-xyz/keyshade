@@ -1,3 +1,9 @@
+## [2.17.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.5...v2.17.0-stage.6) (2025-04-27)
+
+### 🐛 Bug Fixes
+
+* **platform:** Removed "People Invited" section from "Add Members" dialog ([#902](https://github.com/keyshade-xyz/keyshade/issues/902)) ([a8f6df3](https://github.com/keyshade-xyz/keyshade/commit/a8f6df39fe44427852991c93ec13e2c6bd6a8d37))
+
 ## [2.17.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.4...v2.17.0-stage.5) (2025-04-27)
 
 ### 🚀 Features
