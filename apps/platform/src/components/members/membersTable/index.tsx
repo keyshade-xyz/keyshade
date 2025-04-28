@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import dayjs from 'dayjs'
 import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue } from 'jotai'
@@ -27,6 +27,7 @@ import {
 } from '@/store'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 function MemberRow({
   member,
@@ -39,6 +40,11 @@ function MemberRow({
   onEditMember: (member: GetMembersResponse['items'][number]) => void
   onTransferOwnership: (member: GetMembersResponse['items'][number]) => void
 }) {
+
+  const isAdminRole = useMemo(() => member.roles.some(role =>
+    role.role.authorities.some(authority => authority === 'WORKSPACE_ADMIN')
+  ), [member.roles])
+
   return (
     <TableRow className="group hover:bg-transparent" key={member.id}>
       <TableCell className="w-[30%] text-left">
@@ -72,24 +78,66 @@ function MemberRow({
       </TableCell>
       <TableCell className="text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <div className="flex justify-start gap-2">
-          <Button
-            className="border-none bg-transparent p-1 hover:bg-transparent"
-            onClick={() => onRemoveClick(member)}
-          >
-            <UserRemoveSVG />
-          </Button>
-          <Button
-            className="border-none bg-transparent p-1 hover:bg-transparent"
-            onClick={() => onEditMember(member)}
-          >
-            <EditTwoSVG />
-          </Button>
-          <Button
-            className="border-none bg-transparent p-1 hover:bg-transparent"
-            onClick={() => onTransferOwnership(member)}
-          >
-            <MedalStarSVG />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
+                  disabled={isAdminRole}
+                  onClick={() => onRemoveClick(member)}
+                >
+                  <UserRemoveSVG />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                sideOffset={8}
+              >
+                {isAdminRole ? (
+                  "Cannot remove workspace admin"
+                ) : (
+                  "Remove member from workspace"
+                )}
+                <TooltipArrow className="fill-zinc-700" />
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="border-none bg-transparent p-1 hover:bg-transparent"
+                  onClick={() => onEditMember(member)}
+                >
+                  <EditTwoSVG />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                sideOffset={8}
+              >
+                Edit member roles
+                <TooltipArrow className="fill-zinc-700" />
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="border-none bg-transparent p-1 hover:bg-transparent"
+                  onClick={() => onTransferOwnership(member)}
+                >
+                  <MedalStarSVG />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                sideOffset={8}
+              >
+                Transfer workspace ownership
+                <TooltipArrow className="fill-zinc-700" />
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </TableCell>
     </TableRow>
