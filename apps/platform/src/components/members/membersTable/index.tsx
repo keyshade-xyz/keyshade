@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import dayjs from 'dayjs'
 import { EditTwoSVG, MedalStarSVG, UserRemoveSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue } from 'jotai'
@@ -41,9 +41,9 @@ function MemberRow({
   onTransferOwnership: (member: GetMembersResponse['items'][number]) => void
 }) {
 
-  const isAdminRole = member.roles.some(role => 
+  const isAdminRole = useMemo(() => member.roles.some(role =>
     role.role.authorities.some(authority => authority === 'WORKSPACE_ADMIN')
-  )
+  ), [member.roles])
 
   return (
     <TableRow className="group hover:bg-transparent" key={member.id}>
