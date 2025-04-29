@@ -1,3 +1,9 @@
+## [2.17.0-stage.13](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.12...v2.17.0-stage.13) (2025-04-29)
+
+### 🚀 Features
+
+* change the hearo content for launch ([519018c](https://github.com/keyshade-xyz/keyshade/commit/519018cfc786ea2819854f95b6a9058eeeb77d91))
+
 ## [2.17.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.11...v2.17.0-stage.12) (2025-04-29)
 
 ### 🐛 Bug Fixes
