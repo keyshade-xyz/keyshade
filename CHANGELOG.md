@@ -1,3 +1,9 @@
+## [2.17.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.9...v2.17.0-stage.10) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **platform:** Update edit role data handling ([#916](https://github.com/keyshade-xyz/keyshade/issues/916)) ([f01ee85](https://github.com/keyshade-xyz/keyshade/commit/f01ee85dd83d424e3ca2b584349f0048306d73ba))
+
 ## [2.17.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.8...v2.17.0-stage.9) (2025-04-29)
 
 ### 🐛 Bug Fixes
