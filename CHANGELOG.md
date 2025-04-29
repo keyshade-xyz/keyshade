@@ -1,3 +1,9 @@
+## [2.17.1-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.3...v2.17.1-stage.4) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** change redirect method to use window.location.href after profile update ([aee9b87](https://github.com/keyshade-xyz/keyshade/commit/aee9b87fc24013c4a0045f63b3714cb9f20e216e))
+
 ## [2.17.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.2...v2.17.1-stage.3) (2025-04-29)
 
 ### 🐛 Bug Fixes
