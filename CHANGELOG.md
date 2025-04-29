@@ -1,3 +1,13 @@
+## [2.17.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.10...v2.17.0-stage.11) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **web:** Added contacts redirection ([#865](https://github.com/keyshade-xyz/keyshade/issues/865)) ([b9a3988](https://github.com/keyshade-xyz/keyshade/commit/b9a3988673b4ee135eb8920e9b6da6d0944d2eb8))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Housekeeping ([8300ec6](https://github.com/keyshade-xyz/keyshade/commit/8300ec69db5a7e20f6cbe449c8e1d205c88b84b1))
+
 ## [2.17.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.9...v2.17.0-stage.10) (2025-04-29)
 
 ### 🐛 Bug Fixes
