@@ -147,6 +147,7 @@ export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteWorkspaceOpenAtom = atom<boolean>(false)
+export const leaveWorkspaceOpenAtom = atom<boolean>(false)
 
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)

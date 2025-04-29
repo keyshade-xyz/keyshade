@@ -27,7 +27,7 @@ export default function AddVariableDialogue() {
   const [isCreateVariableOpen, setIsCreateVariableOpen] = useAtom(
     createVariableOpenAtom
   )
-  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
   const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
 
@@ -46,12 +46,6 @@ export default function AddVariableDialogue() {
       projectSlug: selectedProject!.slug,
       note: requestData.note,
       entries: parseUpdatedEnvironmentValues([], environmentValues)
-    })
-  )
-  
-  const refreshProject = useHttp(() =>
-    ControllerInstance.getInstance().projectController.getProject({
-      projectSlug: selectedProject!.slug
     })
   )
 
@@ -89,12 +83,6 @@ export default function AddVariableDialogue() {
 
           // Add the variable to the store
           setVariables((prev) => [...prev, data])
-          
-          // Refresh the project data to update counts
-          const projectResponse = await refreshProject()
-          if (projectResponse.success && projectResponse.data) {
-            setSelectedProject(projectResponse.data)
-          }
 
           handleClose()
         }
@@ -108,10 +96,8 @@ export default function AddVariableDialogue() {
     requestData.name,
     createVariable,
     setVariables,
-    refreshProject,
-    setSelectedProject,
-    handleClose
-
+    handleClose,
+    setProjectVariableCount
   ])
 
   return (

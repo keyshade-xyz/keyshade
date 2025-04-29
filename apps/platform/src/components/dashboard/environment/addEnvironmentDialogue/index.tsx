@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogDescription,
-  DialogHeader 
+  DialogHeader
 } from '../../../ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,7 +25,7 @@ export default function AddEnvironmentDialogue() {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
     createEnvironmentOpenAtom
   )
-  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
   const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
@@ -39,12 +39,6 @@ export default function AddEnvironmentDialogue() {
     ControllerInstance.getInstance().environmentController.createEnvironment({
       name: newEnvironmentData.environmentName,
       description: newEnvironmentData.environmentDescription,
-      projectSlug: selectedProject!.slug
-    })
-  )
-  
-  const refreshProject = useHttp(() =>
-    ControllerInstance.getInstance().projectController.getProject({
       projectSlug: selectedProject!.slug
     })
   )
@@ -83,12 +77,6 @@ export default function AddEnvironmentDialogue() {
             ...prev,
             { ...data, secrets: 0, variables: 0 }
           ])
-          
-          // Refresh the project data to update counts
-          const projectResponse = await refreshProject()
-          if (projectResponse.success && projectResponse.data) {
-            setSelectedProject(projectResponse.data)
-          }
 
           // Reset the form
           setNewEnvironmentData({
@@ -109,8 +97,7 @@ export default function AddEnvironmentDialogue() {
     newEnvironmentData.environmentName,
     selectedProject,
     setEnvironments,
-    refreshProject,
-    setSelectedProject,
+    setProjectEnvironmentCount,
     setIsCreateEnvironmentOpen
   ])
 
