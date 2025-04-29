@@ -101,7 +101,8 @@ export function Combobox(): React.JSX.Element {
             workspaces: data.items.map((workspace) => ({
               id: workspace.id,
               name: workspace.name,
-              slug: workspace.slug
+              slug: workspace.slug,
+              icon: workspace.icon ?? '🔥'
             }))
           }))
           setAllWorkspaces(data.items)

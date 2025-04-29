@@ -97,8 +97,8 @@ export default function AddEnvironmentDialogue() {
     newEnvironmentData.environmentName,
     selectedProject,
     setEnvironments,
-    setIsCreateEnvironmentOpen,
-    setProjectEnvironmentCount
+    setProjectEnvironmentCount,
+    setIsCreateEnvironmentOpen
   ])
 
   return (

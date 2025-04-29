@@ -27,7 +27,6 @@ export class CustomLoggerService implements LoggerService {
     if (!this.logtailLogger) {
       const token = process.env.LOGTAIL_API_TOKEN
       const endpoint = process.env.LOGTAIL_API_ENDPOINT
-      console.log('logtail', token, endpoint)
       if (token && endpoint) {
         console.info(
           `${chalk.green('[INFO]')} ${chalk.green(
