@@ -7,6 +7,9 @@ import Avvvatars from 'avvvatars-react'
 import Link from 'next/link'
 import OverviewLoader from '@/components/dashboard/overview/overviewLoader'
 import {
+  projectEnvironmentCountAtom,
+  projectSecretCountAtom,
+  projectVariableCountAtom,
   selectedProjectAtom,
   viewAndDownloadProjectKeysOpenAtom
 } from '@/store'
@@ -31,6 +34,9 @@ function OverviewPage(): React.JSX.Element {
     isViewAndDownloadProjectKeysDialogOpen,
     setIsViewAndDownloadProjectKeysDialogOpen
   ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
+  const secretCount = useAtomValue(projectSecretCountAtom)
+  const variableCount = useAtomValue(projectVariableCountAtom)
+  const environmentCount = useAtomValue(projectEnvironmentCountAtom)
 
   const [localKeyDialogOpen, setLocalKeyDialogOpen] = useState<boolean>(false)
   const [serverKeyDialogOpen, setServerKeyDialogOpen] = useState<boolean>(false)
@@ -117,7 +123,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-black/40 p-2">
               <SecretSVG width={16} />
-              {selectedProject.secretCount}
+              {secretCount}
             </div>
           </Link>
 
@@ -133,7 +139,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
               <VariableSVG width={16} />
-              {selectedProject.variableCount}
+              {variableCount}
             </div>
           </Link>
 
@@ -149,7 +155,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
               <EnvironmentSVG width={16} />
-              {selectedProject.environmentCount}
+              {environmentCount}
             </div>
           </Link>
         </div>

@@ -1,13 +1,15 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
   allWorkspacesAtom,
   deleteWorkspaceOpenAtom,
-  selectedWorkspaceAtom
+  leaveWorkspaceOpenAtom,
+  selectedWorkspaceAtom,
+  workspaceMemberCountAtom
 } from '@/store'
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
@@ -28,14 +30,15 @@ import {
   EmojiPicker,
   EmojiPickerSearch,
   EmojiPickerContent,
-  EmojiPickerFooter,
-} from "@/components/ui/emoji-picker";
+  EmojiPickerFooter
+} from '@/components/ui/emoji-picker'
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  PopoverTrigger
+} from '@/components/ui/popover'
 import { PageTitle } from '@/components/common/page-title'
+import ConfirmLeaveWorkspace from '@/components/dashboard/workspace/confirmLeaveWorkspace'
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
@@ -46,8 +49,12 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(
     deleteWorkspaceOpenAtom
   )
+  const [isLeaveWorkspaceOpen, setIsLeaveWorkspaceOpen] = useAtom(
+    leaveWorkspaceOpenAtom
+  )
 
   const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
+  const memberCount = useAtomValue(workspaceMemberCountAtom)
 
   const [showPicker, setShowPicker] = useState(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -259,7 +266,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           <div className="flex flex-row justify-end gap-x-4">
             <Popover onOpenChange={setShowPicker} open={showPicker}>
               <PopoverTrigger asChild>
-                <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl cursor-pointer">
+                <div className="flex aspect-square h-[60px] w-[60px] cursor-pointer items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
                   {workspaceData.icon}
                 </div>
               </PopoverTrigger>
@@ -290,6 +297,50 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           <div className="w-2/5 rounded-lg border-[1px] border-white/50 px-4 py-3 text-center">
             Coming Soon
           </div>
+        </section>
+
+        <Separator className="bg-white/20" />
+
+        {/* Leave Workspace */}
+        <section className="my-5 flex w-full flex-row items-center">
+          <div className="flex w-3/5 flex-col gap-y-2">
+            <span className="text-lg font-semibold">Leave Workspace</span>
+            <span className="text-sm text-white/60">
+              Your access will be lost to any of your teams and data related to
+              this workspace. This action is irreversible.
+            </span>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
+                  disabled={
+                    isLoading ||
+                    selectedWorkspace?.isDefault ||
+                    memberCount === 1
+                  }
+                  onClick={() => setIsLeaveWorkspaceOpen(true)}
+                  role="button"
+                >
+                  <span>Leave</span>
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent
+                className="border-white/20 bg-white/10 text-white backdrop-blur-xl"
+                sideOffset={7}
+              >
+                {selectedWorkspace?.isDefault ? (
+                  <p>This is your default workspace. You can not leave it.</p>
+                ) : null}
+
+                {memberCount === 1 ? (
+                  <p>You are the only member of this workspace.</p>
+                ) : null}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </section>
 
         <Separator className="bg-white/20" />
@@ -344,6 +395,11 @@ export default function WorkspaceSettingsPage(): JSX.Element {
       {/* Delete workspace alert dialog */}
       {isDeleteWorkspaceOpen && selectedWorkspace ? (
         <ConfirmDeleteWorkspace />
+      ) : null}
+
+      {/* Leave workspace alert dialog */}
+      {isLeaveWorkspaceOpen && selectedWorkspace ? (
+        <ConfirmLeaveWorkspace />
       ) : null}
     </main>
   )
