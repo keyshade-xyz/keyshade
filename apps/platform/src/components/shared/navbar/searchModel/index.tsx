@@ -6,6 +6,13 @@ import { useAtom, useAtomValue } from 'jotai'
 import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ArrowDownSVG, ArrowUpSVG, SelectSVG } from '@public/svg/shared'
+import {
+  EnvironmentSVG,
+  FolderSVG,
+  SecretSVG,
+  VariableSVG
+} from '@public/svg/dashboard'
 import type { CommandDialogProps } from '@/components/ui/command'
 import {
   CommandDialog,
@@ -14,13 +21,17 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator
+  CommandSeparator,
+  CommandShortcut
 } from '@/components/ui/command'
-import { globalSearchDataAtom, selectedProjectAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  globalSearchDataAtom,
+  selectedProjectAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { useDebounce } from '@/hooks/use-debounce'
-import { Skeleton } from '@/components/ui/skeleton'
 
 interface SearchModelProps extends CommandDialogProps {
   isOpen: boolean
@@ -44,15 +55,16 @@ function SearchModel({
   setIsOpen,
   ...props
 }: SearchModelProps): React.JSX.Element {
-  const router = useRouter();
+  const router = useRouter()
 
   const [globalSearchData, setGlobalSearchData] = useAtom(globalSearchDataAtom)
-  const [selectedWorkspace, setSelectedWorkspace] = useAtom(selectedWorkspaceAtom)
+  const [selectedWorkspace, setSelectedWorkspace] = useAtom(
+    selectedWorkspaceAtom
+  )
   const selectedProject = useAtomValue(selectedProjectAtom)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedValue, setDebouncedValue] = useState('')
-  const [isSearching, setIsSearching] = useState<boolean>(false)
   const [hasNoResults, setHasNoResults] = useState<boolean>(false)
 
   const getGlobalSearchData = useHttp(() =>
@@ -63,26 +75,39 @@ function SearchModel({
   )
 
   // Initialize Fuse instances for each data type
-  const fuseInstances = useMemo(() => ({
-    workspaces: new Fuse(globalSearchData.workspaces, searchOptions),
-    secrets: new Fuse(globalSearchData.secrets, searchOptions),
-    projects: new Fuse(globalSearchData.projects, searchOptions),
-    environments: new Fuse(globalSearchData.environments, searchOptions),
-    variables: new Fuse(globalSearchData.variables, searchOptions)
-  }), [globalSearchData])
+  const fuseInstances = useMemo(
+    () => ({
+      workspaces: new Fuse(globalSearchData.workspaces, searchOptions),
+      secrets: new Fuse(globalSearchData.secrets, searchOptions),
+      projects: new Fuse(globalSearchData.projects, searchOptions),
+      environments: new Fuse(globalSearchData.environments, searchOptions),
+      variables: new Fuse(globalSearchData.variables, searchOptions)
+    }),
+    [globalSearchData]
+  )
 
   // Search for results based on the current search query
   const searchResults = useMemo(() => {
     if (!searchQuery) {
-      return globalSearchData;
+      return globalSearchData
     }
 
     return {
-      workspaces: fuseInstances.workspaces.search(searchQuery).map(result => result.item),
-      secrets: fuseInstances.secrets.search(searchQuery).map(result => result.item),
-      projects: fuseInstances.projects.search(searchQuery).map(result => result.item),
-      environments: fuseInstances.environments.search(searchQuery).map(result => result.item),
-      variables: fuseInstances.variables.search(searchQuery).map(result => result.item)
+      workspaces: fuseInstances.workspaces
+        .search(searchQuery)
+        .map((result) => result.item),
+      secrets: fuseInstances.secrets
+        .search(searchQuery)
+        .map((result) => result.item),
+      projects: fuseInstances.projects
+        .search(searchQuery)
+        .map((result) => result.item),
+      environments: fuseInstances.environments
+        .search(searchQuery)
+        .map((result) => result.item),
+      variables: fuseInstances.variables
+        .search(searchQuery)
+        .map((result) => result.item)
     }
   }, [searchQuery, fuseInstances, globalSearchData])
 
@@ -96,94 +121,76 @@ function SearchModel({
 
   // Check if there are no results after search
   useEffect(() => {
-    const noResults = Object.values(searchResults).every((results: unknown) => Array.isArray(results) && results.length === 0)
+    const noResults = Object.values(searchResults).every(
+      (results: unknown) => Array.isArray(results) && results.length === 0
+    )
     setHasNoResults(noResults && searchQuery.length > 0)
   }, [searchResults, searchQuery])
 
   // Handle API search
   useEffect(() => {
     if (hasNoResults && debouncedValue) {
-      setIsSearching(true);
-      getGlobalSearchData()
-        .then(({ data, success }) => {
-          if (success && data) {
-            const newData = {
-              workspaces: [],
-              secrets: data.secrets,
-              projects: data.projects,
-              environments: data.environments,
-              variables: data.variables
-            };
-            setGlobalSearchData(newData);
+      getGlobalSearchData().then(({ data, success }) => {
+        if (success && data) {
+          const newData = {
+            workspaces: [],
+            secrets: data.secrets,
+            projects: data.projects,
+            environments: data.environments,
+            variables: data.variables
           }
-        })
-        .finally(() => setIsSearching(false));
+          setGlobalSearchData(newData)
+        }
+      })
     }
-  }, [debouncedValue, getGlobalSearchData, setGlobalSearchData, hasNoResults]);
+  }, [debouncedValue, getGlobalSearchData, setGlobalSearchData, hasNoResults])
 
   // Update the search results when the search query changes
   useEffect(() => {
     debouncedSetValue(searchQuery)
   }, [debouncedSetValue, searchQuery])
 
-  const handleChangeWorkspace = (workspace: WorkspaceWithTierLimitAndProjectCount) => {
-    const newWorkspace = {...workspace, projects: 0}
+  const handleChangeWorkspace = (
+    workspace: WorkspaceWithTierLimitAndProjectCount
+  ) => {
+    const newWorkspace = { ...workspace, projects: 0 }
     setSelectedWorkspace(newWorkspace)
-    router.push("/")
+    router.push('/')
   }
 
   return (
     <CommandDialog onOpenChange={setIsOpen} open={isOpen} {...props}>
-      <CommandInput 
-        onValueChange={handleSearch} 
+      <CommandInput
+        onValueChange={handleSearch}
         placeholder="Search by name, slug or description"
         value={searchQuery}
       />
       <CommandList>
-        {isSearching ? (
-          <CommandSkeletonLoader />
-        ) : hasNoResults ? (
+        {hasNoResults ? (
           <CommandEmpty>No results found.</CommandEmpty>
         ) : (
           <>
             {searchResults.workspaces.length > 0 && (
               <>
                 <CommandGroup heading="WORKSPACES">
-                  {searchResults.workspaces.map(workspace => (
+                  {searchResults.workspaces.map((workspace) => (
                     <CommandItem
-                    key={workspace.id}
+                      key={workspace.id}
                       onClick={() => {
-                        handleChangeWorkspace(workspace as WorkspaceWithTierLimitAndProjectCount)
+                        handleChangeWorkspace(
+                          workspace as WorkspaceWithTierLimitAndProjectCount
+                        )
                         setIsOpen(false)
                       }}
                     >
+                      <span className="mr-2">{workspace.icon}</span>
                       <span>{workspace.name}</span>
-                      {workspace.slug ? <span className="text-sm text-gray-200 ml-2">
+                      {workspace.slug ? (
+                        <span className="ml-2 text-sm text-gray-200">
                           ({workspace.slug})
-                        </span> : null}
+                        </span>
+                      ) : null}
                     </CommandItem>
-                  ))}
-                </CommandGroup>
-                <CommandSeparator />
-              </>
-            )}
-
-            {searchResults.secrets.length > 0 && (
-              <>
-                <CommandGroup heading="SECRETS">
-                  {searchResults.secrets.map(secret => (
-                    <Link
-                    href={`/${selectedWorkspace!.slug}/${secret.project?.slug ?? selectedProject?.slug}?tab=secret&highlight=${secret.slug}`}
-                    key={secret.slug}
-                    onClick={() => setIsOpen(false)}
-                    >
-                      <CommandItem>
-                        <span>{secret.slug}</span>
-                        {secret.slug ? <span className="text-sm text-gray-200 ml-2">
-                            ({secret.slug})
-                          </span> : null}
-                      </CommandItem>
-                    </Link>
                   ))}
                 </CommandGroup>
                 <CommandSeparator />
@@ -193,17 +200,45 @@ function SearchModel({
             {searchResults.projects.length > 0 && (
               <>
                 <CommandGroup heading="PROJECTS">
-                  {searchResults.projects.map(project => (
+                  {searchResults.projects.map((project) => (
                     <Link
-                    href={`/${selectedWorkspace!.slug}/${project.slug}?tab=secret`}
-                    key={project.slug}
-                    onClick={() => setIsOpen(false)}
+                      href={`/${selectedWorkspace!.slug}/${project.slug}?tab=secret`}
+                      key={project.slug}
+                      onClick={() => setIsOpen(false)}
                     >
                       <CommandItem key={project.slug}>
+                        <FolderSVG className="mr-1 h-4 w-4" />
                         <span>{project.slug}</span>
-                        {project.description ? <span className="text-sm text-gray-200 ml-2">
+                        {project.description ? (
+                          <span className="ml-2 text-sm text-gray-200">
                             {project.description}
-                          </span> : null}
+                          </span>
+                        ) : null}
+                      </CommandItem>
+                    </Link>
+                  ))}
+                </CommandGroup>
+                <CommandSeparator />
+              </>
+            )}
+
+            {searchResults.secrets.length > 0 && (
+              <>
+                <CommandGroup heading="SECRETS">
+                  {searchResults.secrets.map((secret) => (
+                    <Link
+                      href={`/${selectedWorkspace!.slug}/${secret.project?.slug ?? selectedProject?.slug}?tab=secret&highlight=${secret.slug}`}
+                      key={secret.slug}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <CommandItem>
+                        <SecretSVG className="mr-2 h-4 w-4" />
+                        <span>{secret.slug}</span>
+                        {secret.slug ? (
+                          <span className="ml-2 text-sm text-gray-200">
+                            ({secret.slug})
+                          </span>
+                        ) : null}
                       </CommandItem>
                     </Link>
                   ))}
@@ -215,17 +250,20 @@ function SearchModel({
             {searchResults.environments.length > 0 && (
               <>
                 <CommandGroup heading="ENVIRONMENTS">
-                  {searchResults.environments.map(environment => (
+                  {searchResults.environments.map((environment) => (
                     <Link
-                    href={`/${selectedWorkspace!.slug}/${environment.project?.slug ?? selectedProject?.slug}?tab=environment&highlight=${environment.slug}`}
-                    key={environment.slug}
-                    onClick={() => setIsOpen(false)}
+                      href={`/${selectedWorkspace!.slug}/${environment.project?.slug ?? selectedProject?.slug}?tab=environment&highlight=${environment.slug}`}
+                      key={environment.slug}
+                      onClick={() => setIsOpen(false)}
                     >
                       <CommandItem>
+                        <EnvironmentSVG className="mr-2 h-4 w-4" />
                         <span>{environment.slug}</span>
-                        {environment.description ? <span className="text-sm text-gray-200 ml-2">
+                        {environment.description ? (
+                          <span className="ml-2 text-sm text-gray-200">
                             {environment.description}
-                          </span> : null}
+                          </span>
+                        ) : null}
                       </CommandItem>
                     </Link>
                   ))}
@@ -236,17 +274,20 @@ function SearchModel({
 
             {searchResults.variables.length > 0 && (
               <CommandGroup heading="VARIABLES">
-                {searchResults.variables.map(variable => (
+                {searchResults.variables.map((variable) => (
                   <Link
-                  href={`/${selectedWorkspace!.slug}/${variable.project?.slug ?? selectedProject?.slug}?tab=variable&highlight=${variable.slug}`}
-                  key={variable.slug}
-                  onClick={() => setIsOpen(false)}
+                    href={`/${selectedWorkspace!.slug}/${variable.project?.slug ?? selectedProject?.slug}?tab=variable&highlight=${variable.slug}`}
+                    key={variable.slug}
+                    onClick={() => setIsOpen(false)}
                   >
                     <CommandItem>
+                      <VariableSVG className="mr-2 h-4 w-4" />
                       <span>{variable.name}</span>
-                      {variable.note ? <span className="text-sm text-gray-200 ml-2">
+                      {variable.note ? (
+                        <span className="ml-2 text-sm text-gray-200">
                           {variable.note}
-                        </span> : null}
+                        </span>
+                      ) : null}
                     </CommandItem>
                   </Link>
                 ))}
@@ -255,26 +296,33 @@ function SearchModel({
           </>
         )}
       </CommandList>
+      <CommandShortcut className="flex w-full items-center justify-between p-4  text-gray-500">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-2 text-xs">
+            <div className="flex gap-1">
+              <span className="rounded-md bg-neutral-800 p-1">
+                <ArrowUpSVG />
+              </span>
+              <span className="rounded-md bg-neutral-800 p-1">
+                <ArrowDownSVG />
+              </span>
+            </div>
+            <p className="text-sm">to navigate</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <div className="rounded-md bg-neutral-800 p-1">
+              <SelectSVG />
+            </div>
+            <p className="text-sm">to select</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <div className="rounded-md bg-neutral-800 p-1">ESC</div>
+          <p className="text-sm">to close</p>
+        </div>
+      </CommandShortcut>
     </CommandDialog>
   )
 }
 
 export default SearchModel
-
-export function CommandSkeletonLoader() {
-  return (
-    <CommandEmpty className="p-3">
-      <div className="space-y-5">
-        {Array.from({ length: 2 }).map((val: number) => (
-          <div className="flex flex-col gap-2" key={val}>
-            <Skeleton className="h-4 w-24" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 flex-1" />
-              <Skeleton className="h-8 flex-1" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </CommandEmpty>
-  )
-}
