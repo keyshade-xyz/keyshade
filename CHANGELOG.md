@@ -1,3 +1,10 @@
+## [2.17.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.2...v2.17.1-stage.3) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** change redirect method to replace after profile update ([81b3c3c](https://github.com/keyshade-xyz/keyshade/commit/81b3c3c852bc7511075c637f4ac5a49894ea7fe3))
+* **auth:** enable redirect to dashboard after profile update ([7ce1b91](https://github.com/keyshade-xyz/keyshade/commit/7ce1b91feb24b08f2227e387cc53faca9551d69f))
+
 ## [2.17.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.1...v2.17.1-stage.2) (2025-04-29)
 
 ### 🐛 Bug Fixes
