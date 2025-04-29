@@ -28,7 +28,7 @@ function Sidebar(): JSX.Element {
     {
       name: 'Members',
       icon: <TeamSVG />,
-      link: '/members',
+      link: '/members?tab=joined',
       matchTo: '/members'
     },
     {

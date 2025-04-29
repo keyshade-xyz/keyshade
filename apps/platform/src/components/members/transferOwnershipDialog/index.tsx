@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
-import type { User } from '@keyshade/schema'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -12,21 +11,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { selectedMemberAtom, selectedWorkspaceAtom, transferOwnershipOpenAtom } from '@/store'
+import {
+  selectedMemberAtom,
+  selectedWorkspaceAtom,
+  transferOwnershipOpenAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 
 export default function TransferOwnershipDialog() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
-  const [isTransferOwnershipOpen, setIsTransferOwnershipOpen] = useAtom(transferOwnershipOpenAtom)
+  const [isTransferOwnershipOpen, setIsTransferOwnershipOpen] = useAtom(
+    transferOwnershipOpenAtom
+  )
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const transferOwnership = useHttp((userEmail: User['email']) =>
-    ControllerInstance.getInstance().workspaceMembershipController.transferOwnership({
-      workspaceSlug: currentWorkspace!.slug,
-      userEmail
-    })
+  const transferOwnership = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.transferOwnership(
+      {
+        workspaceSlug: currentWorkspace!.slug,
+        userEmail: selectedMember!.user.email
+      }
+    )
   )
 
   const handleClose = useCallback(() => {
@@ -43,7 +50,8 @@ export default function TransferOwnershipDialog() {
           toast.success('Ownership transferred successfully', {
             description: (
               <p className="text-xs text-emerald-300">
-                Ownership has been successfully transferred to &quot;{selectedMember.user.name}&quot;
+                Ownership has been successfully transferred to &quot;
+                {selectedMember.user.name}&quot;
               </p>
             )
           })
@@ -56,12 +64,7 @@ export default function TransferOwnershipDialog() {
         toast.dismiss()
       }
     }
-  }, [
-    handleClose,
-    selectedMember,
-    setSelectedMember,
-    transferOwnership
-  ])
+  }, [handleClose, selectedMember, setSelectedMember, transferOwnership])
 
   return (
     <AlertDialog
@@ -77,7 +80,10 @@ export default function TransferOwnershipDialog() {
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This will transfer ownership of <span className='text-white'>{currentWorkspace?.name}</span> to <span className='text-white'>{selectedMember?.user.email}</span>. This action cannot be undone.
+            This will transfer ownership of{' '}
+            <span className="text-white">{currentWorkspace?.name}</span> to{' '}
+            <span className="text-white">{selectedMember?.user.email}</span>.
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

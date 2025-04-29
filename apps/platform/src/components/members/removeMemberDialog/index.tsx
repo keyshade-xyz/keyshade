@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { TrashSVG } from '@public/svg/shared'
-import type { User } from '@keyshade/schema'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -13,21 +12,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { membersOfWorkspaceAtom, removeMemberOpenAtom, selectedMemberAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  membersOfWorkspaceAtom,
+  removeMemberOpenAtom,
+  selectedMemberAtom,
+  selectedWorkspaceAtom,
+  workspaceMemberCountAtom
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 
 export default function RemoveMemberDialog() {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
-  const [isRemoveMemberOpen, setIsRemoveMemberOpen] = useAtom(removeMemberOpenAtom)
+  const setMemberCount = useSetAtom(workspaceMemberCountAtom)
+  const [isRemoveMemberOpen, setIsRemoveMemberOpen] =
+    useAtom(removeMemberOpenAtom)
   const setMembers = useSetAtom(membersOfWorkspaceAtom)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const removeMember = useHttp((userEmails: User['email']) =>
+  const removeMember = useHttp(() =>
     ControllerInstance.getInstance().workspaceMembershipController.removeUsers({
       workspaceSlug: currentWorkspace!.slug,
-      userEmails
+      userEmails: selectedMember!.user.email
     })
   )
 
@@ -42,10 +49,12 @@ export default function RemoveMemberDialog() {
       setIsLoading(true)
       try {
         if (success) {
+          setMemberCount((prevCount) => prevCount - 1)
           toast.success('Member removed successfully', {
             description: (
               <p className="text-xs text-emerald-300">
-                Team member &quot;{selectedMember.user.name}&quot; has been removed successfully.
+                Team member &quot;{selectedMember.user.name}&quot; has been
+                removed successfully.
               </p>
             )
           })
@@ -68,7 +77,8 @@ export default function RemoveMemberDialog() {
     setMembers,
     handleClose,
     selectedMember,
-    setSelectedMember
+    setSelectedMember,
+    setMemberCount
   ])
 
   return (
@@ -86,7 +96,8 @@ export default function RemoveMemberDialog() {
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This action cannot be undone. Although, you can share an invite again to let them join the team again.
+            This action cannot be undone. Although, you can share an invite
+            again to let them join the team again.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
