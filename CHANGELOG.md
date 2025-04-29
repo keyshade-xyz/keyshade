@@ -1,3 +1,9 @@
+## [2.17.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.11...v2.17.0-stage.12) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **platform:** Secret counts not updating and add leave workspace feature ([#895](https://github.com/keyshade-xyz/keyshade/issues/895)) ([076bbfe](https://github.com/keyshade-xyz/keyshade/commit/076bbfe20c40d6010a0bf4d3dac203cf12a87a38))
+
 ## [2.17.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.10...v2.17.0-stage.11) (2025-04-29)
 
 ### 🐛 Bug Fixes
