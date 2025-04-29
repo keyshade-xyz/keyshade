@@ -1,3 +1,9 @@
+## [2.17.1-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.4...v2.17.1-stage.5) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **sidebar:** comment out unused Integrations tab in sidebar ([9e9a658](https://github.com/keyshade-xyz/keyshade/commit/9e9a658ecd224f8860ec42070e6a47df19d8fda9))
+
 ## [2.17.1-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.3...v2.17.1-stage.4) (2025-04-29)
 
 ### 🐛 Bug Fixes
