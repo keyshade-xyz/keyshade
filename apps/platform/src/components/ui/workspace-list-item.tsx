@@ -7,6 +7,7 @@ import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { cn } from '@/lib/utils'
 import { selectedWorkspaceAtom } from '@/store'
 import { CommandItem } from '@/components/ui/command'
+import { setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 interface WorkspaceListItemProps {
   workspace: WorkspaceWithTierLimitAndProjectCount
@@ -26,6 +27,7 @@ export function WorkspaceListItem({
 
   const handleSelect = () => {
     setSelectedWorkspace(workspace)
+    setSelectedWorkspaceToStorage(workspace);
     router.refresh()
     onClose()
   }
