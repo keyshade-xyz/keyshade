@@ -1,3 +1,31 @@
+## [2.17.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.10...v2.17.0-stage.11) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **web:** Added contacts redirection ([#865](https://github.com/keyshade-xyz/keyshade/issues/865)) ([b9a3988](https://github.com/keyshade-xyz/keyshade/commit/b9a3988673b4ee135eb8920e9b6da6d0944d2eb8))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Housekeeping ([8300ec6](https://github.com/keyshade-xyz/keyshade/commit/8300ec69db5a7e20f6cbe449c8e1d205c88b84b1))
+
+## [2.17.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.9...v2.17.0-stage.10) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **platform:** Update edit role data handling ([#916](https://github.com/keyshade-xyz/keyshade/issues/916)) ([f01ee85](https://github.com/keyshade-xyz/keyshade/commit/f01ee85dd83d424e3ca2b584349f0048306d73ba))
+
+## [2.17.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.8...v2.17.0-stage.9) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **api:** Email action url for accept workshop invitation ([#913](https://github.com/keyshade-xyz/keyshade/issues/913)) ([55d8fbf](https://github.com/keyshade-xyz/keyshade/commit/55d8fbfc70417f1f238d208627ae7203e719130e))
+
+## [2.17.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.7...v2.17.0-stage.8) (2025-04-29)
+
+### 🚀 Features
+
+* **platform:** Updated searchbar UI ([#918](https://github.com/keyshade-xyz/keyshade/issues/918)) ([59dddef](https://github.com/keyshade-xyz/keyshade/commit/59dddef338d43a62d6e090570fdc53d0f17420a6))
+
 ## [2.17.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.6...v2.17.0-stage.7) (2025-04-28)
 
 ### 🚀 Features

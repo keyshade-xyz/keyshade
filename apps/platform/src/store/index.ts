@@ -18,7 +18,7 @@ import type {
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
 export const globalSearchDataAtom = atom<{
-  workspaces: { id: string; slug: string; name: string }[]
+  workspaces: { id: string; slug: string; name: string; icon: string }[]
   secrets: {
     slug: string
     name: string
