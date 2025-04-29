@@ -1,3 +1,9 @@
+## [2.17.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.7...v2.17.0-stage.8) (2025-04-29)
+
+### 🚀 Features
+
+* **platform:** Updated searchbar UI ([#918](https://github.com/keyshade-xyz/keyshade/issues/918)) ([59dddef](https://github.com/keyshade-xyz/keyshade/commit/59dddef338d43a62d6e090570fdc53d0f17420a6))
+
 ## [2.17.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.6...v2.17.0-stage.7) (2025-04-28)
 
 ### 🚀 Features
