@@ -50,7 +50,7 @@ const COLORS_LIST = [
     color: '#a855f7'
   },
   {
-    name: 'fuchsia',
+    name: 'Fuchsia',
     color: '#d946ef'
   }
 ]
@@ -90,7 +90,9 @@ export default function EditRoleSheet() {
   const updateRole = useHttp(() =>
     ControllerInstance.getInstance().workspaceRoleController.updateWorkspaceRole(
       {
-        ...editRoleData,
+        ...(editRoleData.name !== selectedRole?.name ? { name: editRoleData.name } : {}),
+        description: editRoleData.description,
+        colorCode: editRoleData.colorCode,
         workspaceRoleSlug: selectedRole!.slug,
         projectEnvironments: Object.entries(projectEnvironmentSelection).map(
           ([projectSlug, { environments }]) => ({
