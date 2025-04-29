@@ -1,3 +1,9 @@
+## [2.17.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.8...v2.17.0-stage.9) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **api:** Email action url for accept workshop invitation ([#913](https://github.com/keyshade-xyz/keyshade/issues/913)) ([55d8fbf](https://github.com/keyshade-xyz/keyshade/commit/55d8fbfc70417f1f238d208627ae7203e719130e))
+
 ## [2.17.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0-stage.7...v2.17.0-stage.8) (2025-04-29)
 
 ### 🚀 Features
