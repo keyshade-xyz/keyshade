@@ -40,9 +40,11 @@ import {
 } from '@/components/ui/popover'
 import { PageTitle } from '@/components/common/page-title'
 import ConfirmLeaveWorkspace from '@/components/dashboard/workspace/confirmLeaveWorkspace'
+import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
 
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
@@ -119,6 +121,14 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         if (success && data) {
           toast.success('Workspace details successfully updated')
 
+          if (workspaceFromStorage?.id === selectedWorkspace.id) {
+            setSelectedWorkspaceToStorage({
+              ...workspaceFromStorage,
+              name: data.name,
+              icon: data.icon
+            });
+          }
+
           // Update the selected workspace
           setSelectedWorkspace({
             ...selectedWorkspace,
@@ -151,14 +161,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         toast.dismiss()
       }
     }
-  }, [
-    router,
-    selectedWorkspace,
-    setAllWorkspaces,
-    setSelectedWorkspace,
-    updateWorkspace,
-    workspaceData.name
-  ])
+  }, [router, selectedWorkspace, setAllWorkspaces, setSelectedWorkspace, updateWorkspace, workspaceData.name, workspaceFromStorage])
 
   useEffect(() => {
     if (selectedWorkspace) {
