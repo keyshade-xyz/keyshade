@@ -1,3 +1,28 @@
+## [2.17.1-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.4...v2.17.1-stage.5) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **sidebar:** comment out unused Integrations tab in sidebar ([9e9a658](https://github.com/keyshade-xyz/keyshade/commit/9e9a658ecd224f8860ec42070e6a47df19d8fda9))
+
+## [2.17.1-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.3...v2.17.1-stage.4) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** change redirect method to use window.location.href after profile update ([aee9b87](https://github.com/keyshade-xyz/keyshade/commit/aee9b87fc24013c4a0045f63b3714cb9f20e216e))
+
+## [2.17.1-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.2...v2.17.1-stage.3) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** change redirect method to replace after profile update ([81b3c3c](https://github.com/keyshade-xyz/keyshade/commit/81b3c3c852bc7511075c637f4ac5a49894ea7fe3))
+* **auth:** enable redirect to dashboard after profile update ([7ce1b91](https://github.com/keyshade-xyz/keyshade/commit/7ce1b91feb24b08f2227e387cc53faca9551d69f))
+
+## [2.17.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.1...v2.17.1-stage.2) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** comment out redirect to dashboard after profile update ([d044191](https://github.com/keyshade-xyz/keyshade/commit/d044191f9493b6580bb94ef7d344b53531bf3dcb))
+
 ## [2.17.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0...v2.17.1-stage.1) (2025-04-29)
 
 ### 🐛 Bug Fixes

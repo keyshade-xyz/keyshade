@@ -3,7 +3,7 @@ import React from 'react'
 import { useAtomValue } from 'jotai'
 import {
   DashboardSVG,
-  IntegrationSVG,
+  // IntegrationSVG,
   KeyshadeLogoSVG,
   RolesSVG,
   SettingsSVG,
@@ -37,12 +37,12 @@ function Sidebar(): JSX.Element {
       link: '/roles',
       matchTo: '/roles'
     },
-    {
-      name: 'Integrations',
-      icon: <IntegrationSVG />,
-      link: '/',
-      matchTo: '/integrations'
-    },
+    // {
+    //   name: 'Integrations',
+    //   icon: <IntegrationSVG />,
+    //   link: '/',
+    //   matchTo: '/integrations'
+    // },
     {
       name: 'Settings',
       icon: <SettingsSVG />,
