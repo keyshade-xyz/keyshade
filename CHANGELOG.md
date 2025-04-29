@@ -1,3 +1,9 @@
+## [2.17.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0...v2.17.1-stage.1) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **platform:** Enhance workspace selection handling and local storage integration ([#915](https://github.com/keyshade-xyz/keyshade/issues/915)) ([07d4f2c](https://github.com/keyshade-xyz/keyshade/commit/07d4f2c2bd9555ea2b345dbf7a0d031a6d476e14))
+
 ## [2.17.0](https://github.com/keyshade-xyz/keyshade/compare/v2.16.0...v2.17.0) (2025-04-29)
 
 ### 🚀 Features
