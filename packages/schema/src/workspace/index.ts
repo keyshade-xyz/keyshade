@@ -161,21 +161,30 @@ export const GlobalSearchResponseSchema = z.object({
     z.object({
       slug: EnvironmentSchema.shape.slug,
       name: EnvironmentSchema.shape.name,
-      description: EnvironmentSchema.shape.description
+      description: EnvironmentSchema.shape.description,
+      project: z.object({
+        slug: z.string()
+      })
     })
   ),
   secrets: z.array(
     z.object({
       slug: z.string(),
       name: z.string(),
-      note: z.string()
+      note: z.string(),
+      project: z.object({
+        slug: z.string()
+      })
     })
   ),
   variables: z.array(
     z.object({
       slug: z.string(),
       name: z.string(),
-      note: z.string()
+      note: z.string(),
+      project: z.object({
+        slug: z.string()
+      })
     })
   )
 })
@@ -184,6 +193,7 @@ export const GetWorkspaceInvitationsRequest = PageRequestSchema
 
 export const GetWorkspaceInvitationsResponse = PageResponseSchema(
   z.object({
+    invitationAccepted: z.boolean(),
     workspace: z.object({
       id: z.string(),
       name: z.string(),

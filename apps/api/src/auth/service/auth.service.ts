@@ -249,7 +249,10 @@ export class AuthService {
     // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
       throw new UnauthorizedException(
-        'The user has signed up with a different authentication provider.'
+        constructErrorBody(
+          'Error signing in',
+          'The user has signed up with a different authentication provider.'
+        )
       )
     }
 

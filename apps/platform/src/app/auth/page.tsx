@@ -42,9 +42,18 @@ export default function AuthPage(): React.JSX.Element {
   // If user comes here with redirection from OAuth login,
   // fetch the details from the url query params.
   useEffect(() => {
-    const urlEncodedData = new URLSearchParams(window.location.search).get(
-      'data'
-    )
+    const searchParams = new URLSearchParams(window.location.search)
+
+    // Check if there was OAuth failure
+    const reason = searchParams.get('reason')
+    if (reason) {
+      toast.error('Something went wrong while logging you in!', {
+        description: <p className="text-xs text-red-300">hello</p>
+      })
+      return
+    }
+
+    const urlEncodedData = searchParams.get('data')
 
     if (!urlEncodedData) {
       // Not OAuth login

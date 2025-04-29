@@ -28,6 +28,10 @@ import UserRemoveSVG from './user-remove.svg'
 import LockSVG from './lock.svg'
 import RegenerateSVG from './regenerate.svg'
 import TickCircleSVG from './tick-circle.svg'
+import LinkSVG from './link.svg'
+import SelectSVG from './select.svg'
+import ArrowUpSVG from './arrowup.svg'
+import ArrowDownSVG from './arrowdown.svg'
 
 export {
   DropdownSVG,
@@ -60,4 +64,8 @@ export {
   LockSVG,
   RegenerateSVG,
   TickCircleSVG,
+  LinkSVG,
+  SelectSVG,
+  ArrowUpSVG,
+  ArrowDownSVG
 }

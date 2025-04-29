@@ -62,6 +62,7 @@ export default function GeneralSettings(): React.JSX.Element {
         <div className="aspect-square w-[60px] rounded-full" >
           {user?.profilePictureUrl ? (
             <AvatarComponent
+              className='w-full h-full'
               name={user.name || 'User'}
               profilePictureUrl={user.profilePictureUrl}
             />

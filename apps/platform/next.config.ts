@@ -1,9 +1,9 @@
-import path, { dirname } from 'path'
-import { withSentryConfig } from '@sentry/nextjs'
-import { fileURLToPath } from 'url'
+import path, { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { type SentryBuildOptions, withSentryConfig } from '@sentry/nextjs'
+import type { NextConfig } from 'next'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: 'standalone',
   pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
   webpack(config, { isServer }) {
@@ -17,6 +17,10 @@ const nextConfig = {
 
     if (!isServer) {
       config.resolve.alias['@public'] = path.join(__dirname, 'public')
+      config.resolve.alias['@radix-ui/react-use-effect-event'] = path.resolve(
+        __dirname,
+        'stubs/use-effect-event.js'
+      )
     }
 
     return config
@@ -30,7 +34,7 @@ const nextConfig = {
   }
 }
 
-export default withSentryConfig(nextConfig, {
+const sentryBuildOptions: SentryBuildOptions = {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
@@ -57,9 +61,6 @@ export default withSentryConfig(nextConfig, {
   // side errors will fail.
   // tunnelRoute: "/monitoring",
 
-  // Hides source maps from generated client bundles
-  hideSourceMaps: false,
-
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
 
@@ -68,4 +69,6 @@ export default withSentryConfig(nextConfig, {
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true
-})
+}
+
+export default withSentryConfig(nextConfig, sentryBuildOptions)

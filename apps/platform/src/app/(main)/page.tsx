@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { FolderSVG } from '@public/svg/dashboard'
+import { FolderIconSVG } from '@public/svg/dashboard'
 import ProjectCard from '@/components/dashboard/project/projectCard'
 import ControllerInstance from '@/lib/controller-instance'
 import ProjectScreenLoader from '@/components/dashboard/project/projectScreenLoader'
@@ -13,21 +13,24 @@ import {
   projectsOfWorkspaceAtom,
   deleteProjectOpenAtom,
   selectedProjectAtom,
-  userAtom
+  userAtom,
+  globalSearchDataAtom
 } from '@/store'
 import EditProjectSheet from '@/components/dashboard/project/editProjectSheet'
 import { Button } from '@/components/ui/button'
 import ConfirmDeleteProject from '@/components/dashboard/project/confirmDeleteProject'
 import { useHttp } from '@/hooks/use-http'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
+import { PageTitle } from '@/components/common/page-title'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
 }
-export default function Index(): JSX.Element {
+export default function Index(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true)
 
   const setUser = useSetAtom(userAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const setIsCreateProjectDialogOpen = useSetAtom(createProjectOpenAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
@@ -77,6 +80,14 @@ export default function Index(): JSX.Element {
         .then(({ data, success }) => {
           if (success && data) {
             setProjects(data.items)
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              projects: data.items.map((project) => ({
+                name: project.name,
+                slug: project.slug,
+                description: project.description
+              }))
+            }))
           }
         })
         .finally(() => {
@@ -88,10 +99,18 @@ export default function Index(): JSX.Element {
         setUser(data)
       }
     })
-  }, [getAllProjects, selectedWorkspace, setProjects, getSelf, setUser])
+  }, [
+    getAllProjects,
+    selectedWorkspace,
+    setProjects,
+    getSelf,
+    setUser,
+    setGlobalSearchData
+  ])
 
   return (
     <div className="flex flex-col gap-4">
+      <PageTitle title={`${selectedWorkspace?.name} | Dashboard`} />
       <div className="flex items-center justify-between">
         {!isProjectsEmpty && (
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
@@ -107,11 +126,11 @@ export default function Index(): JSX.Element {
           fetchFunction={fetchProjects}
           itemComponent={ProjectItemComponent}
           itemKey={(item) => item.id}
-          itemsPerPage={10}
+          itemsPerPage={15}
         />
       ) : (
         <div className="mt-[10vh] flex h-[40vh] flex-col items-center justify-center gap-y-4">
-          <FolderSVG width="150" />
+          <FolderIconSVG width="100" />
           <div className="text-4xl">Start your First Project</div>
           <div>
             Create a project and start setting up your variables and secret keys

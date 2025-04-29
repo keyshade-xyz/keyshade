@@ -874,7 +874,7 @@ export class WorkspaceMembershipService {
     this.mailService.invitedToWorkspace(
       member.email,
       workspace.name,
-      `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspace.slug}/join`,
+      `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
       user.name,
       membership.createdOn.toISOString(),
       true
@@ -1007,7 +1007,7 @@ export class WorkspaceMembershipService {
         this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspace.slug}/join`,
+          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
           invitedOn.toISOString(),
           true
@@ -1034,11 +1034,7 @@ export class WorkspaceMembershipService {
         this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/workspace/${
-            workspace.id
-          }/join?token=${await this.jwt.signAsync({
-            id: userId
-          })}`,
+          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
           new Date().toISOString(),
           false

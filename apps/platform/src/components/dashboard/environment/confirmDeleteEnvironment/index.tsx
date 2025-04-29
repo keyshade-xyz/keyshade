@@ -18,7 +18,8 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   deleteEnvironmentOpenAtom,
   selectedEnvironmentAtom,
-  environmentsOfProjectAtom
+  environmentsOfProjectAtom,
+  projectEnvironmentCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 
@@ -30,6 +31,7 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
     deleteEnvironmentOpenAtom
   )
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -52,6 +54,7 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
         const { success } = await deleteEnvironment()
 
         if (success) {
+          setProjectEnvironmentCount((prevCount) => prevCount - 1)
           toast.success('Environment deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -82,7 +85,8 @@ export default function ConfirmDeleteEnvironment(): React.JSX.Element {
     deleteEnvironment,
     setEnvironments,
     setSelectedEnvironment,
-    handleClose
+    handleClose,
+    setProjectEnvironmentCount
   ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog
