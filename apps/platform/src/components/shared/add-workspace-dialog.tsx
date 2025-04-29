@@ -58,7 +58,12 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
         setGlobalSearchData((prev) => ({
           ...prev,
           workspaces: [
-            { id: data.id, name: data.name, slug: data.slug },
+            {
+              id: data.id,
+              name: data.name,
+              slug: data.slug,
+              icon: data.icon ?? '🔥'
+            },
             ...prev.workspaces
           ]
         }))

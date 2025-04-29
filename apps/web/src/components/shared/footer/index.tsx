@@ -82,7 +82,9 @@ function Footer(): React.JSX.Element {
                   </Link>
                 </li>
                 <li className="text-white/60 transition-colors hover:text-white">
-                  <EncryptText TARGET_TEXT="Contact" />
+                  <Link href="mailto:support@keyshade.xyz">
+                    <EncryptText TARGET_TEXT="Contact" />
+                  </Link>
                 </li>
               </ul>
             </div>
