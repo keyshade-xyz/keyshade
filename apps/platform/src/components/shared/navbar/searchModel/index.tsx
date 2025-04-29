@@ -233,7 +233,7 @@ function SearchModel({
                     >
                       <CommandItem>
                         <SecretSVG className="mr-2 h-4 w-4" />
-                        <span>{secret.slug}</span>
+                        <span>{secret.name}</span>
                         {secret.slug ? (
                           <span className="ml-2 text-sm text-gray-200">
                             ({secret.slug})
