@@ -327,18 +327,20 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </Button>
               </TooltipTrigger>
 
-              <TooltipContent
-                className="border-white/20 bg-white/10 text-white backdrop-blur-xl"
-                sideOffset={7}
-              >
-                {selectedWorkspace?.isDefault ? (
-                  <p>This is your default workspace. You can not leave it.</p>
-                ) : null}
+              {selectedWorkspace?.isDefault || memberCount === 1 ? (
+                <TooltipContent
+                  className="border-white/20 bg-white/10 text-white backdrop-blur-xl"
+                  sideOffset={7}
+                >
+                  {selectedWorkspace?.isDefault ? (
+                    <p>This is your default workspace. You can not leave it.</p>
+                  ) : null}
 
-                {memberCount === 1 ? (
-                  <p>You are the only member of this workspace.</p>
-                ) : null}
-              </TooltipContent>
+                  {memberCount === 1 ? (
+                    <p>You are the only member of this workspace.</p>
+                  ) : null}
+                </TooltipContent>
+              ) : null}
             </Tooltip>
           </TooltipProvider>
         </section>
