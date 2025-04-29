@@ -1,3 +1,22 @@
+## [2.17.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0...v2.17.1) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** change redirect method to replace after profile update ([81b3c3c](https://github.com/keyshade-xyz/keyshade/commit/81b3c3c852bc7511075c637f4ac5a49894ea7fe3))
+* **auth:** change redirect method to use window.location.href after profile update ([aee9b87](https://github.com/keyshade-xyz/keyshade/commit/aee9b87fc24013c4a0045f63b3714cb9f20e216e))
+* **auth:** comment out redirect to dashboard after profile update ([d044191](https://github.com/keyshade-xyz/keyshade/commit/d044191f9493b6580bb94ef7d344b53531bf3dcb))
+* **auth:** enable redirect to dashboard after profile update ([7ce1b91](https://github.com/keyshade-xyz/keyshade/commit/7ce1b91feb24b08f2227e387cc53faca9551d69f))
+* **platform:** Enhance workspace selection handling and local storage integration ([#915](https://github.com/keyshade-xyz/keyshade/issues/915)) ([07d4f2c](https://github.com/keyshade-xyz/keyshade/commit/07d4f2c2bd9555ea2b345dbf7a0d031a6d476e14))
+* **sidebar:** comment out unused Integrations tab in sidebar ([9e9a658](https://github.com/keyshade-xyz/keyshade/commit/9e9a658ecd224f8860ec42070e6a47df19d8fda9))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.17.1-stage.1 [skip ci] ([1fba176](https://github.com/keyshade-xyz/keyshade/commit/1fba17684559572ab54680f1619483addd476795))
+* **release:** 2.17.1-stage.2 [skip ci] ([0e59cbe](https://github.com/keyshade-xyz/keyshade/commit/0e59cbebf5d9be2d3e1e259c2b9958b3e3fedc2b))
+* **release:** 2.17.1-stage.3 [skip ci] ([5e07446](https://github.com/keyshade-xyz/keyshade/commit/5e07446ce285fe28dae18bc872bd4ec9fd9bf75d))
+* **release:** 2.17.1-stage.4 [skip ci] ([5d8de35](https://github.com/keyshade-xyz/keyshade/commit/5d8de3599c1150396435318562103820852c1cfd))
+* **release:** 2.17.1-stage.5 [skip ci] ([5a85b3e](https://github.com/keyshade-xyz/keyshade/commit/5a85b3e7ba111e84dae603a98449534643bf39aa))
+
 ## [2.17.1-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.4...v2.17.1-stage.5) (2025-04-29)
 
 ### 🐛 Bug Fixes
