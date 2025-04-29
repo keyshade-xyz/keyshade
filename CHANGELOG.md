@@ -1,3 +1,9 @@
+## [2.17.1-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.1...v2.17.1-stage.2) (2025-04-29)
+
+### 🐛 Bug Fixes
+
+* **auth:** comment out redirect to dashboard after profile update ([d044191](https://github.com/keyshade-xyz/keyshade/commit/d044191f9493b6580bb94ef7d344b53531bf3dcb))
+
 ## [2.17.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.0...v2.17.1-stage.1) (2025-04-29)
 
 ### 🐛 Bug Fixes
