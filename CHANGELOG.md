@@ -4,6 +4,24 @@
 
 * **platform:** Member tab update joined-invited tab ([#923](https://github.com/keyshade-xyz/keyshade/issues/923)) ([a9495cc](https://github.com/keyshade-xyz/keyshade/commit/a9495cc6ab7ca4ea5694963519e8081f30b96dfa))
 
+### 🐛 Bug Fixes
+
+* **platform:** Leave workspace Tooltip fix ([#925](https://github.com/keyshade-xyz/keyshade/issues/925)) ([f93a4c6](https://github.com/keyshade-xyz/keyshade/commit/f93a4c69a6db49dea8794c645fdcc8fe2e538c19))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Update workspace creation logs ([c0e7c10](https://github.com/keyshade-xyz/keyshade/commit/c0e7c10b07b8101d6ca75e3643e2c028550e4b15))
+* **release:** 2.18.0-stage.1 [skip ci] ([6b9d815](https://github.com/keyshade-xyz/keyshade/commit/6b9d815e6dc98fb61fba5348e55b4e9017c60554))
+* **release:** 2.18.0-stage.1 [skip ci] ([40b1d55](https://github.com/keyshade-xyz/keyshade/commit/40b1d55ceedc9a26b4740ab16fc09edcaea3b79f))
+* **release:** 2.18.0-stage.1 [skip ci] ([2227083](https://github.com/keyshade-xyz/keyshade/commit/22270838d12c0955d550f59d8834f179ce96c98a))
+* Update lockfile ([e69b9d3](https://github.com/keyshade-xyz/keyshade/commit/e69b9d3685d5d0aaa537fbc3bfe5ca8b87814886))
+
+## [2.18.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1...v2.18.0-stage.1) (2025-04-30)
+
+### 🚀 Features
+
+* **platform:** Member tab update joined-invited tab ([#923](https://github.com/keyshade-xyz/keyshade/issues/923)) ([a9495cc](https://github.com/keyshade-xyz/keyshade/commit/a9495cc6ab7ca4ea5694963519e8081f30b96dfa))
+
 ### 🔧 Miscellaneous Chores
 
 * **api:** Update workspace creation logs ([c0e7c10](https://github.com/keyshade-xyz/keyshade/commit/c0e7c10b07b8101d6ca75e3643e2c028550e4b15))
@@ -23,8 +41,6 @@
 * Update lockfile ([e69b9d3](https://github.com/keyshade-xyz/keyshade/commit/e69b9d3685d5d0aaa537fbc3bfe5ca8b87814886))
 
 ## [2.18.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.5...v2.18.0-stage.1) (2025-04-30)
-
-### 🚀 Features
 
 - **platform:** Member tab update joined-invited tab ([#923](https://github.com/keyshade-xyz/keyshade/issues/923)) ([ccdbb86](https://github.com/keyshade-xyz/keyshade/commit/ccdbb8661f519577283255ca73391144b29bcbd3))
 

@@ -40,7 +40,10 @@ import {
 } from '@/components/ui/popover'
 import { PageTitle } from '@/components/common/page-title'
 import ConfirmLeaveWorkspace from '@/components/dashboard/workspace/confirmLeaveWorkspace'
-import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
+import {
+  getSelectedWorkspaceFromStorage,
+  setSelectedWorkspaceToStorage
+} from '@/store/workspace'
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
@@ -126,7 +129,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               name: data.name,
               slug: data.slug,
               icon: data.icon
-            });
+            })
           }
 
           // Update the selected workspace
@@ -162,7 +165,15 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         toast.dismiss()
       }
     }
-  }, [router, selectedWorkspace, setAllWorkspaces, setSelectedWorkspace, updateWorkspace, workspaceData.name, workspaceFromStorage])
+  }, [
+    router,
+    selectedWorkspace,
+    setAllWorkspaces,
+    setSelectedWorkspace,
+    updateWorkspace,
+    workspaceData.name,
+    workspaceFromStorage
+  ])
 
   useEffect(() => {
     if (selectedWorkspace) {
@@ -340,17 +351,13 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 >
                   {selectedWorkspace?.isDefault ? (
                     <p>This is your default workspace. You can not leave it.</p>
-                  ) : null}
-
-                  {memberCount === 1 ? (
-                    <p>You are the only member of this workspace.</p>
-                  ) : null}
-
-                  {user?.id === selectedWorkspace?.ownedBy.id ? (
+                  ) : user?.id === selectedWorkspace?.ownedBy.id ? (
                     <p>
                       You are the owner of this workspace. You can not leave
-                      workspace without transfering ownership.
+                      workspace without transferring ownership.
                     </p>
+                  ) : memberCount === 1 ? (
+                    <p>You are the only member of this workspace.</p>
                   ) : null}
                 </TooltipContent>
               ) : null}
