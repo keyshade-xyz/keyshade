@@ -157,21 +157,21 @@ export default function RoleCard({
       <TableCell className="h-full">
         <div className="h-full grid grid-cols-2 gap-2">
           {role.authorities.length > 0 ? (
-            (() => {
-              const authoritiesCount = role.authorities.length
-              const showMoreButton = authoritiesCount > 5
-
-              return (
-                <>
-                  {role.authorities.slice(0, showAllAuthorities ? authoritiesCount : 5).map((authority) => (
-                    <AuthorityTile authority={authority} key={authority} />
-                  ))}
-                  {showMoreButton ? <Button className="h-auto border-none justify-start bg-transparent text-blue-300 underline hover:bg-inherit" onClick={() => setShowAllAuthorities(!showAllAuthorities)}>
-                      {showAllAuthorities ? 'Show less' : 'Show more'}
-                    </Button> : null}
-                </>
-              );
-            })()
+            <>
+              {role.authorities.slice(0, showAllAuthorities ? role.authorities.length : 5).map((authority) => (
+                <AuthorityTile authority={authority} key={authority} />
+              ))}
+              {role.authorities.length > 5 ? (
+                <Button
+                  aria-controls="authorities-list"
+                  aria-expanded={showAllAuthorities}
+                  className="h-auto border-none justify-start bg-transparent text-blue-300 underline hover:bg-inherit"
+                  onClick={() => setShowAllAuthorities(!showAllAuthorities)}
+                >
+                  {showAllAuthorities ? 'Show less' : 'Show more'}
+                </Button>
+              ) : null}
+            </>
           ) : (
             <span className="text-sm text-white/60">No authorities available</span>
           )}
