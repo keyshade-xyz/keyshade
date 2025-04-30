@@ -23,8 +23,11 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { Input } from '@/components/ui/input'
+import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 export default function ConfirmDeleteWorkspace(): React.JSX.Element {
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
+
   const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
@@ -64,6 +67,11 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             (workspace) => workspace.id !== selectedWorkspace.id
           )
           setAllWorkspaces(remainingWorkspaces)
+
+          if (workspaceFromStorage?.id === selectedWorkspace.id) {
+            setSelectedWorkspaceToStorage(remainingWorkspaces[0]);
+          }
+
           setSelectedWorkspace(remainingWorkspaces[0])
         }
       } finally {
