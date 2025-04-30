@@ -96,10 +96,9 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     ControllerInstance.getInstance().workspaceController.updateWorkspace({
       workspaceSlug: selectedWorkspace!.slug,
       icon: workspaceData.icon,
-      name:
-        workspaceData.name === selectedWorkspace?.name
-          ? undefined
-          : workspaceData.name
+      name: workspaceData.name === selectedWorkspace?.name
+        ? undefined
+        : workspaceData.name
     })
   )
 
@@ -128,6 +127,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             setSelectedWorkspaceToStorage({
               ...workspaceFromStorage,
               name: data.name,
+              slug: data.slug,
               icon: data.icon
             })
           }
@@ -136,6 +136,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           setSelectedWorkspace({
             ...selectedWorkspace,
             name: data.name,
+            slug: data.slug,
             icon: data.icon
           })
 
@@ -400,8 +401,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <Separator className="bg-white/20" />
 
         {/* Save Button */}
-        <section className="my-5 flex w-full flex-row items-center">
-          <div className="w-3/5" />
+        <section className="my-5 flex w-full items-center justify-end">
           <Button
             className="w-2/5"
             disabled={isLoading}
