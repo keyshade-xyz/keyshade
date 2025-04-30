@@ -1,40 +1,11 @@
-'use client'
+import React from 'react'
 
-import React, { useEffect } from 'react'
-import { useAtomValue, useSetAtom } from 'jotai'
-import MembersHeader from '@/components/members/membersHeader'
-import MembersTable from '@/components/members/membersTable'
-import ControllerInstance from '@/lib/controller-instance'
-import { useHttp } from '@/hooks/use-http'
-import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
-import { PageTitle } from '@/components/common/page-title'
-
-function TeamPage(): React.JSX.Element {
-  const setRoles = useSetAtom(rolesOfWorkspaceAtom)
-  const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
-
-  const getAllRoles = useHttp(() =>
-    ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
-      { workspaceSlug: currentWorkspace!.slug },
-      {}
-    )
-  )
-
-  useEffect(() => {
-    getAllRoles().then(({ data, success }) => {
-      if (success && data) {
-        setRoles(data.items)
-      }
-    })
-  }, [getAllRoles, setRoles])
-
+function MembersPage() {
   return (
-    <div className="flex flex-col gap-y-10">
-      <PageTitle title={`${currentWorkspace?.name} | Members`} />
-      <MembersHeader />
-      <MembersTable />
+    <div>
+      <h1>Members page</h1>
     </div>
   )
 }
 
-export default TeamPage
+export default MembersPage
