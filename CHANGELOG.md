@@ -1,3 +1,14 @@
+## [2.18.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1...v2.18.0-stage.1) (2025-04-30)
+
+### 🚀 Features
+
+* **platform:** Member tab update joined-invited tab ([#923](https://github.com/keyshade-xyz/keyshade/issues/923)) ([a9495cc](https://github.com/keyshade-xyz/keyshade/commit/a9495cc6ab7ca4ea5694963519e8081f30b96dfa))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.18.0-stage.1 [skip ci] ([2227083](https://github.com/keyshade-xyz/keyshade/commit/22270838d12c0955d550f59d8834f179ce96c98a))
+* Update lockfile ([e69b9d3](https://github.com/keyshade-xyz/keyshade/commit/e69b9d3685d5d0aaa537fbc3bfe5ca8b87814886))
+
 ## [2.18.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1-stage.5...v2.18.0-stage.1) (2025-04-30)
 
 ### 🚀 Features
