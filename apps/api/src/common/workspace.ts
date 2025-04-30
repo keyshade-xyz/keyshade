@@ -27,14 +27,16 @@ export const createWorkspace = async (
   const logger = new Logger('createWorkspace')
 
   const workspaceId = v4()
+  const workspaceSlug = await generateEntitySlug(dto.name, 'WORKSPACE', prisma)
 
   logger.log(
-    `Creating workspace ${dto.name} (${workspaceId}) for user ${user.id}`
+    `Creating workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
   )
+
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,
-      slug: await generateEntitySlug(dto.name, 'WORKSPACE', prisma),
+      slug: workspaceSlug,
       name: dto.name,
       icon: dto.icon,
       isFreeTier: true,
@@ -64,11 +66,13 @@ export const createWorkspace = async (
       }
     }
   })
-  logger.log(`Created workspace ${dto.name} (${workspaceId})`)
+  logger.log(
+    `Created workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+  )
 
   // Add the owner to the workspace
   logger.log(
-    `Assigning ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+    `Assigning ownership of workspace ${dto.name} (${workspaceSlug}) to user ${user.id}`
   )
   const assignOwnership = prisma.workspaceMember.create({
     data: {
