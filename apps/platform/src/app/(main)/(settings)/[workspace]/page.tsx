@@ -93,7 +93,9 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     ControllerInstance.getInstance().workspaceController.updateWorkspace({
       workspaceSlug: selectedWorkspace!.slug,
       icon: workspaceData.icon,
-      name: workspaceData.name
+      name: workspaceData.name === selectedWorkspace?.name
+        ? undefined
+        : workspaceData.name
     })
   )
 
@@ -395,7 +397,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <section className="my-5 flex w-full items-center justify-end">
           <Button
             className="w-2/5"
-            disabled={isLoading || (workspaceData.name === selectedWorkspace?.name && workspaceData.icon === selectedWorkspace.icon)}
+            disabled={isLoading}
             onClick={handleSaveDetails}
             type="button"
           >
