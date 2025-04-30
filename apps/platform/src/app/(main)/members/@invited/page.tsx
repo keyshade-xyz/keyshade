@@ -1,127 +1,41 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import dayjs from 'dayjs'
-import { CloseCircleSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue } from 'jotai'
 import type { GetMembersResponse } from '@keyshade/schema'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import AvatarComponent from '@/components/common/avatar'
-import { Button } from '@/components/ui/button'
 import {
   cancelInviteOpenAtom,
-  resendInviteOpenAtom,
   selectedMemberAtom,
   selectedWorkspaceAtom
 } from '@/store'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
 import CancelInvitationDialog from '@/components/members/cancelInvitationDialog'
-import ResendInvitationDialog from '@/components/members/resendInvitationDialog'
-
-function MemberRow({
-  member,
-  onCancelInvitation,
-  onResendInvitation
-}: {
-  member: GetMembersResponse['items'][number]
-  onCancelInvitation: (member: GetMembersResponse['items'][number]) => void
-  onResendInvitation: (member: GetMembersResponse['items'][number]) => void
-}) {
-  return (
-    <TableRow className="group hover:bg-transparent" key={member.id}>
-      <TableCell className="w-[30%] text-left">
-        <div className="flex items-center">
-          <AvatarComponent
-            className="h-10 w-10"
-            name={member.user.name || ''}
-            profilePictureUrl={member.user.profilePictureUrl}
-          />
-          <div className="ml-3">
-            <div className="text-base font-medium text-white">
-              {member.user.name}
-            </div>
-            <div className="text-xs font-normal text-white">
-              {member.user.email}
-            </div>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell className="w-[30%] text-left">
-        {dayjs(member.createdOn).format('MMM D, YYYY')}
-      </TableCell>
-      <TableCell className="w-[40%] text-left">
-        <div className="flex w-[8rem] items-center justify-center rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-purple-200">
-          {member.roles[0].role.name}
-        </div>
-      </TableCell>
-      <TableCell className="text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-        <div className="flex justify-start gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
-                  onClick={() => onResendInvitation(member)}
-                >
-                  Resend
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
-                sideOffset={8}
-              >
-                Resend invitation email to the member
-                <TooltipArrow className="fill-zinc-700" />
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
-                  onClick={() => onCancelInvitation(member)}
-                >
-                  <CloseCircleSVG />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
-                sideOffset={8}
-              >
-                Cancel invitation of the member
-                <TooltipArrow className="fill-zinc-700" />
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </TableCell>
-    </TableRow>
-  )
-}
+import MemberRow from '@/components/members/memberRow'
+import { useHttp } from '@/hooks/use-http'
 
 export default function InvitedMembersTable(): React.JSX.Element {
   const [selectedMember, setSelectedMember] = useAtom(selectedMemberAtom)
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
-
   const [isCancelInvitationOpen, setIsCancelInvitationOpen] =
     useAtom(cancelInviteOpenAtom)
-  const [isResendInvitationOpen, setIsResendInvitationOpen] =
-    useAtom(resendInviteOpenAtom)
+
+  const resendInvite = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.resendInvitation(
+      {
+        workspaceSlug: currentWorkspace!.slug,
+        userEmail: selectedMember!.user.email
+      }
+    )
+  )
 
   const fetchMembers = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
@@ -165,16 +79,31 @@ export default function InvitedMembersTable(): React.JSX.Element {
     setSelectedMember(member)
     setIsCancelInvitationOpen(true)
   }
-  const handleResendInvitation = (
+  const handleResendInvitation = async (
     member: GetMembersResponse['items'][number]
-  ): void => {
+  ) => {
     setSelectedMember(member)
-    setIsResendInvitationOpen(true)
+    try {
+      const { success } = await resendInvite()
+      if (success) {
+        toast.success('Invitation email resent successfully', {
+          description: (
+            <p className="text-xs text-emerald-300">
+              Invitation email has been sent to &quot;
+              {selectedMember?.user.email}&quot; successfully.
+            </p>
+          )
+        })
+      }
+    } finally {
+      toast.dismiss()
+    }
   }
 
   const renderMemberRow = (member: GetMembersResponse['items'][number]) => {
     return (
       <MemberRow
+        isInvited
         key={member.id}
         member={member}
         onCancelInvitation={handleCancelInvitation}
@@ -213,11 +142,6 @@ export default function InvitedMembersTable(): React.JSX.Element {
           </TableBody>
         </Table>
       </div>
-
-      {/* Resend invitation alert dialog */}
-      {isResendInvitationOpen && selectedMember ? (
-        <ResendInvitationDialog />
-      ) : null}
 
       {/* Cancel invitation alert dialog */}
       {isCancelInvitationOpen && selectedMember ? (

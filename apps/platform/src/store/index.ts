@@ -162,7 +162,6 @@ export const deleteRoleOpenAtom = atom<boolean>(false)
 export const removeMemberOpenAtom = atom<boolean>(false)
 export const transferOwnershipOpenAtom = atom<boolean>(false)
 export const editMemberOpenAtom = atom<boolean>(false)
-export const resendInviteOpenAtom = atom<boolean>(false)
 export const cancelInviteOpenAtom = atom<boolean>(false)
 
 export const deleteAccountOpenAtom = atom<boolean>(false)
