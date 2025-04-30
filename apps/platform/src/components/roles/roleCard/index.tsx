@@ -1,7 +1,9 @@
+'use client'
+
 import type { AuthorityEnum, WorkspaceRole } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { Copy, Pen } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useSetAtom } from 'jotai'
 import { TrashWhiteSVG } from '@public/svg/shared'
@@ -16,6 +18,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { deleteRoleOpenAtom, editRoleOpenAtom, selectedRoleAtom } from '@/store'
+import { Button } from '@/components/ui/button'
 
 interface RoleListItemProps {
   role: WorkspaceRole
@@ -27,7 +30,7 @@ function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
   second = second.charAt(0) + second.slice(1).toLowerCase()
 
   return (
-    <div className="h-fit w-fit rounded-lg border-[1px] border-sky-500 bg-sky-500/10 px-2 py-1 text-sm text-sky-400">
+    <div className="h-fit w-full text-center rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-sm text-cyan-200">
       {first} {second}
     </div>
   )
@@ -59,6 +62,8 @@ function ProjectsAndEnvironmentsTooltip({
 export default function RoleCard({
   role
 }: RoleListItemProps): React.JSX.Element {
+  const [showAllAuthorities, setShowAllAuthorities] = useState(false)
+
   const setSelectedRole = useSetAtom(selectedRoleAtom)
   const setIsDeleteRoleOpen = useSetAtom(deleteRoleOpenAtom)
   const setIsEditRoleOpen = useSetAtom(editRoleOpenAtom)
@@ -150,10 +155,26 @@ export default function RoleCard({
         </div>
       </TableCell>
       <TableCell className="h-full">
-        <div className="flex h-full flex-grow flex-wrap gap-2">
-          {role.authorities.map((authority) => (
-            <AuthorityTile authority={authority} key={authority} />
-          ))}
+        <div className="h-full grid grid-cols-2 gap-2">
+          {role.authorities.length > 0 ? (
+            (() => {
+              const authoritiesCount = role.authorities.length
+              const showMoreButton = authoritiesCount > 5
+
+              return (
+                <>
+                  {role.authorities.slice(0, showAllAuthorities ? authoritiesCount : 5).map((authority) => (
+                    <AuthorityTile authority={authority} key={authority} />
+                  ))}
+                  {showMoreButton ? <Button className="h-auto border-none justify-start bg-transparent text-blue-300 underline hover:bg-inherit" onClick={() => setShowAllAuthorities(!showAllAuthorities)}>
+                      {showAllAuthorities ? 'Show less' : 'Show more'}
+                    </Button> : null}
+                </>
+              );
+            })()
+          ) : (
+            <span className="text-sm text-white/60">No authorities available</span>
+          )}
         </div>
       </TableCell>
       <TableCell className="h-full cursor-pointer text-sm text-white/60 underline">
