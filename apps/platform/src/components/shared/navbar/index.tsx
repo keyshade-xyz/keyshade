@@ -51,6 +51,10 @@ function Navbar(): React.JSX.Element {
       { id: 'secret', label: 'Secret', icon: <SecretSVG /> },
       { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
       { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }
+    ],
+    members: [
+      { id: 'joined', label: 'Joined' },
+      { id: 'invited', label: 'Invited' }
     ]
   }
 
@@ -93,7 +97,7 @@ function Navbar(): React.JSX.Element {
       : ''
 
   const shouldRenderTab = (): boolean => {
-    const allowedPaths = ['/settings', getProjectPath()] // modify the list based on what paths you want to have tab
+    const allowedPaths = ['/settings', '/members', getProjectPath()] // modify the list based on what paths you want to have tab
     return pathname !== '/' && allowedPaths.includes(pathname)
   }
 
@@ -105,6 +109,9 @@ function Navbar(): React.JSX.Element {
 
       case '/settings':
         return TAB_CONFIGS.settings
+
+      case '/members':
+        return TAB_CONFIGS.members
 
       default:
         return []
