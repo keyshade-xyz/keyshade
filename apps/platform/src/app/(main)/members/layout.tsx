@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, Suspense } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useSearchParams } from 'next/navigation'
 import JoinedMemberPage from './@joined/page'
@@ -45,4 +45,12 @@ function DetailedMemberPage(): React.JSX.Element {
   )
 }
 
-export default DetailedMemberPage
+export default function MembersLayout(): React.JSX.Element {
+  return (
+    <main>
+      <Suspense fallback={null}>
+        <DetailedMemberPage />
+      </Suspense>
+    </main>
+  )
+}
