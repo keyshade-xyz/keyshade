@@ -83,7 +83,7 @@ export class EnvironmentService {
     await this.tierLimitService.checkEnvironmentLimitReached(project)
 
     // Check if environment name is valid
-    await this.environmentNameIsValid(dto.name)
+    this.environmentNameIsValid(dto.name)
 
     // Check if an environment with the same name already exists
     await this.environmentExists(dto.name, project)
