@@ -38,7 +38,6 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     })
   )
 
-  // const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
   const setSelectedWorkspace = useSetAtom(selectedWorkspaceAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
