@@ -1,7 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useSetAtom } from 'jotai'
+import { useSetAtom, useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
@@ -30,6 +30,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
 
   const createWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.createWorkspace({
@@ -37,7 +38,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     })
   )
 
-  const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
+  // const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
   const setSelectedWorkspace = useSetAtom(selectedWorkspaceAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
@@ -47,6 +48,17 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
         description: 'Please enter a workspace name'
       })
     }
+
+    // Check if there is a name that is the same as the one without surrounding spaces
+    const nameAlreadyExists = allWorkspaces.some(
+      (workspace) => workspace.name.trim() === name.trim()
+    )
+    if (nameAlreadyExists) {
+      return toast.error('Workspace exists', {
+        description: 'Workspace with the same name already exists'
+      })
+    }
+
     setIsLoading(true)
     toast.loading('Creating workspace…')
     try {
@@ -60,7 +72,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
           workspaces: [
             {
               id: data.id,
-              name: data.name,
+              name: data.name.trim(),
               slug: data.slug,
               icon: data.icon ?? '🔥'
             },
@@ -76,6 +88,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     }
   }, [
     name,
+    allWorkspaces,
     createWorkspace,
     setAllWorkspaces,
     setGlobalSearchData,

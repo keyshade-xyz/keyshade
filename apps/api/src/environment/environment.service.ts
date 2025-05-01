@@ -82,6 +82,9 @@ export class EnvironmentService {
     // Check if more environments can be created in the project
     await this.tierLimitService.checkEnvironmentLimitReached(project)
 
+    // Check if environment name is valid
+    await this.environmentNameValid(dto.name)
+
     // Check if an environment with the same name already exists
     await this.environmentExists(dto.name, project)
 
@@ -467,6 +470,25 @@ export class EnvironmentService {
   }
 
   /**
+   * Checks if an environment name is valid(not blank and at least is 3 chars length).
+   * @throws BadRequestException if an environment name is invalid
+   * @private
+   */
+  private async environmentNameValid(name: Environment['name']) {
+    this.logger.log(`Checking if environment name ${name} is valid`)
+
+    if (name.trim() === '' || name.trim().length < 3) {
+      const errorMessage = `Environment name ${name} is blank or too short`
+      this.logger.error(errorMessage)
+      throw new BadRequestException(
+        constructErrorBody('Environment name invalid', errorMessage)
+      )
+    }
+
+    this.logger.log(`Environment name ${name} is valid`)
+  }
+
+  /**
    * Checks if an environment with the given name already exists in the given project.
    * @throws ConflictException if an environment with the given name already exists
    * @private
@@ -483,7 +505,7 @@ export class EnvironmentService {
         where: {
           projectId_name: {
             projectId,
-            name
+            name: name.trim()
           }
         }
       })) !== null
@@ -491,7 +513,7 @@ export class EnvironmentService {
       const errorMessage = `Environment with name ${name} already exists in project ${slug}`
       this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody('Environment exits', errorMessage)
+        constructErrorBody('Environment exists', errorMessage)
       )
     }
 
