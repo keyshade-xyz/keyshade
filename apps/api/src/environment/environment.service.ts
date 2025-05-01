@@ -474,7 +474,7 @@ export class EnvironmentService {
    * @throws BadRequestException if an environment name is invalid
    * @private
    */
-  private async environmentNameIsValid(name: Environment['name']) {
+  private environmentNameIsValid(name: Environment['name']) {
     this.logger.log(`Checking if environment name ${name} is valid`)
 
     if (name.trim() === '' || name.trim().length < 3) {
