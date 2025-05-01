@@ -26,18 +26,23 @@ export const createWorkspace = async (
 ): Promise<WorkspaceWithLastUpdatedByAndOwner> => {
   const logger = new Logger('createWorkspace')
 
+  const workspaceNameTrimmed = dto.name.trim()
   const workspaceId = v4()
-  const workspaceSlug = await generateEntitySlug(dto.name, 'WORKSPACE', prisma)
+  const workspaceSlug = await generateEntitySlug(
+    workspaceNameTrimmed,
+    'WORKSPACE',
+    prisma
+  )
 
   logger.log(
-    `Creating workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+    `Creating workspace ${workspaceNameTrimmed} (${workspaceSlug}) for user ${user.id}`
   )
 
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,
       slug: workspaceSlug,
-      name: dto.name,
+      name: workspaceNameTrimmed,
       icon: dto.icon,
       isFreeTier: true,
       ownerId: user.id,
@@ -67,12 +72,12 @@ export const createWorkspace = async (
     }
   })
   logger.log(
-    `Created workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+    `Created workspace ${workspaceNameTrimmed} (${workspaceSlug}) for user ${user.id}`
   )
 
   // Add the owner to the workspace
   logger.log(
-    `Assigning ownership of workspace ${dto.name} (${workspaceSlug}) to user ${user.id}`
+    `Assigning ownership of workspace ${workspaceNameTrimmed} (${workspaceSlug}) to user ${user.id}`
   )
   const assignOwnership = prisma.workspaceMember.create({
     data: {
@@ -102,7 +107,7 @@ export const createWorkspace = async (
     }
   })
   logger.log(
-    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+    `Assigned ownership of workspace ${workspaceNameTrimmed} (${workspaceId}) to user ${user.id}`
   )
 
   logger.log(
