@@ -30,7 +30,7 @@ function Navbar(): React.JSX.Element {
         </li>
         <li>
           <a
-            href="https://dev.to/keyshade"
+            href="https://blog.keyshade.xyz/"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -38,9 +38,23 @@ function Navbar(): React.JSX.Element {
           </a>
         </li>
       </ul>
-      <a href="https://git.new/keyshade">
-        <Button duration={6 * 1000}>View GitHub</Button>
-      </a>
+      <div className="flex items-center gap-x-4">
+        <a href="https://git.new/keyshade">
+          <button
+            className="rounded-full border border-white/50 px-4 py-2 text-white/80 hidden md:flex"
+            type="button"
+          >
+            View GitHub
+          </button>
+        </a>
+        <a
+          href="https://app.keyshade.xyz"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <Button duration={6 * 1000}> Join in</Button>
+        </a>
+      </div>
     </nav>
   )
 }

@@ -17,48 +17,47 @@ import {
 } from '@/components/ui/alert-dialog'
 import {
   allWorkspacesAtom,
-  deleteWorkspaceOpenAtom,
+  leaveWorkspaceOpenAtom,
   selectedWorkspaceAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { Input } from '@/components/ui/input'
-import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
-export default function ConfirmDeleteWorkspace(): React.JSX.Element {
-  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
-
+export default function ConfirmLeaveWorkspace(): React.JSX.Element {
   const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
-  const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(
-    deleteWorkspaceOpenAtom
+  const [isLeaveWorkspaceOpen, setIsLeaveWorkspaceOpen] = useAtom(
+    leaveWorkspaceOpenAtom
   )
 
   const [confirmWorkspaceName, setConfirmWorkspaceName] = useState('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
 
-  const deleteWorkspace = useHttp(() =>
-    ControllerInstance.getInstance().workspaceController.deleteWorkspace({
-      workspaceSlug: selectedWorkspace!.slug
-    })
+  const leaveWorkspace = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.leaveWorkspace(
+      {
+        workspaceSlug: selectedWorkspace!.slug
+      }
+    )
   )
 
-  const handleDeleteWorkspace = async () => {
+  const handleLeaveWorkspace = async () => {
     if (selectedWorkspace) {
       setIsLoading(true)
-      toast.loading('Deleting workspace...')
+      toast.loading('Leaving workspace...')
 
       try {
-        const { success } = await deleteWorkspace()
+        const { success } = await leaveWorkspace()
 
         if (success) {
-          toast.success('Workspace deleted successfully', {
+          toast.success('Workspace left successfully', {
             description: (
               <p className="text-xs text-emerald-300">
-                The workspace has been deleted.
+                You are no longer a member of this workspace.
               </p>
             )
           })
@@ -67,11 +66,6 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
             (workspace) => workspace.id !== selectedWorkspace.id
           )
           setAllWorkspaces(remainingWorkspaces)
-
-          if (workspaceFromStorage?.id === selectedWorkspace.id) {
-            setSelectedWorkspaceToStorage(remainingWorkspaces[0]);
-          }
-
           setSelectedWorkspace(remainingWorkspaces[0])
         }
       } finally {
@@ -84,29 +78,29 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
   }
 
   const handleClose = useCallback(() => {
-    setIsDeleteWorkspaceOpen(false)
-  }, [setIsDeleteWorkspaceOpen])
+    setIsLeaveWorkspaceOpen(false)
+  }, [setIsLeaveWorkspaceOpen])
 
   return (
     <AlertDialog
-      aria-hidden={!isDeleteWorkspaceOpen}
-      open={isDeleteWorkspaceOpen}
+      aria-hidden={!isLeaveWorkspaceOpen}
+      open={isLeaveWorkspaceOpen}
     >
       <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
         <AlertDialogHeader>
           <div className="flex items-center gap-x-3">
             <TrashSVG />
             <AlertDialogTitle className="text-lg font-semibold">
-              Do you want to delete this workspace?
+              Do you want to leave this workspace?
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This action cannot be undone. This will permanently delete your
-            workspace and remove your environment data from our servers.
+            This action cannot be undone. You will loss the access to this
+            workspace.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex w-full flex-col gap-y-5 text-sm">
-          To confirm that you really want to delete this workspace, please type
+          To confirm that you really want to leave this workspace, please type
           in the name of the workspace below.
           <Input
             className="w-full"
@@ -131,9 +125,9 @@ export default function ConfirmDeleteWorkspace(): React.JSX.Element {
               allWorkspaces.length === 1 ||
               confirmWorkspaceName !== selectedWorkspace?.name
             }
-            onClick={handleDeleteWorkspace}
+            onClick={handleLeaveWorkspace}
           >
-            Yes, delete the workspace
+            Yes, leave the workspace
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

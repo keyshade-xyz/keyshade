@@ -147,6 +147,7 @@ export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentOpenAtom = atom<boolean>(false)
 export const deleteWorkspaceOpenAtom = atom<boolean>(false)
+export const leaveWorkspaceOpenAtom = atom<boolean>(false)
 
 export const createApiKeyOpenAtom = atom<boolean>(false)
 export const editApiKeyOpenAtom = atom<boolean>(false)
@@ -161,6 +162,7 @@ export const deleteRoleOpenAtom = atom<boolean>(false)
 export const removeMemberOpenAtom = atom<boolean>(false)
 export const transferOwnershipOpenAtom = atom<boolean>(false)
 export const editMemberOpenAtom = atom<boolean>(false)
+export const cancelInviteOpenAtom = atom<boolean>(false)
 
 export const deleteAccountOpenAtom = atom<boolean>(false)
 
