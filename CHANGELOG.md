@@ -7,6 +7,30 @@
 ### 🐛 Bug Fixes
 
 * **platform:** Leave workspace Tooltip fix ([#925](https://github.com/keyshade-xyz/keyshade/issues/925)) ([f93a4c6](https://github.com/keyshade-xyz/keyshade/commit/f93a4c69a6db49dea8794c645fdcc8fe2e538c19))
+* **platform:** Platform build error fix ([#935](https://github.com/keyshade-xyz/keyshade/issues/935)) ([15601f0](https://github.com/keyshade-xyz/keyshade/commit/15601f09046e4ec9e9716bc37ab95194f6534fe9))
+* **platform:** Update workspace logic to include slug and update navigation logic ([#924](https://github.com/keyshade-xyz/keyshade/issues/924)) ([9ae7218](https://github.com/keyshade-xyz/keyshade/commit/9ae7218434d57f94f306725197d703ddf84b1249))
+* **web:** mobile responsiveness and removed top banner ([#934](https://github.com/keyshade-xyz/keyshade/issues/934)) ([27b91da](https://github.com/keyshade-xyz/keyshade/commit/27b91dadde60f4abc731868351fa46c58031b0fc))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Update workspace creation logs ([c0e7c10](https://github.com/keyshade-xyz/keyshade/commit/c0e7c10b07b8101d6ca75e3643e2c028550e4b15))
+* **release:** 2.18.0-stage.1 [skip ci] ([9e7d34f](https://github.com/keyshade-xyz/keyshade/commit/9e7d34f57690b7703ef21e0dbb666f1a0ce927ee))
+* **release:** 2.18.0-stage.1 [skip ci] ([a87b75e](https://github.com/keyshade-xyz/keyshade/commit/a87b75ee57fe37ce2e8071d7deebdcff077ae00c))
+* **release:** 2.18.0-stage.1 [skip ci] ([661e208](https://github.com/keyshade-xyz/keyshade/commit/661e208934db0c754b2139a7729357893b17d9fd))
+* **release:** 2.18.0-stage.1 [skip ci] ([6b9d815](https://github.com/keyshade-xyz/keyshade/commit/6b9d815e6dc98fb61fba5348e55b4e9017c60554))
+* **release:** 2.18.0-stage.1 [skip ci] ([40b1d55](https://github.com/keyshade-xyz/keyshade/commit/40b1d55ceedc9a26b4740ab16fc09edcaea3b79f))
+* **release:** 2.18.0-stage.1 [skip ci] ([2227083](https://github.com/keyshade-xyz/keyshade/commit/22270838d12c0955d550f59d8834f179ce96c98a))
+* Update lockfile ([e69b9d3](https://github.com/keyshade-xyz/keyshade/commit/e69b9d3685d5d0aaa537fbc3bfe5ca8b87814886))
+
+## [2.18.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1...v2.18.0-stage.1) (2025-05-01)
+
+### 🚀 Features
+
+* **platform:** Member tab update joined-invited tab ([#923](https://github.com/keyshade-xyz/keyshade/issues/923)) ([a9495cc](https://github.com/keyshade-xyz/keyshade/commit/a9495cc6ab7ca4ea5694963519e8081f30b96dfa))
+
+### 🐛 Bug Fixes
+
+* **platform:** Leave workspace Tooltip fix ([#925](https://github.com/keyshade-xyz/keyshade/issues/925)) ([f93a4c6](https://github.com/keyshade-xyz/keyshade/commit/f93a4c69a6db49dea8794c645fdcc8fe2e538c19))
 * **platform:** Update workspace logic to include slug and update navigation logic ([#924](https://github.com/keyshade-xyz/keyshade/issues/924)) ([9ae7218](https://github.com/keyshade-xyz/keyshade/commit/9ae7218434d57f94f306725197d703ddf84b1249))
 * **web:** mobile responsiveness and removed top banner ([#934](https://github.com/keyshade-xyz/keyshade/issues/934)) ([27b91da](https://github.com/keyshade-xyz/keyshade/commit/27b91dadde60f4abc731868351fa46c58031b0fc))
 
