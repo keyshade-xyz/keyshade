@@ -83,7 +83,7 @@ export class EnvironmentService {
     await this.tierLimitService.checkEnvironmentLimitReached(project)
 
     // Check if environment name is valid
-    await this.environmentNameValid(dto.name)
+    await this.environmentNameIsValid(dto.name)
 
     // Check if an environment with the same name already exists
     await this.environmentExists(dto.name, project)
@@ -470,11 +470,11 @@ export class EnvironmentService {
   }
 
   /**
-   * Checks if an environment name is valid(not blank and at least is 3 chars length).
+   * Checks if an environment name is valid(not blank and at least 3 characters long.)
    * @throws BadRequestException if an environment name is invalid
    * @private
    */
-  private async environmentNameValid(name: Environment['name']) {
+  private async environmentNameIsValid(name: Environment['name']) {
     this.logger.log(`Checking if environment name ${name} is valid`)
 
     if (name.trim() === '' || name.trim().length < 3) {

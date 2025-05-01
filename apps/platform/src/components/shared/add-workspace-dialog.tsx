@@ -49,7 +49,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
       })
     }
 
-    // Check if there is a name that is the same as the one without surrounding spaces
+    // Check if there is a name that matches the trimmed version of the input
     const nameAlreadyExists = allWorkspaces.some(
       (workspace) => workspace.name.trim() === name.trim()
     )
