@@ -63,9 +63,6 @@ export class WorkspaceService {
       `User ${user.id} attempted to create a workspace ${dto.name}`
     )
 
-    // Check if workspace name is valid
-    await this.workspaceNameValid(dto.name)
-
     await this.existsByName(dto.name, user.id)
 
     const newWorkspace = await createWorkspace(user, dto, this.prisma)
@@ -869,25 +866,6 @@ export class WorkspaceService {
   }
 
   /**
-   * Checks if an workspace name is valid(not blank).
-   * @throws BadRequestException if an workspace name is invalid
-   * @private
-   */
-  private async workspaceNameValid(name: string) {
-    this.logger.log(`Checking if workspace name ${name} is valid`)
-
-    if (name.trim() === '') {
-      const errorMessage = `Workspace name ${name} is blank`
-      this.logger.error(errorMessage)
-      throw new BadRequestException(
-        constructErrorBody('Workspace name invalid', errorMessage)
-      )
-    }
-
-    this.logger.log(`Workspace name ${name} is valid`)
-  }
-
-  /**
    * Checks if a workspace with the given name exists for the given user.
    * @param name The name of the workspace to check for
    * @param userId The ID of the user to check for
@@ -900,7 +878,7 @@ export class WorkspaceService {
     const workspaceExists =
       (await this.prisma.workspace.count({
         where: {
-          name: name.trim(),
+          name,
           ownerId: userId
         }
       })) > 0

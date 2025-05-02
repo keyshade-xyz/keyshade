@@ -82,9 +82,6 @@ export class EnvironmentService {
     // Check if more environments can be created in the project
     await this.tierLimitService.checkEnvironmentLimitReached(project)
 
-    // Check if environment name is valid
-    this.environmentNameIsValid(dto.name)
-
     // Check if an environment with the same name already exists
     await this.environmentExists(dto.name, project)
 
@@ -470,25 +467,6 @@ export class EnvironmentService {
   }
 
   /**
-   * Checks if an environment name is valid(not blank and at least 3 characters long.)
-   * @throws BadRequestException if an environment name is invalid
-   * @private
-   */
-  private environmentNameIsValid(name: Environment['name']) {
-    this.logger.log(`Checking if environment name ${name} is valid`)
-
-    if (name.trim() === '' || name.trim().length < 3) {
-      const errorMessage = `Environment name ${name} is blank or too short`
-      this.logger.error(errorMessage)
-      throw new BadRequestException(
-        constructErrorBody('Environment name invalid', errorMessage)
-      )
-    }
-
-    this.logger.log(`Environment name ${name} is valid`)
-  }
-
-  /**
    * Checks if an environment with the given name already exists in the given project.
    * @throws ConflictException if an environment with the given name already exists
    * @private
@@ -505,7 +483,7 @@ export class EnvironmentService {
         where: {
           projectId_name: {
             projectId,
-            name: name.trim()
+            name: name
           }
         }
       })) !== null

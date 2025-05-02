@@ -71,7 +71,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
           workspaces: [
             {
               id: data.id,
-              name: data.name.trim(),
+              name: data.name,
               slug: data.slug,
               icon: data.icon ?? '🔥'
             },
