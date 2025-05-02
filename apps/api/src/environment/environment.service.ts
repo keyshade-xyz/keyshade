@@ -483,7 +483,7 @@ export class EnvironmentService {
         where: {
           projectId_name: {
             projectId,
-            name: name
+            name
           }
         }
       })) !== null
