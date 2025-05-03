@@ -1,7 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useSetAtom } from 'jotai'
+import { useSetAtom, useAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
 import {
   Dialog,
@@ -30,6 +30,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
 
   const createWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.createWorkspace({
@@ -37,7 +38,6 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     })
   )
 
-  const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
   const setSelectedWorkspace = useSetAtom(selectedWorkspaceAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
@@ -45,6 +45,16 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     if (!name.trim()) {
       return toast.error('Workspace name is empty', {
         description: 'Please enter a workspace name'
+      })
+    }
+
+    // Check if there is a name that matches the trimmed version of the input
+    const nameAlreadyExists = allWorkspaces.some(
+      (workspace) => workspace.name.trim() === name.trim()
+    )
+    if (nameAlreadyExists) {
+      return toast.error('Workspace exists', {
+        description: 'Workspace with the same name already exists'
       })
     }
 
@@ -77,6 +87,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
     }
   }, [
     name,
+    allWorkspaces,
     createWorkspace,
     setAllWorkspaces,
     setGlobalSearchData,
