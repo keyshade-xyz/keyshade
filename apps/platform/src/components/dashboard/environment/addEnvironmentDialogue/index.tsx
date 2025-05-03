@@ -37,7 +37,7 @@ export default function AddEnvironmentDialogue() {
 
   const createEnvironment = useHttp(() =>
     ControllerInstance.getInstance().environmentController.createEnvironment({
-      name: newEnvironmentData.environmentName.trim(),
+      name: newEnvironmentData.environmentName,
       description: newEnvironmentData.environmentDescription,
       projectSlug: selectedProject!.slug
     })
