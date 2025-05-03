@@ -19,6 +19,7 @@ function InvitesPage(): React.JSX.Element {
       {}
     )
   )
+  const hasInvitations = workspaceInvitations.length > 0
 
   useEffect(() => {
     setIsLoading(true)
@@ -50,7 +51,7 @@ function InvitesPage(): React.JSX.Element {
         </div>
       ) : (
         <div className="flex max-w-3xl flex-col justify-between gap-y-6 sm:items-center">
-          {workspaceInvitations.length > 0 ? (
+          {hasInvitations ? (
             workspaceInvitations.map((invitation) => (
               <div className="w-full" key={invitation.workspace.slug}>
                 <InviteCard
