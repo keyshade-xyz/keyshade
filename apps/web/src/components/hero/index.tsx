@@ -12,7 +12,7 @@ function Hero(): React.JSX.Element {
         <ColorBGSVG className="absolute -z-10 -translate-y-[12rem]" />
         <section className="flex flex-col items-center gap-8 py-[6.88rem]">
           <h1
-            className={` text-brandBlue w-[25rem] text-center text-9xl md:w-auto md:text-6xl`}
+            className={` text-brandBlue w-[25rem] text-center text-4xl md:w-auto md:text-7xl`}
             style={{ textShadow: '0px 4px 4px rgba(202, 236, 241, 0.25)' }}
           >
             The better .env file replacement
