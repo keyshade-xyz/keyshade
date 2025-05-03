@@ -1,3 +1,9 @@
+## [2.19.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.18.0...v2.19.0-stage.1) (2025-05-03)
+
+### 🚀 Features
+
+* **platform:** Billing-Invite tab, screen overlay update ([#937](https://github.com/keyshade-xyz/keyshade/issues/937)) ([733c8dd](https://github.com/keyshade-xyz/keyshade/commit/733c8dd4c5422618af705e1b296c095e23ff790c))
+
 ## [2.18.0](https://github.com/keyshade-xyz/keyshade/compare/v2.17.1...v2.18.0) (2025-05-02)
 
 ### 🚀 Features

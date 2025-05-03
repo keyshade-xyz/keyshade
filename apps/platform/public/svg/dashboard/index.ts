@@ -6,6 +6,7 @@ import PrivateSVG from './private.svg'
 import GlobalSVG from './global.svg'
 import InternalSVG from './internal.svg'
 import FolderIconSVG from './folderIcon.svg'
+import LogoSVG from './logo.svg'
 
 export {
   EnvironmentSVG,
@@ -15,5 +16,6 @@ export {
   PrivateSVG,
   GlobalSVG,
   InternalSVG,
-  FolderIconSVG
+  FolderIconSVG,
+  LogoSVG
 }
