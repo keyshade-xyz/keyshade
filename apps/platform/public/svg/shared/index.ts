@@ -32,6 +32,8 @@ import LinkSVG from './link.svg'
 import SelectSVG from './select.svg'
 import ArrowUpSVG from './arrowup.svg'
 import ArrowDownSVG from './arrowdown.svg'
+import MobileScreenSVG from './mobile-screen.svg'
+import InvitationSVG from './invitation.svg'
 
 export {
   DropdownSVG,
@@ -67,5 +69,7 @@ export {
   LinkSVG,
   SelectSVG,
   ArrowUpSVG,
-  ArrowDownSVG
+  ArrowDownSVG,
+  MobileScreenSVG,
+  InvitationSVG
 }
