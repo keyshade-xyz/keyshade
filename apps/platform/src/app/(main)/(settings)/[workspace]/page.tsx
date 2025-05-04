@@ -232,7 +232,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </div>
               ) : null}
             </div>
-            <div className="h-fit flex-1 overflow-hidden">
+            <div className="h-fit overflow-hidden">
               <CopyToClipboard text={selectedWorkspace?.slug || ''} />
             </div>
           </div>
