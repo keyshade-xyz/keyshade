@@ -49,7 +49,7 @@ export default function CopyToClipboard({
 
   return (
     <button
-      className={`${roboto.className} group flex w-fit cursor-copy gap-2 whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
+      className={`${roboto.className} group flex w-[-webkit-fill-available] truncate cursor-copy gap-2 whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 font-mono text-sm text-white/50 hover:bg-white/15`}
       onClick={copyToClipboard}
       type="button"
     >
