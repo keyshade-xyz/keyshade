@@ -47,6 +47,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
         description: 'Please enter a workspace name'
       })
     }
+
     setIsLoading(true)
     toast.loading('Creating workspace…')
     try {

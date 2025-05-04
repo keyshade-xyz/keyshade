@@ -491,7 +491,7 @@ export class EnvironmentService {
       const errorMessage = `Environment with name ${name} already exists in project ${slug}`
       this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody('Environment exits', errorMessage)
+        constructErrorBody('Environment exists', errorMessage)
       )
     }
 
