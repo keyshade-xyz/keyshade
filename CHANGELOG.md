@@ -1,3 +1,14 @@
+## [2.19.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.1...v2.19.0-stage.2) (2025-05-05)
+
+### 🚀 Features
+
+* **platform:** Enhance RoleCard to display authorities with 'Show more' functionality ([#932](https://github.com/keyshade-xyz/keyshade/issues/932)) ([837c3a1](https://github.com/keyshade-xyz/keyshade/commit/837c3a16cb09bb86731947b63c21314bc119164e))
+
+### 🐛 Bug Fixes
+
+* **platform:** Add truncation and overflow handling for workspace, env, [secure] and variable names ([#938](https://github.com/keyshade-xyz/keyshade/issues/938)) ([30aa18b](https://github.com/keyshade-xyz/keyshade/commit/30aa18b7d2ff04c12c1e24bb316a6cbfe014e7b9))
+* **platform:** Add validation and trimming for environment/workspace names ([#936](https://github.com/keyshade-xyz/keyshade/issues/936)) ([b050ef9](https://github.com/keyshade-xyz/keyshade/commit/b050ef97903701c87b7dc6bc98f555b393bac853))
+
 ## [2.19.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.18.0...v2.19.0-stage.1) (2025-05-03)
 
 ### 🚀 Features
