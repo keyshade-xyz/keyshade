@@ -100,7 +100,7 @@ export default function VariableCard({
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="hover:no-underline overflow-hidden"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
@@ -116,8 +116,8 @@ export default function VariableCard({
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">{variable.name}</div>
+            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
+              <div className="flex items-center gap-x-4 truncate">{variable.name}</div>
               {variable.note ? (
                 <TooltipProvider>
                   <Tooltip>

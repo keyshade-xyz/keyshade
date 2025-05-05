@@ -197,10 +197,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
-            <div className="flex flex-grow flex-col gap-y-2">
+            <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
               {/* <div className="mb-2 flex flex-row gap-x-2">
               </div> */}
-              <h1 className="text-2xl font-bold">{selectedWorkspace?.name}</h1>
+              <h1 className="text-2xl font-bold truncate">{selectedWorkspace?.name}</h1>
               {selectedWorkspace ? (
                 <div className="flex flex-row gap-x-2 text-white/60">
                   <div className="flex flex-row gap-x-1 text-sm">
@@ -232,7 +232,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </div>
               ) : null}
             </div>
-            <div className="h-fit">
+            <div className="h-fit overflow-hidden">
               <CopyToClipboard text={selectedWorkspace?.slug || ''} />
             </div>
           </div>

@@ -148,7 +148,7 @@ export default function SecretCard({
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="hover:no-underline overflow-hidden"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
@@ -164,8 +164,8 @@ export default function SecretCard({
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">
+            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
+              <div className="flex items-center gap-x-4 truncate">
                 {/* <SecretLogoSVG /> */}
                 {secret.name}
               </div>
