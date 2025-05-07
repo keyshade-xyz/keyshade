@@ -1,13 +1,13 @@
 'use client'
 import { GeistSans } from 'geist/font/sans'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
 import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import type { User } from '@keyshade/schema'
-import { LoadingSVG } from '@public/svg/shared'
+import { ErrorInfoSVG, LoadingSVG } from '@public/svg/shared'
 import {
   GithubSVG,
   GoogleSVG,
@@ -39,20 +39,19 @@ export default function AuthPage(): React.JSX.Element {
     })
   )
 
-  // If user comes here with redirection from OAuth login,
-  // fetch the details from the url query params.
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-
-    // Check if there was OAuth failure
-    const reason = searchParams.get('reason')
-    if (reason) {
-      toast.error('Something went wrong while logging you in!', {
-        description: <p className="text-xs text-red-300">hello</p>
-      })
-      return
+  // Memoize searchParams to prevent recreation on every render
+  const searchParams = useMemo(() => {
+    // Only run in browser environment
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search)
     }
+    return new URLSearchParams()
+  }, [])
 
+  // Check if there was OAuth failure
+  const reason = useMemo(() => searchParams.get('reason'), [searchParams])
+
+  useEffect(() => {
     const urlEncodedData = searchParams.get('data')
 
     if (!urlEncodedData) {
@@ -90,7 +89,7 @@ export default function AuthPage(): React.JSX.Element {
         `Expected JSON Object in query param for OAuth login. Got ${urlEncodedData}`
       )
     }
-  })
+  }, [router, searchParams, setUser])
 
   const handleGetStarted = async (): Promise<void> => {
     const result = z.string().email().safeParse(email)
@@ -116,9 +115,12 @@ export default function AuthPage(): React.JSX.Element {
   }
 
   return (
-    <main className="flex h-dvh items-center justify-center justify-items-center px-4">
-      <div className="flex flex-col gap-6">
-        <div className="mb-14 flex flex-col items-center">
+    <main className="flex h-dvh items-center justify-center px-4">
+      {/* Constrain overall width */}
+      <div className="flex w-full max-w-md flex-col gap-6">
+        <div
+          className={`${reason ? 'mb-4' : 'mb-14'} flex flex-col items-center`}
+        >
           <KeyshadeBigSVG />
           <h1
             className={`${GeistSans.className} text-[2rem] font-semibold md:text-[2.5rem]`}
@@ -126,6 +128,23 @@ export default function AuthPage(): React.JSX.Element {
             Welcome to Keyshade
           </h1>
         </div>
+
+        {/* OAuth-failure banner */}
+        {reason ? (
+          <div className="rounded-md border border-red-500/40 bg-red-950/30 px-4 py-3 text-sm text-red-300">
+            <div className="flex items-center justify-around gap-4">
+              <ErrorInfoSVG />
+              <div>
+                <strong className="font-medium">Login Error:</strong>{' '}
+                <span className="opacity-90">
+                  The email have been already used with a different OAuth
+                  provider
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-3 gap-x-6">
           <Button onClick={() => (window.location.href = GOOGLE_OAUTH_PATH)}>
             <GoogleSVG />
