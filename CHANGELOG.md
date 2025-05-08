@@ -1,3 +1,9 @@
+## [2.19.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.3...v2.19.0-stage.4) (2025-05-08)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed the avatar alignment in roles card ([#940](https://github.com/keyshade-xyz/keyshade/issues/940)) ([54bef1d](https://github.com/keyshade-xyz/keyshade/commit/54bef1d89c892c1be4a45e571c6253533602f9df))
+
 ## [2.19.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.2...v2.19.0-stage.3) (2025-05-08)
 
 ### 🐛 Bug Fixes
