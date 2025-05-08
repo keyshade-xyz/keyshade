@@ -34,6 +34,7 @@ import ArrowUpSVG from './arrowup.svg'
 import ArrowDownSVG from './arrowdown.svg'
 import MobileScreenSVG from './mobile-screen.svg'
 import InvitationSVG from './invitation.svg'
+import ErrorInfoSVG from './errorInfo.svg'
 
 export {
   DropdownSVG,
@@ -71,5 +72,6 @@ export {
   ArrowUpSVG,
   ArrowDownSVG,
   MobileScreenSVG,
-  InvitationSVG
+  InvitationSVG,
+  ErrorInfoSVG
 }
