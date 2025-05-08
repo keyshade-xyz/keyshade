@@ -107,7 +107,7 @@ export default function RoleCard({
         ) : null}
       </TableCell>
       <TableCell className="h-full">
-        <div className="flex h-full flex-wrap">
+        <div className="flex h-full mt-1 items-start flex-wrap">
           {role.members.map((member) => (
             <TooltipProvider key={member.email}>
               <Tooltip>

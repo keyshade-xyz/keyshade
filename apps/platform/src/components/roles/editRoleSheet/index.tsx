@@ -69,7 +69,7 @@ export default function EditRoleSheet() {
   const [editRoleData, setEditRoleData] = useState({
     name: selectedRole?.name ?? '',
     description: selectedRole?.description ?? '',
-    colorCode: selectedRole?.colorCode ?? '#000000'
+    colorCode: selectedRole?.authorities.includes('WORKSPACE_ADMIN') ? COLORS_LIST[2].color : (selectedRole?.colorCode || '#000000')
   })
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function EditRoleSheet() {
         }
       }
 
-      setProjectEnvironmentSelection(selections)
+    setProjectEnvironmentSelection(selections)
     }
   }, [selectedRole])
 
@@ -190,6 +190,7 @@ export default function EditRoleSheet() {
               </Label>
               <Input
                 className="col-span-3 h-[2.25rem] w-[20rem] "
+                disabled={selectedRole?.authorities.includes('WORKSPACE_ADMIN')}
                 id="name"
                 onChange={(e) =>
                   setEditRoleData((prev) => ({
@@ -269,6 +270,7 @@ export default function EditRoleSheet() {
 
             {/* Authority Selection */}
             <AuthoritySelector
+              isAdminRole={selectedRole?.authorities.includes('WORKSPACE_ADMIN')}
               parent="ROLES"
               selectedPermissions={selectedPermissions}
               setSelectedPermissions={setSelectedPermissions}

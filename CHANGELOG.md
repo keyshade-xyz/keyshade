@@ -1,3 +1,21 @@
+## [2.19.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.4...v2.19.0-stage.5) (2025-05-08)
+
+### 🚀 Features
+
+* **platform:** Remove admin role while inviting ([#939](https://github.com/keyshade-xyz/keyshade/issues/939)) ([45c0bfc](https://github.com/keyshade-xyz/keyshade/commit/45c0bfc3d9dd255c713e246bdb46793177aaa0ba))
+
+## [2.19.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.3...v2.19.0-stage.4) (2025-05-08)
+
+### 🐛 Bug Fixes
+
+* **platform:** Fixed the avatar alignment in roles card ([#940](https://github.com/keyshade-xyz/keyshade/issues/940)) ([54bef1d](https://github.com/keyshade-xyz/keyshade/commit/54bef1d89c892c1be4a45e571c6253533602f9df))
+
+## [2.19.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.2...v2.19.0-stage.3) (2025-05-08)
+
+### 🐛 Bug Fixes
+
+* Added validations for admin role updation ([#941](https://github.com/keyshade-xyz/keyshade/issues/941)) ([6cbb8d9](https://github.com/keyshade-xyz/keyshade/commit/6cbb8d9b2f3df97306a8439e60f696a6c310b469))
+
 ## [2.19.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.1...v2.19.0-stage.2) (2025-05-05)
 
 ### 🚀 Features
