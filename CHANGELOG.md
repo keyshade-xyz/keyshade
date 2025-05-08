@@ -1,3 +1,9 @@
+## [2.19.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.4...v2.19.0-stage.5) (2025-05-08)
+
+### 🚀 Features
+
+* **platform:** Remove admin role while inviting ([#939](https://github.com/keyshade-xyz/keyshade/issues/939)) ([45c0bfc](https://github.com/keyshade-xyz/keyshade/commit/45c0bfc3d9dd255c713e246bdb46793177aaa0ba))
+
 ## [2.19.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.3...v2.19.0-stage.4) (2025-05-08)
 
 ### 🐛 Bug Fixes
