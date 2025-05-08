@@ -1,3 +1,9 @@
+## [2.19.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.2...v2.19.0-stage.3) (2025-05-08)
+
+### 🐛 Bug Fixes
+
+* Added validations for admin role updation ([#941](https://github.com/keyshade-xyz/keyshade/issues/941)) ([6cbb8d9](https://github.com/keyshade-xyz/keyshade/commit/6cbb8d9b2f3df97306a8439e60f696a6c310b469))
+
 ## [2.19.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.1...v2.19.0-stage.2) (2025-05-05)
 
 ### 🚀 Features

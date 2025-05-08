@@ -263,23 +263,47 @@ export class WorkspaceRoleService {
     workspaceRoleSlug: WorkspaceRole['slug'],
     dto: UpdateWorkspaceRole
   ) {
-    if (
-      dto.authorities &&
-      dto.authorities.includes(Authority.WORKSPACE_ADMIN)
-    ) {
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not assign admin authority',
-          'You can not explicitly assign workspace admin authority to a role'
-        )
-      )
-    }
-
     const workspaceRole = (await this.getWorkspaceRoleWithAuthority(
       user.id,
       workspaceRoleSlug,
       Authority.UPDATE_WORKSPACE_ROLE
     )) as WorkspaceRoleWithProjects
+
+    const isAdminRole = workspaceRole.authorities.includes(
+      Authority.WORKSPACE_ADMIN
+    )
+
+    if (isAdminRole) {
+      // For the admin role, only allow updating description and colorCode
+      if (
+        (dto.authorities &&
+          dto.authorities.some(
+            (authority) => authority !== Authority.WORKSPACE_ADMIN
+          )) ||
+        dto.name
+      ) {
+        throw new BadRequestException(
+          constructErrorBody(
+            'Cannot modify admin role authorities or name',
+            'You cannot change the authorities or name of the admin role'
+          )
+        )
+      }
+    } else {
+      // For non-admin roles, prevent assigning admin authority
+      if (
+        dto.authorities &&
+        dto.authorities.includes(Authority.WORKSPACE_ADMIN)
+      ) {
+        throw new BadRequestException(
+          constructErrorBody(
+            'Can not assign admin authority',
+            'You can not explicitly assign workspace admin authority to a role'
+          )
+        )
+      }
+    }
+
     const workspaceRoleId = workspaceRole.id
 
     const workspace = await this.prisma.workspace.findUnique({
