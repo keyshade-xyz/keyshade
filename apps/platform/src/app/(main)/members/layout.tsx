@@ -27,7 +27,10 @@ function DetailedMemberPage(): React.JSX.Element {
   useEffect(() => {
     getAllRoles().then(({ data, success }) => {
       if (success && data) {
-        setRoles(data.items)
+        const nonAdminRoles = data.items.filter(
+          (role) => !role.hasAdminAuthority
+        )
+        setRoles(nonAdminRoles)
       }
     })
   }, [getAllRoles, setRoles])
