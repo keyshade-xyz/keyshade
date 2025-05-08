@@ -137,7 +137,7 @@ export default function AuthPage(): React.JSX.Element {
               <div>
                 <strong className="font-medium">Login Error:</strong>{' '}
                 <span className="opacity-90">
-                  The email have been already used with a different OAuth
+                  This email has already been used with a different OAuth
                   provider
                 </span>
               </div>
