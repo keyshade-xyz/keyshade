@@ -972,6 +972,68 @@ describe('Workspace Role Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+
+    it('should not allow updating admin role authorities to anything other than WORKSPACE_ADMIN', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          authorities: [Authority.CREATE_SECRET, Authority.WORKSPACE_ADMIN]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toContain(
+        'Cannot modify admin role authorities or name'
+      )
+    })
+
+    it('should not allow updating admin role authorities to just WORKSPACE_ADMIN (authorities should not be updatable at all)', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          authorities: [Authority.WORKSPACE_ADMIN]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toContain(
+        'Cannot modify admin role authorities or name'
+      )
+    })
+
+    it('should not allow updating admin role name to a duplicate', async () => {
+      // Create another role with a unique name
+      await workspaceRoleService.createWorkspaceRole(
+        alice,
+        workspaceAlice.slug,
+        {
+          name: 'UniqueRole',
+          description: 'Another role',
+          colorCode: '#123456',
+          authorities: [Authority.READ_WORKSPACE_ROLE]
+        }
+      )
+
+      // Try to update admin role's name to 'UniqueRole'
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          name: 'UniqueRole'
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(409)
+      expect(response.json().message).toContain('Workspace role already exists')
+    })
   })
 
   describe('Delete Workspace Role Tests', () => {
