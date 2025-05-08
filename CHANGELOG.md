@@ -1,3 +1,9 @@
+## [2.19.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.5...v2.19.0-stage.6) (2025-05-08)
+
+### 🚀 Features
+
+* **platform:** OAuth failure handle auth page ([#942](https://github.com/keyshade-xyz/keyshade/issues/942)) ([e66139a](https://github.com/keyshade-xyz/keyshade/commit/e66139a48aa8f38da616ccd671a29553f68ba0dc))
+
 ## [2.19.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.4...v2.19.0-stage.5) (2025-05-08)
 
 ### 🚀 Features
