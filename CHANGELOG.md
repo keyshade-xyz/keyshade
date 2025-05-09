@@ -1,3 +1,28 @@
+## [2.19.0](https://github.com/keyshade-xyz/keyshade/compare/v2.18.0...v2.19.0) (2025-05-09)
+
+### 🚀 Features
+
+* **platform:** Billing-Invite tab, screen overlay update ([#937](https://github.com/keyshade-xyz/keyshade/issues/937)) ([733c8dd](https://github.com/keyshade-xyz/keyshade/commit/733c8dd4c5422618af705e1b296c095e23ff790c))
+* **platform:** Enhance RoleCard to display authorities with 'Show more' functionality ([#932](https://github.com/keyshade-xyz/keyshade/issues/932)) ([837c3a1](https://github.com/keyshade-xyz/keyshade/commit/837c3a16cb09bb86731947b63c21314bc119164e))
+* **platform:** OAuth failure handle auth page ([#942](https://github.com/keyshade-xyz/keyshade/issues/942)) ([e66139a](https://github.com/keyshade-xyz/keyshade/commit/e66139a48aa8f38da616ccd671a29553f68ba0dc))
+* **platform:** Remove admin role while inviting ([#939](https://github.com/keyshade-xyz/keyshade/issues/939)) ([45c0bfc](https://github.com/keyshade-xyz/keyshade/commit/45c0bfc3d9dd255c713e246bdb46793177aaa0ba))
+
+### 🐛 Bug Fixes
+
+* Added validations for admin role updation ([#941](https://github.com/keyshade-xyz/keyshade/issues/941)) ([6cbb8d9](https://github.com/keyshade-xyz/keyshade/commit/6cbb8d9b2f3df97306a8439e60f696a6c310b469))
+* **platform:** Add truncation and overflow handling for workspace, env, [secure] and variable names ([#938](https://github.com/keyshade-xyz/keyshade/issues/938)) ([30aa18b](https://github.com/keyshade-xyz/keyshade/commit/30aa18b7d2ff04c12c1e24bb316a6cbfe014e7b9))
+* **platform:** Add validation and trimming for environment/workspace names ([#936](https://github.com/keyshade-xyz/keyshade/issues/936)) ([b050ef9](https://github.com/keyshade-xyz/keyshade/commit/b050ef97903701c87b7dc6bc98f555b393bac853))
+* **platform:** Fixed the avatar alignment in roles card ([#940](https://github.com/keyshade-xyz/keyshade/issues/940)) ([54bef1d](https://github.com/keyshade-xyz/keyshade/commit/54bef1d89c892c1be4a45e571c6253533602f9df))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.19.0-stage.1 [skip ci] ([623a3f6](https://github.com/keyshade-xyz/keyshade/commit/623a3f616cb1d595784e4dba296808bb8c8c1756))
+* **release:** 2.19.0-stage.2 [skip ci] ([eb1389a](https://github.com/keyshade-xyz/keyshade/commit/eb1389aa35eb83e0edacedebe3bca14a65ae59a8))
+* **release:** 2.19.0-stage.3 [skip ci] ([7bb4dee](https://github.com/keyshade-xyz/keyshade/commit/7bb4dee4edfdaa7b734e0b04f70f21b0732e358c))
+* **release:** 2.19.0-stage.4 [skip ci] ([32cdc5a](https://github.com/keyshade-xyz/keyshade/commit/32cdc5a261e9df321c3f7ec9ad7928c19e7d8226))
+* **release:** 2.19.0-stage.5 [skip ci] ([8fa4824](https://github.com/keyshade-xyz/keyshade/commit/8fa4824c0186c70cf01d211879512a61c9072c35))
+* **release:** 2.19.0-stage.6 [skip ci] ([6c7c4f0](https://github.com/keyshade-xyz/keyshade/commit/6c7c4f0cbd0e18b0e0251797a4dea51b0ac7dd9c))
+
 ## [2.19.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0-stage.5...v2.19.0-stage.6) (2025-05-08)
 
 ### 🚀 Features

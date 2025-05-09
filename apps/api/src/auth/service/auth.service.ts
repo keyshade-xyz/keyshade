@@ -248,10 +248,30 @@ export class AuthService {
     // If the user has used OAuth to log in, we need to check if the OAuth provider
     // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
-      throw new UnauthorizedException(
+      let formattedAuthProvider = ''
+
+      switch (user.authProvider) {
+        case AuthProvider.GOOGLE:
+          formattedAuthProvider = 'Google'
+          break
+        case AuthProvider.GITHUB:
+          formattedAuthProvider = 'GitHub'
+          break
+        case AuthProvider.EMAIL_OTP:
+          formattedAuthProvider = 'Email and OTP'
+          break
+        case AuthProvider.GITLAB:
+          formattedAuthProvider = 'GitLab'
+          break
+      }
+
+      this.logger.error(
+        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+      )
+      throw new BadRequestException(
         constructErrorBody(
           'Error signing in',
-          'The user has signed up with a different authentication provider.'
+          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
         )
       )
     }

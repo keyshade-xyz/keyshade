@@ -136,10 +136,7 @@ export default function AuthPage(): React.JSX.Element {
               <ErrorInfoSVG />
               <div>
                 <strong className="font-medium">Login Error:</strong>{' '}
-                <span className="opacity-90">
-                  This email has already been used with a different OAuth
-                  provider
-                </span>
+                <span className="opacity-90">{reason}</span>
               </div>
             </div>
           </div>

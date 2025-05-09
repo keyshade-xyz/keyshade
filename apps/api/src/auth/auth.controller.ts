@@ -172,7 +172,7 @@ export class AuthController {
     const email = emails[0].value
     const profilePictureUrl = photos[0]?.value
 
-    this.handleOAuthProcess(
+    await this.handleOAuthProcess(
       email,
       name,
       profilePictureUrl,
@@ -199,13 +199,7 @@ export class AuthController {
       const user = setCookie(response, data)
       sendOAuthSuccessRedirect(response, user)
     } catch (error) {
-      this.logger.warn(
-        'User attempted to log in with a different OAuth provider'
-      )
-      sendOAuthFailureRedirect(
-        response,
-        'User attempted to log in with a different OAuth provider'
-      )
+      sendOAuthFailureRedirect(response, JSON.parse(error.message).body)
     }
   }
 
