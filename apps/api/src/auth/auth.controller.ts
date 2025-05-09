@@ -97,7 +97,7 @@ export class AuthController {
     const email = emails[0].value
     const profilePictureUrl = photos[0]?.value
 
-    return this.handleOAuthProcess(
+    await this.handleOAuthProcess(
       email,
       name,
       profilePictureUrl,
@@ -134,7 +134,7 @@ export class AuthController {
     }
     const email = emails[0].value
 
-    this.handleOAuthProcess(
+    await this.handleOAuthProcess(
       email,
       name,
       profilePictureUrl,
