@@ -1,3 +1,9 @@
+## [2.20.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0-stage.1) (2025-05-09)
+
+### 🚀 Features
+
+* Enhanced Login error message ([#943](https://github.com/keyshade-xyz/keyshade/issues/943)) ([9ce9c71](https://github.com/keyshade-xyz/keyshade/commit/9ce9c716176f2846b586c227502b554a7b9474c7))
+
 ## [2.19.0](https://github.com/keyshade-xyz/keyshade/compare/v2.18.0...v2.19.0) (2025-05-09)
 
 ### 🚀 Features
