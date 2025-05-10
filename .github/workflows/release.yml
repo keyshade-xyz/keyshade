@@ -230,6 +230,8 @@ jobs:
           NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
         run: |
           # Build a docker container and push it to ACR
           echo "Building image..."
