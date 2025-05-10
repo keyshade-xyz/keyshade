@@ -8,6 +8,7 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import { posthog } from 'posthog-js'
 import { GeistSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import {
@@ -89,6 +90,7 @@ export default function AuthOTPPage(): React.JSX.Element {
 
         if (data.isOnboardingFinished) {
           router.push('/')
+          posthog.identify()
         } else {
           router.push('/auth/account-details')
         }
@@ -175,7 +177,7 @@ export default function AuthOTPPage(): React.JSX.Element {
             >
               {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
             </Button>
-            <div className="gap-2 flex items-center justify-center text-[#71717A]">
+            <div className="flex items-center justify-center gap-2 text-[#71717A]">
               <span>Didn’t receive OTP?</span>
               <Button
                 className="text-[#71717A]"
