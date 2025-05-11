@@ -10,7 +10,8 @@ export const UserSchema = z.object({
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
-  authProvider: authProviderEnum
+  authProvider: authProviderEnum,
+  joinedOn: z.date()
 })
 
 export const GetSelfResponseSchema = UserSchema.extend({
