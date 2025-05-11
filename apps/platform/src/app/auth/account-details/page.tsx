@@ -7,6 +7,7 @@ import Cookies from 'js-cookie'
 import { toast } from 'sonner'
 import { LoadingSVG } from '@public/svg/shared'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+import { posthog } from 'posthog-js'
 import { GeistSansFont, NunitoSansFont } from '@/fonts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,11 +60,12 @@ export default function AuthDetailsPage(): React.JSX.Element {
         )
 
         setUser(data)
+        posthog.identify()
 
         /**
          * redirect to dashboard after updating the profile details
          */
-        window.location.href='/'
+        window.location.href = '/'
       }
     } finally {
       toast.dismiss()

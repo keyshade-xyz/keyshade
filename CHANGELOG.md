@@ -1,3 +1,15 @@
+## [2.20.0](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0) (2025-05-10)
+
+### 🚀 Features
+
+* Enhanced Login error message ([#943](https://github.com/keyshade-xyz/keyshade/issues/943)) ([9ce9c71](https://github.com/keyshade-xyz/keyshade/commit/9ce9c716176f2846b586c227502b554a7b9474c7))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Add posthog env ([1e7ecc3](https://github.com/keyshade-xyz/keyshade/commit/1e7ecc3e4bb7d51d0f37ff04794f7bea5d44f6d9))
+* **platform:** Add PostHog for user analytics ([#944](https://github.com/keyshade-xyz/keyshade/issues/944)) ([6ac1e6e](https://github.com/keyshade-xyz/keyshade/commit/6ac1e6eba49332ebd7e8ceae36bf16ceb0cc123e))
+* **release:** 2.20.0-stage.1 [skip ci] ([397e2be](https://github.com/keyshade-xyz/keyshade/commit/397e2be6fd8b7ddd99426e2bf4433258e22d7dba))
+
 ## [2.20.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0-stage.1) (2025-05-09)
 
 ### 🚀 Features
