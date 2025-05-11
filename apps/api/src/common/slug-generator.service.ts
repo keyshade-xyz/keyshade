@@ -42,17 +42,19 @@ export default class SlugGenerator {
   private async fetchLatestCreatedSlug(
     baseSlug: string,
     model: keyof PrismaClient
-  ): Promise<string | null> {
+  ): Promise<number | null> {
     this.logger.log(
       `Fetching latest created slug for base slug ${baseSlug} and model ${model.toString()} from cache...`
     )
-    const cachedSlug = await this.redisClient.publisher.get(
+    const cachedSlugNumericPart = await this.redisClient.publisher.get(
       this.getSlugKey(baseSlug, model)
     )
 
-    if (cachedSlug) {
-      this.logger.log(`Found cached slug: ${cachedSlug}`)
-      return cachedSlug
+    if (cachedSlugNumericPart) {
+      this.logger.log(
+        `Found cached slug's numeric part: ${cachedSlugNumericPart}`
+      )
+      return parseInt(cachedSlugNumericPart, 10)
     } else {
       this.logger.log(
         `No cached slug found for base slug ${baseSlug} and model ${model.toString()}.`
@@ -66,7 +68,7 @@ export default class SlugGenerator {
    *
    * @param baseSlug The base slug string.
    * @param model The model name as a key of PrismaClient.
-   * @param slug The slug to cache.
+   * @param numericPart The numeric part of the slug to cache.
    *
    * @remarks
    * The slug is cached for a day.
@@ -74,18 +76,20 @@ export default class SlugGenerator {
   private async cacheSlug(
     baseSlug: string,
     model: keyof PrismaClient,
-    slug: string
+    numericPart: number
   ): Promise<void> {
-    this.logger.log(`Caching slug ${slug} for ${baseSlug}...`)
+    this.logger.log(
+      `Caching numeric part ${numericPart} for base slug ${baseSlug} and model ${model.toString()}....`
+    )
     await this.redisClient.publisher.set(
       this.getSlugKey(baseSlug, model),
-      slug,
+      numericPart.toString(),
       {
         EX: 60 * 60 * 24 // Cache for 1 day
       }
     )
     this.logger.log(
-      `Slug ${slug} cached for base slug ${baseSlug} and model ${model.toString()}.`
+      `Cached numeric part ${numericPart} for base slug ${baseSlug} and model ${model.toString()}`
     )
   }
 
@@ -131,10 +135,15 @@ export default class SlugGenerator {
     let newSlug: string
 
     // Check if the slug already exists in the cache
-    const cachedSlug = await this.fetchLatestCreatedSlug(baseSlug, model)
-    if (cachedSlug) {
-      this.logger.log(`Using cached slug ${cachedSlug} to generate new slug...`)
-      max = parseInt(cachedSlug.split('-').pop())
+    const cachedSlugNumericPart = await this.fetchLatestCreatedSlug(
+      baseSlug,
+      model
+    )
+    if (cachedSlugNumericPart) {
+      this.logger.log(
+        `Found cached slug's numeric part: ${cachedSlugNumericPart}`
+      )
+      max = cachedSlugNumericPart
     } else {
       // Get all slugs that match baseSlug-N
       const existingSlugs = await (this.prisma[model] as any).findMany({
@@ -182,7 +191,7 @@ export default class SlugGenerator {
         this.logger.log(
           `Slug ${newSlug} already exists in ${model.toString()}.`
         )
-        return this.generateUniqueSlug(name, model)
+        return await this.generateUniqueSlug(name, model, iterationCount + 1)
       }
     }
 
@@ -191,7 +200,7 @@ export default class SlugGenerator {
     )
 
     // Store the new slug in the cache
-    await this.cacheSlug(baseSlug, model, newSlug)
+    await this.cacheSlug(baseSlug, model, max)
 
     return newSlug
   }
