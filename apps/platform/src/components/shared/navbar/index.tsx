@@ -53,10 +53,10 @@ function Navbar(): React.JSX.Element {
       { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
       { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }
     ],
-    members: [
-      { id: 'joined', label: 'Joined' },
-      { id: 'invited', label: 'Invited' }
-    ]
+    // members: [
+    //   { id: 'joined', label: 'Joined' },
+    //   { id: 'invited', label: 'Invited' }
+    // ]
   }
 
   useEffect(() => {
@@ -113,8 +113,8 @@ function Navbar(): React.JSX.Element {
       case '/settings':
         return TAB_CONFIGS.settings
 
-      case '/members':
-        return TAB_CONFIGS.members
+      // case '/members':
+      //   return TAB_CONFIGS.members
 
       default:
         return []
