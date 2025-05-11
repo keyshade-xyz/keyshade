@@ -9,6 +9,7 @@ import {
 import { createWorkspace } from './workspace'
 import { UserWithWorkspace } from '@/user/user.types'
 import { constructErrorBody } from './util'
+import SlugGenerator from './slug-generator.service'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
@@ -18,7 +19,8 @@ import { constructErrorBody } from './util'
  */
 export async function createUser(
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
-  prisma: PrismaService
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
@@ -55,6 +57,7 @@ export async function createUser(
       user,
       { name: 'My Workspace' },
       prisma,
+      slugGenerator,
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)

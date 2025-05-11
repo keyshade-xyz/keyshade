@@ -19,10 +19,10 @@ import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import IntegrationFactory from './plugins/factory/integration.factory'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class IntegrationService {
@@ -30,7 +30,8 @@ export class IntegrationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -135,7 +136,10 @@ export class IntegrationService {
     const integration = await this.prisma.integration.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(
+          dto.name,
+          'INTEGRATION'
+        ),
         type: dto.type,
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
@@ -270,7 +274,7 @@ export class IntegrationService {
       data: {
         name: dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'INTEGRATION')
           : integration.slug,
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
