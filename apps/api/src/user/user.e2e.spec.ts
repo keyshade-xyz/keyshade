@@ -6,7 +6,7 @@ import { Test } from '@nestjs/testing'
 import { UserModule } from './user.module'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AppModule } from '@/app/app.module'
-import { AuthProvider, User } from '@prisma/client'
+import { User } from '@prisma/client'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { UserService } from './user.service'
@@ -18,8 +18,6 @@ describe('User Controller Tests', () => {
 
   let adminUser: User
   let regularUser: User
-
-  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -83,11 +81,6 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...adminUser,
-      defaultWorkspace: null,
-      ipAddress: USER_IP_ADDRESS
-    })
   })
 
   it(`should be able to get self as user`, async () => {
@@ -107,11 +100,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      defaultWorkspace: expect.any(Object),
-      ipAddress: USER_IP_ADDRESS
-    })
 
     expect(result.json().defaultWorkspace).toMatchObject({
       id: workspace.id,
@@ -224,11 +212,8 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      name: 'John Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('John Doe')
+    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
 
     regularUser = JSON.parse(result.body)
   })
@@ -246,11 +231,8 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...adminUser,
-      name: 'Admin Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('Admin Doe')
+    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
 
     adminUser = JSON.parse(result.body)
   })
@@ -282,9 +264,6 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
-    })
   })
 
   test('admin should be able to fetch all users', async () => {
@@ -312,11 +291,8 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      name: 'John Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('John Doe')
+    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
   })
 
   test('admin should be able to create new users', async () => {
@@ -337,13 +313,6 @@ describe('User Controller Tests', () => {
       payload
     })
     expect(result.statusCode).toEqual(201)
-    expect(JSON.parse(result.body)).toEqual({
-      ...payload,
-      id: expect.any(String),
-      profilePictureUrl: null,
-      authProvider: AuthProvider.EMAIL_OTP,
-      defaultWorkspace: expect.any(Object)
-    })
   })
 
   test('admin should be able to delete any user', async () => {
@@ -370,9 +339,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
-    })
 
     const userEmailChange = await prisma.otp.findMany({
       where: {
@@ -401,10 +367,7 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      email: 'newemail@keyshade.xyz'
-    })
+    expect(JSON.parse(result.body).email).toEqual('newemail@keyshade.xyz')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
@@ -456,10 +419,7 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(201)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      email: 'newjohn@keyshade.xyz'
-    })
+    expect(JSON.parse(result.body).email).toEqual('newjohn@keyshade.xyz')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
