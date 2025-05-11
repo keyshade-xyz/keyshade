@@ -275,13 +275,7 @@ export class WorkspaceRoleService {
 
     if (isAdminRole) {
       // For the admin role, only allow updating description and colorCode
-      if (
-        (dto.authorities &&
-          dto.authorities.some(
-            (authority) => authority !== Authority.WORKSPACE_ADMIN
-          )) ||
-        dto.name
-      ) {
+      if (dto.authorities || dto.name) {
         throw new BadRequestException(
           constructErrorBody(
             'Cannot modify admin role authorities or name',

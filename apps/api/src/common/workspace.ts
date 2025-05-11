@@ -28,9 +28,14 @@ export const createWorkspace = async (
 
   const workspaceId = v4()
   const workspaceSlug = await generateEntitySlug(dto.name, 'WORKSPACE', prisma)
+  const workspaceAdminRoleSlug = await generateEntitySlug(
+    'Admin',
+    'WORKSPACE_ROLE',
+    prisma
+  )
 
   logger.log(
-    `Creating workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+    `Creating workspace ${dto.name} (${workspaceSlug}) for user ${user.id} and admin role ${workspaceAdminRoleSlug}`
   )
 
   const createNewWorkspace = prisma.workspace.create({
@@ -47,7 +52,7 @@ export const createWorkspace = async (
           data: [
             {
               name: 'Admin',
-              slug: await generateEntitySlug('Admin', 'WORKSPACE_ROLE', prisma),
+              slug: workspaceAdminRoleSlug,
               authorities: [Authority.WORKSPACE_ADMIN],
               hasAdminAuthority: true,
               colorCode: '#FF0000'
@@ -66,14 +71,8 @@ export const createWorkspace = async (
       }
     }
   })
-  logger.log(
-    `Created workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
-  )
 
   // Add the owner to the workspace
-  logger.log(
-    `Assigning ownership of workspace ${dto.name} (${workspaceSlug}) to user ${user.id}`
-  )
   const assignOwnership = prisma.workspaceMember.create({
     data: {
       workspace: {
@@ -101,17 +100,20 @@ export const createWorkspace = async (
       }
     }
   })
-  logger.log(
-    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
-  )
 
   logger.log(
-    `Executing transactions for creating workspace and assigning ownership`
+    `Executing transactions for creating workspace ${dto.name} (${workspaceSlug}) and assigning ownership ${workspaceAdminRoleSlug} to user ${user.id}`
   )
   const result = await prisma.$transaction([
     createNewWorkspace,
     assignOwnership
   ])
+  logger.log(
+    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+  )
+  logger.log(
+    `Created workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+  )
   logger.log(
     `Executed transactions for creating workspace and assigning ownership`
   )

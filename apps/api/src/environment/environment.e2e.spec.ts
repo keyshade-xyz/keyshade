@@ -232,7 +232,9 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toContain('name should not be empty')
+      expect(response.json().message[0]).toContain(
+        'name must be longer than or equal to 3 characters'
+      )
     })
 
     it('should not be able to create an environment in a project that does not exist', async () => {

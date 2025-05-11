@@ -1,194 +1,82 @@
 import { PrismaService } from '@/prisma/prisma.service'
-import { InternalServerErrorException } from '@nestjs/common'
-import { Workspace } from '@prisma/client'
+import { InternalServerErrorException, Logger } from '@nestjs/common'
+import { PrismaClient } from '@prisma/client'
+import slugify from 'slugify'
+import { constructErrorBody } from './util'
 
-export const incrementSlugSuffix = (
-  existingSlug: string,
-  baseSlug: string
-): string => {
-  const charset = '0123456789abcdefghijklmnopqrstuvwxyz'
+const MAX_ITERATIONS = 10
 
-  let suffix = ''
-
-  if (existingSlug) {
-    suffix = existingSlug.substring(baseSlug.length + 1)
+async function generateUniqueSlug(
+  name: string,
+  model: keyof PrismaClient,
+  prisma: PrismaService,
+  iterationCount: number = 0
+): Promise<string> {
+  // Check if the iteration count exceeds the limit
+  if (iterationCount > MAX_ITERATIONS) {
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Too many iterations while generating slug',
+        `Failed to generate unique slug for ${name} in ${model.toString()} after 10 attempts.`
+      )
+    )
   }
 
-  if (!suffix) {
+  const logger = new Logger('generateUniqueSlug')
+  logger.log(`Generating unique slug for ${name} in ${model.toString()}...`)
+
+  const baseSlug = slugify(name, { lower: true, strict: true })
+  logger.log(`Generated base slug for ${name}: ${baseSlug}`)
+
+  // Get all slugs that match baseSlug or baseSlug-N
+  const existingSlugs = await (prisma[model] as any).findMany({
+    where: {
+      slug: {
+        startsWith: baseSlug
+      }
+    },
+    select: {
+      slug: true
+    }
+  })
+  logger.log(`Existing slugs for ${name}: ${existingSlugs.length}`)
+
+  if (existingSlugs.length === 0) {
     return `${baseSlug}-0`
   }
 
-  let result = ''
-  let carry = true
+  let max = 0
 
-  for (let i = suffix.length - 1; i >= 0; i--) {
-    if (carry) {
-      const currentChar = suffix[i]
-      const index = charset.indexOf(currentChar)
-
-      if (index === -1) {
-        throw new InternalServerErrorException(
-          `Invalid character in slug suffix: ${currentChar}`
-        )
-      }
-      const nextIndex = (index + 1) % charset.length
-      result = charset[nextIndex] + result
-
-      // Carry over if we wrapped around to '0'
-      carry = nextIndex === 0
-    } else {
-      // No carry, just append the remaining part of the suffix
-      result = suffix[i] + result
+  for (const existingSlug of existingSlugs) {
+    const numericPart = existingSlug.slug.split('-').pop()
+    if (numericPart && !isNaN(parseInt(numericPart, 10))) {
+      max = Math.max(max, parseInt(numericPart, 10))
     }
   }
 
-  if (carry) {
-    result = '0' + result
+  // Increment the max value by 1
+  max += 1
+  const newSlug = `${baseSlug}-${max}`
+  logger.log(`Generated new slug for ${name}: ${newSlug}`)
+
+  // Check if the new slug already exists
+  logger.log(`Checking if slug already exists in ${model.toString()}...`)
+  const slugExists = await (prisma[model] as any).findFirst({
+    where: {
+      slug: newSlug
+    }
+  })
+
+  if (slugExists) {
+    // If it exists, call the function recursively to generate a new slug
+    logger.log(`Slug ${newSlug} already exists in ${model.toString()}.`)
+    return generateUniqueSlug(name, model, prisma)
+  } else {
+    logger.log(
+      `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
+    )
+    return newSlug
   }
-
-  return `${baseSlug}-${result}`
-}
-
-/**
- * Generates a slug for the given name. It keeps generating slugs until it finds
- * one that does not exist in the database.
- *
- * @param name The name of the entity.
- * @returns A alphanumeric slug for the given name.
- */
-export const generateSlugName = (name: string): string => {
-  // Convert to lowercase
-  const lowerCaseName = name.trim().toLowerCase()
-
-  // Replace spaces with hyphens
-  const hyphenatedName = lowerCaseName.replace(/\s+/g, '-')
-
-  // Replace all non-alphanumeric characters with hyphens
-  const alphanumericName = hyphenatedName.replace(/[^a-zA-Z0-9-]/g, '')
-
-  return alphanumericName
-}
-
-const getWorkspaceRoleIfSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug: { slug: string }[] = await prisma.$queryRaw<
-    { slug: string }[]
-  >`
-    SELECT slug
-    FROM "WorkspaceRole"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getWorkspaceSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Workspace"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getProjectSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Project"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getVariableSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Variable"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getSecretSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Secret"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getIntegrationSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Integration"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getEnvironmentSlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "Environment"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
-}
-
-const getApiKeySlugExists = async (
-  slug: Workspace['slug'],
-  prisma: PrismaService
-): Promise<string> => {
-  const search = `${slug}-[a-z0-9]*`
-  const existingSlug = await prisma.$queryRaw<{ slug: string }[]>`
-    SELECT slug
-    FROM "ApiKey"
-    WHERE slug ~ ${search}
-    ORDER BY slug DESC
-    LIMIT 1
-  `
-  return existingSlug.length > 0 ? existingSlug[0].slug : ''
 }
 
 /**
@@ -212,33 +100,22 @@ export default async function generateEntitySlug(
     | 'API_KEY',
   prisma: PrismaService
 ): Promise<string> {
-  const baseSlug = generateSlugName(name)
-  let existingSlug = ''
   switch (entityType) {
     case 'WORKSPACE_ROLE':
-      existingSlug = await getWorkspaceRoleIfSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'workspaceRole', prisma)
     case 'WORKSPACE':
-      existingSlug = await getWorkspaceSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'workspace', prisma)
     case 'PROJECT':
-      existingSlug = await getProjectSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'project', prisma)
     case 'VARIABLE':
-      existingSlug = await getVariableSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'variable', prisma)
     case 'SECRET':
-      existingSlug = await getSecretSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'secret', prisma)
     case 'INTEGRATION':
-      existingSlug = await getIntegrationSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'integration', prisma)
     case 'ENVIRONMENT':
-      existingSlug = await getEnvironmentSlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'environment', prisma)
     case 'API_KEY':
-      existingSlug = await getApiKeySlugExists(baseSlug, prisma)
-      break
+      return generateUniqueSlug(name, 'apiKey', prisma)
   }
-  return incrementSlugSuffix(existingSlug, baseSlug)
 }
