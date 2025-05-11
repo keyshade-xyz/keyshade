@@ -1,3 +1,17 @@
+## [2.20.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.1...v2.20.2-stage.1) (2025-05-11)
+
+### 🐛 Bug Fixes
+
+* **platform:** Route to dashboard on selection of different workspace ([#950](https://github.com/keyshade-xyz/keyshade/issues/950)) ([c896ee4](https://github.com/keyshade-xyz/keyshade/commit/c896ee4fbf9d846b99df3d838fc41e6c35507254))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Utilize caching for slug lookup while generation ([#946](https://github.com/keyshade-xyz/keyshade/issues/946)) ([7d09cdb](https://github.com/keyshade-xyz/keyshade/commit/7d09cdb4966162940c942fea7fc34dec12578876))
+
+### 🔨 Code Refactoring
+
+* **platform:** Use HiddenContent for private key display in workspace overview page ([#949](https://github.com/keyshade-xyz/keyshade/issues/949)) ([8dcce0e](https://github.com/keyshade-xyz/keyshade/commit/8dcce0ed253d67c4c0c74810de301e754be0ac1b))
+
 ## [2.20.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.0...v2.20.1) (2025-05-11)
 
 ### 🐛 Bug Fixes
