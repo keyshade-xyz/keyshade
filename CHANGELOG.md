@@ -1,3 +1,9 @@
+## [2.20.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.0...v2.20.1-stage.1) (2025-05-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Update slug generation method ([#945](https://github.com/keyshade-xyz/keyshade/issues/945)) ([e33eba9](https://github.com/keyshade-xyz/keyshade/commit/e33eba9748dd26845536b49fd527984fcdedaa3b))
+
 ## [2.20.0](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0) (2025-05-10)
 
 ### 🚀 Features
