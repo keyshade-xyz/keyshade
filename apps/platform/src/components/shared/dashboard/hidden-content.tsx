@@ -33,7 +33,7 @@ export function HiddenContent({ isPrivateKey, value }: HiddenContentProps) {
   const maskedValue = value.replace(/./g, '•')
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center flex-1">
       <Input
         className={isPrivateKey ? 'pr-20' : 'pr-12'}
         readOnly
