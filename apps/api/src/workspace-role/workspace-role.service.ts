@@ -22,11 +22,11 @@ import { WorkspaceRoleWithProjects } from './workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -34,7 +34,8 @@ export class WorkspaceRoleService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -96,10 +97,9 @@ export class WorkspaceRoleService {
         data: {
           id: workspaceRoleId,
           name: dto.name,
-          slug: await generateEntitySlug(
+          slug: await this.slugGenerator.generateEntitySlug(
             dto.name,
-            'WORKSPACE_ROLE',
-            this.prisma
+            'WORKSPACE_ROLE'
           ),
           description: dto.description,
           colorCode: dto.colorCode,
@@ -426,7 +426,10 @@ export class WorkspaceRoleService {
       data: {
         name: dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'WORKSPACE_ROLE', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(
+              dto.name,
+              'WORKSPACE_ROLE'
+            )
           : undefined,
         description: dto.description,
         colorCode: dto.colorCode,

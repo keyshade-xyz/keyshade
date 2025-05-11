@@ -25,7 +25,6 @@ import { ProjectWithCounts, ProjectWithSecrets } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
 import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import {
   constructErrorBody,
@@ -34,6 +33,7 @@ import {
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class ProjectService {
@@ -42,7 +42,8 @@ export class ProjectService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService
+    private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -82,7 +83,7 @@ export class ProjectService {
 
     const data: any = {
       name: dto.name,
-      slug: await generateEntitySlug(dto.name, 'PROJECT', this.prisma),
+      slug: await this.slugGenerator.generateEntitySlug(dto.name, 'PROJECT'),
       description: dto.description,
       storePrivateKey:
         dto.accessLevel === ProjectAccessLevel.GLOBAL
@@ -188,10 +189,9 @@ export class ProjectService {
           this.prisma.environment.create({
             data: {
               name: environment.name,
-              slug: await generateEntitySlug(
+              slug: await this.slugGenerator.generateEntitySlug(
                 environment.name,
-                'ENVIRONMENT',
-                this.prisma
+                'ENVIRONMENT'
               ),
               description: environment.description,
               projectId: newProjectId,
@@ -206,10 +206,9 @@ export class ProjectService {
         this.prisma.environment.create({
           data: {
             name: 'default',
-            slug: await generateEntitySlug(
+            slug: await this.slugGenerator.generateEntitySlug(
               'default',
-              'ENVIRONMENT',
-              this.prisma
+              'ENVIRONMENT'
             ),
             description: 'Default environment for the project',
             projectId: newProjectId,
@@ -371,7 +370,7 @@ export class ProjectService {
       name: dto.name === project.name ? undefined : dto.name,
       slug:
         dto.name && dto.name !== project.name
-          ? await generateEntitySlug(dto.name, 'PROJECT', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'PROJECT')
           : project.slug,
       description: dto.description,
       storePrivateKey: dto.storePrivateKey,
@@ -552,7 +551,10 @@ export class ProjectService {
       data: {
         id: newProjectId,
         name: newProjectName,
-        slug: await generateEntitySlug(newProjectName, 'PROJECT', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(
+          newProjectName,
+          'PROJECT'
+        ),
         description: project.description,
         storePrivateKey:
           forkMetadata.storePrivateKey || project.storePrivateKey,
@@ -1280,10 +1282,9 @@ export class ProjectService {
           data: {
             id: newEnvironmentId,
             name: environment.name,
-            slug: await generateEntitySlug(
+            slug: await this.slugGenerator.generateEntitySlug(
               environment.name,
-              'ENVIRONMENT',
-              this.prisma
+              'ENVIRONMENT'
             ),
             description: environment.description,
             projectId: toProject.id,
@@ -1335,7 +1336,10 @@ export class ProjectService {
         this.prisma.secret.create({
           data: {
             name: secret.name,
-            slug: await generateEntitySlug(secret.name, 'SECRET', this.prisma),
+            slug: await this.slugGenerator.generateEntitySlug(
+              secret.name,
+              'SECRET'
+            ),
             projectId: toProject.id,
             lastUpdatedById: user.id,
             note: secret.note,
@@ -1391,10 +1395,9 @@ export class ProjectService {
         this.prisma.variable.create({
           data: {
             name: variable.name,
-            slug: await generateEntitySlug(
+            slug: await this.slugGenerator.generateEntitySlug(
               variable.name,
-              'VARIABLE',
-              this.prisma
+              'VARIABLE'
             ),
             projectId: toProject.id,
             lastUpdatedById: user.id,
