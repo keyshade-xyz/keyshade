@@ -1,3 +1,13 @@
+## [2.21.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.2-stage.1...v2.21.0-stage.1) (2025-05-11)
+
+### 🚀 Features
+
+* **platform:** Update tab on members page ([#951](https://github.com/keyshade-xyz/keyshade/issues/951)) ([25e645f](https://github.com/keyshade-xyz/keyshade/commit/25e645f1bd1f3c2c3a07b83ddcd45bd6898cf5b1))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Pass build args into platform build ([7d504c9](https://github.com/keyshade-xyz/keyshade/commit/7d504c90b264e8f1e7fa542823e9fcebae7337c2))
+
 ## [2.20.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.1...v2.20.2-stage.1) (2025-05-11)
 
 ### 🐛 Bug Fixes
