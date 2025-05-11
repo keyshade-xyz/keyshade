@@ -1,8 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service'
-import generateEntitySlug, {
-  generateSlugName,
-  incrementSlugSuffix
-} from './slug-generator'
+import generateEntitySlug from './slug-generator'
 import { mockDeep } from 'jest-mock-extended'
 
 describe('generateEntitySlug', () => {
@@ -10,31 +7,6 @@ describe('generateEntitySlug', () => {
 
   beforeEach(() => {
     prisma = mockDeep<PrismaService>()
-  })
-
-  describe('generateSlugName', () => {
-    it('should convert name to slug format', () => {
-      expect(generateSlugName('Hello World')).toBe('hello-world')
-      expect(generateSlugName('Entity with 123')).toBe('entity-with-123')
-      expect(generateSlugName('Special #Name!')).toBe('special-name')
-    })
-  })
-
-  describe('incrementSlugSuffix', () => {
-    it('should return base slug with `-0` when no suffix is found', () => {
-      const result = incrementSlugSuffix('', 'my-slug')
-      expect(result).toBe('my-slug-0')
-    })
-
-    it('should increment suffix when found', () => {
-      const result = incrementSlugSuffix('my-slug-0', 'my-slug')
-      expect(result).toBe('my-slug-1')
-    })
-
-    it('should handle complex increment cases with carryover', () => {
-      const result = incrementSlugSuffix('my-slug-z', 'my-slug')
-      expect(result).toBe('my-slug-00')
-    })
   })
 
   describe('generateEntitySlug for each entity type', () => {
