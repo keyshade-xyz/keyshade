@@ -28,7 +28,7 @@ export function WorkspaceListItem({
   const handleSelect = () => {
     setSelectedWorkspace(workspace)
     setSelectedWorkspaceToStorage(workspace);
-    router.push('/')
+    router.replace('/')
     onClose()
   }
 
