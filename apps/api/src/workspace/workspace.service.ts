@@ -2,7 +2,6 @@
 import { getCollectiveProjectAuthorities } from '@/common/collective-authorities'
 import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import {
   associateWorkspaceOwnerDetails,
@@ -37,6 +36,7 @@ import {
   WorkspaceWithLastUpdatedByAndOwnerAndProjects
 } from './workspace.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class WorkspaceService {
@@ -45,7 +45,8 @@ export class WorkspaceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService
+    private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -65,7 +66,12 @@ export class WorkspaceService {
 
     await this.existsByName(dto.name, user.id)
 
-    const newWorkspace = await createWorkspace(user, dto, this.prisma)
+    const newWorkspace = await createWorkspace(
+      user,
+      dto,
+      this.prisma,
+      this.slugGenerator
+    )
 
     return {
       ...newWorkspace,
@@ -114,7 +120,7 @@ export class WorkspaceService {
       data: {
         name: dto.name === workspace.name ? undefined : dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'WORKSPACE', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'WORKSPACE')
           : undefined,
         icon: dto.icon,
         lastUpdatedBy: {

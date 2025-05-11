@@ -17,16 +17,18 @@ import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    @Inject(MAIL_SERVICE) private mailService: IMailService,
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService,
-    private cache: CacheService
+    private readonly jwt: JwtService,
+    private readonly cache: CacheService,
+    private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -241,7 +243,8 @@ export class AuthService {
           profilePictureUrl,
           authProvider
         },
-        this.prisma
+        this.prisma,
+        this.slugGenerator
       )
     }
 

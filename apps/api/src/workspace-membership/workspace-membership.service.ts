@@ -29,6 +29,7 @@ import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -39,7 +40,8 @@ export class WorkspaceMembershipService {
     private readonly authorizationService: AuthorizationService,
     private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -1024,7 +1026,8 @@ export class WorkspaceMembershipService {
             email: member.email,
             authProvider: AuthProvider.EMAIL_OTP
           },
-          this.prisma
+          this.prisma,
+          this.slugGenerator
         )
 
         await this.prisma.$transaction([createMembership])
