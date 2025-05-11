@@ -189,6 +189,7 @@ model User {
   isAdmin              Boolean       @default(false)
   authProvider         AuthProvider?
   subscription         Subscription?
+  joinedOn             DateTime      @default(now())
 
   workspaceMembers WorkspaceMember[]
   workspaces       Workspace[]
