@@ -1,3 +1,9 @@
+## [2.22.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.21.0...v2.22.0-stage.1) (2025-05-11)
+
+### 🚀 Features
+
+* **api:** Add `joinedOn` column in Users table ([#965](https://github.com/keyshade-xyz/keyshade/issues/965)) ([8a2f2ff](https://github.com/keyshade-xyz/keyshade/commit/8a2f2ff0cb729a67039770353bfd1acf93a0a91e))
+
 ## [2.21.0](https://github.com/keyshade-xyz/keyshade/compare/v2.20.1...v2.21.0) (2025-05-11)
 
 ### 🚀 Features
