@@ -17,16 +17,18 @@ import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    @Inject(MAIL_SERVICE) private mailService: IMailService,
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService,
-    private cache: CacheService
+    private readonly jwt: JwtService,
+    private readonly cache: CacheService,
+    private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -241,17 +243,38 @@ export class AuthService {
           profilePictureUrl,
           authProvider
         },
-        this.prisma
+        this.prisma,
+        this.slugGenerator
       )
     }
 
     // If the user has used OAuth to log in, we need to check if the OAuth provider
     // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
-      throw new UnauthorizedException(
+      let formattedAuthProvider = ''
+
+      switch (user.authProvider) {
+        case AuthProvider.GOOGLE:
+          formattedAuthProvider = 'Google'
+          break
+        case AuthProvider.GITHUB:
+          formattedAuthProvider = 'GitHub'
+          break
+        case AuthProvider.EMAIL_OTP:
+          formattedAuthProvider = 'Email and OTP'
+          break
+        case AuthProvider.GITLAB:
+          formattedAuthProvider = 'GitLab'
+          break
+      }
+
+      this.logger.error(
+        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+      )
+      throw new BadRequestException(
         constructErrorBody(
           'Error signing in',
-          'The user has signed up with a different authentication provider.'
+          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
         )
       )
     }

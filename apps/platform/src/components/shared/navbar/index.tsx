@@ -12,6 +12,7 @@ import {
   FolderSVG
 } from '@public/svg/dashboard'
 import { DropdownSVG } from '@public/svg/shared'
+import { posthog } from 'posthog-js'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -85,6 +86,8 @@ function Navbar(): React.JSX.Element {
 
     // Clear local store
     localStorage.clear()
+
+    posthog.reset()
 
     // Redirect to login page
     // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted

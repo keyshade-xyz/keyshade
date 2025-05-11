@@ -20,6 +20,7 @@ import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
 import { UpdateSelfRequest } from '@keyshade/schema'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,8 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   async onApplicationBootstrap() {
@@ -382,7 +384,8 @@ export class UserService {
     // Create the user's default workspace along with user
     const createdUser = await createUser(
       { authProvider: AuthProvider.EMAIL_OTP, ...dto },
-      this.prisma
+      this.prisma,
+      this.slugGenerator
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 

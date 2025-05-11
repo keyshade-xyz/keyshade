@@ -505,7 +505,6 @@ describe('Workspace Role Controller Tests', () => {
         method: 'PUT',
         url: `/workspace-role/${adminRole1.slug}`,
         payload: {
-          name: 'Updated Admin',
           description: 'Updated Description',
           colorCode: '#00FF00'
         },
@@ -517,7 +516,7 @@ describe('Workspace Role Controller Tests', () => {
       expect(response.statusCode).toBe(200)
       expect(response.json()).toEqual({
         id: adminRole1.id,
-        name: 'Updated Admin',
+        name: 'Admin',
         slug: expect.any(String),
         description: 'Updated Description',
         colorCode: '#00FF00',
@@ -534,7 +533,6 @@ describe('Workspace Role Controller Tests', () => {
     it('should have created a WORKSPACE_ROLE_UPDATED event', async () => {
       // Update the workspace role
       await workspaceRoleService.updateWorkspaceRole(alice, adminRole1.slug, {
-        name: 'Updated Admin',
         description: 'Updated Description',
         colorCode: '#00FF00'
       })
@@ -557,9 +555,16 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should not be able to add WORKSPACE_ADMIN authority to the role', async () => {
+      const memberRole = await prisma.workspaceRole.findFirst({
+        where: {
+          workspaceId: workspaceAlice.id,
+          name: 'Member'
+        }
+      })
+
       const response = await app.inject({
         method: 'PUT',
-        url: `/workspace-role/${adminRole1.slug}`,
+        url: `/workspace-role/${memberRole.slug}`,
         payload: {
           authorities: [Authority.WORKSPACE_ADMIN]
         },
@@ -593,11 +598,18 @@ describe('Workspace Role Controller Tests', () => {
     })
 
     it('should not be able to update workspace role with the same name', async () => {
+      const memberRole = await prisma.workspaceRole.findFirst({
+        where: {
+          workspaceId: workspaceAlice.id,
+          name: 'Member'
+        }
+      })
+
       const response = await app.inject({
         method: 'PUT',
-        url: `/workspace-role/${adminRole1.slug}`,
+        url: `/workspace-role/${memberRole.slug}`,
         payload: {
-          name: 'Admin',
+          name: memberRole.name,
           description: 'Description',
           colorCode: '#00FF00',
           authorities: [
@@ -971,6 +983,40 @@ describe('Workspace Role Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+
+    it('should not allow updating admin role authorities to anything other than WORKSPACE_ADMIN', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          authorities: [Authority.CREATE_SECRET, Authority.WORKSPACE_ADMIN]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toContain(
+        'Cannot modify admin role authorities or name'
+      )
+    })
+
+    it('should not allow updating admin role authorities to just WORKSPACE_ADMIN (authorities should not be updatable at all)', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/workspace-role/${adminRole1.slug}`,
+        payload: {
+          authorities: [Authority.WORKSPACE_ADMIN]
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.json().message).toContain(
+        'Cannot modify admin role authorities or name'
+      )
     })
   })
 

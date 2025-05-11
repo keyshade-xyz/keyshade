@@ -34,7 +34,6 @@ import {
   constructErrorBody,
   limitMaxItemsPerPage
 } from '@/common/util'
-import generateEntitySlug from '@/common/slug-generator'
 import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
@@ -43,6 +42,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class SecretService {
@@ -53,6 +53,7 @@ export class SecretService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -115,7 +116,7 @@ export class SecretService {
     const secretData = await this.prisma.secret.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'SECRET', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET'),
         note: dto.note,
         rotateAt: addHoursToDate(dto.rotateAfter),
         rotateAfter: +dto.rotateAfter,
@@ -261,7 +262,7 @@ export class SecretService {
         data: {
           name: dto.name,
           slug: dto.name
-            ? await generateEntitySlug(dto.name, 'SECRET', this.prisma)
+            ? await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET')
             : undefined,
           note: dto.note,
           ...(dto.rotateAfter
