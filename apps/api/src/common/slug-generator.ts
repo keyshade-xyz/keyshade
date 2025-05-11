@@ -1,13 +1,27 @@
 import { PrismaService } from '@/prisma/prisma.service'
-import { Logger } from '@nestjs/common'
+import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { PrismaClient } from '@prisma/client'
 import slugify from 'slugify'
+import { constructErrorBody } from './util'
+
+const MAX_ITERATIONS = 10
 
 async function generateUniqueSlug(
   name: string,
   model: keyof PrismaClient,
-  prisma: PrismaService
+  prisma: PrismaService,
+  iterationCount: number = 0
 ): Promise<string> {
+  // Check if the iteration count exceeds the limit
+  if (iterationCount > MAX_ITERATIONS) {
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Too many iterations while generating slug',
+        `Failed to generate unique slug for ${name} in ${model.toString()} after 10 attempts.`
+      )
+    )
+  }
+
   const logger = new Logger('generateUniqueSlug')
   logger.log(`Generating unique slug for ${name} in ${model.toString()}...`)
 
@@ -58,7 +72,9 @@ async function generateUniqueSlug(
     logger.log(`Slug ${newSlug} already exists in ${model.toString()}.`)
     return generateUniqueSlug(name, model, prisma)
   } else {
-    logger.log(`Slug ${newSlug} is unique in ${model.toString()}.`)
+    logger.log(
+      `Slug ${newSlug} is unique in ${model.toString()}. Iteration count: ${iterationCount}`
+    )
     return newSlug
   }
 }
