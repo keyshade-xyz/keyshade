@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { AddSVG, EyeOpenSVG, EyeSlashSVG, TrashSVG } from '@public/svg/shared'
+import React from 'react'
+import { TrashSVG } from '@public/svg/shared'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 
 interface LocalKeySetupProps {
   privateKey: string | null
@@ -16,32 +17,13 @@ function LocalKeySetup({
   onOpenSetupDialog,
   onDelete
 }: LocalKeySetupProps): React.JSX.Element {
-  const [isRevealed, setIsRevealed] = useState<boolean>(false)
-
-  const handleToggleReveal = () => setIsRevealed((prev) => !prev)
 
   if (privateKey && !isStoredOnServer) {
     return (
-      <div className="flex gap-1">
-        <Input
-          className="px-4 py-6"
-          readOnly
-          type="text"
-          value={
-            isRevealed
-              ? privateKey
-              : privateKey.replace(/./g, '*').substring(0, 20)
-          }
-        />
+      <div className="flex justify-between gap-1">
+        <HiddenContent isPrivateKey value={privateKey} />
         <Button
-          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
-          onClick={handleToggleReveal}
-          type="button"
-        >
-          {isRevealed ? <EyeSlashSVG /> : <EyeOpenSVG />}
-        </Button>
-        <Button
-          className="flex items-center justify-center bg-neutral-800 px-4 py-6"
+          className="flex items-center justify-center bg-neutral-800 p-2"
           onClick={onDelete}
           type="button"
         >
@@ -52,13 +34,13 @@ function LocalKeySetup({
   }
   return (
     <Button
-      className="w-fit px-4 py-6"
+      className="w-fit px-4 py-6 flex items-center gap-1"
       disabled={Boolean(privateKey !== null && isStoredOnServer)}
       onClick={onOpenSetupDialog}
       type="button"
       variant="secondary"
     >
-      <AddSVG />
+      <Plus />
       <div className="font-bold">Setup Private Key</div>
     </Button>
   )
