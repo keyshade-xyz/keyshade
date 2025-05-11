@@ -57,7 +57,8 @@ export async function createUser(
       user,
       { name: 'My Workspace' },
       prisma,
-      slugGenerator
+      slugGenerator,
+      true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
 
