@@ -351,7 +351,11 @@ export class SecretService {
       updatedVersions: updatedVersions
     }
 
-    if (secret.project.storePrivateKey && secret.project.privateKey) {
+    if (
+      secret.project.storePrivateKey &&
+      secret.project.privateKey &&
+      dto.decryptValue
+    ) {
       for (const version of updatedVersions) {
         version.value = await decrypt(secret.project.privateKey, version.value)
       }

@@ -100,7 +100,8 @@ export default function EditSecretSheet(): JSX.Element {
       entries: parseUpdatedEnvironmentValues(
         selectedSecretData!.values,
         isDecrypted ? environmentValues : decryptedValues
-      )
+      ),
+      decryptValue: isDecrypted
     })
   )
 

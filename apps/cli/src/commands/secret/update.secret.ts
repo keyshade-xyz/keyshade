@@ -95,8 +95,9 @@ export default class UpdateSecret extends BaseCommand {
     note?: string
     rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
     entries?: Array<{ value: string; environmentSlug: string }>
+    decryptValue?: boolean
   }> {
-    const { name, note, rotateAfter, entry: rawEntries } = options
+    const { name, note, rotateAfter, entry: rawEntries, decryptValue } = options
 
     const entries: Array<{ value: string; environmentSlug: string }> = []
 
@@ -130,7 +131,8 @@ export default class UpdateSecret extends BaseCommand {
       name,
       note,
       rotateAfter,
-      entries: entries.length !== 0 ? entries : undefined
+      entries: entries.length !== 0 ? entries : undefined,
+      decryptValue
     }
   }
 }
