@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -16,12 +16,15 @@ import { Input } from '@/components/ui/input'
 import {
   editSecretOpenAtom,
   secretsOfProjectAtom,
+  shouldRevealSecretEnabled,
   selectedSecretAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { Textarea } from '@/components/ui/textarea'
 import { useHttp } from '@/hooks/use-http'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { decrypt } from '@/lib/decrypt'
 import {
   mergeExistingEnvironments,
   parseUpdatedEnvironmentValues
@@ -32,6 +35,9 @@ export default function EditSecretSheet(): JSX.Element {
     useAtom(editSecretOpenAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
+  const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
+  const { projectPrivateKey } = useProjectPrivateKey()
+
 
   const [requestData, setRequestData] = useState<{
     name: string | undefined
@@ -53,6 +59,34 @@ export default function EditSecretSheet(): JSX.Element {
         {} as Record<string, string>
       ) || {}
   )
+  const [decryptedValues, setDecryptedValues] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    // decrypt environmentvalues 
+  if (!projectPrivateKey) return;
+  if (isDecrypted) return;
+
+  Object.entries(environmentValues).forEach(([slug, encrypted]) => {
+      if (decryptedValues[slug]) return;
+
+      decrypt(projectPrivateKey, encrypted)
+        .then((decrypted) => {
+          setDecryptedValues((prev) => ({
+            ...prev,
+            [slug]: decrypted,
+          }));
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console -- console.error is used for debugging
+          console.error('Decryption failed:', error);
+          setDecryptedValues((prev) => ({
+            ...prev,
+            [slug]: 'Decryption failed',
+          }));
+        });
+    });
+  }, [projectPrivateKey, environmentValues, isDecrypted, decryptedValues]);
+
 
   const updateSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.updateSecret({
@@ -65,7 +99,7 @@ export default function EditSecretSheet(): JSX.Element {
       note: requestData.note?.trim() || undefined,
       entries: parseUpdatedEnvironmentValues(
         selectedSecretData!.values,
-        environmentValues
+        isDecrypted ? environmentValues : decryptedValues
       )
     })
   )
@@ -180,8 +214,8 @@ export default function EditSecretSheet(): JSX.Element {
             />
           </div>
           <EnvironmentValueEditor
-            environmentValues={environmentValues}
-            setEnvironmentValues={setEnvironmentValues}
+            environmentValues={isDecrypted ? environmentValues : decryptedValues}
+            setEnvironmentValues={isDecrypted ? setEnvironmentValues : setDecryptedValues}
           />
         </div>
         <SheetFooter className="py-3">
