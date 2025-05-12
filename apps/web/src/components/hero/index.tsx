@@ -1,10 +1,12 @@
-// import { GeistSans } from 'geist/font/sans'
+'use client'
 import Image from 'next/image'
 import { Toaster } from 'sonner'
 import { ColorBGSVG, HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function Hero(): React.JSX.Element {
+
   return (
     <>
       <Toaster />
@@ -23,9 +25,11 @@ function Hero(): React.JSX.Element {
           </span>
           <a href="https://app.keyshade.xyz" rel="noreferrer" target="_blank">
             <div className="border-brandBlue/[8%] rounded-full border p-[0.31rem] ">
-              <EncryptButton TARGET_TEXT="Try Keyshade for Free" />
+              <EncryptButton TARGET_TEXT={isUserLoggedIn() ? "Open app":"Try Keyshade for Free"} />
             </div>
-            <p className='text-sm text-white/30 text-center mt-2'>Currently in alpha</p>
+            <p className="mt-2 text-center text-sm text-white/30">
+              Currently in alpha
+            </p>
           </a>
         </section>
         <Image

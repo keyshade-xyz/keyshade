@@ -1,6 +1,8 @@
+"use client"
 import Link from 'next/link'
 import { Logo, LogoM } from '@public/shared'
 import { Button } from '@/components/ui/moving-border'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function Navbar(): React.JSX.Element {
   return (
@@ -52,7 +54,9 @@ function Navbar(): React.JSX.Element {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <Button duration={6 * 1000}> Join in</Button>
+          <Button duration={6 * 1000}>{
+            isUserLoggedIn() ? "Open app" : "Join in"
+            }</Button>
         </a>
       </div>
     </nav>
