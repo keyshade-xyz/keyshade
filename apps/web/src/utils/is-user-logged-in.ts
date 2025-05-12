@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { isJWTValid } from './is-jwt-valid'
+import { isActiveJWT } from './is-jwt-valid'
 
 export function isUserLoggedIn(): boolean {
   if (typeof document === 'undefined') {
@@ -11,7 +11,7 @@ export function isUserLoggedIn(): boolean {
     return false
   }
 
-  if (!isJWTValid(token.split(' ')[1])) {
+  if (!isActiveJWT(token.split(' ')[1])) {
     Cookies.remove('token')
     Cookies.remove('isOnboardingFinished')
     return false

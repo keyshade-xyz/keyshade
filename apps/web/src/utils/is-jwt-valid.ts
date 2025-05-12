@@ -1,7 +1,7 @@
 interface JWTPayload {
   exp?: number
 }
-export function isJWTValid(token: string): boolean {
+export function isActiveJWT(token: string): boolean {
   if (!token) {
     return false
   }
