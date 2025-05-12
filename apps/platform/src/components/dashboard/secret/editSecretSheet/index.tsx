@@ -85,7 +85,7 @@ export default function EditSecretSheet(): JSX.Element {
           }));
         });
     });
-  }, [projectPrivateKey, environmentValues, isDecrypted, decryptedValues]);
+  }, [projectPrivateKey, environmentValues, isDecrypted]);
 
 
   const updateSecret = useHttp(() =>
