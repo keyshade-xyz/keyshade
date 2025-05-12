@@ -1,3 +1,82 @@
+## [2.22.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.21.0...v2.22.0-stage.1) (2025-05-11)
+
+### 🚀 Features
+
+* **api:** Add `joinedOn` column in Users table ([#965](https://github.com/keyshade-xyz/keyshade/issues/965)) ([8a2f2ff](https://github.com/keyshade-xyz/keyshade/commit/8a2f2ff0cb729a67039770353bfd1acf93a0a91e))
+
+## [2.21.0](https://github.com/keyshade-xyz/keyshade/compare/v2.20.1...v2.21.0) (2025-05-11)
+
+### 🚀 Features
+
+* **platform:** Update tab on members page ([#951](https://github.com/keyshade-xyz/keyshade/issues/951)) ([25e645f](https://github.com/keyshade-xyz/keyshade/commit/25e645f1bd1f3c2c3a07b83ddcd45bd6898cf5b1))
+
+### 🐛 Bug Fixes
+
+* **platform:** Route to dashboard on selection of different workspace ([#950](https://github.com/keyshade-xyz/keyshade/issues/950)) ([c896ee4](https://github.com/keyshade-xyz/keyshade/commit/c896ee4fbf9d846b99df3d838fc41e6c35507254))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Utilize caching for slug lookup while generation ([#946](https://github.com/keyshade-xyz/keyshade/issues/946)) ([7d09cdb](https://github.com/keyshade-xyz/keyshade/commit/7d09cdb4966162940c942fea7fc34dec12578876))
+* **ci:** Pass build args into platform build ([7d504c9](https://github.com/keyshade-xyz/keyshade/commit/7d504c90b264e8f1e7fa542823e9fcebae7337c2))
+* **release:** 2.20.2-stage.1 [skip ci] ([cd1973d](https://github.com/keyshade-xyz/keyshade/commit/cd1973d453a79c24e4fa25b84f34f51b40ed7fe9))
+* **release:** 2.21.0-stage.1 [skip ci] ([c8c4952](https://github.com/keyshade-xyz/keyshade/commit/c8c4952dee9947d5ed4f41696541ac4504e5347e))
+
+### 🔨 Code Refactoring
+
+* **platform:** Use HiddenContent for private key display in workspace overview page ([#949](https://github.com/keyshade-xyz/keyshade/issues/949)) ([8dcce0e](https://github.com/keyshade-xyz/keyshade/commit/8dcce0ed253d67c4c0c74810de301e754be0ac1b))
+
+## [2.21.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.2-stage.1...v2.21.0-stage.1) (2025-05-11)
+
+### 🚀 Features
+
+* **platform:** Update tab on members page ([#951](https://github.com/keyshade-xyz/keyshade/issues/951)) ([25e645f](https://github.com/keyshade-xyz/keyshade/commit/25e645f1bd1f3c2c3a07b83ddcd45bd6898cf5b1))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Pass build args into platform build ([7d504c9](https://github.com/keyshade-xyz/keyshade/commit/7d504c90b264e8f1e7fa542823e9fcebae7337c2))
+
+## [2.20.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.1...v2.20.2-stage.1) (2025-05-11)
+
+### 🐛 Bug Fixes
+
+* **platform:** Route to dashboard on selection of different workspace ([#950](https://github.com/keyshade-xyz/keyshade/issues/950)) ([c896ee4](https://github.com/keyshade-xyz/keyshade/commit/c896ee4fbf9d846b99df3d838fc41e6c35507254))
+
+### 🔧 Miscellaneous Chores
+
+* **api:** Utilize caching for slug lookup while generation ([#946](https://github.com/keyshade-xyz/keyshade/issues/946)) ([7d09cdb](https://github.com/keyshade-xyz/keyshade/commit/7d09cdb4966162940c942fea7fc34dec12578876))
+
+### 🔨 Code Refactoring
+
+* **platform:** Use HiddenContent for private key display in workspace overview page ([#949](https://github.com/keyshade-xyz/keyshade/issues/949)) ([8dcce0e](https://github.com/keyshade-xyz/keyshade/commit/8dcce0ed253d67c4c0c74810de301e754be0ac1b))
+
+## [2.20.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.0...v2.20.1) (2025-05-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Update slug generation method ([#945](https://github.com/keyshade-xyz/keyshade/issues/945)) ([e33eba9](https://github.com/keyshade-xyz/keyshade/commit/e33eba9748dd26845536b49fd527984fcdedaa3b))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.20.1-stage.1 [skip ci] ([2ed44cb](https://github.com/keyshade-xyz/keyshade/commit/2ed44cbf6bb8365e6eca2b64134b79bda5c14e69))
+
+## [2.20.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.20.0...v2.20.1-stage.1) (2025-05-11)
+
+### 🐛 Bug Fixes
+
+* **api:** Update slug generation method ([#945](https://github.com/keyshade-xyz/keyshade/issues/945)) ([e33eba9](https://github.com/keyshade-xyz/keyshade/commit/e33eba9748dd26845536b49fd527984fcdedaa3b))
+
+## [2.20.0](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0) (2025-05-10)
+
+### 🚀 Features
+
+* Enhanced Login error message ([#943](https://github.com/keyshade-xyz/keyshade/issues/943)) ([9ce9c71](https://github.com/keyshade-xyz/keyshade/commit/9ce9c716176f2846b586c227502b554a7b9474c7))
+
+### 🔧 Miscellaneous Chores
+
+* **ci:** Add posthog env ([1e7ecc3](https://github.com/keyshade-xyz/keyshade/commit/1e7ecc3e4bb7d51d0f37ff04794f7bea5d44f6d9))
+* **platform:** Add PostHog for user analytics ([#944](https://github.com/keyshade-xyz/keyshade/issues/944)) ([6ac1e6e](https://github.com/keyshade-xyz/keyshade/commit/6ac1e6eba49332ebd7e8ceae36bf16ceb0cc123e))
+* **release:** 2.20.0-stage.1 [skip ci] ([397e2be](https://github.com/keyshade-xyz/keyshade/commit/397e2be6fd8b7ddd99426e2bf4433258e22d7dba))
+
 ## [2.20.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.19.0...v2.20.0-stage.1) (2025-05-09)
 
 ### 🚀 Features

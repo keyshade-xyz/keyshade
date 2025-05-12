@@ -28,13 +28,13 @@ import {
 } from '@/socket/socket.types'
 import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
 import { VariableWithValues } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class VariableService {
@@ -45,6 +45,7 @@ export class VariableService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -107,7 +108,7 @@ export class VariableService {
     const variableData = await this.prisma.variable.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'VARIABLE', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(dto.name, 'VARIABLE'),
         note: dto.note,
         versions: shouldCreateRevisions
           ? {
@@ -241,7 +242,7 @@ export class VariableService {
         data: {
           name: dto.name,
           slug: dto.name
-            ? await generateEntitySlug(dto.name, 'VARIABLE', this.prisma)
+            ? await this.slugGenerator.generateEntitySlug(dto.name, 'VARIABLE')
             : undefined,
           note: dto.note,
           lastUpdatedById: user.id

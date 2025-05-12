@@ -12,6 +12,7 @@ import {
   FolderSVG
 } from '@public/svg/dashboard'
 import { DropdownSVG } from '@public/svg/shared'
+import { posthog } from 'posthog-js'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -52,10 +53,10 @@ function Navbar(): React.JSX.Element {
       { id: 'variable', label: 'Variable', icon: <VariableSVG /> },
       { id: 'environment', label: 'Environment', icon: <EnvironmentSVG /> }
     ],
-    members: [
-      { id: 'joined', label: 'Joined' },
-      { id: 'invited', label: 'Invited' }
-    ]
+    // members: [
+    //   { id: 'joined', label: 'Joined' },
+    //   { id: 'invited', label: 'Invited' }
+    // ]
   }
 
   useEffect(() => {
@@ -86,6 +87,8 @@ function Navbar(): React.JSX.Element {
     // Clear local store
     localStorage.clear()
 
+    posthog.reset()
+
     // Redirect to login page
     // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted
     window.location.href = '/auth'
@@ -110,8 +113,8 @@ function Navbar(): React.JSX.Element {
       case '/settings':
         return TAB_CONFIGS.settings
 
-      case '/members':
-        return TAB_CONFIGS.members
+      // case '/members':
+      //   return TAB_CONFIGS.members
 
       default:
         return []

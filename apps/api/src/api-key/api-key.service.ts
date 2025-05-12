@@ -8,7 +8,6 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { CreateApiKey } from './dto/create.api-key/create.api-key'
 import { UpdateApiKey } from './dto/update.api-key/update.api-key'
 import { ApiKey, User } from '@prisma/client'
-import generateEntitySlug from '@/common/slug-generator'
 import { generateApiKey, toSHA256 } from '@/common/cryptography'
 import {
   addHoursToDate,
@@ -16,12 +15,16 @@ import {
   limitMaxItemsPerPage
 } from '@/common/util'
 import { paginate } from '@/common/paginate'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class ApiKeyService {
   private readonly logger = new Logger(ApiKeyService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly slugGenerator: SlugGenerator
+  ) {}
 
   private apiKeySelect = {
     id: true,
@@ -59,7 +62,7 @@ export class ApiKeyService {
     const apiKey = await this.prisma.apiKey.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'API_KEY', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(dto.name, 'API_KEY'),
         value: hashedApiKey,
         preview: previewKey,
         authorities: dto.authorities
@@ -127,7 +130,7 @@ export class ApiKeyService {
       data: {
         name: dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'API_KEY', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'API_KEY')
           : apiKey.slug,
         authorities: dto.authorities ? dto.authorities : undefined,
         expiresAt: dto.expiresAfter
