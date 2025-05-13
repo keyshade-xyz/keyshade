@@ -1,3 +1,9 @@
+## [2.22.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.1...v2.22.0-stage.2) (2025-05-12)
+
+### 🚀 Features
+
+* **web:** show button as open app if user logged in ([#968](https://github.com/keyshade-xyz/keyshade/issues/968)) ([ccdf1e8](https://github.com/keyshade-xyz/keyshade/commit/ccdf1e81f054d91c6951dff9f0c053c1e7a3bab9))
+
 ## [2.22.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.21.0...v2.22.0-stage.1) (2025-05-11)
 
 ### 🚀 Features
