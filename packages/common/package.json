@@ -1,0 +1,22 @@
+{
+  "name": "@keyshade/common",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "description": "This package includes common functions, constants, and other utilities used across multiple applications.",
+  "private": true,
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "watch": "tsc -w",
+    "start": "node dist/index.js",
+    "dev": "npx tsc && node dist/index.js",
+    "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "dependencies": {
+    "eccrypto": "^1.1.6"
+  },
+  "devDependencies": {
+    "@types/eccrypto": "^1.1.6"
+  }
+}

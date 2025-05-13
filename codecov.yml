@@ -61,3 +61,12 @@ flag_management:
           target: 80%
         - type: patch
           target: 98%
+    - name: common
+      paths:
+        - packages/common/
+      carryforward: true
+      statuses:
+        - type: project
+          target: 80%
+        - type: patch
+          target: 98%

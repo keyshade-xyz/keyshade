@@ -1,0 +1,19 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "paths": {
+      "@common/*": ["./src/*"]
+    },
+    "outDir": "./dist",
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "moduleResolution": "Bundler"
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": false
+  },
+  "include": ["src/"],
+  "exclude": ["node_modules", "dist"]
+}
