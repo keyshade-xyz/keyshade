@@ -1,3 +1,9 @@
+## [2.22.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.2...v2.22.0-stage.3) (2025-05-14)
+
+### 🐛 Bug Fixes
+
+* **api:** Error message changed in backend for Invalid OTP ([#969](https://github.com/keyshade-xyz/keyshade/issues/969)) ([6b891ab](https://github.com/keyshade-xyz/keyshade/commit/6b891abb4546fa98ce96debc697201b3bb345665))
+
 ## [2.22.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.1...v2.22.0-stage.2) (2025-05-12)
 
 ### 🚀 Features
