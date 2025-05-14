@@ -67,38 +67,79 @@ function Tiers() {
     )
   }
 
-  let title = 'Projects'
-  let currentCount = projectCount
-  let maxCount = selectedWorkspace?.maxAllowedProjects
+  let limits = [
+    {
+      title: 'Projects',
+      currentCount: projectCount,
+      maxCount: selectedWorkspace?.maxAllowedProjects
+    }
+  ]
 
   if (pathname === '/members') {
-    title = 'Members'
-    currentCount = memberCount
-    maxCount = selectedWorkspace?.maxAllowedMembers
+    limits = [
+      {
+        title: 'Members',
+        currentCount: memberCount,
+        maxCount: selectedWorkspace?.maxAllowedMembers
+      }
+    ]
+  } else if (tab === 'overview') {
+    limits = [
+      {
+        title: 'Secrets',
+        currentCount: secretCount,
+        maxCount: selectedProject?.maxAllowedSecrets
+      },
+      {
+        title: 'Variables',
+        currentCount: variableCount,
+        maxCount: selectedProject?.maxAllowedVariables
+      },
+      {
+        title: 'Environments',
+        currentCount: environmentCount,
+        maxCount: selectedProject?.maxAllowedEnvironments
+      }
+    ]
   } else if (tab === 'secret') {
-    title = 'Secrets'
-    currentCount = secretCount
-    maxCount = selectedProject?.maxAllowedSecrets
+    limits = [
+      {
+        title: 'Secrets',
+        currentCount: secretCount,
+        maxCount: selectedProject?.maxAllowedSecrets
+      }
+    ]
   } else if (tab === 'variable') {
-    title = 'Variables'
-    currentCount = variableCount
-    maxCount = selectedProject?.maxAllowedVariables
+    limits = [
+      {
+        title: 'Variables',
+        currentCount: variableCount,
+        maxCount: selectedProject?.maxAllowedVariables
+      }
+    ]
   } else if (tab === 'environment') {
-    title = 'Environments'
-    currentCount = environmentCount
-    maxCount = selectedProject?.maxAllowedEnvironments
+    limits = [
+      {
+        title: 'Environments',
+        currentCount: environmentCount,
+        maxCount: selectedProject?.maxAllowedEnvironments
+      }
+    ]
   }
 
   return (
     <div>
-      <div className="text-md mb-3 flex items-center justify-between">
-        <h1>{title}</h1>
-        <p>
-          {currentCount}/{maxCount}
-        </p>
-      </div>
-
-      <Progress value={(currentCount / maxCount!) * 100} />
+      {limits.map((limit) => (
+        <div className="pb-2" key={limit.title}>
+          <div className="text-md mb-3 flex items-center justify-between">
+            <h1>{limit.title}</h1>
+            <p>
+              {limit.currentCount}/{limit.maxCount}
+            </p>
+          </div>
+          <Progress value={(limit.currentCount / limit.maxCount!) * 100} />
+        </div>
+      ))}
     </div>
   )
 }
