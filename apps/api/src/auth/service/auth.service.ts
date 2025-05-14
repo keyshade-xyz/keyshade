@@ -117,7 +117,7 @@ export class AuthService {
       throw new UnauthorizedException(
         constructErrorBody(
           'Invalid OTP',
-          'Please enter a valid 6 digit alphanumeric OTP.'
+          'The OTP you entered is invalid or has expired. Please try again.'
         )
       )
     }
