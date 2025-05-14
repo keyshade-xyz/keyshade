@@ -1,3 +1,9 @@
+## [2.22.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.3...v2.22.0-stage.4) (2025-05-14)
+
+### 🚀 Features
+
+* **platform:** Tier limit card to display [secure]s, variables and environments ([#972](https://github.com/keyshade-xyz/keyshade/issues/972)) ([0e269a9](https://github.com/keyshade-xyz/keyshade/commit/0e269a9a204bd150285612cad7916e835b7a2266))
+
 ## [2.22.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.2...v2.22.0-stage.3) (2025-05-14)
 
 ### 🐛 Bug Fixes
