@@ -1,3 +1,10 @@
+## [2.22.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.6...v2.22.0-stage.7) (2025-05-15)
+
+### 🚀 Features
+
+* **cli:** add homepage ([#975](https://github.com/keyshade-xyz/keyshade/issues/975)) ([3cf968c](https://github.com/keyshade-xyz/keyshade/commit/3cf968c5624f11416bc03e39415e77ec913d5d4d))
+* Create new keyshade common package ([#970](https://github.com/keyshade-xyz/keyshade/issues/970)) ([04c8e92](https://github.com/keyshade-xyz/keyshade/commit/04c8e926b7d63a6527e4070fc9b560f711416e14))
+
 ## [2.22.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.5...v2.22.0-stage.6) (2025-05-15)
 
 ### 🚀 Features
