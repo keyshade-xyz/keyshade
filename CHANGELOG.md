@@ -1,3 +1,9 @@
+## [2.22.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.5...v2.22.0-stage.6) (2025-05-15)
+
+### 🚀 Features
+
+* **platform:** Integrate logout endpoint on platform ([#974](https://github.com/keyshade-xyz/keyshade/issues/974)) ([62c569a](https://github.com/keyshade-xyz/keyshade/commit/62c569a0f22a1f9f199b81cede0b044c21bb152b))
+
 ## [2.22.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.4...v2.22.0-stage.5) (2025-05-15)
 
 ### 🐛 Bug Fixes
