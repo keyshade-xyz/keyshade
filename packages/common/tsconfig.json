@@ -1,19 +1,20 @@
 {
   "extends": "tsconfig/base.json",
   "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
     "baseUrl": ".",
     "declaration": true,
     "paths": {
-      "@common/*": ["./src/*"]
+      "@api-client/*": ["./src/*"]
     },
-    "outDir": "./dist",
-    "plugins": [{ "transform": "typescript-transform-paths" }],
-    "moduleResolution": "Bundler"
+    "outDir": "dist",
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   },
   "tsc-alias": {
     "resolveFullPaths": true,
     "verbose": false
   },
-  "include": ["src/"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
