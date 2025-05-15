@@ -93,13 +93,10 @@ function Navbar(): React.JSX.Element {
       const { success } = await logOut()
       if (success) {
         document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
-        document.cookie =
-          'isOnboardingFinished=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
 
-        // Clear local store
         localStorage.clear()
-
         posthog.reset()
+        toast.success('Logged out successfully')
 
         // Redirect to login page
         // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted
@@ -107,7 +104,6 @@ function Navbar(): React.JSX.Element {
       }
     } finally {
       toast.dismiss()
-      toast.success('Logged out successfully')
     }
   }
 
