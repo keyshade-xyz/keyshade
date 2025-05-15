@@ -1,3 +1,9 @@
+## [2.22.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.4...v2.22.0-stage.5) (2025-05-15)
+
+### 🐛 Bug Fixes
+
+* **web:** Black boxes on home page while using firefox . ([#973](https://github.com/keyshade-xyz/keyshade/issues/973)) ([8a20c1d](https://github.com/keyshade-xyz/keyshade/commit/8a20c1d4fe2dd7521a1aa133d0887190777d6e31))
+
 ## [2.22.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0-stage.3...v2.22.0-stage.4) (2025-05-14)
 
 ### 🚀 Features
