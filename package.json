@@ -125,7 +125,7 @@
     "start:cli": "turbo run start --filter=@keyshade/cli",
     "test": "turbo run test",
     "test:api": "pnpm unit:api && pnpm e2e:api",
-    "unit:api": "pnpm run --filter=@keyshade/api unit",
+    "unit:api": "pnpm build:common && pnpm run --filter=@keyshade/api unit",
     "e2e:api": "pnpm run --filter=@keyshade/api e2e",
     "test:web": "turbo run test --filter=@keyshade/web",
     "test:platform": "turbo run test --filter=@keyshade/platform",
