@@ -462,26 +462,6 @@ describe('Secret Controller Tests', () => {
       expect(messages[0]).toEqual('name should not be empty')
     })
 
-    it('should not be able to update secret with empty name', async () => {
-      const response = await app.inject({
-        method: 'PUT',
-        url: `/secret/${secret1.slug}`,
-        payload: {
-          name: ' '
-        },
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(400)
-
-      const messages = response.json().message
-
-      expect(messages).toHaveLength(1)
-      expect(messages[0]).toEqual('name should not be empty')
-    })
-
     it('should be able to update the secret name and note without creating a new version', async () => {
       const response = await app.inject({
         method: 'PUT',
@@ -572,6 +552,140 @@ describe('Secret Controller Tests', () => {
               environmentSlug: environment1.slug
             }
           ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).not.toBe(
+        'Updated Secret 1 value'
+      )
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        include: {
+          environment: true
+        }
+      })
+
+      expect(secretVersion.length).toBe(2)
+    })
+
+    it('should have decrypted values after new version creation if decryptValue is true && project stores private key', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          entries: [
+            {
+              value: 'Updated Secret 1 value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          decryptValue: true
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).toBe(
+        'Updated Secret 1 value'
+      )
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        include: {
+          environment: true
+        }
+      })
+
+      expect(secretVersion.length).toBe(2)
+    })
+
+    it('should have decrypted values after new version creation if decryptValue is true and private key is specified and project does not store private key', async () => {
+      // Remove the private key from the project
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          entries: [
+            {
+              value: 'Updated Secret 1 value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          decryptValue: true,
+          privateKey: project1.privateKey
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json().updatedVersions.length).toBe(1)
+      expect(response.json().updatedVersions[0].value).toBe(
+        'Updated Secret 1 value'
+      )
+
+      const secretVersion = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id,
+          environmentId: environment1.id
+        },
+        include: {
+          environment: true
+        }
+      })
+
+      expect(secretVersion.length).toBe(2)
+    })
+
+    it('should return encrypted values if decryptValue is true and project does not store private key and no private key is specified', async () => {
+      // Remove the private key from the project
+      await prisma.project.update({
+        where: {
+          id: project1.id
+        },
+        data: {
+          storePrivateKey: false,
+          privateKey: null
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}`,
+        payload: {
+          entries: [
+            {
+              value: 'Updated Secret 1 value',
+              environmentSlug: environment1.slug
+            }
+          ],
+          decryptValue: true
         },
         headers: {
           'x-e2e-user-email': user1.email

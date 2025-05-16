@@ -38,7 +38,6 @@ export default function EditSecretSheet(): JSX.Element {
   const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
   const { projectPrivateKey } = useProjectPrivateKey()
 
-
   const [requestData, setRequestData] = useState<{
     name: string | undefined
     note: string | undefined
@@ -59,34 +58,35 @@ export default function EditSecretSheet(): JSX.Element {
         {} as Record<string, string>
       ) || {}
   )
-  const [decryptedValues, setDecryptedValues] = useState<Record<string, string>>({})
+  const [decryptedValues, setDecryptedValues] = useState<
+    Record<string, string>
+  >({})
 
   useEffect(() => {
-    // decrypt environmentvalues 
-  if (!projectPrivateKey) return;
-  if (isDecrypted) return;
+    // decrypt environment values
+    if (!projectPrivateKey) return
+    if (isDecrypted) return
 
-  Object.entries(environmentValues).forEach(([slug, encrypted]) => {
-      if (decryptedValues[slug]) return;
+    Object.entries(environmentValues).forEach(([slug, encrypted]) => {
+      if (decryptedValues[slug]) return
 
       decrypt(projectPrivateKey, encrypted)
         .then((decrypted) => {
           setDecryptedValues((prev) => ({
             ...prev,
-            [slug]: decrypted,
-          }));
+            [slug]: decrypted
+          }))
         })
         .catch((error) => {
           // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Decryption failed:', error);
+          console.error('Decryption failed:', error)
           setDecryptedValues((prev) => ({
             ...prev,
-            [slug]: 'Decryption failed',
-          }));
-        });
-    });
-  }, [projectPrivateKey, environmentValues, isDecrypted]);
-
+            [slug]: ''
+          }))
+        })
+    })
+  }, [projectPrivateKey, environmentValues, isDecrypted, decryptedValues])
 
   const updateSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.updateSecret({
@@ -101,7 +101,8 @@ export default function EditSecretSheet(): JSX.Element {
         selectedSecretData!.values,
         isDecrypted ? environmentValues : decryptedValues
       ),
-      decryptValue: isDecrypted
+      decryptValue: isDecrypted,
+      privateKey: projectPrivateKey || undefined
     })
   )
 
@@ -215,8 +216,12 @@ export default function EditSecretSheet(): JSX.Element {
             />
           </div>
           <EnvironmentValueEditor
-            environmentValues={isDecrypted ? environmentValues : decryptedValues}
-            setEnvironmentValues={isDecrypted ? setEnvironmentValues : setDecryptedValues}
+            environmentValues={
+              isDecrypted ? environmentValues : decryptedValues
+            }
+            setEnvironmentValues={
+              isDecrypted ? setEnvironmentValues : setDecryptedValues
+            }
           />
         </div>
         <SheetFooter className="py-3">

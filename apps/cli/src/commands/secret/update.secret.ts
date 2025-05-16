@@ -49,6 +49,19 @@ export default class UpdateSecret extends BaseCommand {
         long: '--entry [entries...]',
         description:
           'An array of values for the secret. If specified, should be in the form <environment slug>=<value>'
+      },
+      {
+        short: '',
+        long: '--decrypt-value',
+        description:
+          'Optionally decrypt the value of the newly created revision while fetching',
+        defaultValue: false
+      },
+      {
+        short: '-k',
+        long: '--private-key <string>',
+        description:
+          'The private key to decrypt the secret. Necessary if --decrypt-value is set and the project does not store the private key'
       }
     ]
   }
@@ -90,14 +103,22 @@ export default class UpdateSecret extends BaseCommand {
     }
   }
 
-  private async parseInput(options: any): Promise<{
+  private async parseInput(options: CommandActionData['options']): Promise<{
     name?: string
     note?: string
     rotateAfter?: '24' | '168' | '720' | '8760' | 'never'
     entries?: Array<{ value: string; environmentSlug: string }>
     decryptValue?: boolean
+    privateKey?: string
   }> {
-    const { name, note, rotateAfter, entry: rawEntries, decryptValue } = options
+    const {
+      name,
+      note,
+      rotateAfter,
+      entry: rawEntries,
+      decryptValue,
+      privateKey
+    } = options
 
     const entries: Array<{ value: string; environmentSlug: string }> = []
 
@@ -132,7 +153,8 @@ export default class UpdateSecret extends BaseCommand {
       note,
       rotateAfter,
       entries: entries.length !== 0 ? entries : undefined,
-      decryptValue
+      decryptValue,
+      privateKey
     }
   }
 }

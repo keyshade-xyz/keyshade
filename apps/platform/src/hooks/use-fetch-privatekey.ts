@@ -15,7 +15,7 @@ export interface UseProjectPrivateKeyResult {
 }
 
 export function useProjectPrivateKey(): UseProjectPrivateKeyResult {
-  const [projectPrivateKey, setprojectPrivateKey] = useAtom(
+  const [projectPrivateKey, setProjectPrivateKey] = useAtom(
     selectedProjectPrivateKeyAtom
   )
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -27,24 +27,24 @@ export function useProjectPrivateKey(): UseProjectPrivateKeyResult {
   useEffect(() => {
     setLoading(true)
     if (!selectedProject) {
-      setprojectPrivateKey(null)
+      setProjectPrivateKey(null)
       setHasServerStoredKey(false)
       return
     }
 
     if (selectedProject.storePrivateKey && selectedProject.privateKey) {
       setHasServerStoredKey(true)
-      setprojectPrivateKey(selectedProject.privateKey)
+      setProjectPrivateKey(selectedProject.privateKey)
     } else {
       const localKey =
         localProjectPrivateKey.find(
           (pair) => pair.slug === selectedProject.slug
         )?.key ?? null
       setHasServerStoredKey(false)
-      setprojectPrivateKey(localKey)
+      setProjectPrivateKey(localKey)
     }
     setLoading(false)
-  }, [selectedProject, localProjectPrivateKey, setprojectPrivateKey])
+  }, [selectedProject, localProjectPrivateKey, setProjectPrivateKey])
 
   return {
     projectPrivateKey,

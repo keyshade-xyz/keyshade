@@ -5,4 +5,8 @@ export class UpdateSecret extends PartialType(CreateSecret) {
   @IsBoolean()
   @IsOptional()
   decryptValue?: boolean
+
+  @IsBoolean()
+  @IsOptional()
+  privateKey?: string
 }
