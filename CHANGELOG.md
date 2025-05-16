@@ -1,3 +1,9 @@
+## [2.22.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.1...v2.22.2-stage.1) (2025-05-16)
+
+### 🐛 Bug Fixes
+
+* **platform:** Edit [secure] issues [#899](https://github.com/keyshade-xyz/keyshade/issues/899) ([#967](https://github.com/keyshade-xyz/keyshade/issues/967)) ([543c84f](https://github.com/keyshade-xyz/keyshade/commit/543c84f38faf127b93ae4207bb89a2046a894188))
+
 ## [2.22.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0...v2.22.1) (2025-05-16)
 
 ### 🐛 Bug Fixes
