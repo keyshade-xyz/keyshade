@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { decrypt } from '@keyshade/common'
 import {
   Sheet,
   SheetClose,
@@ -24,7 +25,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { useHttp } from '@/hooks/use-http'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
-import { decrypt } from '@/lib/decrypt'
 import {
   mergeExistingEnvironments,
   parseUpdatedEnvironmentValues
