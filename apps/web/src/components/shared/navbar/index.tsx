@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import Link from 'next/link'
 import { Logo, LogoM } from '@public/shared'
 import { Button } from '@/components/ui/moving-border'
@@ -43,7 +43,7 @@ function Navbar(): React.JSX.Element {
       <div className="flex items-center gap-x-4">
         <a href="https://git.new/keyshade">
           <button
-            className="rounded-full border border-white/50 px-4 py-2 text-white/80 hidden md:flex"
+            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 md:flex"
             type="button"
           >
             View GitHub
@@ -54,9 +54,9 @@ function Navbar(): React.JSX.Element {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <Button duration={6 * 1000}>{
-            isUserLoggedIn() ? "Open app" : "Join in"
-            }</Button>
+          <Button duration={6 * 1000}>
+            {isUserLoggedIn() ? 'Open app' : 'Join in'}
+          </Button>
         </a>
       </div>
     </nav>

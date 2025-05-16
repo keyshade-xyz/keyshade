@@ -34,7 +34,6 @@ import {
   constructErrorBody,
   limitMaxItemsPerPage
 } from '@/common/util'
-import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { getSecretWithValues, generateSecretValue } from '@/common/secret'
@@ -43,6 +42,7 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
 export class SecretService {
