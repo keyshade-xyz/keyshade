@@ -1,3 +1,9 @@
+## [2.22.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.0...v2.22.1-stage.1) (2025-05-16)
+
+### 🐛 Bug Fixes
+
+* **web:** Broken alignment ([3faf7af](https://github.com/keyshade-xyz/keyshade/commit/3faf7af953c9de29e8c40e6a80f214057d0da25e))
+
 ## [2.22.0](https://github.com/keyshade-xyz/keyshade/compare/v2.21.0...v2.22.0) (2025-05-16)
 
 ### 🚀 Features
