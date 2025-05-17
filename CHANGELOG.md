@@ -1,3 +1,9 @@
+## [2.22.2-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.2-stage.1...v2.22.2-stage.2) (2025-05-17)
+
+### 🐛 Bug Fixes
+
+* **api:** Missing default workspace and [secure] test fix ([bb2411e](https://github.com/keyshade-xyz/keyshade/commit/bb2411e68aa7c7b0bd13a09fd204a48d15446fa8))
+
 ## [2.22.2-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.1...v2.22.2-stage.1) (2025-05-16)
 
 ### 🐛 Bug Fixes
