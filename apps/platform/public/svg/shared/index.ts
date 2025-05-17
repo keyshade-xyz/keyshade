@@ -35,6 +35,9 @@ import ArrowDownSVG from './arrowdown.svg'
 import MobileScreenSVG from './mobile-screen.svg'
 import InvitationSVG from './invitation.svg'
 import ErrorInfoSVG from './errorInfo.svg'
+import DiscordSVG from './discord.svg'
+import SlackSVG from './slack.svg'
+import EmptyIntegrationSVG from './emptyIntegration.svg'
 
 export {
   DropdownSVG,
@@ -73,5 +76,8 @@ export {
   ArrowDownSVG,
   MobileScreenSVG,
   InvitationSVG,
-  ErrorInfoSVG
+  EmptyIntegrationSVG,
+  ErrorInfoSVG,
+  DiscordSVG,
+  SlackSVG
 }

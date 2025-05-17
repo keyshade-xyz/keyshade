@@ -5,6 +5,7 @@ import type {
   Environment,
   GetAllEnvironmentsOfProjectResponse,
   GetMembersResponse,
+  Integration,
   ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
@@ -107,6 +108,7 @@ export const environmentsOfProjectAtom = atom<
 
 export const selectedRoleAtom = atom<WorkspaceRole | null>(null)
 export const rolesOfWorkspaceAtom = atom<WorkspaceRole[]>([])
+export const integrationsOfWorkspaceAtom = atom<Integration[]>([])
 
 export const selectedApiKeyAtom = atom<ApiKey | null>(null)
 export const apiKeysOfProjectAtom = atom<ApiKey[]>([])
@@ -142,6 +144,7 @@ export const deleteSecretOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 export const secretRevisionsOpenAtom = atom<boolean>(false)
 export const rollbackSecretOpenAtom = atom<boolean>(false)
+export const createIntegrationOpenAtom = atom<boolean>(false)
 
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)
