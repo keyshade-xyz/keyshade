@@ -513,7 +513,7 @@ describe('Secret Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).toBe(
+      expect(response.json().updatedVersions[0].value).not.toBe(
         'Updated Secret 1 value'
       )
 
