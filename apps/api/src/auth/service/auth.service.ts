@@ -76,7 +76,11 @@ export class AuthService {
       )
     }
 
-    const user = await getUserByEmailOrId(email, this.prisma)
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
   }
@@ -96,7 +100,11 @@ export class AuthService {
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(`Validating login code for ${email}`)
 
-    const user = await getUserByEmailOrId(email, this.prisma)
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
 
     this.logger.log(`Checking if OTP is valid for ${email}`)
     const isOtpValid =
@@ -231,7 +239,7 @@ export class AuthService {
 
     this.logger.log(`Checking if user exists with email: ${email}`)
     try {
-      user = await getUserByEmailOrId(email, this.prisma)
+      user = await getUserByEmailOrId(email, this.prisma, this.slugGenerator)
     } catch (ignored) {}
 
     // We need to create the user if it doesn't exist yet

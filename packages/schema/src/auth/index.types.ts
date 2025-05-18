@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import {
+  LogOutRequestSchema,
+  LogOutResponseSchema,
   ResendOTPRequestSchema,
   ResendOTPResponseSchema,
   SendOTPRequestSchema,
@@ -19,3 +21,7 @@ export type ValidateOTPResponse = z.infer<typeof ValidateOTPResponseSchema>
 export type SendOTPRequest = z.infer<typeof SendOTPRequestSchema>
 
 export type SendOTPResponse = z.infer<typeof SendOTPResponseSchema>
+
+export type LogOutRequest = z.infer<typeof LogOutRequestSchema>
+
+export type LogOutResponse = z.infer<typeof LogOutResponseSchema>

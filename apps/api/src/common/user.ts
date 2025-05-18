@@ -86,7 +86,8 @@ export async function createUser(
  */
 export async function getUserByEmailOrId(
   input: User['email'] | User['id'],
-  prisma: PrismaService
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
@@ -135,7 +136,7 @@ export async function getUserByEmailOrId(
     logger.log(
       `User ${user.id} is a regular user. Getting default workspace for user ${user.id}`
     )
-    const defaultWorkspace = await prisma.workspace.findFirst({
+    let defaultWorkspace = await prisma.workspace.findFirst({
       where: {
         ownerId: user.id,
         isDefault: true
@@ -143,12 +144,21 @@ export async function getUserByEmailOrId(
     })
 
     if (!defaultWorkspace) {
-      logger.error(`Default workspace not found for user ${user.id}`)
-      throw new NotFoundException(
-        constructErrorBody(
-          'Default workspace not found',
-          'We could not find your default workspace. Please get in touch with us.'
-        )
+      logger.warn(`Default workspace not found for user ${user.id}`)
+
+      // Create the user's default workspace
+      logger.log(
+        `User ${user.id} has no default workspace. Creating default workspace.`
+      )
+      defaultWorkspace = await createWorkspace(
+        user,
+        { name: 'My Workspace' },
+        prisma,
+        slugGenerator,
+        true
+      )
+      logger.log(
+        `Created user ${user.id} with default workspace ${defaultWorkspace.id}`
       )
     }
 

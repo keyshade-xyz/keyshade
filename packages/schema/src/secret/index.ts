@@ -60,7 +60,9 @@ export const CreateSecretResponseSchema = SecretSchema
 
 export const UpdateSecretRequestSchema =
   CreateSecretRequestSchema.partial().extend({
-    secretSlug: z.string()
+    secretSlug: z.string(),
+    decryptValue: z.boolean().optional(),
+    privateKey: z.string().optional()
   })
 
 export const UpdateSecretResponseSchema = z.object({

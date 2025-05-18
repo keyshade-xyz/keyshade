@@ -17,6 +17,7 @@ import { toSHA256 } from '@/common/cryptography'
 import { getUserByEmailOrId } from '@/common/user'
 import { Request } from 'express'
 import { constructErrorBody } from '@/common/util'
+import SlugGenerator from '@/common/slug-generator.service'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -29,7 +30,8 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly reflector: Reflector,
-    private readonly cache: CacheService
+    private readonly cache: CacheService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -77,7 +79,11 @@ export class AuthGuard implements CanActivate {
       if (!email) {
         throw new ForbiddenException()
       }
-      const user = await getUserByEmailOrId(email, this.prisma)
+      const user = await getUserByEmailOrId(
+        email,
+        this.prisma,
+        this.slugGenerator
+      )
 
       userContext = {
         ...user,
@@ -134,7 +140,11 @@ export class AuthGuard implements CanActivate {
               ipAddress: request.ip
             }
           } else {
-            const user = await getUserByEmailOrId(payload['id'], this.prisma)
+            const user = await getUserByEmailOrId(
+              payload['id'],
+              this.prisma,
+              this.slugGenerator
+            )
 
             userContext = {
               ...user,

@@ -1,7 +1,7 @@
 'use client'
 
 import { Search } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAtomValue } from 'jotai'
@@ -13,6 +13,7 @@ import {
 } from '@public/svg/dashboard'
 import { DropdownSVG } from '@public/svg/shared'
 import { posthog } from 'posthog-js'
+import { toast } from 'sonner'
 import SearchModel from './searchModel'
 import {
   DropdownMenu,
@@ -25,6 +26,8 @@ import {
 import LineTab from '@/components/ui/line-tab'
 import AvatarComponent from '@/components/common/avatar'
 import { selectedProjectAtom, selectedWorkspaceAtom, userAtom } from '@/store'
+import { useHttp } from '@/hooks/use-http'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface Tab {
   id: string
@@ -35,6 +38,7 @@ interface Tab {
 function Navbar(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isApple, setIsApple] = useState<boolean>(false)
+
   const user = useAtomValue(userAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -78,21 +82,30 @@ function Navbar(): React.JSX.Element {
     }
   }, [])
 
-  const handleLogOut = useCallback((): void => {
-    // Expire cookies
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
-    document.cookie =
-      'isOnboardingFinished=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
+  const logOut = useHttp(() =>
+    ControllerInstance.getInstance().authController.logOut()
+  )
 
-    // Clear local store
-    localStorage.clear()
+  const handleLogOut = async () => {
+    toast.loading('Logging out...')
+    
+    try {
+      const { success } = await logOut()
+      if (success) {
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
 
-    posthog.reset()
+        localStorage.clear()
+        posthog.reset()
+        toast.success('Logged out successfully')
 
-    // Redirect to login page
-    // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted
-    window.location.href = '/auth'
-  }, [])
+        // Redirect to login page
+        // Using window.location because at times next router throws up this error: https://nextjs.org/docs/messages/next-router-not-mounted
+        window.location.href = '/auth'
+      }
+    } finally {
+      toast.dismiss()
+    }
+  }
 
   const getProjectPath = (): string =>
     selectedWorkspace?.slug && selectedProject?.slug

@@ -14,6 +14,9 @@ importers:
       '@keyshade/api-client':
         specifier: workspace:*
         version: link:packages/api-client
+      '@keyshade/common':
+        specifier: workspace:*
+        version: link:packages/common
       '@keyshade/schema':
         specifier: workspace:*
         version: link:packages/schema
@@ -711,6 +714,16 @@ importers:
         version: link:../../packages/tsconfig
 
   packages/api-client: {}
+
+  packages/common:
+    dependencies:
+      eccrypto:
+        specifier: ^1.1.6
+        version: 1.1.6
+    devDependencies:
+      '@types/eccrypto':
+        specifier: ^1.1.6
+        version: 1.1.6
 
   packages/eslint-config-custom:
     devDependencies:
