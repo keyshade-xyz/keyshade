@@ -48,7 +48,7 @@ function IntegrationMetadata({
                 .replace(/^./, (str) => str.toUpperCase())}
             </label>
             <Input
-              className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 text-white"
+              className="h-[2.25rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 text-white"
               id={fieldKey}
               onChange={(e) => handleInputChange(fieldKey, e.target.value)}
               placeholder={`Enter ${fieldKey}`}

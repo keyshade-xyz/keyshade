@@ -18,18 +18,24 @@ type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
 interface ProjectEnvironmentInputProps {
   onProjectChange?: (projectSlug: string | null) => void
   onEnvironmentChange?: (environmentSlug: string | null) => void
+  initialProject?: PartialProject | null
+  initialEnvironment?: PartialEnvironment | null
 }
 
 export default function ProjectEnvironmentInput({
   onProjectChange,
-  onEnvironmentChange
+  onEnvironmentChange,
+  initialProject,
+  initialEnvironment
 }: ProjectEnvironmentInputProps): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [projects, setProjects] = useState<PartialProject[]>([])
   const [environments, setEnvironments] = useState<PartialEnvironment[]>([])
   const [selectedProject, setSelectedProject] = useState<PartialProject | null>(
-    null
+    initialProject || null
   )
+  const [selectedEnvironment, setSelectedEnvironment] =
+    useState<PartialEnvironment | null>(initialEnvironment || null)
 
   const getAllProjectsOfWorkspace = useHttp(() =>
     ControllerInstance.getInstance().projectController.getAllProjects({
@@ -95,6 +101,7 @@ export default function ProjectEnvironmentInput({
 
   const handleEnvironmentSelect = useCallback(
     (environment: PartialEnvironment) => {
+      setSelectedEnvironment(environment)
       if (onEnvironmentChange) onEnvironmentChange(environment.slug)
     },
     [onEnvironmentChange]
@@ -111,12 +118,15 @@ export default function ProjectEnvironmentInput({
             const project = JSON.parse(value) as PartialProject
             handleProjectSelect(project)
           }}
+          value={selectedProject ? JSON.stringify(selectedProject) : undefined}
         >
           <SelectTrigger
             className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
             id="project-select"
           >
-            <SelectValue placeholder="Select project" />
+            <SelectValue placeholder="Select project">
+              {selectedProject?.name}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
             {projects.length > 0 ? (
@@ -144,12 +154,19 @@ export default function ProjectEnvironmentInput({
             const environment = JSON.parse(value) as PartialEnvironment
             handleEnvironmentSelect(environment)
           }}
+          value={
+            selectedEnvironment
+              ? JSON.stringify(selectedEnvironment)
+              : undefined
+          }
         >
           <SelectTrigger
             className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
             id="environment-select"
           >
-            <SelectValue placeholder="Select environment" />
+            <SelectValue placeholder="Select environment">
+              {selectedEnvironment?.name}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
             {environments.length > 0 ? (
