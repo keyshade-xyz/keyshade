@@ -148,6 +148,7 @@ export const rollbackSecretOpenAtom = atom<boolean>(false)
 export const selectedIntegrationAtom = atom<Integration | null>(null)
 export const createIntegrationOpenAtom = atom<boolean>(false)
 export const editIntegrationOpenAtom = atom<boolean>(false)
+export const deleteIntegrationOpenAtom = atom<boolean>(false)
 
 export const createEnvironmentOpenAtom = atom<boolean>(false)
 export const editEnvironmentOpenAtom = atom<boolean>(false)

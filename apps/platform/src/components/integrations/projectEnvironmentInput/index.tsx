@@ -125,7 +125,7 @@ export default function ProjectEnvironmentInput({
             id="project-select"
           >
             <SelectValue placeholder="Select project">
-              {selectedProject?.name}
+              {selectedProject?.name || 'Select project'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
@@ -165,7 +165,7 @@ export default function ProjectEnvironmentInput({
             id="environment-select"
           >
             <SelectValue placeholder="Select environment">
-              {selectedEnvironment?.name}
+              {selectedEnvironment?.name || 'Select environment'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">

@@ -1,10 +1,16 @@
-import { DiscordSVG, IntegrationSVG, SlackSVG } from '@public/svg/shared'
+import {
+  DiscordSVG,
+  IntegrationSVG,
+  SlackSVG,
+  TrashWhiteSVG
+} from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import { Pen } from 'lucide-react'
 import type { Integration } from '@keyshade/schema'
 import EmptyIntegration from '../emptyIntegration'
 import {
+  deleteIntegrationOpenAtom,
   editIntegrationOpenAtom,
   integrationsOfWorkspaceAtom,
   selectedIntegrationAtom,
@@ -32,6 +38,9 @@ function IntegrationList() {
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
+  const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useAtom(
+    deleteIntegrationOpenAtom
+  )
 
   const getAllIntegrations = useHttp(() =>
     ControllerInstance.getInstance().integrationController.getAllIntegrations(
@@ -45,7 +54,12 @@ function IntegrationList() {
         setIntegrations(data.items)
       }
     })
-  }, [getAllIntegrations, setIntegrations, isEditIntegrationOpen])
+  }, [
+    getAllIntegrations,
+    setIntegrations,
+    isEditIntegrationOpen,
+    isDeleteIntegrationOpen
+  ])
 
   const hasIntegrations = integrations.length > 0
 
@@ -57,10 +71,18 @@ function IntegrationList() {
     [setSelectedIntegration, setIsEditIntegrationOpen]
   )
 
+  const handleDeleteIntegration = useCallback(
+    (integration: Integration) => {
+      setSelectedIntegration(integration)
+      setIsDeleteIntegrationOpen(true)
+    },
+    [setSelectedIntegration, setIsDeleteIntegrationOpen]
+  )
+
   return (
     <div className="flex h-full w-full justify-center">
       {hasIntegrations ? (
-        <div className="mr-auto flex w-full max-w-sm flex-col gap-y-2">
+        <div className="mr-auto flex w-full max-w-md flex-col gap-y-2">
           {integrations.map((integration) => (
             <div
               className="flex items-center justify-between rounded-lg border border-white/10 bg-neutral-800 p-4"
@@ -83,7 +105,13 @@ function IntegrationList() {
                   onClick={() => handleEditIntegration(integration)}
                   type="button"
                 >
-                  <Pen size={15} />
+                  <Pen size={20} />
+                </button>
+                <button
+                  onClick={() => handleDeleteIntegration(integration)}
+                  type="button"
+                >
+                  <TrashWhiteSVG />
                 </button>
               </div>
             </div>
