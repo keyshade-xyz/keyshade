@@ -7,7 +7,7 @@ const integrationFields: Record<string, string[]> = {
   slack: ['botToken', 'signingSecret', 'channelId']
 }
 
-interface IntegrationFormProps {
+interface IntegrationMetadataProps {
   integrationType: keyof typeof integrationFields
   initialMetadata?: Record<string, string>
   onChange: (metadata: Record<string, string>) => void
@@ -17,7 +17,7 @@ function IntegrationMetadata({
   integrationType,
   initialMetadata = {},
   onChange
-}: IntegrationFormProps): JSX.Element {
+}: IntegrationMetadataProps): JSX.Element {
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
     const fields = integrationFields[integrationType]
     return fields.reduce<Record<string, string>>((acc, key) => {
