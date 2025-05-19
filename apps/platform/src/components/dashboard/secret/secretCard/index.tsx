@@ -4,6 +4,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
 import { useState } from 'react'
+import {decrypt} from '@keyshade/common'
 import {
   AccordionContent,
   AccordionItem,
@@ -39,7 +40,6 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import { decrypt } from '@/lib/decrypt'
 
 interface SecretCardProps {
   secretData: Secret

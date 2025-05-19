@@ -1,5 +1,5 @@
 import { SecretWithValues } from '@/secret/secret.types'
-import { decrypt } from './cryptography'
+import { decrypt } from '@keyshade/common'
 
 export async function getSecretWithValues(
   secretWithVersion: SecretWithValues['secret'] & {

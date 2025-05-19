@@ -24,7 +24,7 @@ import { v4 } from 'uuid'
 import { ProjectWithCounts, ProjectWithSecrets } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
-import { createKeyPair, decrypt, encrypt } from '@/common/cryptography'
+import { createKeyPair } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import {
   constructErrorBody,
@@ -34,6 +34,7 @@ import {
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
 export class ProjectService {

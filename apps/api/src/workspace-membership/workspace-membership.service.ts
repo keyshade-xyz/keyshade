@@ -66,7 +66,11 @@ export class WorkspaceMembershipService {
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
-    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(
+      otherUserEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     if (otherUser.id === user.id) {
       throw new BadRequestException(
@@ -360,7 +364,11 @@ export class WorkspaceMembershipService {
     otherUserEmail: User['email'],
     roleSlugs: WorkspaceRole['slug'][]
   ): Promise<void> {
-    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(
+      otherUserEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -656,7 +664,11 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug'],
     inviteeEmail: User['email']
   ): Promise<void> {
-    const inviteeUser = await getUserByEmailOrId(inviteeEmail, this.prisma)
+    const inviteeUser = await getUserByEmailOrId(
+      inviteeEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -811,7 +823,11 @@ export class WorkspaceMembershipService {
     let otherUser: User | null = null
 
     try {
-      otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+      otherUser = await getUserByEmailOrId(
+        otherUserEmail,
+        this.prisma,
+        this.slugGenerator
+      )
     } catch (e) {
       return false
     }
@@ -836,7 +852,11 @@ export class WorkspaceMembershipService {
     )
 
     // Fetch the invitee user
-    const member = await getUserByEmailOrId(inviteeEmail, this.prisma)
+    const member = await getUserByEmailOrId(
+      inviteeEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({

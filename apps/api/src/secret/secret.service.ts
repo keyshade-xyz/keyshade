@@ -34,7 +34,6 @@ import {
   constructErrorBody,
   limitMaxItemsPerPage
 } from '@/common/util'
-import { decrypt, encrypt } from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { getSecretWithValues, generateSecretValue } from '@/common/secret'
@@ -43,6 +42,7 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
 export class SecretService {
@@ -352,9 +352,20 @@ export class SecretService {
       updatedVersions: updatedVersions
     }
 
-    if (secret.project.storePrivateKey && secret.project.privateKey) {
+    // Decrypt the secret values before sending only if one of the conditions are met:
+    // 1. The user has requested to decrypt the secret values
+    // 2. The project stores the private key OR
+    // 3. The user has provided the private key
+    if (
+      dto.decryptValue &&
+      ((secret.project.storePrivateKey && secret.project.privateKey) ||
+        dto.privateKey)
+    ) {
       for (const version of updatedVersions) {
-        version.value = await decrypt(secret.project.privateKey, version.value)
+        version.value = await decrypt(
+          secret.project.privateKey ?? dto.privateKey,
+          version.value
+        )
       }
     }
 

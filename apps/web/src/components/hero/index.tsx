@@ -1,18 +1,16 @@
 'use client'
 import Image from 'next/image'
 import { Toaster } from 'sonner'
-import { ColorBGSVG, HeroImage } from '@public/hero'
+import { HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function Hero(): React.JSX.Element {
-
   return (
     <>
       <Toaster />
-      <div className="relative flex h-screen flex-col items-center justify-center md:mt-[10rem]">
-        <ColorBGSVG className="absolute -z-10 -translate-y-[12rem]" />
-        <section className="flex flex-col items-center gap-8 py-[6.88rem]">
+      <div className="relative -top-8 flex h-screen w-full flex-col items-center justify-center  bg-[url(/hero/colour-bg.svg)]  bg-cover bg-no-repeat md:pt-[36rem]">
+        <section className="flex flex-col items-center gap-8 py-[6.88rem] ">
           <h1
             className={` text-brandBlue w-[25rem] text-center text-4xl md:w-auto md:text-7xl`}
             style={{ textShadow: '0px 4px 4px rgba(202, 236, 241, 0.25)' }}
@@ -25,7 +23,11 @@ function Hero(): React.JSX.Element {
           </span>
           <a href="https://app.keyshade.xyz" rel="noreferrer" target="_blank">
             <div className="border-brandBlue/[8%] rounded-full border p-[0.31rem] ">
-              <EncryptButton TARGET_TEXT={isUserLoggedIn() ? "Open app":"Try Keyshade for Free"} />
+              <EncryptButton
+                TARGET_TEXT={
+                  isUserLoggedIn() ? 'Open app' : 'Try Keyshade for Free'
+                }
+              />
             </div>
             <p className="mt-2 text-center text-sm text-white/30">
               Currently in alpha
