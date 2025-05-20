@@ -1,8 +1,8 @@
-import { DiscordSVG, IntegrationSVG, SlackSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import type { Integration } from '@keyshade/schema'
 import EmptyIntegration from '../emptyIntegration'
+import IntegrationIcon from '../integrationIcon'
 import {
   deleteIntegrationOpenAtom,
   editIntegrationOpenAtom,
@@ -19,18 +19,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
-
-//add new integrations
-function IntegrationIcon({ type }: { type: string }) {
-  switch (type) {
-    case 'DISCORD':
-      return <DiscordSVG className="h-6 w-6" />
-    case 'SLACK':
-      return <SlackSVG className="h-6 w-6" />
-    default:
-      return <IntegrationSVG className="h-6 w-6" />
-  }
-}
+import CopyToClipboard from '@/components/common/copy-to-clipboard'
 
 function IntegrationList() {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -90,7 +79,10 @@ function IntegrationList() {
                 <div className="flex items-center justify-between rounded-lg border border-white/10 bg-neutral-800 p-4">
                   <div className="flex items-center gap-x-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
-                      <IntegrationIcon type={integration.type} />
+                      <IntegrationIcon
+                        className="h-6 w-6"
+                        type={integration.type}
+                      />
                     </div>
                     <div>
                       <h2 className="text-lg font-semibold">
@@ -102,9 +94,7 @@ function IntegrationList() {
                     </div>
                   </div>
                   <div className="flex items-start justify-center gap-x-2">
-                    <span className="rounded-full bg-neutral-700 px-2 py-1 text-xs text-white/80">
-                      {integration.slug}
-                    </span>
+                    <CopyToClipboard text={integration.slug} />
                   </div>
                 </div>
               </ContextMenuTrigger>

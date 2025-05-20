@@ -2,13 +2,11 @@
 import React, { Suspense } from 'react'
 import { useAtomValue } from 'jotai'
 import { useSearchParams } from 'next/navigation'
+import { Integrations } from '@keyshade/common'
 import SetupIntegration from './@setup/page'
 import IntegrationsPage from './page'
 import { selectedWorkspaceAtom } from '@/store'
 import { PageTitle } from '@/components/common/page-title'
-
-//update it while adding new integrations :)
-const VALID_INTEGRATION_TYPES = ['DISCORD', 'SLACK']
 
 function IntegrationsContent(): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -16,8 +14,7 @@ function IntegrationsContent(): React.JSX.Element {
   const setupParam = searchParams.get('setup')
 
   const isValidIntegrationType =
-    setupParam !== null &&
-    VALID_INTEGRATION_TYPES.includes(setupParam.toUpperCase())
+    setupParam !== null && Integrations.isValidType(setupParam.toUpperCase())
 
   return (
     <main>

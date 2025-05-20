@@ -1,8 +1,10 @@
 'use client'
-import { AddSVG, DiscordSVG, SlackSVG } from '@public/svg/shared'
+import { AddSVG } from '@public/svg/shared'
 import React from 'react'
 import { useAtom } from 'jotai'
 import Link from 'next/link'
+import { Integrations } from '@keyshade/common'
+import IntegrationIcon from '../integrationIcon'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,17 +23,7 @@ export default function CreateIntegration(): React.JSX.Element {
     setIsCreateIntegrationOpen((prev) => !prev)
   }
 
-  //Add more integrations here
-  const integrations = [
-    {
-      name: 'Slack',
-      Icon: SlackSVG
-    },
-    {
-      name: 'Discord',
-      Icon: DiscordSVG
-    }
-  ]
+  const integrations = Integrations.getAll()
 
   return (
     <Dialog onOpenChange={handleToggel} open={isCreateIntegrationOpen}>
@@ -55,10 +47,14 @@ export default function CreateIntegration(): React.JSX.Element {
             <Link
               href={`integrations?setup=${integration.name.toLowerCase()}`}
               key={integration.name}
+              onClick={() => setIsCreateIntegrationOpen(false)}
             >
               <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-white/20 bg-white/5 p-4 transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/10 hover:shadow-md">
                 <div className="mb-4 h-16 w-16">
-                  <integration.Icon className="h-full w-full" />
+                  <IntegrationIcon
+                    className="h-full w-full"
+                    type={integration.type}
+                  />
                 </div>
                 <span className="text-lg font-medium text-white/60">
                   {integration.name}

@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import { Integrations } from '@keyshade/common'
 import { Input } from '@/components/ui/input'
 
-//add more integrations
-const integrationFields: Record<string, string[]> = {
-  discord: ['webhookUrl'],
-  slack: ['botToken', 'signingSecret', 'channelId']
-}
-
 interface IntegrationMetadataProps {
-  integrationType: keyof typeof integrationFields
+  integrationType: string
   initialMetadata?: Record<string, string>
   onChange: (metadata: Record<string, string>) => void
 }
@@ -19,9 +14,10 @@ function IntegrationMetadata({
   onChange
 }: IntegrationMetadataProps): JSX.Element {
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
-    const fields = integrationFields[integrationType]
-    return fields.reduce<Record<string, string>>((acc, key) => {
-      acc[key] = initialMetadata[key] || ''
+    const metadataFields = Integrations.metadata(integrationType)
+    return metadataFields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.requestFieldName] =
+        initialMetadata[field.requestFieldName] || ''
       return acc
     }, {})
   })
@@ -39,21 +35,24 @@ function IntegrationMetadata({
       <h3 className="font-medium capitalize text-white">
         {integrationType} Configuration
       </h3>
-      <div className="flex flex-col gap-y-4 rounded-lg border border-white/10 bg-neutral-800 p-4">
-        {integrationFields[integrationType].map((fieldKey) => (
-          <div className="flex flex-col gap-y-2" key={fieldKey}>
-            <label className="font-medium text-white" htmlFor={fieldKey}>
-              {fieldKey
-                .replace(/(?:[A-Z])/g, ' $&')
-                .replace(/^./, (str) => str.toUpperCase())}
+      <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
+        {Integrations.metadata(integrationType).map((field) => (
+          <div className="flex flex-col gap-y-1" key={field.requestFieldName}>
+            <label
+              className="font-medium text-white"
+              htmlFor={field.requestFieldName}
+            >
+              {field.name}
             </label>
+            {field.description ? <p className="mb-3 text-sm text-white/50">{field.description}</p> : null}
             <Input
-              className="h-[2.25rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 text-white"
-              id={fieldKey}
-              onChange={(e) => handleInputChange(fieldKey, e.target.value)}
-              placeholder={`Enter ${fieldKey}`}
+              id={field.requestFieldName}
+              onChange={(e) =>
+                handleInputChange(field.requestFieldName, e.target.value)
+              }
+              placeholder={field.placeholder}
               type="text"
-              value={metadata[fieldKey]}
+              value={metadata[field.requestFieldName]}
             />
           </div>
         ))}

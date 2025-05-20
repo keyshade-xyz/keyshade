@@ -8,9 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
 import IntegrationForm from '@/components/integrations/integrationMetadata'
-import type {
-  EventType
-} from '@/components/integrations/eventTriggers';
+import type { EventType } from '@/components/integrations/eventTriggers'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -101,7 +99,6 @@ export default function SetupIntegration({ setupType }: SetupIntegrationProps) {
             Integration Name
           </label>
           <Input
-            className=""
             id="integration-name"
             onChange={(e) => setName(e.currentTarget.value)}
             placeholder="Name of Integration"

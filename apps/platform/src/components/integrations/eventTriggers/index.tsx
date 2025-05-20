@@ -90,13 +90,13 @@ export default function EventTriggersInput({
       </div>
 
       <div
-        className="space-y-3 rounded-lg border border-white/10 bg-neutral-800 p-4"
+        className="space-y-3 rounded-lg border border-white/10 p-4"
         id="select-events"
       >
         <div className="mb-3 flex items-center space-x-3 border-b border-white/10 pb-3">
           <Checkbox
             checked={areAllSelected}
-            className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+            className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
             id="select-all"
             onCheckedChange={(checked) => selectAll(checked === true)}
           />
@@ -113,7 +113,7 @@ export default function EventTriggersInput({
             <div className="flex items-center space-x-3" key={event}>
               <Checkbox
                 checked={selectedEvents.includes(event)}
-                className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+                className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
                 id={event}
                 onCheckedChange={() => toggleEvent(event)}
               />
