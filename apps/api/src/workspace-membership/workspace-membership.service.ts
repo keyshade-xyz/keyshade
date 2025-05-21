@@ -30,6 +30,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { UserService } from '@/user/user.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -41,7 +42,8 @@ export class WorkspaceMembershipService {
     private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly userService: UserService
   ) {}
 
   /**
@@ -312,6 +314,26 @@ export class WorkspaceMembershipService {
           }
         }
       })
+
+      const member = await getUserByEmailOrId(
+        user.email,
+        this.prisma,
+        this.slugGenerator
+      )
+
+      const userWithWorkspace = await this.userService.getSelf(member)
+      if (
+        userWithWorkspace.emailPreference &&
+        !userWithWorkspace.emailPreference.activity
+      ) {
+        this.log.log(`User ${member.id} has opted out of receiving invitations`)
+        throw new BadRequestException(
+          constructErrorBody(
+            'User has opted out',
+            'The user has opted out of receiving invitations'
+          )
+        )
+      }
 
       // Send an email to the removed users
       const removedOn = new Date()
@@ -885,6 +907,20 @@ export class WorkspaceMembershipService {
         constructErrorBody(
           'Membership not found',
           'You are trying to invite someone who has not been invited before'
+        )
+      )
+    }
+
+    const userWithWorkspace = await this.userService.getSelf(member)
+    if (
+      userWithWorkspace.emailPreference &&
+      !userWithWorkspace.emailPreference.critical
+    ) {
+      this.log.log(`User ${member.id} has opted out of receiving invitations`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'User has opted out',
+          'The user has opted out of receiving invitations'
         )
       )
     }
