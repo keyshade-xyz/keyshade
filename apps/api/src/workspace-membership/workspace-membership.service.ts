@@ -30,7 +30,6 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
-import { UserService } from '@/user/user.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -42,8 +41,7 @@ export class WorkspaceMembershipService {
     private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly slugGenerator: SlugGenerator,
-    private readonly userService: UserService
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -907,11 +905,7 @@ export class WorkspaceMembershipService {
       )
     }
 
-    const userWithWorkspace = await this.userService.getSelf(member)
-    if (
-      userWithWorkspace.emailPreference &&
-      !userWithWorkspace.emailPreference.critical
-    ) {
+    if (member.emailPreference && !member.emailPreference.critical) {
       this.log.log(
         `User ${member.id} has opted out of receiving critical notifications`
       )
