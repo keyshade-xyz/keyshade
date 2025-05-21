@@ -151,13 +151,6 @@ export async function getUserByEmailOrId(
   }
 
   logger.log(`Got user ${user.id}`)
-
-  logger.log(`Retrieving email preference for user ${user.id}`)
-  const emailPreference = await prisma.emailPreference.findUnique({
-    where: {
-      userId: user.id
-    }
-  })
   logger.log(`Email preference for user ${user.id} has been retrieved.`)
 
   if (user.isAdmin) {
@@ -165,7 +158,7 @@ export async function getUserByEmailOrId(
     return {
       ...user,
       defaultWorkspace: null,
-      emailPreference
+      emailPreference: user.emailPreference
     }
   } else {
     logger.log(
@@ -204,7 +197,7 @@ export async function getUserByEmailOrId(
     return {
       ...user,
       defaultWorkspace,
-      emailPreference
+      emailPreference: user.emailPreference
     }
   }
 }

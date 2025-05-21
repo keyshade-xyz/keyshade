@@ -124,7 +124,7 @@ export class UserService {
     await this.cache.setUser({
       ...updatedUser,
       defaultWorkspace: user.defaultWorkspace,
-      emailPreference: user.emailPreference
+      emailPreference: updatedEmailPreferences || user.emailPreference
     })
 
     return { ...updatedUser, emailPreference: updatedEmailPreferences }

@@ -912,11 +912,13 @@ export class WorkspaceMembershipService {
       userWithWorkspace.emailPreference &&
       !userWithWorkspace.emailPreference.critical
     ) {
-      this.log.log(`User ${member.id} has opted out of receiving invitations`)
+      this.log.log(
+        `User ${member.id} has opted out of receiving critical notifications`
+      )
       throw new BadRequestException(
         constructErrorBody(
           'User has opted out',
-          'The user has opted out of receiving invitations'
+          'The user has opted out of receiving critical notifications'
         )
       )
     }
