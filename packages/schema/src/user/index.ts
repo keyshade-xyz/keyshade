@@ -11,7 +11,12 @@ export const UserSchema = z.object({
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
   authProvider: authProviderEnum,
-  joinedOn: z.coerce.date()
+  joinedOn: z.coerce.date(),
+  emailPreference: z.object({
+    marketing: z.boolean(),
+    activity: z.boolean(),
+    critical: z.boolean()
+  })
 })
 
 export const GetSelfResponseSchema = UserSchema.extend({
@@ -22,7 +27,14 @@ export const UpdateSelfRequestSchema = z.object({
   name: z.string().optional(),
   profilePictureUrl: z.string().optional(),
   isOnboardingFinished: z.boolean().optional(),
-  email: z.string().email().optional()
+  email: z.string().email().optional(),
+  emailPreferences: z
+    .object({
+      marketing: z.boolean(),
+      activity: z.boolean(),
+      critical: z.boolean()
+    })
+    .optional()
 })
 
 export const UpdateSelfResponseSchema = UserSchema
