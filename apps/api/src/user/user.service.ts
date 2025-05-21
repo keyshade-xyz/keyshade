@@ -121,13 +121,15 @@ export class UserService {
       `Updated email preference for user ${user.id} ${JSON.stringify(dto.emailPreferences)}`
     )
 
-    await this.cache.setUser({
+    const updatedUserData = {
       ...updatedUser,
       defaultWorkspace: user.defaultWorkspace,
       emailPreference: updatedEmailPreferences || user.emailPreference
-    })
+    }
 
-    return { ...updatedUser, emailPreference: updatedEmailPreferences }
+    await this.cache.setUser(updatedUserData)
+
+    return updatedUserData
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
