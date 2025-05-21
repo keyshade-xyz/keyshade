@@ -321,11 +321,7 @@ export class WorkspaceMembershipService {
         this.slugGenerator
       )
 
-      const userWithWorkspace = await this.userService.getSelf(member)
-      if (
-        userWithWorkspace.emailPreference &&
-        !userWithWorkspace.emailPreference.activity
-      ) {
+      if (member.emailPreference && !member.emailPreference.activity) {
         this.log.log(`User ${member.id} has opted out of receiving invitations`)
         throw new BadRequestException(
           constructErrorBody(
