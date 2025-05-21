@@ -98,16 +98,36 @@ export class UserService {
       where: {
         id: user.id
       },
-      data
+      data: {
+        name: dto?.name,
+        profilePictureUrl: dto?.profilePictureUrl,
+        isOnboardingFinished: dto.isOnboardingFinished
+      }
     })
     this.log.log(`Updated user ${user.id} with data ${data}`)
 
+    let updatedEmailPreferences
+    if (dto.emailPreferences) {
+      updatedEmailPreferences = await this.prisma.emailPreference.update({
+        where: { userId: user.id },
+        data: {
+          marketing: dto.emailPreferences?.marketing,
+          activity: dto.emailPreferences?.activity,
+          critical: dto.emailPreferences?.critical
+        }
+      })
+    }
+    this.log.log(
+      `Updated email preference for user ${user.id} ${JSON.stringify(dto.emailPreferences)}`
+    )
+
     await this.cache.setUser({
       ...updatedUser,
-      defaultWorkspace: user.defaultWorkspace
+      defaultWorkspace: user.defaultWorkspace,
+      emailPreference: user.emailPreference
     })
 
-    return updatedUser
+    return { ...updatedUser, emailPreference: updatedEmailPreferences }
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {

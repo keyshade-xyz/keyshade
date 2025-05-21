@@ -1,4 +1,4 @@
-import { AuthProvider, User } from '@prisma/client'
+import { AuthProvider, EmailPreference, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '@/user/dto/create.user/create.user'
 import {
@@ -41,13 +41,32 @@ export async function createUser(
     })
     logger.log(`Created user ${user.id}`)
 
+    // Create the user's default email preference
+    logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
+    const emailPreference = await prisma.emailPreference.create({
+      data: {
+        marketing: true,
+        activity: true,
+        critical: true,
+        user: {
+          connect: {
+            id: user.id
+          }
+        }
+      }
+    })
+    logger.log(
+      `Created user ${user.id} with default email preference ${emailPreference.id}`
+    )
+
     // If the user is an admin, return the user without a default workspace
     logger.log(`Checking if user is an admin: ${user.id}`)
     if (user.isAdmin) {
       logger.log(`Created admin user ${user.id}. No default workspace needed.`)
       return {
         ...user,
-        defaultWorkspace: null
+        defaultWorkspace: null,
+        emailPreference
       }
     }
 
@@ -64,7 +83,8 @@ export async function createUser(
 
     return {
       ...user,
-      defaultWorkspace: workspace
+      defaultWorkspace: workspace,
+      emailPreference
     }
   } catch (error) {
     logger.error(`Error creating user: ${error}`)
@@ -93,18 +113,24 @@ export async function getUserByEmailOrId(
 
   logger.log(`Getting user by email or ID: ${input}`)
 
-  let user: User
+  let user: User & { emailPreference?: EmailPreference }
 
   try {
     user =
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
+        },
+        include: {
+          emailPreference: true
         }
       })) ??
       (await prisma.user.findUnique({
         where: {
           id: input
+        },
+        include: {
+          emailPreference: true
         }
       }))
   } catch (error) {
@@ -126,11 +152,20 @@ export async function getUserByEmailOrId(
 
   logger.log(`Got user ${user.id}`)
 
+  logger.log(`Retrieving email preference for user ${user.id}`)
+  const emailPreference = await prisma.emailPreference.findUnique({
+    where: {
+      userId: user.id
+    }
+  })
+  logger.log(`Email preference for user ${user.id} has been retrieved.`)
+
   if (user.isAdmin) {
     logger.log(`User ${user.id} is an admin. No default workspace needed.`)
     return {
       ...user,
-      defaultWorkspace: null
+      defaultWorkspace: null,
+      emailPreference
     }
   } else {
     logger.log(
@@ -168,7 +203,8 @@ export async function getUserByEmailOrId(
 
     return {
       ...user,
-      defaultWorkspace
+      defaultWorkspace,
+      emailPreference
     }
   }
 }
