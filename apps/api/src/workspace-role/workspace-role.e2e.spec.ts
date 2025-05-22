@@ -100,9 +100,45 @@ describe('Workspace Role Controller Tests', () => {
     delete createBob.defaultWorkspace
     delete createCharlie.defaultWorkspace
 
-    alice = { ...createAlice, ipAddress: USER_IP_ADDRESS }
-    bob = { ...createBob, ipAddress: USER_IP_ADDRESS }
-    charlie = { ...createCharlie, ipAddress: USER_IP_ADDRESS }
+    alice = {
+      ...createAlice,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createAlice.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    bob = {
+      ...createBob,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createBob.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    charlie = {
+      ...createCharlie,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createCharlie.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     adminRole1 = await prisma.workspaceRole.findFirst({
       where: {
