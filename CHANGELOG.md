@@ -1,3 +1,9 @@
+## [2.22.3-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.2...v2.22.3-stage.1) (2025-05-19)
+
+### 🐛 Bug Fixes
+
+* **cli:** keyshade run wouldn't decrypt encrypted [secure]s ([13a9c11](https://github.com/keyshade-xyz/keyshade/commit/13a9c113f9524ad5fc5d851d1a25d208e649fe84))
+
 ## [2.22.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.1...v2.22.2) (2025-05-17)
 
 ### 🐛 Bug Fixes
