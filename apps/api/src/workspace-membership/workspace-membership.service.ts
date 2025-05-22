@@ -313,14 +313,8 @@ export class WorkspaceMembershipService {
         }
       })
 
-      const member = await getUserByEmailOrId(
-        user.email,
-        this.prisma,
-        this.slugGenerator
-      )
-
-      if (member.emailPreference && !member.emailPreference.activity) {
-        this.log.log(`User ${member.id} has opted out of receiving invitations`)
+      if (user.emailPreference && !user.emailPreference.activity) {
+        this.log.log(`User ${user.id} has opted out of receiving invitations`)
         throw new BadRequestException(
           constructErrorBody(
             'User has opted out',
@@ -905,7 +899,7 @@ export class WorkspaceMembershipService {
       )
     }
 
-    if (member.emailPreference && !member.emailPreference.critical) {
+    if (user.emailPreference && !user.emailPreference.critical) {
       this.log.log(
         `User ${member.id} has opted out of receiving critical notifications`
       )

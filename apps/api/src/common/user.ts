@@ -1,4 +1,4 @@
-import { AuthProvider, EmailPreference, User } from '@prisma/client'
+import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { CreateUserDto } from '@/user/dto/create.user/create.user'
 import {
@@ -36,28 +36,20 @@ export async function createUser(
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,
         isOnboardingFinished: dto.isOnboardingFinished ?? false,
-        authProvider: dto.authProvider
+        authProvider: dto.authProvider,
+        emailPreference: {
+          create: {
+            marketing: true,
+            activity: true,
+            critical: true
+          }
+        }
       }
     })
     logger.log(`Created user ${user.id}`)
 
     // Create the user's default email preference
     logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
-    const emailPreference = await prisma.emailPreference.create({
-      data: {
-        marketing: true,
-        activity: true,
-        critical: true,
-        user: {
-          connect: {
-            id: user.id
-          }
-        }
-      }
-    })
-    logger.log(
-      `Created user ${user.id} with default email preference ${emailPreference.id}`
-    )
 
     // If the user is an admin, return the user without a default workspace
     logger.log(`Checking if user is an admin: ${user.id}`)
@@ -65,8 +57,7 @@ export async function createUser(
       logger.log(`Created admin user ${user.id}. No default workspace needed.`)
       return {
         ...user,
-        defaultWorkspace: null,
-        emailPreference
+        defaultWorkspace: null
       }
     }
 
@@ -83,8 +74,7 @@ export async function createUser(
 
     return {
       ...user,
-      defaultWorkspace: workspace,
-      emailPreference
+      defaultWorkspace: workspace
     }
   } catch (error) {
     logger.error(`Error creating user: ${error}`)
@@ -113,7 +103,7 @@ export async function getUserByEmailOrId(
 
   logger.log(`Getting user by email or ID: ${input}`)
 
-  let user: User & { emailPreference?: EmailPreference }
+  let user: User
 
   try {
     user =
@@ -151,14 +141,12 @@ export async function getUserByEmailOrId(
   }
 
   logger.log(`Got user ${user.id}`)
-  logger.log(`Email preference for user ${user.id} has been retrieved.`)
 
   if (user.isAdmin) {
     logger.log(`User ${user.id} is an admin. No default workspace needed.`)
     return {
       ...user,
-      defaultWorkspace: null,
-      emailPreference: user.emailPreference
+      defaultWorkspace: null
     }
   } else {
     logger.log(
@@ -196,8 +184,7 @@ export async function getUserByEmailOrId(
 
     return {
       ...user,
-      defaultWorkspace,
-      emailPreference: user.emailPreference
+      defaultWorkspace
     }
   }
 }
