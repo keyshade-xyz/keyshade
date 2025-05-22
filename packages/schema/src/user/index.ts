@@ -30,9 +30,9 @@ export const UpdateSelfRequestSchema = z.object({
   email: z.string().email().optional(),
   emailPreferences: z
     .object({
-      marketing: z.boolean(),
-      activity: z.boolean(),
-      critical: z.boolean()
+      marketing: z.boolean().optional(),
+      activity: z.boolean().optional(),
+      critical: z.boolean().optional()
     })
     .optional()
 })
