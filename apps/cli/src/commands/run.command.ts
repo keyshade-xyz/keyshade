@@ -50,7 +50,7 @@ export default class RunCommand extends BaseCommand {
     await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
-    await this.prefetchConfigurations()
+    await this.prefetchConfigurations(configurations.privateKey)
     await this.executeCommand(args[0])
   }
 
@@ -185,7 +185,7 @@ export default class RunCommand extends BaseCommand {
     }
   }
 
-  private async prefetchConfigurations() {
+  private async prefetchConfigurations(privateKey: string) {
     Logger.info('Prefetching configurations...')
     const secretController = new SecretController(this.baseUrl)
     const variableController = new VariableController(this.baseUrl)
@@ -219,8 +219,25 @@ export default class RunCommand extends BaseCommand {
       throw new Error(variablesResponse.error.message)
     }
 
+    // Decrypt secrets if not already decrypted
+    const decryptedSecrets: Array<Omit<Configuration, 'isPlaintext'>> = []
+    for (const secret of secretsResponse.data) {
+      if (secret.isPlaintext) {
+        decryptedSecrets.push({
+          name: secret.name,
+          value: secret.value
+        })
+      } else {
+        const decryptedValue = await decrypt(privateKey, secret.value)
+        decryptedSecrets.push({
+          name: secret.name,
+          value: decryptedValue
+        })
+      }
+    }
+
     // Merge secrets and variables
-    const configurations = [...secretsResponse.data, ...variablesResponse.data]
+    const configurations = [...decryptedSecrets, ...variablesResponse.data]
     Logger.info(
       `Fetched ${configurations.length} configurations (${secretsResponse.data.length} secrets, ${variablesResponse.data.length} variables)`
     )

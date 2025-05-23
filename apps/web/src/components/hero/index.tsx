@@ -1,16 +1,15 @@
 'use client'
 import Image from 'next/image'
 import { Toaster } from 'sonner'
-import {  HeroImage } from '@public/hero'
+import { HeroImage } from '@public/hero'
 import EncryptButton from '../ui/encrypt-btn'
 import { isUserLoggedIn } from '@/utils/is-user-logged-in'
-
 
 function Hero(): React.JSX.Element {
   return (
     <>
       <Toaster />
-      <div className="relative -translate-y-[8rem] flex h-screen flex-col items-center justify-center md:pt-[36rem]  bg-[url(/hero/colour-bg.svg)]  bg-cover bg-no-repeat w-full">
+      <div className="relative -top-8 flex h-screen w-full flex-col items-center justify-center  bg-[url(/hero/colour-bg.svg)]  bg-cover bg-no-repeat md:pt-[36rem]">
         <section className="flex flex-col items-center gap-8 py-[6.88rem] ">
           <h1
             className={` text-brandBlue w-[25rem] text-center text-4xl md:w-auto md:text-7xl`}
