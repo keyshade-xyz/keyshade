@@ -313,6 +313,13 @@ export class WorkspaceMembershipService {
         }
       })
 
+      if (user.emailPreference && !user.emailPreference.activity) {
+        this.log.log(
+          `User ${user.id} has opted out of receiving activity notifications`
+        )
+        return
+      }
+
       // Send an email to the removed users
       const removedOn = new Date()
       const emailPromises = userEmails.map((userEmail) =>
@@ -887,6 +894,13 @@ export class WorkspaceMembershipService {
           'You are trying to invite someone who has not been invited before'
         )
       )
+    }
+
+    if (user.emailPreference && !user.emailPreference.critical) {
+      this.log.log(
+        `User ${member.id} has opted out of receiving critical notifications`
+      )
+      return
     }
 
     // Resend the invitation

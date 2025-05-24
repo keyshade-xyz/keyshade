@@ -98,16 +98,32 @@ export class UserService {
       where: {
         id: user.id
       },
-      data
+      data: {
+        name: dto?.name,
+        profilePictureUrl: dto?.profilePictureUrl,
+        isOnboardingFinished: dto.isOnboardingFinished,
+        emailPreference: {
+          update: {
+            marketing: dto.emailPreferences?.marketing,
+            activity: dto.emailPreferences?.activity,
+            critical: dto.emailPreferences?.critical
+          }
+        }
+      },
+      include: {
+        emailPreference: true
+      }
     })
     this.log.log(`Updated user ${user.id} with data ${data}`)
 
-    await this.cache.setUser({
+    const updatedUserData = {
       ...updatedUser,
       defaultWorkspace: user.defaultWorkspace
-    })
+    }
 
-    return updatedUser
+    await this.cache.setUser(updatedUserData)
+
+    return updatedUserData
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
