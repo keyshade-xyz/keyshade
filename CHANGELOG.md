@@ -1,3 +1,13 @@
+## [2.22.3-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.1...v2.22.3-stage.2) (2025-05-24)
+
+### 🐛 Bug Fixes
+
+* **web:** Broken blog link on the footer > web page ([#980](https://github.com/keyshade-xyz/keyshade/issues/980)) ([8dac31b](https://github.com/keyshade-xyz/keyshade/commit/8dac31b5045a82f0b90fe8ce2f64de1faebf995a))
+
+### 🔨 Code Refactoring
+
+* **platform:** Improve readability and maintainability ([#977](https://github.com/keyshade-xyz/keyshade/issues/977)) ([be4bad0](https://github.com/keyshade-xyz/keyshade/commit/be4bad021171ff45798b323aafe6811288cb15d0))
+
 ## [2.22.3-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.2...v2.22.3-stage.1) (2025-05-19)
 
 ### 🐛 Bug Fixes
