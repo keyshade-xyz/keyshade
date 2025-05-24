@@ -314,13 +314,10 @@ export class WorkspaceMembershipService {
       })
 
       if (user.emailPreference && !user.emailPreference.activity) {
-        this.log.log(`User ${user.id} has opted out of receiving invitations`)
-        throw new BadRequestException(
-          constructErrorBody(
-            'User has opted out',
-            'The user has opted out of receiving invitations'
-          )
+        this.log.log(
+          `User ${user.id} has opted out of receiving activity notifications`
         )
+        return
       }
 
       // Send an email to the removed users
@@ -903,12 +900,7 @@ export class WorkspaceMembershipService {
       this.log.log(
         `User ${member.id} has opted out of receiving critical notifications`
       )
-      throw new BadRequestException(
-        constructErrorBody(
-          'User has opted out',
-          'The user has opted out of receiving critical notifications'
-        )
-      )
+      return
     }
 
     // Resend the invitation

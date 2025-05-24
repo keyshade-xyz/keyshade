@@ -48,9 +48,6 @@ export async function createUser(
     })
     logger.log(`Created user ${user.id}`)
 
-    // Create the user's default email preference
-    logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
-
     // If the user is an admin, return the user without a default workspace
     logger.log(`Checking if user is an admin: ${user.id}`)
     if (user.isAdmin) {
