@@ -422,11 +422,32 @@ export class IntegrationService {
           }
         ]
       },
+      omit: {
+        projectId: true,
+        environmentId: true
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
 
       orderBy: {
         [sort]: order
+      },
+
+      include: {
+        project: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        }
       }
     })
 
