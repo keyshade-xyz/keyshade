@@ -4,6 +4,7 @@ import { SecretService } from './secret.service'
 
 @Module({
   controllers: [SecretController],
-  providers: [SecretService]
+  providers: [SecretService],
+  exports: [SecretService]
 })
 export class SecretModule {}
