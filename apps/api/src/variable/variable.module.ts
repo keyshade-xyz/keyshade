@@ -4,6 +4,7 @@ import { VariableService } from './variable.service'
 
 @Module({
   controllers: [VariableController],
-  providers: [VariableService]
+  providers: [VariableService],
+  exports: [VariableService]
 })
 export class VariableModule {}
