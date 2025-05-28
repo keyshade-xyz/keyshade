@@ -1,9 +1,9 @@
 'use client'
-import { AddSVG } from '@public/svg/shared'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useAtom } from 'jotai'
 import Link from 'next/link'
 import { Integrations } from '@keyshade/common'
+import { AddSVG } from '@public/svg/shared'
 import IntegrationIcon from '../integrationIcon'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,7 +23,7 @@ export default function CreateIntegration(): React.JSX.Element {
     setIsCreateIntegrationOpen((prev) => !prev)
   }
 
-  const integrations = Integrations.getAll()
+  const integrations = useMemo(() => Object.values(Integrations), [])
 
   return (
     <Dialog onOpenChange={handleToggel} open={isCreateIntegrationOpen}>
@@ -43,21 +43,18 @@ export default function CreateIntegration(): React.JSX.Element {
           </p>
         </DialogHeader>
         <div className="grid grid-cols-9 gap-3">
-          {integrations.map((integration) => (
+          {integrations.map(({ name, type }) => (
             <Link
-              href={`integrations?setup=${integration.name.toLowerCase()}`}
-              key={integration.name}
+              href={`integrations?setup=${type}`}
+              key={name}
               onClick={() => setIsCreateIntegrationOpen(false)}
             >
               <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-white/20 bg-white/5 p-4 transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/10 hover:shadow-md">
                 <div className="mb-4 h-16 w-16">
-                  <IntegrationIcon
-                    className="h-full w-full"
-                    type={integration.type}
-                  />
+                  <IntegrationIcon className="h-full w-full" type={type} />
                 </div>
                 <span className="text-lg font-medium text-white/60">
-                  {integration.name}
+                  {name}
                 </span>
               </div>
             </Link>

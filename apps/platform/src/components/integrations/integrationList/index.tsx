@@ -1,8 +1,8 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import type { Integration } from '@keyshade/schema'
-import EmptyIntegration from '../emptyIntegration'
 import IntegrationIcon from '../integrationIcon'
+import EmptyIntegration from '../emptyIntegration'
 import {
   deleteIntegrationOpenAtom,
   editIntegrationOpenAtom,
@@ -76,7 +76,7 @@ function IntegrationList() {
           {integrations.map((integration) => (
             <ContextMenu key={integration.id}>
               <ContextMenuTrigger>
-                <div className="flex items-center justify-between rounded-lg border border-white/10 bg-neutral-800 p-4">
+                <div className="flex h-[6rem] items-center justify-between rounded-lg bg-white/5 px-5 py-4 transition-all duration-150 ease-out hover:bg-white/10">
                   <div className="flex items-center gap-x-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
                       <IntegrationIcon

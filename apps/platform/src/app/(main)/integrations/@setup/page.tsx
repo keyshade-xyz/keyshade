@@ -2,58 +2,73 @@
 import React, { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAtomValue } from 'jotai'
-import type { IntegrationTypeEnum } from '@keyshade/schema'
+import type {
+  Environment,
+  EventTypeEnum,
+  Integration,
+  IntegrationTypeEnum,
+  Project
+} from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
 import IntegrationForm from '@/components/integrations/integrationMetadata'
-import type { EventType } from '@/components/integrations/eventTriggers'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
 
 interface SetupIntegrationProps {
-  setupType: string
+  integrationType: IntegrationTypeEnum
+  integrationName: string
 }
 
-export default function SetupIntegration({ setupType }: SetupIntegrationProps) {
-  const [name, setName] = useState('')
+export default function SetupIntegration({
+  integrationType,
+  integrationName
+}: SetupIntegrationProps) {
+  const [name, setName] = useState<Integration['name']>('')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedEvents, setSelectedEvents] = useState<EventType[]>([])
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string | null>(
-    null
+  const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
+    new Set()
   )
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<
+    Project['slug'] | null
+  >(null)
+  const [selectedEnvironment, setSelectedEnvironment] = useState<
+    Environment['slug'] | null
+  >(null)
   const [metadata, setMetadata] = useState<Record<string, string>>({})
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
-
-  const integrationType = setupType.toUpperCase() as IntegrationTypeEnum
 
   const router = useRouter()
 
   const createIntegration = useHttp(() =>
     ControllerInstance.getInstance().integrationController.createIntegration({
       name,
-      type: integrationType,
+      type: integrationType.toUpperCase() as IntegrationTypeEnum,
       metadata,
       workspaceSlug: selectedWorkspace!.slug,
-      notifyOn: selectedEvents,
-      ...(selectedProject ? { projectSlug: selectedProject } : {}),
-      ...(selectedEnvironment ? { environmentSlug: selectedEnvironment } : {})
+      notifyOn: Array.from(selectedEvents),
+      projectSlug: selectedProjectSlug ?? undefined,
+      environmentSlug: selectedEnvironment ?? undefined
     })
   )
+
+  const resetFormData = () => {
+    setName('')
+    setSelectedEvents(new Set())
+    setSelectedProjectSlug(null)
+    setSelectedEnvironment(null)
+    setMetadata({})
+  }
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       if (!name.trim()) {
         toast.error('Name of integration is required')
-        return
-      }
-      if (selectedEvents.length === 0) {
-        toast.error('Select at least one event type')
         return
       }
 
@@ -63,31 +78,28 @@ export default function SetupIntegration({ setupType }: SetupIntegrationProps) {
         const { success, data } = await createIntegration()
 
         if (success && data) {
-          toast.success(`${setupType} integration created!`)
-          setName('')
-          setSelectedEvents([])
+          toast.success(`${integrationName} integration created!`)
+          resetFormData()
         }
-      } catch (err) {
-        toast.error('There was a problem setting up the integration.')
       } finally {
         setIsLoading(false)
         router.push('/integrations')
       }
     },
-    [name, selectedEvents, setupType, createIntegration, router]
+    [name, createIntegration, integrationName, router]
   )
 
   return (
     <div className="mr-auto max-w-7xl p-6 text-white">
       <div className="mb-2 flex items-center gap-2">
         <h2 className="text-3xl font-bold">
-          Integrate {setupType} with Keyshade
+          Integrate {integrationName} with Keyshade
         </h2>
       </div>
 
       <p className="mb-6 text-white/60">
-        Connect your environment with {setupType} to automate workflows and keep
-        your systems in sync.
+        Connect your environment with {integrationType} to automate workflows
+        and keep your systems in sync.
       </p>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
@@ -108,6 +120,7 @@ export default function SetupIntegration({ setupType }: SetupIntegrationProps) {
 
         {/* Event Triggers Input Component */}
         <EventTriggersInput
+          integrationType={integrationType}
           onChange={setSelectedEvents}
           selectedEvents={selectedEvents}
         />
@@ -115,14 +128,14 @@ export default function SetupIntegration({ setupType }: SetupIntegrationProps) {
         {/* Setup integration metadata */}
         <IntegrationForm
           initialMetadata={metadata}
-          integrationType={setupType}
+          integrationType={integrationType}
           onChange={setMetadata}
         />
 
         {/* Specify Project and Environment(optional) */}
         <ProjectEnvironmentInput
           onEnvironmentChange={setSelectedEnvironment}
-          onProjectChange={setSelectedProject}
+          onProjectChange={setSelectedProjectSlug}
         />
 
         <Button

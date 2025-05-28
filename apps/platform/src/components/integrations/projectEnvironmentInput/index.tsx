@@ -16,8 +16,8 @@ type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
 type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
 
 interface ProjectEnvironmentInputProps {
-  onProjectChange?: (projectSlug: string | null) => void
-  onEnvironmentChange?: (environmentSlug: string | null) => void
+  onProjectChange?: (projectSlug: Project['slug'] | null) => void
+  onEnvironmentChange?: (environmentSlug: Environment['slug'] | null) => void
   initialProject?: PartialProject | null
   initialEnvironment?: PartialEnvironment | null
 }

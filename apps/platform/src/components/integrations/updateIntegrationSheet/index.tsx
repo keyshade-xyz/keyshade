@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
-import type { IntegrationTypeEnum } from '@keyshade/schema'
+import type { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/sheet'
 import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
 import IntegrationMetadata from '@/components/integrations/integrationMetadata'
-import type { EventType } from '@/components/integrations/eventTriggers'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -29,7 +28,9 @@ function UpdateIntegration() {
 
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedEvents, setSelectedEvents] = useState<EventType[]>([])
+  const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
+    new Set()
+  )
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [selectedEnvironment, setSelectedEnvironment] = useState<string | null>(
     null
@@ -40,7 +41,7 @@ function UpdateIntegration() {
   useEffect(() => {
     if (selectedIntegration) {
       setName(selectedIntegration.name || '')
-      setSelectedEvents(selectedIntegration.notifyOn as EventType[])
+      setSelectedEvents(new Set(selectedIntegration.notifyOn))
       setMetadata(selectedIntegration.metadata)
 
       if (selectedIntegration.project) {
@@ -57,9 +58,10 @@ function UpdateIntegration() {
     return ControllerInstance.getInstance().integrationController.updateIntegration(
       {
         integrationSlug: selectedIntegration!.slug,
-        name,
+        name:
+          name.trim() === selectedIntegration!.name ? undefined : name.trim(),
         type: selectedIntegration!.type,
-        notifyOn: selectedEvents,
+        notifyOn: Array.from(selectedEvents),
         metadata,
         ...(selectedProject ? { projectSlug: selectedProject } : {}),
         ...(selectedEnvironment ? { environmentSlug: selectedEnvironment } : {})
@@ -74,7 +76,7 @@ function UpdateIntegration() {
         toast.error('Name of integration is required')
         return
       }
-      if (selectedEvents.length === 0) {
+      if (selectedEvents.size === 0) {
         toast.error('Select at least one event type')
         return
       }
@@ -88,8 +90,6 @@ function UpdateIntegration() {
           toast.success(`Integration updated successfully!`)
           setIsEditIntegrationOpen(false)
         }
-      } catch (err) {
-        toast.error('There was a problem updating the integration.')
       } finally {
         setIsLoading(false)
       }
@@ -142,6 +142,7 @@ function UpdateIntegration() {
 
           {/* Event Triggers Input Component */}
           <EventTriggersInput
+            integrationType={integrationType}
             onChange={setSelectedEvents}
             selectedEvents={selectedEvents}
           />
@@ -149,7 +150,7 @@ function UpdateIntegration() {
           {/* Setup integration metadata */}
           <IntegrationMetadata
             initialMetadata={metadata}
-            integrationType={integrationType.toLowerCase()}
+            integrationType={integrationType}
             onChange={setMetadata}
           />
 

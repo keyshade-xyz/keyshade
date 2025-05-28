@@ -1,4 +1,4 @@
-export type IntegrationType = 'DISCORD' | 'SLACK'
+import { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
 
 export interface MetadataField {
   name: string
@@ -9,14 +9,55 @@ export interface MetadataField {
 
 export interface IntegrationConfig {
   name: string
-  type: IntegrationType
+  type: IntegrationTypeEnum
+  events: EventTypeEnum[]
   metadataFields: MetadataField[]
 }
 
-export const INTEGRATIONS_CONFIG: Record<string, IntegrationConfig> = {
+const COMMUNICATION_EVENTS: EventTypeEnum[] = [
+  'INVITED_TO_WORKSPACE',
+  'REMOVED_FROM_WORKSPACE',
+  'ACCEPTED_INVITATION',
+  'DECLINED_INVITATION',
+  'CANCELLED_INVITATION',
+  'LEFT_WORKSPACE',
+  'WORKSPACE_MEMBERSHIP_UPDATED',
+  'WORKSPACE_UPDATED',
+  'WORKSPACE_CREATED',
+  'WORKSPACE_ROLE_CREATED',
+  'WORKSPACE_ROLE_UPDATED',
+  'WORKSPACE_ROLE_DELETED',
+  'PROJECT_CREATED',
+  'PROJECT_UPDATED',
+  'PROJECT_DELETED',
+  'SECRET_UPDATED',
+  'SECRET_DELETED',
+  'SECRET_ADDED',
+  'VARIABLE_UPDATED',
+  'VARIABLE_DELETED',
+  'VARIABLE_ADDED',
+  'ENVIRONMENT_UPDATED',
+  'ENVIRONMENT_DELETED',
+  'ENVIRONMENT_ADDED',
+  'INTEGRATION_ADDED',
+  'INTEGRATION_UPDATED',
+  'INTEGRATION_DELETED'
+]
+
+// const CONFIGURATION_EVENTS: EventTypeEnum[] = [
+//   'VARIABLE_ADDED',
+//   'VARIABLE_DELETED',
+//   'VARIABLE_UPDATED',
+//   'SECRET_ADDED',
+//   'SECRET_DELETED',
+//   'SECRET_UPDATED'
+// ]
+
+export const Integrations: Record<string, IntegrationConfig> = {
   DISCORD: {
     name: 'Discord',
     type: 'DISCORD',
+    events: COMMUNICATION_EVENTS,
     metadataFields: [
       {
         name: 'Webhook URL',
@@ -29,6 +70,7 @@ export const INTEGRATIONS_CONFIG: Record<string, IntegrationConfig> = {
   SLACK: {
     name: 'Slack',
     type: 'SLACK',
+    events: COMMUNICATION_EVENTS,
     metadataFields: [
       {
         name: 'Bot Token',
@@ -52,30 +94,5 @@ export const INTEGRATIONS_CONFIG: Record<string, IntegrationConfig> = {
         placeholder: 'KS1234567'
       }
     ]
-  }
-}
-
-export const Integrations = {
-  validTypes: Object.keys(INTEGRATIONS_CONFIG),
-
-  get: (type: string): IntegrationConfig | undefined => {
-    const normalizedType = type.toUpperCase()
-    return INTEGRATIONS_CONFIG[normalizedType]
-  },
-
-  // Get all integrations
-  getAll: (): IntegrationConfig[] => {
-    return Object.values(INTEGRATIONS_CONFIG)
-  },
-
-  // Get metadata fields for any integration type
-  metadata: (type: string): MetadataField[] => {
-    const integration = Integrations.get(type)
-    return integration?.metadataFields || []
-  },
-
-  //check valid integration type
-  isValidType: (type: string): boolean => {
-    return !!Integrations.get(type)
   }
 }

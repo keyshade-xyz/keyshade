@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Integrations } from '@keyshade/common'
+import type { IntegrationTypeEnum } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 
 interface IntegrationMetadataProps {
-  integrationType: string
+  integrationType: IntegrationTypeEnum
   initialMetadata?: Record<string, string>
   onChange: (metadata: Record<string, string>) => void
 }
@@ -13,8 +14,12 @@ function IntegrationMetadata({
   initialMetadata = {},
   onChange
 }: IntegrationMetadataProps): JSX.Element {
+  const metadataFields = useMemo(
+    () => Integrations[integrationType].metadataFields,
+    [integrationType]
+  )
+
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
-    const metadataFields = Integrations.metadata(integrationType)
     return metadataFields.reduce<Record<string, string>>((acc, field) => {
       acc[field.requestFieldName] =
         initialMetadata[field.requestFieldName] || ''
@@ -36,26 +41,30 @@ function IntegrationMetadata({
         {integrationType} Configuration
       </h3>
       <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
-        {Integrations.metadata(integrationType).map((field) => (
-          <div className="flex flex-col gap-y-1" key={field.requestFieldName}>
-            <label
-              className="font-medium text-white"
-              htmlFor={field.requestFieldName}
-            >
-              {field.name}
-            </label>
-            {field.description ? <p className="mb-3 text-sm text-white/50">{field.description}</p> : null}
-            <Input
-              id={field.requestFieldName}
-              onChange={(e) =>
-                handleInputChange(field.requestFieldName, e.target.value)
-              }
-              placeholder={field.placeholder}
-              type="text"
-              value={metadata[field.requestFieldName]}
-            />
-          </div>
-        ))}
+        {metadataFields.map(
+          ({ name, requestFieldName, description, placeholder }) => (
+            <div className="flex flex-col gap-y-1" key={requestFieldName}>
+              <label
+                className="font-medium text-white"
+                htmlFor={requestFieldName}
+              >
+                {name}
+              </label>
+              {description ? (
+                <p className="mb-3 text-sm text-white/50">{description}</p>
+              ) : null}
+              <Input
+                id={requestFieldName}
+                onChange={(e) =>
+                  handleInputChange(requestFieldName, e.target.value)
+                }
+                placeholder={placeholder}
+                type="text"
+                value={metadata[requestFieldName]}
+              />
+            </div>
+          )
+        )}
       </div>
     </div>
   )
