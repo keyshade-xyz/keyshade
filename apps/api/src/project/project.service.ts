@@ -1680,7 +1680,8 @@ export class ProjectService {
   }
 
   /**
-   * Returns an export of the secrets in the project in the desidered format
+   * Returns an export of the project configurations (secrets and variables)
+   * in the desidered format
    *
    * @param user The user who is requesting the project secrets
    * @param projectSlug The slug of the project to export secrets from
@@ -1692,33 +1693,19 @@ export class ProjectService {
    * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
    * @throws BadRequestException If the private key is required but not supplied
    */
-  async exportProjectSecrets(
+  async exportProjectConfigurations(
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlugs: Environment['slug'][],
     format: ExportFormat,
-    privateKey?: string
+    privateKey?: Project['privateKey']
   ) {
     this.logger.log(
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
     )
 
-    // if no environment is supplied, default to the first environment that the user has access to
-    const environments =
-      environmentSlugs.length > 0
-        ? environmentSlugs
-        : [
-            (
-              await this.authorizationService.authorizeUserAccessToEnvironment({
-                user,
-                entity: { slug: '' },
-                authorities: [Authority.READ_ENVIRONMENT]
-              })
-            ).slug
-          ]
-
     const environmentExports = await Promise.all(
-      environments.map(async (environmentSlug) => {
+      environmentSlugs.map(async (environmentSlug) => {
         const rawSecrets =
           await this.secretService.getAllSecretsOfProjectAndEnvironment(
             user,
@@ -1761,8 +1748,8 @@ export class ProjectService {
       })
     )
 
-    const files = Object.fromEntries(environmentExports)
+    const fileData = Object.fromEntries(environmentExports)
 
-    return files
+    return fileData
   }
 }
