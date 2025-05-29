@@ -2,17 +2,12 @@ export enum ExportFormat {
   JSON = 'json'
 }
 
-export interface Secret {
-  name: string
-  value: string
-}
-
-export interface Variable {
+export interface Configuration {
   name: string
   value: string
 }
 
 export interface ExportData {
-  secrets: Secret[]
-  variables: Variable[]
+  secrets: Configuration[]
+  variables: Configuration[]
 }

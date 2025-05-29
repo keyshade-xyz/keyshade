@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -125,26 +124,22 @@ export class ProjectController {
     )
   }
 
-  @Get(':projectSlug/export-secrets')
+  @Get(':projectSlug/export-configurations')
   @RequiredApiKeyAuthorities(
     Authority.READ_PROJECT,
     Authority.READ_SECRET,
     Authority.READ_VARIABLE,
     Authority.READ_ENVIRONMENT
   )
-  async exportProjectSecrets(
+  async exportProjectConfigurations(
     @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
-    @Query(
-      'environmentSlugs',
-      new DefaultValuePipe([]),
-      new ParseArrayPipe({ items: String, optional: true })
-    )
+    @Query('environmentSlugs', new ParseArrayPipe({ items: String }))
     environmentSlugs: Environment['slug'][],
     @Query('format', new ParseEnumPipe(ExportFormat)) format: ExportFormat,
-    @Query('privateKey') privateKey: string
+    @Query('privateKey') privateKey: Project['privateKey']
   ) {
-    return await this.service.exportProjectSecrets(
+    return await this.service.exportProjectConfigurations(
       user,
       projectSlug,
       environmentSlugs,
