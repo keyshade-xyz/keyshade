@@ -14,7 +14,7 @@ export class ExportService {
     if (!fn) {
       throw new BadRequestException(`Unsupported format: ${format}`)
     }
-    return fn(data)
+    return Buffer.from(fn(data)).toString('base64')
   }
 
   private flattenObject(data: ExportData): Record<string, string> {
