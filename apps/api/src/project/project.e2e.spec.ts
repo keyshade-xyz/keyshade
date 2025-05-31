@@ -1967,4 +1967,168 @@ describe('Project Controller Tests', () => {
       expect(response.json().items).toHaveLength(1)
     })
   })
+
+  describe('Export Configurations Tests', () => {
+    let env: Environment, envNoPrivateKey: Environment
+
+    beforeEach(async () => {
+      env = (await environmentService.createEnvironment(
+        user1,
+        { name: 'EnvProj1' },
+        project1.slug
+      )) as Environment
+
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'API_KEY',
+          entries: [{ value: 'secret_val', environmentSlug: env.slug }]
+        },
+        project1.slug
+      )
+
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'TIMEOUT',
+          entries: [{ value: '3000', environmentSlug: env.slug }]
+        },
+        project1.slug
+      )
+
+      envNoPrivateKey = (await environmentService.createEnvironment(
+        user2,
+        { name: 'EnvProj2' },
+        project2.slug
+      )) as Environment
+
+      await secretService.createSecret(
+        user2,
+        {
+          name: 'API_KEY',
+          entries: [
+            { value: 'secret_val', environmentSlug: envNoPrivateKey.slug }
+          ]
+        },
+        project2.slug
+      )
+
+      await variableService.createVariable(
+        user2,
+        {
+          name: 'TIMEOUT',
+          entries: [{ value: '3000', environmentSlug: envNoPrivateKey.slug }]
+        },
+        project2.slug
+      )
+    })
+
+    describe('Success cases', () => {
+      it('should export project configurations as base64-JSON', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&privateKey=${project1.privateKey}`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(200)
+
+        const body = response.json()
+        expect(body).toHaveProperty(env.slug)
+
+        const raw = Buffer.from(body[env.slug], 'base64').toString('utf-8')
+        const parsed = JSON.parse(raw)
+        expect(parsed).toEqual({
+          API_KEY: 'secret_val',
+          TIMEOUT: '3000'
+        })
+      })
+
+      it('should 200 if privateKey is missing but the project stores the private key', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(200)
+      })
+    })
+
+    describe('Error cases', () => {
+      it('should 400 if privateKey is missing and the project does not store the private key', async () => {
+        const url =
+          `/project/${project2.slug}/export-configurations` +
+          `?environmentSlugs=${envNoPrivateKey.slug}` +
+          `&format=json`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user2.email }
+        })
+
+        expect(response.statusCode).toBe(400)
+      })
+
+      it('should 400 if privateKey is invalid', async () => {
+        const url =
+          `/project/${project2.slug}/export-configurations` +
+          `?environmentSlugs=${envNoPrivateKey.slug}` +
+          `&format=json` +
+          `&privateKey=totally-wrong-key`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user2.email }
+        })
+
+        expect(response.statusCode).toBe(400)
+      })
+
+      it('should 401 if user is not a workspace member', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&privateKey=${project1.privateKey}`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user2.email }
+        })
+
+        expect(response.statusCode).toBe(401)
+      })
+
+      it('should 404 if project does not exist', async () => {
+        const url =
+          `/project/not-a-real-slug/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&privateKey=${project1.privateKey}`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(404)
+      })
+    })
+  })
 })
