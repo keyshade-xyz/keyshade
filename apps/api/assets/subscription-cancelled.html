@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Subscription Cancelled</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f7;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        background-color: #ffffff;
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #ff4d4f;
+      }
+      p {
+        font-size: 16px;
+        color: #333;
+        line-height: 1.6;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        margin-top: 20px;
+        background-color: #4a90e2;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+      }
+      .features {
+        background-color: #f9f9f9;
+        padding: 10px 15px;
+        border-left: 4px solid #ff4d4f;
+        margin-top: 20px;
+        border-radius: 5px;
+      }
+      .footer {
+        margin-top: 40px;
+        font-size: 12px;
+        color: #888;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>We're sorry to see you go 😢</h2>
+      <p>Hello {{userName}},</p>
+      <p>
+        Your subscription has been successfully cancelled. As a result, the following
+        premium features are no longer available to you:
+      </p>
+
+      <div class="features">
+        <ul>
+          <li>Access to encrypted secrets across teams</li>
+          <li>Advanced permission management</li>
+          <li>Team collaboration tools</li>
+          <li>24/7 priority support</li>
+        </ul>
+      </div>
+
+      <p>
+        You can still access your account and basic features. If this was a mistake
+        or you change your mind, you can reactivate anytime.
+      </p>
+
+      <a class="button" href="{{subscriptionSettingsURL}}">
+        Manage Subscription
+      </a>
+
+      <div class="footer">
+        © 2025 Keyshade. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>
