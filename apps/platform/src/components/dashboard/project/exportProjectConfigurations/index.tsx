@@ -1,4 +1,6 @@
 import { useAtom } from 'jotai'
+import { useEffect, useState } from 'react'
+import type { ExportProjectRequest } from '@keyshade/schema'
 import { exportConfigOpenAtom, selectedProjectAtom } from '@/store'
 import {
   Sheet,
@@ -13,8 +15,25 @@ import { Button } from '@/components/ui/button'
 export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   const [isExportConfigurationSheetOpen, setIsExportConfigurationSheetOpen] =
     useAtom(exportConfigOpenAtom)
-
   const [selectedProject] = useAtom(selectedProjectAtom)
+
+  const [formData, setFormData] = useState<
+    Omit<ExportProjectRequest, 'projectSlug'>
+  >({
+    environmentSlugs: [],
+    format: '',
+    privateKey: ''
+  })
+
+  useEffect(() => {
+    if (isExportConfigurationSheetOpen && selectedProject) {
+      setFormData({
+        environmentSlugs: [],
+        format: '',
+        privateKey: ''
+      })
+    }
+  }, [isExportConfigurationSheetOpen, selectedProject])
 
   const handleSheetChange = (open: boolean) => {
     setIsExportConfigurationSheetOpen(open)
