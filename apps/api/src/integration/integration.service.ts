@@ -145,7 +145,17 @@ export class IntegrationService {
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
-        workspaceId
+        workspaceId,
+        lastUpdatedById: user.id
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -279,7 +289,8 @@ export class IntegrationService {
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
-        projectId: project?.id
+        projectId: project?.id,
+        lastUpdatedById: user.id
       }
     })
 

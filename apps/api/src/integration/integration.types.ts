@@ -49,6 +49,25 @@ export interface SlackIntegrationMetadata extends IntegrationMetadata {
   channelId: string
 }
 
-export interface IntegrationWithWorkspace extends Integration {
+export interface IntegrationWithLastUpdatedBy extends Integration {
+  lastUpdatedBy: {
+    id: string
+    name: string
+    profilePictureUrl: string
+  }
+}
+
+export interface IntegrationWithLastUpdatedByAndReferences
+  extends IntegrationWithLastUpdatedBy {
   workspace: Workspace
+  project: {
+    id: string
+    name: string
+    slug: string
+  } | null
+  environment: {
+    id: string
+    name: string
+    slug: string
+  } | null
 }

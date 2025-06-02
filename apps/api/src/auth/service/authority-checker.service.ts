@@ -15,7 +15,7 @@ import {
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
-import { IntegrationWithWorkspace } from '@/integration/integration.types'
+import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
@@ -538,13 +538,13 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverIntegration(
     params: AuthorizationParams
-  ): Promise<IntegrationWithWorkspace> {
+  ): Promise<IntegrationWithLastUpdatedByAndReferences> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over integration for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
     )
 
-    let integration: IntegrationWithWorkspace | null
+    let integration: IntegrationWithLastUpdatedByAndReferences | null
 
     try {
       if (entity.slug) {
@@ -554,7 +554,28 @@ export class AuthorityCheckerService {
             slug: entity.slug
           },
           include: {
-            workspace: true
+            workspace: true,
+            project: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            },
+            environment: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            },
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       } else {
@@ -565,7 +586,28 @@ export class AuthorityCheckerService {
             workspace: { members: { some: { userId: user.id } } }
           },
           include: {
-            workspace: true
+            workspace: true,
+            project: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            },
+            environment: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            },
+            lastUpdatedBy: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         })
       }

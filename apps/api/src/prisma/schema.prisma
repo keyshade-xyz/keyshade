@@ -203,6 +203,7 @@ model User {
   secretVersion    SecretVersion[]
   variableVersion  VariableVersion[]
   events           Event[]
+  integrations     Integration[] // Stores the integrations the user updated
 
   @@index([email], name: "email")
 }
@@ -225,6 +226,9 @@ model Integration {
   updatedAt DateTime        @updatedAt
   type      IntegrationType
   notifyOn  EventType[]
+
+  lastUpdatedBy  User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
 
   // An integration will always be tied to a workspace
   workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)

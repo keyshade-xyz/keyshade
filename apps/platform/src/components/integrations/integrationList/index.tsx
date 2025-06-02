@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect } from 'react'
 import type { Integration } from '@keyshade/schema'
+import Link from 'next/link'
 import IntegrationIcon from '../integrationIcon'
 import EmptyIntegration from '../emptyIntegration'
 import {
@@ -76,27 +77,29 @@ function IntegrationList() {
           {integrations.map((integration) => (
             <ContextMenu key={integration.id}>
               <ContextMenuTrigger>
-                <div className="flex h-[6rem] items-center justify-between rounded-lg bg-white/5 px-5 py-4 transition-all duration-150 ease-out hover:bg-white/10">
-                  <div className="flex items-center gap-x-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
-                      <IntegrationIcon
-                        className="h-6 w-6"
-                        type={integration.type}
-                      />
+                <Link href={`/integrations?details=${integration.slug}`}>
+                  <div className="flex h-[6rem] items-center justify-between rounded-lg bg-white/5 px-5 py-4 transition-all duration-150 ease-out hover:bg-white/10">
+                    <div className="flex items-center gap-x-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
+                        <IntegrationIcon
+                          className="h-6 w-6"
+                          type={integration.type}
+                        />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">
+                          {integration.name}
+                        </h2>
+                        <p className="text-sm text-white/60">
+                          {integration.type}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">
-                        {integration.name}
-                      </h2>
-                      <p className="text-sm text-white/60">
-                        {integration.type}
-                      </p>
+                    <div className="flex items-start justify-center gap-x-2">
+                      <CopyToClipboard text={integration.slug} />
                     </div>
                   </div>
-                  <div className="flex items-start justify-center gap-x-2">
-                    <CopyToClipboard text={integration.slug} />
-                  </div>
-                </div>
+                </Link>
               </ContextMenuTrigger>
               <ContextMenuContent className="w-52">
                 <ContextMenuItem

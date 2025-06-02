@@ -28,7 +28,13 @@ export const IntegrationSchema = z.object({
       name: EnvironmentSchema.shape.name,
       slug: EnvironmentSchema.shape.slug
     })
-    .nullable()
+    .nullable(),
+  workspace: WorkspaceSchema,
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  })
 })
 
 export const CreateIntegrationRequestSchema = z.object({
