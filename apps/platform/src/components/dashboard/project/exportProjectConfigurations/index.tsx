@@ -11,6 +11,16 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+
+const formatOptions = [{ label: 'JSON', value: 'json' }]
 
 export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   const [isExportConfigurationSheetOpen, setIsExportConfigurationSheetOpen] =
@@ -57,7 +67,29 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="grid gap-4 py-4" />
+        <div className="grid gap-4 py-4">
+          <div className="flex flex-col items-start gap-4">
+            <Label htmlFor="format">Export Format</Label>
+            <Select
+              name="format"
+              onValueChange={(value: string) =>
+                setFormData((prev) => ({ ...prev, format: value }))
+              }
+              value={formData.format}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                {formatOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <SheetFooter>
           <Button disabled type="button">
