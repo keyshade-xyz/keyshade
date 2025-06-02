@@ -129,6 +129,7 @@ export const projectVariableCountAtom = atom<number>(0)
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
 export const deleteProjectOpenAtom = atom<boolean>(false)
+export const exportConfigOpenAtom = atom<boolean>(false)
 
 export const createVariableOpenAtom = atom<boolean>(false)
 export const editVariableOpenAtom = atom<boolean>(false)
