@@ -8,7 +8,7 @@
 
 <p align="center">
     <a href="https://www.keyshade.xyz?ref=github" target="_blank"><b>Website</b></a> •
-    <a href="https://docs.keyshade.xyz/" target="_blank"><b>Documentation</b></a> •
+    <a href="https://docs.keyshade.xyz/getting-started/introduction" target="_blank"><b>Documentation</b></a> •
     <a href="https://discord.gg/dh8F3Dzt" target="_blank"><b>Join our Community</b></a> • 
     <a href="https://twitter.com/keyshade_xyz" target="_blank"><b>Twitter</b></a> • 
     <a href="https://www.linkedin.com/company/keyshade-xyz/" target="_blank"><b>LinkedIn</b></a>
@@ -19,17 +19,11 @@
 <div align="center">
 
 [![Coverage Status](https://codecov.io/gh/keyshade-xyz/keyshade/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/keyshade-xyz/keyshade)
-[![Build Status](https://github.com/keyshade-xyz/keyshade/actions/workflows/deploy-cli.yml/badge.svg?branch=master)](https://github.com/keyshade-xyz/keyshade/actions/workflows/deploy-cli.yml)
+[![Build Status](https://img.shields.io/npm/d18m/%40keyshade%2Fcli)](https://img.shields.io/npm/d18m/%40keyshade%2Fcli)
 [![npm version](https://img.shields.io/npm/v/@keyshade/cli.svg)](https://www.npmjs.com/package/@keyshade/cli?activeTab=versions)
 [![license](https://img.shields.io/github/license/keyshade-xyz/keyshade.svg)](https://github.com/keyshade-xyz/keyshade/blob/develop/LICENSE)
 
 </div>
-
----
-
-> ⚠️ Warning: This is a closed alpha version and is not intended for public use at this time.
-
----
 
 # Keyshade Command Line Inteface
 
