@@ -38,6 +38,7 @@ import ErrorInfoSVG from './errorInfo.svg'
 import DiscordSVG from './discord.svg'
 import SlackSVG from './slack.svg'
 import EmptyIntegrationSVG from './emptyIntegration.svg'
+import PendingSVG from './pending.svg'
 
 export {
   DropdownSVG,
@@ -79,5 +80,6 @@ export {
   EmptyIntegrationSVG,
   ErrorInfoSVG,
   DiscordSVG,
-  SlackSVG
+  SlackSVG,
+  PendingSVG
 }

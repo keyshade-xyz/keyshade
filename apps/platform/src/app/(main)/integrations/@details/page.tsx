@@ -1,6 +1,6 @@
 'use client'
-import type { Event, Integration } from '@keyshade/schema'
-import { EditTwoSVG, VectorSVG } from '@public/svg/shared'
+import type { Integration } from '@keyshade/schema'
+import { EditTwoSVG } from '@public/svg/shared'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -9,10 +9,11 @@ import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import { PageTitle } from '@/components/common/page-title'
 import IntegrationIcon from '@/components/integrations/integrationIcon'
 import IntegrationLoader from '@/components/integrations/IntegrationLoader'
+import IntegrationTriggerList from '@/components/integrations/integrationTriggerList'
 import UpdateIntegration from '@/components/integrations/updateIntegrationSheet'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { editIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 
@@ -23,7 +24,6 @@ function IntegrationDetailsPage({
 }) {
   const router = useRouter()
   const [integration, setIntegration] = useState<Integration>()
-  const [eventTriggers, setEventTriggers] = useState<Event[]>([])
   const [showAllEvents, setShowAllEvents] = useState<boolean>(false)
 
   const [selectedIntegration, setSelectedIntegration] = useAtom(
@@ -36,15 +36,6 @@ function IntegrationDetailsPage({
   const getIntegrationDetails = useHttp(() =>
     ControllerInstance.getInstance().integrationController.getIntegration(
       { integrationSlug },
-      {}
-    )
-  )
-
-  const getEventTriggers = useHttp(() =>
-    ControllerInstance.getInstance().eventController.getEvents(
-      {
-        workspaceSlug: integration?.workspace.slug ?? ''
-      },
       {}
     )
   )
@@ -68,16 +59,6 @@ function IntegrationDetailsPage({
       }
     })
   }, [getIntegrationDetails, integrationSlug, router])
-
-  useEffect(() => {
-    if (integration?.workspaceId) {
-      getEventTriggers().then(({ data, success }) => {
-        if (success && data) {
-          setEventTriggers(data.items)
-        }
-      })
-    }
-  }, [getEventTriggers, integration])
 
   if (!integration) {
     return <IntegrationLoader />
@@ -200,52 +181,8 @@ function IntegrationDetailsPage({
         </div>
       </div>
 
-      <div className="w-3/5 flex-1">
-        <div className="h-full rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-          <h2 className="mb-6 text-xl font-semibold text-white">
-            All Triggers
-          </h2>
-          <div className="max-h-[60vh] overflow-y-auto">
-            {eventTriggers.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
-                {eventTriggers.map((trigger) => (
-                  <div
-                    className="flex justify-between gap-2 rounded-md border border-white/20 bg-white/10 p-3 text-xs font-medium text-white/90 transition-colors hover:bg-white/15"
-                    key={trigger.id}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="pt-2">
-                        <VectorSVG />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">
-                          {trigger.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-white/50">
-                          Event:{' '}
-                          <span className="font-semibold text-white/70">
-                            {trigger.type
-                              .replace(/_/g, ' ')
-                              .toLowerCase()
-                              .replace(/\b\w/g, (l) => l.toUpperCase())}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end text-sm text-white/50">
-                      <p>{formatTime(trigger.timestamp)}</p>
-                      <p>{formatDate(trigger.timestamp)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-white/70">No triggers found.</p>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Integration Trigger List Component */}
+      <IntegrationTriggerList integration={integration} />
 
       {/* Update Integration sheet */}
       {isEditIntegrationsOpen && selectedIntegration ? (
