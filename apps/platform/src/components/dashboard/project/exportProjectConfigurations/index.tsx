@@ -29,6 +29,30 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
 
+const formatMap = new Map<
+  string,
+  { label: string; mimeType?: string; extension?: string }
+>([
+  ['json', { label: 'JSON', mimeType: 'application/json', extension: 'json' }]
+])
+
+const downloadBase64File = (
+  base64Contents: string,
+  filename: string,
+  mimeType: string
+) => {
+  const decodedString = atob(base64Contents)
+
+  const blob = new Blob([decodedString], { type: mimeType })
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   const [isLoading, setIsLoading] = useState(false)
   const [isExportConfigurationSheetOpen, setIsExportConfigurationSheetOpen] =
@@ -37,8 +61,6 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   const [environmentsOfProject] = useAtom(environmentsOfProjectAtom)
 
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
-
-  const formatOptions = [{ label: 'JSON', value: 'json' }]
 
   const [formData, setFormData] = useState<
     Omit<ExportProjectRequest, 'projectSlug'>
@@ -130,6 +152,15 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
       const { data, success } = await exportConfigs()
 
       if (success && data) {
+        const mimeType =
+          formatMap.get(formData.format)?.mimeType ?? 'text/plain'
+        const extension = formatMap.get(formData.format)?.extension ?? 'txt'
+
+        Object.entries(data).forEach(([envSlug, base64Contents]) => {
+          const filename = `${envSlug}.${extension}`
+          downloadBase64File(base64Contents, filename, mimeType)
+        })
+
         toast.success('Export request successful. Check your downloads.')
       }
     } catch (err) {
@@ -180,9 +211,9 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
               <SelectContent>
-                {formatOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {[...formatMap].map(([value, { label }]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -211,7 +242,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
 
           {!selectedProject.storePrivateKey && (
             <div className="flex flex-col items-start gap-4">
-              <Label htmlFor="privateKey">Private Key (optional)</Label>
+              <Label htmlFor="privateKey">Private Key</Label>
               <Input
                 id="privateKey"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
