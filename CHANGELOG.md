@@ -1,3 +1,13 @@
+## [2.22.3-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.2...v2.22.3-stage.3) (2025-06-03)
+
+### 🐛 Bug Fixes
+
+* **platform:** Suspense boundary fix ([#983](https://github.com/keyshade-xyz/keyshade/issues/983)) ([dedba9b](https://github.com/keyshade-xyz/keyshade/commit/dedba9bdbca403ba11357d17115108865f08e758))
+
+### 📚 Documentation
+
+* **cli:** add download badge ([9999ec8](https://github.com/keyshade-xyz/keyshade/commit/9999ec8033c1d483b7d9454db007341402902538))
+
 ## [2.22.3-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.1...v2.22.3-stage.2) (2025-05-24)
 
 ### 🐛 Bug Fixes
