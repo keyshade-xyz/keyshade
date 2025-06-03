@@ -118,6 +118,11 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
       return
     }
 
+    if (!selectedProject.storePrivateKey && !formData.privateKey) {
+      toast.error('Private Key is required for this project')
+      return
+    }
+
     setIsLoading(true)
     const loadingToastId = toast.loading('Exporting configurations...')
 
@@ -138,6 +143,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
     selectedProject,
     formData.environmentSlugs,
     formData.format,
+    formData.privateKey,
     exportConfigs,
     setIsExportConfigurationSheetOpen
   ])
@@ -203,18 +209,23 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
             </div>
           </div>
 
-          <div className="flex flex-col items-start gap-4">
-            <Label htmlFor="privateKey">Private Key (optional)</Label>
-            <Input
-              id="privateKey"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFormData((prev) => ({ ...prev, privateKey: e.target.value }))
-              }
-              placeholder="Paste private key here"
-              type="password"
-              value={formData.privateKey}
-            />
-          </div>
+          {!selectedProject.storePrivateKey && (
+            <div className="flex flex-col items-start gap-4">
+              <Label htmlFor="privateKey">Private Key (optional)</Label>
+              <Input
+                id="privateKey"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    privateKey: e.target.value
+                  }))
+                }
+                placeholder="Paste private key here"
+                type="password"
+                value={formData.privateKey}
+              />
+            </div>
+          )}
         </div>
 
         <SheetFooter>
