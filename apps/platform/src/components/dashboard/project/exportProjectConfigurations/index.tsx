@@ -210,7 +210,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-neutral-800">
                 {[...formatMap].map(([value, { label }]) => (
                   <SelectItem key={value} value={value}>
                     {label}
