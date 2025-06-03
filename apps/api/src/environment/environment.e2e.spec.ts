@@ -117,11 +117,11 @@ describe('Environment Controller Tests', () => {
       }
     }
     user2 = {
-      ...createUser1,
+      ...createUser2,
       ipAddress: USER_IP_ADDRESS,
       emailPreference: {
         id: expect.any(String),
-        userId: createUser1.id,
+        userId: createUser2.id,
         marketing: true,
         activity: true,
         critical: true,
