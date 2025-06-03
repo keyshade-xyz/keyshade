@@ -1,6 +1,7 @@
 import { useAtom, useSetAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { ExportProjectRequest } from '@keyshade/schema'
+import { toast } from 'sonner'
 import {
   environmentsOfProjectAtom,
   exportConfigOpenAtom,
@@ -28,15 +29,16 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
 
-const formatOptions = [{ label: 'JSON', value: 'json' }]
-
 export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
+  const [isLoading, setIsLoading] = useState(false)
   const [isExportConfigurationSheetOpen, setIsExportConfigurationSheetOpen] =
     useAtom(exportConfigOpenAtom)
   const [selectedProject] = useAtom(selectedProjectAtom)
   const [environmentsOfProject] = useAtom(environmentsOfProjectAtom)
 
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+
+  const formatOptions = [{ label: 'JSON', value: 'json' }]
 
   const [formData, setFormData] = useState<
     Omit<ExportProjectRequest, 'projectSlug'>
@@ -89,6 +91,56 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
       return { ...prev, environmentSlugs: Array.from(set) }
     })
   }
+
+  const exportConfigs = useHttp(() => {
+    return ControllerInstance.getInstance().projectController.exportProjectConfigurations(
+      {
+        projectSlug: selectedProject!.slug,
+        environmentSlugs: formData.environmentSlugs,
+        format: formData.format,
+        privateKey: formData.privateKey || undefined
+      }
+    )
+  })
+
+  const handleExport = useCallback(async () => {
+    if (!selectedProject) {
+      toast.error('No project selected')
+      return
+    }
+
+    if (formData.environmentSlugs.length < 1) {
+      toast.error('Please select at least one environment')
+      return
+    }
+    if (!formData.format) {
+      toast.error('Please pick a format')
+      return
+    }
+
+    setIsLoading(true)
+    const loadingToastId = toast.loading('Exporting configurations...')
+
+    try {
+      const { data, success } = await exportConfigs()
+
+      if (success && data) {
+        toast.success('Export request successful. Check your downloads.')
+      }
+    } catch (err) {
+      toast.error('An error occurred during export', { id: loadingToastId })
+    } finally {
+      toast.dismiss(loadingToastId)
+      setIsLoading(false)
+      setIsExportConfigurationSheetOpen(false)
+    }
+  }, [
+    selectedProject,
+    formData.environmentSlugs,
+    formData.format,
+    exportConfigs,
+    setIsExportConfigurationSheetOpen
+  ])
 
   if (!selectedProject) {
     return null
@@ -166,8 +218,13 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
         </div>
 
         <SheetFooter>
-          <Button disabled type="button">
-            Export
+          <Button
+            disabled={isLoading}
+            onClick={handleExport}
+            type="button"
+            variant="secondary"
+          >
+            {isLoading ? 'Exporting...' : 'Export'}
           </Button>
         </SheetFooter>
       </SheetContent>
