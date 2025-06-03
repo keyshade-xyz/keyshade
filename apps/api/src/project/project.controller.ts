@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -136,7 +137,16 @@ export class ProjectController {
     @Param('projectSlug') projectSlug: Project['slug'],
     @Query('environmentSlugs', new ParseArrayPipe({ items: String }))
     environmentSlugs: Environment['slug'][],
-    @Query('format', new ParseEnumPipe(ExportFormat)) format: ExportFormat,
+    @Query(
+      'format',
+      new ParseEnumPipe(ExportFormat, {
+        exceptionFactory: () =>
+          new BadRequestException(
+            `Invalid format provided. Supported formats: ${Object.values(ExportFormat).join(', ')}`
+          )
+      })
+    )
+    format: ExportFormat,
     @Query('privateKey') privateKey: Project['privateKey']
   ) {
     return await this.service.exportProjectConfigurations(
