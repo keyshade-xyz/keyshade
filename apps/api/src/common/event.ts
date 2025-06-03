@@ -5,7 +5,6 @@ import {
   EventTriggerer,
   EventType,
   EventSource,
-  PrismaClient,
   Project,
   Secret,
   User,
@@ -15,10 +14,11 @@ import {
   Integration
 } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
-import IntegrationFactory from '@/integration/plugins/factory/integration.factory'
+import IntegrationFactory from '@/integration/plugins/integration.factory'
 import { EventService } from '@/event/event.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from './util'
+import { PrismaService } from '@/prisma/prisma.service'
 
 /**
  * Creates a new event and saves it to the database.
@@ -48,7 +48,7 @@ export const createEvent = async (
     description?: string
     metadata: JsonObject
   },
-  prisma: PrismaClient
+  prisma: PrismaService
 ): Promise<void> => {
   const logger = new Logger('CreateEvent')
 
@@ -160,7 +160,8 @@ export const createEvent = async (
         `Emitting event for integration with id ${integration.id} and type ${integration.type}`
       )
       const integrationInstance = IntegrationFactory.createIntegration(
-        integration.type
+        integration.type,
+        prisma
       )
       integrationInstance.emitEvent(
         {
@@ -168,9 +169,11 @@ export const createEvent = async (
           source: data.source,
           eventType: data.type,
           title: data.title,
-          description: data.description
+          description: data.description,
+          eventId: event.id
         },
-        integration.metadata
+        integration.metadata,
+        integration.id
       )
       logger.log(`Event emitted for integration with id ${integration.id}`)
     }

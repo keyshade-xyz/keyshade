@@ -1,16 +1,20 @@
-import { EventType, IntegrationType } from '@prisma/client'
+import {
+  EventType,
+  Integration,
+  IntegrationRunStatus,
+  IntegrationType
+} from '@prisma/client'
 import {
   DiscordIntegrationMetadata,
   IntegrationEventData
-} from '../../integration.types'
-import { BaseIntegration } from '../base.integration'
-import { Logger } from '@nestjs/common'
+} from '../integration.types'
+import { BaseIntegration } from './base.integration'
+import { PrismaService } from '@/prisma/prisma.service'
+import { makeTimedRequest } from '@/common/util'
 
 export class DiscordIntegration extends BaseIntegration {
-  private readonly logger = new Logger('DiscordIntegration')
-
-  constructor() {
-    super(IntegrationType.DISCORD)
+  constructor(integrationType: IntegrationType, prisma: PrismaService) {
+    super(integrationType, prisma)
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -53,39 +57,55 @@ export class DiscordIntegration extends BaseIntegration {
 
   async emitEvent(
     data: IntegrationEventData,
-    metadata: DiscordIntegrationMetadata
+    metadata: DiscordIntegrationMetadata,
+    integrationId: Integration['id']
   ): Promise<void> {
     this.logger.log(`Emitting event to Discord: ${data.title}`)
 
-    const response = await fetch(metadata.webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        content: 'Update occurred on keyshade',
-        embeds: [
-          {
-            title: data.title ?? 'No title provided',
-            description: data.description ?? 'No description provided',
-            author: {
-              name: 'keyshade',
-              url: 'https://keyshade.xyz'
-            },
-            fields: [
-              {
-                name: 'Event',
-                value: data.title
-              },
-              {
-                name: 'Source',
-                value: data.source
-              }
-            ]
-          }
-        ]
-      })
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: data.eventId,
+      integrationId,
+      title: 'Posting message to Discord'
     })
+
+    const { response, duration } = await makeTimedRequest(() =>
+      fetch(metadata.webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: 'Update occurred on keyshade',
+          embeds: [
+            {
+              title: data.title ?? 'No title provided',
+              description: data.description ?? 'No description provided',
+              author: {
+                name: 'keyshade',
+                url: 'https://keyshade.xyz'
+              },
+              fields: [
+                {
+                  name: 'Event',
+                  value: data.title
+                },
+                {
+                  name: 'Source',
+                  value: data.source
+                }
+              ]
+            }
+          ]
+        })
+      })
+    )
+
+    await this.markIntegrationRunAsFinished(
+      integrationRunId,
+      response.ok ? IntegrationRunStatus.SUCCESS : IntegrationRunStatus.FAILED,
+      duration,
+      await response.text()
+    )
 
     if (!response.ok) {
       this.logger.error(

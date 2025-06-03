@@ -107,3 +107,9 @@ export const authProviderEnum = z.enum([
   'GOOGLE',
   'GITLAB'
 ])
+
+export const integrationRunStatusEnum = z.enum([
+  'PENDING',
+  'SUCCESS',
+  'FAILURE'
+])

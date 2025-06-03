@@ -1,8 +1,9 @@
 import { IntegrationType } from '@prisma/client'
-import { BaseIntegration } from '../base.integration'
-import { DiscordIntegration } from '../discord/discord.integration'
+import { BaseIntegration } from './base.integration'
+import { DiscordIntegration } from './discord.integration'
 import { InternalServerErrorException } from '@nestjs/common'
-import { SlackIntegration } from '../slack/slack.integration'
+import { SlackIntegration } from './slack.integration'
+import { PrismaService } from '@/prisma/prisma.service'
 /**
  * Factory class to create integrations. This class will be called to create an integration,
  * based on the integration type. This has only a single factory method. You will need to
@@ -15,13 +16,14 @@ export default class IntegrationFactory {
    * @returns The integration object.
    */
   public static createIntegration(
-    integrationType: IntegrationType
+    integrationType: IntegrationType,
+    prisma: PrismaService
   ): BaseIntegration {
     switch (integrationType) {
       case IntegrationType.DISCORD:
-        return new DiscordIntegration()
+        return new DiscordIntegration(integrationType, prisma)
       case IntegrationType.SLACK:
-        return new SlackIntegration()
+        return new SlackIntegration(integrationType, prisma)
       default:
         throw new InternalServerErrorException('Integration type not found')
     }

@@ -1,17 +1,23 @@
-import { EventType, IntegrationType } from '@prisma/client'
+import {
+  EventType,
+  Integration,
+  IntegrationRunStatus,
+  IntegrationType
+} from '@prisma/client'
 import {
   SlackIntegrationMetadata,
   IntegrationEventData
-} from '../../integration.types'
+} from '../integration.types'
 import { App } from '@slack/bolt'
-import { BaseIntegration } from '../base.integration'
-import { Logger } from '@nestjs/common'
+import { BaseIntegration } from './base.integration'
+import { PrismaService } from '@/prisma/prisma.service'
+import { makeTimedRequest } from '@/common/util'
+import { InternalServerErrorException } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private readonly logger = new Logger('SlackIntegration')
   private app: App
-  constructor() {
-    super(IntegrationType.SLACK)
+  constructor(integrationType: IntegrationType, prisma: PrismaService) {
+    super(integrationType, prisma)
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -54,11 +60,18 @@ export class SlackIntegration extends BaseIntegration {
 
   async emitEvent(
     data: IntegrationEventData,
-    metadata: SlackIntegrationMetadata
+    metadata: SlackIntegrationMetadata,
+    integrationId: Integration['id']
   ): Promise<void> {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
 
     try {
+      const { id: integrationRunId } = await this.registerIntegrationRun({
+        eventId: data.eventId,
+        integrationId,
+        title: 'Posting message to Slack'
+      })
+
       if (!this.app) {
         this.app = new App({
           token: metadata.botToken,
@@ -107,17 +120,34 @@ export class SlackIntegration extends BaseIntegration {
           ]
         }
       ]
-      await this.app.client.chat.postMessage({
-        channel: metadata.channelId,
-        blocks: block,
-        text: data.title
-      })
 
-      this.logger.log(`Successfully emitted event to Slack: ${data.title}`)
+      const { response, duration } = await makeTimedRequest(() =>
+        this.app.client.chat.postMessage({
+          channel: metadata.channelId,
+          blocks: block,
+          text: data.title
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        response.message.text
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to emit event to Slack: ${response.status} - ${response.statusText}`
+        )
+      } else {
+        this.logger.log(`Event emitted to Slack in ${duration}ms`)
+      }
     } catch (error) {
-      this.logger.error(`Failed to emit event to Slack: ${error.message}`)
-      console.error(error)
-      throw error
+      this.logger.error(`Failed to emit event to Slack: ${error}`)
+      throw new InternalServerErrorException('Failed to emit event to Slack')
     }
   }
 }

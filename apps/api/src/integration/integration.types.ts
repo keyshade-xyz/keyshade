@@ -7,7 +7,9 @@ import {
   Secret,
   Variable,
   Workspace,
-  WorkspaceRole
+  WorkspaceRole,
+  Event,
+  IntegrationRun
 } from '@prisma/client'
 
 /**
@@ -26,6 +28,13 @@ export interface IntegrationEventData {
   eventType: EventType
   title?: string
   description?: string
+  eventId?: Event['id']
+}
+
+export interface IntegrationRunData {
+  title: IntegrationRun['title']
+  eventId: Event['id']
+  integrationId: Integration['id']
 }
 
 /**

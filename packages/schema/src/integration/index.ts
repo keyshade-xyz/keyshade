@@ -1,9 +1,14 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { eventTypeEnum, integrationTypeEnum } from '@/enums'
+import {
+  eventTypeEnum,
+  integrationRunStatusEnum,
+  integrationTypeEnum
+} from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
+import { EventSchema } from '@/event'
 
 export const IntegrationSchema = z.object({
   id: z.string(),
@@ -35,6 +40,18 @@ export const IntegrationSchema = z.object({
     name: z.string(),
     profilePictureUrl: z.string().nullable()
   })
+})
+
+export const IntegrationRunSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  duration: z.number(),
+  triggeredAt: z.string().datetime(),
+  logs: z.string().optional(),
+  status: integrationRunStatusEnum,
+  event: EventSchema,
+  eventId: EventSchema.shape.id,
+  integrationId: IntegrationSchema.shape.id
 })
 
 export const CreateIntegrationRequestSchema = z.object({
@@ -80,3 +97,10 @@ export const GetAllIntegrationRequestSchema = PageRequestSchema.extend({
 
 export const GetAllIntegrationResponseSchema =
   PageResponseSchema(IntegrationSchema)
+
+export const GetAllIntegrationRunsRequestSchema = PageRequestSchema.extend({
+  integrationSlug: IntegrationSchema.shape.slug
+})
+
+export const GetAllIntegrationRunsResponseSchema =
+  PageResponseSchema(IntegrationRunSchema)

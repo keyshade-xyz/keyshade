@@ -652,7 +652,6 @@ export class AuthorityCheckerService {
 
       if (!project) {
         this.logger.warn(`Project with ID ${integration.projectId} not found`)
-        this.logger.warn(`Project with ID ${integration.projectId} not found`)
         throw new NotFoundException(
           `Project with ID ${integration.projectId} not found`
         )
