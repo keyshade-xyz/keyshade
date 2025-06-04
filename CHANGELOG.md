@@ -1,3 +1,15 @@
+## [2.23.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.23.0-stage.1...v2.23.0-stage.2) (2025-06-04)
+
+### 🚀 Features
+
+* **api:** add cross-platform sleep utility for e2e preparation ([#985](https://github.com/keyshade-xyz/keyshade/issues/985)) ([befb695](https://github.com/keyshade-xyz/keyshade/commit/befb69518f4218a725fa62a153be5b37d148c196))
+
+## [2.23.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.3...v2.23.0-stage.1) (2025-06-04)
+
+### 🚀 Features
+
+* **api:** added support for email preferences ([#978](https://github.com/keyshade-xyz/keyshade/issues/978)) ([f7e5028](https://github.com/keyshade-xyz/keyshade/commit/f7e50282ee819e3b466aaa86c3c13f7d594c4ba4))
+
 ## [2.22.3-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.2...v2.22.3-stage.3) (2025-06-03)
 
 ### 🐛 Bug Fixes
