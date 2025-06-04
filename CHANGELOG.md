@@ -1,3 +1,9 @@
+## [2.23.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.23.0-stage.2...v2.23.0-stage.3) (2025-06-04)
+
+### 🚀 Features
+
+* **platform:** Integration setup ([#976](https://github.com/keyshade-xyz/keyshade/issues/976)) ([ac98f27](https://github.com/keyshade-xyz/keyshade/commit/ac98f27113d519b4ebb5f04bec50fccb3337378d))
+
 ## [2.23.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.23.0-stage.1...v2.23.0-stage.2) (2025-06-04)
 
 ### 🚀 Features
