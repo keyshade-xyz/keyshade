@@ -109,7 +109,7 @@ export const authProviderEnum = z.enum([
 ])
 
 export const integrationRunStatusEnum = z.enum([
-  'PENDING',
+  'RUNNING',
   'SUCCESS',
   'FAILURE'
 ])
