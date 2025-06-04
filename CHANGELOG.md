@@ -1,3 +1,9 @@
+## [2.23.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.23.0-stage.1...v2.23.0-stage.2) (2025-06-04)
+
+### 🚀 Features
+
+* **api:** add cross-platform sleep utility for e2e preparation ([#985](https://github.com/keyshade-xyz/keyshade/issues/985)) ([befb695](https://github.com/keyshade-xyz/keyshade/commit/befb69518f4218a725fa62a153be5b37d148c196))
+
 ## [2.23.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.22.3-stage.3...v2.23.0-stage.1) (2025-06-04)
 
 ### 🚀 Features
