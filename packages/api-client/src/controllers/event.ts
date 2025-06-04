@@ -15,7 +15,7 @@ export default class EventController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<GetEventsResponse>> {
     const response = await this.apiClient.get(
-      `/api/event/${request.workspaceSlug}?source=${request.source}`,
+      `/api/event/${request.workspaceSlug}?source=${request.source || ''}`,
       headers
     )
 

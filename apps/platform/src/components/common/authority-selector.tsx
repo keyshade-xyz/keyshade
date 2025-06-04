@@ -431,7 +431,7 @@ interface AuthoritySelectorProps {
     React.SetStateAction<Set<AuthorityEnum>>
   >
   isSheet?: boolean
-  parent: 'API_KEY' | 'ROLES',
+  parent: 'API_KEY' | 'ROLES'
   isAdminRole?: boolean
 }
 
@@ -607,9 +607,11 @@ export default function AuthoritySelector({
       <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
-      <div className={cn("mt-2 h-full w-full space-y-4", {
-        'opacity-50 pointer-events-none cursor-none': isAdminRole
-      })}>
+      <div
+        className={cn('mt-2 h-full w-full space-y-4', {
+          'pointer-events-none cursor-none opacity-50': isAdminRole
+        })}
+      >
         {authorityGroups
           .filter((group) => {
             if (group.explicitToApiKey) {

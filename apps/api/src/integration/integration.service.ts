@@ -17,7 +17,7 @@ import {
 import { CreateIntegration } from './dto/create.integration/create.integration'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import IntegrationFactory from './plugins/factory/integration.factory'
+import IntegrationFactory from './plugins/integration.factory'
 import { paginate } from '@/common/paginate'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
@@ -121,7 +121,10 @@ export class IntegrationService {
 
     // Create the integration object
     this.logger.log(`Creating integration object of type ${dto.type}`)
-    const integrationObject = IntegrationFactory.createIntegration(dto.type)
+    const integrationObject = IntegrationFactory.createIntegration(
+      dto.type,
+      this.prisma
+    )
 
     // Check for permitted events
     this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
@@ -145,7 +148,17 @@ export class IntegrationService {
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
-        workspaceId
+        workspaceId,
+        lastUpdatedById: user.id
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -258,7 +271,8 @@ export class IntegrationService {
     // Create the integration object
     this.logger.log(`Creating integration object of type ${integration.type}`)
     const integrationObject = IntegrationFactory.createIntegration(
-      integration.type
+      integration.type,
+      this.prisma
     )
 
     // Check for permitted events
@@ -279,7 +293,8 @@ export class IntegrationService {
         metadata: dto.metadata,
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
-        projectId: project?.id
+        projectId: project?.id,
+        lastUpdatedById: user.id
       }
     })
 
@@ -422,11 +437,32 @@ export class IntegrationService {
           }
         ]
       },
+      omit: {
+        projectId: true,
+        environmentId: true
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
 
       orderBy: {
         [sort]: order
+      },
+
+      include: {
+        project: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        }
       }
     })
 
@@ -506,6 +542,61 @@ export class IntegrationService {
       },
       this.prisma
     )
+  }
+
+  async getAllRunsOfIntegration(
+    user: AuthenticatedUser,
+    integrationSlug: Integration['slug'],
+    page: number,
+    limit: number
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to retrieve all runs of integration ${integrationSlug}`
+    )
+
+    // Check if the user has READ authority over the integration
+    this.logger.log(`Checking user access to integration ${integrationSlug}`)
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        entity: { slug: integrationSlug },
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    const integrationId = integration.id
+
+    // Fetch all runs of the integration
+    this.logger.log(`Fetching all runs of integration ${integrationId}`)
+    const runs = await this.prisma.integrationRun.findMany({
+      where: {
+        integrationId
+      },
+      include: {
+        event: true
+      },
+      skip: page * limit,
+      take: limitMaxItemsPerPage(limit),
+      orderBy: {
+        triggeredAt: 'desc'
+      }
+    })
+
+    // Calculate metadata for pagination
+    const totalCount = await this.prisma.integrationRun.count({
+      where: {
+        integrationId
+      }
+    })
+    const metadata = paginate(
+      totalCount,
+      `/integration/${integrationSlug}/run`,
+      {
+        page,
+        limit: limitMaxItemsPerPage(limit)
+      }
+    )
+
+    return { items: runs, metadata }
   }
 
   /**

@@ -150,6 +150,12 @@ enum ProjectAccessLevel {
   PRIVATE
 }
 
+enum IntegrationRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
 model Event {
   id          String         @id @default(cuid())
   source      EventSource
@@ -166,6 +172,23 @@ model Event {
   userId      String?
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   workspaceId String?
+
+  integrationTrigger IntegrationRun[]
+}
+
+model IntegrationRun {
+  id          String               @id @default(cuid())
+  title       String
+  duration    Int
+  triggeredAt DateTime
+  logs        String?
+  status      IntegrationRunStatus
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  eventId String
+
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  integrationId String
 }
 
 model Notification {
@@ -203,6 +226,7 @@ model User {
   secretVersion    SecretVersion[]
   variableVersion  VariableVersion[]
   events           Event[]
+  integrations     Integration[] // Stores the integrations the user updated
   emailPreference  EmailPreference?
 
   @@index([email], name: "email")
@@ -227,6 +251,9 @@ model Integration {
   type      IntegrationType
   notifyOn  EventType[]
 
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
   // An integration will always be tied to a workspace
   workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   workspaceId   String
@@ -236,6 +263,8 @@ model Integration {
   // An integration may or may not have relations with environments
   environment   Environment? @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   environmentId String?
+
+  integrationTrigger IntegrationRun[]
 
   @@unique([workspaceId, name])
 }
