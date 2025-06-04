@@ -126,8 +126,32 @@ describe('Project Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
-    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
@@ -1005,7 +1029,19 @@ describe('Project Controller Tests', () => {
         isAdmin: false
       })
 
-      const johnny: AuthenticatedUser = { ...user, ipAddress: USER_IP_ADDRESS }
+      const johnny: AuthenticatedUser = {
+        ...user,
+        ipAddress: USER_IP_ADDRESS,
+        emailPreference: {
+          id: expect.any(String),
+          userId: user.id,
+          marketing: true,
+          activity: true,
+          critical: true,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date)
+        }
+      }
 
       // Create a member role for the workspace
       const role = await workspaceRoleService.createWorkspaceRole(

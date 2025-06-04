@@ -52,7 +52,19 @@ describe('Api Key Role Controller Tests', () => {
 
     delete createUser.defaultWorkspace
 
-    user = { ...createUser, ipAddress: USER_IP_ADDRESS }
+    user = {
+      ...createUser,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     apiKey = await apiKeyService.createApiKey(user, {
       name: 'Test Key',

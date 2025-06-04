@@ -95,7 +95,19 @@ describe('Event Controller Tests', () => {
       isOnboardingFinished: true
     })
 
-    user = { ...createUser, ipAddress: USER_IP_ADDRESS }
+    user = {
+      ...createUser,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
   })
 
   it('should be defined', async () => {
