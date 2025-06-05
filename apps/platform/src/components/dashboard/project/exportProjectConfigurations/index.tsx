@@ -28,6 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 
 const formatMap = new Map<
   string,
@@ -69,6 +70,8 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
     format: '',
     privateKey: ''
   })
+
+  const { projectPrivateKey: browserProjectPrivateKey } = useProjectPrivateKey()
 
   const fetchEnvironments = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
@@ -120,7 +123,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
         projectSlug: selectedProject!.slug,
         environmentSlugs: formData.environmentSlugs,
         format: formData.format,
-        privateKey: formData.privateKey || undefined
+        privateKey: formData.privateKey || browserProjectPrivateKey || undefined
       }
     )
   })
@@ -140,7 +143,11 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
       return
     }
 
-    if (!selectedProject.storePrivateKey && !formData.privateKey) {
+    if (
+      !selectedProject.storePrivateKey &&
+      !formData.privateKey &&
+      !browserProjectPrivateKey
+    ) {
       toast.error('Private Key is required for this project')
       return
     }
@@ -175,6 +182,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
     formData.environmentSlugs,
     formData.format,
     formData.privateKey,
+    browserProjectPrivateKey,
     exportConfigs,
     setIsExportConfigurationSheetOpen
   ])
@@ -240,7 +248,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
             </div>
           </div>
 
-          {!selectedProject.storePrivateKey && (
+          {!selectedProject.storePrivateKey && !browserProjectPrivateKey && (
             <div className="flex flex-col items-start gap-4">
               <Label htmlFor="privateKey">Private Key</Label>
               <Input
