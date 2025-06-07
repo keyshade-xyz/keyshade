@@ -21,7 +21,11 @@ import { UpdateProject } from './dto/update.project/update.project'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { v4 } from 'uuid'
-import { ProjectWithCounts, ProjectWithSecrets } from './project.types'
+import {
+  ExportFormat,
+  ProjectWithCounts,
+  ProjectWithSecrets
+} from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
 import { createKeyPair } from '@/common/cryptography'
@@ -34,6 +38,9 @@ import {
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { SecretService } from '@/secret/secret.service'
+import { VariableService } from '@/variable/variable.service'
+import { ExportService } from './export/export.service'
 import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
@@ -44,7 +51,10 @@ export class ProjectService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly secretService: SecretService,
+    private readonly variableService: VariableService,
+    private readonly exportService: ExportService
   ) {}
 
   /**
@@ -1667,5 +1677,79 @@ export class ProjectService {
       maxAllowedVariables,
       totalVariables
     }
+  }
+
+  /**
+   * Returns an export of the project configurations (secrets and variables)
+   * in the desidered format
+   *
+   * @param user The user who is requesting the project secrets
+   * @param projectSlug The slug of the project to export secrets from
+   * @param environmentSlug The slug of the environment to export secrets from
+   * @param format The format to export the secrets in
+   * @param privateKey The private key to use for secret decryption
+   * @returns The secrets exported in the desired format
+   *
+   * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
+   * @throws BadRequestException If the private key is required but not supplied
+   */
+  async exportProjectConfigurations(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    environmentSlugs: Environment['slug'][],
+    format: ExportFormat,
+    privateKey?: Project['privateKey']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to export secrets in project ${projectSlug}`
+    )
+
+    const environmentExports = await Promise.all(
+      environmentSlugs.map(async (environmentSlug) => {
+        const rawSecrets =
+          await this.secretService.getAllSecretsOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+
+        const secrets = await Promise.all(
+          rawSecrets.map(async (secret) => {
+            try {
+              return {
+                name: secret.name,
+                value: secret.isPlaintext
+                  ? secret.value
+                  : await decrypt(privateKey, secret.value)
+              }
+            } catch (err) {
+              throw new BadRequestException(
+                constructErrorBody('Failed to decrypt', err.message)
+              )
+            }
+          })
+        )
+
+        const variables = (
+          await this.variableService.getAllVariablesOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+        ).map((variable) => ({
+          name: variable.name,
+          value: variable.value
+        }))
+
+        return [
+          environmentSlug,
+          this.exportService.format({ secrets, variables }, format)
+        ]
+      })
+    )
+
+    const fileData = Object.fromEntries(environmentExports)
+
+    return fileData
   }
 }
