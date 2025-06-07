@@ -89,6 +89,22 @@ export class IntegrationController {
     )
   }
 
+  @Get(':integrationSlug/runs')
+  @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
+  async getAllRunsOfIntegration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('integrationSlug') integrationSlug: string,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.integrationService.getAllRunsOfIntegration(
+      user,
+      integrationSlug,
+      page,
+      limit
+    )
+  }
+
   @Delete(':integrationSlug')
   @RequiredApiKeyAuthorities(Authority.DELETE_INTEGRATION)
   async deleteIntegration(

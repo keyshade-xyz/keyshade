@@ -4,7 +4,7 @@ import { ProjectWithSecrets } from '@/project/project.types'
 import { EnvironmentWithProject } from '@/environment/environment.types'
 import { VariableWithProjectAndVersion } from '@/variable/variable.types'
 import { SecretWithProjectAndVersion } from '@/secret/secret.types'
-import { IntegrationWithWorkspace } from '@/integration/integration.types'
+import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -140,7 +140,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToIntegration(
     params: AuthorizationParams
-  ): Promise<IntegrationWithWorkspace> {
+  ): Promise<IntegrationWithLastUpdatedByAndReferences> {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration(params)
 

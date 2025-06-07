@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { GeistSansFont } from '../fonts/index'
 import { Toaster } from '@/components/ui/sonner'
 import './global.css'
@@ -19,16 +20,18 @@ export default function RootLayout({
   return (
     <html className={GeistSansFont.className} lang="en">
       <body>
-        <PostHogProvider>
-          <JotaiProvider>
-            <>
-              <OnlineStatusHandler />
-              {children}
-              <MobileOverlay />
-              <Toaster richColors />
-            </>
-          </JotaiProvider>
-        </PostHogProvider>
+        <Suspense>
+          <PostHogProvider>
+            <JotaiProvider>
+              <>
+                <OnlineStatusHandler />
+                {children}
+                <MobileOverlay />
+                <Toaster richColors />
+              </>
+            </JotaiProvider>
+          </PostHogProvider>
+        </Suspense>
       </body>
     </html>
   )

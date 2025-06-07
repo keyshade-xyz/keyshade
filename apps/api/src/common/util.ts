@@ -138,3 +138,17 @@ export const constructErrorBody = (header: string, body: string): string => {
     body
   })
 }
+
+export const makeTimedRequest = async <T>(
+  func: () => Promise<T>
+): Promise<{ response: T; duration: number }> => {
+  const startTime = Date.now()
+  const response = await func()
+  const endTime = Date.now()
+  const duration = endTime - startTime
+
+  return {
+    response,
+    duration
+  }
+}

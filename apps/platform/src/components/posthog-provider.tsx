@@ -7,13 +7,18 @@ import { usePathname, useSearchParams } from 'next/navigation'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: '/ingest',
-      ui_host: 'https://eu.posthog.com',
-      capture_pageview: false, // We capture pageviews manually
-      capture_pageleave: true, // Enable pageleave capture
-      debug: process.env.NODE_ENV === 'development'
-    })
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+        api_host: '/ingest',
+        ui_host: 'https://eu.posthog.com',
+        capture_pageview: false, // We capture pageviews manually
+        capture_pageleave: true, // Enable pageleave capture
+        debug: process.env.NODE_ENV === 'development'
+      })
+    }
   }, [])
 
   return (
@@ -34,7 +39,7 @@ function PostHogPageView() {
       let url = window.origin + pathname
       const search = searchParams.toString()
       if (search) {
-        url += `?${  search}`
+        url += `?${search}`
       }
       posthogInstance.capture('$pageview', { $current_url: url })
     }

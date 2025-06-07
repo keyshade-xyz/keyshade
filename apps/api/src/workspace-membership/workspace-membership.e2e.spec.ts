@@ -150,9 +150,45 @@ describe('Workspace Membership Controller Tests', () => {
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
-    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
-    user3 = { ...createUser3, ipAddress: USER_IP_ADDRESS }
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user3 = {
+      ...createUser3,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser3.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     memberRole = await prisma.workspaceRole.create({
       data: {

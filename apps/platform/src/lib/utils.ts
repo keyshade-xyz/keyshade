@@ -26,6 +26,10 @@ export function formatDate(date: string): string {
   return dayjs(date).format('D MMMM, YYYY')
 }
 
+export function formatTime(date: string): string {
+  return dayjs(date).format('HH:mm')
+}
+
 export function parseUpdatedEnvironmentValues(
   oldValues: Variable['values'],
   newValues: Record<string, string>

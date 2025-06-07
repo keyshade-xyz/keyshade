@@ -5,6 +5,8 @@ import {
   DeleteIntegrationResponse,
   GetAllIntegrationRequest,
   GetAllIntegrationResponse,
+  GetAllIntegrationRunsRequest,
+  GetAllIntegrationRunsResponse,
   GetIntegrationRequest,
   GetIntegrationResponse,
   UpdateIntegrationRequest,
@@ -67,6 +69,18 @@ export default class IntegrationController {
     )
     const response = await this.apiClient.get(url, headers)
     return await parseResponse<GetAllIntegrationResponse>(response)
+  }
+
+  async getAllIntegrationRuns(
+    request: GetAllIntegrationRunsRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllIntegrationRunsResponse>> {
+    const url = parsePaginationUrl(
+      `/api/integration/${request.integrationSlug}/runs`,
+      request
+    )
+    const response = await this.apiClient.get(url, headers)
+    return await parseResponse<GetAllIntegrationRunsResponse>(response)
   }
 
   async deleteIntegration(

@@ -36,7 +36,14 @@ export async function createUser(
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,
         isOnboardingFinished: dto.isOnboardingFinished ?? false,
-        authProvider: dto.authProvider
+        authProvider: dto.authProvider,
+        emailPreference: {
+          create: {
+            marketing: true,
+            activity: true,
+            critical: true
+          }
+        }
       }
     })
     logger.log(`Created user ${user.id}`)
@@ -100,11 +107,17 @@ export async function getUserByEmailOrId(
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
+        },
+        include: {
+          emailPreference: true
         }
       })) ??
       (await prisma.user.findUnique({
         where: {
           id: input
+        },
+        include: {
+          emailPreference: true
         }
       }))
   } catch (error) {

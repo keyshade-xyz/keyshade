@@ -1,13 +1,29 @@
-import { EventType, IntegrationType } from '@prisma/client'
-import { IntegrationMetadata, IntegrationEventData } from '../integration.types'
-import { BadRequestException } from '@nestjs/common'
+import {
+  EventType,
+  Integration,
+  IntegrationRun,
+  IntegrationRunStatus,
+  IntegrationType
+} from '@prisma/client'
+import {
+  IntegrationMetadata,
+  IntegrationEventData,
+  IntegrationRunData
+} from '../integration.types'
+import { BadRequestException, Logger } from '@nestjs/common'
 import { constructErrorBody } from '@/common/util'
+import { PrismaService } from '@/prisma/prisma.service'
 
 /**
  * The integration abstract class that every integration must extend.
  */
 export abstract class BaseIntegration {
-  constructor(public readonly integrationType: IntegrationType) {}
+  protected readonly logger = new Logger(BaseIntegration.name)
+
+  constructor(
+    private readonly integrationType: IntegrationType,
+    private readonly prisma: PrismaService
+  ) {}
 
   /**
    * Call the actual API for the specific integration.
@@ -15,10 +31,12 @@ export abstract class BaseIntegration {
    * to make actual calls to the APIs that will perform the desired operations.
    * @param data The data that will be sent to the integration.
    * @param metadata The metadata data that will be used to authenticate with the integration and perform the tasks.
+   * @param integrationId The id of the integration that is being used.
    */
   abstract emitEvent(
     data: IntegrationEventData,
-    metadata: IntegrationMetadata
+    metadata: IntegrationMetadata,
+    integrationId: Integration['id']
   ): Promise<void>
 
   /**
@@ -30,6 +48,51 @@ export abstract class BaseIntegration {
    * Use this function to list the required metadata parameters for the integration.
    */
   abstract getRequiredMetadataParameters(): Set<string>
+
+  // WARNING: DO NOT OVERRIDE
+  protected async registerIntegrationRun({
+    eventId,
+    integrationId,
+    title
+  }: IntegrationRunData): Promise<IntegrationRun> {
+    this.logger.log(
+      `Registering integration run for event ${eventId} with title ${title}`
+    )
+
+    const integrationRun = await this.prisma.integrationRun.create({
+      data: {
+        title,
+        duration: 0,
+        triggeredAt: new Date(),
+        status: IntegrationRunStatus.RUNNING,
+        eventId: eventId,
+        integrationId: integrationId
+      }
+    })
+    this.logger.log(
+      `Registered integration run ${integrationRun.id} for event ${eventId} with title ${title}`
+    )
+
+    return integrationRun
+  }
+
+  protected async markIntegrationRunAsFinished(
+    integrationRunId: IntegrationRun['id'],
+    status: IntegrationRunStatus,
+    duration: IntegrationRun['duration'],
+    logs: IntegrationRun['logs']
+  ): Promise<void> {
+    this.logger.log(`Marking integration run ${integrationRunId} as ${status}`)
+    await this.prisma.integrationRun.update({
+      where: { id: integrationRunId },
+      data: {
+        status,
+        duration,
+        logs
+      }
+    })
+    this.logger.log(`Marked integration run ${integrationRunId} as ${status}`)
+  }
 
   // WARNING: DO NOT OVERRIDE
   validatePermittedEvents(events: EventType[]): void {

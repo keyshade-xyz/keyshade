@@ -8,7 +8,9 @@ import {
   WorkspaceController,
   WorkspaceMembershipController,
   WorkspaceRoleController,
-  ApiKeyController
+  ApiKeyController,
+  IntegrationController,
+  EventController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
@@ -24,6 +26,8 @@ export default class ControllerInstance {
   private _secretController: SecretController
   private _variableController: VariableController
   private _apiKeyController: ApiKeyController
+  private _integrationController: IntegrationController
+  private _eventController: EventController
 
   get authController(): AuthController {
     return this._authController
@@ -65,6 +69,14 @@ export default class ControllerInstance {
     return this._apiKeyController
   }
 
+  get integrationController(): IntegrationController {
+    return this._integrationController
+  }
+
+  get eventController(): EventController {
+    return this._eventController
+  }
+
   static getInstance(): ControllerInstance {
     if (!ControllerInstance.instance) {
       ControllerInstance.instance = new ControllerInstance()
@@ -92,6 +104,11 @@ export default class ControllerInstance {
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
       ControllerInstance.instance._apiKeyController = new ApiKeyController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._integrationController =
+        new IntegrationController(process.env.NEXT_PUBLIC_BACKEND_URL)
+      ControllerInstance.instance._eventController = new EventController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
     }
