@@ -27,6 +27,7 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
+import { sDecrypt } from '@/common/cryptography'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -384,6 +385,11 @@ describe('Integration Controller Tests', () => {
       })
       expect(integration).toBeDefined()
       expect(integration!.id).toEqual(result.json().id)
+
+      // Metadata should be in encrypted format
+      expect(JSON.parse(sDecrypt(integration.metadata)).webhookUrl).toEqual(
+        'DUMMY_URL'
+      )
     })
   })
 

@@ -23,6 +23,7 @@ import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
+import { sDecrypt, sEncrypt } from '@/common/cryptography'
 
 @Injectable()
 export class IntegrationService {
@@ -144,7 +145,7 @@ export class IntegrationService {
           'INTEGRATION'
         ),
         type: dto.type,
-        metadata: dto.metadata,
+        metadata: sEncrypt(JSON.stringify(dto.metadata)),
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
@@ -335,11 +336,16 @@ export class IntegrationService {
     this.logger.log(
       `User ${user.id} attempted to retrieve integration ${integrationSlug}`
     )
-    return await this.authorizationService.authorizeUserAccessToIntegration({
-      user,
-      entity: { slug: integrationSlug },
-      authorities: [Authority.READ_INTEGRATION]
-    })
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        entity: { slug: integrationSlug },
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    integration.metadata = JSON.parse(sDecrypt(integration.metadata))
+
+    return integration
   }
 
   /* istanbul ignore next */
@@ -492,6 +498,11 @@ export class IntegrationService {
       order,
       search
     })
+
+    // Decrypt the metadata
+    for (const integration of integrations) {
+      integration.metadata = JSON.parse(sDecrypt(integration.metadata))
+    }
 
     return { items: integrations, metadata }
   }

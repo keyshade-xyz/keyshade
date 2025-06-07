@@ -19,6 +19,7 @@ import { EventService } from '@/event/event.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from './util'
 import { PrismaService } from '@/prisma/prisma.service'
+import { sDecrypt } from './cryptography'
 
 /**
  * Creates a new event and saves it to the database.
@@ -172,7 +173,7 @@ export const createEvent = async (
           description: data.description,
           eventId: event.id
         },
-        integration.metadata,
+        JSON.parse(sDecrypt(integration.metadata)),
         integration.id
       )
       logger.log(`Event emitted for integration with id ${integration.id}`)
