@@ -1,3 +1,9 @@
+## [2.24.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.23.0...v2.24.0-stage.1) (2025-06-07)
+
+### 🚀 Features
+
+* **api:** Encrypt integration metadata at rest ([#990](https://github.com/keyshade-xyz/keyshade/issues/990)) ([f9acddf](https://github.com/keyshade-xyz/keyshade/commit/f9acddf1274ab80c7f072d188f2eb33fbd500ce8))
+
 ## [2.23.0](https://github.com/keyshade-xyz/keyshade/compare/v2.22.2...v2.23.0) (2025-06-05)
 
 ### 🚀 Features
