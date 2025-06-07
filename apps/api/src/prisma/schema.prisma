@@ -245,7 +245,7 @@ model Integration {
   id        String          @id @default(cuid())
   name      String
   slug      String          @unique
-  metadata  Json
+  metadata  String
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   type      IntegrationType

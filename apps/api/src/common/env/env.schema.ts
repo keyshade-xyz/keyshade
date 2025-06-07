@@ -40,6 +40,8 @@ const devSchema = z.object({
   DATABASE_URL: z.string(),
   ADMIN_EMAIL: z.string().email(),
 
+  SERVER_SECRET: z.string().min(1),
+
   REDIS_URL: z.string(),
   REDIS_PASSWORD: z.string().optional(),
 
@@ -114,6 +116,8 @@ const prodSchema = z.object({
   NODE_ENV: z.literal('prod'),
   DATABASE_URL: z.string().min(1),
   ADMIN_EMAIL: z.string().email().min(5),
+
+  SERVER_SECRET: z.string().min(1),
 
   REDIS_URL: z.string().min(1),
   REDIS_PASSWORD: z.string().min(1),

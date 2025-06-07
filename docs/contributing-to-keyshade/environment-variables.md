@@ -27,6 +27,7 @@ Here's the description of the environment variables used in the project. You can
 - **FEEDBACK_FORWARD_EMAIL**: Feedbacks submitted by the user would be sent to this email address for the concerned authorities to view it. Ideally, in development environment, this would be your personal email address
 - **NEXT_PUBLIC_BACKEND_URL**: The URL of the backend server. This is used by the frontend to make API requests to the backend.
 - **FROM_EMAIL**: The display of the email sender title.
+- **SERVER_SECRETS**: This value is used to encrypt sensitive details on the server.
 
 ### Optional
 

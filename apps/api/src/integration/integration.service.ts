@@ -23,6 +23,7 @@ import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
+import { sDecrypt, sEncrypt } from '@/common/cryptography'
 
 @Injectable()
 export class IntegrationService {
@@ -144,7 +145,7 @@ export class IntegrationService {
           'INTEGRATION'
         ),
         type: dto.type,
-        metadata: dto.metadata,
+        metadata: this.encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
@@ -181,6 +182,7 @@ export class IntegrationService {
       this.prisma
     )
 
+    integration.metadata = this.decryptMetadata(integration.metadata)
     return integration
   }
 
@@ -290,7 +292,7 @@ export class IntegrationService {
         slug: dto.name
           ? await this.slugGenerator.generateEntitySlug(dto.name, 'INTEGRATION')
           : integration.slug,
-        metadata: dto.metadata,
+        metadata: this.encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
@@ -317,6 +319,9 @@ export class IntegrationService {
       this.prisma
     )
 
+    updatedIntegration.metadata = this.decryptMetadata(
+      updatedIntegration.metadata
+    )
     return updatedIntegration
   }
 
@@ -335,11 +340,15 @@ export class IntegrationService {
     this.logger.log(
       `User ${user.id} attempted to retrieve integration ${integrationSlug}`
     )
-    return await this.authorizationService.authorizeUserAccessToIntegration({
-      user,
-      entity: { slug: integrationSlug },
-      authorities: [Authority.READ_INTEGRATION]
-    })
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        entity: { slug: integrationSlug },
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    integration.metadata = this.decryptMetadata(integration.metadata)
+    return integration
   }
 
   /* istanbul ignore next */
@@ -493,6 +502,11 @@ export class IntegrationService {
       search
     })
 
+    // Decrypt the metadata
+    for (const integration of integrations) {
+      integration.metadata = this.decryptMetadata(integration.metadata)
+    }
+
     return { items: integrations, metadata }
   }
 
@@ -635,5 +649,36 @@ export class IntegrationService {
         `Integration with name ${name} does not exist in workspace ${workspace.slug}`
       )
     }
+  }
+
+  /**
+   * Encrypts the given metadata using the server secret. This is a private
+   * function that should not be used directly. The metadata is encrypted to
+   * protect the integration's credentials when they are stored in the database.
+   * @param metadata The integration metadata to encrypt
+   * @returns The encrypted metadata as a string
+   */
+  private encryptMetadata(
+    metadata: Record<string, unknown>
+  ): string | undefined {
+    if (!metadata) {
+      return undefined
+    }
+    return sEncrypt(JSON.stringify(metadata))
+  }
+
+  /**
+   * Decrypts the given metadata using the server secret. This is a private
+   * function that should not be used directly. The metadata is decrypted to
+   * retrieve the integration's credentials when they are retrieved from the
+   * database.
+   * @param encryptedMetadata The encrypted metadata to decrypt
+   * @returns The decrypted metadata as an object
+   */
+  private decryptMetadata(encryptedMetadata: string): string | undefined {
+    if (!encryptedMetadata) {
+      return undefined
+    }
+    return JSON.parse(sDecrypt(encryptedMetadata))
   }
 }
