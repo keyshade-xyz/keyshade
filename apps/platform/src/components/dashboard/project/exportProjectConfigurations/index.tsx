@@ -8,13 +8,11 @@ import {
   selectedProjectAtom
 } from '@/store'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle
-} from '@/components/ui/sheet'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -54,9 +52,9 @@ const downloadBase64File = (
   URL.revokeObjectURL(url)
 }
 
-export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
+export default function ExportProjectConfigurationsDialog(): JSX.Element | null {
   const [isLoading, setIsLoading] = useState(false)
-  const [isExportConfigurationSheetOpen, setIsExportConfigurationSheetOpen] =
+  const [isExportConfigurationDialogOpen, setIsExportConfigurationDialogOpen] =
     useAtom(exportConfigOpenAtom)
   const [selectedProject] = useAtom(selectedProjectAtom)
   const [environmentsOfProject] = useAtom(environmentsOfProjectAtom)
@@ -92,17 +90,17 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   }, [selectedProject, fetchEnvironments, setEnvironments])
 
   useEffect(() => {
-    if (isExportConfigurationSheetOpen && selectedProject) {
+    if (isExportConfigurationDialogOpen && selectedProject) {
       setFormData({
         environmentSlugs: [],
         format: '',
         privateKey: ''
       })
     }
-  }, [isExportConfigurationSheetOpen, selectedProject])
+  }, [isExportConfigurationDialogOpen, selectedProject])
 
   const handleSheetChange = (open: boolean) => {
-    setIsExportConfigurationSheetOpen(open)
+    setIsExportConfigurationDialogOpen(open)
   }
 
   const handleEnvironmentToggle = (slug: string, checked: boolean) => {
@@ -175,7 +173,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
     } finally {
       toast.dismiss(loadingToastId)
       setIsLoading(false)
-      setIsExportConfigurationSheetOpen(false)
+      setIsExportConfigurationDialogOpen(false)
     }
   }, [
     selectedProject,
@@ -184,7 +182,7 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
     formData.privateKey,
     browserProjectPrivateKey,
     exportConfigs,
-    setIsExportConfigurationSheetOpen
+    setIsExportConfigurationDialogOpen
   ])
 
   if (!selectedProject) {
@@ -192,82 +190,86 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
   }
 
   return (
-    <Sheet
+    <Dialog
       onOpenChange={handleSheetChange}
-      open={isExportConfigurationSheetOpen}
+      open={isExportConfigurationDialogOpen}
     >
-      <SheetContent className="border-white/15 bg-[#222425]">
-        <SheetHeader>
-          <SheetTitle className="text-white">Export Configurations</SheetTitle>
-          <SheetDescription>
+      <DialogContent className="rounded-[12px] border bg-[#1E1E1F] ">
+        <div className="flex w-full flex-col items-start justify-center">
+          <DialogTitle className=" font-geist h-[1.875rem] text-[1.125rem] font-semibold text-white ">
+            Export Configurations
+          </DialogTitle>
+
+          <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
             Pick options and export selected configurations for project{' '}
             <strong>{selectedProject.name}</strong>
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="grid gap-4 py-4">
-          <div className="flex flex-col items-start gap-4">
-            <Label htmlFor="format">Export Format</Label>
-            <Select
-              name="format"
-              onValueChange={(value: string) =>
-                setFormData((prev) => ({ ...prev, format: value }))
-              }
-              value={formData.format}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent className="bg-neutral-800">
-                {[...formatMap].map(([value, { label }]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col items-start gap-4">
-            <Label className="mb-2">Choose Environments</Label>
-            <div className="space-y-1">
-              {environmentsOfProject.map(
-                (env: { slug: string; name: string }) => (
-                  <div className="flex items-center gap-2" key={env.slug}>
-                    <Checkbox
-                      checked={formData.environmentSlugs.includes(env.slug)}
-                      name={`env-${env.slug}`}
-                      onCheckedChange={(checked: boolean) =>
-                        handleEnvironmentToggle(env.slug, checked)
-                      }
-                    />
-                    <Label htmlFor={`env-${env.slug}`}>{env.name}</Label>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-
-          {!selectedProject.storePrivateKey && !browserProjectPrivateKey && (
-            <div className="flex flex-col items-start gap-4">
-              <Label htmlFor="privateKey">Private Key</Label>
-              <Input
-                id="privateKey"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    privateKey: e.target.value
-                  }))
-                }
-                placeholder="Paste private key here"
-                type="password"
-                value={formData.privateKey}
-              />
-            </div>
-          )}
+          </DialogDescription>
         </div>
 
-        <SheetFooter>
+        <div className="flex flex-col gap-y-8 overflow-auto">
+          <div className="flex w-full flex-col gap-4 py-4">
+            <div className="flex flex-col items-start gap-4">
+              <Label htmlFor="format">Export Format</Label>
+              <Select
+                name="format"
+                onValueChange={(value: string) =>
+                  setFormData((prev) => ({ ...prev, format: value }))
+                }
+                value={formData.format}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-800">
+                  {[...formatMap].map(([value, { label }]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col items-start gap-4">
+              <Label className="mb-2">Choose Environments</Label>
+              <div className="space-y-1">
+                {environmentsOfProject.map(
+                  (env: { slug: string; name: string }) => (
+                    <div className="flex items-center gap-2" key={env.slug}>
+                      <Checkbox
+                        checked={formData.environmentSlugs.includes(env.slug)}
+                        name={`env-${env.slug}`}
+                        onCheckedChange={(checked: boolean) =>
+                          handleEnvironmentToggle(env.slug, checked)
+                        }
+                      />
+                      <Label htmlFor={`env-${env.slug}`}>{env.name}</Label>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            {!selectedProject.storePrivateKey && !browserProjectPrivateKey && (
+              <div className="flex flex-col items-start gap-4">
+                <Label htmlFor="privateKey">Private Key</Label>
+                <Input
+                  id="privateKey"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      privateKey: e.target.value
+                    }))
+                  }
+                  placeholder="Paste private key here"
+                  type="password"
+                  value={formData.privateKey}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex h-[2.25rem] w-full justify-end">
           <Button
             disabled={isLoading}
             onClick={handleExport}
@@ -276,8 +278,8 @@ export default function ExportProjectConfigurationsSheet(): JSX.Element | null {
           >
             {isLoading ? 'Exporting...' : 'Export'}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

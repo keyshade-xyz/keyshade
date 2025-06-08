@@ -52,7 +52,7 @@ export default function ProjectCard({
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const setIsExportConfigurationSheetOpen = useSetAtom(exportConfigOpenAtom)
+  const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -76,7 +76,7 @@ export default function ProjectCard({
 
   const handleExportConfiguration = () => {
     setSelectedProject(project)
-    setIsExportConfigurationSheetOpen(true)
+    setIsExportConfigurationDialogOpen(true)
   }
 
   const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
