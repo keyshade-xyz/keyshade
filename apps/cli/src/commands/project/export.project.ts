@@ -145,7 +145,7 @@ export default class ExportProject extends BaseCommand {
     const multiple = entries.length > 1
 
     entries.forEach(([environmentSlug, rawBase64]) => {
-      const fileName = multiple ? `${environmentSlug}-${output}` : output
+      const fileName = multiple ? `${environmentSlug}.${output}` : output
       const filePath = join(process.cwd(), fileName)
 
       try {
