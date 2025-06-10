@@ -142,7 +142,7 @@
 
 - Critical release to make CI pass. No changes were introduced
 
-## 3.0.2-stage.1
+## 3.0.2
 
 ### Patches
 
