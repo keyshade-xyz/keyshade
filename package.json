@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.24.0-stage.1",
+  "version": "2.24.0",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
