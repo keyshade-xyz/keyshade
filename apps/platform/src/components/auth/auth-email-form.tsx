@@ -25,10 +25,12 @@ export default function AuthEmailForm() {
     })
   )
 
-  const handleGetStarted = async (): Promise<void> => {
-    const result = z.string().email().safeParse(email)
+  const handleGetStarted = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault()
 
-    if (!result.success) {
+    if (!validateEmail(email)) {
       setIsInvalidEmail(true)
       return
     }
@@ -55,16 +57,19 @@ export default function AuthEmailForm() {
     setEmail(value)
   }
 
-  const loadErrorMessage = () => {
-    if (!isInvalidEmail) return null
+  const validateEmail = (value: string): boolean => {
+    const result = z.string().email().safeParse(value)
+    return result.success
+  }
 
+  const loadErrorMessage = () => {
     if (email.trim() === '') return 'Email is required'
 
-    return 'Invalid email'
+    return !validateEmail(email) ? 'Invalid email' : null
   }
 
   return (
-    <form className="flex flex-col gap-3">
+    <form className="flex flex-col gap-3" onSubmit={handleGetStarted}>
       <label htmlFor="email">
         <Input
           disabled={isLoading}
@@ -77,11 +82,7 @@ export default function AuthEmailForm() {
         ) : null}
       </label>
 
-      <Button
-        className="w-full"
-        disabled={isLoading}
-        onClick={handleGetStarted}
-      >
+      <Button className="w-full" disabled={isLoading} type="submit">
         {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
       </Button>
     </form>
