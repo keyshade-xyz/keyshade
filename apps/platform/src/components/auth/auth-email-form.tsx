@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
 import { LoadingSVG } from '@public/svg/shared'
-import { z } from 'zod'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
-import { Input } from '../ui/input'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import { toast } from 'sonner'
+import { z } from 'zod'
 import { Button } from '../ui/button'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
+import { Input } from '../ui/input'
 import { userAtom } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
 
 export default function AuthEmailForm() {
   const [isInvalidEmail, setIsInvalidEmail] = useState<boolean>(false)
@@ -19,22 +19,24 @@ export default function AuthEmailForm() {
 
   const router = useRouter()
 
-    const sendOTP = useHttp(() =>
-	  ControllerInstance.getInstance().authController.sendOTP({
-		email
-	  })
-	)
+  const sendOTP = useHttp(() =>
+    ControllerInstance.getInstance().authController.sendOTP({
+      email
+    })
+  )
 
   const handleGetStarted = async (): Promise<void> => {
     const result = z.string().email().safeParse(email)
+
     if (!result.success) {
       setIsInvalidEmail(true)
       return
     }
+
     setIsLoading(true)
-    setIsInvalidEmail(false)
 
     toast.loading('Sending OTP...')
+
     try {
       const { success } = await sendOTP()
       if (success) {
@@ -53,6 +55,14 @@ export default function AuthEmailForm() {
     setEmail(value)
   }
 
+  const loadErrorMessage = () => {
+    if (!isInvalidEmail) return null
+
+    if (email.trim() === '') return 'Email is required'
+
+    return 'Invalid email'
+  }
+
   return (
     <form className="flex flex-col gap-3">
       <label htmlFor="email">
@@ -62,9 +72,9 @@ export default function AuthEmailForm() {
           placeholder="Enter your mail "
           type="email"
         />
-        <span className="text-xs text-red-400">
-          {isInvalidEmail ? 'Invalid email' : null}
-        </span>
+        {isInvalidEmail ? (
+          <span className="text-xs text-red-400">{loadErrorMessage()}</span>
+        ) : null}
       </label>
 
       <Button
