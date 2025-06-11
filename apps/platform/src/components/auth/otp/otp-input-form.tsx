@@ -53,16 +53,10 @@ export default function OtpInputForm({
       throw new Error('User not set in context')
     }
 
-    const emailResult = z.string().email().safeParse(user.email)
-    const alphanumeric = z
-      .string()
-      .length(6)
-      .refine((value) => /^[a-z0-9]+$/i.test(value), {
-        message: 'OTP must be alphanumeric'
-      })
-    const otpResult = alphanumeric.safeParse(otp)
+    const isEmailValid = z.string().email().safeParse(user.email).success
+    const isOtpValid = isAlphanumeric(otp)
 
-    if (!emailResult.success || !otpResult.success) {
+    if (!isEmailValid || !isOtpValid) {
       toast.error('Invalid OTP', {
         description: (
           <p className="text-xs text-red-300">
@@ -100,6 +94,18 @@ export default function OtpInputForm({
       setIsLoading(false)
       toast.dismiss()
     }
+  }
+
+  const isAlphanumeric = (value: string): boolean => {
+    const result = z
+      .string()
+      .length(6)
+      .refine((str) => /^[a-z0-9]+$/i.test(str), {
+        message: 'OTP must be alphanumeric'
+      })
+      .safeParse(value)
+
+    return result.success
   }
 
   return (
