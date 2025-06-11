@@ -44,7 +44,11 @@ export default function OtpInputForm({
     throw new Error('User not set in context')
   })
 
-  const handleVerifyOTP = async (): Promise<void> => {
+  const handleVerifyOTP = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault()
+
     if (!user) {
       throw new Error('User not set in context')
     }
@@ -99,7 +103,7 @@ export default function OtpInputForm({
   }
 
   return (
-    <form className="flex w-[17rem] flex-col gap-3">
+    <form className="flex w-[17rem] flex-col gap-3" onSubmit={handleVerifyOTP}>
       <div>
         <InputOTP
           maxLength={6}
@@ -123,7 +127,7 @@ export default function OtpInputForm({
         </InputOTP>
       </div>
 
-      <Button className="w-full" disabled={isLoading} onClick={handleVerifyOTP}>
+      <Button className="w-full" disabled={isLoading} type="submit">
         {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
       </Button>
     </form>
