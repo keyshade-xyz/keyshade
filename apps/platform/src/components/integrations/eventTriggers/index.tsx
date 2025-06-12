@@ -79,7 +79,7 @@ export default function EventTriggersInput({
             onCheckedChange={(checked) => selectAll(checked === true)}
           />
           <label
-            className="cursor-pointer text-sm font-semibold text-slate-100"
+            className="cursor-pointer text-sm font-semibold text-white/90"
             htmlFor="select-all"
           >
             Select All Events
@@ -90,22 +90,25 @@ export default function EventTriggersInput({
           {visibleGroups.map((group) => (
             <div className="" key={group.name}>
               <div className="flex flex-col items-start gap-2">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-start space-x-3">
                   <Checkbox
                     checked={isGroupSelected(group.items)}
-                    className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+                    className="mt-1 rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
                     id={`group-${group.name}`}
                     onCheckedChange={() => toggleGroup(group.items)}
                   />
                   <label
-                    className="cursor-pointer text-sm font-semibold text-slate-100"
+                    className="cursor-pointer text-sm font-semibold text-white/90"
                     htmlFor={`group-${group.name}`}
                   >
-                    {group.name}
+                    <div className="flex flex-col gap-1">
+                      {group.name}
+                      <p className="text-xs text-white/50">
+                        {group.description}
+                      </p>
+                    </div>
                   </label>
                 </div>
-
-                <p className="text-xs text-slate-300">{group.description}</p>
               </div>
             </div>
           ))}
