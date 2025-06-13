@@ -35,6 +35,7 @@ export default function AuthEmailForm() {
       return
     }
 
+    setIsInvalidEmail(false)
     setIsLoading(true)
 
     toast.loading('Sending OTP...')
