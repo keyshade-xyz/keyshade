@@ -5,49 +5,56 @@ import { Integrations } from '@keyshade/common'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 
-const formatEventType = (eventType: string) => {
-  return eventType
-    .replace(/_/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
 interface EventTriggersInputProps {
   selectedEvents: Set<EventTypeEnum>
   onChange: (checkedEvents: Set<EventTypeEnum>) => void
   integrationType: IntegrationTypeEnum
 }
-
-const INITIAL_EVENT_COUNT = 8
+const INITIAL_GROUP_COUNT = 4
 
 export default function EventTriggersInput({
   selectedEvents,
   onChange,
   integrationType
 }: EventTriggersInputProps) {
-  const [showAllEvents, setShowAllEvents] = useState(false)
-  const allEvents: EventTypeEnum[] = useMemo(
+  const [showAllGroups, setShowAllGroups] = useState(false)
+
+  const eventGroups = useMemo(
     () => Integrations[integrationType].events,
     [integrationType]
   )
 
-  const toggleEvent = (event: EventTypeEnum) => {
-    if (selectedEvents.has(event)) {
-      const updatedEvents = new Set(selectedEvents)
-      updatedEvents.delete(event)
-      onChange(updatedEvents)
+  const allEvents: EventTypeEnum[] = useMemo(
+    () => eventGroups.flatMap((group) => group.items),
+    [eventGroups]
+  )
+
+  const toggleGroup = (groupItems: EventTypeEnum[]) => {
+    const allGroupSelected = groupItems.every((event) =>
+      selectedEvents.has(event)
+    )
+    const updatedEvents = new Set(selectedEvents)
+
+    if (allGroupSelected) {
+      groupItems.forEach((event) => updatedEvents.delete(event))
     } else {
-      onChange(new Set(selectedEvents).add(event))
+      groupItems.forEach((event) => updatedEvents.add(event))
     }
+
+    onChange(updatedEvents)
   }
 
   const selectAll = (select: boolean) => {
     onChange(new Set(select ? allEvents : []))
   }
 
-  const visibleEvents = showAllEvents
-    ? allEvents
-    : allEvents.slice(0, INITIAL_EVENT_COUNT)
+  const isGroupSelected = (groupItems: EventTypeEnum[]) => {
+    return groupItems.every((event) => selectedEvents.has(event))
+  }
+
+  const visibleGroups = showAllGroups
+    ? eventGroups
+    : eventGroups.slice(0, INITIAL_GROUP_COUNT)
 
   return (
     <div>
@@ -61,10 +68,10 @@ export default function EventTriggersInput({
       </div>
 
       <div
-        className="space-y-3 rounded-lg border border-white/10 p-4"
+        className="space-y-4 rounded-lg border border-white/10 p-4"
         id="select-events"
       >
-        <div className="mb-3 flex items-center space-x-3 border-b border-white/10 pb-3">
+        <div className="flex items-center space-x-3 border-b border-white/10 pb-3">
           <Checkbox
             checked={selectedEvents.size === allEvents.length}
             className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
@@ -72,41 +79,50 @@ export default function EventTriggersInput({
             onCheckedChange={(checked) => selectAll(checked === true)}
           />
           <label
-            className="cursor-pointer text-sm font-semibold text-slate-100"
+            className="cursor-pointer text-sm font-semibold text-white/90"
             htmlFor="select-all"
           >
             Select All Events
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {visibleEvents.map((event) => (
-            <div className="flex items-center space-x-3" key={event}>
-              <Checkbox
-                checked={selectedEvents.has(event)}
-                className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
-                id={event}
-                onCheckedChange={() => toggleEvent(event)}
-              />
-              <label
-                className="cursor-pointer text-sm font-medium leading-none text-slate-200"
-                htmlFor={event}
-              >
-                {formatEventType(event)}
-              </label>
+        <div className="space-y-5">
+          {visibleGroups.map((group) => (
+            <div className="" key={group.name}>
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    checked={isGroupSelected(group.items)}
+                    className="mt-1 rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+                    id={`group-${group.name}`}
+                    onCheckedChange={() => toggleGroup(group.items)}
+                  />
+                  <label
+                    className="cursor-pointer text-sm font-semibold text-white/90"
+                    htmlFor={`group-${group.name}`}
+                  >
+                    <div className="flex flex-col gap-1">
+                      {group.name}
+                      <p className="text-xs text-white/50">
+                        {group.description}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
             </div>
           ))}
         </div>
 
-        {allEvents.length > INITIAL_EVENT_COUNT && (
+        {eventGroups.length > INITIAL_GROUP_COUNT && (
           <div className="flex w-full justify-end">
             <Button
               className="text-white/50 hover:bg-transparent hover:text-white/60"
-              onClick={() => setShowAllEvents(!showAllEvents)}
+              onClick={() => setShowAllGroups(!showAllGroups)}
               type="button"
               variant="ghost"
             >
-              {showAllEvents ? 'Show Less' : 'Show More'}
+              {showAllGroups ? 'Show Less' : 'Show More'}
             </Button>
           </div>
         )}
