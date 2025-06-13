@@ -1,0 +1,33 @@
+{
+  "extends": "../../packages/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "outDir": "dist",
+    "plugins": [{ "transform": "typescript-transform-paths" }],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": false
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"],
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src/**/*.ts",
+    ".eslintrc.cjs",
+    "tsup.config.ts",
+    "esbuild.config.js"
+  ],
+  "exclude": ["node_modules"]
+}

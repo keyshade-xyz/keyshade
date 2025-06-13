@@ -1,0 +1,14 @@
+pkgbase = keyshade
+	pkgdesc = Realtime secret and configuration management CLI tool with end-to-end encryption
+	pkgver = 3.0.2
+	pkgrel = 1
+	url = https://github.com/keyshade-xyz/keyshade
+	arch = any
+	license = MPL2
+	depends = nodejs
+	depends = npm
+	optdepends = git: for git integration features
+	source = https://registry.npmjs.org/@keyshade/cli/-/cli-3.0.2.tgz
+	sha256sums = 5a27a8e37846acf91d46e80d4dc76ff4dbf15430d6482006e934d7d92752cafe
+
+pkgname = keyshade
