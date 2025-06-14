@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
 import { LoadingSVG } from '@public/svg/shared'
-import { z } from 'zod'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { useSetAtom } from 'jotai'
-import { Input } from '../ui/input'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '../ui/button'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
+import { Input } from '../ui/input'
 import { userAtom } from '@/store'
+import ControllerInstance from '@/lib/controller-instance'
+import { useHttp } from '@/hooks/use-http'
+import { isEmptyString } from '@/lib/is-empty-string'
+import { isEmailValid } from '@/lib/is-email-valid'
 
 export default function AuthEmailForm() {
   const [isInvalidEmail, setIsInvalidEmail] = useState<boolean>(false)
@@ -19,22 +20,27 @@ export default function AuthEmailForm() {
 
   const router = useRouter()
 
-    const sendOTP = useHttp(() =>
-	  ControllerInstance.getInstance().authController.sendOTP({
-		email
-	  })
-	)
+  const sendOTP = useHttp(() =>
+    ControllerInstance.getInstance().authController.sendOTP({
+      email
+    })
+  )
 
-  const handleGetStarted = async (): Promise<void> => {
-    const result = z.string().email().safeParse(email)
-    if (!result.success) {
+  const handleGetStarted = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault()
+
+    if (!isEmailValid(email)) {
       setIsInvalidEmail(true)
       return
     }
-    setIsLoading(true)
+
     setIsInvalidEmail(false)
+    setIsLoading(true)
 
     toast.loading('Sending OTP...')
+
     try {
       const { success } = await sendOTP()
       if (success) {
@@ -53,8 +59,16 @@ export default function AuthEmailForm() {
     setEmail(value)
   }
 
+  const loadErrorMessage = () => {
+    if (isEmptyString(email)) return 'Email is required'
+
+    return !isEmailValid(email) ? 'Invalid email' : null
+  }
+
+  const isButtonDisabled = isLoading || isEmptyString(email)
+
   return (
-    <form className="flex flex-col gap-3">
+    <form className="flex flex-col gap-3" onSubmit={handleGetStarted}>
       <label htmlFor="email">
         <Input
           disabled={isLoading}
@@ -62,15 +76,15 @@ export default function AuthEmailForm() {
           placeholder="Enter your mail "
           type="email"
         />
-        <span className="text-xs text-red-400">
-          {isInvalidEmail ? 'Invalid email' : null}
-        </span>
+        {isInvalidEmail ? (
+          <span className="text-xs text-red-400">{loadErrorMessage()}</span>
+        ) : null}
       </label>
 
       <Button
         className="w-full"
-        disabled={isLoading}
-        onClick={handleGetStarted}
+        disabled={isButtonDisabled}
+        type="submit"
       >
         {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
       </Button>
