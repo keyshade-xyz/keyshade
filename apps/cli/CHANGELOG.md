@@ -92,8 +92,58 @@
 
 - Update error logging
 
-## 2.5.3-stage
+## 2.5.3
 
 ### Minor Changes
 
 - Added `keyshade workspace resend-invitation` command to resend an invitation to a user to join a workspace.
+
+## 3.0.0-stage.0
+
+## Major Changes
+
+- Updated the private key file to store keys in format `workspace_project` instead of `workspace_project_environment`
+
+### Minor Changes
+
+- Added `keyshade config update` command to update the project-specific keyshade.json file
+- Added `keyshade config private-key add` command to add a private key into ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key delete` command to remove a private key from ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key list` command to list all the private keys in ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key update` command to update the private key of a combo in ~/.keyshade/private-keys.json file
+
+### Patches
+
+- Hardcoded API base URL
+- Updated pipeline to release stage builds. Can be installed using `pnpm add @keyshade/cli@stage`
+- Add logging to denote config file creation
+
+## 3.0.0
+
+### Major Changes
+
+- Updated the private key file to store keys in format `workspace_project` instead of `workspace_project_environment`
+
+### Minor Changes
+
+- Added `keyshade config update` command to update the project-specific keyshade.json file
+- Added `keyshade config private-key add` command to add a private key into ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key delete` command to remove a private key from ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key list` command to list all the private keys in ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key update` command to update the private key of a combo in ~/.keyshade/private-keys.json file
+
+### Patches
+
+- Hardcoded API base URL
+- Updated pipeline to release stage builds. Can be installed using `pnpm add @keyshade/cli@stage`
+- Add logging to denote config file creation
+
+## 3.0.1
+
+- Critical release to make CI pass. No changes were introduced
+
+## 3.0.2
+
+### Patches
+
+- `keyshade run` wouldn't decrypt secrets if the project didn't store the private key

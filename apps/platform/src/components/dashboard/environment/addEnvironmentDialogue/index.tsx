@@ -7,13 +7,15 @@ import {
   DialogTrigger,
   DialogContent,
   DialogTitle,
-  DialogDescription
-, DialogHeader } from '../../../ui/dialog'
+  DialogDescription,
+  DialogHeader
+} from '../../../ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   createEnvironmentOpenAtom,
   environmentsOfProjectAtom,
+  projectEnvironmentCountAtom,
   selectedProjectAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
@@ -25,6 +27,7 @@ export default function AddEnvironmentDialogue() {
   )
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
   const [newEnvironmentData, setNewEnvironmentData] = useState({
     environmentName: '',
@@ -42,11 +45,12 @@ export default function AddEnvironmentDialogue() {
 
   const handleAddEnvironment = useCallback(async () => {
     if (selectedProject) {
-      if (newEnvironmentData.environmentName === '') {
+      // Check if environment name is empty/only whitespace and whether is at least 3 chars length
+      if (newEnvironmentData.environmentName.trim() === '' || newEnvironmentData.environmentName.trim().length < 3) {
         toast.error('Environment name is required', {
           description: (
             <p className="text-xs text-red-300">
-              Please provide a name for the environment.
+              Please provide a valid name for the environment (not blank and at least has 3 chars).
             </p>
           )
         })
@@ -60,6 +64,7 @@ export default function AddEnvironmentDialogue() {
         const { success, data } = await createEnvironment()
 
         if (success && data) {
+          setProjectEnvironmentCount((prev) => prev + 1)
           toast.success('Environment added successfully', {
             description: (
               <p className="text-xs text-green-300">
@@ -93,6 +98,7 @@ export default function AddEnvironmentDialogue() {
     newEnvironmentData.environmentName,
     selectedProject,
     setEnvironments,
+    setProjectEnvironmentCount,
     setIsCreateEnvironmentOpen
   ])
 

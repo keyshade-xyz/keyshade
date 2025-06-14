@@ -148,8 +148,32 @@ describe('Workspace Controller Tests', () => {
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
-    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -527,6 +551,7 @@ describe('Workspace Controller Tests', () => {
       expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
       expect(body.items[0]).toEqual({
         invitedOn: expect.any(String),
+        invitationAccepted: false,
         workspace: {
           icon: workspace1.icon,
           id: workspace1.id,

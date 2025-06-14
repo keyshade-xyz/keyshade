@@ -7,7 +7,9 @@ import {
   Secret,
   Variable,
   Workspace,
-  WorkspaceRole
+  WorkspaceRole,
+  Event,
+  IntegrationRun
 } from '@prisma/client'
 
 /**
@@ -26,6 +28,13 @@ export interface IntegrationEventData {
   eventType: EventType
   title?: string
   description?: string
+  eventId?: Event['id']
+}
+
+export interface IntegrationRunData {
+  title: IntegrationRun['title']
+  eventId: Event['id']
+  integrationId: Integration['id']
 }
 
 /**
@@ -49,6 +58,25 @@ export interface SlackIntegrationMetadata extends IntegrationMetadata {
   channelId: string
 }
 
-export interface IntegrationWithWorkspace extends Integration {
+export interface IntegrationWithLastUpdatedBy extends Integration {
+  lastUpdatedBy: {
+    id: string
+    name: string
+    profilePictureUrl: string
+  }
+}
+
+export interface IntegrationWithLastUpdatedByAndReferences
+  extends IntegrationWithLastUpdatedBy {
   workspace: Workspace
+  project: {
+    id: string
+    name: string
+    slug: string
+  } | null
+  environment: {
+    id: string
+    name: string
+    slug: string
+  } | null
 }

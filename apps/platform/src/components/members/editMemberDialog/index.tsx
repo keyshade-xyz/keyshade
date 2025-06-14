@@ -1,6 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
-import type { User } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { ChevronDown } from 'lucide-react'
 import {
@@ -9,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
+  DialogFooter
 } from '@/components/ui/dialog'
 import {
   editMemberOpenAtom,
@@ -25,8 +24,8 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 
 interface SelectedRoles {
-  name: string;
-  roleSlug: string;
+  name: string
+  roleSlug: string
 }
 
 export default function EditMemberDialog() {
@@ -38,21 +37,23 @@ export default function EditMemberDialog() {
   const roles = useAtomValue(rolesOfWorkspaceAtom)
 
   const toggleRole = (role: SelectedRoles): void => {
-    setSelectedRoles(prev => {
-      const isSelected = prev.some(r => r.roleSlug === role.roleSlug)
+    setSelectedRoles((prev) => {
+      const isSelected = prev.some((r) => r.roleSlug === role.roleSlug)
       if (isSelected) {
-        return prev.filter(r => r.roleSlug !== role.roleSlug)
+        return prev.filter((r) => r.roleSlug !== role.roleSlug)
       }
       return [...prev, role]
     })
   }
 
-  const editMember = useHttp((userEmail: User['email']) =>
-    ControllerInstance.getInstance().workspaceMembershipController.updateMemberRoles({
-      workspaceSlug: currentWorkspace!.slug,
-      roleSlugs: selectedRoles.map(role => role.roleSlug),
-      userEmail
-    })
+  const editMember = useHttp(() =>
+    ControllerInstance.getInstance().workspaceMembershipController.updateMemberRoles(
+      {
+        workspaceSlug: currentWorkspace!.slug,
+        roleSlugs: selectedRoles.map((role) => role.roleSlug),
+        userEmail: selectedMember!.user.email
+      }
+    )
   )
 
   const handleClose = useCallback(() => {
@@ -68,7 +69,8 @@ export default function EditMemberDialog() {
           toast.success('Member edited successfully', {
             description: (
               <p className="text-xs text-emerald-300">
-                Role of the member &quot;{selectedMember.user.name}&quot; has been edited.
+                Role of the member &quot;{selectedMember.user.name}&quot; has
+                been edited.
               </p>
             )
           })
@@ -80,18 +82,15 @@ export default function EditMemberDialog() {
         toast.dismiss()
       }
     }
-  }, [
-    editMember,
-    handleClose,
-    selectedMember,
-    setSelectedMember
-  ])
+  }, [editMember, handleClose, selectedMember, setSelectedMember])
 
   useEffect(() => {
     if (selectedMember) {
       const initialRoles = selectedMember.roles
-        .filter(memberRole => roles.some(role => role.slug === memberRole.role.slug))
-        .map(memberRole => ({
+        .filter((memberRole) =>
+          roles.some((role) => role.slug === memberRole.role.slug)
+        )
+        .map((memberRole) => ({
           name: memberRole.role.name,
           roleSlug: memberRole.role.slug
         }))
@@ -118,7 +117,10 @@ export default function EditMemberDialog() {
         </DialogHeader>
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <Label className="w-20 text-sm font-medium text-white" htmlFor="email">
+            <Label
+              className="w-20 text-sm font-medium text-white"
+              htmlFor="email"
+            >
               Email
             </Label>
             <Input
@@ -130,50 +132,60 @@ export default function EditMemberDialog() {
             />
           </div>
           <div className="flex items-start gap-4">
-            <Label className="w-16 flex items-center text-sm font-medium text-white" htmlFor="roles">
+            <Label
+              className="flex w-16 items-center text-sm font-medium text-white"
+              htmlFor="roles"
+            >
               Role(s)
             </Label>
-            <div className="flex-1 relative">
+            <div className="relative flex-1">
               <Button
-                className="w-full px-3 py-2 flex items-center justify-between bg-white/5 hover:bg-white/5"
+                className="flex w-full items-center justify-between bg-white/5 px-3 py-2 hover:bg-white/5"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 variant="outline"
               >
-                <div className="flex gap-2 items-center flex-1 mr-2">
+                <div className="mr-2 flex flex-1 items-center gap-2">
                   {selectedRoles.length === 0 ? (
                     <span className="text-gray-400">Select roles</span>
                   ) : (
                     <>
                       {selectedRoles.slice(0, 2).map((role) => (
                         <span
-                          className="bg-[#3B0764] border-purple-200 text-purple-200 border text-xs px-4 py-2 rounded-full"
+                          className="rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-xs text-purple-200"
                           key={role.roleSlug}
                         >
                           {role.name}
                         </span>
                       ))}
                       {selectedRoles.length > 2 && (
-                        <span className="text-[#A5F3FC] text-xs p-2">
+                        <span className="p-2 text-xs text-[#A5F3FC]">
                           +{selectedRoles.length - 2} more
                         </span>
                       )}
                     </>
                   )}
                 </div>
-                <ChevronDown className={`transition-transform flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                <ChevronDown
+                  className={`flex-shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                  size={16}
+                />
               </Button>
 
               {isDropdownOpen ? (
-                <div className="top-full left-0 right-0 mt-1 bg-zinc-800 rounded-md shadow-lg overflow-hidden z-50">
+                <div className="left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md bg-zinc-800 shadow-lg">
                   {roles.map((role) => (
                     <Label
-                      className="flex items-center px-3 py-2 cursor-pointer hover:bg-zinc-700"
+                      className="flex cursor-pointer items-center px-3 py-2 hover:bg-zinc-700"
                       key={role.id}
                     >
                       <Checkbox
-                        checked={selectedRoles.some(r => r.roleSlug === role.slug)}
-                        className="mr-2 rounded-sm data-[state=checked]:text-black data-[state=checked]:border-none border-none data-[state=checked]:bg-white bg-gray-400"
-                        onCheckedChange={() => toggleRole({ name: role.name, roleSlug: role.slug })}
+                        checked={selectedRoles.some(
+                          (r) => r.roleSlug === role.slug
+                        )}
+                        className="mr-2 rounded-sm border-none bg-gray-400 data-[state=checked]:border-none data-[state=checked]:bg-white data-[state=checked]:text-black"
+                        onCheckedChange={() =>
+                          toggleRole({ name: role.name, roleSlug: role.slug })
+                        }
                       />
                       <span className="text-white">{role.name}</span>
                     </Label>
@@ -195,4 +207,3 @@ export default function EditMemberDialog() {
     </Dialog>
   )
 }
-

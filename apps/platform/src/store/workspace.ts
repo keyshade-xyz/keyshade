@@ -6,7 +6,7 @@ export function setWorkspace(workspaceData: Workspace[]): void {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('defaultWorkspace', JSON.stringify(defaultWorkspace))
 
-    if (getselectedWorkspace() === null) {
+    if (getSelectedWorkspaceFromStorage() === null) {
       localStorage.setItem(
         'selectedWorkspace',
         JSON.stringify(defaultWorkspace)
@@ -15,7 +15,7 @@ export function setWorkspace(workspaceData: Workspace[]): void {
   }
 }
 
-export function getselectedWorkspace(): Workspace | null {
+export function getSelectedWorkspaceFromStorage(): Workspace | null {
   const selectedWorkspace =
     typeof localStorage !== 'undefined'
       ? localStorage.getItem('selectedWorkspace')
@@ -27,6 +27,6 @@ export function getselectedWorkspace(): Workspace | null {
   return null
 }
 
-export function setselectedWorkspace(workspace: Workspace): void {
+export function setSelectedWorkspaceToStorage(workspace: Workspace): void {
   localStorage.setItem('selectedWorkspace', JSON.stringify(workspace))
 }

@@ -7,6 +7,7 @@ import {
   eventTriggererEnum,
   eventTypeEnum,
   expiresAfterEnum,
+  integrationRunStatusEnum,
   integrationTypeEnum,
   projectAccessLevelEnum,
   rotateAfterEnum
@@ -31,3 +32,5 @@ export type ExpiresAfterEnum = z.infer<typeof expiresAfterEnum>
 export type IntegrationTypeEnum = z.infer<typeof integrationTypeEnum>
 
 export type AuthProviderEnum = z.infer<typeof authProviderEnum>
+
+export type integrationRunStatusEnum = z.infer<typeof integrationRunStatusEnum>

@@ -10,8 +10,11 @@ import {
   TeamSVG
 } from '@public/svg/shared'
 import SidebarTab from './sidebarTab'
+import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
+import { Button } from '@/components/ui/button'
+import { TIRE_PLAN, VERSION_BADGE } from '@/constants/sidebar'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -26,7 +29,7 @@ function Sidebar(): JSX.Element {
     {
       name: 'Members',
       icon: <TeamSVG />,
-      link: '/members',
+      link: '/members?tab=joined',
       matchTo: '/members'
     },
     {
@@ -38,7 +41,7 @@ function Sidebar(): JSX.Element {
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
-      link: '/',
+      link: '/integrations',
       matchTo: '/integrations'
     },
     {
@@ -57,7 +60,7 @@ function Sidebar(): JSX.Element {
             <KeyshadeLogoSVG /> Keyshade
           </div>
           <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
-            BETA
+            {VERSION_BADGE}
           </div>
         </div>
         <Combobox />
@@ -73,6 +76,15 @@ function Sidebar(): JSX.Element {
               />
             )
           })}
+        </div>
+        <div className="absolute bottom-10 w-[17rem] rounded-lg border border-white/10 bg-white/5 p-4">
+          <div className="mb-5 flex items-center gap-3">
+            <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
+              {TIRE_PLAN}
+            </Button>
+          </div>
+
+          <TierLimit />
         </div>
       </div>
     </aside>

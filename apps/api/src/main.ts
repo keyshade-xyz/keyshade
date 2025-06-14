@@ -37,7 +37,9 @@ async function initializeSentry() {
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Express()
     ],
-    debug: false
+    debug: false,
+    sourceMapsEnabled: true,
+    attachStacktrace: true
   }
   try {
     Sentry.init(sentryConfig)

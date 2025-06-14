@@ -1,5 +1,6 @@
 import type { AuthorityEnum } from '@keyshade/schema'
 import { Checkbox } from '../ui/checkbox'
+import { cn } from '@/lib/utils'
 
 interface ChecklistItem {
   id: AuthorityEnum // the authority id in prisma schema
@@ -431,6 +432,7 @@ interface AuthoritySelectorProps {
   >
   isSheet?: boolean
   parent: 'API_KEY' | 'ROLES'
+  isAdminRole?: boolean
 }
 
 function extractAuthoritiesFromGroupItem(
@@ -481,6 +483,7 @@ export default function AuthoritySelector({
   selectedPermissions,
   setSelectedPermissions,
   isSheet,
+  isAdminRole,
   parent
 }: AuthoritySelectorProps): React.JSX.Element {
   const handleGroupToggle = (groupItem: GroupItem, checked: boolean) => {
@@ -530,7 +533,7 @@ export default function AuthoritySelector({
     group: GroupItem
   ) {
     return (
-      <>
+      <div key={group.name}>
         <div
           className={`space-y-2 ml-[${currentLevel * 20}px]`}
           key={group.name}
@@ -593,7 +596,7 @@ export default function AuthoritySelector({
         {group.subgroups?.map((subgroup) =>
           renderAuthorityGroupsRecursively(currentLevel + 1, subgroup)
         )}
-      </>
+      </div>
     )
   }
 
@@ -604,7 +607,11 @@ export default function AuthoritySelector({
       <label className="w-[9rem] text-base font-semibold" htmlFor="authorities">
         Authorities
       </label>
-      <div className="mt-2 h-full w-full space-y-4">
+      <div
+        className={cn('mt-2 h-full w-full space-y-4', {
+          'pointer-events-none cursor-none opacity-50': isAdminRole
+        })}
+      >
         {authorityGroups
           .filter((group) => {
             if (group.explicitToApiKey) {

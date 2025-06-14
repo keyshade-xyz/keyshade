@@ -17,6 +17,7 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import {
   deleteVariableOpenAtom,
+  projectVariableCountAtom,
   selectedVariableAtom,
   variablesOfProjectAtom
 } from '@/store'
@@ -28,6 +29,7 @@ export default function ConfirmDeleteVariable() {
     deleteVariableOpenAtom
   )
   const setVariables = useSetAtom(variablesOfProjectAtom)
+  const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -50,6 +52,7 @@ export default function ConfirmDeleteVariable() {
 
       try {
         if (success) {
+          setProjectVariableCount((prevCount) => prevCount - 1)
           toast.success('Variable deleted successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -78,7 +81,8 @@ export default function ConfirmDeleteVariable() {
     deleteVariable,
     setVariables,
     setSelectedVariable,
-    handleClose
+    handleClose,
+    setProjectVariableCount
   ])
 
   //Cleaning the pointer events for the context menu after closing the alert dialog

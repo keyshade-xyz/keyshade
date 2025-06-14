@@ -39,9 +39,15 @@ import {
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
 
-export default function VariableCard(
+interface VariableCardProps {
   variableData: GetAllVariablesOfProjectResponse['items'][number]
-) {
+  className?: string
+}
+
+export default function VariableCard({
+  variableData,
+  className
+}: VariableCardProps) {
   const setSelectedVariable = useSetAtom(selectedVariableAtom)
   const setSelectedVariableEnvironment = useSetAtom(
     selectedVariableEnvironmentAtom
@@ -54,7 +60,6 @@ export default function VariableCard(
   const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
   const { variable, values } = variableData
-
   const handleCopyToClipboard = () => {
     copyToClipboard(
       variable.slug,
@@ -88,13 +93,14 @@ export default function VariableCard(
   return (
     <ContextMenu key={variable.id}>
       <AccordionItem
-        className="rounded-xl bg-white/5 px-5"
+        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`variable-${variable.slug}`}
         key={variable.id}
         value={variable.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="hover:no-underline overflow-hidden"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
@@ -110,8 +116,8 @@ export default function VariableCard(
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">{variable.name}</div>
+            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
+              <div className="flex items-center gap-x-4 truncate">{variable.name}</div>
               {variable.note ? (
                 <TooltipProvider>
                   <Tooltip>

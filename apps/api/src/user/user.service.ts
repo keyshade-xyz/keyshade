@@ -20,6 +20,7 @@ import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
 import { UpdateSelfRequest } from '@keyshade/schema'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,8 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   async onApplicationBootstrap() {
@@ -96,16 +98,32 @@ export class UserService {
       where: {
         id: user.id
       },
-      data
+      data: {
+        name: dto?.name,
+        profilePictureUrl: dto?.profilePictureUrl,
+        isOnboardingFinished: dto.isOnboardingFinished,
+        emailPreference: {
+          update: {
+            marketing: dto.emailPreferences?.marketing,
+            activity: dto.emailPreferences?.activity,
+            critical: dto.emailPreferences?.critical
+          }
+        }
+      },
+      include: {
+        emailPreference: true
+      }
     })
     this.log.log(`Updated user ${user.id} with data ${data}`)
 
-    await this.cache.setUser({
+    const updatedUserData = {
       ...updatedUser,
       defaultWorkspace: user.defaultWorkspace
-    })
+    }
 
-    return updatedUser
+    await this.cache.setUser(updatedUserData)
+
+    return updatedUserData
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
@@ -382,11 +400,16 @@ export class UserService {
     // Create the user's default workspace along with user
     const createdUser = await createUser(
       { authProvider: AuthProvider.EMAIL_OTP, ...dto },
-      this.prisma
+      this.prisma,
+      this.slugGenerator
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 
-    await this.mailService.accountLoginEmail(createdUser.email)
+    await this.mailService.accountLoginEmail(
+      createdUser.email,
+      createdUser.name,
+      process.env.PLATFORM_FRONTEND_URL
+    )
     this.log.log(`Sent login email to ${createdUser.email}`)
 
     return createdUser

@@ -1,6 +1,8 @@
+'use client'
 import Link from 'next/link'
 import { Logo, LogoM } from '@public/shared'
 import { Button } from '@/components/ui/moving-border'
+import { isUserLoggedIn } from '@/utils/is-user-logged-in'
 
 function Navbar(): React.JSX.Element {
   return (
@@ -29,11 +31,8 @@ function Navbar(): React.JSX.Element {
           <Link href="/about">About</Link>
         </li>
         <li>
-          <Link href="/pricing">Pricing</Link>
-        </li>
-        <li>
           <a
-            href="https://dev.to/keyshade"
+            href="https://blog.keyshade.xyz/"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -41,9 +40,25 @@ function Navbar(): React.JSX.Element {
           </a>
         </li>
       </ul>
-      <a href="https://git.new/keyshade">
-        <Button duration={6 * 1000}>View GitHub</Button>
-      </a>
+      <div className="flex items-center gap-x-4">
+        <a href="https://git.new/keyshade">
+          <button
+            className="hidden rounded-full border border-white/50 px-4 py-2 text-white/80 md:flex"
+            type="button"
+          >
+            View GitHub
+          </button>
+        </a>
+        <a
+          href="https://app.keyshade.xyz"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <Button duration={6 * 1000}>
+            {isUserLoggedIn() ? 'Open app' : 'Join in'}
+          </Button>
+        </a>
+      </div>
     </nav>
   )
 }

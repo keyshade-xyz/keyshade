@@ -7,6 +7,9 @@ import Avvvatars from 'avvvatars-react'
 import Link from 'next/link'
 import OverviewLoader from '@/components/dashboard/overview/overviewLoader'
 import {
+  projectEnvironmentCountAtom,
+  projectSecretCountAtom,
+  projectVariableCountAtom,
   selectedProjectAtom,
   viewAndDownloadProjectKeysOpenAtom
 } from '@/store'
@@ -23,6 +26,7 @@ import InformationCard from '@/components/shared/information-card'
 import ConfirmDeleteKeyDialog from '@/components/dashboard/overview/confirmDeleteKey'
 import ViewAndDownloadProjectKeysDialog from '@/components/dashboard/project/viewAndDownloadKeysDialog'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { PageTitle } from '@/components/common/page-title'
 
 function OverviewPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
@@ -30,6 +34,9 @@ function OverviewPage(): React.JSX.Element {
     isViewAndDownloadProjectKeysDialogOpen,
     setIsViewAndDownloadProjectKeysDialogOpen
   ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
+  const secretCount = useAtomValue(projectSecretCountAtom)
+  const variableCount = useAtomValue(projectVariableCountAtom)
+  const environmentCount = useAtomValue(projectEnvironmentCountAtom)
 
   const [localKeyDialogOpen, setLocalKeyDialogOpen] = useState<boolean>(false)
   const [serverKeyDialogOpen, setServerKeyDialogOpen] = useState<boolean>(false)
@@ -67,6 +74,7 @@ function OverviewPage(): React.JSX.Element {
 
   return (
     <div className="flex w-full gap-5 pt-2">
+      <PageTitle title={`${selectedProject.name} | Overview`} />
       <div className="flex-1 rounded-md bg-white/5 p-6 drop-shadow-[0px_1px_2px_rgba(16,24,40,0.06)]">
         <div className="flex items-start justify-between pb-5">
           <div className="flex w-full flex-col gap-3">
@@ -115,7 +123,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-black/40 p-2">
               <SecretSVG width={16} />
-              {selectedProject.secretCount}
+              {secretCount}
             </div>
           </Link>
 
@@ -131,7 +139,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
               <VariableSVG width={16} />
-              {selectedProject.variableCount}
+              {variableCount}
             </div>
           </Link>
 
@@ -147,7 +155,7 @@ function OverviewPage(): React.JSX.Element {
             </div>
             <div className="flex gap-2 rounded-lg bg-[#262626] p-2">
               <EnvironmentSVG width={16} />
-              {selectedProject.environmentCount}
+              {environmentCount}
             </div>
           </Link>
         </div>
@@ -265,7 +273,11 @@ function OverviewPage(): React.JSX.Element {
       />
       {/* View and download project keys dialog */}
       {isViewAndDownloadProjectKeysDialogOpen ? (
-        <ViewAndDownloadProjectKeysDialog projectKeys={regeneratedKeys} />
+        <ViewAndDownloadProjectKeysDialog
+          isCreated={false}
+          projectKeys={regeneratedKeys}
+          projectSlug={selectedProject.slug}
+        />
       ) : null}
     </div>
   )

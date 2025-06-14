@@ -28,6 +28,17 @@ import UserRemoveSVG from './user-remove.svg'
 import LockSVG from './lock.svg'
 import RegenerateSVG from './regenerate.svg'
 import TickCircleSVG from './tick-circle.svg'
+import LinkSVG from './link.svg'
+import SelectSVG from './select.svg'
+import ArrowUpSVG from './arrowup.svg'
+import ArrowDownSVG from './arrowdown.svg'
+import MobileScreenSVG from './mobile-screen.svg'
+import InvitationSVG from './invitation.svg'
+import ErrorInfoSVG from './errorInfo.svg'
+import DiscordSVG from './discord.svg'
+import SlackSVG from './slack.svg'
+import EmptyIntegrationSVG from './emptyIntegration.svg'
+import PendingSVG from './pending.svg'
 
 export {
   DropdownSVG,
@@ -60,4 +71,15 @@ export {
   LockSVG,
   RegenerateSVG,
   TickCircleSVG,
+  LinkSVG,
+  SelectSVG,
+  ArrowUpSVG,
+  ArrowDownSVG,
+  MobileScreenSVG,
+  InvitationSVG,
+  EmptyIntegrationSVG,
+  ErrorInfoSVG,
+  DiscordSVG,
+  SlackSVG,
+  PendingSVG
 }

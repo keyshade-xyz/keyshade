@@ -29,6 +29,7 @@ import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -39,7 +40,8 @@ export class WorkspaceMembershipService {
     private readonly authorizationService: AuthorizationService,
     private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
-    @Inject(MAIL_SERVICE) private readonly mailService: IMailService
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -64,7 +66,11 @@ export class WorkspaceMembershipService {
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
-    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(
+      otherUserEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     if (otherUser.id === user.id) {
       throw new BadRequestException(
@@ -307,6 +313,13 @@ export class WorkspaceMembershipService {
         }
       })
 
+      if (user.emailPreference && !user.emailPreference.activity) {
+        this.log.log(
+          `User ${user.id} has opted out of receiving activity notifications`
+        )
+        return
+      }
+
       // Send an email to the removed users
       const removedOn = new Date()
       const emailPromises = userEmails.map((userEmail) =>
@@ -358,7 +371,11 @@ export class WorkspaceMembershipService {
     otherUserEmail: User['email'],
     roleSlugs: WorkspaceRole['slug'][]
   ): Promise<void> {
-    const otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+    const otherUser = await getUserByEmailOrId(
+      otherUserEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -654,7 +671,11 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug'],
     inviteeEmail: User['email']
   ): Promise<void> {
-    const inviteeUser = await getUserByEmailOrId(inviteeEmail, this.prisma)
+    const inviteeUser = await getUserByEmailOrId(
+      inviteeEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -809,7 +830,11 @@ export class WorkspaceMembershipService {
     let otherUser: User | null = null
 
     try {
-      otherUser = await getUserByEmailOrId(otherUserEmail, this.prisma)
+      otherUser = await getUserByEmailOrId(
+        otherUserEmail,
+        this.prisma,
+        this.slugGenerator
+      )
     } catch (e) {
       return false
     }
@@ -834,7 +859,11 @@ export class WorkspaceMembershipService {
     )
 
     // Fetch the invitee user
-    const member = await getUserByEmailOrId(inviteeEmail, this.prisma)
+    const member = await getUserByEmailOrId(
+      inviteeEmail,
+      this.prisma,
+      this.slugGenerator
+    )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
@@ -867,6 +896,13 @@ export class WorkspaceMembershipService {
       )
     }
 
+    if (user.emailPreference && !user.emailPreference.critical) {
+      this.log.log(
+        `User ${member.id} has opted out of receiving critical notifications`
+      )
+      return
+    }
+
     // Resend the invitation
     this.log.log(
       `Resending invitation to user ${member.id} for workspace ${workspace.id}`
@@ -874,7 +910,7 @@ export class WorkspaceMembershipService {
     this.mailService.invitedToWorkspace(
       member.email,
       workspace.name,
-      `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspace.slug}/join`,
+      `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
       user.name,
       membership.createdOn.toISOString(),
       true
@@ -1007,7 +1043,7 @@ export class WorkspaceMembershipService {
         this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspace.slug}/join`,
+          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
           invitedOn.toISOString(),
           true
@@ -1024,7 +1060,8 @@ export class WorkspaceMembershipService {
             email: member.email,
             authProvider: AuthProvider.EMAIL_OTP
           },
-          this.prisma
+          this.prisma,
+          this.slugGenerator
         )
 
         await this.prisma.$transaction([createMembership])
@@ -1034,11 +1071,7 @@ export class WorkspaceMembershipService {
         this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
-          `${process.env.PLATFORM_FRONTEND_URL}/workspace/${
-            workspace.id
-          }/join?token=${await this.jwt.signAsync({
-            id: userId
-          })}`,
+          `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
           new Date().toISOString(),
           false

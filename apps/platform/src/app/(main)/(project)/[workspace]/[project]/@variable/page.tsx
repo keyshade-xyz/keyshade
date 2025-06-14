@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useSearchParams } from 'next/navigation'
 import {
   selectedProjectAtom,
   deleteVariableOpenAtom,
@@ -10,7 +11,8 @@ import {
   variablesOfProjectAtom,
   deleteEnvironmentValueOfVariableOpenAtom,
   variableRevisionsOpenAtom,
-  rollbackVariableOpenAtom
+  rollbackVariableOpenAtom,
+  globalSearchDataAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -25,8 +27,14 @@ import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboar
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
 import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
+import { cn } from '@/lib/utils'
+import { PageTitle } from '@/components/common/page-title'
 
 function VariablePage(): React.JSX.Element {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
+  const [isHighlighted, setIsHighlighted] = useState(false)
+
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
@@ -37,6 +45,7 @@ function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
@@ -66,15 +75,45 @@ function VariablePage(): React.JSX.Element {
             if (data.metadata.links.next === null) {
               setHasMore(false)
             }
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              variables: data.items.map((item) => ({
+                slug: item.variable.slug,
+                name: item.variable.name,
+                note: item.variable.note
+              }))
+            }))
           }
         })
         .finally(() => setIsLoading(false))
     }
-  }, [getAllVariablesOfProject, page, selectedProject, setVariables])
+  }, [
+    getAllVariablesOfProject,
+    page,
+    selectedProject,
+    setGlobalSearchData,
+    setVariables
+  ])
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1)
   }
+
+  useEffect(() => {
+    if (highlightSlug) {
+      // Find and scroll to the element
+      const element = document.getElementById(`variable-${highlightSlug}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setIsHighlighted(true)
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          setIsHighlighted(false)
+        }, 2000)
+      }
+    }
+  }, [highlightSlug, variables])
 
   if (isLoading && page === 0) {
     return (
@@ -90,6 +129,7 @@ function VariablePage(): React.JSX.Element {
     <div
       className={` flex h-full w-full ${isDeleteVariableOpen ? 'inert' : ''} `}
     >
+      <PageTitle title={`${selectedProject?.name} | Variables`} />
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
         <EmptyVariableListContent />
@@ -104,11 +144,15 @@ function VariablePage(): React.JSX.Element {
               collapsible
               type="single"
             >
-              {variables.map(({ variable, values }) => (
+              {variables.map((variableData) => (
                 <VariableCard
-                  key={variable.id}
-                  values={values}
-                  variable={variable}
+                  className={cn(
+                    highlightSlug === variableData.variable.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
+                  )}
+                  key={variableData.variable.id}
+                  variableData={variableData}
                 />
               ))}
             </Accordion>

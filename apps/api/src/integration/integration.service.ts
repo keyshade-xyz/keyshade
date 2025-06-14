@@ -17,12 +17,13 @@ import {
 import { CreateIntegration } from './dto/create.integration/create.integration'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import IntegrationFactory from './plugins/factory/integration.factory'
+import IntegrationFactory from './plugins/integration.factory'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
+import SlugGenerator from '@/common/slug-generator.service'
+import { sDecrypt, sEncrypt } from '@/common/cryptography'
 
 @Injectable()
 export class IntegrationService {
@@ -30,7 +31,8 @@ export class IntegrationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -120,7 +122,10 @@ export class IntegrationService {
 
     // Create the integration object
     this.logger.log(`Creating integration object of type ${dto.type}`)
-    const integrationObject = IntegrationFactory.createIntegration(dto.type)
+    const integrationObject = IntegrationFactory.createIntegration(
+      dto.type,
+      this.prisma
+    )
 
     // Check for permitted events
     this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
@@ -135,13 +140,26 @@ export class IntegrationService {
     const integration = await this.prisma.integration.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(
+          dto.name,
+          'INTEGRATION'
+        ),
         type: dto.type,
-        metadata: dto.metadata,
+        metadata: this.encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
         projectId: project?.id,
-        workspaceId
+        workspaceId,
+        lastUpdatedById: user.id
+      },
+      include: {
+        lastUpdatedBy: {
+          select: {
+            id: true,
+            name: true,
+            profilePictureUrl: true
+          }
+        }
       }
     })
 
@@ -164,6 +182,7 @@ export class IntegrationService {
       this.prisma
     )
 
+    integration.metadata = this.decryptMetadata(integration.metadata)
     return integration
   }
 
@@ -254,7 +273,8 @@ export class IntegrationService {
     // Create the integration object
     this.logger.log(`Creating integration object of type ${integration.type}`)
     const integrationObject = IntegrationFactory.createIntegration(
-      integration.type
+      integration.type,
+      this.prisma
     )
 
     // Check for permitted events
@@ -270,12 +290,13 @@ export class IntegrationService {
       data: {
         name: dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'INTEGRATION', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'INTEGRATION')
           : integration.slug,
-        metadata: dto.metadata,
+        metadata: this.encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
         environmentId: environment?.id,
-        projectId: project?.id
+        projectId: project?.id,
+        lastUpdatedById: user.id
       }
     })
 
@@ -298,6 +319,9 @@ export class IntegrationService {
       this.prisma
     )
 
+    updatedIntegration.metadata = this.decryptMetadata(
+      updatedIntegration.metadata
+    )
     return updatedIntegration
   }
 
@@ -316,11 +340,15 @@ export class IntegrationService {
     this.logger.log(
       `User ${user.id} attempted to retrieve integration ${integrationSlug}`
     )
-    return await this.authorizationService.authorizeUserAccessToIntegration({
-      user,
-      entity: { slug: integrationSlug },
-      authorities: [Authority.READ_INTEGRATION]
-    })
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        entity: { slug: integrationSlug },
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    integration.metadata = this.decryptMetadata(integration.metadata)
+    return integration
   }
 
   /* istanbul ignore next */
@@ -418,11 +446,32 @@ export class IntegrationService {
           }
         ]
       },
+      omit: {
+        projectId: true,
+        environmentId: true
+      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
 
       orderBy: {
         [sort]: order
+      },
+
+      include: {
+        project: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        },
+        environment: {
+          select: {
+            id: true,
+            slug: true,
+            name: true
+          }
+        }
       }
     })
 
@@ -452,6 +501,11 @@ export class IntegrationService {
       order,
       search
     })
+
+    // Decrypt the metadata
+    for (const integration of integrations) {
+      integration.metadata = this.decryptMetadata(integration.metadata)
+    }
 
     return { items: integrations, metadata }
   }
@@ -504,6 +558,61 @@ export class IntegrationService {
     )
   }
 
+  async getAllRunsOfIntegration(
+    user: AuthenticatedUser,
+    integrationSlug: Integration['slug'],
+    page: number,
+    limit: number
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to retrieve all runs of integration ${integrationSlug}`
+    )
+
+    // Check if the user has READ authority over the integration
+    this.logger.log(`Checking user access to integration ${integrationSlug}`)
+    const integration =
+      await this.authorizationService.authorizeUserAccessToIntegration({
+        user,
+        entity: { slug: integrationSlug },
+        authorities: [Authority.READ_INTEGRATION]
+      })
+
+    const integrationId = integration.id
+
+    // Fetch all runs of the integration
+    this.logger.log(`Fetching all runs of integration ${integrationId}`)
+    const runs = await this.prisma.integrationRun.findMany({
+      where: {
+        integrationId
+      },
+      include: {
+        event: true
+      },
+      skip: page * limit,
+      take: limitMaxItemsPerPage(limit),
+      orderBy: {
+        triggeredAt: 'desc'
+      }
+    })
+
+    // Calculate metadata for pagination
+    const totalCount = await this.prisma.integrationRun.count({
+      where: {
+        integrationId
+      }
+    })
+    const metadata = paginate(
+      totalCount,
+      `/integration/${integrationSlug}/run`,
+      {
+        page,
+        limit: limitMaxItemsPerPage(limit)
+      }
+    )
+
+    return { items: runs, metadata }
+  }
+
   /**
    * Checks if an integration with the same name already exists in the workspace.
    * Throws a ConflictException if the integration already exists.
@@ -540,5 +649,36 @@ export class IntegrationService {
         `Integration with name ${name} does not exist in workspace ${workspace.slug}`
       )
     }
+  }
+
+  /**
+   * Encrypts the given metadata using the server secret. This is a private
+   * function that should not be used directly. The metadata is encrypted to
+   * protect the integration's credentials when they are stored in the database.
+   * @param metadata The integration metadata to encrypt
+   * @returns The encrypted metadata as a string
+   */
+  private encryptMetadata(
+    metadata: Record<string, unknown>
+  ): string | undefined {
+    if (!metadata) {
+      return undefined
+    }
+    return sEncrypt(JSON.stringify(metadata))
+  }
+
+  /**
+   * Decrypts the given metadata using the server secret. This is a private
+   * function that should not be used directly. The metadata is decrypted to
+   * retrieve the integration's credentials when they are retrieved from the
+   * database.
+   * @param encryptedMetadata The encrypted metadata to decrypt
+   * @returns The decrypted metadata as an object
+   */
+  private decryptMetadata(encryptedMetadata: string): string | undefined {
+    if (!encryptedMetadata) {
+      return undefined
+    }
+    return JSON.parse(sDecrypt(encryptedMetadata))
   }
 }

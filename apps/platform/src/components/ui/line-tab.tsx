@@ -58,7 +58,7 @@ function Tab({
           layoutId={`${customID}linetab`}
           transition={{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }}
         >
-          <span className="z-0 h-[3px] w-full rounded-t-full bg-white" />
+          <span className="z-0 h-[1px] w-[80%] rounded-full bg-white" />
         </motion.div>
       ) : null}
     </button>
@@ -89,7 +89,7 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
           customID={customID}
           icon={tab.icon}
           key={tab.id}
-          searchParams={searchParams}
+          searchParams={searchParams} 
           selected={search?.toLocaleLowerCase() === tab.id.toLocaleLowerCase()}
           text={tab.label}
         />

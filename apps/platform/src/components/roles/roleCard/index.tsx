@@ -1,8 +1,9 @@
+'use client'
+
 import type { AuthorityEnum, WorkspaceRole } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { Copy, Pen } from 'lucide-react'
-import { useCallback } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useState } from 'react'
 import { useSetAtom } from 'jotai'
 import { TrashWhiteSVG } from '@public/svg/shared'
 import { NoteIconSVG } from '@public/svg/secret'
@@ -15,7 +16,9 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { deleteRoleOpenAtom, selectedRoleAtom } from '@/store'
+import { deleteRoleOpenAtom, editRoleOpenAtom, selectedRoleAtom } from '@/store'
+import { Button } from '@/components/ui/button'
+import { copyToClipboard } from '@/lib/clipboard'
 
 interface RoleListItemProps {
   role: WorkspaceRole
@@ -27,7 +30,7 @@ function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
   second = second.charAt(0) + second.slice(1).toLowerCase()
 
   return (
-    <div className="h-fit w-fit rounded-lg border-[1px] border-sky-500 bg-sky-500/10 px-2 py-1 text-sm text-sky-400">
+    <div className="h-fit w-full rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-center text-sm text-cyan-200">
       {first} {second}
     </div>
   )
@@ -59,24 +62,24 @@ function ProjectsAndEnvironmentsTooltip({
 export default function RoleCard({
   role
 }: RoleListItemProps): React.JSX.Element {
+  const AUTHORITY_DISPLAY_LIMIT = 5
+  const hasAuthorities = role.authorities.length > 0
+
+  const [showAllAuthorities, setShowAllAuthorities] = useState(false)
+
   const setSelectedRole = useSetAtom(selectedRoleAtom)
   const setIsDeleteRoleOpen = useSetAtom(deleteRoleOpenAtom)
+  const setIsEditRoleOpen = useSetAtom(editRoleOpenAtom)
 
   const handleDeleteRole = useCallback(() => {
     setSelectedRole(role)
     setIsDeleteRoleOpen(true)
   }, [role, setIsDeleteRoleOpen, setSelectedRole])
 
-  const copySlugToClipboard = useCallback(() => {
-    navigator.clipboard.writeText(role.slug)
-    toast.success('Copied to clipboard!', {
-      description: (
-        <p className="text-xs text-green-300">
-          The slug got copied to your clipboard.
-        </p>
-      )
-    })
-  }, [role.slug])
+  const handleEditRole = useCallback(() => {
+    setSelectedRole(role)
+    setIsEditRoleOpen(true)
+  }, [role, setIsEditRoleOpen, setSelectedRole])
 
   const isAdminRole = role.authorities.some(
     (authority) => authority === 'WORKSPACE_ADMIN'
@@ -104,28 +107,30 @@ export default function RoleCard({
         ) : null}
       </TableCell>
       <TableCell className="h-full">
-        <div className="flex h-full flex-wrap">
+        <div className="flex h-full mt-1 items-start flex-wrap">
           {role.members.map((member) => (
             <TooltipProvider key={member.email}>
               <Tooltip>
                 <TooltipTrigger>
                   <AvatarComponent
                     className="ml-[-0.3rem]"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                 </TooltipTrigger>
                 <TooltipContent
-                  className="flex w-fit items-start justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
+                  className="flex w-fit items-center justify-between rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
                   sideOffset={8}
                 >
                   <AvatarComponent
                     className="h-10 w-10"
-                    name={member.name}
+                    name={member.name || ''}
                     profilePictureUrl={member.profilePictureUrl}
                   />
                   <div className="ml-2 mr-5 flex flex-col">
-                    <div className="font-semibold">{member.name}</div>
+                    {member.name ? (
+                      <div className="font-semibold">{member.name}</div>
+                    ) : null}
                     <div className="text-sm">{member.email}</div>
                   </div>
                   <div className="flex flex-col items-end">
@@ -142,10 +147,30 @@ export default function RoleCard({
         </div>
       </TableCell>
       <TableCell className="h-full">
-        <div className="flex h-full flex-grow flex-wrap gap-2">
-          {role.authorities.map((authority) => (
-            <AuthorityTile authority={authority} key={authority} />
-          ))}
+        <div className="grid h-full grid-cols-2 gap-2">
+          {hasAuthorities ? (
+            <>
+              {role.authorities
+                .slice(0, showAllAuthorities ? role.authorities.length : 5)
+                .map((authority) => (
+                  <AuthorityTile authority={authority} key={authority} />
+                ))}
+              {role.authorities.length > AUTHORITY_DISPLAY_LIMIT ? (
+                <Button
+                  aria-controls="authorities-list"
+                  aria-expanded={showAllAuthorities}
+                  className="h-auto justify-start border-none bg-transparent text-blue-300 underline hover:bg-inherit"
+                  onClick={() => setShowAllAuthorities(!showAllAuthorities)}
+                >
+                  {showAllAuthorities ? 'Show less' : 'Show more'}
+                </Button>
+              ) : null}
+            </>
+          ) : (
+            <span className="text-sm text-white/60">
+              No authorities available
+            </span>
+          )}
         </div>
       </TableCell>
       <TableCell className="h-full cursor-pointer text-sm text-white/60 underline">
@@ -171,8 +196,17 @@ export default function RoleCard({
       <TableCell className="flex justify-end gap-x-4 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
-              <button onClick={copySlugToClipboard} type="button">
+            <TooltipTrigger asChild>
+              <button
+                onClick={() =>
+                  copyToClipboard(
+                    role.slug,
+                    'The slug got copied to your clipboard.',
+                    'Failed to copy slug'
+                  )
+                }
+                type="button"
+              >
                 <Copy size={20} />
               </button>
             </TooltipTrigger>
@@ -185,13 +219,13 @@ export default function RoleCard({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <button type="button">
+        <button onClick={handleEditRole} type="button">
           <Pen size={20} />
         </button>
 
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <button
                 disabled={isAdminRole}
                 onClick={handleDeleteRole}

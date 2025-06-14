@@ -4,6 +4,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
 import { useState } from 'react'
+import {decrypt} from '@keyshade/common'
 import {
   AccordionContent,
   AccordionItem,
@@ -39,18 +40,19 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import { decrypt } from '@/lib/decrypt'
 
 interface SecretCardProps {
   secretData: Secret
   isDecrypted: boolean
   privateKey: string | null
+  className?: string
 }
 
 export default function SecretCard({
   secretData,
   isDecrypted,
-  privateKey
+  privateKey,
+  className
 }: SecretCardProps) {
   const { secret, values } = secretData
 
@@ -139,13 +141,14 @@ export default function SecretCard({
   return (
     <ContextMenu>
       <AccordionItem
-        className="rounded-xl bg-white/5 px-5"
+        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`secret-${secretData.secret.slug}`}
         key={secret.id}
         value={secret.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="hover:no-underline overflow-hidden"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
@@ -161,15 +164,15 @@ export default function SecretCard({
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">
+            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
+              <div className="flex items-center gap-x-4 truncate">
                 {/* <SecretLogoSVG /> */}
                 {secret.name}
               </div>
               {secret.note ? (
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">

@@ -2,11 +2,13 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(req: NextRequest): NextResponse {
+export async function middleware(req: NextRequest): Promise<NextResponse> {
   const cookieStore = cookies()
 
-  const token = cookieStore.has('token')
-  const isOnboardingFinished = cookieStore.get('isOnboardingFinished')?.value
+  const token = (await cookieStore).has('token')
+  const isOnboardingFinished = (await cookieStore).get(
+    'isOnboardingFinished'
+  )?.value
 
   const currentPath = req.nextUrl.pathname
 

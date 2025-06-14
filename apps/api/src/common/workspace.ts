@@ -3,12 +3,12 @@ import { CreateWorkspace } from '@/workspace/dto/create.workspace/create.workspa
 import { PrismaService } from '@/prisma/prisma.service'
 import { Logger } from '@nestjs/common'
 import { v4 } from 'uuid'
-import generateEntitySlug from './slug-generator'
 import { createEvent } from './event'
 import {
   WorkspaceWithLastUpdateBy,
   WorkspaceWithLastUpdatedByAndOwner
 } from '@/workspace/workspace.types'
+import SlugGenerator from './slug-generator.service'
 
 /**
  * Creates a new workspace and adds the user as the owner.
@@ -22,19 +22,29 @@ export const createWorkspace = async (
   user: User,
   dto: CreateWorkspace,
   prisma: PrismaService,
+  slugGenerator: SlugGenerator,
   isDefault?: boolean
 ): Promise<WorkspaceWithLastUpdatedByAndOwner> => {
   const logger = new Logger('createWorkspace')
 
   const workspaceId = v4()
+  const workspaceSlug = await slugGenerator.generateEntitySlug(
+    dto.name,
+    'WORKSPACE'
+  )
+  const workspaceAdminRoleSlug = await slugGenerator.generateEntitySlug(
+    'Admin',
+    'WORKSPACE_ROLE'
+  )
 
   logger.log(
-    `Creating workspace ${dto.name} (${workspaceId}) for user ${user.id}`
+    `Creating workspace ${dto.name} (${workspaceSlug}) for user ${user.id} and admin role ${workspaceAdminRoleSlug}`
   )
+
   const createNewWorkspace = prisma.workspace.create({
     data: {
       id: workspaceId,
-      slug: await generateEntitySlug(dto.name, 'WORKSPACE', prisma),
+      slug: workspaceSlug,
       name: dto.name,
       icon: dto.icon,
       isFreeTier: true,
@@ -45,7 +55,7 @@ export const createWorkspace = async (
           data: [
             {
               name: 'Admin',
-              slug: await generateEntitySlug('Admin', 'WORKSPACE_ROLE', prisma),
+              slug: workspaceAdminRoleSlug,
               authorities: [Authority.WORKSPACE_ADMIN],
               hasAdminAuthority: true,
               colorCode: '#FF0000'
@@ -64,12 +74,8 @@ export const createWorkspace = async (
       }
     }
   })
-  logger.log(`Created workspace ${dto.name} (${workspaceId})`)
 
   // Add the owner to the workspace
-  logger.log(
-    `Assigning ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
-  )
   const assignOwnership = prisma.workspaceMember.create({
     data: {
       workspace: {
@@ -97,17 +103,20 @@ export const createWorkspace = async (
       }
     }
   })
-  logger.log(
-    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
-  )
 
   logger.log(
-    `Executing transactions for creating workspace and assigning ownership`
+    `Executing transactions for creating workspace ${dto.name} (${workspaceSlug}) and assigning ownership ${workspaceAdminRoleSlug} to user ${user.id}`
   )
   const result = await prisma.$transaction([
     createNewWorkspace,
     assignOwnership
   ])
+  logger.log(
+    `Assigned ownership of workspace ${dto.name} (${workspaceId}) to user ${user.id}`
+  )
+  logger.log(
+    `Created workspace ${dto.name} (${workspaceSlug}) for user ${user.id}`
+  )
   logger.log(
     `Executed transactions for creating workspace and assigning ownership`
   )
