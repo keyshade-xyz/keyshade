@@ -2,38 +2,14 @@
 
 import { LogoSVG } from '@public/svg/dashboard'
 import { MobileScreenSVG } from '@public/svg/shared'
-import { useEffect, useState } from 'react'
+import { useIsMobileDevice } from '@/hooks/use-is-mobile-device'
 
 export default function MobileOverlay() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    function checkMobile() {
-      // Check if device supports touch
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const smallerDimension = Math.min(window.innerWidth, window.innerHeight);
-      const isSmallDevice = smallerDimension <= 768;
-      
-      const isMobileDevice = isTouchDevice && isSmallDevice;
-      
-      setIsMobile(isMobileDevice);
-    }
-
-    checkMobile();
-
-    window.addEventListener('resize', checkMobile);
-    
-    screen.orientation.addEventListener('change', checkMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      screen.orientation.removeEventListener('change', checkMobile);
-    };
-  }, []);
+  const isMobile = useIsMobileDevice()
 
   // Do not render overlay during initial render to avoid hydration mismatch
   if (typeof window === 'undefined') {
-    return null;
+    return null
   }
 
   if (isMobile) {
@@ -49,6 +25,6 @@ export default function MobileOverlay() {
       </div>
     )
   }
-  
-  return null;
+
+  return null
 }
