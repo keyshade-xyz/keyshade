@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
+import { isEmailValid } from '@/lib/is-email-valid'
 
 interface OtpInputFormProps {
   isLoading: boolean
@@ -53,10 +54,9 @@ export default function OtpInputForm({
       throw new Error('User not set in context')
     }
 
-    const isEmailValid = z.string().email().safeParse(user.email).success
     const isOtpValid = isAlphanumeric(otp)
 
-    if (!isEmailValid || !isOtpValid) {
+    if (!isEmailValid(user.email) || !isOtpValid) {
       toast.error('Invalid OTP', {
         description: (
           <p className="text-xs text-red-300">
@@ -108,6 +108,15 @@ export default function OtpInputForm({
     return result.success
   }
 
+  const isButtonDisabled = (): boolean => {
+    return (
+      isLoading ||
+      otp.length !== 6 ||
+      !isAlphanumeric(otp) ||
+      !isEmailValid(user?.email)
+    )
+  }
+
   return (
     <form className="flex w-[17rem] flex-col gap-3" onSubmit={handleVerifyOTP}>
       <div>
@@ -133,7 +142,7 @@ export default function OtpInputForm({
         </InputOTP>
       </div>
 
-      <Button className="w-full" disabled={isLoading} type="submit">
+      <Button className="w-full" disabled={isButtonDisabled()} type="submit">
         {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
       </Button>
     </form>

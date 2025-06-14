@@ -3,12 +3,13 @@ import { useSetAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { userAtom } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { isEmptyString } from '@/lib/is-empty-string'
+import { isEmailValid } from '@/lib/is-email-valid'
 
 export default function AuthEmailForm() {
   const [isInvalidEmail, setIsInvalidEmail] = useState<boolean>(false)
@@ -30,7 +31,7 @@ export default function AuthEmailForm() {
   ): Promise<void> => {
     e.preventDefault()
 
-    if (!validateEmail(email)) {
+    if (!isEmailValid(email)) {
       setIsInvalidEmail(true)
       return
     }
@@ -58,16 +59,13 @@ export default function AuthEmailForm() {
     setEmail(value)
   }
 
-  const validateEmail = (value: string): boolean => {
-    const result = z.string().email().safeParse(value)
-    return result.success
-  }
-
   const loadErrorMessage = () => {
-    if (email.trim() === '') return 'Email is required'
+    if (isEmptyString(email)) return 'Email is required'
 
-    return !validateEmail(email) ? 'Invalid email' : null
+    return !isEmailValid(email) ? 'Invalid email' : null
   }
+
+  const isButtonDisabled = isLoading || isEmptyString(email)
 
   return (
     <form className="flex flex-col gap-3" onSubmit={handleGetStarted}>
@@ -83,7 +81,11 @@ export default function AuthEmailForm() {
         ) : null}
       </label>
 
-      <Button className="w-full" disabled={isLoading} type="submit">
+      <Button
+        className="w-full"
+        disabled={isButtonDisabled}
+        type="submit"
+      >
         {isLoading ? <LoadingSVG className="h-auto w-10" /> : 'Get Started'}
       </Button>
     </form>
