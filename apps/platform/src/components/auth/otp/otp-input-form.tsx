@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
-import { isEmailValid } from '@/lib/is-email-valid'
 
 interface OtpInputFormProps {
   isLoading: boolean
@@ -45,18 +44,21 @@ export default function OtpInputForm({
     throw new Error('User not set in context')
   })
 
-  const handleVerifyOTP = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    e.preventDefault()
-
+  const handleVerifyOTP = async (): Promise<void> => {
     if (!user) {
       throw new Error('User not set in context')
     }
 
-    const isOtpValid = isAlphanumeric(otp)
+    const emailResult = z.string().email().safeParse(user.email)
+    const alphanumeric = z
+      .string()
+      .length(6)
+      .refine((value) => /^[a-z0-9]+$/i.test(value), {
+        message: 'OTP must be alphanumeric'
+      })
+    const otpResult = alphanumeric.safeParse(otp)
 
-    if (!isEmailValid(user.email) || !isOtpValid) {
+    if (!emailResult.success || !otpResult.success) {
       toast.error('Invalid OTP', {
         description: (
           <p className="text-xs text-red-300">
@@ -96,29 +98,8 @@ export default function OtpInputForm({
     }
   }
 
-  const isAlphanumeric = (value: string): boolean => {
-    const result = z
-      .string()
-      .length(6)
-      .refine((str) => /^[a-z0-9]+$/i.test(str), {
-        message: 'OTP must be alphanumeric'
-      })
-      .safeParse(value)
-
-    return result.success
-  }
-
-  const isButtonDisabled = (): boolean => {
-    return (
-      isLoading ||
-      otp.length !== 6 ||
-      !isAlphanumeric(otp) ||
-      !isEmailValid(user?.email)
-    )
-  }
-
   return (
-    <form className="flex w-[17rem] flex-col gap-3" onSubmit={handleVerifyOTP}>
+    <form className="flex w-[17rem] flex-col gap-3">
       <div>
         <InputOTP
           maxLength={6}
@@ -142,7 +123,7 @@ export default function OtpInputForm({
         </InputOTP>
       </div>
 
-      <Button className="w-full" disabled={isButtonDisabled()} type="submit">
+      <Button className="w-full" disabled={isLoading} onClick={handleVerifyOTP}>
         {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
       </Button>
     </form>
