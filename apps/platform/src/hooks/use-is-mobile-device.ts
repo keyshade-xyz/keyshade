@@ -8,12 +8,14 @@ import { useCallback, useEffect, useState } from 'react'
 export function useIsMobileDevice(): boolean {
   const [isMobile, setIsMobile] = useState(false)
 
+  const MOBILE_BREAKPOINT = 768
+
   const checkMobile = useCallback(() => {
     // Check if device supports touch
     const isTouchDevice =
       'ontouchstart' in window || navigator.maxTouchPoints > 0
     const smallerDimension = Math.min(window.innerWidth, window.innerHeight)
-    const isSmallDevice = smallerDimension <= 768
+    const isSmallDevice = smallerDimension <= MOBILE_BREAKPOINT
 
     const isMobileDevice = isTouchDevice && isSmallDevice
 
