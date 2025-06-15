@@ -1046,10 +1046,7 @@ export class VariableService {
    * @returns nothing
    * @throws `ConflictException` if the variable already exists
    */
-  private async variableExists(
-    variableName: Variable['name'],
-    project: Project
-  ) {
+  async variableExists(variableName: Variable['name'], project: Project) {
     this.logger.log(
       `Checking if variable ${variableName} already exists in project ${project.slug}`
     )

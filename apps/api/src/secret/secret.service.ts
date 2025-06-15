@@ -42,6 +42,7 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { VariableService } from '@/variable/variable.service'
 import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
@@ -54,6 +55,7 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -95,6 +97,9 @@ export class SecretService {
 
     // Check if the secret with the same name already exists in the project
     await this.secretExists(dto.name, project)
+
+    // Check if a variable with the same name already exists in the project
+    await this.variableService.variableExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
