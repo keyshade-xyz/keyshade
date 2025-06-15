@@ -1,3 +1,22 @@
+## [2.25.0](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0) (2025-06-15)
+
+### 🚀 Features
+
+* **platform:** add event trigger groups integration ([#992](https://github.com/keyshade-xyz/keyshade/issues/992)) ([6cbd003](https://github.com/keyshade-xyz/keyshade/commit/6cbd0036ab1188febbaa7f9318a7827b61d93c62))
+
+### 🐛 Bug Fixes
+
+* **platform:** mobile detection logic and conditional rendering for overlay ([#1001](https://github.com/keyshade-xyz/keyshade/issues/1001)) ([156b3da](https://github.com/keyshade-xyz/keyshade/commit/156b3da4f6c27a3feb7716bebb864206fd2d16c6))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.25.0-stage.1 [skip ci] ([26cf373](https://github.com/keyshade-xyz/keyshade/commit/26cf373e21ce5d4d0739b76514a765060700bd55))
+* **Snyk:** Upgrade conventional-changelog-writer from 8.0.1 to 8.1.0 ([#997](https://github.com/keyshade-xyz/keyshade/issues/997)) ([e7f1702](https://github.com/keyshade-xyz/keyshade/commit/e7f1702437a0dc6dfe8c4e9541c04228855344f8))
+
+### 🔨 Code Refactoring
+
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([fc15d74](https://github.com/keyshade-xyz/keyshade/commit/fc15d74cc6d6a96c634738159fd2cef3ecd97f63))
+
 ## [2.25.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0-stage.1) (2025-06-14)
 
 ### 🚀 Features
