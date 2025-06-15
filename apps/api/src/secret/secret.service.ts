@@ -244,6 +244,10 @@ export class SecretService {
     // Check if the secret with the same name already exists in the project
     dto.name && (await this.secretExists(dto.name, secret.project))
 
+    // Check if a variable with the same name already exists in the project
+    dto.name &&
+      (await this.variableService.variableExists(dto.name, secret.project))
+
     // Check if the user has access to the environments
     const environmentSlugToIdMap = shouldCreateRevisions
       ? await getEnvironmentIdToSlugMap(
