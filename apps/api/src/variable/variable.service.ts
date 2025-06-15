@@ -221,6 +221,10 @@ export class VariableService {
     // Check if the variable already exists in the project
     dto.name && (await this.variableExists(dto.name, variable.project))
 
+    // Check if a secret with the same name already exists in the project
+    dto.name &&
+      (await this.secretService.secretExists(dto.name, variable.project))
+
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
       `${dto.entries?.length || 0} revisions set for variable. Revision creation for variable ${dto.name} is set to ${shouldCreateRevisions}`
