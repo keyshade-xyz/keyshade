@@ -4,6 +4,9 @@ import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
 import * as crypto from 'crypto'
+import { sDecrypt, sEncrypt } from './cryptography'
+import { Entry } from './dto/entry.dto'
+import { Environment } from '@keyshade/schema'
 
 /**
  * Limits the given limit to a maximum number of items per page.
@@ -151,4 +154,63 @@ export const makeTimedRequest = async <T>(
     response,
     duration
   }
+}
+
+/**
+ * Encrypts the given metadata.
+ *
+ * This function serializes the metadata into a JSON string and then encrypts it.
+ * If the metadata is not provided, it returns undefined.
+ *
+ * @param metadata - The metadata to encrypt.
+ * @returns The encrypted metadata as a string, or undefined if no metadata is provided.
+ */
+export const encryptMetadata = (
+  metadata: Record<string, unknown>
+): string | undefined => {
+  if (!metadata) {
+    return undefined
+  }
+  return sEncrypt(JSON.stringify(metadata))
+}
+
+/**
+ * Decrypts the given encrypted metadata.
+ *
+ * This function decrypts the given string and then parses it into a JSON object.
+ * If the given string is empty, it returns undefined.
+ *
+ * @param encryptedMetadata - The encrypted metadata to decrypt.
+ * @returns The decrypted metadata as a JSON object, or undefined if the given string is empty.
+ */
+export const decryptMetadata = <T extends Record<string, unknown>>(
+  encryptedMetadata: string
+): T | undefined => {
+  if (!encryptedMetadata) {
+    return undefined
+  }
+  return JSON.parse(sDecrypt(encryptedMetadata))
+}
+
+/**
+ * Maps an array of entries into an object where the keys are the environment names
+ * and the values are the entry values.
+ *
+ * If the given array is empty, it returns an empty object.
+ *
+ * @param entries - The array of entries to map.
+ * @returns An object with the environment names as keys and the entry values as values.
+ */
+export const mapEntriesToEventMetadata = (
+  entries?: Entry[]
+): Record<Environment['name'], string> => {
+  return entries
+    ? entries.reduce(
+        (acc, entry) => {
+          acc[entry.environmentSlug] = entry.value
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    : {}
 }

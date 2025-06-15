@@ -20,10 +20,15 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import IntegrationFactory from './plugins/integration.factory'
 import { paginate } from '@/common/paginate'
 import { createEvent } from '@/common/event'
-import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import {
+  constructErrorBody,
+  decryptMetadata,
+  encryptMetadata,
+  limitMaxItemsPerPage
+} from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
-import { sDecrypt, sEncrypt } from '@/common/cryptography'
+import { IntegrationAddedEventMetadata } from '@/event/event.types'
 
 @Injectable()
 export class IntegrationService {
@@ -62,7 +67,8 @@ export class IntegrationService {
   async createIntegration(
     user: AuthenticatedUser,
     dto: CreateIntegration,
-    workspaceSlug: Workspace['slug']
+    workspaceSlug: Workspace['slug'],
+    privateKey?: Project['privateKey']
   ) {
     this.logger.log(
       `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
@@ -81,8 +87,15 @@ export class IntegrationService {
     // Check if integration with the same name already exists
     await this.existsByNameAndWorkspaceId(dto.name, workspace)
 
+    // Create the integration object
+    this.logger.log(`Creating integration object of type ${dto.type}`)
+    let integrationObject = IntegrationFactory.createIntegrationWithType(
+      dto.type,
+      this.prisma
+    )
+
     let project: Project | null = null
-    let environment: Environment | null = null
+    const environments: Array<Environment> | null = []
 
     // Check if the user has READ authority over the project
     if (dto.projectSlug) {
@@ -92,12 +105,36 @@ export class IntegrationService {
         entity: { slug: dto.projectSlug },
         authorities: [Authority.READ_PROJECT]
       })
+
+      privateKey = project.storePrivateKey ? project.privateKey : privateKey
+
+      if (!privateKey && integrationObject.isPrivateKeyRequired()) {
+        this.logger.error(
+          `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Can not create integration without private key',
+            'Private key is required for this integration type'
+          )
+        )
+      }
+    } else if (integrationObject.isProjectRequired()) {
+      this.logger.error(
+        `Can not create integration ${dto.type} without project. Project slug: ${dto.projectSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not create integration without project',
+          'Project is required for this integration type'
+        )
+      )
     }
 
-    // Check if only environmentId is provided
-    if (dto.environmentSlug && !dto.projectSlug) {
+    // Check if only environments are provided
+    if (dto.environmentSlugs && !dto.projectSlug) {
       this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlug}`
+        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slugs: ${dto.environmentSlugs}`
       )
       throw new BadRequestException(
         constructErrorBody(
@@ -107,25 +144,32 @@ export class IntegrationService {
       )
     }
 
-    // Check if the user has READ authority over the environment
-    if (dto.environmentSlug) {
-      this.logger.log(
-        `Checking user access to environment ${dto.environmentSlug}`
-      )
-      environment =
-        await this.authorizationService.authorizeUserAccessToEnvironment({
-          user,
-          entity: { slug: dto.environmentSlug },
-          authorities: [Authority.READ_ENVIRONMENT]
-        })
-    }
+    // Check if the user has READ authority over the environments
+    if (dto.environmentSlugs) {
+      for (const environmentSlug of dto.environmentSlugs) {
+        this.logger.log(
+          `Checking user access to environment ${environmentSlug}`
+        )
 
-    // Create the integration object
-    this.logger.log(`Creating integration object of type ${dto.type}`)
-    const integrationObject = IntegrationFactory.createIntegration(
-      dto.type,
-      this.prisma
-    )
+        const environment =
+          await this.authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            entity: { slug: environmentSlug },
+            authorities: [Authority.READ_ENVIRONMENT]
+          })
+        environments.push(environment)
+      }
+    } else if (integrationObject.areEnvironmentsRequired()) {
+      this.logger.error(
+        `Can not create integration ${dto.type} without environment. Environment slugs: ${dto.environmentSlugs}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not create integration without environments',
+          'Environment is required for this integration type'
+        )
+      )
+    }
 
     // Check for permitted events
     this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
@@ -145,9 +189,11 @@ export class IntegrationService {
           'INTEGRATION'
         ),
         type: dto.type,
-        metadata: this.encryptMetadata(dto.metadata),
+        metadata: encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
-        environmentId: environment?.id,
+        environments: {
+          connect: environments
+        },
         projectId: project?.id,
         workspaceId,
         lastUpdatedById: user.id
@@ -159,15 +205,21 @@ export class IntegrationService {
             name: true,
             profilePictureUrl: true
           }
+        },
+        environments: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
         }
       }
     })
-
     this.logger.log(
       `Integration ${integration.id} created by user ${user.id} in workspace ${workspaceId}`
     )
 
-    await createEvent(
+    const event = await createEvent(
       {
         triggeredBy: user,
         entity: integration,
@@ -175,14 +227,23 @@ export class IntegrationService {
         source: EventSource.INTEGRATION,
         title: `Integration ${integration.name} created`,
         metadata: {
-          integrationId: integration.id
-        },
+          privateKey
+        } as IntegrationAddedEventMetadata,
         workspaceId: workspaceId
       },
       this.prisma
     )
 
-    integration.metadata = this.decryptMetadata(integration.metadata)
+    // Initialize the integration
+    this.logger.log(`Initializing integration: ${integration.id}`)
+    integrationObject = IntegrationFactory.createIntegration(
+      integration,
+      this.prisma
+    )
+    integrationObject.init(privateKey, event.id)
+
+    // integration.metadata = decryptMetadata(integration.metadata)
+    delete integration.environments
     return integration
   }
 
@@ -226,13 +287,27 @@ export class IntegrationService {
       })
     const integrationId = integration.id
 
+    // Create the integration object
+    this.logger.log(`Creating integration object of type ${integration.type}`)
+    const integrationObject = IntegrationFactory.createIntegrationWithType(
+      integration.type,
+      this.prisma
+    )
+
+    // Check for permitted events
+    dto.notifyOn && integrationObject.validatePermittedEvents(dto.notifyOn)
+
+    // Check for authentication parameters
+    dto.metadata &&
+      integrationObject.validateMetadataParameters(dto.metadata, true)
+
     // Check if the name of the integration is being changed, and if so, check if the new name is unique
     if (dto.name) {
       await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
     }
 
     let project: Project | null = null
-    let environment: Environment | null = null
+    let environments: Array<Environment> | null = null
 
     // If the project is being changed, check if the user has READ authority over the new project
     if (dto.projectSlug) {
@@ -244,10 +319,10 @@ export class IntegrationService {
       })
     }
 
-    // Check if only environmentId is provided, or if the integration has no project associated from prior
-    if (dto.environmentSlug && !integration.projectId && !dto.projectSlug) {
+    // Check if only environments are provided, or if the integration has no project associated from prior
+    if (dto.environmentSlugs && !integration.projectId && !dto.projectSlug) {
       this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlug}`
+        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlugs}`
       )
       throw new BadRequestException(
         constructErrorBody(
@@ -258,30 +333,20 @@ export class IntegrationService {
     }
 
     // If the environment is being changed, check if the user has READ authority over the new environment
-    if (dto.environmentSlug) {
+    if (dto.environmentSlugs) {
       this.logger.log(
-        `Checking user access to environment ${dto.environmentSlug}`
+        `Checking user access to environments ${dto.environmentSlugs.join(', ')}`
       )
-      environment =
-        await this.authorizationService.authorizeUserAccessToEnvironment({
-          user,
-          entity: { slug: dto.environmentSlug },
-          authorities: [Authority.READ_ENVIRONMENT]
-        })
+      environments = await Promise.all(
+        dto.environmentSlugs.map((environmentSlug) =>
+          this.authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            entity: { slug: environmentSlug },
+            authorities: [Authority.READ_ENVIRONMENT]
+          })
+        )
+      )
     }
-
-    // Create the integration object
-    this.logger.log(`Creating integration object of type ${integration.type}`)
-    const integrationObject = IntegrationFactory.createIntegration(
-      integration.type,
-      this.prisma
-    )
-
-    // Check for permitted events
-    dto.notifyOn && integrationObject.validatePermittedEvents(dto.notifyOn)
-
-    // Check for authentication parameters
-    dto.metadata && integrationObject.validateMetadataParameters(dto.metadata)
 
     // Update the integration
     this.logger.log(`Updating integration: ${integration.id}`)
@@ -292,11 +357,25 @@ export class IntegrationService {
         slug: dto.name
           ? await this.slugGenerator.generateEntitySlug(dto.name, 'INTEGRATION')
           : integration.slug,
-        metadata: this.encryptMetadata(dto.metadata),
+        metadata: encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
-        environmentId: environment?.id,
+        environments:
+          environments && environments.length > 0
+            ? {
+                connect: environments
+              }
+            : undefined,
         projectId: project?.id,
         lastUpdatedById: user.id
+      },
+      include: {
+        environments: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
       }
     })
 
@@ -319,9 +398,8 @@ export class IntegrationService {
       this.prisma
     )
 
-    updatedIntegration.metadata = this.decryptMetadata(
-      updatedIntegration.metadata
-    )
+    // @ts-expect-error -- We expect the metadata to be in JSON format
+    updatedIntegration.metadata = decryptMetadata(updatedIntegration.metadata)
     return updatedIntegration
   }
 
@@ -347,7 +425,8 @@ export class IntegrationService {
         authorities: [Authority.READ_INTEGRATION]
       })
 
-    integration.metadata = this.decryptMetadata(integration.metadata)
+    // @ts-expect-error -- We expect the metadata to be in JSON format
+    integration.metadata = decryptMetadata(integration.metadata)
     return integration
   }
 
@@ -447,8 +526,7 @@ export class IntegrationService {
         ]
       },
       omit: {
-        projectId: true,
-        environmentId: true
+        projectId: true
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
@@ -465,7 +543,7 @@ export class IntegrationService {
             name: true
           }
         },
-        environment: {
+        environments: {
           select: {
             id: true,
             slug: true,
@@ -504,7 +582,8 @@ export class IntegrationService {
 
     // Decrypt the metadata
     for (const integration of integrations) {
-      integration.metadata = this.decryptMetadata(integration.metadata)
+      // @ts-expect-error -- We expect the metadata to be in JSON format
+      integration.metadata = decryptMetadata(integration.metadata)
     }
 
     return { items: integrations, metadata }
@@ -649,36 +728,5 @@ export class IntegrationService {
         `Integration with name ${name} does not exist in workspace ${workspace.slug}`
       )
     }
-  }
-
-  /**
-   * Encrypts the given metadata using the server secret. This is a private
-   * function that should not be used directly. The metadata is encrypted to
-   * protect the integration's credentials when they are stored in the database.
-   * @param metadata The integration metadata to encrypt
-   * @returns The encrypted metadata as a string
-   */
-  private encryptMetadata(
-    metadata: Record<string, unknown>
-  ): string | undefined {
-    if (!metadata) {
-      return undefined
-    }
-    return sEncrypt(JSON.stringify(metadata))
-  }
-
-  /**
-   * Decrypts the given metadata using the server secret. This is a private
-   * function that should not be used directly. The metadata is decrypted to
-   * retrieve the integration's credentials when they are retrieved from the
-   * database.
-   * @param encryptedMetadata The encrypted metadata to decrypt
-   * @returns The decrypted metadata as an object
-   */
-  private decryptMetadata(encryptedMetadata: string): string | undefined {
-    if (!encryptedMetadata) {
-      return undefined
-    }
-    return JSON.parse(sDecrypt(encryptedMetadata))
   }
 }
