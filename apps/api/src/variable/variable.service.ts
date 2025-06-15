@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -35,6 +36,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { VariableWithValues } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { SecretService } from '@/secret/secret.service'
 
 @Injectable()
 export class VariableService {
@@ -46,6 +48,8 @@ export class VariableService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    @Inject(forwardRef(() => SecretService))
+    private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -87,6 +91,9 @@ export class VariableService {
 
     // Check if a variable with the same name already exists in the project
     await this.variableExists(dto.name, project)
+
+    // Check if a secret with the same name already exists in the project
+    await this.secretService.secretExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(

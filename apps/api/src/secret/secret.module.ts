@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { SecretController } from './secret.controller'
 import { SecretService } from './secret.service'
 import { VariableModule } from '@/variable/variable.module'
@@ -7,6 +7,6 @@ import { VariableModule } from '@/variable/variable.module'
   controllers: [SecretController],
   providers: [SecretService],
   exports: [SecretService],
-  imports: [VariableModule]
+  imports: [forwardRef(() => VariableModule)]
 })
 export class SecretModule {}

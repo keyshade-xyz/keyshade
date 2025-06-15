@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -55,6 +56,7 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
@@ -1225,7 +1227,7 @@ export class SecretService {
    * @param secretName the name of the secret to check
    * @param project the project to check the secret in
    */
-  private async secretExists(secretName: Secret['name'], project: Project) {
+  async secretExists(secretName: Secret['name'], project: Project) {
     this.logger.log(
       `Checking if secret ${secretName} exists in project ${project.slug}`
     )
