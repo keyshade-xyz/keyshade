@@ -1,3 +1,14 @@
+## [2.25.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.1...v2.25.0-stage.2) (2025-06-15)
+
+### 🚀 Features
+
+* Add Secret & Variable export, include JSON format ([#981](https://github.com/keyshade-xyz/keyshade/issues/981)) ([83cacd8](https://github.com/keyshade-xyz/keyshade/commit/83cacd87ace371faf070b94cea580ba66d379eaf))
+
+### 🔨 Code Refactoring
+
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([2f445f4](https://github.com/keyshade-xyz/keyshade/commit/2f445f4b971422091bb755476310c254a2c48ed1))
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([#1008](https://github.com/keyshade-xyz/keyshade/issues/1008)) ([15a7819](https://github.com/keyshade-xyz/keyshade/commit/15a7819538c7a8fe65b4517accdbcf1a33de58e8))
+
 ## [2.25.0](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0) (2025-06-15)
 
 ### 🚀 Features
