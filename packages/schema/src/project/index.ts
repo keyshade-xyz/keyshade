@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { CreateEnvironmentRequestSchema } from '@/environment'
+import {
+  CreateEnvironmentRequestSchema,
+  EnvironmentSchema
+} from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
 
@@ -126,4 +129,16 @@ export const GetAllProjectsRequestSchema = PageRequestSchema.extend({
 
 export const GetAllProjectsResponseSchema = PageResponseSchema(
   ProjectWithTierLimitAndCountSchema
+)
+
+export const ExportProjectConfigurationRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug).min(1),
+  format: z.string(),
+  privateKey: z.optional(BaseProjectSchema.shape.privateKey)
+})
+
+export const ExportProjectConfigurationsResponseSchema = z.record(
+  EnvironmentSchema.shape.slug,
+  z.string()
 )
