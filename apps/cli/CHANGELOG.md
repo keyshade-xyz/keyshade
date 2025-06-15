@@ -147,3 +147,9 @@
 ### Patches
 
 - `keyshade run` wouldn't decrypt secrets if the project didn't store the private key
+
+## 3.1.0-stage.1
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
