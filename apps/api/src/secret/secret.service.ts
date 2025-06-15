@@ -32,7 +32,8 @@ import { paginate } from '@/common/paginate'
 import {
   addHoursToDate,
   constructErrorBody,
-  limitMaxItemsPerPage
+  limitMaxItemsPerPage,
+  mapEntriesToEventMetadata
 } from '@/common/util'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
@@ -43,6 +44,11 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { decrypt, encrypt } from '@keyshade/common'
+import {
+  ConfigurationAddedEventMetadata,
+  ConfigurationDeletedEventMetadata,
+  ConfigurationUpdatedEventMetadata
+} from '@/event/event.types'
 
 @Injectable()
 export class SecretService {
@@ -194,11 +200,12 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          secretId: secret.secret.id,
-          name: secret.secret.name,
-          projectId,
-          projectName: project.name
-        },
+          name: secretData.name,
+          description: secretData.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isSecret: true,
+          isPlaintext: true
+        } as ConfigurationAddedEventMetadata,
         workspaceId: project.workspaceId
       },
       this.prisma
@@ -347,11 +354,6 @@ export class SecretService {
     const updatedSecret = tx[0]
     const updatedVersions = tx.slice(1)
 
-    const result = {
-      secret: updatedSecret,
-      updatedVersions: updatedVersions
-    }
-
     // Decrypt the secret values before sending only if one of the conditions are met:
     // 1. The user has requested to decrypt the secret values
     // 2. The project stores the private key OR
@@ -367,6 +369,11 @@ export class SecretService {
           version.value
         )
       }
+    }
+
+    const result = {
+      secret: updatedSecret,
+      updatedVersions: updatedVersions
     }
 
     // Notify the new secret version through Redis
@@ -402,11 +409,13 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret updated`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          oldName: secret.name,
+          newName: updatedSecret.name,
+          description: updatedSecret.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isPlaintext: true,
+          isSecret: true
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -464,15 +473,13 @@ export class SecretService {
       {
         triggeredBy: user,
         entity: secret,
-        type: EventType.SECRET_UPDATED,
+        type: EventType.SECRET_DELETED,
         source: EventSource.SECRET,
         title: `Secret updated`,
         metadata: {
-          secretId: secret.id,
           name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          environments: [environmentSlug]
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -541,8 +548,12 @@ export class SecretService {
       )
     }
 
-    // Sorting is in ascending order of dates. So the last element is the latest version
-    const maxVersion = secret.versions[secret.versions.length - 1].version
+    let maxVersion = 0
+    for (let i = 0; i < secret.versions.length; i++) {
+      if (secret.versions[i].version > maxVersion) {
+        maxVersion = secret.versions[i].version
+      }
+    }
     this.logger.log(
       `Latest version of secret ${secretSlug} in environment ${environmentSlug} is ${maxVersion}. Rollback version is ${rollbackVersion}`
     )
@@ -572,18 +583,26 @@ export class SecretService {
       `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
     )
 
+    // Decrypt the value if it can be done
+    const secretValue =
+      project.storePrivateKey && project.privateKey !== null
+        ? await decrypt(
+            project.privateKey,
+            secret.versions[rollbackVersion - 1].value
+          )
+        : secret.versions[rollbackVersion - 1].value
+
     try {
       this.logger.log(
         `Publishing secret update to Redis for secret ${secretSlug} in environment ${environmentSlug}`
       )
+
       await this.redis.publish(
         CHANGE_NOTIFIER_RSC,
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: project.storePrivateKey
-            ? await decrypt(project.privateKey, secret.versions[0].value)
-            : secret.versions[0].value,
+          value: secretValue,
           isPlaintext: project.storePrivateKey
         } as ChangeNotificationEvent)
       )
@@ -602,11 +621,14 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret rolled back`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          oldName: secret.name,
+          newName: secret.name,
+          values: {
+            [environment.slug]: secretValue
+          },
+          isPlaintext: project.storePrivateKey && project.privateKey !== null,
+          isSecret: true
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -648,6 +670,11 @@ export class SecretService {
       authorities: [Authority.DELETE_SECRET]
     })
 
+    const secretVersionEnvironments = new Set<Environment['slug']>()
+    for (const version of secret.versions) {
+      secretVersionEnvironments.add(version.environment.slug)
+    }
+
     // Delete the secret
     this.logger.log(`Deleting secret ${secretSlug}`)
     await this.prisma.secret.delete({
@@ -665,8 +692,9 @@ export class SecretService {
         entity: secret,
         title: `Secret deleted`,
         metadata: {
-          secretId: secret.id
-        },
+          name: secret.name,
+          environments: Array.from(secretVersionEnvironments)
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma

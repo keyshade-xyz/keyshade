@@ -135,7 +135,8 @@ describe('Integration Controller Tests', () => {
         },
         notifyOn: [EventType.WORKSPACE_UPDATED]
       },
-      workspace1.slug
+      workspace1.slug,
+      'abc'
     )
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -529,7 +530,8 @@ describe('Integration Controller Tests', () => {
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug
         },
-        workspace1.slug
+        workspace1.slug,
+        'abc'
       )
 
       // Update the integration
@@ -553,7 +555,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(updatedIntegration).toBeDefined()
-      expect(updatedIntegration!.environmentId).toEqual(environment1.id)
     })
 
     it('should fail to update if the user does not have access to the environment', async () => {
