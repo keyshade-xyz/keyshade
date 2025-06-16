@@ -262,10 +262,23 @@ export class VercelIntegration extends BaseIntegration {
 
             for (let i = 0; i < filteredValues.length; i++) {
               const [environmentName, value] = filteredValues[i]
-              filteredValues[i] = [
-                environmentName,
-                await decrypt(privateKey, value)
-              ]
+              try {
+                filteredValues[i] = [
+                  environmentName,
+                  await decrypt(privateKey, value)
+                ]
+              } catch (error) {
+                this.logger.error(
+                  `Failed to decrypt value for environment ${environmentName}: ${error}`
+                )
+                await this.markIntegrationRunAsFinished(
+                  integrationRunId,
+                  IntegrationRunStatus.FAILED,
+                  totalDuration,
+                  `Failed to decrypt value using KS_PRIVATE_KEY.`
+                )
+                return
+              }
             }
 
             this.logger.log(
@@ -458,7 +471,7 @@ export class VercelIntegration extends BaseIntegration {
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
       integrationId: integration.id,
-      title: `Deleting environment variable: ${data.name}`
+      title: `Deleting environment variable ${data.name}`
     })
 
     const vercelSystemEnvironmentsSet = new Set()
