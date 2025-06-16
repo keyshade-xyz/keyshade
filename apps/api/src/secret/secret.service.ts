@@ -1243,9 +1243,15 @@ export class SecretService {
       const errorMessage = `Secret ${secretName} already exists in project ${project.slug}`
       this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody('Secret already exists', errorMessage)
+        constructErrorBody(
+          'Secret already exists',
+          'A secret/variable with the same name already exists in this project'
+        )
       )
     }
+    this.logger.log(
+      `Secret ${secretName} does not exist in project ${project.slug}`
+    )
   }
 
   /**
