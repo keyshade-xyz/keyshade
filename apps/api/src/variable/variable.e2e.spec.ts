@@ -39,6 +39,8 @@ import { fetchEvents } from '@/common/event'
 import { AuthenticatedUser } from '@/user/user.types'
 import { ValidationPipe } from '@nestjs/common'
 import { TierLimitService } from '@/common/tier-limit.service'
+import { SecretService } from '@/secret/secret.service'
+import { SecretModule } from '@/secret/secret.module'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -50,6 +52,7 @@ describe('Variable Controller Tests', () => {
   let eventService: EventService
   let userService: UserService
   let tierLimitService: TierLimitService
+  let secretService: SecretService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
@@ -69,7 +72,8 @@ describe('Variable Controller Tests', () => {
         ProjectModule,
         EnvironmentModule,
         VariableModule,
-        UserModule
+        UserModule,
+        SecretModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -89,6 +93,7 @@ describe('Variable Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     userService = moduleRef.get(UserService)
     tierLimitService = moduleRef.get(TierLimitService)
+    secretService = moduleRef.get(SecretService)
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -420,6 +425,39 @@ describe('Variable Controller Tests', () => {
 
       expect(variableVersions.length).toBe(0)
     })
+
+    it('should not allow creating a variable when a secret with the same name exists', async () => {
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'COLLIDE',
+          entries: [{ environmentSlug: environment1.slug, value: 'foo' }]
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}`,
+        payload: {
+          name: 'COLLIDE',
+          note: 'Collide Note',
+          rotateAfter: '24',
+          entries: [{ environmentSlug: environment1.slug, value: 'bar' }]
+        },
+        headers: { 'x-e2e-user-email': user1.email }
+      })
+
+      const body = response.json()
+
+      expect(body.statusCode).toBe(409)
+
+      const msg = JSON.parse(body.message)
+      expect(msg.header).toBe('Secret already exists')
+      expect(msg.body).toBe(
+        'A secret/variable with the same name already exists in this project'
+      )
+    })
   })
 
   describe('Update Variable Tests', () => {
@@ -599,6 +637,34 @@ describe('Variable Controller Tests', () => {
       expect(event.type).toBe(EventType.VARIABLE_UPDATED)
       expect(event.workspaceId).toBe(workspace1.id)
       expect(event.itemId).toBeDefined()
+    })
+
+    it('should not allow renaming a variable to a name that matches an existing secret', async () => {
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'COLLIDE',
+          entries: [{ environmentSlug: environment1.slug, value: 'foo' }]
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}`,
+        payload: { name: 'COLLIDE' },
+        headers: { 'x-e2e-user-email': user1.email }
+      })
+
+      const body = response.json()
+
+      expect(body.statusCode).toBe(409)
+
+      const msg = JSON.parse(body.message)
+      expect(msg.header).toBe('Secret already exists')
+      expect(msg.body).toBe(
+        'A secret/variable with the same name already exists in this project'
+      )
     })
   })
 
