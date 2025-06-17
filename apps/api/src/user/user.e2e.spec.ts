@@ -310,7 +310,7 @@ describe('User Controller Tests', () => {
 
     test('should fail if referral code is not present', async () => {
       const result = await app.inject({
-        method: 'POST',
+        method: 'PUT',
         url: '/user/onboarding',
         headers: {
           'x-e2e-user-email': regularUser.email
