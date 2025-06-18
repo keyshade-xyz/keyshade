@@ -30,7 +30,7 @@ function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
   second = second.charAt(0) + second.slice(1).toLowerCase()
 
   return (
-    <div className="h-fit w-full rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-center text-sm text-cyan-200">
+    <div className="h-fit w-fit rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-center text-sm text-cyan-200">
       {first} {second}
     </div>
   )
