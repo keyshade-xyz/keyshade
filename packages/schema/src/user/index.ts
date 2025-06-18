@@ -41,6 +41,8 @@ export const UpdateSelfRequestSchema = z.object({
 export const UpdateSelfResponseSchema = UserSchema
 
 export const FinishOnboardingRequestSchema = z.object({
+  name: z.string(),
+  profilePictureUrl: z.string().optional(),
   role: z.string().optional(),
   industry: z.string().optional(),
   teamSize: z.string().optional(),

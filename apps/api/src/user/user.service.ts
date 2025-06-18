@@ -147,18 +147,14 @@ export class UserService {
       this.log.log(
         `User ${user.id} has been referred using code ${dto.referralCode}`
       )
-
-      let referralCodeUser: User | null
       // Check if the code exists
-      try {
-        referralCodeUser = await this.prisma.user.findUnique({
-          where: {
-            referralCode: dto.referralCode
-          }
-        })
-      } catch (error) {
+      const referralCodeUser = await this.prisma.user.findUnique({
+        where: { referralCode: dto.referralCode }
+      })
+
+      if (!referralCodeUser) {
         this.log.error(
-          `User ${user.id} has been referred using code ${dto.referralCode} but it does not exist`
+          `User ${user.id} provided invalid referral code ${dto.referralCode}`
         )
         throw new NotFoundException(
           constructErrorBody(
@@ -196,6 +192,8 @@ export class UserService {
         },
         data: {
           isOnboardingFinished: true,
+          name: dto.name,
+          profilePictureUrl: dto.profilePictureUrl,
           onboardingAnswers: {
             create: {
               heardFrom: dto.heardFrom,

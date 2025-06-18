@@ -48,6 +48,8 @@ export default function OnboardingStepper() {
 
   const finishOnboarding = useHttp(() =>
     ControllerInstance.getInstance().userController.finishOnboarding({
+      name: data.name,
+      profilePictureUrl: data.imageurl,
       role: data.role,
       industry: data.background,
       teamSize: data.teamSize,
@@ -76,7 +78,6 @@ export default function OnboardingStepper() {
     try {
       const { success, data: updated } = await finishOnboarding()
       if (success && updated) {
-        toast.success('Onboarding skipped')
         Cookies.set('isOnboardingFinished', 'true')
         setUser(updated)
         posthog.identify()

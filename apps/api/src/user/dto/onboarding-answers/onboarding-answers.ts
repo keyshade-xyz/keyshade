@@ -2,6 +2,13 @@ import { IsOptional, IsString } from 'class-validator'
 
 export class OnboardingAnswersDto {
   @IsString()
+  name: string
+
+  @IsString()
+  @IsOptional()
+  profilePictureUrl?: string
+
+  @IsString()
   @IsOptional()
   role?: string
 
