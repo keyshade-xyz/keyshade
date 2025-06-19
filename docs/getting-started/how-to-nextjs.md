@@ -81,7 +81,3 @@ Keyshade will inject your environment values securely.
 ## You're Done!🎊
 
 _Your app is now configured with secure runtime secrets and variables powered by Keyshade._
-
-----------
-
-> 📚 Explore more at [docs.keyshade.xyz](https://docs.keyshade.xyz/)
