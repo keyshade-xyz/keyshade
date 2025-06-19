@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
-import React, { useRef } from 'react'
-import { Camera, User } from 'lucide-react'
+import React from 'react'
+import { User } from 'lucide-react'
 import Image from 'next/image'
 import { NunitoSansFont } from '@/fonts'
 import { Input } from '@/components/ui/input'
@@ -16,26 +16,26 @@ export default function ProfileDetailsForm({
   setOnboardingData
 }: ProfileDetailsFormProps) {
   const { name, profilePictureUrl } = onboardingData
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // const fileInputRef = useRef<HTMLInputElement>(null)
 
   const updateField = (field: keyof OnboardingData, value: string) => {
     setOnboardingData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        updateField('profilePictureUrl', result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-  const triggerFileInput = () => {
-    fileInputRef.current?.click()
-  }
+  // const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0]
+  //   if (file) {
+  //     const reader = new FileReader()
+  //     reader.onload = (e) => {
+  //       const result = e.target?.result as string
+  //       updateField('profilePictureUrl', result)
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
+  // const triggerFileInput = () => {
+  //   fileInputRef.current?.click()
+  // }
 
   return (
     <div className="space-y-4">
@@ -58,22 +58,22 @@ export default function ProfileDetailsForm({
             )}
           </div>
 
-          <button
+          {/* <button
             className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-600 text-white shadow-lg transition-all duration-200 hover:scale-110 hover:bg-neutral-700"
             onClick={triggerFileInput}
             type="button"
           >
             <Camera size={14} />
-          </button>
+          </button> */}
         </div>
 
-        <input
+        {/* <input
           accept="image/*"
           className="hidden"
           onChange={handleImageUpload}
           ref={fileInputRef}
           type="file"
-        />
+        /> */}
       </div>
       <div className="mx-auto space-y-4 md:w-[20vw]">
         <label

@@ -49,7 +49,7 @@ export default function OnboardingStepper() {
   const finishOnboarding = useHttp(() =>
     ControllerInstance.getInstance().userController.finishOnboarding({
       name: data.name,
-      profilePictureUrl: data.profilePictureUrl,
+      //  profilePictureUrl: data.profilePictureUrl,
       role: data.role,
       industry: data.industry,
       teamSize: data.teamSize,
