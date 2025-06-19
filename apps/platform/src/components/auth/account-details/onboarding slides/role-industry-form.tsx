@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction} from 'react';
+import type { Dispatch, SetStateAction } from 'react'
 import React, { useState } from 'react'
 import { NunitoSansFont } from '@/fonts'
 import type { OnboardingData } from '@/components/auth/account-details/onboarding-stepper'
@@ -20,7 +20,7 @@ export default function RoleIndustryForm({
   onboardingData,
   setOnboardingData
 }: RoleIndustryFormProps) {
-  const { role, background } = onboardingData
+  const { role, industry } = onboardingData
   const [isRoleOther, setIsRoleOther] = useState(
     role === 'Other' ||
       (role &&
@@ -32,11 +32,11 @@ export default function RoleIndustryForm({
           'Product Manager'
         ].includes(role))
   )
-  const [isBackgroundOther, setIsBackgroundOther] = useState(
-    background === 'Other' ||
-      (background &&
+  const [isIndustryOther, setIsIndustryOther] = useState(
+    industry === 'Other' ||
+      (industry &&
         !['SaaS', 'Fintech', 'E-commerce', 'Healthcare', 'Education'].includes(
-          background
+          industry
         ))
   )
 
@@ -54,13 +54,13 @@ export default function RoleIndustryForm({
     }
   }
 
-  const handleBackgroundChange = (value: string) => {
+  const handleIndustryChange = (value: string) => {
     if (value === 'Other') {
-      setIsBackgroundOther(true)
-      updateField('background', '')
+      setIsIndustryOther(true)
+      updateField('industry', '')
     } else {
-      setIsBackgroundOther(false)
-      updateField('background', value)
+      setIsIndustryOther(false)
+      updateField('industry', value)
     }
   }
 
@@ -93,12 +93,14 @@ export default function RoleIndustryForm({
             <SelectItem value="Other">Other (please specify)</SelectItem>
           </SelectContent>
         </Select>
-        {isRoleOther ? <Input
+        {isRoleOther ? (
+          <Input
             className="mt-2"
             onChange={(e) => updateField('role', e.target.value)}
             placeholder="Please specify your role"
             value={role}
-          /> : null}
+          />
+        ) : null}
       </div>
 
       {/* Industry Background */}
@@ -109,8 +111,8 @@ export default function RoleIndustryForm({
           What industry are you in?
         </span>
         <Select
-          onValueChange={handleBackgroundChange}
-          value={isBackgroundOther ? 'Other' : background}
+          onValueChange={handleIndustryChange}
+          value={isIndustryOther ? 'Other' : industry}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select industry" />
@@ -124,12 +126,14 @@ export default function RoleIndustryForm({
             <SelectItem value="Other">Other (please specify)</SelectItem>
           </SelectContent>
         </Select>
-        {isBackgroundOther ? <Input
+        {isIndustryOther ? (
+          <Input
             className="mt-2"
-            onChange={(e) => updateField('background', e.target.value)}
+            onChange={(e) => updateField('industry', e.target.value)}
             placeholder="Please specify your industry"
-            value={background}
-          /> : null}
+            value={industry}
+          />
+        ) : null}
       </div>
     </div>
   )

@@ -19,7 +19,7 @@ export default function TeamOverviewForm({
   onboardingData,
   setOnboardingData
 }: TeamOverviewFormProps) {
-  const { teamSize, stage, useCase } = onboardingData
+  const { teamSize, productStage, useCase } = onboardingData
 
   const updateField = (field: keyof OnboardingData, value: string) => {
     setOnboardingData((prev: OnboardingData) => ({ ...prev, [field]: value }))
@@ -63,8 +63,8 @@ export default function TeamOverviewForm({
           What is your current stage?
         </span>
         <Select
-          onValueChange={(value) => updateField('stage', value)}
-          value={stage || ''}
+          onValueChange={(value) => updateField('productStage', value)}
+          value={productStage || ''}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select stage" />

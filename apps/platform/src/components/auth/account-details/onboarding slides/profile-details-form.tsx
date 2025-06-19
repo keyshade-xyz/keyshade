@@ -15,7 +15,7 @@ export default function ProfileDetailsForm({
   onboardingData,
   setOnboardingData
 }: ProfileDetailsFormProps) {
-  const { name, imageurl } = onboardingData
+  const { name, profilePictureUrl } = onboardingData
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const updateField = (field: keyof OnboardingData, value: string) => {
@@ -28,7 +28,7 @@ export default function ProfileDetailsForm({
       const reader = new FileReader()
       reader.onload = (e) => {
         const result = e.target?.result as string
-        updateField('imageurl', result)
+        updateField('profilePictureUrl', result)
       }
       reader.readAsDataURL(file)
     }
@@ -42,13 +42,13 @@ export default function ProfileDetailsForm({
       <div className="flex flex-col items-center space-y-4">
         <div className="relative">
           <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-white/10 bg-neutral-800 shadow-lg transition-all duration-200 hover:shadow-xl">
-            {imageurl ? (
+            {profilePictureUrl ? (
               <div className="relative h-full w-full">
                 <Image
                   alt="Profile"
                   className="h-full w-full object-cover"
                   fill
-                  src={imageurl}
+                  src={profilePictureUrl}
                 />
               </div>
             ) : (

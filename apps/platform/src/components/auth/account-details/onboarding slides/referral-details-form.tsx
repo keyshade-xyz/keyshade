@@ -20,11 +20,11 @@ export default function ReferralForm({
   onboardingData,
   setOnboardingData
 }: ReferralDetailsFormProps) {
-  const { promotion, referral } = onboardingData
+  const { heardFrom, referralCode } = onboardingData
 
-  const [isPromotionOther, setIsPromotionOther] = useState(
-    promotion === 'Other' ||
-      (promotion &&
+  const [isHeardFromOther, setIsHeardFromOther] = useState(
+    heardFrom === 'Other' ||
+      (heardFrom &&
         ![
           'GitHub',
           'Twitter / X',
@@ -32,20 +32,20 @@ export default function ReferralForm({
           'Reddit',
           'Word of mouth',
           'Google Search'
-        ].includes(promotion))
+        ].includes(heardFrom))
   )
 
   const updateField = (field: keyof OnboardingData, value: string) => {
     setOnboardingData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handlePromotionChange = (value: string) => {
+  const handleHeardFromChange = (value: string) => {
     if (value === 'Other') {
-      setIsPromotionOther(true)
-      updateField('promotion', '')
+      setIsHeardFromOther(true)
+      updateField('heardFrom', '')
     } else {
-      setIsPromotionOther(false)
-      updateField('promotion', value)
+      setIsHeardFromOther(false)
+      updateField('heardFrom', value)
     }
   }
 
@@ -58,8 +58,8 @@ export default function ReferralForm({
           Where did you hear about Keyshade?
         </span>
         <Select
-          onValueChange={handlePromotionChange}
-          value={isPromotionOther ? 'Other' : promotion || ''}
+          onValueChange={handleHeardFromChange}
+          value={isHeardFromOther ? 'Other' : heardFrom || ''}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select" />
@@ -74,12 +74,12 @@ export default function ReferralForm({
             <SelectItem value="Other">Other (please specify)</SelectItem>
           </SelectContent>
         </Select>
-        {isPromotionOther ? (
+        {isHeardFromOther ? (
           <Input
             className="mt-2"
-            onChange={(e) => updateField('promotion', e.target.value)}
+            onChange={(e) => updateField('heardFrom', e.target.value)}
             placeholder="Please specify"
-            value={promotion || ''}
+            value={heardFrom || ''}
           />
         ) : null}
       </div>
@@ -91,9 +91,9 @@ export default function ReferralForm({
           Referral Code (if any)
           <Input
             id="referral-input"
-            onChange={(e) => updateField('referral', e.target.value)}
+            onChange={(e) => updateField('referralCode', e.target.value)}
             placeholder="Enter referral code"
-            value={referral || ''}
+            value={referralCode || ''}
           />
         </label>
       </div>

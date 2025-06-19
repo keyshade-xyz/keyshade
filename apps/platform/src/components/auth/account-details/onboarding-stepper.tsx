@@ -26,14 +26,14 @@ const totalSteps = 4
 
 export interface OnboardingData {
   name: string
-  imageurl?: string
-  referral?: string
+  profilePictureUrl?: string
+  referralCode?: string
   role?: string
-  background?: string
+  industry?: string
   teamSize?: string
-  stage?: string
+  productStage?: string
   useCase?: string
-  promotion?: string
+  heardFrom?: string
 }
 
 export default function OnboardingStepper() {
@@ -43,20 +43,20 @@ export default function OnboardingStepper() {
 
   const [data, setData] = useState<OnboardingData>({
     name: user?.name || '',
-    imageurl: user?.profilePictureUrl || ''
+    profilePictureUrl: user?.profilePictureUrl || ''
   })
 
   const finishOnboarding = useHttp(() =>
     ControllerInstance.getInstance().userController.finishOnboarding({
       name: data.name,
-      profilePictureUrl: data.imageurl,
+      profilePictureUrl: data.profilePictureUrl,
       role: data.role,
-      industry: data.background,
+      industry: data.industry,
       teamSize: data.teamSize,
-      productStage: data.stage,
+      productStage: data.productStage,
       useCase: data.useCase,
-      heardFrom: data.promotion,
-      referralCode: data.referral
+      heardFrom: data.heardFrom,
+      referralCode: data.referralCode
     })
   )
 
