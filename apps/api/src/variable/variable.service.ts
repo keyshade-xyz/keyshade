@@ -1073,10 +1073,7 @@ export class VariableService {
       const errorMessage = `Variable ${variableName} already exists in project ${project.slug}`
       this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody(
-          'Variable already exists',
-          'A secret/variable with the same name already exists in this project'
-        )
+        constructErrorBody('Variable already exists', errorMessage)
       )
     }
 

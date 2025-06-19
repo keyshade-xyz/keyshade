@@ -482,7 +482,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        'A secret/variable with the same name already exists in this project'
+        `Variable COLLIDE already exists in project ${project1.slug}`
       )
     })
   })
@@ -840,7 +840,7 @@ describe('Secret Controller Tests', () => {
       const msg = JSON.parse(body.message)
       expect(msg.header).toBe('Variable already exists')
       expect(msg.body).toBe(
-        'A secret/variable with the same name already exists in this project'
+        `Variable COLLIDE already exists in project ${project1.slug}`
       )
     })
   })
