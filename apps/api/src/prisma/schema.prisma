@@ -246,7 +246,6 @@ model OnboardingAnswers {
   productStage String?
   useCase String?
   heardFrom String?
-  wouldLikeToRefer String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique

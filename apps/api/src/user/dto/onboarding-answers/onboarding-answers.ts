@@ -34,9 +34,5 @@ export class OnboardingAnswersDto {
 
   @IsString()
   @IsOptional()
-  wouldLikeToRefer?: string
-
-  @IsString()
-  @IsOptional()
   referralCode?: string
 }

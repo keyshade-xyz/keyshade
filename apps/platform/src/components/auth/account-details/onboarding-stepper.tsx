@@ -60,19 +60,25 @@ export default function OnboardingStepper() {
     })
   )
 
+  const validateName = (): boolean => {
+    try {
+      nameSchema.parse(data.name)
+      return true
+    } catch (e) {
+      toast.error((e as z.ZodError).errors[0].message)
+      return false
+    }
+  }
+
   const handleNext = () => {
-    if (currentStep === 1) {
-      try {
-        nameSchema.parse(data.name)
-      } catch (e) {
-        toast.error((e as z.ZodError).errors[0].message)
-        return
-      }
+    if (currentStep === 1 && !validateName()) {
+      return
     }
     setCurrentStep((prev) => Math.min(totalSteps, prev + 1))
   }
 
   const handleSubmit = async () => {
+    if (!validateName()) return
     setIsLoading(true)
     toast.loading('Updating profile details...')
     try {
@@ -125,17 +131,8 @@ export default function OnboardingStepper() {
       <div className=" flex flex-col gap-4 rounded-xl bg-[#191A1C] p-8">
         {renderStep()}
 
-        <div className="mt-6 flex justify-end gap-2">
-          <Button
-            className="text-sm"
-            disabled={isLoading}
-            onClick={handleSubmit}
-            variant="outline"
-          >
-            Skip
-          </Button>
-
-          <div className="flex gap-4">
+        <div className="mt-6 flex flex-col justify-end gap-2">
+          <div className="flex gap-6">
             <Button
               className="flex-1"
               disabled={isLoading}
@@ -151,6 +148,14 @@ export default function OnboardingStepper() {
               )}
             </Button>
           </div>
+          <Button
+            className="border-white/60 text-sm text-white/60"
+            disabled={isLoading}
+            onClick={handleSubmit}
+            variant="outline"
+          >
+            Skip
+          </Button>
         </div>
       </div>
     </div>

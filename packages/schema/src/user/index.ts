@@ -49,7 +49,6 @@ export const FinishOnboardingRequestSchema = z.object({
   productStage: z.string().optional(),
   useCase: z.string().optional(),
   heardFrom: z.string().optional(),
-  wouldLikeToRefer: z.string().optional(),
   referralCode: z.string().optional()
 })
 

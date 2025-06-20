@@ -201,7 +201,6 @@ export class UserService {
               teamSize: dto.teamSize,
               productStage: dto.productStage,
               useCase: dto.useCase,
-              wouldLikeToRefer: dto.wouldLikeToRefer,
               industry: dto.industry
             }
           }
