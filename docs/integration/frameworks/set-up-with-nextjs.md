@@ -71,12 +71,24 @@ This will create a `keyshade.json` in the root.
 ## 6. Run the App
 
 Start your dev server with Keyshade:
-
 ```bash
 keyshade run "npm run dev"
 ```
-
 Keyshade will inject your environment values securely.
+
+## 7. Accessing Your Secrets and Variables
+
+Once you've run your app, your environment values are available as usual through `process.env`.
+
+For example, if you added a variable named `MY_SECRET_KEY` or `NEXT_PUBLIC_API_BASE_URL` in the Keyshade dashboard:
+
+```typescript
+// server-side
+const secretKey = process.env.MY_SECRET_KEY;
+
+// client-side
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+```
 
 ## You're Done!🎊
 
