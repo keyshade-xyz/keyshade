@@ -4,7 +4,7 @@ description: Use keyshade CLI to run your app
 
 # Running your app
 
-In te previous section, we added keyshade to our project. Now, let's run our app.
+In the previous section, we added keyshade to our project. Now, let's run our app.
 
 Generally we run NextJS apps using the `npm run dev` command. But to make keyshade work, we will need to run it using this command:
 
