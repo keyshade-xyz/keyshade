@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { createWorkspace } from './workspace'
 import { UserWithWorkspace } from '@/user/user.types'
-import { constructErrorBody } from './util'
+import { constructErrorBody, generateReferralCode } from './util'
 import SlugGenerator from './slug-generator.service'
 
 /**
@@ -26,12 +26,15 @@ export async function createUser(
 
   logger.log(`Creating user: ${dto.email}`)
   try {
+    const referralCode = await generateReferralCode(prisma)
+
     // Create the user
     const user = await prisma.user.create({
       data: {
         id: dto.id,
         email: dto.email.toLowerCase(),
         name: dto.name,
+        referralCode,
         profilePictureUrl: dto.profilePictureUrl,
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,

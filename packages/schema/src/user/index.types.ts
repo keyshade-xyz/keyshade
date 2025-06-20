@@ -9,7 +9,9 @@ import {
   ValidateEmailChangeOTPRequestSchema,
   ValidateEmailChangeOTPResponseSchema,
   ResendEmailChangeOTPRequestSchema,
-  ResendEmailChangeOTPResponseSchema
+  ResendEmailChangeOTPResponseSchema,
+  FinishOnboardingRequestSchema,
+  FinishOnboardingResponseSchema
 } from '.'
 
 export type User = z.infer<typeof UserSchema>
@@ -19,6 +21,14 @@ export type GetSelfResponse = z.infer<typeof GetSelfResponseSchema>
 export type UpdateSelfRequest = z.infer<typeof UpdateSelfRequestSchema>
 
 export type UpdateSelfResponse = z.infer<typeof UpdateSelfResponseSchema>
+
+export type FinishOnboardingRequest = z.infer<
+  typeof FinishOnboardingRequestSchema
+>
+
+export type FinishOnboardingResponse = z.infer<
+  typeof FinishOnboardingResponseSchema
+>
 
 export type DeleteSelfRequest = z.infer<typeof DeleteSelfRequestSchema>
 

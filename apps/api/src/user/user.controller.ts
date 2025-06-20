@@ -20,6 +20,7 @@ import { BypassOnboarding } from '@/decorators/bypass-onboarding.decorator'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { ForbidApiKey } from '@/decorators/forbid-api-key.decorator'
 import { UserWithWorkspace } from './user.types'
+import { OnboardingAnswersDto } from './dto/onboarding-answers/onboarding-answers'
 
 @Controller('user')
 export class UserController {
@@ -40,6 +41,16 @@ export class UserController {
     @Body() dto: UpdateUserDto
   ) {
     return await this.userService.updateSelf(user, dto)
+  }
+
+  @Put('onboarding')
+  @BypassOnboarding()
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SELF)
+  async finishOnboarding(
+    @CurrentUser() user: UserWithWorkspace,
+    @Body() dto: OnboardingAnswersDto
+  ) {
+    return await this.userService.finishOnboarding(user, dto)
   }
 
   @Delete()

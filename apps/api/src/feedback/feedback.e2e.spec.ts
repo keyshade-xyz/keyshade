@@ -11,6 +11,7 @@ import { FeedbackModule } from './feedback.module'
 import { MailModule } from '@/mail/mail.module'
 import { PrismaService } from '@/prisma/prisma.service'
 import { User } from '@prisma/client'
+import { generateReferralCode } from '@/common/util'
 
 describe('Feedback Controller (E2E)', () => {
   let app: NestFastifyApplication
@@ -44,6 +45,7 @@ describe('Feedback Controller (E2E)', () => {
       data: {
         email: 'janice@keyshade.xyz',
         name: 'Janice',
+        referralCode: await generateReferralCode(prisma),
         isActive: true,
         isAdmin: false,
         isOnboardingFinished: false

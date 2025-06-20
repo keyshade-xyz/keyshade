@@ -213,6 +213,7 @@ model User {
   authProvider         AuthProvider?
   subscription         Subscription?
   joinedOn             DateTime      @default(now())
+  referralCode         String        @unique
 
   workspaceMembers WorkspaceMember[]
   workspaces       Workspace[]
@@ -228,8 +229,27 @@ model User {
   events           Event[]
   integrations     Integration[] // Stores the integrations the user updated
   emailPreference  EmailPreference?
+  onboardingAnswers OnboardingAnswers?
+
+  referredById         String?       
+  referredBy           User?         @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers        User[]        @relation("UserReferrals")
 
   @@index([email], name: "email")
+}
+
+model OnboardingAnswers {
+  id   String @id @default(cuid())
+  role String?
+  industry String?
+  teamSize String?
+  productStage String?
+  useCase String?
+  heardFrom String?
+  wouldLikeToRefer String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
 }
 
 model Subscription {

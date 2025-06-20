@@ -139,6 +139,12 @@ export const constructErrorBody = (header: string, body: string): string => {
   })
 }
 
+/**
+ * Wraps a promise-returning function in a call that times the duration of the request.
+ *
+ * @param func - The function to call.
+ * @returns A promise that resolves to an object with the response of the function and the duration of the request.
+ */
 export const makeTimedRequest = async <T>(
   func: () => Promise<T>
 ): Promise<{ response: T; duration: number }> => {
@@ -151,4 +157,48 @@ export const makeTimedRequest = async <T>(
     response,
     duration
   }
+}
+
+/**
+ * Generates a random referral code that is unique for all users.
+ *
+ * @param prisma A PrismaClient instance
+ * @returns A string representing the generated referral code
+ * @throws {InternalServerErrorException} If it cannot generate a unique referral code
+ */
+export const generateReferralCode = async (
+  prisma: PrismaClient
+): Promise<string> => {
+  const logger = new Logger('generateReferralCode')
+  logger.log('Generating referral code')
+  let referralCode: string | null
+  let tries = 0
+
+  do {
+    referralCode = crypto
+      .randomBytes(6)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 8)
+    tries++
+  } while (
+    (await prisma.user.count({
+      where: { referralCode }
+    })) > 0 &&
+    tries < 10
+  )
+
+  if (tries === 10) {
+    logger.error('Ran out of referral codes')
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Ran out of referral codes',
+        'Could not generate a unique referral code'
+      )
+    )
+  }
+
+  logger.log(`Generated referral code: ${referralCode} in ${tries} tries`)
+
+  return referralCode
 }
