@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -42,6 +43,7 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { VariableService } from '@/variable/variable.service'
 import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
@@ -54,6 +56,8 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    @Inject(forwardRef(() => VariableService))
+    private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -95,6 +99,9 @@ export class SecretService {
 
     // Check if the secret with the same name already exists in the project
     await this.secretExists(dto.name, project)
+
+    // Check if a variable with the same name already exists in the project
+    await this.variableService.variableExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -238,6 +245,10 @@ export class SecretService {
 
     // Check if the secret with the same name already exists in the project
     dto.name && (await this.secretExists(dto.name, secret.project))
+
+    // Check if a variable with the same name already exists in the project
+    dto.name &&
+      (await this.variableService.variableExists(dto.name, secret.project))
 
     // Check if the user has access to the environments
     const environmentSlugToIdMap = shouldCreateRevisions
@@ -1216,7 +1227,7 @@ export class SecretService {
    * @param secretName the name of the secret to check
    * @param project the project to check the secret in
    */
-  private async secretExists(secretName: Secret['name'], project: Project) {
+  async secretExists(secretName: Secret['name'], project: Project) {
     this.logger.log(
       `Checking if secret ${secretName} exists in project ${project.slug}`
     )
@@ -1235,6 +1246,9 @@ export class SecretService {
         constructErrorBody('Secret already exists', errorMessage)
       )
     }
+    this.logger.log(
+      `Secret ${secretName} does not exist in project ${project.slug}`
+    )
   }
 
   /**

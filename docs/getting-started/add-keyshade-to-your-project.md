@@ -18,9 +18,11 @@ npx create-next-app my-app
 
 You can find more info about creating a Next.js project [here](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Updating the `main.ts` file
+## Updating the entry file
 
-In the `my-app` directory, open the `main.ts` file and add the following code:
+In your `my-app` directory, open the main entry file — typically `app/page.tsx` or `pages/index.tsx` depending on your setup.
+
+Replace its contents with:
 
 ```typescript
 export default function Home() {
