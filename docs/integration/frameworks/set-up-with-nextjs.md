@@ -1,5 +1,5 @@
 ---
-description: A step-by-step guide to integrate Keyshade into your Next.js app for managing secrets and environment variables — no .env files needed.
+description: A step-by-step guide to integrate Keyshade into your Next.js app for managing secrets and environment variables — a drop-in replacement for .env files.
 ---
 
 # How to Set Up Keyshade into a Next.js Project
@@ -9,18 +9,23 @@ description: A step-by-step guide to integrate Keyshade into your Next.js app fo
 Create a new Next.js app and make sure you select TypeScript:
 
 ```bash
-npx create-next-app my-app
+npx create-next-app <your-app-name>
 ```
-You can find more info about creating a Next.js project [here](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+You more details, refer to the [Next.js documentation](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## 2. Install the Keyshade CLI
+
 Install globally via npm:
+
 ```bash
 npm i -g @keyshade/cli
 ```
-_Refer: [Installing the CLI](/docs/getting-started/installing-the-cli)_
+
+*Refer: [Installing the CLI](/docs/getting-started/installing-the-cli)*
 
 ## 3. Set Up Your Keyshade Profile
+
 If you're using Keyshade **for the first time**, refer: [Setting up your profile](/docs/getting-started/setting-up-your-profile)
 
 If you've **used Keyshade before**, you can switch to an existing profile by running:
@@ -29,44 +34,50 @@ If you've **used Keyshade before**, you can switch to an existing profile by run
 keyshade profile use <profile_name>
 ```
 
-Verify your profile is active:
+Verify your profile is active by running:
 ```bash
 keyshade workspace list
 ```
 
-## 4. Create a Project in the Dashboard and Adding Secrets and Variables
-_Refer: [Creating a project](/docs/getting-started/adding-your-first-secret-and-variable)_
+## 4. Create a Project in the Dashboard and Add Secrets and Variables
+
+*Refer: [Creating a project](/docs/getting-started/adding-your-first-secret-and-variable)*
 
 > 💡 **Secrets vs Variables:**
-> 
-> -   **Secrets** are sensitive credentials like API keys or tokens.
->     
-> -   **Variables** are non-sensitive configs like ports, flags, or feature toggles.
->     
+>
+> * **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
+> * **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
 
-Use `NEXT_PUBLIC_` prefix for any value exposed to the browser as this is a Next.js convention.
+Here’s your sentence rewritten for clarity and consistency with the rest of the guide:
 
-You do **not** need to use `.env` or `.env.local`. Keyshade handles that for you at runtime!
+> Use the `NEXT_PUBLIC_` prefix for browser-exposed values. See the [Next.js convention](https://nextjs.org/docs/app/guides/environment-variables#bundling-environment-variables-for-the-browser) for details.
+
+No need to create an `.env` file. Keyshade handles that for you at runtime!
 
 ## 5. Configure Your Project
 
-Run this in your app directory:
+Navigate to your Next.js project directory:
+
+```bash
+cd <your-app-name>
+```
+
+Then run the Keyshade initialization by running:
 
 ```bash
 keyshade init
 ```
-
-Or skip prompts:
+Or skip prompts by running:
 
 ```bash
 keyshade init \
-  --workspace-slug my-workspace \
-  --project-slug my-project \
-  --environment-slug dev \
-  --private-key my-private-key
+  --workspace-slug <your-workspace-slug> \
+  --project-slug <your-project-slug> \
+  --environment-slug <your-environment-slug> \
+  --private-key <your-private-key>
 ```
 
-This will create a `keyshade.json` in the root.
+This will create a `keyshade.json` file in the **root of your project**.
 
 ## 6. Run the App
 
@@ -90,6 +101,6 @@ const secretKey = process.env.MY_SECRET_KEY;
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 ```
 
-## You're Done!🎊
+## You're Done! 🎊
 
 _Your app is now configured with secure runtime secrets and variables powered by Keyshade._
