@@ -1,3 +1,13 @@
+## [2.25.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.3...v2.25.0-stage.4) (2025-06-21)
+
+### 🚀 Features
+
+* Update onboarding and add referral ([d9710e6](https://github.com/keyshade-xyz/keyshade/commit/d9710e6eaaf00dde83f2d76baf7c2b4e93ca9f6e))
+
+### 📚 Documentation
+
+* small edits and spelling checks ([#1022](https://github.com/keyshade-xyz/keyshade/issues/1022)) ([0747622](https://github.com/keyshade-xyz/keyshade/commit/0747622f4624401075d173212170d16cd976ad46))
+
 ## [2.25.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.2...v2.25.0-stage.3) (2025-06-20)
 
 ### 🐛 Bug Fixes

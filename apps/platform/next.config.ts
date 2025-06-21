@@ -30,16 +30,16 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/ingest/static/:path*',
-        destination: 'https://eu-assets.i.posthog.com/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*'
       },
       {
         source: '/ingest/:path*',
-        destination: 'https://eu.i.posthog.com/:path*',
+        destination: 'https://eu.i.posthog.com/:path*'
       },
       {
         source: '/ingest/decide',
-        destination: 'https://eu.i.posthog.com/decide',
-      },
+        destination: 'https://eu.i.posthog.com/decide'
+      }
     ]
   },
   // This is required to support PostHog trailing slash API requests
@@ -50,6 +50,14 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**'
+      }
+    ]
   }
 }
 
