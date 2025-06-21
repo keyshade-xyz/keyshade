@@ -1,3 +1,9 @@
+## [2.25.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.5...v2.25.0-stage.6) (2025-06-21)
+
+### 🚀 Features
+
+* Decrypt [secure]s on client side only; Private keys are encrypted at rest aswell ([#1026](https://github.com/keyshade-xyz/keyshade/issues/1026)) ([b788b2f](https://github.com/keyshade-xyz/keyshade/commit/b788b2f0c81122cba1a815a13726d4e8be7ae31a))
+
 ## [2.25.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.4...v2.25.0-stage.5) (2025-06-21)
 
 ### 🚀 Features
