@@ -19,8 +19,8 @@ export class ExportService {
 
   private flattenObject(data: ExportData): Record<string, string> {
     const entries = [
-      ...data.secrets.map(({ name, value }) => [name, value]),
-      ...data.variables.map(({ name, value }) => [name, value])
+      ...(data.secrets?.map(({ name, value }) => [name, value]) ?? []),
+      ...(data.variables?.map(({ name, value }) => [name, value]) ?? [])
     ]
 
     return Object.fromEntries(entries)
