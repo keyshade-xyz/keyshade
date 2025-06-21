@@ -1698,7 +1698,6 @@ export class ProjectService {
    * @param projectSlug The slug of the project to export secrets from
    * @param environmentSlug The slug of the environment to export secrets from
    * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
    * @param separateFiles When `true`, writes secrets and variables into separate files (`secrets.*` & `variables.*`).
    * When `false`, merges both into a single file.
    * @returns The secrets exported in the desired format
