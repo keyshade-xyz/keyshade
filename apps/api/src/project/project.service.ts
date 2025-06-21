@@ -1693,6 +1693,8 @@ export class ProjectService {
    * @param environmentSlug The slug of the environment to export secrets from
    * @param format The format to export the secrets in
    * @param privateKey The private key to use for secret decryption
+   * @param separateFiles When `true`, writes secrets and variables into separate files (`secrets.*` & `variables.*`).
+   * When `false`, merges both into a single file.
    * @returns The secrets exported in the desired format
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
@@ -1702,7 +1704,8 @@ export class ProjectService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlugs: Environment['slug'][],
-    format: ExportFormat
+    format: ExportFormat,
+    separateFiles = false
   ) {
     this.logger.log(
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
@@ -1733,14 +1736,27 @@ export class ProjectService {
           value: variable.value
         }))
 
-        return [
-          environmentSlug,
-          this.exportService.format({ secrets, variables }, format)
-        ]
+        return separateFiles
+          ? [
+              [
+                `${environmentSlug}.variables`,
+                this.exportService.format({ variables }, format)
+              ],
+              [
+                `${environmentSlug}.secrets`,
+                this.exportService.format({ secrets }, format)
+              ]
+            ]
+          : [
+              [
+                environmentSlug,
+                this.exportService.format({ secrets, variables }, format)
+              ]
+            ]
       })
     )
 
-    const fileData = Object.fromEntries(environmentExports)
+    const fileData = Object.fromEntries(environmentExports.flat())
 
     return fileData
   }
