@@ -2,6 +2,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import type { ExportProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { ALL_EXPORT_FORMATS, ExportFormatMetadata } from '@keyshade/common'
 import {
   environmentsOfProjectAtom,
   exportConfigOpenAtom,
@@ -31,9 +32,16 @@ import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 const formatMap = new Map<
   string,
   { label: string; mimeType?: string; extension?: string }
->([
-  ['json', { label: 'JSON', mimeType: 'application/json', extension: 'json' }]
-])
+>(
+  ALL_EXPORT_FORMATS.map((format) => [
+    format,
+    {
+      label: ExportFormatMetadata[format].label,
+      mimeType: ExportFormatMetadata[format].mimeType,
+      extension: ExportFormatMetadata[format].extension
+    }
+  ])
+)
 
 const downloadBase64File = (
   base64Contents: string,

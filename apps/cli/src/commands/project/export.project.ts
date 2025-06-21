@@ -9,6 +9,7 @@ import { Logger } from '@/util/logger'
 import { z } from 'zod'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
+import { ExportFormat } from '@keyshade/common'
 
 export default class ExportProject extends BaseCommand {
   getName(): string {
@@ -101,7 +102,7 @@ export default class ExportProject extends BaseCommand {
       environmentSlugs: z
         .array(z.string().min(1, { message: 'Environment cannot be empty' }))
         .nonempty({ message: 'You must specify at least one environment' }),
-      format: z.string(),
+      format: z.nativeEnum(ExportFormat),
       output: z
         .string()
         .min(1, { message: 'Output filename cannot be empty' })

@@ -1,6 +1,4 @@
-export enum ExportFormat {
-  JSON = 'json'
-}
+export { ExportFormat } from '@keyshade/common'
 
 export interface Configuration {
   name: string
