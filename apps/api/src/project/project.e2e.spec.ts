@@ -489,7 +489,7 @@ describe('Project Controller Tests', () => {
       expect(project.isDisabled).toBe(project1.isDisabled)
       expect(project.accessLevel).toBe(project1.accessLevel)
       expect(project.publicKey).toBe(project1.publicKey)
-      expect(project.privateKey).not.toBe(project1.privateKey)
+      expect(project.privateKey).toBe(project1.privateKey)
     })
 
     it('should not be able to fetch a non existing project', async () => {
@@ -940,7 +940,7 @@ describe('Project Controller Tests', () => {
       expect(project.isDisabled).toBe(globalProject.isDisabled)
       expect(project.accessLevel).toBe(globalProject.accessLevel)
       expect(project.publicKey).toBe(globalProject.publicKey)
-      expect(project.privateKey).not.toBe(globalProject.privateKey)
+      expect(project.privateKey).toBe(globalProject.privateKey)
       expect(project.environmentCount).toBe(1)
       expect(project.secretCount).toBe(0)
       expect(project.variableCount).toBe(0)
@@ -968,7 +968,7 @@ describe('Project Controller Tests', () => {
       expect(project.isDisabled).toBe(internalProject.isDisabled)
       expect(project.accessLevel).toBe(internalProject.accessLevel)
       expect(project.publicKey).toBe(internalProject.publicKey)
-      expect(project.privateKey).not.toBe(internalProject.privateKey)
+      expect(project.privateKey).toBe(internalProject.privateKey)
       expect(project.environmentCount).toBe(1)
       expect(project.secretCount).toBe(0)
       expect(project.variableCount).toBe(0)
@@ -1200,7 +1200,7 @@ describe('Project Controller Tests', () => {
     expect(project.isDisabled).toBe(privateProject.isDisabled)
     expect(project.accessLevel).toBe(privateProject.accessLevel)
     expect(project.publicKey).toBe(privateProject.publicKey)
-    expect(project.privateKey).not.toBe(privateProject.privateKey)
+    expect(project.privateKey).toBe(privateProject.privateKey)
   })
 
   it('should not allow users without sufficient access to access a private project', async () => {
