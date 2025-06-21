@@ -2,6 +2,7 @@ import { PrismaClient, ProjectAccessLevel, AuthProvider } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import { Logger } from '@nestjs/common'
 import { sEncrypt } from '@/common/cryptography'
+import { generateReferralCode } from '@/common/util'
 
 const prisma = new PrismaClient()
 
@@ -19,6 +20,7 @@ async function main() {
       update: {},
       create: {
         email: userEmail,
+        referralCode: await generateReferralCode(prisma),
         name: faker.person.fullName(),
         isActive: true,
         isOnboardingFinished: true,

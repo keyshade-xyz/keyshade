@@ -4,7 +4,7 @@ import type {
   CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '../base.command'
-import { confirm, text } from '@clack/prompts'
+import { confirm, text, multiselect } from '@clack/prompts'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import fs from 'node:fs/promises'
@@ -61,7 +61,7 @@ export default class ImportFromEnv extends BaseCommand {
         return
       }
 
-      const secretsAndVariables = secretDetector.scanJsObject(envVariables)
+      let secretsAndVariables = secretDetector.scanJsObject(envVariables)
 
       Logger.info(
         'Detected secrets:\n' +
@@ -76,6 +76,53 @@ export default class ImportFromEnv extends BaseCommand {
             .map(([key, value]) => key + ' = ' + JSON.stringify(value))
             .join('\n')
       )
+
+      const toggleClassification = await confirm({
+        message:
+          'Do you want to toggle the classification of the detected secrets and variables? (y/N)',
+        initialValue: false
+      })
+      if (toggleClassification) {
+        const selectedSecrets = await multiselect({
+          message:
+            'Select all the keys that you want to classify as "Secret" (press Space to select, Enter to confirm):',
+          options: Object.entries(envVariables).map(([key]) => ({
+            value: key,
+            label: `${key}`
+          })),
+          initialValues: Object.keys(secretsAndVariables.secrets)
+        })
+
+        const newSecrets: Record<string, string> = {}
+        const newVariables: Record<string, string> = {}
+
+        for (const [key, value] of Object.entries(envVariables)) {
+          if (Array.isArray(selectedSecrets) && selectedSecrets.includes(key)) {
+            newSecrets[key] = typeof value === 'string' ? value.trim() : value
+          } else {
+            newVariables[key] = typeof value === 'string' ? value.trim() : value
+          }
+        }
+
+        secretsAndVariables = {
+          secrets: newSecrets,
+          variables: newVariables
+        }
+
+        Logger.info(
+          'Updated secrets:\n' +
+            Object.entries(secretsAndVariables.secrets)
+              .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+              .join('\n') +
+            '\n'
+        )
+        Logger.info(
+          'Updated variables:\n' +
+            Object.entries(secretsAndVariables.variables)
+              .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+              .join('\n')
+        )
+      }
 
       const confirmImport = await confirm({
         message:
