@@ -1,3 +1,40 @@
+## [2.25.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.4...v2.25.0-stage.5) (2025-06-21)
+
+### 🚀 Features
+
+* **cli:** Select [secure]-variable while Project Import command ([#1025](https://github.com/keyshade-xyz/keyshade/issues/1025)) ([b642552](https://github.com/keyshade-xyz/keyshade/commit/b6425527aa617cdceffdfe078f51edb6ee3267de))
+
+## [2.25.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.3...v2.25.0-stage.4) (2025-06-21)
+
+### 🚀 Features
+
+* Update onboarding and add referral ([d9710e6](https://github.com/keyshade-xyz/keyshade/commit/d9710e6eaaf00dde83f2d76baf7c2b4e93ca9f6e))
+
+### 📚 Documentation
+
+* small edits and spelling checks ([#1022](https://github.com/keyshade-xyz/keyshade/issues/1022)) ([0747622](https://github.com/keyshade-xyz/keyshade/commit/0747622f4624401075d173212170d16cd976ad46))
+
+## [2.25.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.2...v2.25.0-stage.3) (2025-06-20)
+
+### 🐛 Bug Fixes
+
+* **api:** Secret & Variable unique names ([#1011](https://github.com/keyshade-xyz/keyshade/issues/1011)) ([013d0ee](https://github.com/keyshade-xyz/keyshade/commit/013d0ee0bef21e12a985cb05d33955b7a8ca12bc))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** Update changelog and version ([a3a9675](https://github.com/keyshade-xyz/keyshade/commit/a3a9675d41f867fe048c15b0b52361fe1ddd9ec2))
+
+## [2.25.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.1...v2.25.0-stage.2) (2025-06-15)
+
+### 🚀 Features
+
+* Add Secret & Variable export, include JSON format ([#981](https://github.com/keyshade-xyz/keyshade/issues/981)) ([83cacd8](https://github.com/keyshade-xyz/keyshade/commit/83cacd87ace371faf070b94cea580ba66d379eaf))
+
+### 🔨 Code Refactoring
+
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([2f445f4](https://github.com/keyshade-xyz/keyshade/commit/2f445f4b971422091bb755476310c254a2c48ed1))
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([#1008](https://github.com/keyshade-xyz/keyshade/issues/1008)) ([15a7819](https://github.com/keyshade-xyz/keyshade/commit/15a7819538c7a8fe65b4517accdbcf1a33de58e8))
+
 ## [2.25.0](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0) (2025-06-15)
 
 ### 🚀 Features

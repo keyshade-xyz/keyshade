@@ -207,15 +207,120 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       },
       payload: {
-        name: 'John Doe',
-        isOnboardingFinished: true
+        name: 'John Doe'
       }
     })
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body).name).toEqual('John Doe')
-    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
 
     regularUser = JSON.parse(result.body)
+  })
+
+  describe('Onboarding and Referral Tests', () => {
+    beforeEach(async () => {
+      // Flip the user's onboarding status to false
+      await prisma.user.update({
+        where: {
+          email: regularUser.email
+        },
+        data: {
+          isOnboardingFinished: false
+        }
+      })
+    })
+
+    test('users should be able to finish onboarding', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          teamSize: '4-10',
+          heardFrom: 'Google'
+        }
+      })
+      expect(result.statusCode).toEqual(200)
+      expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
+
+      const onboardingAnswers = await prisma.onboardingAnswers.findFirst({
+        where: {
+          userId: regularUser.id
+        }
+      })
+
+      expect(onboardingAnswers.heardFrom).toEqual('Google')
+      expect(onboardingAnswers.teamSize).toEqual('4-10')
+    })
+
+    test('users should not be able to finish onboarding twice', async () => {
+      await prisma.user.update({
+        where: {
+          email: regularUser.email
+        },
+        data: {
+          isOnboardingFinished: true
+        }
+      })
+
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          teamSize: '4-10',
+          heardFrom: 'Google'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+    })
+
+    test('users should be able to be referred', async () => {
+      await prisma.user.update({
+        where: {
+          id: adminUser.id
+        },
+        data: {
+          referralCode: '123456'
+        }
+      })
+
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          referralCode: '123456'
+        }
+      })
+      expect(result.statusCode).toEqual(200)
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: regularUser.email
+        }
+      })
+      expect(user.referredById).toEqual(adminUser.id)
+    })
+
+    test('should fail if referral code is not present', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          referralCode: '123456'
+        }
+      })
+      expect(result.statusCode).toEqual(404)
+    })
   })
 
   test('admin should be able to update themselves', async () => {
@@ -226,13 +331,11 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': adminUser.email
       },
       payload: {
-        name: 'Admin Doe',
-        isOnboardingFinished: true
+        name: 'Admin Doe'
       }
     })
     expect(result.statusCode).toEqual(200)
     expect(JSON.parse(result.body).name).toEqual('Admin Doe')
-    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
 
     adminUser = JSON.parse(result.body)
   })

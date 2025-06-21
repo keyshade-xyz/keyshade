@@ -18,5 +18,5 @@ To verify the installation, you can run the following command:
 keyshade --version
 ```
 
-This should print the version of the Keyshade CLI that you have installed.
-![keyshade-cli](../../blob/keyshade-version.png) At the time of creating this blog, the latest version of the CLI is `3.0.1`
+This should print the version of the Keyshade CLI installed on your system.
+![keyshade-cli](../../blob/keyshade-version.png) _(Version shown here is `3.0.1`, but yours may differ depending on installation time or updates.)_

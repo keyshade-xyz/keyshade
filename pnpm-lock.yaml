@@ -212,7 +212,7 @@ importers:
         version: 2.49.4
       '@vercel/sdk':
         specifier: ^1.7.7
-        version: 1.7.7(zod@3.24.3)
+        version: 1.8.5(zod@3.24.3)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -4942,8 +4942,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vercel/sdk@1.7.7':
-    resolution: {integrity: sha512-1qtW7eMUza7WPxuYFzZvR3ajj4v+QBqXa2e9whK8hlOYpCrvBdezYq2oseBtIO0numkIY2974RTHyKmLZQ1pSg==}
+  '@vercel/sdk@1.8.5':
+    resolution: {integrity: sha512-LIvWg9w3heznGkNfOKJDemG/I/wQjlXOyIcHZL7YeTxBvzAOt7HolNJWCiRQyZQACKp5s9IDIYd+37ePIJ09mg==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.5.0 <1.10.0'
@@ -15810,7 +15810,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.5.0':
     optional: true
 
-  '@vercel/sdk@1.7.7(zod@3.24.3)':
+  '@vercel/sdk@1.8.5(zod@3.24.3)':
     dependencies:
       zod: 3.24.3
 

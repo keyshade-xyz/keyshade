@@ -20,7 +20,9 @@ import {
   GetAllProjectsRequestSchema,
   GetAllProjectsResponseSchema,
   ProjectWithCountSchema,
-  ProjectWithTierLimitAndCountSchema
+  ProjectWithTierLimitAndCountSchema,
+  ExportProjectConfigurationRequestSchema,
+  ExportProjectConfigurationsResponseSchema
 } from '.'
 
 export type Project = z.infer<typeof ProjectSchema>
@@ -65,4 +67,12 @@ export type GetAllProjectsRequest = z.infer<typeof GetAllProjectsRequestSchema>
 
 export type GetAllProjectsResponse = z.infer<
   typeof GetAllProjectsResponseSchema
+>
+
+export type ExportProjectRequest = z.infer<
+  typeof ExportProjectConfigurationRequestSchema
+>
+
+export type ExportProjectResponse = z.infer<
+  typeof ExportProjectConfigurationsResponseSchema
 >
