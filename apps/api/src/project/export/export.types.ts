@@ -1,6 +1,4 @@
-export enum ExportFormat {
-  JSON = 'json'
-}
+export { ExportFormat } from '@keyshade/common'
 
 export interface Configuration {
   name: string
@@ -8,6 +6,21 @@ export interface Configuration {
 }
 
 export interface ExportData {
-  secrets: Configuration[]
-  variables: Configuration[]
+  secrets?: Configuration[]
+  variables?: Configuration[]
+}
+
+export interface SecretManifest {
+  apiVersion: 'v1'
+  kind: 'Secret'
+  metadata: { name: string }
+  type: 'Opaque'
+  data: Record<string, string>
+}
+
+export interface ConfigMapManifest {
+  apiVersion: 'v1'
+  kind: 'ConfigMap'
+  metadata: { name: string }
+  data: Record<string, string>
 }

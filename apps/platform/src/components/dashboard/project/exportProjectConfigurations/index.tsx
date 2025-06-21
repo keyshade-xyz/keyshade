@@ -2,6 +2,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import type { ExportProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { EXPORT_FORMAT_INFO } from '@keyshade/common'
 import {
   environmentsOfProjectAtom,
   exportConfigOpenAtom,
@@ -27,13 +28,9 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { Switch } from '@/components/ui/switch'
 
-const formatMap = new Map<
-  string,
-  { label: string; mimeType?: string; extension?: string }
->([
-  ['json', { label: 'JSON', mimeType: 'application/json', extension: 'json' }]
-])
+const formatMap = new Map(Object.entries(EXPORT_FORMAT_INFO))
 
 const downloadBase64File = (
   base64Contents: string,
@@ -115,13 +112,22 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     })
   }
 
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      separateFiles: checked
+    }))
+  }
+
   const exportConfigs = useHttp(() => {
     return ControllerInstance.getInstance().projectController.exportProjectConfigurations(
       {
         projectSlug: selectedProject!.slug,
         environmentSlugs: formData.environmentSlugs,
         format: formData.format,
-        privateKey: formData.privateKey || browserProjectPrivateKey || undefined
+        privateKey:
+          formData.privateKey || browserProjectPrivateKey || undefined,
+        separateFiles: formData.separateFiles
       }
     )
   })
@@ -267,6 +273,21 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
                 />
               </div>
             )}
+
+            <div className="flex items-center justify-between">
+              <Label className="text-left" htmlFor="storePrivateKey">
+                Separate files for secrets and variables?
+              </Label>
+              <div className="flex gap-1 text-sm">
+                <div>No</div>
+                <Switch
+                  checked={formData.separateFiles}
+                  id="separateFiles"
+                  onCheckedChange={handleSwitchChange}
+                />
+                <div>Yes</div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex h-[2.25rem] w-full justify-end">

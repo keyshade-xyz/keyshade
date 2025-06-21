@@ -134,7 +134,8 @@ export const GetAllProjectsResponseSchema = PageResponseSchema(
 export const ExportProjectConfigurationRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
   environmentSlugs: z.array(EnvironmentSchema.shape.slug).min(1),
-  format: z.string()
+  format: z.string(),
+  separateFiles: z.boolean().optional()
 })
 
 export const ExportProjectConfigurationsResponseSchema = z.record(
