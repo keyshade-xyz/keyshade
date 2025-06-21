@@ -7,8 +7,8 @@ import type { IntegrationTypeEnum } from '@keyshade/schema'
 import SetupIntegration from './@setup/page'
 import IntegrationsPage from './page'
 import IntegrationDetailsPage from './@details/page'
-import { PageTitle } from '@/components/common/page-title'
 import { selectedWorkspaceAtom } from '@/store'
+import { PageTitle } from '@/components/common/page-title'
 
 function IntegrationsContent(): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)

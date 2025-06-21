@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { TrashSVG } from '@public/svg/shared'
 import { toast } from 'sonner'
+import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
   AlertDialogAction,

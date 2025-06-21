@@ -1,4 +1,3 @@
-import { LoadingSVG } from '@public/svg/shared'
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useState } from 'react'
@@ -8,6 +7,7 @@ import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import { posthog } from 'posthog-js'
 import Cookies from 'js-cookie'
+import { LoadingSVG } from '@public/svg/shared'
 import {
   InputOTP,
   InputOTPGroup,
