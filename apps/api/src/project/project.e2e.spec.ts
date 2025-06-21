@@ -2061,6 +2061,43 @@ describe('Project Controller Tests', () => {
 
         expect(response.statusCode).toBe(200)
       })
+
+      it('should export secrets and variables as separate files when requested', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&separateFiles=true`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(200)
+        const body = response.json()
+
+        expect(body).toHaveProperty([`${env.slug}.secrets`])
+        expect(body).toHaveProperty([`${env.slug}.variables`])
+
+        const rawSecrets = Buffer.from(
+          body[`${env.slug}.secrets`],
+          'base64'
+        ).toString()
+        const parsedSecrets = JSON.parse(rawSecrets)
+
+        const rawVars = Buffer.from(
+          body[`${env.slug}.variables`],
+          'base64'
+        ).toString()
+        const parsedVars = JSON.parse(rawVars)
+
+        expect(parsedSecrets).toHaveProperty('API_KEY')
+        expect(parsedSecrets.API_KEY).not.toBe('secret_val')
+
+        expect(parsedVars).toEqual({ TIMEOUT: '3000' })
+      })
     })
 
     describe('Error cases', () => {
@@ -2094,6 +2131,35 @@ describe('Project Controller Tests', () => {
         })
 
         expect(response.statusCode).toBe(404)
+      })
+
+      it('should 422 when no configurations are present for the given environments', async () => {
+        const emptyEnv = await environmentService.createEnvironment(
+          user1,
+          { name: 'EmptyEnv' },
+          project1.slug
+        )
+
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${emptyEnv.slug}` +
+          `&format=json`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(422)
+
+        const raw = response.json()
+        const err = JSON.parse(raw.message)
+
+        expect(err.header).toBe('No configuration present')
+        expect(err.body).toBe(
+          `Could not build any configuration files for project "${project1.slug}" in environments [${emptyEnv.slug}]`
+        )
       })
     })
   })
