@@ -8,6 +8,6 @@ export interface Configuration {
 }
 
 export interface ExportData {
-  secrets: Configuration[]
-  variables: Configuration[]
+  secrets?: Configuration[]
+  variables?: Configuration[]
 }
