@@ -23,10 +23,10 @@ _Refer: [Installing the CLI](/docs/getting-started/installing-the-cli)_
 ## 3. Set Up Your Keyshade Profile
 If you're using Keyshade **for the first time**, refer: [Setting up your profile](/docs/getting-started/setting-up-your-profile)
 
-If you've **used Keyshade before**, you can simply switch to an existing profile:
+If you've **used Keyshade before**, you can switch to an existing profile by running:
 
 ```bash
-keyshade profile use my-profile
+keyshade profile use <profile_name>
 ```
 
 Verify your profile is active:
