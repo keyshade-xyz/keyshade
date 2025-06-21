@@ -1,3 +1,9 @@
+## [2.25.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.4...v2.25.0-stage.5) (2025-06-21)
+
+### 🚀 Features
+
+* **cli:** Select [secure]-variable while Project Import command ([#1025](https://github.com/keyshade-xyz/keyshade/issues/1025)) ([b642552](https://github.com/keyshade-xyz/keyshade/commit/b6425527aa617cdceffdfe078f51edb6ee3267de))
+
 ## [2.25.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0-stage.3...v2.25.0-stage.4) (2025-06-21)
 
 ### 🚀 Features
