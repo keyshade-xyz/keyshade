@@ -52,6 +52,13 @@ export default class ExportProject extends BaseCommand {
         short: '-p',
         long: '--private-key <string>',
         description: 'Private key to decrypt secrets'
+      },
+      {
+        short: '-s',
+        long: '--separate-files',
+        description:
+          'Write variables and secrets to two separate files instead of one combined file',
+        defaultValue: false
       }
     ]
   }
@@ -90,12 +97,14 @@ export default class ExportProject extends BaseCommand {
     format: string
     output: string
     privateKey?: string
+    separateFiles: boolean
   } {
     const {
       environment: environmentSlugs,
       format,
       output,
-      privateKey
+      privateKey,
+      separateFiles
     } = options
 
     const inputSchema = z.object({
@@ -116,14 +125,16 @@ export default class ExportProject extends BaseCommand {
           message:
             'Invalid output filename: no slashes, backslashes, or control chars allowed'
         }),
-      privateKey: z.string().optional()
+      privateKey: z.string().optional(),
+      separateFiles: z.boolean()
     })
 
     const parsed = inputSchema.parse({
       environmentSlugs,
       format,
       output,
-      privateKey
+      privateKey,
+      separateFiles
     })
 
     if (!parsed.environmentSlugs || !parsed.format || !parsed.output) {
@@ -134,7 +145,8 @@ export default class ExportProject extends BaseCommand {
       environmentSlugs: parsed.environmentSlugs,
       format: parsed.format,
       output: parsed.output,
-      privateKey: parsed.privateKey
+      privateKey: parsed.privateKey,
+      separateFiles: parsed.separateFiles
     }
   }
 
