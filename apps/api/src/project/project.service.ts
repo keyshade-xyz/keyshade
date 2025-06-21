@@ -1737,6 +1737,8 @@ export class ProjectService {
           value: variable.value
         }))
 
+        if (secrets.length === 0 && variables.length === 0) return []
+
         return separateFiles
           ? [
               [
