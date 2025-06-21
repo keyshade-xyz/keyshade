@@ -146,13 +146,15 @@ export class ProjectController {
           )
       })
     )
-    format: ExportFormat
+    format: ExportFormat,
+    @Query('separateFiles') separateFiles: boolean
   ) {
     return await this.service.exportProjectConfigurations(
       user,
       projectSlug,
       environmentSlugs,
-      format
+      format,
+      separateFiles
     )
   }
 }
