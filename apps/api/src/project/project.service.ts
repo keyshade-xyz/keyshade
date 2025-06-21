@@ -2,7 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  UnprocessableEntityException
 } from '@nestjs/common'
 import {
   Authority,
@@ -1762,6 +1763,23 @@ export class ProjectService {
     )
 
     const fileData = Object.fromEntries(environmentExports.flat())
+
+    if (Object.keys(fileData).length === 0) {
+      this.logger.warn(
+        `No configuration files generated — metadata=${JSON.stringify({
+          project: projectSlug,
+          environments: environmentSlugs,
+          user: user.id,
+          action: 'exportProjectConfigurations'
+        })}`
+      )
+
+      const errorMessage = `Could not build any configuration files for project "${projectSlug}" in environments [${environmentSlugs.join(', ')}]`
+
+      throw new UnprocessableEntityException(
+        constructErrorBody('No configuration present', errorMessage)
+      )
+    }
 
     return fileData
   }
