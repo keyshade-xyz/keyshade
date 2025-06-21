@@ -2,10 +2,10 @@
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useSetAtom } from 'jotai'
-import VariablePage from './@variable/page'
-import SecretPage from './@secret/page'
-import EnvironmentPage from './@environment/page'
 import OverviewPage from './@overview/page'
+import EnvironmentPage from './@environment/page'
+import SecretPage from './@secret/page'
+import VariablePage from './@variable/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import {

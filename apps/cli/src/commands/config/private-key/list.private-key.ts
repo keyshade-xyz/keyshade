@@ -18,11 +18,6 @@ export default class ListPrivateKey extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
       {
-        short: '-w',
-        long: '--workspace <string>',
-        description: 'Filter by workspace slug'
-      },
-      {
         short: '-p',
         long: '--project <string>',
         description: 'Filter by project slug'
@@ -31,32 +26,24 @@ export default class ListPrivateKey extends BaseCommand {
   }
 
   async action({ options }: CommandActionData): Promise<void> {
-    const { workspace, project } = options
+    const { project } = options
     const privateKeys = await fetchPrivateKeyConfig()
     const keys = Object.entries(privateKeys)
 
     const filteredKeys = keys.filter(([key]) => {
-      const [keyWorkspace, keyProject] = key.split('_')
-      return (
-        (!workspace ||
-          keyWorkspace.toLowerCase().includes(workspace.toLowerCase())) &&
-        (!project || keyProject.toLowerCase().includes(project.toLowerCase()))
-      )
+      return !project || key.toLowerCase().includes(project.toLowerCase())
     })
 
     const logKeys = filteredKeys.map(([key, value]) => ({
-      workspace: key.split('_')[0],
-      project: key.split('_')[1],
+      project: key,
       value
     }))
 
     if (logKeys.length === 0) {
       Logger.info('No private keys found.')
     } else {
-      logKeys.forEach(({ workspace, project, value }) => {
-        Logger.info(
-          `Workspace: ${workspace} | Project: ${project} | Key: ${value}`
-        )
+      logKeys.forEach(({ project, value }) => {
+        Logger.info(`Project: ${project} | Key: ${value}`)
       })
     }
   }

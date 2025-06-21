@@ -1,5 +1,5 @@
-import { EnvironmentSVG } from '@public/svg/dashboard'
 import { useSetAtom } from 'jotai'
+import { EnvironmentSVG } from '@public/svg/dashboard'
 import { Button } from '@/components/ui/button'
 import { createEnvironmentOpenAtom } from '@/store'
 

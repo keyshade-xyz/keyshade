@@ -21,11 +21,6 @@ export default class UpdatePrivateKey extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
       {
-        short: '-w',
-        long: '--workspace <string>',
-        description: 'Workspace slug'
-      },
-      {
         short: '-p',
         long: '--project <string>',
         description: 'Project slug'
@@ -43,22 +38,22 @@ export default class UpdatePrivateKey extends BaseCommand {
   }
 
   async action({ options, args }: CommandActionData): Promise<void> {
-    const { workspace, project } = options
+    const { project } = options
     const [privateKey] = args
 
-    if (!workspace || !project) {
+    if (!project) {
       throw new Error('Workspace and project slugs are required.')
     }
 
     const privateKeys = await fetchPrivateKeyConfig()
 
-    if (!privateKeys[`${workspace}_${project}`]) {
+    if (!privateKeys[project]) {
       throw new Error(
         'Private key not found for this project and workspace combo.'
       )
     }
 
-    privateKeys[`${workspace}_${project}`] = privateKey
+    privateKeys[project] = privateKey
 
     await writePrivateKeyConfig(privateKeys)
   }
