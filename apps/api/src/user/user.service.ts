@@ -19,7 +19,6 @@ import {
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
-import { UpdateSelfRequest } from '@keyshade/schema'
 import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
@@ -46,7 +45,7 @@ export class UserService {
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
     this.log.log(`User ${user.id} attempted to update their own profile`)
 
-    const data: UpdateSelfRequest = {
+    const data = {
       name: dto?.name,
       profilePictureUrl: dto?.profilePictureUrl,
       isOnboardingFinished: dto.isOnboardingFinished

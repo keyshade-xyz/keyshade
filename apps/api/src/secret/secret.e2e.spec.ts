@@ -247,7 +247,7 @@ describe('Secret Controller Tests', () => {
       expect(body.secret.note).toBe('Secret 2 note')
       expect(body.secret.projectId).toBe(project1.id)
       expect(body.values.length).toBe(1)
-      expect(body.values[0].value).toBe('Secret 2 value')
+      expect(body.values[0].value).not.toBe('Secret 2 value')
       expect(body.values[0].environment.id).toBe(environment1.id)
       expect(body.values[0].environment.slug).toBe(environment1.slug)
     })
@@ -601,140 +601,6 @@ describe('Secret Controller Tests', () => {
       expect(secretVersion.length).toBe(2)
     })
 
-    it('should have decrypted values after new version creation if decryptValue is true && project stores private key', async () => {
-      const response = await app.inject({
-        method: 'PUT',
-        url: `/secret/${secret1.slug}`,
-        payload: {
-          entries: [
-            {
-              value: 'Updated Secret 1 value',
-              environmentSlug: environment1.slug
-            }
-          ],
-          decryptValue: true
-        },
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).toBe(
-        'Updated Secret 1 value'
-      )
-
-      const secretVersion = await prisma.secretVersion.findMany({
-        where: {
-          secretId: secret1.id,
-          environmentId: environment1.id
-        },
-        include: {
-          environment: true
-        }
-      })
-
-      expect(secretVersion.length).toBe(2)
-    })
-
-    it('should have decrypted values after new version creation if decryptValue is true and private key is specified and project does not store private key', async () => {
-      // Remove the private key from the project
-      await prisma.project.update({
-        where: {
-          id: project1.id
-        },
-        data: {
-          storePrivateKey: false,
-          privateKey: null
-        }
-      })
-
-      const response = await app.inject({
-        method: 'PUT',
-        url: `/secret/${secret1.slug}`,
-        payload: {
-          entries: [
-            {
-              value: 'Updated Secret 1 value',
-              environmentSlug: environment1.slug
-            }
-          ],
-          decryptValue: true,
-          privateKey: project1.privateKey
-        },
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).toBe(
-        'Updated Secret 1 value'
-      )
-
-      const secretVersion = await prisma.secretVersion.findMany({
-        where: {
-          secretId: secret1.id,
-          environmentId: environment1.id
-        },
-        include: {
-          environment: true
-        }
-      })
-
-      expect(secretVersion.length).toBe(2)
-    })
-
-    it('should return encrypted values if decryptValue is true and project does not store private key and no private key is specified', async () => {
-      // Remove the private key from the project
-      await prisma.project.update({
-        where: {
-          id: project1.id
-        },
-        data: {
-          storePrivateKey: false,
-          privateKey: null
-        }
-      })
-
-      const response = await app.inject({
-        method: 'PUT',
-        url: `/secret/${secret1.slug}`,
-        payload: {
-          entries: [
-            {
-              value: 'Updated Secret 1 value',
-              environmentSlug: environment1.slug
-            }
-          ],
-          decryptValue: true
-        },
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json().updatedVersions.length).toBe(1)
-      expect(response.json().updatedVersions[0].value).not.toBe(
-        'Updated Secret 1 value'
-      )
-
-      const secretVersion = await prisma.secretVersion.findMany({
-        where: {
-          secretId: secret1.id,
-          environmentId: environment1.id
-        },
-        include: {
-          environment: true
-        }
-      })
-
-      expect(secretVersion.length).toBe(2)
-    })
-
     it('should fail to create a new version if the environment does not exist', async () => {
       const response = await app.inject({
         method: 'PUT',
@@ -909,41 +775,6 @@ describe('Secret Controller Tests', () => {
   })
 
   describe('Get All Secrets By Project Tests', () => {
-    it('should not be able to fetch decrypted secrets if the project does not store the private key', async () => {
-      // Fetch the environment of the project
-      const environment = await prisma.environment.findFirst({
-        where: {
-          projectId: project2.id
-        }
-      })
-
-      await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 20',
-          entries: [
-            {
-              environmentSlug: environment.slug,
-              value: 'Secret 20 value'
-            }
-          ],
-          rotateAfter: '24',
-          note: 'Secret 20 note'
-        },
-        project2.slug
-      )
-
-      const response = await app.inject({
-        method: 'GET',
-        url: `/secret/${project2.slug}?decryptValue=true`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(400)
-    })
-
     it('should be able to fetch all secrets', async () => {
       const response = await app.inject({
         method: 'GET',
@@ -987,15 +818,15 @@ describe('Secret Controller Tests', () => {
       const metadata = response.json().metadata
       expect(metadata.totalCount).toEqual(1)
       expect(metadata.links.self).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
       expect(metadata.links.first).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
       expect(metadata.links.previous).toBeNull()
       expect(metadata.links.next).toBeNull()
       expect(metadata.links.last).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
     })
 
@@ -1053,114 +884,16 @@ describe('Secret Controller Tests', () => {
       const metadata = response.json().metadata
       expect(metadata.totalCount).toEqual(1)
       expect(metadata.links.self).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
       expect(metadata.links.first).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
       expect(metadata.links.previous).toBeNull()
       expect(metadata.links.next).toBeNull()
       expect(metadata.links.last).toEqual(
-        `/secret/${project1.slug}?decryptValue=false&page=0&limit=10&sort=name&order=asc&search=`
+        `/secret/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
-    })
-
-    it('should be able to fetch all secrets decrypted', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/secret/${project1.slug}?decryptValue=true&page=0&limit=10`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(response.json().items.length).toBe(1)
-
-      const { secret, values } = response.json().items[0]
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: secret1.updatedAt.toISOString(),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
-      expect(values.length).toBe(1)
-
-      const value = values[0]
-      expect(value.version).toBe(1)
-      expect(value.environment.id).toBe(environment1.id)
-      expect(value.environment.slug).toBe(environment1.slug)
-      expect(value.environment.name).toBe(environment1.name)
-      expect(value.value).toEqual('Secret 1 value')
-
-      //check metadata
-      const metadata = response.json().metadata
-      expect(metadata.totalCount).toEqual(1)
-      expect(metadata.links.self).toEqual(
-        `/secret/${project1.slug}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
-      )
-      expect(metadata.links.first).toEqual(
-        `/secret/${project1.slug}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
-      )
-      expect(metadata.links.previous).toBeNull()
-      expect(metadata.links.next).toBeNull()
-      expect(metadata.links.last).toEqual(
-        `/secret/${project1.slug}?decryptValue=true&page=0&limit=10&sort=name&order=asc&search=`
-      )
-    })
-
-    it('should not be able to fetch all secrets decrypted if the project does not store the private key', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/secret/${project2.slug}?decryptValue=true`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(400)
-    })
-
-    it('should not be able to fetch all secrets decrypted if somehow the project does not have a private key even though it stores it (hypothetical)', async () => {
-      await prisma.project.update({
-        where: {
-          id: project1.id
-        },
-        data: {
-          storePrivateKey: true,
-          privateKey: null
-        }
-      })
-
-      const response = await app.inject({
-        method: 'GET',
-        url: `/secret/${project1.slug}?decryptValue=true`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        }
-      })
-
-      expect(response.statusCode).toBe(404)
-
-      await prisma.project.update({
-        where: {
-          id: project1.id
-        },
-        data: {
-          privateKey: project1.privateKey
-        }
-      })
     })
 
     it('should not be able to fetch all secrets if the user has no access to the project', async () => {
@@ -1459,8 +1192,7 @@ describe('Secret Controller Tests', () => {
 
       const secret = response.json()[0]
       expect(secret.name).toBe('Secret 1')
-      expect(secret.value).toBe('Secret 1 value')
-      expect(secret.isPlaintext).toBe(true)
+      expect(secret.value).not.toBe('Secret 1 value')
     })
 
     it('should not be able to fetch all secrets by project and environment if project does not exists', async () => {
@@ -1538,7 +1270,6 @@ describe('Secret Controller Tests', () => {
       const secret = response.json()[0]
       expect(secret.name).toBe('Secret 20')
       expect(secret.value).not.toBe('Secret 20 value')
-      expect(secret.isPlaintext).toBe(false)
     })
   })
 })

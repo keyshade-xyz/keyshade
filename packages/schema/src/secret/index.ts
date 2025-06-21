@@ -60,9 +60,7 @@ export const CreateSecretResponseSchema = SecretSchema
 
 export const UpdateSecretRequestSchema =
   CreateSecretRequestSchema.partial().extend({
-    secretSlug: z.string(),
-    decryptValue: z.boolean().optional(),
-    privateKey: z.string().optional()
+    secretSlug: z.string()
   })
 
 export const UpdateSecretResponseSchema = z.object({
@@ -91,8 +89,7 @@ export const DeleteSecretResponseSchema = z.void()
 export const RollBackSecretRequestSchema = z.object({
   environmentSlug: EnvironmentSchema.shape.slug,
   version: z.number(),
-  secretSlug: z.string(),
-  decryptValue: z.boolean().optional()
+  secretSlug: z.string()
 })
 
 export const RollBackSecretResponseSchema = z.object({
@@ -101,8 +98,7 @@ export const RollBackSecretResponseSchema = z.object({
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: BaseProjectSchema.shape.slug,
-  decryptValue: z.boolean().optional()
+  projectSlug: BaseProjectSchema.shape.slug
 })
 
 export const GetAllSecretsOfProjectResponseSchema =
@@ -111,8 +107,7 @@ export const GetAllSecretsOfProjectResponseSchema =
 export const GetRevisionsOfSecretRequestSchema =
   PageRequestSchema.partial().extend({
     secretSlug: z.string(),
-    environmentSlug: EnvironmentSchema.shape.slug,
-    decryptValue: z.boolean().optional()
+    environmentSlug: EnvironmentSchema.shape.slug
   })
 
 export const GetRevisionsOfSecretResponseSchema =
@@ -126,7 +121,6 @@ export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
 export const GetAllSecretsOfEnvironmentResponseSchema = z.array(
   z.object({
     name: z.string(),
-    value: z.string(),
-    isPlaintext: z.boolean()
+    value: z.string()
   })
 )

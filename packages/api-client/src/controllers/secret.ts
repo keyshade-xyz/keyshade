@@ -73,7 +73,7 @@ export default class SecretController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<RollBackSecretResponse>> {
     const response = await this.apiClient.put(
-      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}&decryptValue=${request.decryptValue}`,
+      `/api/secret/${request.secretSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
       request,
       headers
     )
@@ -101,10 +101,7 @@ export default class SecretController {
       `/api/secret/${request.projectSlug}`,
       request
     )
-    const response = await this.apiClient.get(
-      `${url}&decryptValue=${request.decryptValue}`,
-      headers
-    )
+    const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllSecretsOfProjectResponse>(response)
   }
@@ -117,10 +114,7 @@ export default class SecretController {
       `/api/secret/${request.secretSlug}/revisions/${request.environmentSlug}`,
       request
     )
-    const response = await this.apiClient.get(
-      `${url}&decryptValue=${request.decryptValue}`,
-      headers
-    )
+    const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetRevisionsOfSecretResponse>(response)
   }

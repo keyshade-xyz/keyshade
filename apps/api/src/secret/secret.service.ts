@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -42,7 +41,7 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
-import { decrypt, encrypt } from '@keyshade/common'
+import { encrypt } from '@keyshade/common'
 
 @Injectable()
 export class SecretService {
@@ -180,11 +179,7 @@ export class SecretService {
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const secret = await getSecretWithValues(
-      secretData,
-      project.storePrivateKey && project.privateKey !== null,
-      project.privateKey
-    )
+    const secret = await getSecretWithValues(secretData)
 
     await createEvent(
       {
@@ -352,23 +347,6 @@ export class SecretService {
       updatedVersions: updatedVersions
     }
 
-    // Decrypt the secret values before sending only if one of the conditions are met:
-    // 1. The user has requested to decrypt the secret values
-    // 2. The project stores the private key OR
-    // 3. The user has provided the private key
-    if (
-      dto.decryptValue &&
-      ((secret.project.storePrivateKey && secret.project.privateKey) ||
-        dto.privateKey)
-    ) {
-      for (const version of updatedVersions) {
-        version.value = await decrypt(
-          secret.project.privateKey ?? dto.privateKey,
-          version.value
-        )
-      }
-    }
-
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
       for (const entry of dto.entries) {
@@ -491,8 +469,7 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
-    rollbackVersion: SecretVersion['version'],
-    decryptValue: boolean
+    rollbackVersion: SecretVersion['version']
   ) {
     this.logger.log(
       `User ${user.id} attempted to rollback secret ${secretSlug} to version ${rollbackVersion}`
@@ -581,9 +558,7 @@ export class SecretService {
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: project.storePrivateKey
-            ? await decrypt(project.privateKey, secret.versions[0].value)
-            : secret.versions[0].value,
+          value: secret.versions[0].value,
           isPlaintext: project.storePrivateKey
         } as ChangeNotificationEvent)
       )
@@ -615,13 +590,6 @@ export class SecretService {
     const currentRevision = secret.versions.find(
       (version) => version.version === rollbackVersion
     )!
-
-    if (decryptValue && project.storePrivateKey) {
-      currentRevision.value = await decrypt(
-        project.privateKey,
-        currentRevision.value
-      )
-    }
 
     return {
       ...result,
@@ -678,7 +646,6 @@ export class SecretService {
    * @param user the user performing the action
    * @param secretSlug the slug of the secret
    * @param environmentSlug the slug of the environment
-   * @param decryptValue whether to decrypt the secret values or not
    * @param page the page of items to return
    * @param limit the number of items to return per page
    * @param order the order of the items. Default is 'desc'
@@ -688,7 +655,6 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
-    decryptValue: boolean,
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
@@ -719,9 +685,6 @@ export class SecretService {
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
-
-    // Check if the secret can be decrypted
-    await this.checkAutoDecrypt(decryptValue, secret.project)
 
     // Get the revisions
     this.logger.log(
@@ -761,14 +724,6 @@ export class SecretService {
       `Fetched ${items.length} revisions of secret ${secretSlug} in environment ${environmentSlug}`
     )
 
-    // Decrypt the values
-    if (decryptValue) {
-      this.logger.log(`Decrypting values of secret ${secretSlug}`)
-      for (const item of items) {
-        item.value = await decrypt(secret.project.privateKey, item.value)
-      }
-    }
-
     const totalCount = await this.prisma.secretVersion.count({
       where: {
         secretId: secretId,
@@ -789,7 +744,6 @@ export class SecretService {
    * Gets all secrets of a project
    * @param user the user performing the action
    * @param projectSlug the slug of the project
-   * @param decryptValue whether to decrypt the secret values or not
    * @param page the page of items to return
    * @param limit the number of items to return per page
    * @param sort the field to sort the results by
@@ -800,7 +754,6 @@ export class SecretService {
   async getAllSecretsOfProject(
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
-    decryptValue: boolean,
     page: number,
     limit: number,
     sort: string,
@@ -822,9 +775,6 @@ export class SecretService {
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
-
-    // Check if the secret values can be decrypted
-    await this.checkAutoDecrypt(decryptValue, project)
 
     // Get the secrets
     this.logger.log(
@@ -944,9 +894,7 @@ export class SecretService {
                 name: secretVersion.environment.name,
                 slug: secretVersion.environment.slug
               },
-              value: decryptValue
-                ? await decrypt(project.privateKey, secretVersion.value)
-                : secretVersion.value,
+              value: secretVersion.value,
               version: secretVersion.version,
               createdBy: {
                 id: secretVersion.createdBy.id,
@@ -972,18 +920,13 @@ export class SecretService {
       }
     })
 
-    const metadata = paginate(
-      totalCount,
-      `/secret/${projectSlug}`,
-      {
-        page,
-        limit: limitMaxItemsPerPage(limit),
-        sort,
-        order,
-        search
-      },
-      { decryptValue }
-    )
+    const metadata = paginate(totalCount, `/secret/${projectSlug}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
 
     return { items, metadata }
   }
@@ -1061,10 +1004,7 @@ export class SecretService {
     for (const secret of secrets) {
       response.push({
         name: secret.name,
-        value: project.storePrivateKey
-          ? await decrypt(project.privateKey, secret.versions[0].value)
-          : secret.versions[0].value,
-        isPlaintext: project.storePrivateKey
+        value: secret.versions[0].value
       })
     }
 
@@ -1235,43 +1175,5 @@ export class SecretService {
         constructErrorBody('Secret already exists', errorMessage)
       )
     }
-  }
-
-  /**
-   * Checks if the project is allowed to decrypt secret values
-   * @param decryptValue whether to decrypt the secret values or not
-   * @param project the project to check
-   * @throws {BadRequestException} if the project does not store the private key and decryptValue is true
-   * @throws {NotFoundException} if the project does not have a private key and decryptValue is true
-   */
-  private async checkAutoDecrypt(decryptValue: boolean, project: Project) {
-    this.logger.log(
-      `Checking if secret values can be decrypted for project ${project.slug}`
-    )
-
-    if (decryptValue) {
-      // Check if the project is allowed to store the private key
-      if (!project.storePrivateKey) {
-        const errorMessage = `Project ${project.slug} does not store the private key`
-        this.logger.error(errorMessage)
-        throw new BadRequestException(
-          constructErrorBody('Can not decrypt secret values', errorMessage)
-        )
-      }
-
-      // Check if the project has a private key. This is just to ensure that we don't run into any
-      // problems while decrypting the secret
-      if (!project.privateKey) {
-        const errorMessage = `Project ${project.slug} does not have a private key`
-        this.logger.error(errorMessage)
-        throw new NotFoundException(
-          constructErrorBody('Can not decrypt secret values', errorMessage)
-        )
-      }
-    }
-
-    this.logger.log(
-      `Secret values can be decrypted for project ${project.slug}`
-    )
   }
 }
