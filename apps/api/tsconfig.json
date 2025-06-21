@@ -21,6 +21,6 @@
     "moduleResolution": "NodeNext",
     "paths": {
       "@/*": ["./src/*"]
-    },
+    }
   }
 }

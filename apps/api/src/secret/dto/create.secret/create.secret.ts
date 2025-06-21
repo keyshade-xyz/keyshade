@@ -8,6 +8,7 @@ import {
   ValidateNested
 } from 'class-validator'
 import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { Entry } from '@/common/dto/entry.dto'
 
 export class CreateSecret {
   @NonEmptyTrimmedString()
@@ -26,12 +27,4 @@ export class CreateSecret {
   @ValidateNested({ each: true })
   @Type(() => Entry)
   entries?: Entry[]
-}
-
-class Entry {
-  @NonEmptyTrimmedString()
-  environmentSlug: string
-
-  @NonEmptyTrimmedString()
-  value: string
 }

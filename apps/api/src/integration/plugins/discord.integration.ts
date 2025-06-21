@@ -1,6 +1,5 @@
 import {
   EventType,
-  Integration,
   IntegrationRunStatus,
   IntegrationType
 } from '@prisma/client'
@@ -13,8 +12,8 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { makeTimedRequest } from '@/common/util'
 
 export class DiscordIntegration extends BaseIntegration {
-  constructor(integrationType: IntegrationType, prisma: PrismaService) {
-    super(integrationType, prisma)
+  constructor(prisma: PrismaService) {
+    super(IntegrationType.DISCORD, prisma)
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -55,21 +54,24 @@ export class DiscordIntegration extends BaseIntegration {
     return new Set(['webhookUrl'])
   }
 
-  async emitEvent(
-    data: IntegrationEventData,
-    metadata: DiscordIntegrationMetadata,
-    integrationId: Integration['id']
-  ): Promise<void> {
+  public init(): Promise<void> {
+    // TODO: Send a text message to the discord channel confirming keyshade was added
+    return Promise.resolve()
+  }
+
+  async emitEvent(data: IntegrationEventData): Promise<void> {
     this.logger.log(`Emitting event to Discord: ${data.title}`)
 
+    const integration = this.getIntegration<DiscordIntegrationMetadata>()
+
     const { id: integrationRunId } = await this.registerIntegrationRun({
-      eventId: data.eventId,
-      integrationId,
+      eventId: data.event.id,
+      integrationId: integration.id,
       title: 'Posting message to Discord'
     })
 
     const { response, duration } = await makeTimedRequest(() =>
-      fetch(metadata.webhookUrl, {
+      fetch(integration.metadata.webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -25,9 +25,9 @@ export class CreateIntegration {
   @ArrayMinSize(1)
   notifyOn?: EventType[]
 
-  @IsString()
+  @IsArray()
   @IsOptional()
-  environmentSlug?: Environment['slug']
+  environmentSlugs?: Environment['slug'][]
 
   @IsString()
   @IsOptional()
