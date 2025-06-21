@@ -167,3 +167,16 @@
 - Updated secret-related commands to decrypt secrets on local device ONLY
 - `keyshade run` command decrypts all secrets locally
 - Updated private key config to map to project slugs only, removing workspace slug
+
+# 3.1.0
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
+- Updated secret-related commands to decrypt secrets on local device ONLY
+- `keyshade run` command decrypts all secrets locally
+- Updated private key config to map to project slugs only, removing workspace slug
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
