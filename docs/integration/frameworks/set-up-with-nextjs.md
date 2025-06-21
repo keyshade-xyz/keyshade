@@ -21,7 +21,7 @@ Install globally via npm:
 ```bash
 npm i -g @keyshade/cli
 ```
-
+**Note:** Node.js v24 may cause issues with the Keyshade CLI. Use v20 (LTS) for best compatibility.
 *Refer: [Installing the CLI](/docs/getting-started/installing-the-cli)*
 
 ## 3. Set Up Your Keyshade Profile
