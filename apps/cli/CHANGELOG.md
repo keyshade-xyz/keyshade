@@ -153,3 +153,9 @@
 ### Minor Changes
 
 - Added `keyshade project export` command to export secrets and variables to a file
+
+## 3.1.0-stage.2
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
