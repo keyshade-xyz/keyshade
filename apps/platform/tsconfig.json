@@ -22,7 +22,9 @@
     "tailwind.config.ts",
     ".next/types/**/*.ts",
     "sentry.*.ts",
-    "next.config.ts"
+    "next.config.ts",
+    "__tests__/**/*.ts",
+    "jest.config.ts",
   ],
   "exclude": ["node_modules"]
 }

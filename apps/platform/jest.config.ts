@@ -1,10 +1,20 @@
-/* eslint-disable */
-export default {
-  displayName: 'workspace',
+// apps/platform/jest.config.ts
+
+import type { Config } from 'jest'
+
+const config: Config = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   transform: {
-    '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
-    '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/next/babel'] }]
+    '^.+\\.(ts|tsx)$': 'ts-jest'
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/apps/workspace'
+  testMatch: ['**/__tests__/**/*.(spec|test).(ts|tsx)'],
+  rootDir: '.',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@public/(.*)$': '<rootDir>/public/$1'
+  }
 }
+
+export default config

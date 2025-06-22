@@ -2,11 +2,13 @@
   "name": "@keyshade/platform",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "env-cmd -f ../../.env --silent next dev -p 3025",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix --config .eslintrc.cjs"
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix --config .eslintrc.cjs",
+    "test": "jest --config jest.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
@@ -31,6 +33,8 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@sentry/nextjs": "^9.13.0",
     "@tanstack/react-table": "^8.16.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/react-hooks": "^8.0.1",
     "avvvatars-react": "^0.4.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -62,15 +66,20 @@
     "@next/eslint-plugin-next": "15.2.3",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/forms": "^0.5.7",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/dayjs-precise-range": "^1.0.5",
     "@types/eccrypto": "^1.1.6",
+    "@types/jest": "^29.5.2",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.1",
     "autoprefixer": "^10.4.16",
     "eslint-config-custom": "workspace:*",
+    "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
+    "ts-jest": "^29.1.0",
     "tsconfig": "workspace:*"
   }
 }
