@@ -6,6 +6,8 @@ import {
 } from '@/environment'
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
+import { GetAllSecretsOfEnvironmentResponseSchema } from '@/secret'
+import { GetAllVariablesOfEnvironmentResponseSchema } from '@/variable'
 
 export const BaseProjectSchema = z.object({
   id: z.string(),
@@ -133,12 +135,13 @@ export const GetAllProjectsResponseSchema = PageResponseSchema(
 
 export const ExportProjectConfigurationRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
-  environmentSlugs: z.array(EnvironmentSchema.shape.slug).min(1),
-  format: z.string(),
-  separateFiles: z.boolean().optional()
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug).min(1)
 })
 
 export const ExportProjectConfigurationsResponseSchema = z.record(
   EnvironmentSchema.shape.slug,
-  z.string()
+  z.object({
+    secrets: GetAllSecretsOfEnvironmentResponseSchema,
+    variables: GetAllVariablesOfEnvironmentResponseSchema
+  })
 )
