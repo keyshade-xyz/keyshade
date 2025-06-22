@@ -1,12 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
   ParseArrayPipe,
-  ParseEnumPipe,
   Post,
   Put,
   Query
@@ -19,7 +17,6 @@ import { UpdateProject } from './dto/update.project/update.project'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { AuthenticatedUser } from '@/user/user.types'
-import { ExportFormat } from './project.types'
 
 @Controller('project')
 export class ProjectController {
@@ -136,25 +133,12 @@ export class ProjectController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('projectSlug') projectSlug: Project['slug'],
     @Query('environmentSlugs', new ParseArrayPipe({ items: String }))
-    environmentSlugs: Environment['slug'][],
-    @Query(
-      'format',
-      new ParseEnumPipe(ExportFormat, {
-        exceptionFactory: () =>
-          new BadRequestException(
-            `Invalid format provided. Supported formats: ${Object.values(ExportFormat).join(', ')}`
-          )
-      })
-    )
-    format: ExportFormat,
-    @Query('separateFiles') separateFiles: boolean
+    environmentSlugs: Environment['slug'][]
   ) {
     return await this.service.exportProjectConfigurations(
       user,
       projectSlug,
-      environmentSlugs,
-      format,
-      separateFiles
+      environmentSlugs
     )
   }
 }

@@ -22,11 +22,7 @@ import { UpdateProject } from './dto/update.project/update.project'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { v4 } from 'uuid'
-import {
-  ExportFormat,
-  ProjectWithCounts,
-  ProjectWithSecrets
-} from './project.types'
+import { ProjectWithCounts, ProjectWithSecrets } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
 import {
@@ -47,7 +43,6 @@ import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
-import { ExportService } from './export/export.service'
 
 @Injectable()
 export class ProjectService {
@@ -59,8 +54,7 @@ export class ProjectService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly secretService: SecretService,
-    private readonly variableService: VariableService,
-    private readonly exportService: ExportService
+    private readonly variableService: VariableService
   ) {}
 
   /**
@@ -1708,9 +1702,7 @@ export class ProjectService {
   async exportProjectConfigurations(
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
-    environmentSlugs: Environment['slug'][],
-    format: ExportFormat,
-    separateFiles = false
+    environmentSlugs: Environment['slug'][]
   ) {
     this.logger.log(
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
@@ -1718,14 +1710,13 @@ export class ProjectService {
 
     const environmentExports = await Promise.all(
       environmentSlugs.map(async (environmentSlug) => {
-        const rawSecrets =
+        const secrets = (
           await this.secretService.getAllSecretsOfProjectAndEnvironment(
             user,
             projectSlug,
             environmentSlug
           )
-
-        const secrets = rawSecrets.map((secret) => ({
+        ).map((secret) => ({
           name: secret.name,
           value: secret.value
         }))
@@ -1741,47 +1732,20 @@ export class ProjectService {
           value: variable.value
         }))
 
-        if (secrets.length === 0 && variables.length === 0) return []
-
-        return separateFiles
-          ? [
-              [
-                `${environmentSlug}.variables`,
-                this.exportService.format({ variables }, format)
-              ],
-              [
-                `${environmentSlug}.secrets`,
-                this.exportService.format({ secrets }, format)
-              ]
-            ]
-          : [
-              [
-                environmentSlug,
-                this.exportService.format({ secrets, variables }, format)
-              ]
-            ]
+        return [environmentSlug, { secrets, variables }]
       })
     )
 
-    const fileData = Object.fromEntries(environmentExports.flat())
+    const result = Object.fromEntries(environmentExports)
 
-    if (Object.keys(fileData).length === 0) {
-      this.logger.warn(
-        `No configuration files generated — metadata=${JSON.stringify({
-          project: projectSlug,
-          environments: environmentSlugs,
-          user: user.id,
-          action: 'exportProjectConfigurations'
-        })}`
-      )
-
-      const errorMessage = `Could not build any configuration files for project "${projectSlug}" in environments [${environmentSlugs.join(', ')}]`
+    if (Object.keys(result).length === 0) {
+      const errorMessage = `Could not build any configuration exports for project "${projectSlug}" in environments [${environmentSlugs.join(', ')}]`
 
       throw new UnprocessableEntityException(
-        constructErrorBody('No configuration present', errorMessage)
+        constructErrorBody('No configurations present', errorMessage)
       )
     }
 
-    return fileData
+    return result
   }
 }
