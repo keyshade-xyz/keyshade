@@ -1,6 +1,6 @@
 export enum ExportFormat {
-  JSON = 'json',
-  KUBERNETES = 'kubernetes'
+  JSON = 'JSON',
+  KUBERNETES = 'KUBERNETES'
 }
 
 export interface ExportFormatInfo {
@@ -9,12 +9,6 @@ export interface ExportFormatInfo {
   extension: string
 }
 
-/**
- * Definitions for every ExportFormat:
- *  • label:     human-readable
- *  • mimeType:  HTTP Content-Type
- *  • extension: file suffix
- */
 export const EXPORT_FORMAT_INFO: Record<ExportFormat, ExportFormatInfo> = {
   [ExportFormat.JSON]: {
     label: 'JSON',
@@ -26,4 +20,14 @@ export const EXPORT_FORMAT_INFO: Record<ExportFormat, ExportFormatInfo> = {
     mimeType: 'application/x-yaml',
     extension: 'yaml'
   }
+}
+
+interface Configuration {
+  name: string
+  value: string
+}
+
+export interface ExportData {
+  secrets?: Configuration[]
+  variables?: Configuration[]
 }
