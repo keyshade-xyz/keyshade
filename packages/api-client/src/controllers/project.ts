@@ -156,9 +156,7 @@ export default class ProjectController {
 
     const url =
       `/api/project/${request.projectSlug}/export-configurations?` +
-      environmentSlugs +
-      `&format=${request.format}` +
-      (request.separateFiles ? `&separateFiles=${request.separateFiles}` : '')
+      environmentSlugs
 
     const response = await this.apiClient.get(url, headers)
 
