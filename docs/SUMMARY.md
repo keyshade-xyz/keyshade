@@ -24,13 +24,10 @@
 
 ## Integrations 
 
-### Frameworks
-
-- [Set up with Next.js](integration/frameworks/set-up-with-nextjs.md)
-
-### Languages
-
-<!-- TO BE ADDED -->
+- Frameworks
+  - [Set up with Next.js](integration/frameworks/set-up-with-nextjs.md)
+- Languages
+  <!-- TO BE ADDED -->
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
