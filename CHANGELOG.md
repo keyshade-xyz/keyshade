@@ -1,3 +1,42 @@
+## [2.25.0](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0) (2025-06-23)
+
+### 🚀 Features
+
+* Add Secret & Variable export, include JSON format ([#981](https://github.com/keyshade-xyz/keyshade/issues/981)) ([83cacd8](https://github.com/keyshade-xyz/keyshade/commit/83cacd87ace371faf070b94cea580ba66d379eaf))
+* **cli:** Select [secure]-variable while Project Import command ([#1025](https://github.com/keyshade-xyz/keyshade/issues/1025)) ([b642552](https://github.com/keyshade-xyz/keyshade/commit/b6425527aa617cdceffdfe078f51edb6ee3267de))
+* Decrypt [secure]s on client side only; Private keys are encrypted at rest aswell ([#1026](https://github.com/keyshade-xyz/keyshade/issues/1026)) ([b788b2f](https://github.com/keyshade-xyz/keyshade/commit/b788b2f0c81122cba1a815a13726d4e8be7ae31a))
+* **platform:** add event trigger groups integration ([#992](https://github.com/keyshade-xyz/keyshade/issues/992)) ([6cbd003](https://github.com/keyshade-xyz/keyshade/commit/6cbd0036ab1188febbaa7f9318a7827b61d93c62))
+* Update onboarding and add referral ([d9710e6](https://github.com/keyshade-xyz/keyshade/commit/d9710e6eaaf00dde83f2d76baf7c2b4e93ca9f6e))
+
+### 🐛 Bug Fixes
+
+* **api:** Secret & Variable unique names ([#1011](https://github.com/keyshade-xyz/keyshade/issues/1011)) ([013d0ee](https://github.com/keyshade-xyz/keyshade/commit/013d0ee0bef21e12a985cb05d33955b7a8ca12bc))
+* **platform:** mobile detection logic and conditional rendering for overlay ([#1001](https://github.com/keyshade-xyz/keyshade/issues/1001)) ([156b3da](https://github.com/keyshade-xyz/keyshade/commit/156b3da4f6c27a3feb7716bebb864206fd2d16c6))
+
+### 📚 Documentation
+
+* small edits and spelling checks ([#1022](https://github.com/keyshade-xyz/keyshade/issues/1022)) ([0747622](https://github.com/keyshade-xyz/keyshade/commit/0747622f4624401075d173212170d16cd976ad46))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** Bump version to 3.1.0 ([68580a3](https://github.com/keyshade-xyz/keyshade/commit/68580a39503c09603a6ba8efbecceacbdef3ea98))
+* **cli:** Update changelog and version ([a3a9675](https://github.com/keyshade-xyz/keyshade/commit/a3a9675d41f867fe048c15b0b52361fe1ddd9ec2))
+* Fixed version ([b2a8446](https://github.com/keyshade-xyz/keyshade/commit/b2a8446ace71b8d0de997af103affc6695c5c98c))
+* **release:** 2.25.0 [skip ci] ([4089581](https://github.com/keyshade-xyz/keyshade/commit/40895814d51b9c4f0297d13e127b46342f62369b))
+* **release:** 2.25.0 [skip ci] ([77cd5cd](https://github.com/keyshade-xyz/keyshade/commit/77cd5cda7979c7e94f3157ac8793893f3fdbfb70))
+* **release:** 2.25.0-stage.1 [skip ci] ([26cf373](https://github.com/keyshade-xyz/keyshade/commit/26cf373e21ce5d4d0739b76514a765060700bd55))
+* **release:** 2.25.0-stage.2 [skip ci] ([d8cc49f](https://github.com/keyshade-xyz/keyshade/commit/d8cc49fe9ae2e6d6b3c1582cff1f72a7a5ba5726))
+* **release:** 2.25.0-stage.3 [skip ci] ([669345f](https://github.com/keyshade-xyz/keyshade/commit/669345f3a1a568b14da251ace5f479d5aad3abb2))
+* **release:** 2.25.0-stage.4 [skip ci] ([9f51c1d](https://github.com/keyshade-xyz/keyshade/commit/9f51c1dd28fa6db1cdc76536ac3c63526450cf23))
+* **release:** 2.25.0-stage.5 [skip ci] ([f97a9ae](https://github.com/keyshade-xyz/keyshade/commit/f97a9aefb255ed0749015f12a1156fc5d5284061))
+* **release:** 2.25.0-stage.6 [skip ci] ([d199bd9](https://github.com/keyshade-xyz/keyshade/commit/d199bd9e2ee03041ac4992e14d690883a34320dc))
+* **Snyk:** Upgrade conventional-changelog-writer from 8.0.1 to 8.1.0 ([#997](https://github.com/keyshade-xyz/keyshade/issues/997)) ([e7f1702](https://github.com/keyshade-xyz/keyshade/commit/e7f1702437a0dc6dfe8c4e9541c04228855344f8))
+
+### 🔨 Code Refactoring
+
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([2f445f4](https://github.com/keyshade-xyz/keyshade/commit/2f445f4b971422091bb755476310c254a2c48ed1))
+* **auth:** improve OTP and email validation in form ([#995](https://github.com/keyshade-xyz/keyshade/issues/995)) ([#1008](https://github.com/keyshade-xyz/keyshade/issues/1008)) ([15a7819](https://github.com/keyshade-xyz/keyshade/commit/15a7819538c7a8fe65b4517accdbcf1a33de58e8))
+
 ## [2.25.0](https://github.com/keyshade-xyz/keyshade/compare/v2.24.0...v2.25.0) (2025-06-21)
 
 ### 🚀 Features
