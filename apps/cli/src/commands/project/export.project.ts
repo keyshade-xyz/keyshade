@@ -92,16 +92,15 @@ export default class ExportProject extends BaseCommand {
     Logger.info(`Project ${projectSlug} configuration exported successfully!`)
 
     const fileArrays = await Promise.all(
-      Object.entries(data).map(
-        async ([env, { secrets = [], variables = [] }]) =>
-          await buildEnvFiles(
-            env,
-            secrets,
-            variables,
-            privateKey,
-            format,
-            separateFiles
-          )
+      Object.entries(data).map(([env, { secrets = [], variables = [] }]) =>
+        buildEnvFiles(
+          env,
+          secrets,
+          variables,
+          privateKey,
+          format,
+          separateFiles
+        )
       )
     )
 
@@ -174,7 +173,7 @@ export default class ExportProject extends BaseCommand {
   }
 
   private writeConfigFiles(
-    configurations: Array<{ filename: string; content: string }>,
+    configurations: { filename: string; content: string }[],
     output: string
   ) {
     const multiple = configurations.length > 1
