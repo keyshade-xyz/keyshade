@@ -8,4 +8,8 @@ export default class IntegrationCommand extends BaseCommand {
   getDescription(): string {
     return 'Manage your integrations in keyshade.'
   }
+
+  canMakeHttpRequests(): boolean {
+    return true
+  }
 }
