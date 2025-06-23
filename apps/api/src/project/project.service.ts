@@ -1708,33 +1708,39 @@ export class ProjectService {
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
     )
 
-    const environmentExports = await Promise.all(
-      environmentSlugs.map(async (environmentSlug) => {
-        const secrets = (
-          await this.secretService.getAllSecretsOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-        ).map((secret) => ({
-          name: secret.name,
-          value: secret.value
-        }))
+    const environmentExports = (
+      await Promise.all(
+        environmentSlugs.map(async (environmentSlug) => {
+          const secrets = (
+            await this.secretService.getAllSecretsOfProjectAndEnvironment(
+              user,
+              projectSlug,
+              environmentSlug
+            )
+          ).map((secret) => ({
+            name: secret.name,
+            value: secret.value
+          }))
 
-        const variables = (
-          await this.variableService.getAllVariablesOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-        ).map((variable) => ({
-          name: variable.name,
-          value: variable.value
-        }))
+          const variables = (
+            await this.variableService.getAllVariablesOfProjectAndEnvironment(
+              user,
+              projectSlug,
+              environmentSlug
+            )
+          ).map((variable) => ({
+            name: variable.name,
+            value: variable.value
+          }))
 
-        return [environmentSlug, { secrets, variables }]
-      })
-    )
+          if (secrets.length === 0 && variables.length === 0) {
+            return null
+          }
+
+          return [environmentSlug, { secrets, variables }] as const
+        })
+      )
+    ).filter((tuple) => tuple !== null)
 
     const result = Object.fromEntries(environmentExports)
 
