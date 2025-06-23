@@ -9,22 +9,14 @@ import { useIsAppleDevice } from '@/hooks/use-is-apple-device'
  * @param expectedResult - The expected result of the hook
  */
 function testUserAgent(userAgent: string, expectedResult: boolean) {
-  const originalUserAgent = window.navigator.userAgent
-  Object.defineProperties(window.navigator, {
-    userAgent: {
-      value: userAgent,
-      writable: true
-    }
-  })
+  const spy = jest.spyOn(window.navigator, 'userAgent', 'get')
+  spy.mockReturnValue(userAgent)
 
   const { result } = renderHook(() => useIsAppleDevice())
 
   expect(result.current.isApple).toBe(expectedResult)
 
-  // Restore the original User Agent
-  Object.defineProperty(window.navigator, 'userAgent', {
-    value: originalUserAgent
-  })
+  spy.mockRestore()
 }
 
 /**
