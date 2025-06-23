@@ -1,3 +1,16 @@
+## [2.26.0](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0...v2.26.0) (2025-06-23)
+
+### 🚀 Features
+
+* **cli:** Update base integration command ([791489e](https://github.com/keyshade-xyz/keyshade/commit/791489ee8a3904cdc4a18b7d2c4be0b07c3db053))
+
+### 🔧 Miscellaneous Chores
+
+* Bumped version ([ff027aa](https://github.com/keyshade-xyz/keyshade/commit/ff027aab112a48cfa4752c6b534bb13815ace18a))
+* **cli:** Add base integration command ([91f121e](https://github.com/keyshade-xyz/keyshade/commit/91f121e0bd46e648c5b2c29504e5d1cb97356920))
+* **cli:** Bumped version to 3.2.0-stage.1 ([a04a515](https://github.com/keyshade-xyz/keyshade/commit/a04a5158dcc48d00eda83e3619b1f3eccf8538de))
+* trigger release version bump ([37ace45](https://github.com/keyshade-xyz/keyshade/commit/37ace45ecefe70c7fbdf47e337bfee09c90c7a19))
+
 ## [2.25.1](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0...v2.25.1) (2025-06-23)
 
 ### Patches
