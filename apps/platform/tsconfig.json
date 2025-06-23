@@ -24,6 +24,7 @@
     "sentry.*.ts",
     "next.config.ts",
     "__tests__/**/*.ts",
+    "__tests__/**/*.tsx",
     "jest.config.ts",
   ],
   "exclude": ["node_modules"]

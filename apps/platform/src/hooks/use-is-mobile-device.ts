@@ -14,8 +14,8 @@ export function useIsMobileDevice(): boolean {
     // Check if device supports touch
     const isTouchDevice =
       'ontouchstart' in window || navigator.maxTouchPoints > 0
-    const smallerDimension = Math.min(window.innerWidth, window.innerHeight)
-    const isSmallDevice = smallerDimension <= MOBILE_BREAKPOINT
+    const minViewportDimension = Math.min(window.innerWidth, window.innerHeight)
+    const isSmallDevice = minViewportDimension <= MOBILE_BREAKPOINT
 
     const isMobileDevice = isTouchDevice && isSmallDevice
 

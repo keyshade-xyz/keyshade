@@ -1,5 +1,10 @@
-import { renderHook } from '@testing-library/react-hooks'
+import { render, screen } from '@testing-library/react'
 import { useIsAppleDevice } from '@/hooks/use-is-apple-device'
+
+function IsAppleDeviceTestComponent() {
+  const { isApple } = useIsAppleDevice()
+  return <div data-testid="result">{isApple ? 'true' : 'false'}</div>
+}
 
 /**
  * A helper function to test the useIsAppleDevice hook with a specific
@@ -12,9 +17,11 @@ function testUserAgent(userAgent: string, expectedResult: boolean) {
   const spy = jest.spyOn(window.navigator, 'userAgent', 'get')
   spy.mockReturnValue(userAgent)
 
-  const { result } = renderHook(() => useIsAppleDevice())
+  render(<IsAppleDeviceTestComponent />)
 
-  expect(result.current.isApple).toBe(expectedResult)
+  const textContent = screen.getByTestId('result').textContent
+
+   expect(textContent).toBe(expectedResult.toString())
 
   spy.mockRestore()
 }

@@ -7,7 +7,11 @@ const config: Config = {
   testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx',
+      }
+    }]
   },
   testMatch: ['**/__tests__/**/*.(spec|test).(ts|tsx)'],
   rootDir: '.',
