@@ -180,3 +180,7 @@
 ### Patches
 
 - Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
+
+# 3.2.0-stage.1
+
+- Added `keyshade integration` base command

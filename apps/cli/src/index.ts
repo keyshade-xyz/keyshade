@@ -12,6 +12,7 @@ import SecretCommand from './commands/secret.command'
 import VariableCommand from './commands/variable.command'
 import { version } from '../package.json'
 import ConfigCommand from './commands/config.command'
+import IntegrationCommand from './commands/integration.command'
 
 const program = new Command()
 
@@ -30,7 +31,8 @@ const COMMANDS: BaseCommand[] = [
   new SecretCommand(),
   new ScanCommand(),
   new VariableCommand(),
-  new ConfigCommand()
+  new ConfigCommand(),
+  new IntegrationCommand()
 ]
 
 COMMANDS.forEach((command) => {

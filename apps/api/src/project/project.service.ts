@@ -28,7 +28,13 @@ import {
 } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
-import { createKeyPair, sDecrypt, sEncrypt } from '@/common/cryptography'
+import {
+  createKeyPair,
+  decrypt,
+  encrypt,
+  sDecrypt,
+  sEncrypt
+} from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import {
   constructErrorBody,
@@ -41,7 +47,6 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
-import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
 export class ProjectService {
