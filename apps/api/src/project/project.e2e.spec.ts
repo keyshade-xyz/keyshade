@@ -2120,8 +2120,6 @@ describe('Project Controller Tests', () => {
           headers: { 'x-e2e-user-email': user1.email }
         })
 
-        console.log(response.json())
-
         expect(response.statusCode).toBe(422)
 
         const raw = response.json()
