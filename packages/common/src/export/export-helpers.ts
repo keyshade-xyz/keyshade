@@ -26,7 +26,6 @@ export const buildEnvFiles = async (
   formatKey: string,
   separateFiles: boolean
 ): Promise<Array<{ filename: string; content: string }>> => {
-  console.log(separateFiles)
   const decrypted = await decryptAllSecrets(secrets, privateKey)
   const format = ExportFormat[formatKey]
   if (!format) throw new Error(`Unsupported format "${formatKey}"`)
