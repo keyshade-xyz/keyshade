@@ -717,9 +717,6 @@ importers:
 
   packages/common:
     dependencies:
-      '@types/js-yaml':
-        specifier: ^4.0.9
-        version: 4.0.9
       eccrypto:
         specifier: ^1.1.6
         version: 1.1.6
@@ -730,6 +727,9 @@ importers:
       '@types/eccrypto':
         specifier: ^1.1.6
         version: 1.1.6
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
 
   packages/eslint-config-custom:
     devDependencies:
