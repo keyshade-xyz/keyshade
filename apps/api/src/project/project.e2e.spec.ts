@@ -1967,7 +1967,7 @@ describe('Project Controller Tests', () => {
   })
 
   describe('Export Configurations Tests', () => {
-    let env: Environment, envNoPrivateKey: Environment
+    let env: Environment, env2: Environment
 
     beforeEach(async () => {
       env = (await environmentService.createEnvironment(
@@ -1976,57 +1976,42 @@ describe('Project Controller Tests', () => {
         project1.slug
       )) as Environment
 
-      await secretService.createSecret(
+      env2 = (await environmentService.createEnvironment(
         user1,
-        {
-          name: 'API_KEY',
-          entries: [{ value: 'secret_val', environmentSlug: env.slug }]
-        },
-        project1.slug
-      )
-
-      await variableService.createVariable(
-        user1,
-        {
-          name: 'TIMEOUT',
-          entries: [{ value: '3000', environmentSlug: env.slug }]
-        },
-        project1.slug
-      )
-
-      envNoPrivateKey = (await environmentService.createEnvironment(
-        user2,
         { name: 'EnvProj2' },
-        project2.slug
+        project1.slug
       )) as Environment
 
       await secretService.createSecret(
-        user2,
+        user1,
         {
           name: 'API_KEY',
           entries: [
-            { value: 'secret_val', environmentSlug: envNoPrivateKey.slug }
+            { value: 'secret_val', environmentSlug: env.slug },
+            { value: 'secret_val2', environmentSlug: env2.slug }
           ]
         },
-        project2.slug
+        project1.slug
       )
 
       await variableService.createVariable(
-        user2,
+        user1,
         {
           name: 'TIMEOUT',
-          entries: [{ value: '3000', environmentSlug: envNoPrivateKey.slug }]
+          entries: [
+            { value: '3000', environmentSlug: env.slug },
+            { value: '3002', environmentSlug: env2.slug }
+          ]
         },
-        project2.slug
+        project1.slug
       )
     })
 
     describe('Success cases', () => {
-      it('should export project configurations as base64-JSON', async () => {
+      it('should export project configurations for a single environment', async () => {
         const url =
           `/project/${project1.slug}/export-configurations` +
-          `?environmentSlugs=${env.slug}` +
-          `&format=json`
+          `?environmentSlugs=${env.slug}`
 
         const response = await app.inject({
           method: 'GET',
@@ -2037,21 +2022,23 @@ describe('Project Controller Tests', () => {
         expect(response.statusCode).toBe(200)
 
         const body = response.json()
+
         expect(body).toHaveProperty(env.slug)
 
-        const raw = Buffer.from(body[env.slug], 'base64').toString('utf-8')
-        const parsed = JSON.parse(raw)
-        expect(parsed).toEqual({
-          API_KEY: expect.not.stringMatching('secret_val'),
-          TIMEOUT: '3000'
-        })
+        const { secrets, variables } = body[env.slug]
+
+        expect(secrets).toHaveLength(1)
+        expect(secrets[0].name).toBe('API_KEY')
+        expect(secrets[0].value).toBeDefined()
+        expect(secrets[0].value).not.toBe('secret_val')
+
+        expect(variables).toEqual([{ name: 'TIMEOUT', value: '3000' }])
       })
 
-      it('should 200 if privateKey is missing but the project stores the private key', async () => {
+      it('should export project configurations for multiple environments', async () => {
         const url =
           `/project/${project1.slug}/export-configurations` +
-          `?environmentSlugs=${env.slug}` +
-          `&format=json`
+          `?environmentSlugs=${env.slug},${env2.slug}`
 
         const response = await app.inject({
           method: 'GET',
@@ -2060,43 +2047,30 @@ describe('Project Controller Tests', () => {
         })
 
         expect(response.statusCode).toBe(200)
-      })
 
-      it('should export secrets and variables as separate files when requested', async () => {
-        const url =
-          `/project/${project1.slug}/export-configurations` +
-          `?environmentSlugs=${env.slug}` +
-          `&format=json` +
-          `&separateFiles=true`
-
-        const response = await app.inject({
-          method: 'GET',
-          url,
-          headers: { 'x-e2e-user-email': user1.email }
-        })
-
-        expect(response.statusCode).toBe(200)
         const body = response.json()
 
-        expect(body).toHaveProperty([`${env.slug}.secrets`])
-        expect(body).toHaveProperty([`${env.slug}.variables`])
+        expect(body).toHaveProperty(env.slug)
+        expect(body).toHaveProperty(env2.slug)
 
-        const rawSecrets = Buffer.from(
-          body[`${env.slug}.secrets`],
-          'base64'
-        ).toString()
-        const parsedSecrets = JSON.parse(rawSecrets)
+        const { secrets: secretsEnv, variables: variablesEnv } = body[env.slug]
 
-        const rawVars = Buffer.from(
-          body[`${env.slug}.variables`],
-          'base64'
-        ).toString()
-        const parsedVars = JSON.parse(rawVars)
+        expect(secretsEnv).toHaveLength(1)
+        expect(secretsEnv[0].name).toBe('API_KEY')
+        expect(secretsEnv[0].value).toBeDefined()
+        expect(secretsEnv[0].value).not.toBe('secret_val')
 
-        expect(parsedSecrets).toHaveProperty('API_KEY')
-        expect(parsedSecrets.API_KEY).not.toBe('secret_val')
+        expect(variablesEnv).toEqual([{ name: 'TIMEOUT', value: '3000' }])
 
-        expect(parsedVars).toEqual({ TIMEOUT: '3000' })
+        const { secrets: secretsEnv2, variables: variablesEnv2 } =
+          body[env2.slug]
+
+        expect(secretsEnv2).toHaveLength(1)
+        expect(secretsEnv2[0].name).toBe('API_KEY')
+        expect(secretsEnv2[0].value).toBeDefined()
+        expect(secretsEnv2[0].value).not.toBe('secret_val2')
+
+        expect(variablesEnv2).toEqual([{ name: 'TIMEOUT', value: '3002' }])
       })
     })
 
@@ -2104,9 +2078,7 @@ describe('Project Controller Tests', () => {
       it('should 401 if user is not a workspace member', async () => {
         const url =
           `/project/${project1.slug}/export-configurations` +
-          `?environmentSlugs=${env.slug}` +
-          `&format=json` +
-          `&privateKey=${project1.privateKey}`
+          `?environmentSlugs=${env.slug}`
 
         const response = await app.inject({
           method: 'GET',
@@ -2120,9 +2092,7 @@ describe('Project Controller Tests', () => {
       it('should 404 if project does not exist', async () => {
         const url =
           `/project/not-a-real-slug/export-configurations` +
-          `?environmentSlugs=${env.slug}` +
-          `&format=json` +
-          `&privateKey=${project1.privateKey}`
+          `?environmentSlugs=${env.slug}`
 
         const response = await app.inject({
           method: 'GET',
@@ -2142,8 +2112,7 @@ describe('Project Controller Tests', () => {
 
         const url =
           `/project/${project1.slug}/export-configurations` +
-          `?environmentSlugs=${emptyEnv.slug}` +
-          `&format=json`
+          `?environmentSlugs=${emptyEnv.slug}`
 
         const response = await app.inject({
           method: 'GET',
@@ -2151,14 +2120,16 @@ describe('Project Controller Tests', () => {
           headers: { 'x-e2e-user-email': user1.email }
         })
 
+        console.log(response.json())
+
         expect(response.statusCode).toBe(422)
 
         const raw = response.json()
         const err = JSON.parse(raw.message)
 
-        expect(err.header).toBe('No configuration present')
+        expect(err.header).toBe('No configurations present')
         expect(err.body).toBe(
-          `Could not build any configuration files for project "${project1.slug}" in environments [${emptyEnv.slug}]`
+          `Could not build any configuration exports for project "${project1.slug}" in environments [${emptyEnv.slug}]`
         )
       })
     })
