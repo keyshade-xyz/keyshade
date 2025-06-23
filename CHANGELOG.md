@@ -1,3 +1,9 @@
+## [2.26.1](https://github.com/keyshade-xyz/keyshade/compare/v2.26.0...v2.26.1) (2025-06-23)
+
+### 🐛 Bug Fixes
+
+* **api:** Docker build fix ([06c3149](https://github.com/keyshade-xyz/keyshade/commit/06c31490651a1dca8e665b7d7028a90c5b0149d9))
+
 ## [2.26.0](https://github.com/keyshade-xyz/keyshade/compare/v2.25.0...v2.26.0) (2025-06-23)
 
 ### 🚀 Features
