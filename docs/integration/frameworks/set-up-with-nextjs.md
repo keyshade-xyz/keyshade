@@ -1,8 +1,10 @@
 ---
-description: A step-by-step guide to integrate Keyshade into your Next.js app for managing secrets and environment variables — a drop-in replacement for .env files.
+description: How to set up Keyshade in Next.js to manage secrets without .env files
 ---
 
-# How to Set Up Keyshade into a Next.js Project
+# Set Up Keyshade with Nextjs
+
+A step-by-step guide to integrate Keyshade into your Next.js app for managing secrets and environment variables — a drop-in replacement for .env files.
 
 ## Create a Next.js Project
 
@@ -43,11 +45,11 @@ keyshade workspace list
 
 *Refer: [Creating a project](/docs/getting-started/adding-your-first-secret-and-variable)*
 
-> 💡 **Secrets vs Variables:**
+>💡 **Secrets vs Variables:**
 >
-> * **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
+>**Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
 >
-> * **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
+>**Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
 
 Here’s your sentence rewritten for clarity and consistency with the rest of the guide:
 
@@ -98,6 +100,6 @@ const secretKey = process.env.MY_SECRET_KEY;
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 ```
 
-## You're Done! 🎊
+## You're Done!
 
 Your app is now configured with secure runtime secrets and variables powered by Keyshade.
