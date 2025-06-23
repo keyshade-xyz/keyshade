@@ -2,8 +2,6 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { Input } from '../../../ui/input'
-import { Button } from '../../../ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +10,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../ui/dialog'
-import DecryptSecret from '../decryptSecret'
+import { Button } from '../../../ui/button'
+import { Input } from '../../../ui/input'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
@@ -102,7 +101,6 @@ export default function AddSecretDialog() {
 
   return (
     <div className="flex items-center justify-center gap-6">
-      <DecryptSecret />
       <Dialog onOpenChange={handleClose} open={isCreateSecretOpen}>
         <DialogTrigger asChild>
           <Button

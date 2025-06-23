@@ -1,6 +1,6 @@
 'use client'
-import { KeyshadeBigSVG } from '@public/svg/auth'
 import React from 'react'
+import { KeyshadeBigSVG } from '@public/svg/auth'
 
 function BillingPage(): React.JSX.Element {
   return (

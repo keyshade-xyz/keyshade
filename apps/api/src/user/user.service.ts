@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
 import { UpdateUserDto } from './dto/update.user/update.user'
@@ -14,13 +16,14 @@ import { EnvSchema } from '@/common/env/env.schema'
 import {
   constructErrorBody,
   generateOtp,
+  generateReferralCode,
   limitMaxItemsPerPage
 } from '@/common/util'
 import { createUser } from '@/common/user'
 import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
-import { UpdateSelfRequest } from '@keyshade/schema'
 import SlugGenerator from '@/common/slug-generator.service'
+import { OnboardingAnswersDto } from './dto/onboarding-answers/onboarding-answers'
 
 @Injectable()
 export class UserService {
@@ -46,10 +49,9 @@ export class UserService {
   async updateSelf(user: UserWithWorkspace, dto: UpdateUserDto) {
     this.log.log(`User ${user.id} attempted to update their own profile`)
 
-    const data: UpdateSelfRequest = {
+    const data = {
       name: dto?.name,
-      profilePictureUrl: dto?.profilePictureUrl,
-      isOnboardingFinished: dto.isOnboardingFinished
+      profilePictureUrl: dto?.profilePictureUrl
     }
 
     if (dto?.email) {
@@ -124,6 +126,93 @@ export class UserService {
     await this.cache.setUser(updatedUserData)
 
     return updatedUserData
+  }
+
+  async finishOnboarding(user: UserWithWorkspace, dto: OnboardingAnswersDto) {
+    this.log.log(`User ${user.id} attempted to finish onboarding`)
+    const op = []
+    if (user.isOnboardingFinished) {
+      this.log.error(`User ${user.id} has already finished onboarding`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'Onboarding already finished',
+          'You have already finished your onboarding'
+        )
+      )
+    }
+
+    // Check if user has been referred
+    if (dto.referralCode) {
+      this.log.log(
+        `User ${user.id} has been referred using code ${dto.referralCode}`
+      )
+      // Check if the code exists
+      const referralCodeUser = await this.prisma.user.findUnique({
+        where: { referralCode: dto.referralCode }
+      })
+
+      if (!referralCodeUser) {
+        this.log.error(
+          `User ${user.id} provided invalid referral code ${dto.referralCode}`
+        )
+        throw new NotFoundException(
+          constructErrorBody(
+            'Referral code does not exist',
+            'The referral code you provided does not exist'
+          )
+        )
+      }
+
+      this.log.log(
+        `User ${user.id} has been referred using code ${dto.referralCode} by user ${referralCodeUser.id}`
+      )
+      // Update user referral
+      op.push(
+        this.prisma.user.update({
+          where: {
+            id: user.id
+          },
+          data: {
+            referredBy: {
+              connect: {
+                id: referralCodeUser.id
+              }
+            }
+          }
+        })
+      )
+    }
+
+    // Set the onboarding answers
+    op.push(
+      this.prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          isOnboardingFinished: true,
+          name: dto.name,
+          profilePictureUrl: dto.profilePictureUrl,
+          onboardingAnswers: {
+            create: {
+              heardFrom: dto.heardFrom,
+              role: dto.role,
+              teamSize: dto.teamSize,
+              productStage: dto.productStage,
+              useCase: dto.useCase,
+              industry: dto.industry
+            }
+          }
+        }
+      })
+    )
+
+    const updatedUser = (await this.prisma.$transaction(op))[0]
+    await this.cache.setUser(updatedUser)
+
+    this.log.log(`Finished onboarding for user ${user.id}`)
+
+    return updatedUser
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
@@ -424,6 +513,7 @@ export class UserService {
         data: {
           email: 'johndoe@example.com',
           name: 'John Doe',
+          referralCode: await generateReferralCode(this.prisma),
           isActive: true,
           isOnboardingFinished: true
         }
@@ -464,6 +554,7 @@ export class UserService {
           name: 'Admin',
           email: process.env.ADMIN_EMAIL,
           isAdmin: true,
+          referralCode: await generateReferralCode(this.prisma),
           isActive: true,
           isOnboardingFinished: true
         }
