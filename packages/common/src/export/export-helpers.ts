@@ -5,18 +5,22 @@ import { formatExport } from './export-service'
 const decryptAllSecrets = async (
   secrets: Array<{ name: string; value: string }>,
   privateKey: string
-): Promise<Array<{ name: string; value: string }>> =>
-  secrets.length === 0
-    ? []
-    : await Promise.all(
-        secrets.map(
-          async ({ name, value: encrypted }) =>
-            await decrypt(privateKey, encrypted).then((value) => ({
-              name,
-              value
-            }))
-        )
-      )
+): Promise<Array<{ name: string; value: string }>> => {
+  if (secrets.length === 0) return []
+
+  try {
+    return await Promise.all(
+      secrets.map(async ({ name, value: encrypted }) => ({
+        name,
+        value: await decrypt(privateKey, encrypted)
+      }))
+    )
+  } catch (error) {
+    throw new Error(
+      `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+}
 
 export const buildEnvFiles = async (
   envSlug: string,
