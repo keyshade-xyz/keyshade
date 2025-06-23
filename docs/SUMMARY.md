@@ -22,6 +22,7 @@
 - [Run](cli/run.md)
 - [Scan](cli/scan.md)
 
+
 ## 🥰 CONTRIBUTING TO KEYSHADE
 
 - [Summary](contributing-to-keyshade/summary.md)
@@ -41,6 +42,11 @@
   - [Running the CLI](contributing-to-keyshade/running-things-locally/running-the-cli.md)
   - [API Testing](contributing-to-keyshade/running-things-locally/api-testing.md)
   - [Docker Support](contributing-to-keyshade/running-things-locally/docker-support.md)
+
+## Integrations
+- [Introduction](integrations/introduction.md)
+- [Discord](integrations/discord-integration.md)
+- [Slack](integrations/slack-integration.md)
 
 ## Internals
 
