@@ -22,9 +22,8 @@
 - [Run](cli/run.md)
 - [Scan](cli/scan.md)
 
-## Integrations
 
-### Frameworks
+## Frameworks
 
 - [Set up with Next.js](integration/frameworks/set-up-with-nextjs.md)
 
