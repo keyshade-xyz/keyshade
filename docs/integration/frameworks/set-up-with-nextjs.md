@@ -4,7 +4,7 @@ description: A step-by-step guide to integrate Keyshade into your Next.js app fo
 
 # How to Set Up Keyshade into a Next.js Project
 
-## 1. Create a Next.js Project
+## Create a Next.js Project
 
 Create a new Next.js app and make sure you select TypeScript:
 
@@ -14,7 +14,7 @@ npx create-next-app <your-app-name>
 
 You more details, refer to the [Next.js documentation](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## 2. Install the Keyshade CLI
+## Install the Keyshade CLI
 
 Install globally via npm:
 
@@ -24,7 +24,7 @@ npm i -g @keyshade/cli
 **Note:** Node.js v24 may cause issues with the Keyshade CLI. Use v20 (LTS) for best compatibility.
 *Refer: [Installing the CLI](/docs/getting-started/installing-the-cli)*
 
-## 3. Set Up Your Keyshade Profile
+## Set Up Your Keyshade Profile
 
 If you're using Keyshade **for the first time**, refer: [Setting up your profile](/docs/getting-started/setting-up-your-profile)
 
@@ -39,13 +39,14 @@ Verify your profile is active by running:
 keyshade workspace list
 ```
 
-## 4. Create a Project in the Dashboard and Add Secrets and Variables
+## Create a Project in the Dashboard and Add Secrets and Variables
 
 *Refer: [Creating a project](/docs/getting-started/adding-your-first-secret-and-variable)*
 
 > 💡 **Secrets vs Variables:**
 >
 > * **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
+>
 > * **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
 
 Here’s your sentence rewritten for clarity and consistency with the rest of the guide:
@@ -54,7 +55,7 @@ Here’s your sentence rewritten for clarity and consistency with the rest of th
 
 No need to create an `.env` file. Keyshade handles that for you at runtime!
 
-## 5. Configure Your Project
+## Configure Your Project
 
 Navigate to your Next.js project directory:
 
@@ -70,16 +71,12 @@ keyshade init
 Or skip prompts by running:
 
 ```bash
-keyshade init \
-  --workspace-slug <your-workspace-slug> \
-  --project-slug <your-project-slug> \
-  --environment-slug <your-environment-slug> \
-  --private-key <your-private-key>
+keyshade init --workspace-slug <my-workspace> --project-slug <my-project> --environment-slug <my-environment> --private-key <my-private-key>
 ```
 
 This will create a `keyshade.json` file in the **root of your project**.
 
-## 6. Run the App
+## Run the App
 
 Start your dev server with Keyshade:
 ```bash
@@ -87,7 +84,7 @@ keyshade run "npm run dev"
 ```
 Keyshade will inject your environment values securely.
 
-## 7. Accessing Your Secrets and Variables
+## Accessing Your Secrets and Variables
 
 Once you've run your app, your environment values are available as usual through `process.env`.
 
@@ -103,4 +100,4 @@ const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 ## You're Done! 🎊
 
-_Your app is now configured with secure runtime secrets and variables powered by Keyshade._
+Your app is now configured with secure runtime secrets and variables powered by Keyshade.
