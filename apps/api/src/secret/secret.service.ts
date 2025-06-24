@@ -188,6 +188,30 @@ export class SecretService {
 
     const secret = await getSecretWithValues(secretData)
 
+    if (dto.entries && dto.entries.length > 0) {
+      try {
+        for (const { environmentSlug, value } of dto.entries) {
+          this.logger.log(
+            `Publishing secret creation to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+          )
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: environmentSlugToIdMap.get(environmentSlug),
+              name: dto.name,
+              value,
+              isPlaintext: project.storePrivateKey
+            } as ChangeNotificationEvent)
+          )
+          this.logger.log(
+            `Published secret update to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+          )
+        }
+      } catch (error) {
+        this.logger.error(`Error publishing secret update to Redis: ${error}`)
+      }
+    }
+
     await createEvent(
       {
         triggeredBy: user,
