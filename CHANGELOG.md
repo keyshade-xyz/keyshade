@@ -1,3 +1,9 @@
+## [2.27.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.1...v2.27.0-stage.2) (2025-06-24)
+
+### 🚀 Features
+
+* **platform:** Updated description metadata ([5b82120](https://github.com/keyshade-xyz/keyshade/commit/5b82120d09fbe3ff8252b5058ab25a1afd9e4e2a))
+
 ## [2.27.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.26.1...v2.27.0-stage.1) (2025-06-24)
 
 ### 🚀 Features
