@@ -1,3 +1,9 @@
+## [2.27.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.26.1...v2.27.0-stage.1) (2025-06-24)
+
+### 🚀 Features
+
+* trigger release version bump ([4c2e34d](https://github.com/keyshade-xyz/keyshade/commit/4c2e34d689bda0d05bd97fb72d5970d9854168a5))
+
 ## [2.26.1](https://github.com/keyshade-xyz/keyshade/compare/v2.26.0...v2.26.1) (2025-06-23)
 
 ### 🐛 Bug Fixes
