@@ -5,10 +5,9 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { UserModule } from '@/user/user.module'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
-import { ExportService } from './export/export.service'
 
 @Module({
-  providers: [ProjectService, ExportService],
+  providers: [ProjectService],
   controllers: [ProjectController],
   imports: [UserModule, EnvironmentModule, SecretModule, VariableModule]
 })

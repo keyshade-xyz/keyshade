@@ -13,9 +13,11 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "dependencies": {
-    "eccrypto": "^1.1.6"
+    "eccrypto": "^1.1.6",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "@types/eccrypto": "^1.1.6"
+    "@types/eccrypto": "^1.1.6",
+    "@types/js-yaml": "^4.0.9"
   }
 }

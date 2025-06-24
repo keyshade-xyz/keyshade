@@ -2,6 +2,7 @@ import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import type { ExportProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
+import { buildEnvFiles, EXPORT_FORMAT_INFO } from '@keyshade/common'
 import {
   environmentsOfProjectAtom,
   exportConfigOpenAtom,
@@ -27,22 +28,12 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Input } from '@/components/ui/input'
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { Switch } from '@/components/ui/switch'
 
-const formatMap = new Map<
-  string,
-  { label: string; mimeType?: string; extension?: string }
->([
-  ['json', { label: 'JSON', mimeType: 'application/json', extension: 'json' }]
-])
+const formatMap = new Map(Object.entries(EXPORT_FORMAT_INFO))
 
-const downloadBase64File = (
-  base64Contents: string,
-  filename: string,
-  mimeType: string
-) => {
-  const decodedString = atob(base64Contents)
-
-  const blob = new Blob([decodedString], { type: mimeType })
+const download = (file: string, filename: string, mimeType: string) => {
+  const blob = new Blob([file], { type: mimeType })
 
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -62,11 +53,16 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
 
   const [formData, setFormData] = useState<
-    Omit<ExportProjectRequest, 'projectSlug'>
+    Omit<ExportProjectRequest, 'projectSlug'> & {
+      format: string
+      privateKey: string
+      separateFiles: boolean
+    }
   >({
     environmentSlugs: [],
     format: '',
-    privateKey: ''
+    privateKey: '',
+    separateFiles: false
   })
 
   const { projectPrivateKey: browserProjectPrivateKey } = useProjectPrivateKey()
@@ -94,12 +90,13 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
       setFormData({
         environmentSlugs: [],
         format: '',
-        privateKey: ''
+        privateKey: '',
+        separateFiles: false
       })
     }
   }, [isExportConfigurationDialogOpen, selectedProject])
 
-  const handleSheetChange = (open: boolean) => {
+  const handleDialogChange = (open: boolean) => {
     setIsExportConfigurationDialogOpen(open)
   }
 
@@ -115,13 +112,18 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     })
   }
 
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      separateFiles: checked
+    }))
+  }
+
   const exportConfigs = useHttp(() => {
     return ControllerInstance.getInstance().projectController.exportProjectConfigurations(
       {
         projectSlug: selectedProject!.slug,
-        environmentSlugs: formData.environmentSlugs,
-        format: formData.format,
-        privateKey: formData.privateKey || browserProjectPrivateKey || undefined
+        environmentSlugs: formData.environmentSlugs
       }
     )
   })
@@ -141,11 +143,9 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
       return
     }
 
-    if (
-      !selectedProject.storePrivateKey &&
-      !formData.privateKey &&
-      !browserProjectPrivateKey
-    ) {
+    const privateKey = formData.privateKey || browserProjectPrivateKey
+
+    if (!privateKey) {
       toast.error('Private Key is required for this project')
       return
     }
@@ -160,13 +160,33 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
         const mimeType =
           formatMap.get(formData.format)?.mimeType ?? 'text/plain'
         const extension = formatMap.get(formData.format)?.extension ?? 'txt'
+        try {
+          const fileArrays = await Promise.all(
+            Object.entries(data).map(
+              ([env, { secrets = [], variables = [] }]) =>
+                buildEnvFiles(
+                  env,
+                  secrets,
+                  variables,
+                  privateKey,
+                  formData.format,
+                  formData.separateFiles
+                )
+            )
+          )
 
-        Object.entries(data).forEach(([envSlug, base64Contents]) => {
-          const filename = `${envSlug}.${extension}`
-          downloadBase64File(base64Contents, filename, mimeType)
-        })
+          const allFiles = fileArrays.flat()
 
-        toast.success('Export request successful. Check your downloads.')
+          allFiles.forEach(({ filename, content }) =>
+            download(content, `${filename}.${extension}`, mimeType)
+          )
+
+          toast.success('Export request successful. Check your downloads.')
+        } catch (err) {
+          toast.error(
+            `An error occurred: ${err instanceof Error ? err.message : err}`
+          )
+        }
       }
     } catch (err) {
       toast.error('An error occurred during export', { id: loadingToastId })
@@ -177,9 +197,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     }
   }, [
     selectedProject,
-    formData.environmentSlugs,
-    formData.format,
-    formData.privateKey,
+    formData,
     browserProjectPrivateKey,
     exportConfigs,
     setIsExportConfigurationDialogOpen
@@ -191,7 +209,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
 
   return (
     <Dialog
-      onOpenChange={handleSheetChange}
+      onOpenChange={handleDialogChange}
       open={isExportConfigurationDialogOpen}
     >
       <DialogContent className="rounded-[12px] border bg-[#1E1E1F] ">
@@ -250,7 +268,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
               </div>
             </div>
 
-            {!selectedProject.storePrivateKey && !browserProjectPrivateKey && (
+            {!browserProjectPrivateKey && (
               <div className="flex flex-col items-start gap-4">
                 <Label htmlFor="privateKey">Private Key</Label>
                 <Input
@@ -267,6 +285,21 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
                 />
               </div>
             )}
+
+            <div className="flex items-center justify-between">
+              <Label className="text-left" htmlFor="storePrivateKey">
+                Separate files for secrets and variables?
+              </Label>
+              <div className="flex gap-1 text-sm">
+                <div>No</div>
+                <Switch
+                  checked={formData.separateFiles}
+                  id="separateFiles"
+                  onCheckedChange={handleSwitchChange}
+                />
+                <div>Yes</div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex h-[2.25rem] w-full justify-end">

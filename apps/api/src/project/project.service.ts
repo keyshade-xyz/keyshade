@@ -2,7 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  UnprocessableEntityException
 } from '@nestjs/common'
 import {
   Authority,
@@ -21,11 +22,7 @@ import { UpdateProject } from './dto/update.project/update.project'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { v4 } from 'uuid'
-import {
-  ExportFormat,
-  ProjectWithCounts,
-  ProjectWithSecrets
-} from './project.types'
+import { ProjectWithCounts, ProjectWithSecrets } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
 import {
@@ -46,7 +43,6 @@ import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
-import { ExportService } from './export/export.service'
 
 @Injectable()
 export class ProjectService {
@@ -58,8 +54,7 @@ export class ProjectService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
     private readonly secretService: SecretService,
-    private readonly variableService: VariableService,
-    private readonly exportService: ExportService
+    private readonly variableService: VariableService
   ) {}
 
   /**
@@ -1673,7 +1668,8 @@ export class ProjectService {
    * @param projectSlug The slug of the project to export secrets from
    * @param environmentSlug The slug of the environment to export secrets from
    * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
+   * @param separateFiles When `true`, writes secrets and variables into separate files (`secrets.*` & `variables.*`).
+   * When `false`, merges both into a single file.
    * @returns The secrets exported in the desired format
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
@@ -1682,47 +1678,56 @@ export class ProjectService {
   async exportProjectConfigurations(
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
-    environmentSlugs: Environment['slug'][],
-    format: ExportFormat
+    environmentSlugs: Environment['slug'][]
   ) {
     this.logger.log(
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
     )
 
-    const environmentExports = await Promise.all(
-      environmentSlugs.map(async (environmentSlug) => {
-        const rawSecrets =
-          await this.secretService.getAllSecretsOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
+    const environmentExports = (
+      await Promise.all(
+        environmentSlugs.map(async (environmentSlug) => {
+          const secrets = (
+            await this.secretService.getAllSecretsOfProjectAndEnvironment(
+              user,
+              projectSlug,
+              environmentSlug
+            )
+          ).map((secret) => ({
+            name: secret.name,
+            value: secret.value
+          }))
 
-        const secrets = rawSecrets.map((secret) => ({
-          name: secret.name,
-          value: secret.value
-        }))
+          const variables = (
+            await this.variableService.getAllVariablesOfProjectAndEnvironment(
+              user,
+              projectSlug,
+              environmentSlug
+            )
+          ).map((variable) => ({
+            name: variable.name,
+            value: variable.value
+          }))
 
-        const variables = (
-          await this.variableService.getAllVariablesOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-        ).map((variable) => ({
-          name: variable.name,
-          value: variable.value
-        }))
+          if (secrets.length === 0 && variables.length === 0) {
+            return null
+          }
 
-        return [
-          environmentSlug,
-          this.exportService.format({ secrets, variables }, format)
-        ]
-      })
-    )
+          return [environmentSlug, { secrets, variables }] as const
+        })
+      )
+    ).filter((tuple) => tuple !== null)
 
-    const fileData = Object.fromEntries(environmentExports)
+    const result = Object.fromEntries(environmentExports)
 
-    return fileData
+    if (Object.keys(result).length === 0) {
+      const errorMessage = `Could not build any configuration exports for project "${projectSlug}" in environments [${environmentSlugs.join(', ')}]`
+
+      throw new UnprocessableEntityException(
+        constructErrorBody('No configurations present', errorMessage)
+      )
+    }
+
+    return result
   }
 }

@@ -9,6 +9,7 @@ import { Logger } from '@/util/logger'
 import { z } from 'zod'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
+import { buildEnvFiles, ExportFormat } from '@keyshade/common'
 
 export default class ExportProject extends BaseCommand {
   getName(): string {
@@ -51,6 +52,13 @@ export default class ExportProject extends BaseCommand {
         short: '-p',
         long: '--private-key <string>',
         description: 'Private key to decrypt secrets'
+      },
+      {
+        short: '-s',
+        long: '--separate-files',
+        description:
+          'Write variables and secrets to two separate files instead of one combined file',
+        defaultValue: false
       }
     ]
   }
@@ -62,7 +70,8 @@ export default class ExportProject extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
-    const { output, ...parsedOptions } = this.parseInput(options)
+    const { environmentSlugs, format, output, privateKey, separateFiles } =
+      this.parseInput({ ...options, format: options.format.toUpperCase() })
 
     Logger.info(`Exporting project ${projectSlug} configuration...`)
 
@@ -70,7 +79,7 @@ export default class ExportProject extends BaseCommand {
       await ControllerInstance.getInstance().projectController.exportProjectConfigurations(
         {
           projectSlug,
-          ...parsedOptions
+          environmentSlugs
         },
         this.headers
       )
@@ -81,27 +90,45 @@ export default class ExportProject extends BaseCommand {
     }
 
     Logger.info(`Project ${projectSlug} configuration exported successfully!`)
-    this.writeConfigFiles(data, output)
+
+    const fileArrays = await Promise.all(
+      Object.entries(data).map(([env, { secrets = [], variables = [] }]) =>
+        buildEnvFiles(
+          env,
+          secrets,
+          variables,
+          privateKey,
+          format,
+          separateFiles
+        )
+      )
+    )
+
+    const allFiles = fileArrays.flat()
+
+    this.writeConfigFiles(allFiles, output)
   }
 
   private parseInput(options: CommandActionData['options']): {
     environmentSlugs: string[]
     format: string
     output: string
-    privateKey?: string
+    privateKey: string
+    separateFiles: boolean
   } {
     const {
       environment: environmentSlugs,
       format,
       output,
-      privateKey
+      privateKey,
+      separateFiles
     } = options
 
     const inputSchema = z.object({
       environmentSlugs: z
         .array(z.string().min(1, { message: 'Environment cannot be empty' }))
         .nonempty({ message: 'You must specify at least one environment' }),
-      format: z.string(),
+      format: z.nativeEnum(ExportFormat),
       output: z
         .string()
         .min(1, { message: 'Output filename cannot be empty' })
@@ -115,17 +142,24 @@ export default class ExportProject extends BaseCommand {
           message:
             'Invalid output filename: no slashes, backslashes, or control chars allowed'
         }),
-      privateKey: z.string().optional()
+      privateKey: z.string(),
+      separateFiles: z.boolean()
     })
 
     const parsed = inputSchema.parse({
       environmentSlugs,
       format,
       output,
-      privateKey
+      privateKey,
+      separateFiles
     })
 
-    if (!parsed.environmentSlugs || !parsed.format || !parsed.output) {
+    if (
+      !parsed.environmentSlugs ||
+      !parsed.format ||
+      !parsed.output ||
+      !parsed.privateKey
+    ) {
       throw new Error('Missing required options')
     }
 
@@ -133,29 +167,28 @@ export default class ExportProject extends BaseCommand {
       environmentSlugs: parsed.environmentSlugs,
       format: parsed.format,
       output: parsed.output,
-      privateKey: parsed.privateKey
+      privateKey: parsed.privateKey,
+      separateFiles: parsed.separateFiles
     }
   }
 
   private writeConfigFiles(
-    configurations: Record<string, string>,
+    configurations: { filename: string; content: string }[],
     output: string
   ) {
-    const entries = Object.entries(configurations)
-    const multiple = entries.length > 1
+    const multiple = configurations.length > 1
 
-    entries.forEach(([environmentSlug, rawBase64]) => {
-      const fileName = multiple ? `${environmentSlug}.${output}` : output
+    configurations.forEach(({ filename: basicFileName, content }) => {
+      const fileName = multiple ? `${basicFileName}.${output}` : output
       const filePath = join(process.cwd(), fileName)
 
       try {
-        const content = Buffer.from(rawBase64, 'base64').toString('utf-8')
         writeFileSync(filePath, content, 'utf-8')
-        Logger.info(`Wrote environment ${environmentSlug} to file ${fileName}`)
+        Logger.info(`Wrote configuration ${basicFileName} to file ${fileName}`)
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         Logger.error(
-          `Failed to write environment ${environmentSlug} to file ${fileName}: ${msg}`
+          `Failed to write environment ${basicFileName} to file ${fileName}: ${msg}`
         )
       }
     })
