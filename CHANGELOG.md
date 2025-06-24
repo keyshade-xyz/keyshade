@@ -1,3 +1,9 @@
+## [2.27.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.2...v2.27.0-stage.3) (2025-06-24)
+
+### 🚀 Features
+
+* **api:** Multiple bug fixes and small feature implementations ([b123f54](https://github.com/keyshade-xyz/keyshade/commit/b123f54ca5a0aecf5739c0038fad59095250f03b))
+
 ## [2.27.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.1...v2.27.0-stage.2) (2025-06-24)
 
 ### 🚀 Features
