@@ -128,7 +128,7 @@
     "unit:api": "pnpm build:common && pnpm run --filter=@keyshade/api unit",
     "e2e:api": "pnpm run --filter=@keyshade/api e2e",
     "test:web": "turbo run test --filter=@keyshade/web",
-    "test:platform": "turbo run test --filter=@keyshade/platform",
+    "test:platform": "turbo run @keyshade/platform#test",
     "test:api-client": "pnpm run --filter=@keyshade/api-client test",
     "test:secret-scan": "pnpm run --filter=secret-scan test",
     "db:seed": "pnpm run --filter=@keyshade/api db:seed",

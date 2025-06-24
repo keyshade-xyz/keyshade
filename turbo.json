@@ -19,6 +19,9 @@
       "dependsOn": ["build"],
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },
+    "@keyshade/platform#test": {
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
     "sourcemaps": {
       "dependsOn": ["build"],
       "inputs": ["dist/**"]
