@@ -1,5 +1,4 @@
 'use client'
-import type { Integration } from '@keyshade/schema'
 import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -23,7 +22,6 @@ function IntegrationDetailsPage({
   integrationSlug: string
 }) {
   const router = useRouter()
-  const [integration, setIntegration] = useState<Integration>()
   const [showAllEvents, setShowAllEvents] = useState<boolean>(false)
 
   const [selectedIntegration, setSelectedIntegration] = useAtom(
@@ -41,11 +39,11 @@ function IntegrationDetailsPage({
   )
 
   const handleEditIntegration = useCallback(() => {
-    if (!integration) return
+    if (!selectedIntegration) return
 
-    setSelectedIntegration(integration)
+    setSelectedIntegration(selectedIntegration)
     setIsEditIntegrationOpen(true)
-  }, [setSelectedIntegration, setIsEditIntegrationOpen, integration])
+  }, [setSelectedIntegration, setIsEditIntegrationOpen, selectedIntegration])
 
   useEffect(() => {
     if (!integrationSlug) {
@@ -53,32 +51,43 @@ function IntegrationDetailsPage({
     }
     getIntegrationDetails().then(({ data, success }) => {
       if (success && data) {
-        setIntegration(data)
+        setSelectedIntegration(data)
       } else {
         router.push('/integrations')
       }
     })
-  }, [getIntegrationDetails, integrationSlug, router])
+  }, [getIntegrationDetails, integrationSlug, router, setSelectedIntegration])
 
-  if (!integration) {
+  const refreshIntegrationData = useCallback(() => {
+    getIntegrationDetails().then(({ data, success }) => {
+      if (success && data) {
+        setSelectedIntegration(data)
+      }
+    })
+  }, [getIntegrationDetails, setSelectedIntegration])
+
+  if (!selectedIntegration) {
     return <IntegrationLoader />
   }
 
   const INITIAL_EVENTS_COUNT = 6
   const visibleEvents = showAllEvents
-    ? integration.notifyOn
-    : integration.notifyOn.slice(0, INITIAL_EVENTS_COUNT)
+    ? selectedIntegration.notifyOn
+    : selectedIntegration.notifyOn.slice(0, INITIAL_EVENTS_COUNT)
 
-  const hasMoreEvents = integration.notifyOn.length > INITIAL_EVENTS_COUNT
+  const hasMoreEvents =
+    selectedIntegration.notifyOn.length > INITIAL_EVENTS_COUNT
 
   const getEnvironmentText = () => {
-    const environmentName = integration.environment?.name || 'all environments'
-    const projectName = integration.project?.name || 'all projects'
+    const environmentNames = selectedIntegration.environments?.length
+      ? selectedIntegration.environments.map((env) => env.name).join(', ')
+      : 'all environments'
+    const projectName = selectedIntegration.project?.name || 'all projects'
 
     return (
       <p>
         Watching events of{' '}
-        <span className="font-semibold">{environmentName}</span> from{' '}
+        <span className="font-semibold">{environmentNames}</span> from{' '}
         <span className="font-semibold">{projectName}</span>
       </p>
     )
@@ -94,11 +103,11 @@ function IntegrationDetailsPage({
             <div className="flex items-center gap-2">
               <IntegrationIcon
                 className="h-12 w-12 rounded-full border border-white/20 bg-white/10 p-1"
-                type={integration.type}
+                type={selectedIntegration.type}
               />
 
               <h1 className="mb-2 text-3xl font-bold text-white">
-                {integration.name}
+                {selectedIntegration.name}
               </h1>
             </div>
             <Button
@@ -113,18 +122,23 @@ function IntegrationDetailsPage({
           <div className="flex justify-between">
             <div className="flex items-center gap-3 border-t border-white/10 pt-4">
               <AvatarComponent
-                name={integration.lastUpdatedBy.name}
-                profilePictureUrl={integration.lastUpdatedBy.profilePictureUrl}
+                name={selectedIntegration.lastUpdatedBy.name}
+                profilePictureUrl={
+                  selectedIntegration.lastUpdatedBy.profilePictureUrl
+                }
               />
               <div className="flex flex-col text-sm text-white/70">
                 <div>
                   Last updated by{' '}
                   <span className="font-semibold text-white">
-                    {integration.lastUpdatedBy.name}
+                    {selectedIntegration.lastUpdatedBy.name}
                   </span>
                 </div>
                 <div className="text-white/80">
-                  {formatDate(integration.updatedAt || integration.createdAt)}
+                  {formatDate(
+                    selectedIntegration.updatedAt ||
+                      selectedIntegration.createdAt
+                  )}
                 </div>
               </div>
             </div>
@@ -163,7 +177,7 @@ function IntegrationDetailsPage({
               >
                 {showAllEvents
                   ? `Show less`
-                  : `Show ${integration.notifyOn.length - INITIAL_EVENTS_COUNT} more`}
+                  : `Show ${selectedIntegration.notifyOn.length - INITIAL_EVENTS_COUNT} more`}
               </Button>
             ) : null}
           </div>
@@ -182,11 +196,11 @@ function IntegrationDetailsPage({
       </div>
 
       {/* Integration Trigger List Component */}
-      <IntegrationTriggerList integration={integration} />
+      <IntegrationTriggerList integration={selectedIntegration} />
 
       {/* Update Integration sheet */}
-      {isEditIntegrationsOpen && selectedIntegration ? (
-        <UpdateIntegration />
+      {isEditIntegrationsOpen ? (
+        <UpdateIntegration onUpdateSuccess={refreshIntegrationData} />
       ) : null}
     </div>
   )

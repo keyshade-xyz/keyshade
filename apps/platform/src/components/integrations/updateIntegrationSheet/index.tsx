@@ -2,7 +2,10 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
-import type { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
+import type { EventTypeEnum } from '@keyshade/schema'
+import type { VercelEnvironmentMapping } from '@keyshade/common'
+import { Integrations } from '@keyshade/common'
+import ProjectEnvironmentMapping from '../ProjectEnvironmentMapping'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +23,11 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { editIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
 
-function UpdateIntegration() {
+function UpdateIntegration({
+  onUpdateSuccess
+}: {
+  onUpdateSuccess?: () => void
+}) {
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
@@ -32,12 +39,15 @@ function UpdateIntegration() {
     new Set()
   )
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string | null>(
-    null
-  )
-  const [metadata, setMetadata] = useState<Record<string, string>>({})
+  const [selectedEnvironments, setSelectedEnvironments] = useState<string[]>([])
+  const [envMappings, setEnvMappings] = useState<VercelEnvironmentMapping>({})
+  const [metadata, setMetadata] = useState<Record<string, unknown>>({})
 
-  // Load initial data when selectedIntegration changes
+  const integrationType = selectedIntegration?.type
+  const isMappingRequired = integrationType
+    ? Integrations[integrationType].envMapping
+    : false
+
   useEffect(() => {
     if (selectedIntegration) {
       setName(selectedIntegration.name || '')
@@ -48,13 +58,31 @@ function UpdateIntegration() {
         setSelectedProject(selectedIntegration.project.slug)
       }
 
-      if (selectedIntegration.environment) {
-        setSelectedEnvironment(selectedIntegration.environment.slug)
+      if (
+        selectedIntegration.environments &&
+        selectedIntegration.environments.length > 0
+      ) {
+        setSelectedEnvironments(
+          selectedIntegration.environments.map((env) => env.slug)
+        )
+      }
+
+      if (selectedIntegration.metadata.environments) {
+        setEnvMappings(
+          selectedIntegration.metadata
+            .environments as unknown as VercelEnvironmentMapping
+        )
       }
     }
   }, [selectedIntegration])
 
   const updateIntegration = useHttp(() => {
+    const finalMetadata = isMappingRequired
+      ? {
+          ...metadata,
+          environments: envMappings
+        }
+      : metadata
     return ControllerInstance.getInstance().integrationController.updateIntegration(
       {
         integrationSlug: selectedIntegration!.slug,
@@ -62,9 +90,11 @@ function UpdateIntegration() {
           name.trim() === selectedIntegration!.name ? undefined : name.trim(),
         type: selectedIntegration!.type,
         notifyOn: Array.from(selectedEvents),
-        metadata,
+        metadata: finalMetadata as Record<string, string>,
         ...(selectedProject ? { projectSlug: selectedProject } : {}),
-        ...(selectedEnvironment ? { environmentSlug: selectedEnvironment } : {})
+        ...(selectedEnvironments.length > 0
+          ? { environmentSlugs: selectedEnvironments }
+          : {})
       }
     )
   })
@@ -89,12 +119,19 @@ function UpdateIntegration() {
         if (success && data) {
           toast.success(`Integration updated successfully!`)
           setIsEditIntegrationOpen(false)
+          onUpdateSuccess?.()
         }
       } finally {
         setIsLoading(false)
       }
     },
-    [name, selectedEvents, updateIntegration, setIsEditIntegrationOpen]
+    [
+      name,
+      selectedEvents,
+      updateIntegration,
+      setIsEditIntegrationOpen,
+      onUpdateSuccess
+    ]
   )
 
   const handleCancel = () => {
@@ -102,16 +139,12 @@ function UpdateIntegration() {
   }
 
   if (!selectedIntegration) return null
-
-  const integrationType = selectedIntegration.type as IntegrationTypeEnum
+  if (!integrationType) {
+    return null
+  }
 
   return (
-    <Sheet
-      onOpenChange={() => {
-        setIsEditIntegrationOpen((prev) => !prev)
-      }}
-      open={isEditIntegrationOpen}
-    >
+    <Sheet open={isEditIntegrationOpen}>
       <SheetContent className="min-w-[600px] overflow-y-auto border-white/15 bg-[#222425]">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-2xl text-white">
@@ -141,6 +174,7 @@ function UpdateIntegration() {
           </div>
 
           {/* Event Triggers Input Component */}
+
           <EventTriggersInput
             integrationType={integrationType}
             onChange={setSelectedEvents}
@@ -148,6 +182,7 @@ function UpdateIntegration() {
           />
 
           {/* Setup integration metadata */}
+
           <IntegrationMetadata
             initialMetadata={metadata}
             integrationType={integrationType}
@@ -155,12 +190,23 @@ function UpdateIntegration() {
           />
 
           {/* Specify Project and Environment(optional) */}
-          <ProjectEnvironmentInput
-            initialEnvironment={selectedIntegration.environment}
-            initialProject={selectedIntegration.project}
-            onEnvironmentChange={setSelectedEnvironment}
-            onProjectChange={setSelectedProject}
-          />
+          {isMappingRequired ? (
+            <ProjectEnvironmentMapping
+              initialEnvironments={selectedIntegration.environments}
+              initialProject={selectedIntegration.project}
+              keyMapping={envMappings}
+              onEnvironmentChange={setSelectedEnvironments}
+              onKeyMappingChange={setEnvMappings}
+              onProjectChange={setSelectedProject}
+            />
+          ) : (
+            <ProjectEnvironmentInput
+              initialEnvironments={selectedIntegration.environments}
+              initialProject={selectedIntegration.project}
+              onEnvironmentChange={setSelectedEnvironments}
+              onProjectChange={setSelectedProject}
+            />
+          )}
 
           <SheetFooter className="flex justify-end gap-3 pt-4">
             <Button onClick={handleCancel} type="button" variant="outline">

@@ -10,9 +10,12 @@ import type {
   Project
 } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
+import type { VercelEnvironmentMapping } from '@keyshade/common'
+import { Integrations } from '@keyshade/common'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
+import ProjectEnvironmentMapping from '@/components/integrations/ProjectEnvironmentMapping'
 import IntegrationForm from '@/components/integrations/integrationMetadata'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
@@ -36,32 +39,44 @@ export default function SetupIntegration({
   const [selectedProjectSlug, setSelectedProjectSlug] = useState<
     Project['slug'] | null
   >(null)
-  const [selectedEnvironment, setSelectedEnvironment] = useState<
-    Environment['slug'] | null
-  >(null)
-  const [metadata, setMetadata] = useState<Record<string, string>>({})
+  const [selectedEnvironments, setSelectedEnvironments] = useState<
+    Environment['slug'][]
+  >([])
+  const [metadata, setMetadata] = useState<Record<string, unknown>>({})
+  const [mappings, setMappings] = useState<VercelEnvironmentMapping>({})
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
   const router = useRouter()
+  const isMappingRequired = Integrations[integrationType].envMapping === true
 
-  const createIntegration = useHttp(() =>
-    ControllerInstance.getInstance().integrationController.createIntegration({
-      name,
-      type: integrationType.toUpperCase() as IntegrationTypeEnum,
-      metadata,
-      workspaceSlug: selectedWorkspace!.slug,
-      notifyOn: Array.from(selectedEvents),
-      projectSlug: selectedProjectSlug ?? undefined,
-      environmentSlug: selectedEnvironment ?? undefined
-    })
-  )
+  const createIntegration = useHttp(() => {
+    const finalMetadata = isMappingRequired
+      ? {
+          ...metadata,
+          environments: mappings
+        }
+      : metadata
+
+    return ControllerInstance.getInstance().integrationController.createIntegration(
+      {
+        name,
+        type: integrationType.toUpperCase() as IntegrationTypeEnum,
+        metadata: finalMetadata as Record<string, string>,
+        workspaceSlug: selectedWorkspace!.slug,
+        notifyOn: Array.from(selectedEvents),
+        projectSlug: selectedProjectSlug ?? undefined,
+        environmentSlugs: selectedEnvironments
+      }
+    )
+  })
 
   const resetFormData = () => {
     setName('')
     setSelectedEvents(new Set())
     setSelectedProjectSlug(null)
-    setSelectedEnvironment(null)
+    setSelectedEnvironments([])
     setMetadata({})
+    setMappings({})
   }
 
   const handleSubmit = useCallback(
@@ -133,10 +148,19 @@ export default function SetupIntegration({
         />
 
         {/* Specify Project and Environment(optional) */}
-        <ProjectEnvironmentInput
-          onEnvironmentChange={setSelectedEnvironment}
-          onProjectChange={setSelectedProjectSlug}
-        />
+        {isMappingRequired ? (
+          <ProjectEnvironmentMapping
+            keyMapping={mappings}
+            onEnvironmentChange={setSelectedEnvironments}
+            onKeyMappingChange={setMappings}
+            onProjectChange={setSelectedProjectSlug}
+          />
+        ) : (
+          <ProjectEnvironmentInput
+            onEnvironmentChange={setSelectedEnvironments}
+            onProjectChange={setSelectedProjectSlug}
+          />
+        )}
 
         <Button
           className="self-end"

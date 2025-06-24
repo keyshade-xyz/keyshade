@@ -362,7 +362,7 @@ export class IntegrationService {
         environments:
           environments && environments.length > 0
             ? {
-                connect: environments
+                set: environments.map((environment) => ({ id: environment.id }))
               }
             : undefined,
         projectId: project?.id,

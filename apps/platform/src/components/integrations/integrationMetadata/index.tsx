@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 
 interface IntegrationMetadataProps {
   integrationType: IntegrationTypeEnum
-  initialMetadata?: Record<string, string>
+  initialMetadata?: Record<string, unknown>
   onChange: (metadata: Record<string, string>) => void
 }
 
@@ -22,7 +22,9 @@ function IntegrationMetadata({
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
     return metadataFields.reduce<Record<string, string>>((acc, field) => {
       acc[field.requestFieldName] =
-        initialMetadata[field.requestFieldName] || ''
+        initialMetadata[field.requestFieldName] !== undefined
+          ? String(initialMetadata[field.requestFieldName])
+          : ''
       return acc
     }, {})
   })
@@ -41,8 +43,9 @@ function IntegrationMetadata({
         {integrationType} Configuration
       </h3>
       <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
-        {metadataFields.map(
-          ({ name, requestFieldName, description, placeholder }) => (
+        {metadataFields
+          .filter((field) => !field.isEnvironment)
+          .map(({ name, requestFieldName, description, placeholder }) => (
             <div className="flex flex-col gap-y-1" key={requestFieldName}>
               <label
                 className="font-medium text-white"
@@ -63,8 +66,7 @@ function IntegrationMetadata({
                 value={metadata[requestFieldName]}
               />
             </div>
-          )
-        )}
+          ))}
       </div>
     </div>
   )

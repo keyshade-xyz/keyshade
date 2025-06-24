@@ -78,7 +78,7 @@ describe('Get Environments Tests', () => {
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentSlug: environment.slug
+        environmentSlugs: environment.slug
       },
       {
         'x-e2e-user-email': email
@@ -106,7 +106,7 @@ describe('Get Environments Tests', () => {
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentSlug: environment.slug
+        environmentSlugs: environment.slug
       },
       {
         'x-e2e-user-email': email
@@ -151,7 +151,7 @@ describe('Get Environments Tests', () => {
         metadata: {
           webhookUrl: '{{vault:WEBHOOK_URL}}'
         },
-        environmentSlug: environment.slug
+        environmentSlugs: environment.slug
       },
       {
         'x-e2e-user-email': email
