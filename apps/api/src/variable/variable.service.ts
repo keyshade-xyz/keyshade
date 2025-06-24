@@ -628,7 +628,7 @@ export class VariableService {
           newName: variable.name,
           oldName: variable.name,
           values: {
-            [environment.slug]: variable.versions[rollbackVersion - 1].value
+            [environment.slug]: variableValue
           },
           isPlaintext: true,
           isSecret: false

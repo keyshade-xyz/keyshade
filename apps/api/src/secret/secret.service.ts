@@ -590,14 +590,7 @@ export class SecretService {
       `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
     )
 
-    // Decrypt the value if it can be done
-    const secretValue =
-      project.storePrivateKey && project.privateKey !== null
-        ? await decrypt(
-            project.privateKey,
-            secret.versions[rollbackVersion - 1].value
-          )
-        : secret.versions[rollbackVersion - 1].value
+    const secretValue = secret.versions[rollbackVersion - 1].value
 
     try {
       this.logger.log(
