@@ -43,7 +43,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { VariableService } from '@/variable/variable.service'
-import { encrypt } from '@keyshade/common'
+import { encrypt } from '@/common/cryptography'
 
 @Injectable()
 export class SecretService {
