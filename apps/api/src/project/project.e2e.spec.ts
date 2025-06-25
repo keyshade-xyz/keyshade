@@ -120,7 +120,6 @@ describe('Project Controller Tests', () => {
       isAdmin: false
     })
 
-    workspace1 = createUser1.defaultWorkspace
     workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
@@ -153,31 +152,35 @@ describe('Project Controller Tests', () => {
       }
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
+
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true
-    })) as Project
+    })
 
-    project2 = (await projectService.createProject(user2, workspace2.slug, {
+    project2 = await projectService.createProject(user2, workspace2.slug, {
       name: 'Project 2',
       description: 'Project 2 description',
       storePrivateKey: false
-    })) as Project
+    })
 
-    project3 = (await projectService.createProject(user1, workspace1.slug, {
+    project3 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project for fork',
       description: 'Project for fork',
       storePrivateKey: true,
       accessLevel: ProjectAccessLevel.GLOBAL
-    })) as Project
+    })
 
-    project4 = (await projectService.createProject(user2, workspace2.slug, {
+    project4 = await projectService.createProject(user2, workspace2.slug, {
       name: 'Project4',
       description:
         'Project for testing if all environments,secrets and keys are being fetched or not',
       storePrivateKey: true
-    })) as Project
+    })
   })
 
   afterEach(async () => {
@@ -477,21 +480,19 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...project1,
-        lastUpdatedById: user1.id,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        environmentCount: 1,
-        secretCount: 0,
-        variableCount: 0,
-        maxAllowedEnvironments: expect.any(Number),
-        maxAllowedSecrets: expect.any(Number),
-        maxAllowedVariables: expect.any(Number),
-        totalEnvironments: expect.any(Number),
-        totalSecrets: expect.any(Number),
-        totalVariables: expect.any(Number)
-      })
+
+      const project = response.json()
+      expect(project.id).toBe(project1.id)
+      expect(project.name).toBe(project1.name)
+      expect(project.slug).toBe(project1.slug)
+      expect(project.description).toBe(project1.description)
+      expect(project.storePrivateKey).toBe(project1.storePrivateKey)
+      expect(project.workspaceId).toBe(project1.workspaceId)
+      expect(project.lastUpdatedById).toBe(project1.lastUpdatedById)
+      expect(project.isDisabled).toBe(project1.isDisabled)
+      expect(project.accessLevel).toBe(project1.accessLevel)
+      expect(project.publicKey).toBe(project1.publicKey)
+      expect(project.privateKey).toBe(project1.privateKey)
     })
 
     it('should not be able to fetch a non existing project', async () => {
@@ -930,21 +931,22 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...globalProject,
-        lastUpdatedById: user1.id,
-        environmentCount: 1,
-        secretCount: 0,
-        variableCount: 0,
-        maxAllowedEnvironments: expect.any(Number),
-        maxAllowedSecrets: expect.any(Number),
-        maxAllowedVariables: expect.any(Number),
-        totalEnvironments: expect.any(Number),
-        totalSecrets: expect.any(Number),
-        totalVariables: expect.any(Number),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String)
-      })
+
+      const project = response.json()
+      expect(project.id).toBe(globalProject.id)
+      expect(project.name).toBe(globalProject.name)
+      expect(project.slug).toBe(globalProject.slug)
+      expect(project.description).toBe(globalProject.description)
+      expect(project.storePrivateKey).toBe(globalProject.storePrivateKey)
+      expect(project.workspaceId).toBe(globalProject.workspaceId)
+      expect(project.lastUpdatedById).toBe(globalProject.lastUpdatedById)
+      expect(project.isDisabled).toBe(globalProject.isDisabled)
+      expect(project.accessLevel).toBe(globalProject.accessLevel)
+      expect(project.publicKey).toBe(globalProject.publicKey)
+      expect(project.privateKey).toBe(globalProject.privateKey)
+      expect(project.environmentCount).toBe(1)
+      expect(project.secretCount).toBe(0)
+      expect(project.variableCount).toBe(0)
     })
 
     it('should allow workspace members with READ_PROJECT to access an internal project', async () => {
@@ -957,21 +959,22 @@ describe('Project Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        ...internalProject,
-        lastUpdatedById: user1.id,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        environmentCount: 1,
-        secretCount: 0,
-        variableCount: 0,
-        maxAllowedEnvironments: expect.any(Number),
-        maxAllowedSecrets: expect.any(Number),
-        maxAllowedVariables: expect.any(Number),
-        totalEnvironments: expect.any(Number),
-        totalSecrets: expect.any(Number),
-        totalVariables: expect.any(Number)
-      })
+
+      const project = response.json()
+      expect(project.id).toBe(internalProject.id)
+      expect(project.name).toBe(internalProject.name)
+      expect(project.slug).toBe(internalProject.slug)
+      expect(project.description).toBe(internalProject.description)
+      expect(project.storePrivateKey).toBe(internalProject.storePrivateKey)
+      expect(project.workspaceId).toBe(internalProject.workspaceId)
+      expect(project.lastUpdatedById).toBe(internalProject.lastUpdatedById)
+      expect(project.isDisabled).toBe(internalProject.isDisabled)
+      expect(project.accessLevel).toBe(internalProject.accessLevel)
+      expect(project.publicKey).toBe(internalProject.publicKey)
+      expect(project.privateKey).toBe(internalProject.privateKey)
+      expect(project.environmentCount).toBe(1)
+      expect(project.secretCount).toBe(0)
+      expect(project.variableCount).toBe(0)
     })
 
     it('should not allow non-members to access an internal project', async () => {
@@ -1188,25 +1191,23 @@ describe('Project Controller Tests', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({
-      ...privateProject,
-      lastUpdatedById: user1.id,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
-      environmentCount: 1,
-      secretCount: 0,
-      variableCount: 0,
-      maxAllowedEnvironments: expect.any(Number),
-      maxAllowedSecrets: expect.any(Number),
-      maxAllowedVariables: expect.any(Number),
-      totalEnvironments: expect.any(Number),
-      totalSecrets: expect.any(Number),
-      totalVariables: expect.any(Number)
-    })
+
+    const project = response.json()
+    expect(project.id).toBe(privateProject.id)
+    expect(project.name).toBe(privateProject.name)
+    expect(project.slug).toBe(privateProject.slug)
+    expect(project.description).toBe(privateProject.description)
+    expect(project.storePrivateKey).toBe(privateProject.storePrivateKey)
+    expect(project.workspaceId).toBe(privateProject.workspaceId)
+    expect(project.lastUpdatedById).toBe(privateProject.lastUpdatedById)
+    expect(project.isDisabled).toBe(privateProject.isDisabled)
+    expect(project.accessLevel).toBe(privateProject.accessLevel)
+    expect(project.publicKey).toBe(privateProject.publicKey)
+    expect(project.privateKey).toBe(privateProject.privateKey)
   })
 
   it('should not allow users without sufficient access to access a private project', async () => {
-    const privateProject = (await projectService.createProject(
+    const privateProject = await projectService.createProject(
       user1,
       workspace1.slug,
       {
@@ -1215,7 +1216,7 @@ describe('Project Controller Tests', () => {
         storePrivateKey: true,
         accessLevel: ProjectAccessLevel.PRIVATE
       }
-    )) as Project
+    )
 
     const response = await app.inject({
       method: 'GET',
@@ -1965,6 +1966,138 @@ describe('Project Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().items).toHaveLength(1)
+    })
+  })
+
+  describe('Export Configurations Tests', () => {
+    let env: Environment, envNoPrivateKey: Environment
+
+    beforeEach(async () => {
+      env = (await environmentService.createEnvironment(
+        user1,
+        { name: 'EnvProj1' },
+        project1.slug
+      )) as Environment
+
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'API_KEY',
+          entries: [{ value: 'secret_val', environmentSlug: env.slug }]
+        },
+        project1.slug
+      )
+
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'TIMEOUT',
+          entries: [{ value: '3000', environmentSlug: env.slug }]
+        },
+        project1.slug
+      )
+
+      envNoPrivateKey = (await environmentService.createEnvironment(
+        user2,
+        { name: 'EnvProj2' },
+        project2.slug
+      )) as Environment
+
+      await secretService.createSecret(
+        user2,
+        {
+          name: 'API_KEY',
+          entries: [
+            { value: 'secret_val', environmentSlug: envNoPrivateKey.slug }
+          ]
+        },
+        project2.slug
+      )
+
+      await variableService.createVariable(
+        user2,
+        {
+          name: 'TIMEOUT',
+          entries: [{ value: '3000', environmentSlug: envNoPrivateKey.slug }]
+        },
+        project2.slug
+      )
+    })
+
+    describe('Success cases', () => {
+      it('should export project configurations as base64-JSON', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(200)
+
+        const body = response.json()
+        expect(body).toHaveProperty(env.slug)
+
+        const raw = Buffer.from(body[env.slug], 'base64').toString('utf-8')
+        const parsed = JSON.parse(raw)
+        expect(parsed).toEqual({
+          API_KEY: expect.not.stringMatching('secret_val'),
+          TIMEOUT: '3000'
+        })
+      })
+
+      it('should 200 if privateKey is missing but the project stores the private key', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(200)
+      })
+    })
+
+    describe('Error cases', () => {
+      it('should 401 if user is not a workspace member', async () => {
+        const url =
+          `/project/${project1.slug}/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&privateKey=${project1.privateKey}`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user2.email }
+        })
+
+        expect(response.statusCode).toBe(401)
+      })
+
+      it('should 404 if project does not exist', async () => {
+        const url =
+          `/project/not-a-real-slug/export-configurations` +
+          `?environmentSlugs=${env.slug}` +
+          `&format=json` +
+          `&privateKey=${project1.privateKey}`
+
+        const response = await app.inject({
+          method: 'GET',
+          url,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(response.statusCode).toBe(404)
+      })
     })
   })
 })

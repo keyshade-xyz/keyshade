@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { LockSVG } from '@public/svg/shared'
 import { useAtom, useAtomValue } from 'jotai'
-import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import Avvvatars from 'avvvatars-react'
 import Link from 'next/link'
+import { EnvironmentSVG, SecretSVG, VariableSVG } from '@public/svg/dashboard'
+import { LockSVG } from '@public/svg/shared'
 import OverviewLoader from '@/components/dashboard/overview/overviewLoader'
 import {
   projectEnvironmentCountAtom,

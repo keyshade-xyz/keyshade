@@ -18,7 +18,9 @@ import {
   UnlinkProjectRequest,
   UnlinkProjectResponse,
   UpdateProjectRequest,
-  UpdateProjectResponse
+  UpdateProjectResponse,
+  ExportProjectRequest,
+  ExportProjectResponse
 } from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
@@ -142,5 +144,23 @@ export default class ProjectController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllProjectsResponse>(response)
+  }
+
+  async exportProjectConfigurations(
+    request: ExportProjectRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ExportProjectResponse>> {
+    const environmentSlugs = request.environmentSlugs
+      .map((slug) => `environmentSlugs=${slug}`)
+      .join('&')
+
+    const url =
+      `/api/project/${request.projectSlug}/export-configurations?` +
+      environmentSlugs +
+      `&format=${request.format}`
+
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<ExportProjectResponse>(response)
   }
 }

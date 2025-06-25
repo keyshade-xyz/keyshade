@@ -1,6 +1,10 @@
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@keyshade/schema'
+import {
+  ClientResponse,
+  FinishOnboardingRequest,
+  FinishOnboardingResponse
+} from '@keyshade/schema'
 import {
   GetSelfResponse,
   UpdateSelfRequest,
@@ -31,6 +35,18 @@ export default class UserController {
   ): Promise<ClientResponse<UpdateSelfResponse>> {
     const response = await this.apiClient.put(`/api/user`, request, headers)
     return await parseResponse<UpdateSelfResponse>(response)
+  }
+
+  async finishOnboarding(
+    request: FinishOnboardingRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<FinishOnboardingResponse>> {
+    const response = await this.apiClient.put(
+      `/api/user/onboarding`,
+      request,
+      headers
+    )
+    return await parseResponse<FinishOnboardingResponse>(response)
   }
 
   async deleteSelf(

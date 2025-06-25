@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -44,6 +45,7 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
+import { SecretService } from '@/secret/secret.service'
 
 @Injectable()
 export class VariableService {
@@ -55,6 +57,8 @@ export class VariableService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    @Inject(forwardRef(() => SecretService))
+    private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -96,6 +100,9 @@ export class VariableService {
 
     // Check if a variable with the same name already exists in the project
     await this.variableExists(dto.name, project)
+
+    // Check if a secret with the same name already exists in the project
+    await this.secretService.secretExists(dto.name, project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -172,6 +179,30 @@ export class VariableService {
 
     const variable = getVariableWithValues(variableData)
 
+    if (dto.entries && dto.entries.length > 0) {
+      try {
+        for (const { environmentSlug, value } of dto.entries) {
+          this.logger.log(
+            `Publishing variable creation to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+          )
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: environmentSlugToIdMap.get(environmentSlug),
+              name: dto.name,
+              value,
+              isPlaintext: true
+            } as ChangeNotificationEvent)
+          )
+          this.logger.log(
+            `Published variable update to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+          )
+        }
+      } catch (error) {
+        this.logger.error(`Error publishing variable update to Redis: ${error}`)
+      }
+    }
+
     await createEvent(
       {
         triggeredBy: user,
@@ -223,6 +254,10 @@ export class VariableService {
 
     // Check if the variable already exists in the project
     dto.name && (await this.variableExists(dto.name, variable.project))
+
+    // Check if a secret with the same name already exists in the project
+    dto.name &&
+      (await this.secretService.secretExists(dto.name, variable.project))
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -1065,10 +1100,7 @@ export class VariableService {
    * @returns nothing
    * @throws `ConflictException` if the variable already exists
    */
-  private async variableExists(
-    variableName: Variable['name'],
-    project: Project
-  ) {
+  async variableExists(variableName: Variable['name'], project: Project) {
     this.logger.log(
       `Checking if variable ${variableName} already exists in project ${project.slug}`
     )

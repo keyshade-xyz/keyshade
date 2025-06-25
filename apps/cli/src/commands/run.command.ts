@@ -6,10 +6,7 @@ import type {
   CommandActionData,
   CommandArgument
 } from '@/types/command/command.types'
-import {
-  fetchPrivateKeyConfig,
-  fetchProjectRootConfig
-} from '@/util/configuration'
+import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
@@ -57,8 +54,7 @@ export default class RunCommand extends BaseCommand {
   private async fetchConfigurations(): Promise<RunData> {
     const { environment, project, workspace, quitOnDecryptionFailure } =
       await fetchProjectRootConfig()
-    const privateKeyConfig = await fetchPrivateKeyConfig()
-    const privateKey = privateKeyConfig[`${workspace}_${project}`]
+    const privateKey = await fetchPrivateKey(project)
 
     if (!privateKey) {
       throw new Error(
@@ -222,18 +218,11 @@ export default class RunCommand extends BaseCommand {
     // Decrypt secrets if not already decrypted
     const decryptedSecrets: Array<Omit<Configuration, 'isPlaintext'>> = []
     for (const secret of secretsResponse.data) {
-      if (secret.isPlaintext) {
-        decryptedSecrets.push({
-          name: secret.name,
-          value: secret.value
-        })
-      } else {
-        const decryptedValue = await decrypt(privateKey, secret.value)
-        decryptedSecrets.push({
-          name: secret.name,
-          value: decryptedValue
-        })
-      }
+      const decryptedValue = await decrypt(privateKey, secret.value)
+      decryptedSecrets.push({
+        name: secret.name,
+        value: decryptedValue
+      })
     }
 
     // Merge secrets and variables

@@ -1,6 +1,8 @@
 import { PrismaClient, ProjectAccessLevel, AuthProvider } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import { Logger } from '@nestjs/common'
+import { sEncrypt } from '@/common/cryptography'
+import { generateReferralCode } from '@/common/util'
 
 const prisma = new PrismaClient()
 
@@ -18,6 +20,7 @@ async function main() {
       update: {},
       create: {
         email: userEmail,
+        referralCode: await generateReferralCode(prisma),
         name: faker.person.fullName(),
         isActive: true,
         isOnboardingFinished: true,
@@ -83,7 +86,7 @@ async function main() {
           description: 'Project for storing private keys',
           createdAt: new Date(),
           publicKey: faker.string.alphanumeric(32),
-          privateKey: faker.string.alphanumeric(32),
+          privateKey: sEncrypt(faker.string.alphanumeric(32)),
           storePrivateKey: true,
           isDisabled: false,
           workspaceId: workspace.id,
@@ -103,7 +106,7 @@ async function main() {
           description: 'Project for global configuration',
           createdAt: new Date(),
           publicKey: faker.string.alphanumeric(32),
-          privateKey: faker.string.alphanumeric(32),
+          privateKey: sEncrypt(faker.string.alphanumeric(32)),
           storePrivateKey: false,
           isDisabled: false,
           workspaceId: workspace.id,

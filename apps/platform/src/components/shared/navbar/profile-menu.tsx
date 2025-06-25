@@ -1,9 +1,9 @@
-import { DropdownSVG } from '@public/svg/shared'
 import Link from 'next/link'
 import { posthog } from 'posthog-js'
 import React from 'react'
 import { toast } from 'sonner'
 import { useAtomValue } from 'jotai'
+import { DropdownSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import {
@@ -67,7 +67,7 @@ export default function ProfileMenu() {
             )}
             <DropdownSVG />
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Link href="/settings?tab=profile">
@@ -81,9 +81,6 @@ export default function ProfileMenu() {
             </Link>
             <Link href="/teams">
               <DropdownMenuItem>Team</DropdownMenuItem>
-            </Link>
-            <Link href="/settings?tab=profile">
-              <DropdownMenuItem>User Settings</DropdownMenuItem>
             </Link>
 
             <DropdownMenuSeparator />
