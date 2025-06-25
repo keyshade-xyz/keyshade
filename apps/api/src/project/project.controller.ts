@@ -146,15 +146,13 @@ export class ProjectController {
           )
       })
     )
-    format: ExportFormat,
-    @Query('privateKey') privateKey: Project['privateKey']
+    format: ExportFormat
   ) {
     return await this.service.exportProjectConfigurations(
       user,
       projectSlug,
       environmentSlugs,
-      format,
-      privateKey
+      format
     )
   }
 }

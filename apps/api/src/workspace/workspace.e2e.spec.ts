@@ -140,8 +140,6 @@ describe('Workspace Controller Tests', () => {
       name: 'Sadie',
       isOnboardingFinished: true
     })
-
-    workspace1 = createUser1.defaultWorkspace
     workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
@@ -174,6 +172,10 @@ describe('Workspace Controller Tests', () => {
         updatedAt: expect.any(Date)
       }
     }
+
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -224,7 +226,7 @@ describe('Workspace Controller Tests', () => {
         },
         url: '/workspace',
         payload: {
-          name: 'Workspace 1',
+          name: 'Workspace 11',
           icon: '🤓'
         }
       })
@@ -232,7 +234,7 @@ describe('Workspace Controller Tests', () => {
       expect(response.statusCode).toBe(201)
       const body = response.json()
 
-      expect(body.name).toBe('Workspace 1')
+      expect(body.name).toBe('Workspace 11')
       expect(body.slug).toBeDefined()
       expect(body.icon).toBe('🤓')
       expect(body.ownerId).toBe(user1.id)
@@ -257,11 +259,6 @@ describe('Workspace Controller Tests', () => {
     })
 
     it('should let other user to create workspace with same name', async () => {
-      await workspaceService.createWorkspace(user1, {
-        name: 'Workspace 1',
-        icon: '🤓'
-      })
-
       const response = await app.inject({
         method: 'POST',
         headers: {
@@ -362,6 +359,21 @@ describe('Workspace Controller Tests', () => {
       expect(body.icon).toBe('🔥')
     })
 
+    it('should not allow updating the default workspace name', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace2.slug}`,
+        payload: {
+          name: 'Default'
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should not allow external user to update a workspace', async () => {
       const response = await app.inject({
         method: 'PUT',
@@ -451,7 +463,7 @@ describe('Workspace Controller Tests', () => {
 
       const workspaceJson = response.json().items[0]
 
-      expect(workspaceJson.name).toEqual(workspace1.name)
+      expect(workspaceJson.name).toEqual('My Workspace')
       expect(workspaceJson.maxAllowedMembers).toBeDefined()
       expect(workspaceJson.maxAllowedProjects).toBeDefined()
       expect(workspaceJson.totalProjects).toBe(0)
@@ -818,13 +830,22 @@ describe('Workspace Controller Tests', () => {
     })
 
     it('should not be able to delete the default workspace', async () => {
+      const user1DefaultWorkspace = await prisma.workspace.findUnique({
+        where: {
+          name_ownerId: {
+            name: 'My Workspace',
+            ownerId: user1.id
+          }
+        }
+      })
+
       // Try deleting the default workspace
       const response = await app.inject({
         method: 'DELETE',
         headers: {
           'x-e2e-user-email': user1.email
         },
-        url: `/workspace/${workspace1.slug}`
+        url: `/workspace/${user1DefaultWorkspace.slug}`
       })
 
       expect(response.statusCode).toBe(400)

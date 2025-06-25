@@ -1,6 +1,6 @@
-import { KeyshadeBigSVG } from '@public/svg/auth'
 import { GeistSans } from 'geist/font/sans'
 import React from 'react'
+import { KeyshadeBigSVG } from '@public/svg/auth'
 
 interface AuthHeaderProps {
   reason: string | null

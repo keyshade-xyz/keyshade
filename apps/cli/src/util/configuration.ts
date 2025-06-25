@@ -90,3 +90,8 @@ const ensureDirectoryExists = async (path: string) => {
     await mkdir(parentDirectory, { recursive: true })
   }
 }
+
+export const fetchPrivateKey = async (projectSlug: string): Promise<string> => {
+  const privateKeys = await fetchPrivateKeyConfig()
+  return privateKeys[projectSlug]
+}

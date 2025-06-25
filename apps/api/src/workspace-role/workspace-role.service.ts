@@ -103,7 +103,7 @@ export class WorkspaceRoleService {
           ),
           description: dto.description,
           colorCode: dto.colorCode,
-          authorities: dto.authorities ?? [],
+          authorities: dto.authorities ?? ['READ_WORKSPACE'],
           hasAdminAuthority: false,
           workspace: {
             connect: {

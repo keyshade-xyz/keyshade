@@ -1,5 +1,5 @@
-import { ErrorInfoSVG } from '@public/svg/shared'
 import React from 'react'
+import { ErrorInfoSVG } from '@public/svg/shared'
 
 interface AuthErrorBannerProps {
   reason: string | null

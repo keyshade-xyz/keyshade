@@ -709,6 +709,13 @@ export class AuthorityCheckerService {
         permittedAuthorities.has(auth)
       )
 
+      this.logger.log(`Required authorities for user ${userId}: ${authorities}`)
+      this.logger.log(
+        `Permitted authorities for user ${userId}: ${Array.from(
+          permittedAuthorities
+        )}`
+      )
+
       if (!hasRequiredAuthority) {
         this.logger.log(
           `User ${userId} does not have all the required authorities`
