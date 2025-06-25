@@ -138,10 +138,7 @@ function UpdateIntegration({
     setIsEditIntegrationOpen(false)
   }
 
-  if (!selectedIntegration) return null
-  if (!integrationType) {
-    return null
-  }
+  if (!selectedIntegration || !integrationType) return null
 
   return (
     <Sheet open={isEditIntegrationOpen}>
