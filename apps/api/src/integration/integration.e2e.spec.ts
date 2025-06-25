@@ -305,7 +305,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: '123'
+          environmentSlugs: ['123']
         }
       })
 
@@ -326,7 +326,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: environment2.slug,
+          environmentSlugs: [environment2.slug],
           projectSlug: project1.slug
         }
       })
@@ -348,7 +348,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: '999999',
+          environmentSlugs: ['999999'],
           projectSlug: project1.slug
         }
       })
@@ -510,14 +510,14 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          environmentSlug: environment1.slug
+          environmentSlugs: [environment1.slug]
         }
       })
 
       expect(result.statusCode).toEqual(400)
     })
 
-    it('should not fail to update if the integration has projectSlug present and only environmentSlug is updated', async () => {
+    it('should not fail to update if the integration has projectSlug present and only environmentSlugs is updated', async () => {
       // Create the integration
       const integration = await integrationService.createIntegration(
         user1,
@@ -542,7 +542,7 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          environmentSlug: environment1.slug
+          environmentSlugs: [environment1.slug]
         }
       })
 
@@ -567,7 +567,7 @@ describe('Integration Controller Tests', () => {
         },
         payload: {
           projectSlug: project1.slug,
-          environmentSlug: environment2.slug
+          environmentSlugs: [environment2.slug]
         }
       })
 
@@ -584,7 +584,7 @@ describe('Integration Controller Tests', () => {
         },
         payload: {
           projectSlug: project1.slug,
-          environmentSlug: '999999'
+          environmentSlugs: ['999999']
         }
       })
 
