@@ -1,3 +1,9 @@
+## [2.27.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.4...v2.27.0-stage.5) (2025-06-25)
+
+### 🚀 Features
+
+* **platform:** Vercel integration platform ([#1031](https://github.com/keyshade-xyz/keyshade/issues/1031)) ([167f57e](https://github.com/keyshade-xyz/keyshade/commit/167f57e25d0f3fe4993780b55cdec786f56a1d50))
+
 ## [2.27.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.3...v2.27.0-stage.4) (2025-06-25)
 
 ### 🚀 Features
