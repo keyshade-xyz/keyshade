@@ -1,3 +1,9 @@
+## [2.27.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.5...v2.27.0-stage.6) (2025-06-25)
+
+### 🐛 Bug Fixes
+
+* **api:** Fixed import ([5753b1a](https://github.com/keyshade-xyz/keyshade/commit/5753b1a9c12f4c41a32fe726e0a98b5cd01d0beb))
+
 ## [2.27.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.4...v2.27.0-stage.5) (2025-06-25)
 
 ### 🚀 Features
