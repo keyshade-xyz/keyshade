@@ -19,8 +19,7 @@ import {
 import { decryptMetadata, makeTimedRequest } from '@/common/util'
 import { InternalServerErrorException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
-import { decrypt } from '@keyshade/common'
-import { sDecrypt, sEncrypt } from '@/common/cryptography'
+import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
 
 export class VercelIntegration extends BaseIntegration {
   private vercel: Vercel
