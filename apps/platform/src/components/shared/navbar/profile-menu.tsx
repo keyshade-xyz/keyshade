@@ -1,9 +1,9 @@
-import { DropdownSVG } from '@public/svg/shared'
 import Link from 'next/link'
 import { posthog } from 'posthog-js'
 import React from 'react'
 import { toast } from 'sonner'
 import { useAtomValue } from 'jotai'
+import { DropdownSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import {

@@ -2,8 +2,8 @@ import { useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
-import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
+import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,

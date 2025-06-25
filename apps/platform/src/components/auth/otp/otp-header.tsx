@@ -1,5 +1,5 @@
-import { KeyshadeBigSVG } from '@public/svg/auth'
 import React from 'react'
+import { KeyshadeBigSVG } from '@public/svg/auth'
 import { GeistSansFont } from '@/fonts'
 
 interface OtpHeaderProps {

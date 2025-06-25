@@ -28,7 +28,13 @@ import {
 } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { paginate } from '@/common/paginate'
-import { createKeyPair } from '@/common/cryptography'
+import {
+  createKeyPair,
+  decrypt,
+  encrypt,
+  sDecrypt,
+  sEncrypt
+} from '@/common/cryptography'
 import { createEvent } from '@/common/event'
 import {
   constructErrorBody,
@@ -41,7 +47,6 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
-import { decrypt, encrypt } from '@keyshade/common'
 
 @Injectable()
 export class ProjectService {
@@ -108,7 +113,7 @@ export class ProjectService {
     // PLEASE DON'T STORE YOUR PRIVATE KEYS WITH US!!
     if (dto.storePrivateKey) {
       this.logger.log(`Storing private key for project ${dto.name}`)
-      data.privateKey = privateKey
+      data.privateKey = sEncrypt(privateKey)
     } else {
       this.logger.log(`Not storing private key for project ${dto.name}`)
     }
@@ -346,7 +351,10 @@ export class ProjectService {
         // If the project is being made global, the private key must be stored
         // This is because we want anyone to see the secrets in the project
         dto.storePrivateKey = true
-        dto.privateKey = dto.privateKey || project.privateKey
+        dto.privateKey =
+          dto.privateKey || project.privateKey
+            ? sDecrypt(project.privateKey)
+            : null
 
         // We can't make the project global if a private key isn't supplied,
         // because we need to decrypt the secrets
@@ -371,7 +379,7 @@ export class ProjectService {
         dto.regenerateKeyPair = true
 
         // At this point, we already will have the private key since the project is global
-        dto.privateKey = project.privateKey
+        dto.privateKey = sDecrypt(project.privateKey)
       }
     } else {
       this.logger.log(`Access level not specified while updating project.`)
@@ -410,7 +418,7 @@ export class ProjectService {
         const { txs, newPrivateKey, newPublicKey } =
           await this.updateProjectKeyPair(
             project,
-            dto.privateKey || project.privateKey,
+            dto.privateKey || sDecrypt(project.privateKey),
             project.storePrivateKey || dto.storePrivateKey
           )
 
@@ -572,7 +580,7 @@ export class ProjectService {
         publicKey: publicKey,
         privateKey:
           forkMetadata.storePrivateKey || project.storePrivateKey
-            ? privateKey
+            ? sEncrypt(privateKey)
             : null,
         accessLevel: project.accessLevel,
         isForked: true,
@@ -613,7 +621,7 @@ export class ProjectService {
       user,
       {
         id: project.id,
-        privateKey: project.privateKey
+        privateKey: sDecrypt(project.privateKey)
       },
       {
         id: newProjectId,
@@ -753,7 +761,7 @@ export class ProjectService {
       user,
       {
         id: parentProject.id,
-        privateKey: parentProject.privateKey
+        privateKey: sDecrypt(parentProject.privateKey)
       },
       {
         id: projectId,
@@ -883,7 +891,7 @@ export class ProjectService {
             user,
             entity: { slug: fork.slug },
             authorities: [Authority.READ_PROJECT]
-          })) != null
+          })) !== null
 
         return { fork, allowed }
       })
@@ -932,6 +940,8 @@ export class ProjectService {
       })
 
     delete project.secrets
+    project.privateKey =
+      project.privateKey != null ? sDecrypt(project.privateKey) : null
 
     return {
       ...(await this.countEnvironmentsVariablesAndSecretsInProject(
@@ -1002,26 +1012,7 @@ export class ProjectService {
                 contains: search
               }
             }
-          ],
-          workspace: {
-            members: {
-              some: {
-                userId: user.id,
-                roles: {
-                  some: {
-                    role: {
-                      authorities: {
-                        hasSome: [
-                          Authority.WORKSPACE_ADMIN,
-                          Authority.READ_PROJECT
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          ]
         },
         include: {
           lastUpdatedBy: {
@@ -1038,8 +1029,29 @@ export class ProjectService {
       `Found ${projects.length} projects of workspace ${workspaceSlug}`
     )
 
+    const accessibleProjects = []
+    for (const project of projects) {
+      let hasAuthority = null
+      try {
+        hasAuthority =
+          await this.authorizationService.authorizeUserAccessToProject({
+            user,
+            entity: { slug: project.slug },
+            authorities: [Authority.READ_PROJECT]
+          })
+      } catch (_ignored) {
+        this.logger.log(
+          `User ${user.id} does not have access to project ${project.slug}`
+        )
+      }
+
+      if (hasAuthority) {
+        accessibleProjects.push(project)
+      }
+    }
+
     const items = await Promise.all(
-      projects.map(async (project) => ({
+      accessibleProjects.map(async (project) => ({
         ...(await this.countEnvironmentsVariablesAndSecretsInProject(
           project,
           user
@@ -1048,33 +1060,7 @@ export class ProjectService {
       }))
     )
 
-    //calculate metadata
-    const totalCount = await this.prisma.project.count({
-      where: {
-        workspaceId,
-        OR: [
-          {
-            name: {
-              contains: search
-            }
-          },
-          {
-            description: {
-              contains: search
-            }
-          }
-        ],
-        workspace: {
-          members: {
-            some: {
-              userId: user.id
-            }
-          }
-        }
-      }
-    })
-
-    const metadata = paginate(totalCount, `/project/all/${workspaceSlug}`, {
+    const metadata = paginate(items.length, `/project/all/${workspaceSlug}`, {
       page,
       limit,
       sort,
@@ -1504,7 +1490,7 @@ export class ProjectService {
         },
         data: {
           publicKey: newPublicKey,
-          privateKey: storePrivateKey ? newPrivateKey : null
+          privateKey: storePrivateKey ? sEncrypt(newPrivateKey) : null
         }
       })
     )
@@ -1697,8 +1683,7 @@ export class ProjectService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlugs: Environment['slug'][],
-    format: ExportFormat,
-    privateKey?: Project['privateKey']
+    format: ExportFormat
   ) {
     this.logger.log(
       `User ${user.id} attempted to export secrets in project ${projectSlug}`
@@ -1713,22 +1698,10 @@ export class ProjectService {
             environmentSlug
           )
 
-        const secrets = await Promise.all(
-          rawSecrets.map(async (secret) => {
-            try {
-              return {
-                name: secret.name,
-                value: secret.isPlaintext
-                  ? secret.value
-                  : await decrypt(privateKey, secret.value)
-              }
-            } catch (err) {
-              throw new BadRequestException(
-                constructErrorBody('Failed to decrypt', err.message)
-              )
-            }
-          })
-        )
+        const secrets = rawSecrets.map((secret) => ({
+          name: secret.name,
+          value: secret.value
+        }))
 
         const variables = (
           await this.variableService.getAllVariablesOfProjectAndEnvironment(

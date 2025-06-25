@@ -1,5 +1,10 @@
-import { decrypt, encrypt } from '@keyshade/common'
-import { createKeyPair, generateApiKey, toSHA256 } from './cryptography'
+import {
+  createKeyPair,
+  decrypt,
+  encrypt,
+  generateApiKey,
+  toSHA256
+} from './cryptography'
 
 describe('Cryptography Tests', () => {
   it('should be defined', () => {

@@ -1,7 +1,7 @@
-import { RegenerateSVG } from '@public/svg/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useSetAtom } from 'jotai'
+import { RegenerateSVG } from '@public/svg/shared'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'

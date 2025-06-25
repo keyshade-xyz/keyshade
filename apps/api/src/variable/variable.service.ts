@@ -179,6 +179,30 @@ export class VariableService {
 
     const variable = getVariableWithValues(variableData)
 
+    if (dto.entries && dto.entries.length > 0) {
+      try {
+        for (const { environmentSlug, value } of dto.entries) {
+          this.logger.log(
+            `Publishing variable creation to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+          )
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: environmentSlugToIdMap.get(environmentSlug),
+              name: dto.name,
+              value,
+              isPlaintext: true
+            } as ChangeNotificationEvent)
+          )
+          this.logger.log(
+            `Published variable update to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+          )
+        }
+      } catch (error) {
+        this.logger.error(`Error publishing variable update to Redis: ${error}`)
+      }
+    }
+
     await createEvent(
       {
         triggeredBy: user,
