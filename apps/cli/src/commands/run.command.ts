@@ -35,7 +35,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   getArguments(): CommandArgument[] {
-    return [{ name: '<command>', description: 'Command to run' }]
+    return [{ name: '<command...>', description: 'Command to run' }]
   }
 
   canMakeHttpRequests(): boolean {
@@ -43,12 +43,22 @@ export default class RunCommand extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
+    // Handle case where args comes as a single string with commas
+    let command: string
+    if (args.length === 1 && String(args[0]).includes(',')) {
+      // Split by comma and join with spaces
+      command = String(args[0]).split(',').join(' ')
+    } else {
+      // Normal case: join array with spaces
+      command = args.join(' ')
+    }
+
     const configurations = await this.fetchConfigurations()
     await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations(configurations.privateKey)
-    await this.executeCommand(args[0])
+    await this.executeCommand(command)
   }
 
   private async fetchConfigurations(): Promise<RunData> {

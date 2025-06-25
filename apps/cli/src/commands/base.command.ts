@@ -47,7 +47,11 @@ export default abstract class BaseCommand {
             SentryInstance.getInstance()
           }
 
-          if (this.canMakeHttpRequests()) {
+          const commandOptions = data[argsCount]
+          const args: string[] = data.slice(0, argsCount)
+          const needsApiKey =
+            this.canMakeHttpRequests() && !this.hasSpecialFlags(commandOptions)
+          if (needsApiKey) {
             if (!this.apiKey) {
               throw new Error(
                 'API key is missing. This command requires an API key. Either specify it using --api-key, or send in a profile using --profile, or set a default profile'
@@ -65,8 +69,6 @@ export default abstract class BaseCommand {
             }
           }
 
-          const commandOptions = data[argsCount]
-          const args: string[] = data.slice(0, argsCount)
           await this.action({ args, options: commandOptions })
         } catch (error) {
           const errorInfo = error as string
@@ -245,5 +247,9 @@ export default abstract class BaseCommand {
 
     // Initialize Controller Instance
     ControllerInstance.initialize(this.baseUrl)
+  }
+
+  private hasSpecialFlags(options: Record<string, any>): boolean {
+    return options?.test === true
   }
 }
