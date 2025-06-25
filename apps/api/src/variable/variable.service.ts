@@ -30,12 +30,21 @@ import {
 import { paginate } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { createEvent } from '@/common/event'
-import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
+import {
+  constructErrorBody,
+  limitMaxItemsPerPage,
+  mapEntriesToEventMetadata
+} from '@/common/util'
 import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
 import { VariableWithValues } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import {
+  ConfigurationAddedEventMetadata,
+  ConfigurationDeletedEventMetadata,
+  ConfigurationUpdatedEventMetadata
+} from '@/event/event.types'
 import { SecretService } from '@/secret/secret.service'
 
 @Injectable()
@@ -202,11 +211,12 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          variableId: variable.variable.id,
-          name: variable.variable.name,
-          projectId,
-          projectName: project.name
-        },
+          name: variableData.name,
+          description: variable.variable.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isSecret: false,
+          isPlaintext: true
+        } as ConfigurationAddedEventMetadata,
         workspaceId: project.workspaceId
       },
       this.prisma
@@ -396,11 +406,13 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable updated`,
         metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name
-        },
+          oldName: variable.name,
+          newName: updatedVariable.name,
+          description: updatedVariable.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isPlaintext: true,
+          isSecret: false
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: variable.project.workspaceId
       },
       this.prisma
@@ -474,15 +486,13 @@ export class VariableService {
       {
         triggeredBy: user,
         entity: variable,
-        type: EventType.VARIABLE_UPDATED,
+        type: EventType.VARIABLE_DELETED,
         source: EventSource.VARIABLE,
         title: `Variable updated`,
         metadata: {
-          variableId: variable.id,
           name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name
-        },
+          environments: [environmentSlug]
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: variable.project.workspaceId
       },
       this.prisma
@@ -551,8 +561,12 @@ export class VariableService {
       )
     }
 
-    // Sorting is in ascending order of dates. So the last element is the latest version
-    const maxVersion = variable.versions[variable.versions.length - 1].version
+    let maxVersion = 0
+    for (let i = 0; i < variable.versions.length; i++) {
+      if (variable.versions[i].version > maxVersion) {
+        maxVersion = variable.versions[i].version
+      }
+    }
     this.logger.log(
       `Latest version of variable ${variableSlug} in environment ${environmentSlug} is ${maxVersion}`
     )
@@ -582,6 +596,8 @@ export class VariableService {
       `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
     )
 
+    const variableValue = variable.versions[rollbackVersion - 1].value
+
     try {
       // Notify the new variable version through Redis
       this.logger.log(
@@ -592,7 +608,7 @@ export class VariableService {
         JSON.stringify({
           environmentId,
           name: variable.name,
-          value: variable.versions[rollbackVersion - 1].value,
+          value: variableValue,
           isPlaintext: true
         } as ChangeNotificationEvent)
       )
@@ -611,12 +627,14 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable rolled back`,
         metadata: {
-          variableId: variable.id,
-          name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name,
-          rollbackVersion
-        },
+          newName: variable.name,
+          oldName: variable.name,
+          values: {
+            [environment.slug]: variableValue
+          },
+          isPlaintext: true,
+          isSecret: false
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: variable.project.workspaceId
       },
       this.prisma
@@ -659,6 +677,11 @@ export class VariableService {
         authorities: [Authority.DELETE_VARIABLE]
       })
 
+    const variableVersionEnvironments = new Set<Environment['slug']>()
+    for (const version of variable.versions) {
+      variableVersionEnvironments.add(version.environment.slug)
+    }
+
     // Delete the variable
     this.logger.log(`Deleting variable ${variable.slug}`)
     await this.prisma.variable.delete({
@@ -676,11 +699,9 @@ export class VariableService {
         title: `Variable deleted`,
         entity: variable,
         metadata: {
-          variableId: variable.id,
           name: variable.name,
-          projectId: variable.projectId,
-          projectName: variable.project.name
-        },
+          environments: Array.from(variableVersionEnvironments)
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: variable.project.workspaceId
       },
       this.prisma

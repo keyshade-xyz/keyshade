@@ -562,7 +562,7 @@ export class AuthorityCheckerService {
                 slug: true
               }
             },
-            environment: {
+            environments: {
               select: {
                 id: true,
                 name: true,
@@ -594,7 +594,7 @@ export class AuthorityCheckerService {
                 slug: true
               }
             },
-            environment: {
+            environments: {
               select: {
                 id: true,
                 name: true,

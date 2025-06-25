@@ -28,7 +28,7 @@ export interface IntegrationEventData {
   eventType: EventType
   title?: string
   description?: string
-  eventId?: Event['id']
+  event: Event
 }
 
 export interface IntegrationRunData {
@@ -42,7 +42,7 @@ export interface IntegrationRunData {
  * will be used to authenticate with the integration and perform
  * specific tasks.
  */
-export interface IntegrationMetadata {}
+export interface IntegrationMetadata extends Record<string, unknown> {}
 
 /**
  * Discord Integration Data
@@ -58,6 +58,23 @@ export interface SlackIntegrationMetadata extends IntegrationMetadata {
   channelId: string
 }
 
+export interface VercelIntegrationMetadata extends IntegrationMetadata {
+  // Vercel API Token
+  token: string
+
+  // Vercel project's ID for which the configuration will be managed
+  projectId: string
+
+  // Vercel environments mapping with keyshade environment names
+  environments: Record<
+    Environment['name'],
+    {
+      vercelSystemEnvironment?: 'production' | 'preview' | 'development'
+      vercelCustomEnvironmentId?: string
+    }
+  >
+}
+
 export interface IntegrationWithLastUpdatedBy extends Integration {
   lastUpdatedBy: {
     id: string
@@ -66,15 +83,25 @@ export interface IntegrationWithLastUpdatedBy extends Integration {
   }
 }
 
-export interface IntegrationWithLastUpdatedByAndReferences
-  extends IntegrationWithLastUpdatedBy {
-  workspace: Workspace
-  project: {
+export interface IntegrationWithEnvironments extends Integration {
+  environments: {
     id: string
     name: string
     slug: string
-  } | null
-  environment: {
+  }[]
+}
+
+export type IntegrationWithEnvironmentsAndMetadata<
+  T extends IntegrationMetadata
+> = Omit<IntegrationWithEnvironments, 'metadata'> & {
+  metadata: T
+}
+
+export interface IntegrationWithLastUpdatedByAndReferences
+  extends IntegrationWithLastUpdatedBy,
+    IntegrationWithEnvironments {
+  workspace: Workspace
+  project: {
     id: string
     name: string
     slug: string
