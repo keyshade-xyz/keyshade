@@ -45,6 +45,11 @@ import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { VariableService } from '@/variable/variable.service'
 import { encrypt } from '@/common/cryptography'
+import {
+  ConfigurationAddedEventMetadata,
+  ConfigurationDeletedEventMetadata,
+  ConfigurationUpdatedEventMetadata
+} from '@/event/event.types'
 
 @Injectable()
 export class SecretService {
@@ -602,7 +607,7 @@ export class SecretService {
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: secret.versions[0].value,
+          value: secretValue,
           isPlaintext: project.storePrivateKey
         } as ChangeNotificationEvent)
       )

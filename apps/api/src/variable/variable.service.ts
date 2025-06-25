@@ -596,6 +596,8 @@ export class VariableService {
       `Rolled back variable ${variableSlug} to version ${rollbackVersion}`
     )
 
+    const variableValue = variable.versions[rollbackVersion - 1].value
+
     try {
       // Notify the new variable version through Redis
       this.logger.log(
@@ -606,7 +608,7 @@ export class VariableService {
         JSON.stringify({
           environmentId,
           name: variable.name,
-          value: variable.versions[rollbackVersion - 1].value,
+          value: variableValue,
           isPlaintext: true
         } as ChangeNotificationEvent)
       )
