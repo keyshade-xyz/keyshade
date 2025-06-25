@@ -5,6 +5,7 @@ export interface MetadataField {
   description?: string
   requestFieldName: string
   placeholder?: string
+  isEnvironment?: boolean
 }
 
 export interface IntegrationConfig {
@@ -12,6 +13,7 @@ export interface IntegrationConfig {
   type: IntegrationTypeEnum
   events: GroupItem[]
   metadataFields: MetadataField[]
+  envMapping: boolean
 }
 
 interface GroupItem {
@@ -19,6 +21,13 @@ interface GroupItem {
   description: string
   level: number
   items: EventTypeEnum[]
+}
+
+export interface VercelEnvironmentMapping {
+  [environmentName: string]: {
+    vercelSystemEnvironment?: 'production' | 'preview' | 'development'
+    vercelCustomEnvironmentId?: string
+  }
 }
 
 const eventGroups: GroupItem[] = [
@@ -80,20 +89,14 @@ const eventGroups: GroupItem[] = [
   }
 ]
 
-// const CONFIGURATION_EVENTS: EventTypeEnum[] = [
-//   'VARIABLE_ADDED',
-//   'VARIABLE_DELETED',
-//   'VARIABLE_UPDATED',
-//   'SECRET_ADDED',
-//   'SECRET_DELETED',
-//   'SECRET_UPDATED'
-// ]
+const selectedEventGroups: GroupItem[] = [eventGroups[3], eventGroups[4]]
 
 export const Integrations: Record<string, IntegrationConfig> = {
   DISCORD: {
     name: 'Discord',
     type: 'DISCORD',
     events: eventGroups,
+    envMapping: false,
     metadataFields: [
       {
         name: 'Webhook URL',
@@ -107,6 +110,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     name: 'Slack',
     type: 'SLACK',
     events: eventGroups,
+    envMapping: false,
     metadataFields: [
       {
         name: 'Bot Token',
@@ -128,6 +132,34 @@ export const Integrations: Record<string, IntegrationConfig> = {
           'The channel ID Keyshade will use to make requests to Slack',
         requestFieldName: 'channelId',
         placeholder: 'KS1234567'
+      }
+    ]
+  },
+  VERCEL: {
+    name: 'Vercel',
+    type: 'VERCEL',
+    events: selectedEventGroups,
+    envMapping: true,
+    metadataFields: [
+      {
+        name: 'Token',
+        description: 'The token Keyshade will use to make requests to Vercel',
+        requestFieldName: 'token',
+        placeholder: 'your-vercel-token'
+      },
+      {
+        name: 'Project ID',
+        description: 'The ID of the Vercel project to integrate with',
+        requestFieldName: 'projectId',
+        placeholder: 'your-vercel-project-id'
+      },
+      {
+        name: 'Environments',
+        description:
+          'The environments to integrate with (e.g., production, staging)',
+        requestFieldName: 'environments',
+        placeholder: 'production,staging',
+        isEnvironment: true
       }
     ]
   }
