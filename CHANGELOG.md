@@ -1,3 +1,9 @@
+## [2.27.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.3...v2.27.0-stage.4) (2025-06-25)
+
+### 🚀 Features
+
+* Add vercel integration ([#1006](https://github.com/keyshade-xyz/keyshade/issues/1006)) ([cd7ed9b](https://github.com/keyshade-xyz/keyshade/commit/cd7ed9bce4efa3c83f3f20d266cf7f27342535c5))
+
 ## [2.27.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.2...v2.27.0-stage.3) (2025-06-24)
 
 ### 🚀 Features
