@@ -132,7 +132,11 @@ export class IntegrationService {
     }
 
     // Check if only environments are provided
-    if (dto.environmentSlugs && !dto.projectSlug) {
+    if (
+      dto.environmentSlugs &&
+      dto.environmentSlugs.length > 0 &&
+      !dto.projectSlug
+    ) {
       this.logger.error(
         `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slugs: ${dto.environmentSlugs}`
       )
@@ -320,7 +324,12 @@ export class IntegrationService {
     }
 
     // Check if only environments are provided, or if the integration has no project associated from prior
-    if (dto.environmentSlugs && !integration.projectId && !dto.projectSlug) {
+    if (
+      dto.environmentSlugs &&
+      dto.environmentSlugs.length > 0 &&
+      !integration.projectId &&
+      !dto.projectSlug
+    ) {
       this.logger.error(
         `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlugs}`
       )

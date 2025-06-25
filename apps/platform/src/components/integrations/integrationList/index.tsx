@@ -39,14 +39,22 @@ function IntegrationList() {
       {}
     )
   )
+
   useEffect(() => {
-    getAllIntegrations().then(({ data, success }) => {
+    const fetchIntegrations = async () => {
+      const { data, success } = await getAllIntegrations()
       if (success && data) {
         setIntegrations(data.items)
       }
-    })
+    }
+
+    if (selectedWorkspace?.slug) {
+      fetchIntegrations()
+    }
   }, [
+    selectedWorkspace,
     getAllIntegrations,
+    selectedWorkspace?.slug,
     setIntegrations,
     isEditIntegrationOpen,
     isDeleteIntegrationOpen

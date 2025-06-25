@@ -76,13 +76,7 @@ function UpdateIntegration({
     }
   }, [selectedIntegration])
 
-  const updateIntegration = useHttp(() => {
-    const finalMetadata = isMappingRequired
-      ? {
-          ...metadata,
-          environments: envMappings
-        }
-      : metadata
+  const updateIntegration = useHttp((finalMetadata) => {
     return ControllerInstance.getInstance().integrationController.updateIntegration(
       {
         integrationSlug: selectedIntegration!.slug,
@@ -107,14 +101,50 @@ function UpdateIntegration({
         return
       }
       if (selectedEvents.size === 0) {
-        toast.error('Select at least one event type')
+        toast.error('At least one event trigger is required')
+        return
+      }
+
+      const finalMetadata = isMappingRequired
+        ? {
+            ...metadata,
+            environments: envMappings
+          }
+        : metadata
+
+      if (Object.keys(finalMetadata).length === 0) {
+        toast.error('Configuration metadata is required')
+        return
+      }
+
+      const isEmptyValue = (value: unknown): boolean => {
+        if (typeof value === 'string' && value.trim() === '') {
+          return true
+        }
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).length === 0
+        ) {
+          return true
+        }
+
+        return false
+      }
+
+      const hasEmptyValues = Object.values(finalMetadata).some(isEmptyValue)
+
+      if (hasEmptyValues) {
+        toast.error('All configuration fields are required and cannot be empty')
         return
       }
 
       setIsLoading(true)
 
       try {
-        const { success, data } = await updateIntegration()
+        const { success, data } = await updateIntegration(
+          finalMetadata as Record<string, string>
+        )
 
         if (success && data) {
           toast.success(`Integration updated successfully!`)
@@ -130,7 +160,10 @@ function UpdateIntegration({
       selectedEvents,
       updateIntegration,
       setIsEditIntegrationOpen,
-      onUpdateSuccess
+      onUpdateSuccess,
+      isMappingRequired,
+      metadata,
+      envMappings
     ]
   )
 
