@@ -68,7 +68,9 @@ Go to the [Keyshade Dashboard](https://app.keyshade.xyz/) and create a new proje
 Then, add your secrets (like API keys) and variables (like feature flags or ports).
 
 > 💡 **Secrets vs Variables:**
+>
 > **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
+>
 > **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.   
 
 When adding frontend-exposed values, prefix them with `NEXT_PUBLIC_`.  
