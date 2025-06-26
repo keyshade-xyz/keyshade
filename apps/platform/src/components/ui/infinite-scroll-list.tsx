@@ -10,6 +10,7 @@ interface InfiniteScrollListResponse<T> {
   }
   error?: { message: string }
 }
+type ErrorMessage = { header: string; body: string } | null
 
 interface InfiniteScrollListProps<T> {
   itemKey: (item: T) => string | number
@@ -33,7 +34,7 @@ export function InfiniteScrollList<T>({
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
 
   const pageRef = useRef<number>(0)
   const hasMoreRef = useRef<boolean>(true)
@@ -57,6 +58,7 @@ export function InfiniteScrollList<T>({
         page: currentPage,
         limit: itemsPerPage
       })
+
       if (!success) throw new Error(err?.message || 'Fetch failed')
 
       const fetched = data.items
@@ -74,10 +76,13 @@ export function InfiniteScrollList<T>({
 
         return [...prev, ...newItems]
       })
-
-      setError(null)
+      if (err) {
+        const errorMsg = err.message
+        const parsedError = JSON.parse(errorMsg) as ErrorMessage
+        setErrorMessage(parsedError)
+      }
+      setErrorMessage(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error')
       hasMoreRef.current = false
     } finally {
       loadingRef.current = false
@@ -87,7 +92,7 @@ export function InfiniteScrollList<T>({
 
   useEffect(() => {
     setItems([])
-    setError(null)
+    setErrorMessage(null)
     pageRef.current = 0
     hasMoreRef.current = true
     loadingRef.current = false
@@ -132,15 +137,23 @@ export function InfiniteScrollList<T>({
       </div>
     )
   }
-  if (error && items.length === 0) {
+  if (errorMessage && items.length === 0) {
     return inTable ? (
       <tr>
-        <td className="p-4 text-center text-red-500" colSpan={3}>
-          Error: {error}
+        <td className="p-4 text-center text-white/80" colSpan={3}>
+          <h3 className="mb-2 text-lg font-semibold text-white">
+            {errorMessage.header}
+          </h3>
+          <p className="mb-6 text-sm text-white/70">{errorMessage.body}</p>
         </td>
       </tr>
     ) : (
-      <div className="p-4 text-center text-red-500">Error: {error}</div>
+      <div className="p-4 text-center text-white/80">
+        <h3 className="mb-2 text-lg font-semibold text-white">
+          {errorMessage.header}
+        </h3>
+        <p className="mb-6 text-sm text-white/70">{errorMessage.body}</p>
+      </div>
     )
   }
   if (items.length === 0) {
@@ -161,16 +174,20 @@ export function InfiniteScrollList<T>({
         {items.map((item, i) => (
           <React.Fragment key={itemKey(item)}>
             {itemComponent(item)}
-            {i === items.length - 1 && hasMoreRef.current ? <tr>
+            {i === items.length - 1 && hasMoreRef.current ? (
+              <tr>
                 <td colSpan={3} ref={lastItemRef} />
-              </tr> : null}
+              </tr>
+            ) : null}
           </React.Fragment>
         ))}
-        {isLoading ? <tr>
+        {isLoading ? (
+          <tr>
             <td className="flex justify-center p-4" colSpan={3}>
               <Loader2 className="h-5 w-5 animate-spin text-white/70" />
             </td>
-          </tr> : null}
+          </tr>
+        ) : null}
       </>
     )
   }

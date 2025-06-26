@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
+import { Users } from 'lucide-react'
 import RoleCard from '../roleCard'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -11,6 +12,8 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+
+type ErrorMessage = { header: string; body: string } | null
 
 function RoleListItemSkeleton(): React.JSX.Element {
   return (
@@ -26,8 +29,8 @@ function RoleListItemSkeleton(): React.JSX.Element {
 export default function RoleList(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [roles, setRoles] = useAtom(rolesOfWorkspaceAtom)
-
   const [loading, setLoading] = useState<boolean>(true)
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
 
   const getAllRolesOfWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
@@ -40,9 +43,14 @@ export default function RoleList(): React.JSX.Element {
   useEffect(() => {
     if (selectedWorkspace) {
       getAllRolesOfWorkspace()
-        .then(({ data, success }) => {
+        .then(({ data, success, error }) => {
           if (success && data) {
             setRoles(data.items)
+          }
+          if (error) {
+            const errorMsg = error.message
+            const parsedError = JSON.parse(errorMsg) as ErrorMessage
+            setErrorMessage(parsedError)
           }
         })
         .finally(() => {
@@ -59,9 +67,16 @@ export default function RoleList(): React.JSX.Element {
       <RoleListItemSkeleton />
     </div>
   ) : roles.length === 0 ? (
-    <div className="w-full text-center text-sm text-white/60">
-      We could not find any roles for this workspace. This is likely a bug.
-      Please get in touch with us.
+    <div className="mx-auto max-w-md">
+      <div className="rounded-xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-sm">
+        <div className="mb-4 inline-flex rounded-full bg-white/10 p-4">
+          <Users className="h-8 w-8 text-white/70" />
+        </div>
+        <h3 className="mb-2 text-lg font-semibold text-white">
+          {errorMessage?.header}
+        </h3>
+        <p className="mb-6 text-sm text-white/70">{errorMessage?.body}</p>
+      </div>
     </div>
   ) : (
     <Table className="h-full w-full">
