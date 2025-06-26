@@ -50,7 +50,7 @@
   - [API Testing](contributing-to-keyshade/running-things-locally/api-testing.md)
   - [Docker Support](contributing-to-keyshade/running-things-locally/docker-support.md)
 
-## Internals
+### Internals
 
 - [Architecture of keyshade](internals/architecture-of-keyshade.md)
 - [How the CLI works](internals/how-the-cli-works.md)
