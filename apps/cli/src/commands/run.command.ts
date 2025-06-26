@@ -43,14 +43,16 @@ export default class RunCommand extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
-    // Handle case where args comes as a single string with commas
-    let command: string
-    if (args.length === 1 && String(args[0]).includes(',')) {
-      // Split by comma and join with spaces
+    // Join all arguments to form the complete command
+    let command: string = args.join(' ')
+    // Legacy support: handle comma-separated arguments only when explicitly enabled
+    // This prevents breaking commands that legitimately contain commas
+    if (
+      args.length === 1 &&
+      process.env.LEGACY_COMMA_FORMAT === 'true' &&
+      String(args[0]).includes(',')
+    ) {
       command = String(args[0]).split(',').join(' ')
-    } else {
-      // Normal case: join array with spaces
-      command = args.join(' ')
     }
 
     const configurations = await this.fetchConfigurations()
