@@ -25,7 +25,7 @@
 ## Integrations 
 
 - Frameworks
-  - [Next.js](integration/frameworks/set-up-with-nextjs.md)
+  - [Set up Keyshade with Next.js](integration/frameworks/set-up-with-nextjs.md)
 - Languages
   <!-- TO BE ADDED -->
 

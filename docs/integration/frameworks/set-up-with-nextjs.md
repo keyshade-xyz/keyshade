@@ -30,15 +30,16 @@ Here’s what this guide covers:
 If you don't already have a Next.js app, create one using the official CLI:
 
 ```bash
-npx create-next-app my-app
-cd my-app
-
+npx create-next-app <your-app-name>
 ```
+
 > Need more options or want to understand what this command does? [Check out the official Next.js documentation](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Install the Keyshade CLI
 
 The Keyshade CLI lets you fetch secrets, inject env variables, and manage profiles all from your terminal.
+
+Install it globally:
 
 ```bash
 npm install -g @keyshade/cli
@@ -57,11 +58,11 @@ If this is your **first time using Keyshade**, follow [this guide to set up your
 If you've already used Keyshade before:
 
 ```bash
-keyshade  profile  use <your-profile-name>
+keyshade profile use <your-profile-name>
 ```
 You can verify which profile is active with:
 ```bash
-keyshade  workspace  list
+keyshade workspace list
 ```
 
 ## Create a Project and Add Secrets
@@ -76,9 +77,9 @@ To get started:
 
 > 💡 **Secrets vs Variables:**
 >
->  **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
+>* **Secrets** are sensitive credentials like API keys or tokens. These are encrypted.
 >
->  **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
+>* **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is and are not encrypted.
  
 When adding frontend-exposed values, prefix them with `NEXT_PUBLIC_`.
 
@@ -91,12 +92,12 @@ See [Next.js docs](https://nextjs.org/docs/app/guides/environment-variables#bund
 From your project root:
 
 ```bash
-cd <app-name>
+cd <your-app-name>
 ```
 Run the init command to link your local project with the Keyshade dashboard:
 
 ```bash
-keyshade  init
+keyshade init
 ```
 
 You'll be guided through selecting your workspace, project, and environment.
@@ -104,7 +105,7 @@ You'll be guided through selecting your workspace, project, and environment.
 Want to skip the prompts?
 
 ```bash
-keyshade  init  --workspace-slug <my-workspace> --project-slug <my-project> --environment-slug <my-environment> --private-key <my-private-key>
+keyshade init --workspace-slug <my-workspace> --project-slug <my-project> --environment-slug <my-environment> --private-key <my-private-key>
 ```
 This will generate a `keyshade.json` file in your project root.
 
@@ -118,6 +119,7 @@ Start your dev server with Keyshade:
 keyshade run -- npm run dev
 ```
 Example output:
+
 ![Next.js Run](../../../blob/keyshade-nextjs-run.png)
 
 Keyshade will inject your secrets and variables securely at runtime.
