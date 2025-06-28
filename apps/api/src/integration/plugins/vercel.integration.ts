@@ -744,4 +744,5 @@ export class VercelIntegration extends BaseIntegration {
       )
     }
   }
+  public async validateConfiguration(metadata: VercelIntegrationMetadata) {}
 }
