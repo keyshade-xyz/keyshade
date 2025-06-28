@@ -1,3 +1,9 @@
+## [2.27.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.7...v2.27.0-stage.8) (2025-06-28)
+
+### 🐛 Bug Fixes
+
+* **cli:** allow keyshade run to accept multiple arguments without quotes ([#1033](https://github.com/keyshade-xyz/keyshade/issues/1033)) ([3148097](https://github.com/keyshade-xyz/keyshade/commit/3148097b5ca8359693ee5db3d23ee2c6de90bcca))
+
 ## [2.27.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.6...v2.27.0-stage.7) (2025-06-28)
 
 ### 🐛 Bug Fixes
