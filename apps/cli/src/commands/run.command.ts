@@ -23,8 +23,9 @@ export default class RunCommand extends BaseCommand {
 
   private projectSlug: string
   private environmentSlug: string
+  private readonly command: string
 
-  private shouldRestart = false
+  private childProcess = null
 
   getName(): string {
     return 'run'
@@ -35,7 +36,7 @@ export default class RunCommand extends BaseCommand {
   }
 
   getArguments(): CommandArgument[] {
-    return [{ name: '<command>', description: 'Command to run' }]
+    return [{ name: '<command...>', description: 'Command to run' }]
   }
 
   canMakeHttpRequests(): boolean {
@@ -43,12 +44,26 @@ export default class RunCommand extends BaseCommand {
   }
 
   async action({ args }: CommandActionData): Promise<void> {
+    // Join all arguments to form the complete command
+    if (args.length === 0) {
+      throw new Error('No command provided')
+    }
+
+    // @ts-expect-error -- false positive, might be an error on commander.js
+    // args return string[][] instead of string[]
+    this.command = args[0].join(' ')
+
     const configurations = await this.fetchConfigurations()
     await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
     await this.prefetchConfigurations(configurations.privateKey)
-    await this.executeCommand(args[0])
+    this.spawnCommand()
+
+    process.on('SIGINT', () => {
+      this.killCommand()
+      process.exit(0)
+    })
   }
 
   private async fetchConfigurations(): Promise<RunData> {
@@ -58,7 +73,7 @@ export default class RunCommand extends BaseCommand {
 
     if (!privateKey) {
       throw new Error(
-        'Private key not found for this project and workspace combo. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
+        'Private key not found for this project. Please run `keyshade init` or `keyshade config private-key add` to add a private key.'
       )
     }
 
@@ -126,7 +141,7 @@ export default class RunCommand extends BaseCommand {
         }
 
         this.processEnvironmentalVariables[data.name] = data.value
-        this.shouldRestart = true
+        this.restartCommand()
       })
 
       ioClient.on(
@@ -137,48 +152,21 @@ export default class RunCommand extends BaseCommand {
             this.environmentSlug = data.environment
             Logger.info('Successfully registered to API')
           } else {
-            Logger.error(
-              'Error registering to API: ' + registrationResponse.message
-            )
-            throw new Error(registrationResponse.message)
+            let errorText: string
+
+            try {
+              const { header, body } = JSON.parse(registrationResponse.message)
+              errorText = `${header}: ${body}`
+            } catch {
+              errorText = `Error registering to API: ${registrationResponse.message}`
+            }
+
+            Logger.error(errorText)
+            process.exit(1)
           }
         }
       )
     })
-  }
-
-  private async executeCommand(command: string) {
-    let childProcess = null
-    while (true) {
-      if (this.shouldRestart) {
-        Logger.info('Restarting command...')
-        process.kill(-childProcess.pid)
-        this.shouldRestart = false
-      }
-      if (childProcess === null) {
-        childProcess = spawn(command, {
-          // @ts-expect-error this just works
-          stdio: ['inherit', 'pipe', 'pipe'],
-          shell: true,
-          env: { ...process.env, ...this.processEnvironmentalVariables },
-          detached: true
-        })
-
-        childProcess.stdout.on('data', (data) => {
-          process.stdout.write(`[COMMAND] ${data}`)
-        })
-
-        childProcess.stderr.on('data', (data) => {
-          process.stderr.write(`[COMMAND] ${data}`)
-        })
-
-        childProcess.on('exit', () => {
-          Logger.info('Command exited.')
-          childProcess = null
-        })
-      }
-      await this.sleep(1000)
-    }
   }
 
   private async prefetchConfigurations(privateKey: string) {
@@ -261,5 +249,42 @@ export default class RunCommand extends BaseCommand {
     }
 
     Logger.info('API key is valid!')
+  }
+
+  private spawnCommand() {
+    this.childProcess = spawn(this.command, {
+      // @ts-expect-error this just works
+      stdio: ['inherit', 'pipe', 'pipe'],
+      shell: true,
+      env: { ...process.env, ...this.processEnvironmentalVariables },
+      detached: true
+    })
+
+    this.childProcess.stdout.on('data', (data) => {
+      process.stdout.write(`[COMMAND] ${data}`)
+    })
+
+    this.childProcess.stderr.on('data', (data) => {
+      process.stderr.write(`[COMMAND] ${data}`)
+    })
+
+    this.childProcess.on('exit', (code: number | null) => {
+      // Code is 0 only if the command exits on its own
+      if (code === 0) {
+        Logger.info('Command exited successfully!')
+        process.exit(1)
+      }
+    })
+  }
+
+  private restartCommand() {
+    this.killCommand()
+    this.spawnCommand()
+  }
+
+  private killCommand() {
+    if (this.childProcess !== null) {
+      process.kill(-this.childProcess.pid, 'SIGKILL')
+    }
   }
 }
