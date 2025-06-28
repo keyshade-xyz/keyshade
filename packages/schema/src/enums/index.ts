@@ -4,7 +4,8 @@ export const integrationTypeEnum = z.enum([
   'DISCORD',
   'SLACK',
   'GITHUB',
-  'GITLAB'
+  'GITLAB',
+  'VERCEL'
 ])
 
 export const expiresAfterEnum = z.enum(['never', '24', '168', '720', '8760'])
@@ -106,4 +107,10 @@ export const authProviderEnum = z.enum([
   'GITHUB',
   'GOOGLE',
   'GITLAB'
+])
+
+export const integrationRunStatusEnum = z.enum([
+  'RUNNING',
+  'SUCCESS',
+  'FAILURE'
 ])

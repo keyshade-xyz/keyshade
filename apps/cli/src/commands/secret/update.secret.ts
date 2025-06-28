@@ -90,7 +90,7 @@ export default class UpdateSecret extends BaseCommand {
     }
   }
 
-  private async parseInput(options: any): Promise<{
+  private async parseInput(options: CommandActionData['options']): Promise<{
     name?: string
     note?: string
     rotateAfter?: '24' | '168' | '720' | '8760' | 'never'

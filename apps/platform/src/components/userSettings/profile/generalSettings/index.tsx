@@ -59,15 +59,16 @@ export default function GeneralSettings(): React.JSX.Element {
     <>
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="aspect-square w-[60px] rounded-full" >
+        <div className="aspect-square w-[60px] rounded-full">
           {user?.profilePictureUrl ? (
             <AvatarComponent
+              className="h-full w-full"
               name={user.name || 'User'}
               profilePictureUrl={user.profilePictureUrl}
             />
           ) : (
-            <div className='h-full w-full flex justify-center items-center border-2 border-white/70 rounded-full'>
-              <User className='h-[60%] w-[60%]' />
+            <div className="flex h-full w-full items-center justify-center rounded-full border-2 border-white/70">
+              <User className="h-[60%] w-[60%]" />
             </div>
           )}
         </div>
@@ -80,7 +81,7 @@ export default function GeneralSettings(): React.JSX.Element {
         </div>
       </div>
       {/* Name */}
-      <div className="inline-flex w-fit backdrop:flex flex-col gap-4">
+      <div className="inline-flex max-w-md flex-col gap-4 backdrop:flex">
         <div className="flex flex-col gap-2">
           <div className="text-xl font-semibold">Name</div>
           <span className="text-sm text-white/70">

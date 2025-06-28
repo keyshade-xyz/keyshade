@@ -144,15 +144,53 @@ describe('Workspace Membership Controller Tests', () => {
       isOnboardingFinished: true
     })
 
-    workspace1 = createUser1.defaultWorkspace
-
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
-    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
-    user3 = { ...createUser3, ipAddress: USER_IP_ADDRESS }
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user3 = {
+      ...createUser3,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser3.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -316,37 +354,34 @@ describe('Workspace Membership Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+  })
 
-    it('should not be able to transfer ownership of default workspace', async () => {
-      // Invite another user to the workspace
-      await workspaceMembershipService.inviteUsersToWorkspace(
-        user1,
-        workspace1.slug,
-        [
+  describe('Invite User Tests', () => {
+    it('should not be able to invite to default workspace', async () => {
+      const user1DefaultWorkspace = await prisma.workspace.findFirstOrThrow({
+        where: {
+          ownerId: user1.id,
+          isDefault: true
+        }
+      })
+
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${user1DefaultWorkspace.slug}/invite-users`,
+        body: [
           {
             email: user2.email,
             roleSlugs: [memberRole.slug]
           }
         ]
-      )
-
-      // Accept the invitation
-      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
-
-      // Try transferring ownership
-      const response = await app.inject({
-        method: 'PUT',
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        url: `/workspace-membership/${workspace1.slug}/transfer-ownership/${user2.email}`
       })
 
       expect(response.statusCode).toBe(400)
     })
-  })
 
-  describe('Invite User Tests', () => {
     it('should not be able to invite users if tier limit is reached', async () => {
       // Invite users until the tier limit is reached
       for (

@@ -2,8 +2,6 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
-import { Input } from '../../../ui/input'
-import { Button } from '../../../ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,12 +10,14 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../ui/dialog'
-import DecryptSecret from '../decryptSecret'
+import { Button } from '../../../ui/button'
+import { Input } from '../../../ui/input'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
   selectedProjectAtom,
-  secretsOfProjectAtom
+  secretsOfProjectAtom,
+  projectSecretCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import { parseUpdatedEnvironmentValues } from '@/lib/utils'
@@ -27,6 +27,7 @@ export default function AddSecretDialog() {
   const [isCreateSecretOpen, setIsCreateSecretOpen] =
     useAtom(createSecretOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
 
   const [requestData, setRequestData] = useState({
@@ -70,6 +71,7 @@ export default function AddSecretDialog() {
         const { success, data } = await createSecret()
 
         if (success && data) {
+          setProjectSecretCount((prev) => prev + 1)
           toast.success('Secret added successfully', {
             description: (
               <p className="text-xs text-emerald-300">
@@ -88,11 +90,17 @@ export default function AddSecretDialog() {
         setIsLoading(false)
       }
     }
-  }, [selectedProject, requestData.name, createSecret, setSecrets, handleClose])
+  }, [
+    selectedProject,
+    requestData.name,
+    createSecret,
+    setSecrets,
+    handleClose,
+    setProjectSecretCount
+  ])
 
   return (
     <div className="flex items-center justify-center gap-6">
-      <DecryptSecret />
       <Dialog onOpenChange={handleClose} open={isCreateSecretOpen}>
         <DialogTrigger asChild>
           <Button

@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common'
 import { createWorkspace } from './workspace'
 import { UserWithWorkspace } from '@/user/user.types'
-import { constructErrorBody } from './util'
+import { constructErrorBody, generateReferralCode } from './util'
+import SlugGenerator from './slug-generator.service'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
@@ -18,23 +19,34 @@ import { constructErrorBody } from './util'
  */
 export async function createUser(
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
-  prisma: PrismaService
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
   logger.log(`Creating user: ${dto.email}`)
   try {
+    const referralCode = await generateReferralCode(prisma)
+
     // Create the user
     const user = await prisma.user.create({
       data: {
         id: dto.id,
         email: dto.email.toLowerCase(),
         name: dto.name,
+        referralCode,
         profilePictureUrl: dto.profilePictureUrl,
         isActive: dto.isActive ?? true,
         isAdmin: dto.isAdmin ?? false,
         isOnboardingFinished: dto.isOnboardingFinished ?? false,
-        authProvider: dto.authProvider
+        authProvider: dto.authProvider,
+        emailPreference: {
+          create: {
+            marketing: true,
+            activity: true,
+            critical: true
+          }
+        }
       }
     })
     logger.log(`Created user ${user.id}`)
@@ -55,6 +67,7 @@ export async function createUser(
       user,
       { name: 'My Workspace' },
       prisma,
+      slugGenerator,
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
@@ -83,7 +96,8 @@ export async function createUser(
  */
 export async function getUserByEmailOrId(
   input: User['email'] | User['id'],
-  prisma: PrismaService
+  prisma: PrismaService,
+  slugGenerator: SlugGenerator
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
@@ -96,11 +110,17 @@ export async function getUserByEmailOrId(
       (await prisma.user.findUnique({
         where: {
           email: input.toLowerCase()
+        },
+        include: {
+          emailPreference: true
         }
       })) ??
       (await prisma.user.findUnique({
         where: {
           id: input
+        },
+        include: {
+          emailPreference: true
         }
       }))
   } catch (error) {
@@ -132,7 +152,7 @@ export async function getUserByEmailOrId(
     logger.log(
       `User ${user.id} is a regular user. Getting default workspace for user ${user.id}`
     )
-    const defaultWorkspace = await prisma.workspace.findFirst({
+    let defaultWorkspace = await prisma.workspace.findFirst({
       where: {
         ownerId: user.id,
         isDefault: true
@@ -140,12 +160,21 @@ export async function getUserByEmailOrId(
     })
 
     if (!defaultWorkspace) {
-      logger.error(`Default workspace not found for user ${user.id}`)
-      throw new NotFoundException(
-        constructErrorBody(
-          'Default workspace not found',
-          'We could not find your default workspace. Please get in touch with us.'
-        )
+      logger.warn(`Default workspace not found for user ${user.id}`)
+
+      // Create the user's default workspace
+      logger.log(
+        `User ${user.id} has no default workspace. Creating default workspace.`
+      )
+      defaultWorkspace = await createWorkspace(
+        user,
+        { name: 'My Workspace' },
+        prisma,
+        slugGenerator,
+        true
+      )
+      logger.log(
+        `Created user ${user.id} with default workspace ${defaultWorkspace.id}`
       )
     }
 

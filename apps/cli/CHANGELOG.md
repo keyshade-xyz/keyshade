@@ -91,3 +91,106 @@
 ## 2.5.2
 
 - Update error logging
+
+## 2.5.3
+
+### Minor Changes
+
+- Added `keyshade workspace resend-invitation` command to resend an invitation to a user to join a workspace.
+
+## 3.0.0-stage.0
+
+## Major Changes
+
+- Updated the private key file to store keys in format `workspace_project` instead of `workspace_project_environment`
+
+### Minor Changes
+
+- Added `keyshade config update` command to update the project-specific keyshade.json file
+- Added `keyshade config private-key add` command to add a private key into ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key delete` command to remove a private key from ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key list` command to list all the private keys in ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key update` command to update the private key of a combo in ~/.keyshade/private-keys.json file
+
+### Patches
+
+- Hardcoded API base URL
+- Updated pipeline to release stage builds. Can be installed using `pnpm add @keyshade/cli@stage`
+- Add logging to denote config file creation
+
+## 3.0.0
+
+### Major Changes
+
+- Updated the private key file to store keys in format `workspace_project` instead of `workspace_project_environment`
+
+### Minor Changes
+
+- Added `keyshade config update` command to update the project-specific keyshade.json file
+- Added `keyshade config private-key add` command to add a private key into ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key delete` command to remove a private key from ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key list` command to list all the private keys in ~/.keyshade/private-keys.json file
+- Added `keyshade config private-key update` command to update the private key of a combo in ~/.keyshade/private-keys.json file
+
+### Patches
+
+- Hardcoded API base URL
+- Updated pipeline to release stage builds. Can be installed using `pnpm add @keyshade/cli@stage`
+- Add logging to denote config file creation
+
+## 3.0.1
+
+- Critical release to make CI pass. No changes were introduced
+
+## 3.0.2
+
+### Patches
+
+- `keyshade run` wouldn't decrypt secrets if the project didn't store the private key
+
+## 3.1.0-stage.1
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
+
+## 3.1.0-stage.2
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
+
+## 3.1.0-stage.3
+
+### Minor Changes
+
+- Updated secret-related commands to decrypt secrets on local device ONLY
+- `keyshade run` command decrypts all secrets locally
+- Updated private key config to map to project slugs only, removing workspace slug
+
+## 3.1.0
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
+- Updated secret-related commands to decrypt secrets on local device ONLY
+- `keyshade run` command decrypts all secrets locally
+- Updated private key config to map to project slugs only, removing workspace slug
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
+
+## 3.2.0-stage.1
+
+## Minor Changes
+
+- Added `keyshade integration` base command
+
+## 3.2.0-stage.2
+
+### Patches
+
+- Updated `keyshade run` command to parse command without quotes
+- Run command exits when the command passed is a one-time only command
+- Updated `keyshade run` command to kill child command upon ctrl+c

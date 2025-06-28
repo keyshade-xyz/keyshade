@@ -1,16 +1,16 @@
 import type { CreateProjectRequest } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
-import { AddSVG } from '@public/svg/shared'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Plus, Trash2 } from 'lucide-react'
+import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
+  DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -30,13 +30,16 @@ import {
   createProjectOpenAtom,
   selectedWorkspaceAtom,
   projectsOfWorkspaceAtom,
-  viewAndDownloadProjectKeysOpenAtom
+  viewAndDownloadProjectKeysOpenAtom,
+  workspaceProjectCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
+import WarningCard from '@/components/shared/warning-card'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
   const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
+  const setWorkspaceProjectCount = useSetAtom(workspaceProjectCountAtom)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
     createProjectOpenAtom
   )
@@ -56,15 +59,17 @@ export default function CreateProjectDialogue(): JSX.Element {
     storePrivateKey: false,
     environments: [
       {
-        name: '',
-        description: ''
+        name: 'default',
+        description: 'Default environment for this project'
       }
     ],
     accessLevel: 'PRIVATE'
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [projectSlug, setProjectSlug] = useState<string>('')
   const [projectKeys, setProjectKeys] = useState<{
     projectName: string
+    environmentSlug: string
     storePrivateKey: boolean
     keys: { publicKey: string; privateKey: string }
   }>()
@@ -77,6 +82,15 @@ export default function CreateProjectDialogue(): JSX.Element {
         newProjectData.environments?.filter((env) => env.name.trim() !== '') ||
         []
     })
+  )
+
+  // Function to fetch all environments of the new project
+  const getProjectEnvironment = useHttp((newProjectSlug: string) =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: newProjectSlug
+      }
+    )
   )
 
   // Function to create a new project
@@ -103,14 +117,24 @@ export default function CreateProjectDialogue(): JSX.Element {
 
         if (success && data) {
           setProjects([...projects, data])
-          setProjectKeys({
-            projectName: data.name,
-            storePrivateKey: data.storePrivateKey,
-            keys: {
-              publicKey: data.publicKey,
-              privateKey: data.privateKey
+          setWorkspaceProjectCount((prev) => prev + 1)
+
+          await getProjectEnvironment(data.slug).then(
+            ({ data: envData, success: envSuccess }) => {
+              if (envSuccess && envData) {
+                setProjectKeys({
+                  projectName: data.name,
+                  environmentSlug: envData.items[0].slug,
+                  storePrivateKey: data.storePrivateKey,
+                  keys: {
+                    publicKey: data.publicKey,
+                    privateKey: data.privateKey
+                  }
+                })
+                setProjectSlug(data.slug)
+              }
             }
-          })
+          )
         }
       } finally {
         setIsCreateProjectDialogOpen(false)
@@ -125,7 +149,9 @@ export default function CreateProjectDialogue(): JSX.Element {
     createProject,
     setProjects,
     projects,
-    setIsCreateProjectDialogOpen
+    setIsCreateProjectDialogOpen,
+    setWorkspaceProjectCount,
+    getProjectEnvironment
   ])
 
   const toggleDialog = useCallback(() => {
@@ -152,7 +178,7 @@ export default function CreateProjectDialogue(): JSX.Element {
     setNewProjectData((prev) => ({
       ...prev,
       environments: [
-        ...prev.environments || [],
+        ...(prev.environments || []),
         {
           name: '',
           description: ''
@@ -161,22 +187,26 @@ export default function CreateProjectDialogue(): JSX.Element {
     }))
   }, [setNewProjectData])
 
-  const handleEnvironmentChange = useCallback((index: number, field: 'name' | 'description', value: string) => {
-    setNewProjectData((prev) => {
-      const updatedEnvironments = prev.environments || []
-      updatedEnvironments[index] = {
-        ...updatedEnvironments[index],
-        [field]: value
-      }
+  const handleEnvironmentChange = useCallback(
+    (index: number, field: 'name' | 'description', value: string) => {
+      setNewProjectData((prev) => {
+        const updatedEnvironments = prev.environments || []
+        updatedEnvironments[index] = {
+          ...updatedEnvironments[index],
+          [field]: value
+        }
 
-      return {
-        ...prev,
-        environments: updatedEnvironments
-      }
-    })
-  },[setNewProjectData])
+        return {
+          ...prev,
+          environments: updatedEnvironments
+        }
+      })
+    },
+    [setNewProjectData]
+  )
 
-  const handleDeleteEnvironment = useCallback((index: number) => {
+  const handleDeleteEnvironment = useCallback(
+    (index: number) => {
       setNewProjectData((prev) => {
         const updatedEnvs = prev.environments?.filter((_, i) => i !== index)
         return {
@@ -184,7 +214,11 @@ export default function CreateProjectDialogue(): JSX.Element {
           environments: updatedEnvs
         }
       })
-    },[setNewProjectData])
+    },
+    [setNewProjectData]
+  )
+
+  const hasNoEnvironments = newProjectData.environments?.length === 0
 
   return (
     <>
@@ -192,7 +226,7 @@ export default function CreateProjectDialogue(): JSX.Element {
         onOpenChange={setIsCreateProjectDialogOpen}
         open={isCreateProjectDialogOpen}
       >
-        <DialogTrigger>
+        <DialogTrigger asChild>
           {isProjectsEmpty ? null : (
             <Button onClick={toggleDialog}>
               <AddSVG /> Create a new Project
@@ -201,9 +235,9 @@ export default function CreateProjectDialogue(): JSX.Element {
         </DialogTrigger>
         <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
           <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
-            <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
+            <DialogTitle className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
               Create Project
-            </DialogHeader>
+            </DialogTitle>
 
             <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
               Create your new project
@@ -317,68 +351,83 @@ export default function CreateProjectDialogue(): JSX.Element {
                   </div>
                 </div>
                 {newProjectData.storePrivateKey ? (
-                  <div
-                    className="rounded-lg border border-yellow-300 p-4"
-                    ref={privateKeyWarningRef}
-                  >
-                    <p className="text-sm text-[#A1A1AA]">
-                      Enabling this would save the private key in our database.
-                      This would allow all permissible members to read your
-                      secrets. In the unnatural event of a data breach, your
-                      secrets might be exposed to attackers. We recommend you to
-                      not save your private key.
-                    </p>
-                  </div>
+                  <WarningCard>
+                    Enabling this would save the private key in our database.
+                    This would allow all permissible members to read your
+                    secrets. In the unnatural event of a data breach, your
+                    secrets might be exposed to attackers. We recommend you to
+                    not save your private key.
+                  </WarningCard>
                 ) : null}
               </div>
 
               {/* ENVIRONMENTS */}
               <div className="flex flex-col gap-4">
-                <Label className="text-base font-semibold">
-                  Environments
-                </Label>
+                <Label className="text-base font-semibold">Environments</Label>
 
                 <div className="flex flex-col gap-5">
                   {/* Environment List */}
                   <div className="flex flex-col gap-4">
-                    {newProjectData.environments?.map((env, index) => (
-                      <div
-                        className="flex flex-col gap-4"
-                        key={`env-${index + 1}`}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <Input
-                            className="w-[20rem]"
-                            name="name"
-                            onChange={(e) => handleEnvironmentChange(index, 'name', e.target.value)}
-                            placeholder="Name"
-                            value={env.name}
-                          />
-                          <Input
-                            className="w-[20rem] resize-none"
-                            name="description"
-                            onChange={(e) => handleEnvironmentChange(index, 'description', e.target.value)}
-                            placeholder="Description"
-                            value={env.description}
-                          />
-                          <Button
-                            className="w-9 h-9 bg-[#DC2626]/40 text-[#DC2626] rounded-lg hover:bg-[#DC2626]/40 hover:text-[#DC2626]"
-                            onClick={() => handleDeleteEnvironment(index)}
-                            size="icon"
-                            variant="ghost"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    {hasNoEnvironments ? (
+                      <div className="text-sm text-white/60">
+                        No environments specified. An environment named{' '}
+                        <span className="rounded-md bg-white/10 p-1 font-mono text-sm">
+                          default
+                        </span>{' '}
+                        would be created.
                       </div>
-                    ))}
+                    ) : (
+                      newProjectData.environments?.map((env, index) => (
+                        <div
+                          className="flex flex-col gap-4"
+                          key={`env-${index + 1}`}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <Input
+                              className="w-[20rem]"
+                              name="name"
+                              onChange={(e) =>
+                                handleEnvironmentChange(
+                                  index,
+                                  'name',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Name"
+                              value={env.name}
+                            />
+                            <Input
+                              className="w-[20rem] resize-none"
+                              name="description"
+                              onChange={(e) =>
+                                handleEnvironmentChange(
+                                  index,
+                                  'description',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Description"
+                              value={env.description}
+                            />
+                            <Button
+                              className="h-9 w-9 rounded-lg bg-[#DC2626]/40 text-[#DC2626] hover:bg-[#DC2626]/40 hover:text-[#DC2626]"
+                              onClick={() => handleDeleteEnvironment(index)}
+                              size="icon"
+                              variant="ghost"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                   <Button
-                    className="w-max flex items-center gap-1 text-sm font-medium"
+                    className="flex w-max items-center gap-1 text-sm font-medium"
                     onClick={handleCreateNewEnvironment}
                     variant="secondary"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="h-4 w-4" />
                     Add
                   </Button>
                 </div>
@@ -398,7 +447,11 @@ export default function CreateProjectDialogue(): JSX.Element {
         </DialogContent>
       </Dialog>
       {isViewAndDownloadProjectKeysDialogOpen ? (
-        <ViewAndDownloadProjectKeysDialog projectKeys={projectKeys} />
+        <ViewAndDownloadProjectKeysDialog
+          isCreated
+          projectKeys={projectKeys}
+          projectSlug={projectSlug}
+        />
       ) : null}
     </>
   )

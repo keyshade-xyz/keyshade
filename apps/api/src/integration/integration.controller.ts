@@ -30,12 +30,14 @@ export class IntegrationController {
   async createIntegration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration,
-    @Param('workspaceSlug') workspaceSlug: string
+    @Param('workspaceSlug') workspaceSlug: string,
+    @Query('privateKey') privateKey: string
   ) {
     return await this.integrationService.createIntegration(
       user,
       dto,
-      workspaceSlug
+      workspaceSlug,
+      privateKey
     )
   }
 
@@ -86,6 +88,22 @@ export class IntegrationController {
       sort,
       order,
       search
+    )
+  }
+
+  @Get(':integrationSlug/runs')
+  @RequiredApiKeyAuthorities(Authority.READ_INTEGRATION)
+  async getAllRunsOfIntegration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('integrationSlug') integrationSlug: string,
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.integrationService.getAllRunsOfIntegration(
+      user,
+      integrationSlug,
+      page,
+      limit
     )
   }
 

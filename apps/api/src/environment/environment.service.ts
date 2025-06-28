@@ -16,11 +16,11 @@ import { UpdateEnvironment } from './dto/update.environment/update.environment'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class EnvironmentService {
@@ -29,7 +29,8 @@ export class EnvironmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService
+    private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -92,7 +93,10 @@ export class EnvironmentService {
     const environment = await this.prisma.environment.create({
       data: {
         name: dto.name,
-        slug: await generateEntitySlug(dto.name, 'ENVIRONMENT', this.prisma),
+        slug: await this.slugGenerator.generateEntitySlug(
+          dto.name,
+          'ENVIRONMENT'
+        ),
         description: dto.description,
         project: {
           connect: {
@@ -198,7 +202,7 @@ export class EnvironmentService {
       data: {
         name: dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'ENVIRONMENT', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'ENVIRONMENT')
           : environment.slug,
         description: dto.description,
         lastUpdatedById: user.id
@@ -491,7 +495,7 @@ export class EnvironmentService {
       const errorMessage = `Environment with name ${name} already exists in project ${slug}`
       this.logger.error(errorMessage)
       throw new ConflictException(
-        constructErrorBody('Environment exits', errorMessage)
+        constructErrorBody('Environment exists', errorMessage)
       )
     }
 

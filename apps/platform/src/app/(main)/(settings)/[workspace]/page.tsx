@@ -1,15 +1,16 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import dynamic from 'next/dynamic'
-import type { EmojiClickData } from 'emoji-picker-react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
   allWorkspacesAtom,
   deleteWorkspaceOpenAtom,
-  selectedWorkspaceAtom
+  leaveWorkspaceOpenAtom,
+  selectedWorkspaceAtom,
+  userAtom,
+  workspaceMemberCountAtom
 } from '@/store'
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
@@ -26,16 +27,27 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-
-const EmojiPicker = dynamic(
-  () => {
-    return import('emoji-picker-react')
-  },
-  { ssr: false }
-)
+import {
+  EmojiPicker,
+  EmojiPickerSearch,
+  EmojiPickerContent,
+  EmojiPickerFooter
+} from '@/components/ui/emoji-picker'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+import { PageTitle } from '@/components/common/page-title'
+import ConfirmLeaveWorkspace from '@/components/dashboard/workspace/confirmLeaveWorkspace'
+import {
+  getSelectedWorkspaceFromStorage,
+  setSelectedWorkspaceToStorage
+} from '@/store/workspace'
 
 export default function WorkspaceSettingsPage(): JSX.Element {
   const router = useRouter()
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
 
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
@@ -43,8 +55,13 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const [isDeleteWorkspaceOpen, setIsDeleteWorkspaceOpen] = useAtom(
     deleteWorkspaceOpenAtom
   )
+  const [isLeaveWorkspaceOpen, setIsLeaveWorkspaceOpen] = useAtom(
+    leaveWorkspaceOpenAtom
+  )
 
   const setAllWorkspaces = useSetAtom(allWorkspacesAtom)
+  const memberCount = useAtomValue(workspaceMemberCountAtom)
+  const user = useAtomValue(userAtom)
 
   const [showPicker, setShowPicker] = useState(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -55,11 +72,15 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     name: selectedWorkspace?.name || '',
     icon: selectedWorkspace?.icon || '🔥'
   })
+  const isDisableLeave =
+    memberCount === 1 ||
+    selectedWorkspace?.isDefault ||
+    user?.id === selectedWorkspace?.ownedBy.id
 
-  function handleEmojiSelect(emojiData: EmojiClickData) {
+  function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
       ...workspaceData,
-      icon: emojiData.emoji
+      icon: emojiData
     })
     setShowPicker(false)
   }
@@ -75,10 +96,9 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     ControllerInstance.getInstance().workspaceController.updateWorkspace({
       workspaceSlug: selectedWorkspace!.slug,
       icon: workspaceData.icon,
-      name:
-        workspaceData.name === selectedWorkspace?.name
-          ? undefined
-          : workspaceData.name
+      name: workspaceData.name === selectedWorkspace?.name
+        ? undefined
+        : workspaceData.name
     })
   )
 
@@ -103,10 +123,20 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         if (success && data) {
           toast.success('Workspace details successfully updated')
 
+          if (workspaceFromStorage?.id === selectedWorkspace.id) {
+            setSelectedWorkspaceToStorage({
+              ...workspaceFromStorage,
+              name: data.name,
+              slug: data.slug,
+              icon: data.icon
+            })
+          }
+
           // Update the selected workspace
           setSelectedWorkspace({
             ...selectedWorkspace,
             name: data.name,
+            slug: data.slug,
             icon: data.icon
           })
 
@@ -141,7 +171,8 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     setAllWorkspaces,
     setSelectedWorkspace,
     updateWorkspace,
-    workspaceData.name
+    workspaceData.name,
+    workspaceFromStorage
   ])
 
   useEffect(() => {
@@ -158,6 +189,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
   return (
     <main>
+      <PageTitle title={`${selectedWorkspace?.name} | Settings`} />
       <div className="flex w-full flex-col gap-4 px-10 py-7 lg:w-[80vw] xl:w-[50vw]">
         {/* Header */}
         <section className="mb-5 flex flex-col gap-y-5">
@@ -165,10 +197,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             <div className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
-            <div className="flex flex-grow flex-col gap-y-2">
+            <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
               {/* <div className="mb-2 flex flex-row gap-x-2">
               </div> */}
-              <h1 className="text-2xl font-bold">{selectedWorkspace?.name}</h1>
+              <h1 className="text-2xl font-bold truncate">{selectedWorkspace?.name}</h1>
               {selectedWorkspace ? (
                 <div className="flex flex-row gap-x-2 text-white/60">
                   <div className="flex flex-row gap-x-1 text-sm">
@@ -200,7 +232,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </div>
               ) : null}
             </div>
-            <div className="h-fit">
+            <div className="h-fit overflow-hidden">
               <CopyToClipboard text={selectedWorkspace?.slug || ''} />
             </div>
           </div>
@@ -253,20 +285,23 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             </span>
           </div>
           <div className="flex flex-row justify-end gap-x-4">
-            <span
-              aria-label="emoji"
-              className="flex aspect-square h-[60px] w-[60px] items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl"
-              onClick={() => setShowPicker(!showPicker)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setShowPicker(!showPicker)
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              {workspaceData.icon}
-            </span>
+            <Popover onOpenChange={setShowPicker} open={showPicker}>
+              <PopoverTrigger asChild>
+                <div className="flex aspect-square h-[60px] w-[60px] cursor-pointer items-center justify-center rounded-[0.3125rem] bg-[#0B0D0F] p-[0.62rem] text-xl">
+                  {workspaceData.icon}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit p-0">
+                <EmojiPicker
+                  className="h-[342px]"
+                  onEmojiSelect={({ emoji }) => handleEmojiSelect(emoji)}
+                >
+                  <EmojiPickerSearch />
+                  <EmojiPickerContent />
+                  <EmojiPickerFooter />
+                </EmojiPicker>
+              </PopoverContent>
+            </Popover>
           </div>
         </section>
 
@@ -287,6 +322,51 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
         <Separator className="bg-white/20" />
 
+        {/* Leave Workspace */}
+        <section className="my-5 flex w-full flex-row items-center">
+          <div className="flex w-3/5 flex-col gap-y-2">
+            <span className="text-lg font-semibold">Leave Workspace</span>
+            <span className="text-sm text-white/60">
+              Your access will be lost to any of your teams and data related to
+              this workspace. This action is irreversible.
+            </span>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
+                  disabled={isLoading || isDisableLeave}
+                  onClick={() => setIsLeaveWorkspaceOpen(true)}
+                  role="button"
+                >
+                  <span>Leave</span>
+                </Button>
+              </TooltipTrigger>
+
+              {isDisableLeave ? (
+                <TooltipContent
+                  className="max-w-[350px] border-white/20 bg-white/10 text-white backdrop-blur-xl"
+                  sideOffset={7}
+                >
+                  {selectedWorkspace?.isDefault ? (
+                    <p>This is your default workspace. You can not leave it.</p>
+                  ) : user?.id === selectedWorkspace?.ownedBy.id ? (
+                    <p>
+                      You are the owner of this workspace. You can not leave
+                      workspace without transferring ownership.
+                    </p>
+                  ) : memberCount === 1 ? (
+                    <p>You are the only member of this workspace.</p>
+                  ) : null}
+                </TooltipContent>
+              ) : null}
+            </Tooltip>
+          </TooltipProvider>
+        </section>
+
+        <Separator className="bg-white/20" />
+
         {/* Delete Workspace */}
         <section className="my-5 flex w-full flex-row items-center rounded-lg border-[1px] border-red-500 bg-red-500/10 p-5">
           <div className="flex w-3/5 flex-col gap-y-2">
@@ -299,9 +379,9 @@ export default function WorkspaceSettingsPage(): JSX.Element {
           </div>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger className="w-2/5">
+              <TooltipTrigger asChild>
                 <Button
-                  className="flex w-full items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
+                  className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
                   disabled={isLoading || selectedWorkspace?.isDefault}
                   onClick={() => setIsDeleteWorkspaceOpen(true)}
                   role="button"
@@ -321,8 +401,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <Separator className="bg-white/20" />
 
         {/* Save Button */}
-        <section className="my-5 flex w-full flex-row items-center">
-          <div className="w-3/5" />
+        <section className="my-5 flex w-full items-center justify-end">
           <Button
             className="w-2/5"
             disabled={isLoading}
@@ -339,7 +418,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <ConfirmDeleteWorkspace />
       ) : null}
 
-      {showPicker ? <EmojiPicker onEmojiClick={handleEmojiSelect} /> : null}
+      {/* Leave workspace alert dialog */}
+      {isLeaveWorkspaceOpen && selectedWorkspace ? (
+        <ConfirmLeaveWorkspace />
+      ) : null}
     </main>
   )
 }

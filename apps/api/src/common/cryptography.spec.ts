@@ -39,7 +39,7 @@ describe('Cryptography Tests', () => {
       await decrypt(differentKeyPair.privateKey, encrypted)
     } catch (e) {
       expect(e).toBeDefined()
-      expect(e.message).toEqual('Bad MAC')
+      expect(e.message).toEqual('Decryption failed: Bad MAC')
     }
   })
 

@@ -1,6 +1,6 @@
-import { TrashSVG } from '@public/svg/shared'
 import React, { useCallback, useState } from 'react'
 import { useAtom } from 'jotai'
+import { TrashSVG } from '@public/svg/shared'
 import {
   AlertDialog,
   AlertDialogAction,

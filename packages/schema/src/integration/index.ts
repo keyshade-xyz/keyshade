@@ -1,9 +1,14 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { eventTypeEnum, integrationTypeEnum } from '@/enums'
+import {
+  eventTypeEnum,
+  integrationRunStatusEnum,
+  integrationTypeEnum
+} from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
 import { BaseProjectSchema } from '@/project'
 import { EnvironmentSchema } from '@/environment'
+import { EventSchema } from '@/event'
 
 export const IntegrationSchema = z.object({
   id: z.string(),
@@ -15,8 +20,40 @@ export const IntegrationSchema = z.object({
   type: integrationTypeEnum,
   notifyOn: z.array(eventTypeEnum),
   workspaceId: WorkspaceSchema.shape.id,
-  projectId: BaseProjectSchema.shape.id.nullable(),
-  environmentId: EnvironmentSchema.shape.id.nullable()
+  project: z
+    .object({
+      id: BaseProjectSchema.shape.id,
+      name: BaseProjectSchema.shape.name,
+      slug: BaseProjectSchema.shape.slug
+    })
+    .nullable(),
+  environments: z
+    .array(
+      z.object({
+        id: EnvironmentSchema.shape.id,
+        name: EnvironmentSchema.shape.name,
+        slug: EnvironmentSchema.shape.slug
+      })
+    )
+    .nullable(),
+  workspace: WorkspaceSchema,
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  })
+})
+
+export const IntegrationRunSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  duration: z.number(),
+  triggeredAt: z.string().datetime(),
+  logs: z.string().optional(),
+  status: integrationRunStatusEnum,
+  event: EventSchema,
+  eventId: EventSchema.shape.id,
+  integrationId: IntegrationSchema.shape.id
 })
 
 export const CreateIntegrationRequestSchema = z.object({
@@ -26,7 +63,7 @@ export const CreateIntegrationRequestSchema = z.object({
   type: IntegrationSchema.shape.type,
   notifyOn: IntegrationSchema.shape.notifyOn.min(1).optional(),
   metadata: z.record(z.string()),
-  environmentSlug: EnvironmentSchema.shape.slug.optional()
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug.optional())
 })
 
 export const CreateIntegrationResponseSchema = IntegrationSchema
@@ -62,3 +99,10 @@ export const GetAllIntegrationRequestSchema = PageRequestSchema.extend({
 
 export const GetAllIntegrationResponseSchema =
   PageResponseSchema(IntegrationSchema)
+
+export const GetAllIntegrationRunsRequestSchema = PageRequestSchema.extend({
+  integrationSlug: IntegrationSchema.shape.slug
+})
+
+export const GetAllIntegrationRunsResponseSchema =
+  PageResponseSchema(IntegrationRunSchema)

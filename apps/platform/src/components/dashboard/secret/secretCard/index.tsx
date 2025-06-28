@@ -1,9 +1,10 @@
 import type { Environment, Secret } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
+import { useCallback, useEffect, useState } from 'react'
+import { decrypt } from '@keyshade/common'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG, EyeOpenSVG, EyeSlashSVG } from '@public/svg/shared'
-import { useState } from 'react'
 import {
   AccordionContent,
   AccordionItem,
@@ -39,18 +40,17 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
-import { decrypt } from '@/lib/decrypt'
 
 interface SecretCardProps {
   secretData: Secret
-  isDecrypted: boolean
   privateKey: string | null
+  className?: string
 }
 
 export default function SecretCard({
   secretData,
-  isDecrypted,
-  privateKey
+  privateKey,
+  className
 }: SecretCardProps) {
   const { secret, values } = secretData
 
@@ -69,29 +69,36 @@ export default function SecretCard({
     Record<Environment['id'], string>
   >({})
 
-  const handleDecryptValues = (environmentSlug: Environment['slug']) => {
-    if (!privateKey) return
-    const targetValue = values.find(
-      (value) => value.environment.slug === environmentSlug
-    )
-    if (!targetValue) return
+  const handleDecryptValues = useCallback(
+    (environmentSlug: Environment['slug']) => {
+      if (!privateKey) return
+      const targetValue = values.find(
+        (value) => value.environment.slug === environmentSlug
+      )
+      if (!targetValue) return
 
-    decrypt(privateKey, targetValue.value)
-      .then((decrypted) => {
-        setDecryptedValues((prev) => ({
-          ...prev,
-          [targetValue.environment.id]: decrypted
-        }))
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console -- console.error is used for debugging
-        console.error('Decryption error:', error)
-        setDecryptedValues((prev) => ({
-          ...prev,
-          [targetValue.environment.id]: 'Decryption failed'
-        }))
-      })
-  }
+      decrypt(privateKey, targetValue.value)
+        .then((decrypted) => {
+          setDecryptedValues((prev) => ({
+            ...prev,
+            [targetValue.environment.id]: decrypted
+          }))
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console -- console.error is used for debugging
+          console.error('Decryption error:', error)
+          setDecryptedValues((prev) => ({
+            ...prev,
+            [targetValue.environment.id]: 'Decryption failed'
+          }))
+        })
+    },
+    [privateKey, values]
+  )
+
+  useEffect(() => {
+    handleDecryptValues(secretData.values[0]?.environment.slug)
+  }, [secretData.values, handleDecryptValues])
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -139,13 +146,14 @@ export default function SecretCard({
   return (
     <ContextMenu>
       <AccordionItem
-        className="rounded-xl bg-white/5 px-5"
+        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`secret-${secretData.secret.slug}`}
         key={secret.id}
         value={secret.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="overflow-hidden hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
@@ -161,15 +169,15 @@ export default function SecretCard({
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">
+            <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
+              <div className="flex items-center gap-x-4 truncate">
                 {/* <SecretLogoSVG /> */}
                 {secret.name}
               </div>
               {secret.note ? (
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
@@ -201,7 +209,6 @@ export default function SecretCard({
               <TableBody>
                 {values.map((value) => {
                   const isRevealed =
-                    !isDecrypted &&
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
                   return (
@@ -213,18 +220,16 @@ export default function SecretCard({
                         {value.environment.name}
                       </TableCell>
                       <TableCell className="h-full text-base">
-                        {isDecrypted
-                          ? value.value
-                          : isRevealed
-                            ? decryptedValues[value.environment.id]
-                            : value.value.replace(/./g, '*').substring(0, 20)}
+                        {isRevealed
+                          ? decryptedValues[value.environment.id]
+                          : value.value.replace(/./g, '*').substring(0, 20)}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base">
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
-                          {!isDecrypted && privateKey ? (
+                          {privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
                               onClick={() =>

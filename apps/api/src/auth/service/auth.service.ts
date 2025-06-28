@@ -17,16 +17,18 @@ import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    @Inject(MAIL_SERVICE) private mailService: IMailService,
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService,
-    private cache: CacheService
+    private readonly jwt: JwtService,
+    private readonly cache: CacheService,
+    private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -74,7 +76,11 @@ export class AuthService {
       )
     }
 
-    const user = await getUserByEmailOrId(email, this.prisma)
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
   }
@@ -94,7 +100,11 @@ export class AuthService {
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(`Validating login code for ${email}`)
 
-    const user = await getUserByEmailOrId(email, this.prisma)
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
 
     this.logger.log(`Checking if OTP is valid for ${email}`)
     const isOtpValid =
@@ -115,7 +125,7 @@ export class AuthService {
       throw new UnauthorizedException(
         constructErrorBody(
           'Invalid OTP',
-          'Please enter a valid 6 digit alphanumeric OTP.'
+          'The OTP you entered is invalid or has expired. Please try again.'
         )
       )
     }
@@ -229,7 +239,7 @@ export class AuthService {
 
     this.logger.log(`Checking if user exists with email: ${email}`)
     try {
-      user = await getUserByEmailOrId(email, this.prisma)
+      user = await getUserByEmailOrId(email, this.prisma, this.slugGenerator)
     } catch (ignored) {}
 
     // We need to create the user if it doesn't exist yet
@@ -241,15 +251,39 @@ export class AuthService {
           profilePictureUrl,
           authProvider
         },
-        this.prisma
+        this.prisma,
+        this.slugGenerator
       )
     }
 
     // If the user has used OAuth to log in, we need to check if the OAuth provider
     // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
-      throw new UnauthorizedException(
-        'The user has signed up with a different authentication provider.'
+      let formattedAuthProvider = ''
+
+      switch (user.authProvider) {
+        case AuthProvider.GOOGLE:
+          formattedAuthProvider = 'Google'
+          break
+        case AuthProvider.GITHUB:
+          formattedAuthProvider = 'GitHub'
+          break
+        case AuthProvider.EMAIL_OTP:
+          formattedAuthProvider = 'Email and OTP'
+          break
+        case AuthProvider.GITLAB:
+          formattedAuthProvider = 'GitLab'
+          break
+      }
+
+      this.logger.error(
+        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Error signing in',
+          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
+        )
       )
     }
 

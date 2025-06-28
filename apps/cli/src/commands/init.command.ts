@@ -96,7 +96,7 @@ export default class InitCommand extends BaseCommand {
     })
 
     await writePrivateKeyConfig({
-      [`${workspace}_${project}_${environment}`]: privateKey
+      [project]: privateKey
     })
 
     outro('Project configured successfully')

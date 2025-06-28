@@ -98,8 +98,32 @@ describe('Integration Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = { ...createUser1, ipAddress: USER_IP_ADDRESS }
-    user2 = { ...createUser2, ipAddress: USER_IP_ADDRESS }
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     integration1 = await integrationService.createIntegration(
       user1,
@@ -111,7 +135,8 @@ describe('Integration Controller Tests', () => {
         },
         notifyOn: [EventType.WORKSPACE_UPDATED]
       },
-      workspace1.slug
+      workspace1.slug,
+      'abc'
     )
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -280,7 +305,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: '123'
+          environmentSlugs: ['123']
         }
       })
 
@@ -301,7 +326,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: environment2.slug,
+          environmentSlugs: [environment2.slug],
           projectSlug: project1.slug
         }
       })
@@ -323,7 +348,7 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          environmentSlug: '999999',
+          environmentSlugs: ['999999'],
           projectSlug: project1.slug
         }
       })
@@ -485,14 +510,14 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          environmentSlug: environment1.slug
+          environmentSlugs: [environment1.slug]
         }
       })
 
       expect(result.statusCode).toEqual(400)
     })
 
-    it('should not fail to update if the integration has projectSlug present and only environmentSlug is updated', async () => {
+    it('should not fail to update if the integration has projectSlug present and only environmentSlugs is updated', async () => {
       // Create the integration
       const integration = await integrationService.createIntegration(
         user1,
@@ -505,7 +530,8 @@ describe('Integration Controller Tests', () => {
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug
         },
-        workspace1.slug
+        workspace1.slug,
+        'abc'
       )
 
       // Update the integration
@@ -516,7 +542,7 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          environmentSlug: environment1.slug
+          environmentSlugs: [environment1.slug]
         }
       })
 
@@ -529,7 +555,6 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(updatedIntegration).toBeDefined()
-      expect(updatedIntegration!.environmentId).toEqual(environment1.id)
     })
 
     it('should fail to update if the user does not have access to the environment', async () => {
@@ -542,7 +567,7 @@ describe('Integration Controller Tests', () => {
         },
         payload: {
           projectSlug: project1.slug,
-          environmentSlug: environment2.slug
+          environmentSlugs: [environment2.slug]
         }
       })
 
@@ -559,7 +584,7 @@ describe('Integration Controller Tests', () => {
         },
         payload: {
           projectSlug: project1.slug,
-          environmentSlug: '999999'
+          environmentSlugs: ['999999']
         }
       })
 

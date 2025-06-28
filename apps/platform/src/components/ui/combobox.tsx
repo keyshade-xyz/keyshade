@@ -1,23 +1,11 @@
 'use client'
-
-import { ChevronsUpDown, Check } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { useAtom } from 'jotai'
-import { AddSVG } from '@public/svg/shared'
-import { Label } from './label'
-import { Input } from './input'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from './dialog'
-import { Button } from './button'
-import { cn } from '@/lib/utils'
+import { useAtom, useSetAtom } from 'jotai'
+import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
+import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
+import { WorkspaceListItem } from './workspace-list-item'
+import { InfiniteScrollList } from './infinite-scroll-list'
 import {
   Popover,
   PopoverContent,
@@ -27,73 +15,115 @@ import {
   Command,
   CommandEmpty,
   CommandInput,
-  CommandItem,
   CommandList
 } from '@/components/ui/command'
 import ControllerInstance from '@/lib/controller-instance'
-import { allWorkspacesAtom, selectedWorkspaceAtom } from '@/store'
+import {
+  allWorkspacesAtom,
+  globalSearchDataAtom,
+  selectedWorkspaceAtom,
+} from '@/store'
 import { useHttp } from '@/hooks/use-http'
+import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage();
+
   const [open, setOpen] = useState<boolean>(false)
-  const [newWorkspaceName, setNewWorkspaceName] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const router = useRouter()
 
   const getWorkspacesOfUser = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser({})
   )
 
-  const createWorkspace = useHttp(() =>
-    ControllerInstance.getInstance().workspaceController.createWorkspace({
-      name: newWorkspaceName
-    })
-  )
-
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [allWorkspaces, setAllWorkspaces] = useAtom(allWorkspacesAtom)
   const [selectedWorkspace, setSelectedWorkspace] = useAtom(
     selectedWorkspaceAtom
   )
 
-  const handleCreateWorkspace = useCallback(async () => {
-    if (newWorkspaceName.trim() === '') {
-      toast.error('Workspace name is empty', {
-        description: 'Please enter a workspace name'
-      })
-      return
-    }
-
-    setIsLoading(true)
-    toast.loading('Creating workspace...')
-
-    try {
-      const { success, data } = await createWorkspace()
-
-      if (success && data) {
-        toast.success('Workspace created successfully')
-        setSelectedWorkspace(data)
-        setAllWorkspaces((prev) => [...prev, data])
-        setOpen(false)
+  const fetchWorkspaces = useCallback(
+    async ({ page, limit }: { page: number; limit: number }) => {
+      // Check if workspaces are already loaded
+      if (allWorkspaces.length > 0 && allWorkspaces.length > page * limit) {
+        return {
+          success: true,
+          error: undefined,
+          data: {
+            items: allWorkspaces,
+            metadata: { totalCount: allWorkspaces.length }
+          }
+        };
       }
-    } finally {
-      setIsLoading(false)
-      toast.dismiss()
-    }
-  }, [
-    createWorkspace,
-    newWorkspaceName,
-    setAllWorkspaces,
-    setSelectedWorkspace
-  ])
+
+      // If not loaded, fetch from API
+      try {
+        const response =
+          await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
+            {
+              page,
+              limit
+            }
+          )
+        return {
+          success: response.success,
+          error: response.error
+            ? { message: response.error.message }
+            : undefined,
+          data: response.data ?? { items: [], metadata: { totalCount: 0 } }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          data: { items: [], metadata: { totalCount: 0 } },
+          error: {
+            message: error instanceof Error ? error.message : 'Unknown error'
+          }
+        }
+      }
+    },
+    [allWorkspaces]
+  )
+
+  const renderWorkspaceListItem = useCallback(
+    (workspace: WorkspaceWithTierLimitAndProjectCount) => (
+      <WorkspaceListItem onClose={() => setOpen(false)} workspace={workspace} />
+    ),
+    [setOpen]
+  )
 
   useEffect(() => {
-    getWorkspacesOfUser().then(({ success, data }) => {
-      if (success && data) {
-        setAllWorkspaces(data.items)
-        setSelectedWorkspace(data.items[0])
-      }
-    })
-  }, [setSelectedWorkspace, setAllWorkspaces, getWorkspacesOfUser])
+    if (allWorkspaces.length === 0) {
+
+      getWorkspacesOfUser().then(({ success, data }) => {
+        if (success && data) {
+          setGlobalSearchData((prev) => ({
+            ...prev,
+            workspaces: data.items.map((workspace) => ({
+              id: workspace.id,
+              name: workspace.name,
+              slug: workspace.slug,
+              icon: workspace.icon ?? '🔥'
+            }))
+          }))
+          setAllWorkspaces(data.items)
+
+          /**
+           * If workspace stored in local storage is not found in the list of workspaces,
+           * then set the selected workspace to the first one in the list.
+           * This is to ensure that the selected workspace is always valid and belongs to the currently logged in user
+           */
+          const existingWorkspace = data.items.find(item => item.id === workspaceFromStorage?.id && item.ownerId === workspaceFromStorage.ownerId);
+          if (!existingWorkspace) {
+            const newSelectedWorkspace = data.items[0];
+            setSelectedWorkspace(newSelectedWorkspace);
+            setSelectedWorkspaceToStorage(newSelectedWorkspace);
+          } else {
+            setSelectedWorkspace(existingWorkspace);
+          }
+        }
+      })
+    }
+  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData, setAllWorkspaces, allWorkspaces, workspaceFromStorage])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -129,73 +159,17 @@ export function Combobox(): React.JSX.Element {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList className="max-h-[10rem]">
               <CommandEmpty>No workspace found.</CommandEmpty>
-              {allWorkspaces.map((workspace) => {
-                return (
-                  <CommandItem
-                    key={workspace.id}
-                    onSelect={() => {
-                      setSelectedWorkspace(workspace)
-                      router.refresh()
-                      setOpen(false)
-                    }}
-                  >
-                    {' '}
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        selectedWorkspace?.name === workspace.name
-                          ? 'opacity-100'
-                          : 'opacity-0'
-                      )}
-                    />{' '}
-                    {workspace.icon ?? '🔥'} {workspace.name}
-                  </CommandItem>
-                )
-              })}
+              <div className="max-h-[10rem] overflow-auto">
+                <InfiniteScrollList<WorkspaceWithTierLimitAndProjectCount>
+                  fetchFunction={fetchWorkspaces}
+                  itemComponent={renderWorkspaceListItem}
+                  itemKey={(workspace) => workspace.id}
+                  itemsPerPage={10}
+                />
+              </div>
             </CommandList>
           </Command>
-          <Dialog>
-            <DialogTrigger className="w-full">
-              <Button className="mt-5 w-full">
-                <AddSVG /> New workspace
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#1E1E1F]">
-              <DialogHeader>
-                <DialogTitle>Make a new workspace</DialogTitle>
-                <DialogDescription>
-                  Create a new workspace to organize your projects.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-y-8">
-                <div className="flex w-full flex-col">
-                  <div className="flex flex-row items-center gap-4">
-                    <Label className="text-right" htmlFor="name">
-                      Name
-                    </Label>
-                    <Input
-                      className="col-span-3"
-                      id="name"
-                      onChange={(e) => {
-                        setNewWorkspaceName(e.target.value)
-                      }}
-                      placeholder="Enter the name"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex w-full justify-end">
-                  <Button
-                    disabled={isLoading}
-                    onClick={handleCreateWorkspace}
-                    variant="secondary"
-                  >
-                    Add workspace
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AddWorkspaceDialog />
         </div>
       </PopoverContent>
     </Popover>

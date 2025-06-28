@@ -75,7 +75,7 @@ export default class WorkspaceMembershipController {
   ): Promise<ClientResponse<UpdateMemberRoleResponse>> {
     const response = await this.apiClient.put(
       `/api/workspace-membership/${request.workspaceSlug}/update-member-role/${request.userEmail}`,
-      request,
+      request.roleSlugs,
       headers
     )
     return await parseResponse<UpdateMemberRoleResponse>(response)

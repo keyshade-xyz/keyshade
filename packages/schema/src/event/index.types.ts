@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import { GetEventsRequestSchema, GetEventsResponseSchema } from '.'
+import { GetEventsRequestSchema, GetEventsResponseSchema, EventSchema } from '.'
+
+export type Event = z.infer<typeof EventSchema>
 
 export type GetEventsRequest = z.infer<typeof GetEventsRequestSchema>
 

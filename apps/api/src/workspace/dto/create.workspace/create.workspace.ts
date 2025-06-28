@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
 
 export class CreateWorkspace {
   @IsString()
-  @IsNotEmpty()
+  @NonEmptyTrimmedString()
   name: string
 
   @IsString()

@@ -1,7 +1,7 @@
+// eslint-disable-next-line prettier/prettier
 import { getCollectiveProjectAuthorities } from '@/common/collective-authorities'
 import { createEvent } from '@/common/event'
 import { paginate } from '@/common/paginate'
-import generateEntitySlug from '@/common/slug-generator'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import {
   associateWorkspaceOwnerDetails,
@@ -36,6 +36,7 @@ import {
   WorkspaceWithLastUpdatedByAndOwnerAndProjects
 } from './workspace.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
 export class WorkspaceService {
@@ -44,7 +45,8 @@ export class WorkspaceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly tierLimitService: TierLimitService
+    private readonly tierLimitService: TierLimitService,
+    private readonly slugGenerator: SlugGenerator
   ) {}
 
   /**
@@ -64,7 +66,12 @@ export class WorkspaceService {
 
     await this.existsByName(dto.name, user.id)
 
-    const newWorkspace = await createWorkspace(user, dto, this.prisma)
+    const newWorkspace = await createWorkspace(
+      user,
+      dto,
+      this.prisma,
+      this.slugGenerator
+    )
 
     return {
       ...newWorkspace,
@@ -101,6 +108,18 @@ export class WorkspaceService {
         authorities: [Authority.UPDATE_WORKSPACE]
       })
 
+    if (workspace.isDefault && dto.name) {
+      this.logger.error(
+        `User ${user.id} attempted to update the name of the default workspace`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not update workspace name',
+          `You cannot update the name of the default workspace`
+        )
+      )
+    }
+
     // Check if a same named workspace already exists
     dto.name && (await this.existsByName(dto.name, user.id))
 
@@ -113,7 +132,7 @@ export class WorkspaceService {
       data: {
         name: dto.name === workspace.name ? undefined : dto.name,
         slug: dto.name
-          ? await generateEntitySlug(dto.name, 'WORKSPACE', this.prisma)
+          ? await this.slugGenerator.generateEntitySlug(dto.name, 'WORKSPACE')
           : undefined,
         icon: dto.icon,
         lastUpdatedBy: {
@@ -132,7 +151,7 @@ export class WorkspaceService {
         }
       }
     })
-    this.logger.debug(`Updated workspace ${workspace.name} (${workspace.id})`)
+    this.logger.log(`Updated workspace ${workspace.name} (${workspace.id})`)
 
     await createEvent(
       {
@@ -205,7 +224,7 @@ export class WorkspaceService {
       }
     })
 
-    this.logger.debug(`Deleted workspace ${workspace.name} (${workspace.slug})`)
+    this.logger.log(`Deleted workspace ${workspace.name} (${workspace.slug})`)
   }
 
   /**
@@ -273,7 +292,8 @@ export class WorkspaceService {
       where: {
         members: {
           some: {
-            userId: user.id
+            userId: user.id,
+            invitationAccepted: true
           }
         },
 
@@ -292,16 +312,16 @@ export class WorkspaceService {
       }
     })
 
-    this.logger.debug(
+    this.logger.log(
       `Fetched workspaces of user ${user.id}. Count: ${items.length}`
     )
 
     // Parsing projects of workspaces
     this.logger.log(`Parsing projects of workspaces of user ${user.id}`)
     for (const workspace of items) {
-      this.logger.debug(`Parsing projects of workspace ${workspace.slug}`)
+      this.logger.log(`Parsing projects of workspace ${workspace.slug}`)
       workspace['projects'] = await this.getProjectsOfWorkspace(workspace, user)
-      this.logger.debug(`Parsed projects of workspace ${workspace.slug}`)
+      this.logger.log(`Parsed projects of workspace ${workspace.slug}`)
     }
 
     // get total count of workspaces of the user
@@ -558,6 +578,7 @@ export class WorkspaceService {
         }
       },
       select: {
+        invitationAccepted: true,
         workspace: {
           select: {
             id: true,
@@ -687,7 +708,7 @@ export class WorkspaceService {
       }
     })
 
-    this.logger.debug(
+    this.logger.log(
       `Updated workspace blacklisted IP addresses ${workspace.name} (${workspace.id})`
     )
 
@@ -792,7 +813,12 @@ export class WorkspaceService {
           { description: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, description: true }
+      select: {
+        slug: true,
+        name: true,
+        description: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
@@ -818,7 +844,12 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, note: true }
+      select: {
+        slug: true,
+        name: true,
+        note: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
@@ -843,7 +874,12 @@ export class WorkspaceService {
           { note: { contains: searchTerm, mode: 'insensitive' } }
         ]
       },
-      select: { slug: true, name: true, note: true }
+      select: {
+        slug: true,
+        name: true,
+        note: true,
+        project: { select: { slug: true } }
+      }
     })
   }
 
@@ -900,12 +936,19 @@ export class WorkspaceService {
     let accessibleProjectCount = 0
 
     for (const project of projects) {
-      const hasAuthority =
-        await this.authorizationService.authorizeUserAccessToProject({
-          user,
-          entity: { slug: project.slug },
-          authorities: [Authority.READ_PROJECT]
-        })
+      let hasAuthority = null
+      try {
+        hasAuthority =
+          await this.authorizationService.authorizeUserAccessToProject({
+            user,
+            entity: { slug: project.slug },
+            authorities: [Authority.READ_PROJECT]
+          })
+      } catch (_ignored) {
+        this.logger.log(
+          `User ${user.id} does not have access to project ${project.slug}`
+        )
+      }
 
       if (hasAuthority) {
         accessibleProjectCount++

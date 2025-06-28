@@ -24,6 +24,7 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
+  exportConfigOpenAtom,
   selectedProjectAtom,
   selectedWorkspaceAtom
 } from '@/store'
@@ -51,6 +52,7 @@ export default function ProjectCard({
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -72,6 +74,11 @@ export default function ProjectCard({
     setIsDeleteProjectOpen(true)
   }
 
+  const handleExportConfiguration = () => {
+    setSelectedProject(project)
+    setIsExportConfigurationDialogOpen(true)
+  }
+
   const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
     switch (accessLvl) {
       case 'GLOBAL':
@@ -90,7 +97,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`${selectedWorkspace?.slug}/${slug}?tab=secret`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
           key={id}
         >
           <div className="flex items-center gap-x-5">
@@ -146,6 +153,10 @@ export default function ProjectCard({
         </ContextMenuItem>
         <ContextMenuItem inset onClick={handleCopyToClipboard}>
           Copy slug
+        </ContextMenuItem>
+        <ContextMenuSeparator className="bg-white/15" />
+        <ContextMenuItem inset onClick={handleExportConfiguration}>
+          Export configuration
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem inset onClick={handleEditProject}>
