@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -114,6 +116,28 @@ export class IntegrationController {
     return await this.integrationService.deleteIntegration(
       user,
       integrationSlug
+    )
+  }
+
+  @Post(':workspaceSlug/test')
+  @HttpCode(HttpStatus.OK)
+  @RequiredApiKeyAuthorities(
+    Authority.CREATE_INTEGRATION,
+    Authority.READ_WORKSPACE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
+  async testIntegration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateIntegration,
+    @Param('workspaceSlug') workspaceSlug: string,
+    @Query('privateKey') privateKey: string
+  ) {
+    return await this.integrationService.testIntegration(
+      user,
+      dto,
+      workspaceSlug,
+      privateKey
     )
   }
 }
