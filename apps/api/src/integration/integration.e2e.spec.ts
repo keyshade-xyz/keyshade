@@ -27,6 +27,7 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
+import nock = require('nock')
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -44,6 +45,14 @@ describe('Integration Controller Tests', () => {
   let environment1: Environment, environment2: Environment
 
   const USER_IP_ADDRESS = '127.0.0.1'
+  const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
+
+  const createDummyWebhookUrlInterceptor = () => {
+    const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+    return nock(origin)
+      .post(pathname || '/')
+      .reply(200)
+  }
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -125,13 +134,15 @@ describe('Integration Controller Tests', () => {
       }
     }
 
+    createDummyWebhookUrlInterceptor()
+
     integration1 = await integrationService.createIntegration(
       user1,
       {
         name: 'Integration 1',
         type: IntegrationType.DISCORD,
         metadata: {
-          webhookUrl: 'DUMMY_URL'
+          webhookUrl: DUMMY_WEBHOOK_URL
         },
         notifyOn: [EventType.WORKSPACE_UPDATED],
         privateKey: 'abc'
@@ -201,7 +212,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 1',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -221,7 +232,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -241,7 +252,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -261,7 +272,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug
@@ -282,7 +293,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: '999999'
@@ -302,7 +313,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: ['123']
@@ -323,7 +334,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: [environment2.slug],
@@ -345,7 +356,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: ['999999'],
@@ -357,6 +368,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to create an integration without any project or environment slug', async () => {
+      createDummyWebhookUrlInterceptor()
+
       const result = await app.inject({
         method: 'POST',
         url: `/integration/${workspace1.slug}`,
@@ -367,7 +380,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -451,6 +464,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should not fail to update if the integration has project present and only environmentSlugs is updated', async () => {
+      createDummyWebhookUrlInterceptor()
+
       // Create the integration
       const integration = await integrationService.createIntegration(
         user1,
@@ -458,7 +473,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug,
