@@ -168,7 +168,7 @@
 - `keyshade run` command decrypts all secrets locally
 - Updated private key config to map to project slugs only, removing workspace slug
 
-# 3.1.0
+## 3.1.0
 
 ### Minor Changes
 
@@ -181,6 +181,16 @@
 
 - Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
 
-# 3.2.0-stage.1
+## 3.2.0-stage.1
+
+## Minor Changes
 
 - Added `keyshade integration` base command
+
+## 3.2.0-stage.2
+
+### Patches
+
+- Updated `keyshade run` command to parse command without quotes
+- Run command exits when the command passed is a one-time only command
+- Updated `keyshade run` command to kill child command upon ctrl+c
