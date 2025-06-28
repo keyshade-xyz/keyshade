@@ -599,4 +599,6 @@ export class VercelIntegration extends BaseIntegration {
 
     return this.vercel
   }
+
+  public async validateConfiguration(metadata: VercelIntegrationMetadata) {}
 }

@@ -64,6 +64,11 @@ export abstract class BaseIntegration {
    */
   abstract getRequiredMetadataParameters(): Set<string>
 
+  /**
+   * Use this function to test the condfiguration of the integration.
+   */
+  abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
+
   // WARNING: DO NOT OVERRIDE
   protected async registerIntegrationRun({
     eventId,
