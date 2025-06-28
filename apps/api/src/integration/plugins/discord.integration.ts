@@ -117,4 +117,6 @@ export class DiscordIntegration extends BaseIntegration {
       this.logger.log(`Successfully emitted event to Discord: ${data.title}`)
     }
   }
+
+  public async validateConfiguration(metadata: DiscordIntegrationMetadata) {}
 }
