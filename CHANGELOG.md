@@ -1,3 +1,9 @@
+## [2.27.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.6...v2.27.0-stage.7) (2025-06-28)
+
+### 🐛 Bug Fixes
+
+* **api:** Rearranged transactions to ensure user cache updates properly ([cfa80c1](https://github.com/keyshade-xyz/keyshade/commit/cfa80c122bb380d57f418f8553af6e6f854d1b06))
+
 ## [2.27.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.5...v2.27.0-stage.6) (2025-06-25)
 
 ### 🐛 Bug Fixes
