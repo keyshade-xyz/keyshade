@@ -14,6 +14,7 @@ export interface IntegrationConfig {
   events: GroupItem[]
   metadataFields: MetadataField[]
   envMapping: boolean
+  privateKeyRequired: boolean
 }
 
 interface GroupItem {
@@ -97,6 +98,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     type: 'DISCORD',
     events: eventGroups,
     envMapping: false,
+    privateKeyRequired: false,
     metadataFields: [
       {
         name: 'Webhook URL',
@@ -111,6 +113,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     type: 'SLACK',
     events: eventGroups,
     envMapping: false,
+    privateKeyRequired: false,
     metadataFields: [
       {
         name: 'Bot Token',
@@ -140,6 +143,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     type: 'VERCEL',
     events: selectedEventGroups,
     envMapping: true,
+    privateKeyRequired: true,
     metadataFields: [
       {
         name: 'Token',

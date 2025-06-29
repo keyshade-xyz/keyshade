@@ -69,7 +69,8 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     privateKey: ''
   })
 
-  const { projectPrivateKey: browserProjectPrivateKey } = useProjectPrivateKey()
+  const { projectPrivateKey: browserProjectPrivateKey } =
+    useProjectPrivateKey(selectedProject)
 
   const fetchEnvironments = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
