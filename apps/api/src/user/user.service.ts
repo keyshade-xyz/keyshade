@@ -141,6 +141,30 @@ export class UserService {
       )
     }
 
+    // Set the onboarding answers
+    op.push(
+      this.prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          isOnboardingFinished: true,
+          name: dto.name,
+          profilePictureUrl: dto.profilePictureUrl,
+          onboardingAnswers: {
+            create: {
+              heardFrom: dto.heardFrom,
+              role: dto.role,
+              teamSize: dto.teamSize,
+              productStage: dto.productStage,
+              useCase: dto.useCase,
+              industry: dto.industry
+            }
+          }
+        }
+      })
+    )
+
     // Check if user has been referred
     if (dto.referralCode) {
       this.log.log(
@@ -182,30 +206,6 @@ export class UserService {
         })
       )
     }
-
-    // Set the onboarding answers
-    op.push(
-      this.prisma.user.update({
-        where: {
-          id: user.id
-        },
-        data: {
-          isOnboardingFinished: true,
-          name: dto.name,
-          profilePictureUrl: dto.profilePictureUrl,
-          onboardingAnswers: {
-            create: {
-              heardFrom: dto.heardFrom,
-              role: dto.role,
-              teamSize: dto.teamSize,
-              productStage: dto.productStage,
-              useCase: dto.useCase,
-              industry: dto.industry
-            }
-          }
-        }
-      })
-    )
 
     const updatedUser = (await this.prisma.$transaction(op))[0]
     await this.cache.setUser(updatedUser)

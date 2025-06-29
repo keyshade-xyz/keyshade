@@ -51,7 +51,9 @@ export const getCollectiveWorkspaceAuthorities = async (
     })
   })
 
-  logger.log(`Found ${authorities.size} authorities`)
+  logger.log(
+    `Found ${authorities.size} authorities: ${Array.from(authorities)}`
+  )
   return authorities
 }
 

@@ -1012,26 +1012,7 @@ export class ProjectService {
                 contains: search
               }
             }
-          ],
-          workspace: {
-            members: {
-              some: {
-                userId: user.id,
-                roles: {
-                  some: {
-                    role: {
-                      authorities: {
-                        hasSome: [
-                          Authority.WORKSPACE_ADMIN,
-                          Authority.READ_PROJECT
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          ]
         },
         include: {
           lastUpdatedBy: {
@@ -1048,8 +1029,29 @@ export class ProjectService {
       `Found ${projects.length} projects of workspace ${workspaceSlug}`
     )
 
+    const accessibleProjects = []
+    for (const project of projects) {
+      let hasAuthority = null
+      try {
+        hasAuthority =
+          await this.authorizationService.authorizeUserAccessToProject({
+            user,
+            entity: { slug: project.slug },
+            authorities: [Authority.READ_PROJECT]
+          })
+      } catch (_ignored) {
+        this.logger.log(
+          `User ${user.id} does not have access to project ${project.slug}`
+        )
+      }
+
+      if (hasAuthority) {
+        accessibleProjects.push(project)
+      }
+    }
+
     const items = await Promise.all(
-      projects.map(async (project) => ({
+      accessibleProjects.map(async (project) => ({
         ...(await this.countEnvironmentsVariablesAndSecretsInProject(
           project,
           user
@@ -1058,33 +1060,7 @@ export class ProjectService {
       }))
     )
 
-    //calculate metadata
-    const totalCount = await this.prisma.project.count({
-      where: {
-        workspaceId,
-        OR: [
-          {
-            name: {
-              contains: search
-            }
-          },
-          {
-            description: {
-              contains: search
-            }
-          }
-        ],
-        workspace: {
-          members: {
-            some: {
-              userId: user.id
-            }
-          }
-        }
-      }
-    })
-
-    const metadata = paginate(totalCount, `/project/all/${workspaceSlug}`, {
+    const metadata = paginate(items.length, `/project/all/${workspaceSlug}`, {
       page,
       limit,
       sort,

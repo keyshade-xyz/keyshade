@@ -26,7 +26,7 @@ export default function CommandSearch({ setIsOpen }: CommandSearchProps) {
       <div className="flex items-center">
         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <span className="w-fit text-left text-white/80 2xl:w-[25rem]">
-          Search a Project, Secrect or anything...
+          Search a Project, Secret or anything...
         </span>
       </div>
 

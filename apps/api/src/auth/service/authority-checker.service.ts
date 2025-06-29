@@ -562,7 +562,7 @@ export class AuthorityCheckerService {
                 slug: true
               }
             },
-            environment: {
+            environments: {
               select: {
                 id: true,
                 name: true,
@@ -594,7 +594,7 @@ export class AuthorityCheckerService {
                 slug: true
               }
             },
-            environment: {
+            environments: {
               select: {
                 id: true,
                 name: true,
@@ -707,6 +707,13 @@ export class AuthorityCheckerService {
       // Check if the authority object passed is completely contained within the permitted authorities
       const hasRequiredAuthority = authorities.every((auth) =>
         permittedAuthorities.has(auth)
+      )
+
+      this.logger.log(`Required authorities for user ${userId}: ${authorities}`)
+      this.logger.log(
+        `Permitted authorities for user ${userId}: ${Array.from(
+          permittedAuthorities
+        )}`
       )
 
       if (!hasRequiredAuthority) {

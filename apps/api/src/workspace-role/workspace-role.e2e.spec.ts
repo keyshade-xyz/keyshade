@@ -295,6 +295,34 @@ describe('Workspace Role Controller Tests', () => {
       )
     })
 
+    it('should add READ_WORKSPACE authority if no authorities are provided', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/workspace-role/${workspaceAlice.slug}`,
+        payload: {
+          name: 'Test Role',
+          description: 'Test Role Description',
+          colorCode: '#0000FF'
+        },
+        headers: {
+          'x-e2e-user-email': alice.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      expect(response.json()).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Test Role',
+          description: 'Test Role Description',
+          colorCode: '#0000FF',
+          authorities: [Authority.READ_WORKSPACE],
+          workspaceId: workspaceAlice.id,
+          projects: []
+        })
+      )
+    })
+
     it('should have created a WORKSPACE_ROLE_CREATED event', async () => {
       const response = await fetchEvents(
         eventService,

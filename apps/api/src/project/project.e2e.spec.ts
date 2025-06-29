@@ -120,7 +120,6 @@ describe('Project Controller Tests', () => {
       isAdmin: false
     })
 
-    workspace1 = createUser1.defaultWorkspace
     workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
@@ -152,6 +151,10 @@ describe('Project Controller Tests', () => {
         updatedAt: expect.any(Date)
       }
     }
+
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
 
     project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
