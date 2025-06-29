@@ -139,6 +139,7 @@ export default function SetupIntegration({
       // Check if project is selected but no private key is available
       if (
         selectedProjectSlug &&
+        Integrations[integrationType].privateKeyRequired &&
         !projectPrivateKey &&
         !manualPrivateKey.trim()
       ) {
@@ -164,6 +165,7 @@ export default function SetupIntegration({
       name,
       createIntegration,
       integrationName,
+      integrationType,
       router,
       selectedProjectSlug,
       projectPrivateKey,
