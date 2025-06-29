@@ -38,6 +38,7 @@ interface ProjectEnvironmentMappingProps {
   privateKeyLoading?: boolean
   manualPrivateKey?: string
   onManualPrivateKeyChange?: (key: string) => void
+  isProjectDisabled?: boolean
 }
 
 export default function ProjectEnvironmentMapping({
@@ -51,7 +52,8 @@ export default function ProjectEnvironmentMapping({
   projectPrivateKey,
   privateKeyLoading,
   manualPrivateKey,
-  onManualPrivateKeyChange
+  onManualPrivateKeyChange,
+  isProjectDisabled = false
 }: ProjectEnvironmentMappingProps): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [projects, setProjects] = useState<PartialProject[]>([])
@@ -81,7 +83,7 @@ export default function ProjectEnvironmentMapping({
   )
 
   useEffect(() => {
-    if (!currentWorkspace) return
+    if (!currentWorkspace || isProjectDisabled) return
 
     getAllProjectsOfWorkspace().then(({ data, success }) => {
       if (success && data) {
@@ -90,7 +92,7 @@ export default function ProjectEnvironmentMapping({
         )
       }
     })
-  }, [currentWorkspace, getAllProjectsOfWorkspace])
+  }, [currentWorkspace, getAllProjectsOfWorkspace, isProjectDisabled])
 
   // Fetch environments on project change
   useEffect(() => {
@@ -132,6 +134,8 @@ export default function ProjectEnvironmentMapping({
   )
 
   const handleProjectSelect = (projectValue: string) => {
+    if (isProjectDisabled) return
+
     const project = JSON.parse(projectValue) as PartialProject
     setSelectedProjectLocal(project)
     setSelectedEnvironments([])
@@ -229,6 +233,7 @@ export default function ProjectEnvironmentMapping({
           Specify Project
         </label>
         <Select
+          disabled={isProjectDisabled}
           onValueChange={handleProjectSelect}
           value={
             selectedProjectLocal
@@ -237,7 +242,9 @@ export default function ProjectEnvironmentMapping({
           }
         >
           <SelectTrigger
-            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
+              isProjectDisabled ? 'cursor-not-allowed opacity-50' : ''
+            }`}
             id="project-select"
           >
             <SelectValue placeholder="Select project">
@@ -271,6 +278,7 @@ export default function ProjectEnvironmentMapping({
           </label>
           <Input
             className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            disabled={isProjectDisabled}
             id="project-private-key"
             onChange={(e) => onManualPrivateKeyChange?.(e.target.value)}
             placeholder="Enter project private key"
@@ -291,7 +299,9 @@ export default function ProjectEnvironmentMapping({
         <div className="rounded-md border border-white/10 p-2">
           {!selectedProjectLocal ? (
             <div className="px-2 py-4 text-sm text-white/60">
-              Please select a project first
+              {isProjectDisabled
+                ? 'No project selected'
+                : 'Please select a project first'}
             </div>
           ) : environments.length > 0 ? (
             environments.map((env) => (

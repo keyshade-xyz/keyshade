@@ -69,14 +69,13 @@ export const CreateIntegrationRequestSchema = z.object({
 
 export const CreateIntegrationResponseSchema = IntegrationSchema
 
-export const UpdateIntegrationRequestSchema =
-  CreateIntegrationRequestSchema.partial()
-    .omit({
-      workspaceSlug: true
-    })
-    .extend({
-      integrationSlug: IntegrationSchema.shape.slug
-    })
+export const UpdateIntegrationRequestSchema = z.object({
+  integrationSlug: IntegrationSchema.shape.slug,
+  name: z.string().optional(),
+  notifyOn: IntegrationSchema.shape.notifyOn.optional(),
+  metadata: z.record(z.string()).optional(),
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug).optional()
+})
 
 export const UpdateIntegrationResponseSchema = IntegrationSchema
 
