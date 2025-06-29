@@ -28,7 +28,6 @@ import {
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
-import { IntegrationAddedEventMetadata } from '@/event/event.types'
 
 @Injectable()
 export class IntegrationService {
@@ -230,8 +229,12 @@ export class IntegrationService {
         source: EventSource.INTEGRATION,
         title: `Integration ${integration.name} created`,
         metadata: {
-          privateKey: dto.privateKey
-        } as IntegrationAddedEventMetadata,
+          integration: {
+            id: integration.id,
+            name: integration.name,
+            type: integration.type
+          }
+        },
         workspaceId: workspaceId
       },
       this.prisma
@@ -243,7 +246,7 @@ export class IntegrationService {
       integration,
       this.prisma
     )
-    integrationObject.init(dto.privateKey, event.id)
+    integrationObject.init(privateKey, event.id)
 
     // integration.metadata = decryptMetadata(integration.metadata)
     delete integration.environments
