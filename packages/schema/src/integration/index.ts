@@ -63,7 +63,8 @@ export const CreateIntegrationRequestSchema = z.object({
   type: IntegrationSchema.shape.type,
   notifyOn: IntegrationSchema.shape.notifyOn.min(1).optional(),
   metadata: z.record(z.string()),
-  environmentSlugs: z.array(EnvironmentSchema.shape.slug.optional())
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug.optional()),
+  privateKey: z.string().optional()
 })
 
 export const CreateIntegrationResponseSchema = IntegrationSchema
