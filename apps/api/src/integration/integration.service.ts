@@ -67,8 +67,7 @@ export class IntegrationService {
   async createIntegration(
     user: AuthenticatedUser,
     dto: CreateIntegration,
-    workspaceSlug: Workspace['slug'],
-    privateKey?: Project['privateKey']
+    workspaceSlug: Workspace['slug']
   ) {
     this.logger.log(
       `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
@@ -106,9 +105,11 @@ export class IntegrationService {
         authorities: [Authority.READ_PROJECT]
       })
 
-      privateKey = project.storePrivateKey ? project.privateKey : privateKey
+      dto.privateKey = project.storePrivateKey
+        ? project.privateKey
+        : dto.privateKey
 
-      if (!privateKey && integrationObject.isPrivateKeyRequired()) {
+      if (!dto.privateKey && integrationObject.isPrivateKeyRequired()) {
         this.logger.error(
           `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
         )
@@ -227,7 +228,7 @@ export class IntegrationService {
         source: EventSource.INTEGRATION,
         title: `Integration ${integration.name} created`,
         metadata: {
-          privateKey
+          privateKey: dto.privateKey
         } as IntegrationAddedEventMetadata,
         workspaceId: workspaceId
       },
@@ -240,7 +241,7 @@ export class IntegrationService {
       integration,
       this.prisma
     )
-    integrationObject.init(privateKey, event.id)
+    integrationObject.init(dto.privateKey, event.id)
 
     // integration.metadata = decryptMetadata(integration.metadata)
     delete integration.environments

@@ -133,10 +133,10 @@ describe('Integration Controller Tests', () => {
         metadata: {
           webhookUrl: 'DUMMY_URL'
         },
-        notifyOn: [EventType.WORKSPACE_UPDATED]
+        notifyOn: [EventType.WORKSPACE_UPDATED],
+        privateKey: 'abc'
       },
-      workspace1.slug,
-      'abc'
+      workspace1.slug
     )
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -528,10 +528,10 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          projectSlug: project1.slug
+          projectSlug: project1.slug,
+          privateKey: 'abc'
         },
-        workspace1.slug,
-        'abc'
+        workspace1.slug
       )
 
       // Update the integration

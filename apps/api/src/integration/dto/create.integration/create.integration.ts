@@ -35,4 +35,8 @@ export class CreateIntegration {
 
   @IsObject()
   metadata: Record<string, string>
+
+  @IsString()
+  @IsOptional()
+  privateKey?: Project['privateKey']
 }

@@ -29,7 +29,7 @@ export default class IntegrationController {
     headers?: Record<string, string>
   ): Promise<ClientResponse<CreateIntegrationResponse>> {
     const response = await this.apiClient.post(
-      `/api/integration/${request.workspaceSlug}?privateKey=${request.privateKey}`,
+      `/api/integration/${request.workspaceSlug}`,
       request,
       headers
     )
