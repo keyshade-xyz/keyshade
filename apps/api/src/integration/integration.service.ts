@@ -94,6 +94,7 @@ export class IntegrationService {
     )
 
     let project: Project | null = null
+    let privateKey: string | null = null
     const environments: Array<Environment> | null = []
 
     // Check if the user has READ authority over the project
@@ -105,11 +106,12 @@ export class IntegrationService {
         authorities: [Authority.READ_PROJECT]
       })
 
-      dto.privateKey = project.storePrivateKey
-        ? project.privateKey
-        : dto.privateKey
+      privateKey =
+        project.storePrivateKey && project.privateKey
+          ? project.privateKey
+          : dto.privateKey
 
-      if (!dto.privateKey && integrationObject.isPrivateKeyRequired()) {
+      if (!privateKey && integrationObject.isPrivateKeyRequired()) {
         this.logger.error(
           `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
         )
@@ -307,34 +309,23 @@ export class IntegrationService {
       await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
     }
 
-    let project: Project | null = null
     let environments: Array<Environment> | null = null
 
-    // If the project is being changed, check if the user has READ authority over the new project
-    if (dto.projectSlug) {
-      this.logger.log(`Checking user access to project ${dto.projectSlug}`)
-      project = await this.authorizationService.authorizeUserAccessToProject({
-        user,
-        entity: { slug: dto.projectSlug },
-        authorities: [Authority.READ_PROJECT]
-      })
-    }
-
-    // Check if only environments are provided, or if the integration has no project associated from prior
-    if (dto.environmentSlugs && !integration.projectId && !dto.projectSlug) {
-      this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlugs}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not provide environment without project',
-          'Environment can only be provided if project is also provided'
-        )
-      )
-    }
-
-    // If the environment is being changed, check if the user has READ authority over the new environment
     if (dto.environmentSlugs) {
+      // Check if only environments are provided and the integration has no project associated from prior
+      if (!integration.projectId) {
+        this.logger.error(
+          `Can not provide environment without project. Environment slug: ${dto.environmentSlugs}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Can not provide environment without project',
+            'Environment can only be provided if project is also provided'
+          )
+        )
+      }
+
+      // If the environment is being changed, check if the user has READ authority over the new environment
       this.logger.log(
         `Checking user access to environments ${dto.environmentSlugs.join(', ')}`
       )
@@ -366,7 +357,6 @@ export class IntegrationService {
                 set: environments.map((environment) => ({ id: environment.id }))
               }
             : undefined,
-        projectId: project?.id,
         lastUpdatedById: user.id
       },
       include: {
