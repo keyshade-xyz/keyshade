@@ -157,4 +157,6 @@ export class SlackIntegration extends BaseIntegration {
       throw new InternalServerErrorException('Failed to emit event to Slack')
     }
   }
+
+  public async validateConfiguration(metadata: SlackIntegrationMetadata) {}
 }
