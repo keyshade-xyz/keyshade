@@ -119,7 +119,7 @@ export class IntegrationController {
     )
   }
 
-  @Post(':workspaceSlug/test')
+  @Post(':workspaceSlug/validate-config')
   @HttpCode(HttpStatus.OK)
   @RequiredApiKeyAuthorities(
     Authority.CREATE_INTEGRATION,
