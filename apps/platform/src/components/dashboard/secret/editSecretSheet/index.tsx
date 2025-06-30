@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import {
   editSecretOpenAtom,
   secretsOfProjectAtom,
+  selectedProjectAtom,
   selectedSecretAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
@@ -32,9 +33,10 @@ import {
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
     useAtom(editSecretOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
-  const { projectPrivateKey } = useProjectPrivateKey()
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   const [requestData, setRequestData] = useState<{
     name: string | undefined

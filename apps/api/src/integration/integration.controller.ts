@@ -30,14 +30,12 @@ export class IntegrationController {
   async createIntegration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration,
-    @Param('workspaceSlug') workspaceSlug: string,
-    @Query('privateKey') privateKey: string
+    @Param('workspaceSlug') workspaceSlug: string
   ) {
     return await this.integrationService.createIntegration(
       user,
       dto,
-      workspaceSlug,
-      privateKey
+      workspaceSlug
     )
   }
 

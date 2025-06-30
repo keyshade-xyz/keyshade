@@ -1,4 +1,4 @@
-import { Environment, Project } from '@prisma/client'
+import { Environment } from '@prisma/client'
 import { JsonObject } from '@prisma/client/runtime/library'
 
 export interface EventMetadata extends JsonObject {}
@@ -37,8 +37,4 @@ export interface EnvironmentUpdatedEventMetadata extends EventMetadata {
 
 export interface EnvironmentDeletedEventMetadata extends EventMetadata {
   name: Environment['name']
-}
-
-export interface IntegrationAddedEventMetadata extends EventMetadata {
-  privateKey: Project['privateKey']
 }

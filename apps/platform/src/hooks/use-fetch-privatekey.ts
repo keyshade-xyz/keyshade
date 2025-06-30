@@ -3,7 +3,6 @@ import { useAtom, useAtomValue } from 'jotai'
 import type { ProjectWithTierLimitAndCount } from '@keyshade/schema'
 import {
   selectedProjectPrivateKeyAtom,
-  selectedProjectAtom,
   localProjectPrivateKeyAtom
 } from '@/store'
 
@@ -13,12 +12,17 @@ export interface UseProjectPrivateKeyResult {
   setHasServerStoredKey: React.Dispatch<React.SetStateAction<boolean>>
   loading: boolean
 }
+type PartialProject = Pick<
+  ProjectWithTierLimitAndCount,
+  'slug' | 'storePrivateKey' | 'privateKey'
+>
 
-export function useProjectPrivateKey(): UseProjectPrivateKeyResult {
+export function useProjectPrivateKey(
+  selectedProject: PartialProject | null
+): UseProjectPrivateKeyResult {
   const [projectPrivateKey, setProjectPrivateKey] = useAtom(
     selectedProjectPrivateKeyAtom
   )
-  const selectedProject = useAtomValue(selectedProjectAtom)
   const localProjectPrivateKey = useAtomValue(localProjectPrivateKeyAtom)
 
   const [hasServerStoredKey, setHasServerStoredKey] = useState<boolean>(false)

@@ -53,7 +53,7 @@ export default function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const { projectPrivateKey } = useProjectPrivateKey()
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   useEffect(() => {
     if (!selectedProject) return

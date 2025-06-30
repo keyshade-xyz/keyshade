@@ -133,10 +133,10 @@ describe('Integration Controller Tests', () => {
         metadata: {
           webhookUrl: 'DUMMY_URL'
         },
-        notifyOn: [EventType.WORKSPACE_UPDATED]
+        notifyOn: [EventType.WORKSPACE_UPDATED],
+        privateKey: 'abc'
       },
-      workspace1.slug,
-      'abc'
+      workspace1.slug
     )
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
@@ -434,73 +434,6 @@ describe('Integration Controller Tests', () => {
       expect(result.statusCode).toEqual(409)
     })
 
-    it('should have access to a a project if projectSlug is provided while update', async () => {
-      // Create the project
-      const project = (await projectService.createProject(
-        user1,
-        workspace1.slug,
-        {
-          name: 'Project 3',
-          description: 'Description 3'
-        }
-      )) as Project
-
-      // Update the integration
-      const result = await app.inject({
-        method: 'PUT',
-        url: `/integration/${integration1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: {
-          projectSlug: project.slug
-        }
-      })
-
-      expect(result.statusCode).toEqual(200)
-
-      const updatedIntegration = await prisma.integration.findUnique({
-        where: {
-          id: integration1.id
-        }
-      })
-
-      expect(updatedIntegration).toBeDefined()
-      expect(updatedIntegration!.projectId).toEqual(project.id)
-    })
-
-    it('should fail to update if projectId is provided but the user does not have access to the project', async () => {
-      // Update the integration
-      const result = await app.inject({
-        method: 'PUT',
-        url: `/integration/${integration1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: {
-          projectSlug: project2.slug
-        }
-      })
-
-      expect(result.statusCode).toEqual(401)
-    })
-
-    it('should fail to update if projectId is provided but the project does not exist', async () => {
-      // Update the integration
-      const result = await app.inject({
-        method: 'PUT',
-        url: `/integration/${integration1.slug}`,
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        payload: {
-          projectSlug: '999999'
-        }
-      })
-
-      expect(result.statusCode).toEqual(404)
-    })
-
     it('should fail to update if the environment slug is specified and not the project slug', async () => {
       // Update the integration
       const result = await app.inject({
@@ -517,7 +450,7 @@ describe('Integration Controller Tests', () => {
       expect(result.statusCode).toEqual(400)
     })
 
-    it('should not fail to update if the integration has projectSlug present and only environmentSlugs is updated', async () => {
+    it('should not fail to update if the integration has project present and only environmentSlugs is updated', async () => {
       // Create the integration
       const integration = await integrationService.createIntegration(
         user1,
@@ -528,10 +461,10 @@ describe('Integration Controller Tests', () => {
             webhookUrl: 'DUMMY_URL'
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
-          projectSlug: project1.slug
+          projectSlug: project1.slug,
+          privateKey: 'abc'
         },
-        workspace1.slug,
-        'abc'
+        workspace1.slug
       )
 
       // Update the integration
@@ -558,6 +491,15 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should fail to update if the user does not have access to the environment', async () => {
+      await prisma.integration.update({
+        where: {
+          id: integration1.id
+        },
+        data: {
+          projectId: project1.id
+        }
+      })
+
       // Update the integration
       const result = await app.inject({
         method: 'PUT',
@@ -566,7 +508,6 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          projectSlug: project1.slug,
           environmentSlugs: [environment2.slug]
         }
       })
@@ -575,6 +516,15 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should fail to update if the environment does not exist', async () => {
+      await prisma.integration.update({
+        where: {
+          id: integration1.id
+        },
+        data: {
+          projectId: project1.id
+        }
+      })
+
       // Update the integration
       const result = await app.inject({
         method: 'PUT',
@@ -583,7 +533,6 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          projectSlug: project1.slug,
           environmentSlugs: ['999999']
         }
       })

@@ -54,7 +54,7 @@ function OverviewPage(): React.JSX.Element {
     hasServerStoredKey,
     setHasServerStoredKey,
     loading
-  } = useProjectPrivateKey()
+  } = useProjectPrivateKey(selectedProject)
 
   useEffect(() => {
     if (regeneratedKeys) {
