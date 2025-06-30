@@ -114,14 +114,13 @@ export class SecretService {
     )
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     // Create the secret
     this.logger.log(`Creating secret ${dto.name} in project ${projectSlug}`)
@@ -270,21 +269,19 @@ export class SecretService {
     )
 
     // Check if the secret with the same name already exists in the project
-    dto.name && (await this.secretExists(dto.name, secret.project))
+    await this.secretExists(dto.name, secret.project)
 
     // Check if a variable with the same name already exists in the project
-    dto.name &&
-      (await this.variableService.variableExists(dto.name, secret.project))
+    await this.variableService.variableExists(dto.name, secret.project)
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          secret.project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      secret.project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     const op = []
 
@@ -298,9 +295,7 @@ export class SecretService {
         },
         data: {
           name: dto.name,
-          slug: dto.name
-            ? await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET')
-            : undefined,
+          slug: await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET'),
           note: dto.note,
           ...(dto.rotateAfter
             ? {
@@ -561,9 +556,9 @@ export class SecretService {
     }
 
     let maxVersion = 0
-    for (let i = 0; i < secret.versions.length; i++) {
-      if (secret.versions[i].version > maxVersion) {
-        maxVersion = secret.versions[i].version
+    for (const element of secret.versions) {
+      if (element.version > maxVersion) {
+        maxVersion = element.version
       }
     }
     this.logger.log(
@@ -1214,7 +1209,12 @@ export class SecretService {
    * @param secretName the name of the secret to check
    * @param project the project to check the secret in
    */
-  async secretExists(secretName: Secret['name'], project: Project) {
+  async secretExists(
+    secretName: Secret['name'] | null | undefined,
+    project: Project
+  ) {
+    if (!secretName) return
+
     this.logger.log(
       `Checking if secret ${secretName} exists in project ${project.slug}`
     )

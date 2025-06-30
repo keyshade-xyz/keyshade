@@ -110,14 +110,13 @@ export class VariableService {
     )
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     // Create the variable
     this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
@@ -253,11 +252,10 @@ export class VariableService {
       })
 
     // Check if the variable already exists in the project
-    dto.name && (await this.variableExists(dto.name, variable.project))
+    await this.variableExists(dto.name, variable.project)
 
     // Check if a secret with the same name already exists in the project
-    dto.name &&
-      (await this.secretService.secretExists(dto.name, variable.project))
+    await this.secretService.secretExists(dto.name, variable.project)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -265,14 +263,13 @@ export class VariableService {
     )
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          variable.project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      variable.project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     const op = []
 
@@ -286,9 +283,10 @@ export class VariableService {
         },
         data: {
           name: dto.name,
-          slug: dto.name
-            ? await this.slugGenerator.generateEntitySlug(dto.name, 'VARIABLE')
-            : undefined,
+          slug: await this.slugGenerator.generateEntitySlug(
+            dto.name,
+            'VARIABLE'
+          ),
           note: dto.note,
           lastUpdatedById: user.id
         },
@@ -562,9 +560,9 @@ export class VariableService {
     }
 
     let maxVersion = 0
-    for (let i = 0; i < variable.versions.length; i++) {
-      if (variable.versions[i].version > maxVersion) {
-        maxVersion = variable.versions[i].version
+    for (const element of variable.versions) {
+      if (element.version > maxVersion) {
+        maxVersion = element.version
       }
     }
     this.logger.log(
@@ -1102,7 +1100,12 @@ export class VariableService {
    * @returns nothing
    * @throws `ConflictException` if the variable already exists
    */
-  async variableExists(variableName: Variable['name'], project: Project) {
+  async variableExists(
+    variableName: Variable['name'] | null | undefined,
+    project: Project
+  ) {
+    if (!variableName) return
+
     this.logger.log(
       `Checking if variable ${variableName} already exists in project ${project.slug}`
     )

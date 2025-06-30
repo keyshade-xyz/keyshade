@@ -17,6 +17,7 @@ import { constructErrorBody } from './util'
  * @param user The user making the request
  * @param project The project that the environments must belong to
  * @param authorityCheckerService The AuthorityCheckerService instance
+ * @param shouldCreateRevisions If not set, the function will return an empty Map
  *
  * @throws NotFoundException if any of the environments do not exist
  * @throws BadRequestException if any of the environments do not belong to the given project
@@ -27,9 +28,12 @@ export const getEnvironmentIdToSlugMap = async (
   dto: CreateSecret | UpdateSecret | CreateVariable | UpdateVariable,
   user: AuthenticatedUser,
   project: Project,
-  authorizationService: AuthorizationService
+  authorizationService: AuthorizationService,
+  shouldCreateRevisions: boolean
 ): Promise<Map<string, string>> => {
   const environmentSlugToIdMap = new Map<string, string>()
+
+  if (!shouldCreateRevisions) return environmentSlugToIdMap
 
   // Check if the user has access to the environments
   const environmentSlugs = dto.entries.map((entry) => entry.environmentSlug)

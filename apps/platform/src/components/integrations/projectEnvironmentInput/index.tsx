@@ -20,13 +20,15 @@ interface ProjectEnvironmentInputProps {
   onEnvironmentChange?: (environmentSlugs: Environment['slug'][]) => void
   initialProject?: PartialProject | null
   initialEnvironments?: PartialEnvironment[] | null
+  isProjectDisabled?: boolean
 }
 
 export default function ProjectEnvironmentInput({
   onProjectChange,
   onEnvironmentChange,
   initialProject,
-  initialEnvironments
+  initialEnvironments,
+  isProjectDisabled = false
 }: ProjectEnvironmentInputProps): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [projects, setProjects] = useState<PartialProject[]>([])
@@ -56,7 +58,7 @@ export default function ProjectEnvironmentInput({
 
   // Fetch all projects of the workspace
   useEffect(() => {
-    if (!currentWorkspace) return
+    if (!currentWorkspace || isProjectDisabled) return
 
     getAllProjectsOfWorkspace().then(({ data, success }) => {
       if (!success || !data) return
@@ -68,7 +70,7 @@ export default function ProjectEnvironmentInput({
         }))
       )
     })
-  }, [currentWorkspace, getAllProjectsOfWorkspace])
+  }, [currentWorkspace, getAllProjectsOfWorkspace, isProjectDisabled])
 
   // Fetch environments when project changes
   useEffect(() => {
@@ -93,12 +95,14 @@ export default function ProjectEnvironmentInput({
 
   const handleProjectSelect = useCallback(
     (project: PartialProject) => {
+      if (isProjectDisabled) return
+
       setSelectedProject(project)
       if (onProjectChange) onProjectChange(project.slug)
       setSelectedEnvironments([])
       if (onEnvironmentChange) onEnvironmentChange([])
     },
-    [onProjectChange, onEnvironmentChange]
+    [onProjectChange, onEnvironmentChange, isProjectDisabled]
   )
 
   const handleEnvironmentToggle = useCallback(
@@ -125,6 +129,7 @@ export default function ProjectEnvironmentInput({
           Specify Project
         </label>
         <Select
+          disabled={isProjectDisabled}
           onValueChange={(value) => {
             const project = JSON.parse(value) as PartialProject
             handleProjectSelect(project)
@@ -132,7 +137,9 @@ export default function ProjectEnvironmentInput({
           value={selectedProject ? JSON.stringify(selectedProject) : undefined}
         >
           <SelectTrigger
-            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
+              isProjectDisabled ? 'cursor-not-allowed opacity-50' : ''
+            }`}
             id="project-select"
           >
             <SelectValue placeholder="Select project">

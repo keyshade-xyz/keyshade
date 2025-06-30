@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAtomValue } from 'jotai'
 import type {
@@ -7,7 +7,8 @@ import type {
   EventTypeEnum,
   Integration,
   IntegrationTypeEnum,
-  Project
+  Project,
+  ProjectWithTierLimitAndCount
 } from '@keyshade/schema'
 import { useRouter } from 'next/navigation'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
@@ -19,6 +20,7 @@ import ProjectEnvironmentMapping from '@/components/integrations/ProjectEnvironm
 import IntegrationForm from '@/components/integrations/integrationMetadata'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import ControllerInstance from '@/lib/controller-instance'
 import { selectedWorkspaceAtom } from '@/store'
 
@@ -26,6 +28,11 @@ interface SetupIntegrationProps {
   integrationType: IntegrationTypeEnum
   integrationName: string
 }
+
+type PartialProject = Pick<
+  ProjectWithTierLimitAndCount,
+  'slug' | 'storePrivateKey' | 'privateKey'
+>
 
 export default function SetupIntegration({
   integrationType,
@@ -39,15 +46,47 @@ export default function SetupIntegration({
   const [selectedProjectSlug, setSelectedProjectSlug] = useState<
     Project['slug'] | null
   >(null)
+  const [selectedProject, setSelectedProject] = useState<PartialProject | null>(
+    null
+  )
   const [selectedEnvironments, setSelectedEnvironments] = useState<
     Environment['slug'][]
   >([])
   const [metadata, setMetadata] = useState<Record<string, unknown>>({})
   const [mappings, setMappings] = useState<VercelEnvironmentMapping>({})
+  const [manualPrivateKey, setManualPrivateKey] = useState<string>('')
+
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
+  const { projectPrivateKey, loading: privateKeyLoading } =
+    useProjectPrivateKey(selectedProject)
+
   const router = useRouter()
-  const isMappingRequired = Integrations[integrationType].envMapping === true
+  const isMappingRequired = Integrations[integrationType].envMapping
+
+  // Fetch project details when project slug changes
+  const getProjectDetails = useHttp((projectSlug: string) =>
+    ControllerInstance.getInstance().projectController.getProject({
+      projectSlug
+    })
+  )
+
+  useEffect(() => {
+    if (selectedProjectSlug) {
+      getProjectDetails(selectedProjectSlug).then(({ data, success }) => {
+        if (success && data) {
+          setSelectedProject({
+            slug: data.slug,
+            storePrivateKey: data.storePrivateKey,
+            privateKey: data.privateKey
+          })
+        }
+      })
+    } else {
+      setSelectedProject(null)
+      setManualPrivateKey('')
+    }
+  }, [selectedProjectSlug, getProjectDetails])
 
   const createIntegration = useHttp(() => {
     const finalMetadata = isMappingRequired
@@ -57,6 +96,9 @@ export default function SetupIntegration({
         }
       : metadata
 
+    // Determine which private key to use
+    const privateKeyToUse = projectPrivateKey || manualPrivateKey || undefined
+
     return ControllerInstance.getInstance().integrationController.createIntegration(
       {
         name,
@@ -65,7 +107,8 @@ export default function SetupIntegration({
         workspaceSlug: selectedWorkspace!.slug,
         notifyOn: Array.from(selectedEvents),
         projectSlug: selectedProjectSlug ?? undefined,
-        environmentSlugs: selectedEnvironments
+        environmentSlugs: selectedEnvironments,
+        privateKey: privateKeyToUse
       }
     )
   })
@@ -74,9 +117,15 @@ export default function SetupIntegration({
     setName('')
     setSelectedEvents(new Set())
     setSelectedProjectSlug(null)
+    setSelectedProject(null)
     setSelectedEnvironments([])
     setMetadata({})
     setMappings({})
+    setManualPrivateKey('')
+  }
+
+  const handleProjectChange = (projectSlug: Project['slug'] | null) => {
+    setSelectedProjectSlug(projectSlug)
   }
 
   const handleSubmit = useCallback(
@@ -84,6 +133,17 @@ export default function SetupIntegration({
       e.preventDefault()
       if (!name.trim()) {
         toast.error('Name of integration is required')
+        return
+      }
+
+      // Check if project is selected but no private key is available
+      if (
+        selectedProjectSlug &&
+        Integrations[integrationType].privateKeyRequired &&
+        !projectPrivateKey &&
+        !manualPrivateKey.trim()
+      ) {
+        toast.error('Project private key is required for this integration')
         return
       }
 
@@ -101,8 +161,19 @@ export default function SetupIntegration({
         router.push('/integrations')
       }
     },
-    [name, createIntegration, integrationName, router]
+    [
+      name,
+      createIntegration,
+      integrationName,
+      integrationType,
+      router,
+      selectedProjectSlug,
+      projectPrivateKey,
+      manualPrivateKey
+    ]
   )
+
+  selectedProject && !privateKeyLoading && !projectPrivateKey
 
   return (
     <div className="mr-auto max-w-7xl p-6 text-white">
@@ -151,14 +222,19 @@ export default function SetupIntegration({
         {isMappingRequired ? (
           <ProjectEnvironmentMapping
             keyMapping={mappings}
+            manualPrivateKey={manualPrivateKey}
             onEnvironmentChange={setSelectedEnvironments}
             onKeyMappingChange={setMappings}
-            onProjectChange={setSelectedProjectSlug}
+            onManualPrivateKeyChange={setManualPrivateKey}
+            onProjectChange={handleProjectChange}
+            privateKeyLoading={privateKeyLoading}
+            projectPrivateKey={projectPrivateKey}
+            selectedProject={selectedProject}
           />
         ) : (
           <ProjectEnvironmentInput
             onEnvironmentChange={setSelectedEnvironments}
-            onProjectChange={setSelectedProjectSlug}
+            onProjectChange={handleProjectChange}
           />
         )}
 

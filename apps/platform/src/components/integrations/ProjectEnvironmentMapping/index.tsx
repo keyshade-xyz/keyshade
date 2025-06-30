@@ -1,4 +1,8 @@
-import type { Environment, Project } from '@keyshade/schema'
+import type {
+  Environment,
+  Project,
+  ProjectWithTierLimitAndCount
+} from '@keyshade/schema'
 import { useAtomValue } from 'jotai'
 import { useState, useEffect, useCallback } from 'react'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
@@ -17,6 +21,10 @@ import { Input } from '@/components/ui/input'
 type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
 type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
 type VercelSystemEnvironment = 'development' | 'preview' | 'production'
+type PartialProjectWithKey = Pick<
+  ProjectWithTierLimitAndCount,
+  'slug' | 'storePrivateKey' | 'privateKey'
+>
 
 interface ProjectEnvironmentMappingProps {
   onProjectChange?: (projectSlug: Project['slug'] | null) => void
@@ -25,6 +33,12 @@ interface ProjectEnvironmentMappingProps {
   initialProject?: PartialProject | null
   initialEnvironments?: PartialEnvironment[] | null
   keyMapping?: VercelEnvironmentMapping | null
+  selectedProject?: PartialProjectWithKey | null
+  projectPrivateKey?: string | null
+  privateKeyLoading?: boolean
+  manualPrivateKey?: string
+  onManualPrivateKeyChange?: (key: string) => void
+  isProjectDisabled?: boolean
 }
 
 export default function ProjectEnvironmentMapping({
@@ -33,14 +47,19 @@ export default function ProjectEnvironmentMapping({
   onKeyMappingChange,
   initialProject,
   initialEnvironments,
-  keyMapping
+  keyMapping,
+  selectedProject,
+  projectPrivateKey,
+  privateKeyLoading,
+  manualPrivateKey,
+  onManualPrivateKeyChange,
+  isProjectDisabled = false
 }: ProjectEnvironmentMappingProps): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [projects, setProjects] = useState<PartialProject[]>([])
   const [environments, setEnvironments] = useState<PartialEnvironment[]>([])
-  const [selectedProject, setSelectedProject] = useState<PartialProject | null>(
-    initialProject || null
-  )
+  const [selectedProjectLocal, setSelectedProjectLocal] =
+    useState<PartialProject | null>(initialProject || null)
   const [selectedEnvironments, setSelectedEnvironments] = useState<
     PartialEnvironment[]
   >(initialEnvironments || [])
@@ -64,7 +83,7 @@ export default function ProjectEnvironmentMapping({
   )
 
   useEffect(() => {
-    if (!currentWorkspace) return
+    if (!currentWorkspace || isProjectDisabled) return
 
     getAllProjectsOfWorkspace().then(({ data, success }) => {
       if (success && data) {
@@ -73,16 +92,16 @@ export default function ProjectEnvironmentMapping({
         )
       }
     })
-  }, [currentWorkspace, getAllProjectsOfWorkspace])
+  }, [currentWorkspace, getAllProjectsOfWorkspace, isProjectDisabled])
 
   // Fetch environments on project change
   useEffect(() => {
-    if (!selectedProject) {
+    if (!selectedProjectLocal) {
       setEnvironments([])
       return
     }
 
-    getAllEnvironmentsOfProject(selectedProject.slug).then(
+    getAllEnvironmentsOfProject(selectedProjectLocal.slug).then(
       ({ data, success }) => {
         if (success && data) {
           setEnvironments(
@@ -91,7 +110,7 @@ export default function ProjectEnvironmentMapping({
         }
       }
     )
-  }, [selectedProject, getAllEnvironmentsOfProject])
+  }, [selectedProjectLocal, getAllEnvironmentsOfProject])
 
   // Sync initial environments with fetched environments
   useEffect(() => {
@@ -115,8 +134,10 @@ export default function ProjectEnvironmentMapping({
   )
 
   const handleProjectSelect = (projectValue: string) => {
+    if (isProjectDisabled) return
+
     const project = JSON.parse(projectValue) as PartialProject
-    setSelectedProject(project)
+    setSelectedProjectLocal(project)
     setSelectedEnvironments([])
     setEnvironmentMappings({})
 
@@ -201,6 +222,10 @@ export default function ProjectEnvironmentMapping({
   const isEnvironmentSelected = (envId: string) =>
     selectedEnvironments.some((env) => env.id === envId)
 
+  // Check if private key input should be shown
+  const showPrivateKeyInput =
+    selectedProject && !privateKeyLoading && !projectPrivateKey
+
   return (
     <div className="flex flex-col gap-y-5">
       <div className="flex flex-col gap-y-2">
@@ -208,15 +233,22 @@ export default function ProjectEnvironmentMapping({
           Specify Project
         </label>
         <Select
+          disabled={isProjectDisabled}
           onValueChange={handleProjectSelect}
-          value={selectedProject ? JSON.stringify(selectedProject) : undefined}
+          value={
+            selectedProjectLocal
+              ? JSON.stringify(selectedProjectLocal)
+              : undefined
+          }
         >
           <SelectTrigger
-            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            className={`h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 ${
+              isProjectDisabled ? 'cursor-not-allowed opacity-50' : ''
+            }`}
             id="project-select"
           >
             <SelectValue placeholder="Select project">
-              {selectedProject?.name || 'Select project'}
+              {selectedProjectLocal?.name || 'Select project'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
@@ -235,14 +267,41 @@ export default function ProjectEnvironmentMapping({
         </Select>
       </div>
 
+      {/* Private Key Input - Show when project is selected but no private key is found */}
+      {showPrivateKeyInput ? (
+        <div className="flex flex-col gap-y-2">
+          <label
+            className="font-medium text-white"
+            htmlFor="project-private-key"
+          >
+            Project Private Key
+          </label>
+          <Input
+            className="h-[2.25rem] w-[35rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5"
+            disabled={isProjectDisabled}
+            id="project-private-key"
+            onChange={(e) => onManualPrivateKeyChange?.(e.target.value)}
+            placeholder="Enter project private key"
+            type="password"
+            value={manualPrivateKey || ''}
+          />
+          <p className="text-sm text-white/60">
+            This project doesn&apos;t have a stored private key. Please enter it
+            manually.
+          </p>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-y-2">
         <div className="font-medium text-white">
           Specify Environments & Map to Vercel Environments
         </div>
         <div className="rounded-md border border-white/10 p-2">
-          {!selectedProject ? (
+          {!selectedProjectLocal ? (
             <div className="px-2 py-4 text-sm text-white/60">
-              Please select a project first
+              {isProjectDisabled
+                ? 'No project selected'
+                : 'Please select a project first'}
             </div>
           ) : environments.length > 0 ? (
             environments.map((env) => (

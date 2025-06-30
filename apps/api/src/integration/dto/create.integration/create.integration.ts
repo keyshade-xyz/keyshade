@@ -33,6 +33,10 @@ export class CreateIntegration {
   @IsOptional()
   projectSlug?: Project['slug']
 
+  @IsString()
+  @IsOptional()
+  privateKey?: Project['privateKey']
+
   @IsObject()
   metadata: Record<string, string>
 }

@@ -1,3 +1,37 @@
+## [2.28.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0...v2.28.0-stage.1) (2025-06-30)
+
+### 🚀 Features
+
+* **platform:** Integration setup private key ([#1036](https://github.com/keyshade-xyz/keyshade/issues/1036)) ([465c2d1](https://github.com/keyshade-xyz/keyshade/commit/465c2d13a13d0879dd5478b980a8cec8bb7720cb))
+
+## [2.27.0](https://github.com/keyshade-xyz/keyshade/compare/v2.26.1...v2.27.0) (2025-06-28)
+
+### 🚀 Features
+
+* Add vercel integration ([#1006](https://github.com/keyshade-xyz/keyshade/issues/1006)) ([cd7ed9b](https://github.com/keyshade-xyz/keyshade/commit/cd7ed9bce4efa3c83f3f20d266cf7f27342535c5))
+* **api:** Multiple bug fixes and small feature implementations ([b123f54](https://github.com/keyshade-xyz/keyshade/commit/b123f54ca5a0aecf5739c0038fad59095250f03b))
+* **platform:** Updated description metadata ([5b82120](https://github.com/keyshade-xyz/keyshade/commit/5b82120d09fbe3ff8252b5058ab25a1afd9e4e2a))
+* **platform:** Vercel integration platform ([#1031](https://github.com/keyshade-xyz/keyshade/issues/1031)) ([167f57e](https://github.com/keyshade-xyz/keyshade/commit/167f57e25d0f3fe4993780b55cdec786f56a1d50))
+* trigger release version bump ([4c2e34d](https://github.com/keyshade-xyz/keyshade/commit/4c2e34d689bda0d05bd97fb72d5970d9854168a5))
+
+### 🐛 Bug Fixes
+
+* **api:** Fixed import ([5753b1a](https://github.com/keyshade-xyz/keyshade/commit/5753b1a9c12f4c41a32fe726e0a98b5cd01d0beb))
+* **api:** Rearranged transactions to ensure user cache updates properly ([cfa80c1](https://github.com/keyshade-xyz/keyshade/commit/cfa80c122bb380d57f418f8553af6e6f854d1b06))
+* **cli:** allow keyshade run to accept multiple arguments without quotes ([#1033](https://github.com/keyshade-xyz/keyshade/issues/1033)) ([3148097](https://github.com/keyshade-xyz/keyshade/commit/3148097b5ca8359693ee5db3d23ee2c6de90bcca))
+
+### 🔧 Miscellaneous Chores
+
+* **cli:** Bumped version ([d618592](https://github.com/keyshade-xyz/keyshade/commit/d618592dee80123a4aa2501153cc171f2d6f224b))
+* **release:** 2.27.0-stage.1 [skip ci] ([8e4966a](https://github.com/keyshade-xyz/keyshade/commit/8e4966a335a09c0b42fb3c61e630141cd4f41840))
+* **release:** 2.27.0-stage.2 [skip ci] ([ff432ef](https://github.com/keyshade-xyz/keyshade/commit/ff432efc7f707465f87665716110454e36857240))
+* **release:** 2.27.0-stage.3 [skip ci] ([8dcb8ad](https://github.com/keyshade-xyz/keyshade/commit/8dcb8adb5840000d682aa5c8d88f3026a651ec1d))
+* **release:** 2.27.0-stage.4 [skip ci] ([6fa1f23](https://github.com/keyshade-xyz/keyshade/commit/6fa1f23f718613edeb66a3716c6a67aed13bd81d))
+* **release:** 2.27.0-stage.5 [skip ci] ([93f9ab7](https://github.com/keyshade-xyz/keyshade/commit/93f9ab78a4deb14376a2122782a5c0139abe7d7d))
+* **release:** 2.27.0-stage.6 [skip ci] ([6d663da](https://github.com/keyshade-xyz/keyshade/commit/6d663dabff7ccf1f996a1b95c47007ca21e37d44))
+* **release:** 2.27.0-stage.7 [skip ci] ([0cbbd2e](https://github.com/keyshade-xyz/keyshade/commit/0cbbd2ecd7bd8a44ffad0f7ae1ab599f0813a493))
+* **release:** 2.27.0-stage.8 [skip ci] ([887b24e](https://github.com/keyshade-xyz/keyshade/commit/887b24e4591ebae4d422ccff1d0ac24631538862))
+
 ## [2.27.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0-stage.7...v2.27.0-stage.8) (2025-06-28)
 
 ### 🐛 Bug Fixes

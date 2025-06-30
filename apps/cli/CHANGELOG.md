@@ -194,3 +194,15 @@
 - Updated `keyshade run` command to parse command without quotes
 - Run command exits when the command passed is a one-time only command
 - Updated `keyshade run` command to kill child command upon ctrl+c
+
+## 3.2.0
+
+### Minor Changes
+
+- Added `keyshade integration` base command
+
+### Patches
+
+- Updated `keyshade run` command to parse command without quotes
+- Run command exits when the command passed is a one-time only command
+- Updated `keyshade run` command to kill child command upon ctrl+c
