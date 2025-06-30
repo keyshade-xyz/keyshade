@@ -623,9 +623,10 @@ export class IntegrationService {
    * @param dto The integration data
    * @param workspaceSlug The slug of the workspace the integration is being
    * created in
+   * @param privateKey: The private key of the project the integration is being
    * @returns { success: true } if the integration configuration is valid
    */
-  async testIntegration(
+  async validateIntegrationMetadata(
     user: AuthenticatedUser,
     dto: CreateIntegration,
     workspaceSlug: Workspace['slug']
@@ -634,7 +635,7 @@ export class IntegrationService {
       `User ${user.id} is testing configuration of integration ${dto.name} in workspace ${workspaceSlug}`
     )
 
-    await this.validateIntegrationCreation(user, dto, workspaceSlug)
+    await this.validateIntegrationConfiguration(user, dto, workspaceSlug)
 
     return { success: true }
   }
@@ -659,7 +660,7 @@ export class IntegrationService {
    * created in
    * @returns environments, project, workspaceId
    */
-  private async validateIntegrationCreation(
+  private async validateIntegrationConfiguration(
     user: AuthenticatedUser,
     dto: CreateIntegration,
     workspaceSlug: Workspace['slug']
