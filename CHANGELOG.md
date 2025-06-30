@@ -1,3 +1,9 @@
+## [2.28.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0...v2.28.0-stage.1) (2025-06-30)
+
+### 🚀 Features
+
+* **platform:** Integration setup private key ([#1036](https://github.com/keyshade-xyz/keyshade/issues/1036)) ([465c2d1](https://github.com/keyshade-xyz/keyshade/commit/465c2d13a13d0879dd5478b980a8cec8bb7720cb))
+
 ## [2.27.0](https://github.com/keyshade-xyz/keyshade/compare/v2.26.1...v2.27.0) (2025-06-28)
 
 ### 🚀 Features

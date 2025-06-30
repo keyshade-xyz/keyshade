@@ -28,7 +28,6 @@ import {
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
-import { IntegrationAddedEventMetadata } from '@/event/event.types'
 
 @Injectable()
 export class IntegrationService {
@@ -67,8 +66,7 @@ export class IntegrationService {
   async createIntegration(
     user: AuthenticatedUser,
     dto: CreateIntegration,
-    workspaceSlug: Workspace['slug'],
-    privateKey?: Project['privateKey']
+    workspaceSlug: Workspace['slug']
   ) {
     this.logger.log(
       `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
@@ -95,6 +93,7 @@ export class IntegrationService {
     )
 
     let project: Project | null = null
+    let privateKey: string | null = null
     const environments: Array<Environment> | null = []
 
     // Check if the user has READ authority over the project
@@ -106,7 +105,10 @@ export class IntegrationService {
         authorities: [Authority.READ_PROJECT]
       })
 
-      privateKey = project.storePrivateKey ? project.privateKey : privateKey
+      privateKey =
+        project.storePrivateKey && project.privateKey
+          ? project.privateKey
+          : dto.privateKey
 
       if (!privateKey && integrationObject.isPrivateKeyRequired()) {
         this.logger.error(
@@ -231,8 +233,12 @@ export class IntegrationService {
         source: EventSource.INTEGRATION,
         title: `Integration ${integration.name} created`,
         metadata: {
-          privateKey
-        } as IntegrationAddedEventMetadata,
+          integration: {
+            id: integration.id,
+            name: integration.name,
+            type: integration.type
+          }
+        },
         workspaceId: workspaceId
       },
       this.prisma
@@ -310,39 +316,22 @@ export class IntegrationService {
       await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
     }
 
-    let project: Project | null = null
     let environments: Array<Environment> | null = null
-
-    // If the project is being changed, check if the user has READ authority over the new project
-    if (dto.projectSlug) {
-      this.logger.log(`Checking user access to project ${dto.projectSlug}`)
-      project = await this.authorizationService.authorizeUserAccessToProject({
-        user,
-        entity: { slug: dto.projectSlug },
-        authorities: [Authority.READ_PROJECT]
-      })
-    }
-
-    // Check if only environments are provided, or if the integration has no project associated from prior
-    if (
-      dto.environmentSlugs &&
-      dto.environmentSlugs.length > 0 &&
-      !integration.projectId &&
-      !dto.projectSlug
-    ) {
-      this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slug: ${dto.environmentSlugs}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not provide environment without project',
-          'Environment can only be provided if project is also provided'
-        )
-      )
-    }
-
-    // If the environment is being changed, check if the user has READ authority over the new environment
     if (dto.environmentSlugs) {
+      // Check if only environments are provided and the integration has no project associated from prior
+      if (!integration.projectId) {
+        this.logger.error(
+          `Can not provide environment without project. Environment slug: ${dto.environmentSlugs}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Can not provide environment without project',
+            'Environment can only be provided if project is also provided'
+          )
+        )
+      }
+
+      // If the environment is being changed, check if the user has READ authority over the new environment
       this.logger.log(
         `Checking user access to environments ${dto.environmentSlugs.join(', ')}`
       )
@@ -374,7 +363,6 @@ export class IntegrationService {
                 set: environments.map((environment) => ({ id: environment.id }))
               }
             : undefined,
-        projectId: project?.id,
         lastUpdatedById: user.id
       },
       include: {

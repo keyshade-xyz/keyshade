@@ -212,7 +212,7 @@ export default class SlugGenerator {
    * @returns The generated slug
    */
   async generateEntitySlug(
-    name: string,
+    name: string | null | undefined,
     entityType:
       | 'WORKSPACE_ROLE'
       | 'WORKSPACE'
@@ -223,6 +223,8 @@ export default class SlugGenerator {
       | 'ENVIRONMENT'
       | 'API_KEY'
   ): Promise<string> {
+    if (!name) return undefined
+
     switch (entityType) {
       case 'WORKSPACE_ROLE':
         return this.generateUniqueSlug(name, 'workspaceRole')

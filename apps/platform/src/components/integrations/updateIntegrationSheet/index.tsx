@@ -38,7 +38,6 @@ function UpdateIntegration({
   const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
     new Set()
   )
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [selectedEnvironments, setSelectedEnvironments] = useState<string[]>([])
   const [envMappings, setEnvMappings] = useState<VercelEnvironmentMapping>({})
   const [metadata, setMetadata] = useState<Record<string, unknown>>({})
@@ -53,10 +52,6 @@ function UpdateIntegration({
       setName(selectedIntegration.name || '')
       setSelectedEvents(new Set(selectedIntegration.notifyOn))
       setMetadata(selectedIntegration.metadata)
-
-      if (selectedIntegration.project) {
-        setSelectedProject(selectedIntegration.project.slug)
-      }
 
       if (
         selectedIntegration.environments &&
@@ -82,10 +77,8 @@ function UpdateIntegration({
         integrationSlug: selectedIntegration!.slug,
         name:
           name.trim() === selectedIntegration!.name ? undefined : name.trim(),
-        type: selectedIntegration!.type,
         notifyOn: Array.from(selectedEvents),
         metadata: finalMetadata as Record<string, string>,
-        ...(selectedProject ? { projectSlug: selectedProject } : {}),
         ...(selectedEnvironments.length > 0
           ? { environmentSlugs: selectedEnvironments }
           : {})
@@ -171,6 +164,14 @@ function UpdateIntegration({
     setIsEditIntegrationOpen(false)
   }
 
+  const handleEnvironmentChange = (environmentSlugs: string[]) => {
+    setSelectedEnvironments(environmentSlugs)
+  }
+
+  const handleKeyMappingChange = (mappings: VercelEnvironmentMapping) => {
+    setEnvMappings(mappings)
+  }
+
   if (!selectedIntegration || !integrationType) return null
 
   return (
@@ -224,17 +225,17 @@ function UpdateIntegration({
             <ProjectEnvironmentMapping
               initialEnvironments={selectedIntegration.environments}
               initialProject={selectedIntegration.project}
+              isProjectDisabled
               keyMapping={envMappings}
-              onEnvironmentChange={setSelectedEnvironments}
-              onKeyMappingChange={setEnvMappings}
-              onProjectChange={setSelectedProject}
+              onEnvironmentChange={handleEnvironmentChange}
+              onKeyMappingChange={handleKeyMappingChange}
             />
           ) : (
             <ProjectEnvironmentInput
               initialEnvironments={selectedIntegration.environments}
               initialProject={selectedIntegration.project}
-              onEnvironmentChange={setSelectedEnvironments}
-              onProjectChange={setSelectedProject}
+              isProjectDisabled
+              onEnvironmentChange={handleEnvironmentChange}
             />
           )}
 
