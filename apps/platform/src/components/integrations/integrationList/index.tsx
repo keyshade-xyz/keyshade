@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import type { Integration } from '@keyshade/schema'
 import Link from 'next/link'
 import EmptyIntegration from '../emptyIntegration'
@@ -21,11 +21,27 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
+import ErrorCard from '@/components/shared/error-card'
+
+type ErrorMessage = { header: string; body: string } | null
+
+function IntegrationListItemSkeleton(): React.JSX.Element {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+    </div>
+  )
+}
 
 function IntegrationList() {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [integrations, setIntegrations] = useAtom(integrationsOfWorkspaceAtom)
   const setSelectedIntegration = useSetAtom(selectedIntegrationAtom)
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
+  const [loading, setLoading] = useState<boolean>(true)
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
@@ -41,15 +57,21 @@ function IntegrationList() {
   )
 
   useEffect(() => {
-    const fetchIntegrations = async () => {
-      const { data, success } = await getAllIntegrations()
-      if (success && data) {
-        setIntegrations(data.items)
-      }
-    }
-
     if (selectedWorkspace?.slug) {
-      fetchIntegrations()
+      getAllIntegrations()
+        .then(({ data, success, error }) => {
+          if (success && data) {
+            setIntegrations(data.items)
+          }
+          if (error) {
+            const errorMsg = error.message
+            const parsedError = JSON.parse(errorMsg) as ErrorMessage
+            setErrorMessage(parsedError)
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
     }
   }, [
     selectedWorkspace,
@@ -77,6 +99,20 @@ function IntegrationList() {
     },
     [setSelectedIntegration, setIsDeleteIntegrationOpen]
   )
+
+  if (loading) {
+    return (
+      <div className="flex animate-pulse flex-col gap-y-4">
+        <IntegrationListItemSkeleton />
+        <IntegrationListItemSkeleton />
+      </div>
+    )
+  }
+  if (!hasIntegrations && errorMessage) {
+    return (
+      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
+    )
+  }
 
   return (
     <div className="flex h-full w-full justify-center">

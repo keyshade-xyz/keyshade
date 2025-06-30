@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
+import ErrorCard from '../shared/error-card'
 import { cn } from '@/lib/utils'
 
 interface InfiniteScrollListResponse<T> {
@@ -58,9 +59,12 @@ export function InfiniteScrollList<T>({
         page: currentPage,
         limit: itemsPerPage
       })
-
-      if (!success) throw new Error(err?.message || 'Fetch failed')
-
+      if (!success && err) {
+        const errorMsg = err.message
+        const parsedError = JSON.parse(errorMsg) as ErrorMessage
+        setErrorMessage(parsedError)
+        return
+      }
       const fetched = data.items
       const total = data.metadata?.totalCount ?? 0
 
@@ -76,11 +80,6 @@ export function InfiniteScrollList<T>({
 
         return [...prev, ...newItems]
       })
-      if (err) {
-        const errorMsg = err.message
-        const parsedError = JSON.parse(errorMsg) as ErrorMessage
-        setErrorMessage(parsedError)
-      }
       setErrorMessage(null)
     } catch (e) {
       hasMoreRef.current = false
@@ -138,22 +137,8 @@ export function InfiniteScrollList<T>({
     )
   }
   if (errorMessage && items.length === 0) {
-    return inTable ? (
-      <tr>
-        <td className="p-4 text-center text-white/80" colSpan={3}>
-          <h3 className="mb-2 text-lg font-semibold text-white">
-            {errorMessage.header}
-          </h3>
-          <p className="mb-6 text-sm text-white/70">{errorMessage.body}</p>
-        </td>
-      </tr>
-    ) : (
-      <div className="p-4 text-center text-white/80">
-        <h3 className="mb-2 text-lg font-semibold text-white">
-          {errorMessage.header}
-        </h3>
-        <p className="mb-6 text-sm text-white/70">{errorMessage.body}</p>
-      </div>
+    return (
+      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
     )
   }
   if (items.length === 0) {

@@ -1,6 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
-import { Users } from 'lucide-react'
 import RoleCard from '../roleCard'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -12,6 +11,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+import ErrorCard from '@/components/shared/error-card'
 
 type ErrorMessage = { header: string; body: string } | null
 
@@ -67,17 +67,7 @@ export default function RoleList(): React.JSX.Element {
       <RoleListItemSkeleton />
     </div>
   ) : roles.length === 0 ? (
-    <div className="mx-auto max-w-md">
-      <div className="rounded-xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-sm">
-        <div className="mb-4 inline-flex rounded-full bg-white/10 p-4">
-          <Users className="h-8 w-8 text-white/70" />
-        </div>
-        <h3 className="mb-2 text-lg font-semibold text-white">
-          {errorMessage?.header}
-        </h3>
-        <p className="mb-6 text-sm text-white/70">{errorMessage?.body}</p>
-      </div>
-    </div>
+    <ErrorCard description={errorMessage?.body} header={errorMessage?.header} />
   ) : (
     <Table className="h-full w-full">
       <TableHeader className="h-[3.125rem] w-full">
