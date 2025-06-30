@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { posthog } from 'posthog-js'
 import { z } from 'zod'
 import { LoadingSVG } from '@public/svg/shared'
+import { useRouter } from 'next/navigation'
 import TeamOverviewForm from './onboarding slides/team-overview-form'
 import RoleIndustryForm from './onboarding slides/role-industry-form'
 import ProfileDetailsForm from './onboarding slides/profile-details-form'
@@ -45,6 +46,8 @@ export default function OnboardingStepper() {
     name: user?.name || '',
     profilePictureUrl: user?.profilePictureUrl || ''
   })
+
+  const router = useRouter()
 
   const finishOnboarding = useHttp(() =>
     ControllerInstance.getInstance().userController.finishOnboarding({
@@ -87,7 +90,7 @@ export default function OnboardingStepper() {
         Cookies.set('isOnboardingFinished', 'true')
         setUser(updated)
         posthog.identify()
-        window.location.href = '/'
+        router.push('/')
       }
     } finally {
       toast.dismiss()
@@ -148,14 +151,16 @@ export default function OnboardingStepper() {
               )}
             </Button>
           </div>
-          <Button
-            className="border-white/60 text-sm text-white/60"
-            disabled={isLoading}
-            onClick={handleSubmit}
-            variant="outline"
-          >
-            Skip
-          </Button>
+          {currentStep !== 1 && currentStep !== totalSteps && (
+            <Button
+              className="border-white/60 text-sm text-white/60"
+              disabled={isLoading}
+              onClick={handleSubmit}
+              variant="outline"
+            >
+              Skip
+            </Button>
+          )}
         </div>
       </div>
     </div>

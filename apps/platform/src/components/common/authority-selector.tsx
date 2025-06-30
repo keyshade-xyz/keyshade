@@ -534,28 +534,35 @@ export default function AuthoritySelector({
   ) {
     return (
       <div key={group.name}>
-        <div
-          className={`space-y-2 ml-[${currentLevel * 20}px]`}
-          key={group.name}
-        >
-          <div className="flex items-center gap-2">
-            <Checkbox
-              checked={isGroupSelected(group)}
-              className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
-              data-state={isGroupSelected(group) ? 'checked' : 'unchecked'}
-              id={group.name}
-              onCheckedChange={(checked) =>
-                handleGroupToggle(group, checked === true)
+        <div className={`ml-[${currentLevel * 20}px]`} key={group.name}>
+          <div
+            className="flex cursor-pointer flex-col gap-2 rounded-md p-2 hover:bg-white/5"
+            onClick={() => handleGroupToggle(group, !isGroupSelected(group))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleGroupToggle(group, !isGroupSelected(group))
               }
-            />
-            <label className="min-w-40 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              {group.name}
-            </label>
-          </div>
-          <div className="">
-            <p className="max-w-10 whitespace-nowrap text-xs text-zinc-400">
-              {group.description}
-            </p>
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={isGroupSelected(group)}
+                className="rounded-[4px] border border-[#18181B] bg-[#71717A] text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+                data-state={isGroupSelected(group) ? 'checked' : 'unchecked'}
+                id={group.name}
+              />
+              <label className="min-w-40 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                {group.name}
+              </label>
+            </div>
+            <div className="">
+              <p className="max-w-10 whitespace-nowrap text-xs text-zinc-400">
+                {group.description}
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4 pt-3">
             {group.permissions
@@ -567,8 +574,25 @@ export default function AuthoritySelector({
               })
               .map((permission) => (
                 <div
-                  className="mb-2 ml-4 flex flex-col rounded-[4px] p-2 transition-all duration-150 hover:bg-white/10"
+                  className="mb-2 ml-4 flex cursor-pointer flex-col rounded-[4px] p-2 transition-all duration-150 hover:bg-white/10"
                   key={String(permission.id)}
+                  onClick={() =>
+                    handleChecklistItemToggle(
+                      permission,
+                      !isItemSelected(permission.id)
+                    )
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleChecklistItemToggle(
+                        permission,
+                        !isItemSelected(permission.id)
+                      )
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -578,9 +602,6 @@ export default function AuthoritySelector({
                         isItemSelected(permission.id) ? 'checked' : 'unchecked'
                       }
                       id={String(permission.id)}
-                      onCheckedChange={(checked) =>
-                        handleChecklistItemToggle(permission, checked === true)
-                      }
                     />
                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       {permission.label}

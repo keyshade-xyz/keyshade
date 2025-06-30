@@ -11,6 +11,9 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+import ErrorCard from '@/components/shared/error-card'
+
+type ErrorMessage = { header: string; body: string } | null
 
 function RoleListItemSkeleton(): React.JSX.Element {
   return (
@@ -26,8 +29,8 @@ function RoleListItemSkeleton(): React.JSX.Element {
 export default function RoleList(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [roles, setRoles] = useAtom(rolesOfWorkspaceAtom)
-
   const [loading, setLoading] = useState<boolean>(true)
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
 
   const getAllRolesOfWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
@@ -40,9 +43,14 @@ export default function RoleList(): React.JSX.Element {
   useEffect(() => {
     if (selectedWorkspace) {
       getAllRolesOfWorkspace()
-        .then(({ data, success }) => {
+        .then(({ data, success, error }) => {
           if (success && data) {
             setRoles(data.items)
+          }
+          if (error) {
+            const errorMsg = error.message
+            const parsedError = JSON.parse(errorMsg) as ErrorMessage
+            setErrorMessage(parsedError)
           }
         })
         .finally(() => {
@@ -59,10 +67,7 @@ export default function RoleList(): React.JSX.Element {
       <RoleListItemSkeleton />
     </div>
   ) : roles.length === 0 ? (
-    <div className="w-full text-center text-sm text-white/60">
-      We could not find any roles for this workspace. This is likely a bug.
-      Please get in touch with us.
-    </div>
+    <ErrorCard description={errorMessage?.body} header={errorMessage?.header} />
   ) : (
     <Table className="h-full w-full">
       <TableHeader className="h-[3.125rem] w-full">

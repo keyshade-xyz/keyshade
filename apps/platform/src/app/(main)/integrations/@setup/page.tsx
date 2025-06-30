@@ -135,8 +135,44 @@ export default function SetupIntegration({
         toast.error('Name of integration is required')
         return
       }
+      if (selectedEvents.size === 0) {
+        toast.error('At least one event trigger is required')
+        return
+      }
 
-      // Check if project is selected but no private key is available
+      const finalMetadata = isMappingRequired
+        ? {
+            ...metadata,
+            environments: mappings
+          }
+        : metadata
+
+      if (Object.keys(finalMetadata).length === 0) {
+        toast.error('Configuration metadata is required')
+        return
+      }
+
+      const isEmptyValue = (value: unknown): boolean => {
+        if (typeof value === 'string' && value.trim() === '') {
+          return true
+        }
+
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).length === 0
+        ) {
+          return true
+        }
+        return false
+      }
+
+      const hasEmptyValues = Object.values(finalMetadata).some(isEmptyValue)
+
+      if (hasEmptyValues) {
+        toast.error('All configuration fields are required and cannot be empty')
+        return
+      }
       if (
         selectedProjectSlug &&
         Integrations[integrationType].privateKeyRequired &&
@@ -146,27 +182,32 @@ export default function SetupIntegration({
         toast.error('Project private key is required for this integration')
         return
       }
-
       setIsLoading(true)
 
       try {
-        const { success, data } = await createIntegration()
+        const { success, data } = await createIntegration(
+          finalMetadata as Record<string, string>
+        )
 
         if (success && data) {
           toast.success(`${integrationName} integration created!`)
           resetFormData()
+          router.push('/integrations')
         }
       } finally {
         setIsLoading(false)
-        router.push('/integrations')
       }
     },
     [
       name,
       createIntegration,
       integrationName,
-      integrationType,
       router,
+      selectedEvents,
+      metadata,
+      mappings,
+      isMappingRequired,
+      integrationType,
       selectedProjectSlug,
       projectPrivateKey,
       manualPrivateKey
