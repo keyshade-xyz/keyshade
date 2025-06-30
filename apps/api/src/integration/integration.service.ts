@@ -69,7 +69,7 @@ export class IntegrationService {
       workspaceId,
       project,
       privateKey: effectivePrivateKey
-    } = await this.validateIntegrationCreation(user, dto, workspaceSlug)
+    } = await this.validateIntegrationConfiguration(user, dto, workspaceSlug)
 
     // Create the integration
     this.logger.log(`Creating integration: ${dto.name}`)
@@ -773,8 +773,6 @@ export class IntegrationService {
     // Check for authentication parameters
     this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
     integrationObject.validateMetadataParameters(dto.metadata)
-
-    // END
 
     // Test the configuration of the integration
     this.logger.log(`Testing configuration for integration: ${dto.name}`)
