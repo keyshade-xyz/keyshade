@@ -133,7 +133,7 @@ export class IntegrationController {
     @Param('workspaceSlug') workspaceSlug: string,
     @Query('privateKey') privateKey: string
   ) {
-    return await this.integrationService.testIntegration(
+    return await this.integrationService.validateIntegrationMetadata(
       user,
       dto,
       workspaceSlug,
