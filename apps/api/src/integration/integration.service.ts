@@ -71,7 +71,7 @@ export class IntegrationService {
       workspaceId,
       project,
       privateKey: effectivePrivateKey
-    } = await this.validateIntegrationCreation(user, dto, workspaceSlug)
+    } = await this.validateIntegrationConfiguration(user, dto, workspaceSlug)
 
     // Create the integration
     this.logger.log(`Creating integration: ${dto.name}`)

@@ -130,14 +130,12 @@ export class IntegrationController {
   async testIntegration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration,
-    @Param('workspaceSlug') workspaceSlug: string,
-    @Query('privateKey') privateKey: string
+    @Param('workspaceSlug') workspaceSlug: string
   ) {
     return await this.integrationService.validateIntegrationMetadata(
       user,
       dto,
-      workspaceSlug,
-      privateKey
+      workspaceSlug
     )
   }
 }
