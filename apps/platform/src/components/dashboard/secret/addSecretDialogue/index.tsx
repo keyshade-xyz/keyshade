@@ -20,7 +20,7 @@ import {
   projectSecretCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import { cn, parseUpdatedEnvironmentValues, validateAsciiInput } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddSecretDialog() {
@@ -38,6 +38,7 @@ export default function AddSecretDialog() {
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >({})
+  const [secretNameError, setSecretNameError] = useState<string>('')
 
   const createSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.createSecret({
@@ -130,19 +131,32 @@ export default function AddSecretDialog() {
                 >
                   Secret Name
                 </label>
-                <Input
-                  className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
-                  disabled={isLoading}
-                  id="secret-name"
-                  onChange={(e) =>
-                    setRequestData({
-                      ...requestData,
-                      name: e.target.value
-                    })
-                  }
-                  placeholder="Enter the key of the secret"
-                  value={requestData.name}
-                />
+                <div className="flex w-full flex-col gap-2">
+                  <Input
+                    className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
+                      'border-red-500': Boolean(secretNameError)
+                    })}
+                    disabled={isLoading}
+                    id="secret-name"
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setSecretNameError(
+                        !validateAsciiInput(value)
+                          ? 'Only English letters and digits are allowed.'
+                          : ''
+                      )
+                      setRequestData({
+                        ...requestData,
+                        name: value
+                      })
+                    }}
+                    placeholder="Enter the key of the secret"
+                    value={requestData.name}
+                  />
+                  {secretNameError ? <span className="my-2 text-xs text-red-500">
+                      {secretNameError}
+                    </span> : null}
+                </div>
               </div>
 
               <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
@@ -175,7 +189,7 @@ export default function AddSecretDialog() {
               <div className="flex justify-end pt-4">
                 <Button
                   className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                  disabled={isLoading}
+                  disabled={isLoading || Boolean(secretNameError)}
                   onClick={handleAddSecret}
                 >
                   Add Secret

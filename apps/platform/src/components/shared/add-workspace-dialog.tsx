@@ -21,6 +21,7 @@ import {
   selectedWorkspaceAtom,
   globalSearchDataAtom
 } from '@/store'
+import { cn, validateAsciiInput } from '@/lib/utils'
 
 export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode
@@ -30,6 +31,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [workspaceNameError, setWorkspaceNameError] = useState<string>('')
 
   const createWorkspace = useHttp(() =>
     ControllerInstance.getInstance().workspaceController.createWorkspace({
@@ -102,16 +104,24 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
         <div className="flex flex-col gap-y-8">
           <div className="flex items-center gap-4">
             <Label htmlFor="workspace-name">Name</Label>
-            <Input
-              id="workspace-name"
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter the name"
-              value={name}
-            />
+            <div className='flex flex-col gap-2 w-full'>
+              <Input
+                className={cn({ 'border-red-500': Boolean(workspaceNameError) })}
+                id="workspace-name"
+                onChange={(e) => {
+                  const value = e.target.value
+                  setWorkspaceNameError(!validateAsciiInput(value) ? 'Only English letters and digits are allowed.' : '')
+                  setName(value)
+                }}
+                placeholder="Enter the name"
+                value={name}
+              />
+              {workspaceNameError ? <span className="text-xs text-red-500 my-2">{workspaceNameError}</span> : null}
+            </div>
           </div>
           <div className="flex justify-end">
             <Button
-              disabled={isLoading}
+              disabled={isLoading || Boolean(workspaceNameError)}
               onClick={handleCreate}
               variant="secondary"
             >

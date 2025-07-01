@@ -35,6 +35,7 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import WarningCard from '@/components/shared/warning-card'
+import { cn, validateAsciiInput } from '@/lib/utils'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
@@ -66,6 +67,7 @@ export default function CreateProjectDialogue(): JSX.Element {
     accessLevel: 'PRIVATE'
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [projectNameError, setProjectNameError] = useState<string>('')
   const [projectSlug, setProjectSlug] = useState<string>('')
   const [projectKeys, setProjectKeys] = useState<{
     projectName: string
@@ -253,17 +255,30 @@ export default function CreateProjectDialogue(): JSX.Element {
                 >
                   Name
                 </Label>
-                <Input
-                  className="col-span-3 h-[2.25rem] w-[20rem] "
-                  id="name"
-                  onChange={(e) => {
-                    setNewProjectData((prev) => ({
-                      ...prev,
-                      name: e.target.value
-                    }))
-                  }}
-                  placeholder="Enter the name"
-                />
+                <div className="flex flex-col">
+                  <Input
+                    className={cn('col-span-3 h-[2.25rem] w-[20rem]', {
+                      'border-red-500': Boolean(projectNameError)
+                    })}
+                    id="name"
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setProjectNameError(
+                        !validateAsciiInput(value)
+                          ? 'Only English letters and digits are allowed.'
+                          : ''
+                      )
+                      setNewProjectData((prev) => ({
+                        ...prev,
+                        name: e.target.value
+                      }))
+                    }}
+                    placeholder="Enter the name"
+                  />
+                  {projectNameError ? <span className="my-2 text-xs text-red-500">
+                      {projectNameError}
+                    </span> : null}
+                </div>
               </div>
 
               {/* DESCRIPTION */}
@@ -437,7 +452,7 @@ export default function CreateProjectDialogue(): JSX.Element {
           <div className="flex h-[2.25rem] w-full justify-end">
             <Button
               className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
-              disabled={isLoading}
+              disabled={isLoading || Boolean(projectNameError)}
               onClick={handleCreateNewProject}
               variant="secondary"
             >

@@ -20,7 +20,7 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { parseUpdatedEnvironmentValues } from '@/lib/utils'
+import { cn, parseUpdatedEnvironmentValues, validateAsciiInput } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddVariableDialogue() {
@@ -39,6 +39,7 @@ export default function AddVariableDialogue() {
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >({})
+  const [variableNameError, setVariableNameError] = useState<string>('')
 
   const createVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.createVariable({
@@ -132,18 +133,31 @@ export default function AddVariableDialogue() {
               >
                 Variable Name
               </label>
-              <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
-                id="variable-name"
-                onChange={(e) =>
-                  setRequestData({
-                    ...requestData,
-                    name: e.target.value
-                  })
-                }
-                placeholder="Enter the key of the variable"
-                value={requestData.name}
-              />
+              <div className="flex w-full flex-col gap-2">
+                <Input
+                  className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
+                    'border-red-500': Boolean(variableNameError)
+                  })}
+                  id="variable-name"
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setVariableNameError(
+                      !validateAsciiInput(value)
+                        ? 'Only English letters and digits are allowed.'
+                        : ''
+                    )
+                    setRequestData({
+                      ...requestData,
+                      name: value
+                    })
+                  }}
+                  placeholder="Enter the key of the variable"
+                  value={requestData.name}
+                />
+                {variableNameError ? <span className="my-2 text-xs text-red-500">
+                    {variableNameError}
+                  </span> : null}
+              </div>
             </div>
 
             <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
@@ -175,7 +189,7 @@ export default function AddVariableDialogue() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] w-[6.25rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(variableNameError)}
                 onClick={handleAddVariable}
               >
                 Add Variable

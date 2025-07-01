@@ -20,6 +20,7 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
+import { cn, validateAsciiInput } from '@/lib/utils'
 
 export default function AddEnvironmentDialogue() {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
@@ -34,6 +35,7 @@ export default function AddEnvironmentDialogue() {
     environmentDescription: ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [environmentNameError, setEnvironmentNameError] = useState<string>('')
 
   const createEnvironment = useHttp(() =>
     ControllerInstance.getInstance().environmentController.createEnvironment({
@@ -135,18 +137,25 @@ export default function AddEnvironmentDialogue() {
               >
                 Environment Name
               </label>
+              <div className='flex flex-col gap-2 w-full'>
               <Input
-                className="h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500"
+                className={cn('h-[2.75rem] w-[20rem] border border-white/10 bg-neutral-800 text-gray-300 placeholder:text-gray-500', {
+                  'border-red-500': Boolean(environmentNameError)
+                })}
                 id="environment-name"
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = e.target.value
+                  setEnvironmentNameError(!validateAsciiInput(value) ? 'Only English letters and digits are allowed.' : '')
                   setNewEnvironmentData({
                     ...newEnvironmentData,
                     environmentName: e.target.value
                   })
-                }
+                }}
                 placeholder="Enter the key of the environment"
                 value={newEnvironmentData.environmentName}
               />
+              {environmentNameError ? <span className="text-xs text-red-500 my-2">{environmentNameError}</span> : null}
+              </div>
             </div>
 
             <div className="flex h-[2.75rem] w-[28.625rem] items-center justify-center gap-6">
@@ -173,7 +182,7 @@ export default function AddEnvironmentDialogue() {
             <div className="flex justify-end pt-4">
               <Button
                 className="h-[2.625rem] rounded-lg bg-white text-xs font-semibold text-black hover:bg-gray-200"
-                disabled={isLoading}
+                disabled={isLoading || Boolean(environmentNameError)}
                 onClick={handleAddEnvironment}
               >
                 Add Environment

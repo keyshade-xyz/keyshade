@@ -94,3 +94,15 @@ export function mergeExistingEnvironments(oldValues: T, newValues: T): T {
 
   return mergedValues
 }
+
+/**
+ * Checks if a string contains only ASCII characters.
+ * Returns false if invalid, otherwise true.
+ */
+export function validateAsciiInput(value: string): boolean {
+  const alphaNumericRegex = /^[A-Za-z0-9]*$/
+  if (!alphaNumericRegex.test(value)) {
+    return false
+  }
+  return true
+}
