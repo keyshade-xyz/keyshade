@@ -1,3 +1,9 @@
+## [2.28.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.2...v2.28.0-stage.3) (2025-07-01)
+
+### 🐛 Bug Fixes
+
+* **platform:** Bug fixes ([#1034](https://github.com/keyshade-xyz/keyshade/issues/1034)) ([ac56a0f](https://github.com/keyshade-xyz/keyshade/commit/ac56a0fadef78f0176f2cd366ef13522b1098716))
+
 ## [2.28.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.1...v2.28.0-stage.2) (2025-07-01)
 
 ### 🐛 Bug Fixes
