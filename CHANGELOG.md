@@ -1,3 +1,9 @@
+## [2.28.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.1...v2.28.0-stage.2) (2025-07-01)
+
+### 🐛 Bug Fixes
+
+* **cli:** Crash on [secure] decryption due to missing private key ([#1037](https://github.com/keyshade-xyz/keyshade/issues/1037)) ([a90aba1](https://github.com/keyshade-xyz/keyshade/commit/a90aba1d382c9e81f13d08990d5d3a41c6419a79))
+
 ## [2.28.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0...v2.28.0-stage.1) (2025-06-30)
 
 ### 🚀 Features
