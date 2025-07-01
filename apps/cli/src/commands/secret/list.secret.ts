@@ -75,7 +75,7 @@ export default class ListSecret extends BaseCommand {
             createdBy
           } of values) {
             Logger.info(
-              `  | ${environment.name} (${environment.slug}): ${projectPrivateKey !== null ? await decrypt(projectPrivateKey, value) : 'Hidden'} (version ${version})`
+              `  | ${environment.name} (${environment.slug}): ${projectPrivateKey ? await decrypt(projectPrivateKey, value) : 'Hidden'} (version ${version})`
             )
             Logger.info(
               `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
