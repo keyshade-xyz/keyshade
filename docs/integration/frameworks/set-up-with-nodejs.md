@@ -84,8 +84,8 @@ To get started:
 2.  Click **"Create Project"**
 3.  Name your project (e.g. `nodejs-app`)
 4.  Inside the project, click the **"Secrets"** tab
-5.  Add your **secrets**:
-6.  Add your **variables**:
+5.  Add your **secrets** (e.g. `API_KEY`, `DATABASE_URL`)
+6.  Add your **variables** (e.g. `PORT`)
 
 > 💡 **Secrets vs Variables:**
 >
@@ -93,9 +93,11 @@ To get started:
 >     
 > -   **Variables** are non-sensitive settings — like ports, feature flags, or toggles — and are stored as plain values, not encrypted.
  
-> Need help with projects and secrets? See [Managing Secrets & Variables](https://claude.ai/docs/getting-started/adding-your-first-secret-and-variable.md)
+> Need help with projects and secrets? See [Managing Secrets & Variables](/docs/getting-started/adding-your-first-secret-and-variable.md)
 
 ## Initialize Keyshade in Your Project
+
+In order to use the configurations you just created on the dashboard, you would need to initialize keyshade in your project. This generates the necessary configurations for the CLI to tap into your keyshade project.
 
 From your project root:
 
@@ -119,7 +121,7 @@ keyshade init --workspace-slug <my-workspace> --project-slug <my-project> --envi
 
 This will generate a `keyshade.json` file in your project root.
 
-> More on this in the [CLI Reference](https://claude.ai/docs/getting-started/installing-the-cli.md)
+> More on this in the [CLI Reference](/docs/getting-started/installing-the-cli.md)
 
 ## Run Your App with Secure Env Injection
 
