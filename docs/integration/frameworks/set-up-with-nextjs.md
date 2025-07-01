@@ -72,7 +72,7 @@ To get started:
 2.  Click **“Create Project”**
 3.  Name your project (e.g. `nextjs-app`)
 4.  Inside the project, click the **“Secrets”** tab
-5.  Add your **secrets** (e.g. `NEXT_PUBLIC_API_BASE_URL`)
+5.  Add your **secrets** (e.g. `NEXT_PUBLIC_API_URL`)
 6.  Add your **variables** (e.g. `PORT`)
 
 > 💡 **Secrets vs Variables:**
@@ -130,7 +130,7 @@ Keyshade will inject your secrets and variables securely at runtime.
 
 Once your app is running with `keyshade run`, use `process.env` to access any injected values — no extra setup needed.
 
-For example, if you added a secret named or `NEXT_PUBLIC_API_BASE_URL` and a variable named `PORT` in the Keyshade dashboard:
+For example, if you added a secret named or `NEXT_PUBLIC_API_URL` and a variable named `PORT` in the Keyshade dashboard:
 
 ```typescript
 // Server-side
