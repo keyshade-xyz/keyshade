@@ -72,8 +72,8 @@ To get started:
 2.  Click **“Create Project”**
 3.  Name your project (e.g. `nextjs-app`)
 4.  Inside the project, click the **“Secrets”** tab
-5.  Add your **secrets**:  
-6.  Add your **variables**:
+5.  Add your **secrets** (e.g. `NEXT_PUBLIC_API_BASE_URL`)
+6.  Add your **variables** (e.g. `PORT`)
 
 > 💡 **Secrets vs Variables:**
 >
@@ -88,6 +88,8 @@ See [Next.js docs](https://nextjs.org/docs/app/guides/environment-variables#bund
 > Need help with projects and secrets? See [Managing Secrets & Variables](/docs/getting-started/adding-your-first-secret-and-variable.md)
 
 ## Initialize Keyshade in Your Project
+
+In order to use the configurations you just created on the dashboard, you would need to initialize keyshade in your project. This generates the necessary configurations for the CLI to tap into your keyshade project.
 
 From your project root:
 
