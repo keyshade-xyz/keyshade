@@ -68,7 +68,7 @@ export default class ListVariable extends BaseCommand {
       await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
         {
           projectSlug,
-          ...verbose
+          ...options
         },
         this.headers
       )
