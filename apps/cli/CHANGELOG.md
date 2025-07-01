@@ -206,3 +206,9 @@
 - Updated `keyshade run` command to parse command without quotes
 - Run command exits when the command passed is a one-time only command
 - Updated `keyshade run` command to kill child command upon ctrl+c
+
+## 3.2.1-stage.1
+
+### Patches
+
+- Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
