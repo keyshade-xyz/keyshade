@@ -85,7 +85,7 @@ export default class FetchSecretRevisions extends BaseCommand {
 
         for (const revision of revisions) {
           Logger.info(
-            `  | ${privateKey !== null ? await decrypt(privateKey, revision.value) : 'Hidden'} (version ${revision.version})`
+            `  | ${privateKey ? await decrypt(privateKey, revision.value) : 'Hidden'} (version ${revision.version})`
           )
           Logger.info(
             `  | Created on ${formatDate(revision.createdOn)} by ${revision.createdBy.name}`
