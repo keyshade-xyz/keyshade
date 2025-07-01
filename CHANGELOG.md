@@ -1,3 +1,13 @@
+## [2.28.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.3...v2.28.0-stage.4) (2025-07-01)
+
+### 🚀 Features
+
+* **cli:** Revamp CLI outputs ([#1040](https://github.com/keyshade-xyz/keyshade/issues/1040)) ([1d94f51](https://github.com/keyshade-xyz/keyshade/commit/1d94f5190899a1bdf762de1d65ecd452d823fbff))
+
+### 📚 Documentation
+
+* Add NextJS guide ([#1023](https://github.com/keyshade-xyz/keyshade/issues/1023)) ([fe25553](https://github.com/keyshade-xyz/keyshade/commit/fe25553c90e240c2162078d913fb7e234c7075d3))
+
 ## [2.28.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.2...v2.28.0-stage.3) (2025-07-01)
 
 ### 🐛 Bug Fixes
