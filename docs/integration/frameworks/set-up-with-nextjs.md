@@ -145,7 +145,7 @@ You can access `PORT` inside an API route (say `app/api/hello/route.ts`) like th
 
 Now, visit `http://localhost:3001/api/hello` to confirm the port is being read from your Keyshade secret.
 
-![Server-side Output](../../../blob/nextjs-guide-client-side-output.png)
+![Server-side Output](../../../blob/nextjs-guide-server-side-output.png)
 
 
 ### 🌐 Client-side example
@@ -155,7 +155,7 @@ Use NEXT_PUBLIC_API_URL in your React components aT say `app/page.tsx`
 
 Now, visit `http://localhost:3000` to see the public API URL rendered in the browser.
 
-![Client-side Output](../../../blob/nextjs-guide-server-side-output.png)
+![Client-side Output](../../../blob/nextjs-guide-client-side-output.png)
 
 
 **You're All Set 🎊**
