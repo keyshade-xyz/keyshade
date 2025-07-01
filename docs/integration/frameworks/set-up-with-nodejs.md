@@ -158,15 +158,13 @@ For example, if you added a secret named `DATABASE_URL` and a variable named `PO
 In JavaScript:
 
 ```javascript
-// JavaScript
 const dbUrl = process.env.DATABASE_URL;
 const port = process.env.PORT || 3000;
 ```
 
 In TypeScript:
 
-```typescript
-// TypeScript  
+```typescript 
 const dbUrl: string | undefined = process.env.DATABASE_URL;
 const port: number = parseInt(process.env.PORT || '3000');
 ```
