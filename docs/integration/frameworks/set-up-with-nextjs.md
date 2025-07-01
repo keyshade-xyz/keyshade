@@ -143,7 +143,7 @@ You can access `PORT` inside an API route (say `app/api/hello/route.ts`) like th
 
 ![Server-side example](../../../blob/nextjs-guide-server-side-code.png)
 
-Now, visit `http://localhost:3001/api/hello` to confirm the port is being read from your Keyshade secret.
+Now, visit `http://localhost:3000/api/hello` to confirm the port is being read from your Keyshade secret.
 
 ![Server-side Output](../../../blob/nextjs-guide-server-side-output.png)
 
