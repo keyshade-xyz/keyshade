@@ -10,6 +10,8 @@ import formatDate from '@/util/date-formatter'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
 import { fetchPrivateKey } from '@/util/configuration'
 import { decrypt } from '@/util/decrypt'
+import { Table } from '@/util/table'
+import chalk from 'chalk'
 
 export default class ListSecret extends BaseCommand {
   getName(): string {
@@ -34,7 +36,14 @@ export default class ListSecret extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return [...PAGINATION_OPTION]
+    return [
+      {
+        short: '-v',
+        long: '--verbose',
+        description: 'Prints detailed information about each secret'
+      },
+      ...PAGINATION_OPTION
+    ]
   }
 
   getUsage(): string {
@@ -50,6 +59,11 @@ export default class ListSecret extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
+    const { verbose } = options
+    if (!projectSlug) {
+      Logger.error('Project slug is required')
+      return
+    }
     const { paginationOptions } = await this.parseInput(options)
     const projectPrivateKey = await fetchPrivateKey(projectSlug)
 
@@ -64,23 +78,61 @@ export default class ListSecret extends BaseCommand {
 
     if (success) {
       const secrets = data.items
+      Logger.header(`Fetching all secrets for ${projectSlug}...`)
       if (secrets.length > 0) {
-        for (const { secret, values } of secrets) {
-          Logger.info(`- ${secret.name} (${secret.slug})`)
-          for (const {
-            environment,
-            value,
-            version,
-            createdOn,
-            createdBy
-          } of values) {
-            Logger.info(
-              `  | ${environment.name} (${environment.slug}): ${projectPrivateKey !== null ? await decrypt(projectPrivateKey, value) : 'Hidden'} (version ${version})`
+        if (verbose) {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value',
+            '🗓️ Created On',
+            '👤 Created By'
+          ]
+          for (const { secret, values } of secrets) {
+            Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
+            const rows = await Promise.all(
+              values.map(
+                async ({
+                  environment,
+                  value,
+                  version,
+                  createdOn,
+                  createdBy
+                }) => [
+                  `${secret.name}(${secret.slug})`,
+                  environment.name,
+                  String(version),
+                  projectPrivateKey !== null
+                    ? await decrypt(projectPrivateKey, value)
+                    : 'Hidden',
+                  formatDate(createdOn),
+                  createdBy.name
+                ]
+              )
             )
-            Logger.info(
-              `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
+            Table.render(headers, rows)
+          }
+        } else {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value'
+          ]
+          for (const { secret, values } of secrets) {
+            Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
+            const rows = await Promise.all(
+              values.map(async ({ environment, value, version }) => [
+                `${secret.name}(${secret.slug})`,
+                environment.name,
+                String(version),
+                projectPrivateKey !== null
+                  ? await decrypt(projectPrivateKey, value)
+                  : 'Hidden'
+              ])
             )
-            Logger.info('')
+            Table.render(headers, rows)
           }
         }
       } else {

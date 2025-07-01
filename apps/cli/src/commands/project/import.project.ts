@@ -46,6 +46,7 @@ export default class ImportFromEnv extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
+    const startTime = performance.now()
 
     try {
       const parsedOptions = await this.parseOptions(options)
@@ -66,14 +67,18 @@ export default class ImportFromEnv extends BaseCommand {
       Logger.info(
         'Detected secrets:\n' +
           Object.entries(secretsAndVariables.secrets)
-            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+            .map(([key, value], index) => {
+              return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+            })
             .join('\n') +
           '\n'
       )
       Logger.info(
         'Detected variables:\n' +
           Object.entries(secretsAndVariables.variables)
-            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+            .map(([key, value], index) => {
+              return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+            })
             .join('\n')
       )
 
@@ -112,14 +117,18 @@ export default class ImportFromEnv extends BaseCommand {
         Logger.info(
           'Updated secrets:\n' +
             Object.entries(secretsAndVariables.secrets)
-              .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+              .map(([key, value], index) => {
+                return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+              })
               .join('\n') +
             '\n'
         )
         Logger.info(
           'Updated variables:\n' +
             Object.entries(secretsAndVariables.variables)
-              .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+              .map(([key, value], index) => {
+                return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+              })
               .join('\n')
         )
       }
@@ -146,60 +155,99 @@ export default class ImportFromEnv extends BaseCommand {
       let noOfSecrets = 0
       let noOfVariables = 0
       const errors: string[] = []
-      for (const [key, value] of Object.entries(secretsAndVariables.secrets)) {
-        const { error, success } =
-          await ControllerInstance.getInstance().secretController.createSecret(
-            {
-              projectSlug,
-              name: key,
-              entries: [
-                {
-                  value,
-                  environmentSlug
-                }
-              ]
-            },
-            this.headers
+
+      const secretEntries = Object.entries(secretsAndVariables.secrets)
+      const variableEntries = Object.entries(secretsAndVariables.variables)
+      const totalSecrets = secretEntries.length
+      const totalVariables = variableEntries.length
+
+      if (totalSecrets > 0) {
+        for (let i = 0; i < secretEntries.length; i++) {
+          const [key, value] = secretEntries[i]
+          const current = i + 1
+
+          Logger.info(
+            `🔐 Importing secrets ${current}/${totalSecrets} - ${key}`
           )
 
-        if (success) {
-          ++noOfSecrets
-        } else {
-          errors.push(
-            `Failed to create secret for ${key}. Error: ${error.message}.`
-          )
+          const { error, success } =
+            await ControllerInstance.getInstance().secretController.createSecret(
+              {
+                projectSlug,
+                name: key,
+                entries: [
+                  {
+                    value,
+                    environmentSlug
+                  }
+                ]
+              },
+              this.headers
+            )
+
+          if (success) {
+            ++noOfSecrets
+          } else {
+            errors.push(
+              `Failed to create secret for ${key}. Error: ${error.message}.`
+            )
+          }
         }
+        Logger.success('Done importing secrets')
       }
 
-      for (const [key, value] of Object.entries(
-        secretsAndVariables.variables
-      )) {
-        const { error, success } =
-          await ControllerInstance.getInstance().variableController.createVariable(
-            {
-              projectSlug,
-              name: key,
-              entries: [
-                {
-                  value,
-                  environmentSlug
-                }
-              ]
-            },
-            this.headers
+      if (totalVariables > 0) {
+        for (let i = 0; i < variableEntries.length; i++) {
+          const [key, value] = variableEntries[i]
+          const current = i + 1
+
+          Logger.info(
+            `🔧 Importing variables ${current}/${totalVariables} - ${key}`
           )
 
-        if (success) {
-          ++noOfVariables
-        } else {
-          errors.push(
-            `Failed to create variable for ${key}. Error: ${error.message}.`
-          )
+          const { error, success } =
+            await ControllerInstance.getInstance().variableController.createVariable(
+              {
+                projectSlug,
+                name: key,
+                entries: [
+                  {
+                    value,
+                    environmentSlug
+                  }
+                ]
+              },
+              this.headers
+            )
+
+          if (success) {
+            ++noOfVariables
+          } else {
+            errors.push(
+              `Failed to create variable for ${key}. Error: ${error.message}.`
+            )
+          }
         }
+        Logger.success('Done importing variables')
       }
-      Logger.info(
-        `Imported ${noOfSecrets} secrets and ${noOfVariables} variables.`
-      )
+
+      const endTime = performance.now()
+      const duration = ((endTime - startTime) / 1000).toFixed(2)
+      const totalImported = noOfSecrets + noOfVariables
+
+      Logger.section([
+        `🔐 Secrets imported: ${noOfSecrets}`,
+        `🔧 Variables imported: ${noOfVariables}`,
+        `📈 Total imported: ${totalImported}`,
+        `⏱️  Total time: ${duration}s`
+      ])
+
+      if (errors.length > 0) {
+        Logger.warn('Some imports failed:')
+        errors.forEach((error) => {
+          Logger.warn(error)
+        })
+      }
     } catch (error) {
       const errorMessage = (error as Error)?.message
       Logger.error(
