@@ -20,7 +20,7 @@ import {
   projectSecretCountAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { cn, parseUpdatedEnvironmentValues, validateAsciiInput } from '@/lib/utils'
+import { cn, parseUpdatedEnvironmentValues, validateAlphanumericInput } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddSecretDialog() {
@@ -141,7 +141,7 @@ export default function AddSecretDialog() {
                     onChange={(e) => {
                       const value = e.target.value
                       setSecretNameError(
-                        !validateAsciiInput(value)
+                        !validateAlphanumericInput(value)
                           ? 'Only English letters and digits are allowed.'
                           : ''
                       )

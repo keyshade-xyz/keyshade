@@ -35,7 +35,7 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import WarningCard from '@/components/shared/warning-card'
-import { cn, validateAsciiInput } from '@/lib/utils'
+import { cn, validateAlphanumericInput } from '@/lib/utils'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
@@ -264,7 +264,7 @@ export default function CreateProjectDialogue(): JSX.Element {
                     onChange={(e) => {
                       const value = e.target.value
                       setProjectNameError(
-                        !validateAsciiInput(value)
+                        !validateAlphanumericInput(value)
                           ? 'Only English letters and digits are allowed.'
                           : ''
                       )

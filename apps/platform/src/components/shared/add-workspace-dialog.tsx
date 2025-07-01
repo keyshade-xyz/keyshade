@@ -21,7 +21,7 @@ import {
   selectedWorkspaceAtom,
   globalSearchDataAtom
 } from '@/store'
-import { cn, validateAsciiInput } from '@/lib/utils'
+import { cn, validateAlphanumericInput } from '@/lib/utils'
 
 export interface AddWorkspaceDialogProps {
   trigger?: React.ReactNode
@@ -110,7 +110,7 @@ export function AddWorkspaceDialog({ trigger }: AddWorkspaceDialogProps) {
                 id="workspace-name"
                 onChange={(e) => {
                   const value = e.target.value
-                  setWorkspaceNameError(!validateAsciiInput(value) ? 'Only English letters and digits are allowed.' : '')
+                  setWorkspaceNameError(!validateAlphanumericInput(value) ? 'Only English letters and digits are allowed.' : '')
                   setName(value)
                 }}
                 placeholder="Enter the name"

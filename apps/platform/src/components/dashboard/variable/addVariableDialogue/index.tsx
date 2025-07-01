@@ -20,7 +20,7 @@ import {
   variablesOfProjectAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { cn, parseUpdatedEnvironmentValues, validateAsciiInput } from '@/lib/utils'
+import { cn, parseUpdatedEnvironmentValues, validateAlphanumericInput } from '@/lib/utils'
 import EnvironmentValueEditor from '@/components/common/environment-value-editor'
 
 export default function AddVariableDialogue() {
@@ -142,7 +142,7 @@ export default function AddVariableDialogue() {
                   onChange={(e) => {
                     const value = e.target.value
                     setVariableNameError(
-                      !validateAsciiInput(value)
+                      !validateAlphanumericInput(value)
                         ? 'Only English letters and digits are allowed.'
                         : ''
                     )

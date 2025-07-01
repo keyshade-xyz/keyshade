@@ -20,7 +20,7 @@ import {
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
-import { cn, validateAsciiInput } from '@/lib/utils'
+import { cn, validateAlphanumericInput } from '@/lib/utils'
 
 export default function AddEnvironmentDialogue() {
   const [isCreateEnvironmentOpen, setIsCreateEnvironmentOpen] = useAtom(
@@ -145,7 +145,7 @@ export default function AddEnvironmentDialogue() {
                 id="environment-name"
                 onChange={(e) => {
                   const value = e.target.value
-                  setEnvironmentNameError(!validateAsciiInput(value) ? 'Only English letters and digits are allowed.' : '')
+                  setEnvironmentNameError(!validateAlphanumericInput(value) ? 'Only English letters and digits are allowed.' : '')
                   setNewEnvironmentData({
                     ...newEnvironmentData,
                     environmentName: e.target.value
