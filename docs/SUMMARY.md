@@ -22,6 +22,14 @@
 - [Run](cli/run.md)
 - [Scan](cli/scan.md)
 
+## Integrations 
+
+- Frameworks
+  - [Set up Keyshade with Next.js](integration/frameworks/set-up-with-nextjs.md)
+- Languages
+  <!-- TO BE ADDED -->
+
+
 ## 🥰 CONTRIBUTING TO KEYSHADE
 
 - [Summary](contributing-to-keyshade/summary.md)
