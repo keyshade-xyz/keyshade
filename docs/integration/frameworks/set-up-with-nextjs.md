@@ -148,7 +148,7 @@ Now, visit `http://localhost:3000/api/hello` to confirm the port is being read f
 ![Server-side Output](../../../blob/nextjs-guide-server-side-output.png)
 
 
-### 🌐 Client-side example
+### Client-side example
 Use NEXT_PUBLIC_API_URL in your React components at `app/page.tsx`
 
 ![Client-side example](../../../blob/nextjs-guide-client-side-code.png)
