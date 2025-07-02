@@ -137,14 +137,14 @@ function ScanEnvModal({
                 <SecretSVG height={21} width={21} />
                 <p>{secretsCount} secrets to import</p>
               </div>
-              <div className="flex flex-wrap gap-1.5">{secretsList}</div>
+              <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
             </div>
             <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
               <div className="flex items-center gap-2">
                 <VariableSVG height={21} width={21} />
                 <p>{variablesCount} variables to import</p>
               </div>
-              <div className="flex flex-wrap gap-1.5">{variablesList}</div>
+              <div className="ml-6 flex flex-wrap gap-1.5">{variablesList}</div>
             </div>
 
             <p className="text-sm text-white/60">

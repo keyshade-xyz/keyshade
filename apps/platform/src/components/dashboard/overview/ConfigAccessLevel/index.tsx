@@ -37,95 +37,107 @@ function ConfigAccessLevel({
   }
 
   return (
-    <div>
-      <RadioGroup
-        className="gap-3 py-4"
-        onValueChange={(value) =>
-          setSelectedLevel(value as ProjectAccessLevelEnum)
-        }
-        value={selectedLevel}
-      >
-        <div
-          className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
-          onClick={() => setSelectedLevel('PRIVATE')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setSelectedLevel('PRIVATE')
-            }
-          }}
-          role="button"
-          tabIndex={0}
+    <div className="h-fit w-full rounded-2xl bg-white/5 p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.06),0px_1px_3px_rgba(16,24,40,0.1)]">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-medium text-white">
+          Configure access level
+        </h1>
+        <p className="text-sm text-white/60">
+          Control who can access this project by setting the appropriate
+          visibility level.
+        </p>
+      </div>
+      <div>
+        <RadioGroup
+          className="gap-3 py-4"
+          onValueChange={(value) =>
+            setSelectedLevel(value as ProjectAccessLevelEnum)
+          }
+          value={selectedLevel}
         >
-          <RadioGroupItem id="private" value="PRIVATE" />
-          <div className="flex flex-col gap-1">
-            <Label
-              className="cursor-pointer font-medium text-white"
-              htmlFor="private"
-            >
-              Private
-            </Label>
-            <p className="text-sm text-white/60">
-              Only you and users with assigned roles can access this project.
-            </p>
+          <div
+            className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
+            onClick={() => setSelectedLevel('PRIVATE')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setSelectedLevel('PRIVATE')
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <RadioGroupItem id="private" value="PRIVATE" />
+            <div className="flex flex-col gap-1">
+              <Label
+                className="cursor-pointer font-medium text-white"
+                htmlFor="private"
+              >
+                Private
+              </Label>
+              <p className="text-sm text-white/60">
+                Only you and users with assigned roles can access this project.
+              </p>
+            </div>
           </div>
-        </div>
-        <div
-          className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
-          onClick={() => setSelectedLevel('INTERNAL')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setSelectedLevel('INTERNAL')
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <RadioGroupItem id="internal" value="INTERNAL" />
-          <div className="flex flex-col gap-1">
-            <Label
-              className="cursor-pointer font-medium text-white"
-              htmlFor="internal"
-            >
-              Internal
-            </Label>
-            <p className="text-sm text-white/60">
-              Everyone in your workspace can access this project.
-            </p>
+          <div
+            className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
+            onClick={() => setSelectedLevel('INTERNAL')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setSelectedLevel('INTERNAL')
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <RadioGroupItem id="internal" value="INTERNAL" />
+            <div className="flex flex-col gap-1">
+              <Label
+                className="cursor-pointer font-medium text-white"
+                htmlFor="internal"
+              >
+                Internal
+              </Label>
+              <p className="text-sm text-white/60">
+                Everyone in your workspace can access this project.
+              </p>
+            </div>
           </div>
-        </div>
-        <div
-          className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
-          onClick={() => setSelectedLevel('GLOBAL')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setSelectedLevel('GLOBAL')
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <RadioGroupItem id="global" value="GLOBAL" />
-          <div className="flex flex-col gap-1">
-            <Label
-              className="cursor-pointer font-medium text-white"
-              htmlFor="global"
-            >
-              Global
-            </Label>
-            <p className="text-sm text-white/60">
-              Anyone with the link (or via API) can access the project globally.
-            </p>
+          <div
+            className="flex cursor-pointer items-start gap-2 rounded-lg p-2 transition-colors duration-200 hover:bg-white/5"
+            onClick={() => setSelectedLevel('GLOBAL')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setSelectedLevel('GLOBAL')
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <RadioGroupItem id="global" value="GLOBAL" />
+            <div className="flex flex-col gap-1">
+              <Label
+                className="cursor-pointer font-medium text-white"
+                htmlFor="global"
+              >
+                Global
+              </Label>
+              <p className="text-sm text-white/60">
+                Anyone with the link (or via API) can access the project
+                globally.
+              </p>
+            </div>
           </div>
-        </div>
-      </RadioGroup>
+        </RadioGroup>
 
-      <Button
-        className="mt-0"
-        onClick={handleUpdateAccessLevel}
-        variant="secondary"
-      >
-        Save
-      </Button>
+        <Button
+          className="mt-0"
+          onClick={handleUpdateAccessLevel}
+          variant="secondary"
+        >
+          Save
+        </Button>
+      </div>
     </div>
   )
 }
