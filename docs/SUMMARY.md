@@ -28,6 +28,7 @@
   - [Set up Keyshade with Next.js](integration/frameworks/set-up-with-nextjs.md)
   - [Set up Keyshade with Node.js](integration/frameworks/set-up-with-nodejs.md)
 - Languages
+  - [Go](integration/languages/set-up-with-go.md)
   - [Python](integration/languages/set-up-with-python.md)
   - [Rust](integration/languages/set-up-with-rust.md)
 
