@@ -1,3 +1,17 @@
+## [2.28.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.4...v2.28.0-stage.5) (2025-07-02)
+
+### 🚀 Features
+
+* **platform:** Updated Project Overview & Import from env files ([#1045](https://github.com/keyshade-xyz/keyshade/issues/1045)) ([02c9183](https://github.com/keyshade-xyz/keyshade/commit/02c918331c527e52be876d45261883049ad1722f))
+
+### 📚 Documentation
+
+* Add Go Integration Guide ([#1047](https://github.com/keyshade-xyz/keyshade/issues/1047)) ([c8a47c5](https://github.com/keyshade-xyz/keyshade/commit/c8a47c509212b7bcf483d1859e44ae451d3eb9a2))
+* Add Node.js Integration Guide ([#1041](https://github.com/keyshade-xyz/keyshade/issues/1041)) ([0626f22](https://github.com/keyshade-xyz/keyshade/commit/0626f2293c2c354e5dce766d7e396e2870ceb56c))
+* Add Python Integration Guide ([#1042](https://github.com/keyshade-xyz/keyshade/issues/1042)) ([0c13c7b](https://github.com/keyshade-xyz/keyshade/commit/0c13c7bb7110f07474282661ec827d2b8147819c))
+* Add Rust Integration Guide ([#1046](https://github.com/keyshade-xyz/keyshade/issues/1046)) ([c3a4307](https://github.com/keyshade-xyz/keyshade/commit/c3a430767f789261144b83a9822c2e707a18a2e5))
+* Next.js Integration Guide Minor Changes ([#1044](https://github.com/keyshade-xyz/keyshade/issues/1044)) ([7a84998](https://github.com/keyshade-xyz/keyshade/commit/7a84998edc9bffef5f85e8fc4826661cfd9b60f3))
+
 ## [2.28.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.3...v2.28.0-stage.4) (2025-07-01)
 
 ### 🚀 Features
