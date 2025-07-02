@@ -122,12 +122,12 @@ function ModifyFileScan({
                   >
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-medium">{key}</div>
-                      <div className="truncate text-sm text-gray-400">
-                        {value}
+                      <div className="text-sm text-gray-400">
+                        {value.length > 30 ? `${value.slice(0, 30)}...` : value}
                       </div>
                     </div>
                     <div className="ml-4 flex items-center space-x-2">
-                      <div className="flex items-center space-x-1">
+                      <div className="flex w-fit items-center justify-center space-x-1">
                         <Checkbox
                           checked={selectedItems[key] === 'secret'}
                           className="border-white/20 bg-white/10 "
