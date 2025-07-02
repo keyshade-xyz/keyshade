@@ -212,3 +212,10 @@
 ### Patches
 
 - Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
+
+## 3.2.1-stage.2
+
+### Minor Changes
+
+- Updated `keyshade project import` to have better feedback
+- Modified Logger functions and implement new table function, revamping cli outputs

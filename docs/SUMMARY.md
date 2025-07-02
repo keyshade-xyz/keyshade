@@ -26,6 +26,7 @@
 
 - Frameworks
   - [Set up Keyshade with Next.js](integration/frameworks/set-up-with-nextjs.md)
+  - [Set up Keyshade with Node.js](integration/frameworks/set-up-with-nodejs.md)
 - Languages
   - [Python](integration/languages/set-up-with-python.md)
 
