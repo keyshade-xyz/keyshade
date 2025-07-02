@@ -1,6 +1,7 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { TrashSVG } from '@public/svg/shared'
+import { Plus } from 'lucide-react'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,6 @@ function ServerKeySetup({
   onDelete,
   onKeyStored
 }: ServerKeySetupProps): React.JSX.Element {
-
   const updatePrivateKey = useHttp((key: string) =>
     ControllerInstance.getInstance().projectController.updateProject({
       projectSlug,
@@ -60,11 +60,12 @@ function ServerKeySetup({
   }
   return (
     <Button
-      className="w-fit px-8 py-6 font-bold"
+      className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-4 py-6 text-sm text-white/70"
       onClick={handleStorePrivateKey}
       type="button"
-      variant="secondary"
+      variant="default"
     >
+      <Plus />
       Store Private Key
     </Button>
   )

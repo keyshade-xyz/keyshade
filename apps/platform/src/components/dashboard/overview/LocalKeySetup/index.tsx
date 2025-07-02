@@ -17,7 +17,6 @@ function LocalKeySetup({
   onOpenSetupDialog,
   onDelete
 }: LocalKeySetupProps): React.JSX.Element {
-
   if (privateKey && !isStoredOnServer) {
     return (
       <div className="flex justify-between gap-1">
@@ -34,11 +33,11 @@ function LocalKeySetup({
   }
   return (
     <Button
-      className="w-fit px-4 py-6 flex items-center gap-1"
+      className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-4 py-6 text-sm text-white/70"
       disabled={Boolean(privateKey !== null && isStoredOnServer)}
       onClick={onOpenSetupDialog}
       type="button"
-      variant="secondary"
+      variant="default"
     >
       <Plus />
       <div className="font-bold">Setup Private Key</div>

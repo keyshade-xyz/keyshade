@@ -66,10 +66,10 @@ function RegenerateKeySetup({
 
   return (
     <Button
-      className="flex w-fit items-center justify-center gap-2 px-6 py-6"
+      className="flex w-fit items-center gap-2 rounded-md bg-neutral-800 px-4 py-6 text-sm text-white/70"
       onClick={handleRegenerate}
       type="button"
-      variant="secondary"
+      variant="default"
     >
       <RegenerateSVG />
       <div className="font-bold">Regenerate Key</div>

@@ -53,7 +53,7 @@ function Sidebar(): JSX.Element {
   ]
 
   return (
-    <aside className="m-8 w-[20rem]">
+    <aside className="m-8 w-[16rem]">
       <div className="grid gap-y-[1.88rem]">
         <div className="mt-5 flex items-center justify-between">
           <div className=" flex gap-2 text-xl">
@@ -77,7 +77,7 @@ function Sidebar(): JSX.Element {
             )
           })}
         </div>
-        <div className="absolute bottom-10 w-[17rem] rounded-lg border border-white/10 bg-white/5 p-4">
+        <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
           <div className="mb-5 flex items-center gap-3">
             <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
               {TIRE_PLAN}
