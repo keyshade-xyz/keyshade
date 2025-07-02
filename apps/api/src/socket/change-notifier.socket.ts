@@ -171,7 +171,7 @@ export default class ChangeNotifier
       this.logger.error(error)
       client.emit('client-registered', {
         success: false,
-        message: error as string
+        message: error.message
       })
     }
   }
