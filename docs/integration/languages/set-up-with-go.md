@@ -161,7 +161,7 @@ Create a web server in `main.go`:
 
 ![Example Web Server in Go](../../../blob/go-guide-code.png)
 
-Make sure the Gin dependency to your project:
+Make sure the Gin dependency is added to your project:
 
 ```bash
 go get github.com/gin-gonic/gin
