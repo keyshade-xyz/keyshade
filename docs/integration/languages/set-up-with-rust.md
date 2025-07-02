@@ -150,6 +150,12 @@ Once your app is running with `keyshade run`, use `std::env` to access any injec
 
 For example, if you added secrets named `DATABASE_URL` and `API_KEY`, and a variable named `PORT` in the Keyshade dashboard:
 
+```bash
+let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+let api_key = env::var("API_KEY").expect("API_KEY must be set");
+let port = env::var("PORT").unwrap_or_else(|_| "8000".to_string());
+```
+
 ### Example web server in `src/main.rs`:
 
 ![Web Server in Rust](../../../blob/rust-guide-code.png)
