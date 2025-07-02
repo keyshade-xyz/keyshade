@@ -433,6 +433,8 @@ model Secret {
   rotateAfter Int?
   note        String?
 
+  disabledForEnvironments Environment[]
+
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
@@ -468,6 +470,8 @@ model Variable {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   note      String?
+
+  disabledForEnvironments Environment[]
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
