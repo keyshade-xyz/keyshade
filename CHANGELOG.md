@@ -1,3 +1,9 @@
+## [2.28.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.5...v2.28.0-stage.6) (2025-07-02)
+
+### 🐛 Bug Fixes
+
+* **platform:** docker build fix ([#1048](https://github.com/keyshade-xyz/keyshade/issues/1048)) ([4d9f05e](https://github.com/keyshade-xyz/keyshade/commit/4d9f05eb91d490a60717109ead6a5431263090a7))
+
 ## [2.28.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.4...v2.28.0-stage.5) (2025-07-02)
 
 ### 🚀 Features
