@@ -113,7 +113,7 @@ function ConfigAccessLevel({
               Global
             </Label>
             <p className="text-sm text-white/60">
-              Everyone in your workspace can access this project.
+              Anyone with the link (or via API) can access the project globally.
             </p>
           </div>
         </div>
