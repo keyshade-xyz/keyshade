@@ -18,6 +18,8 @@ import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
 
+// TODO: Add optional --environment flag
+
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
 
