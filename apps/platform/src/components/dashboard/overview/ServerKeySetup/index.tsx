@@ -48,23 +48,12 @@ function ServerKeySetup({
       onOpenStoreDialog()
     }
   }
+  const isPrivateKeyStored = privateKey && isStoredOnServer
 
-  if (privateKey && isStoredOnServer) {
-    return (
-      <div className="flex justify-between gap-1">
-        <HiddenContent isPrivateKey value={privateKey} />
-        <Button
-          className="flex items-center justify-center bg-neutral-800 p-2"
-          onClick={onDelete}
-          type="button"
-        >
-          <TrashSVG />
-        </Button>
-      </div>
-    )
-  }
   return (
-    <div className="flex justify-between gap-1.5 rounded-lg bg-white/10 p-3">
+    <div
+      className={`flex justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStored && 'flex-col gap-3'}`}
+    >
       <div>
         <h1 className="text-lg font-medium text-white">
           Share project private key with us?{' '}
@@ -80,15 +69,28 @@ function ServerKeySetup({
           </Tooltip>
         </h1>
       </div>
-      <Button
-        className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-3 py-5 text-sm text-white/70"
-        onClick={handleStorePrivateKey}
-        type="button"
-        variant="default"
-      >
-        <Plus />
-        Store Private Key
-      </Button>
+      {isPrivateKeyStored ? (
+        <div className="flex items-center justify-between gap-1">
+          <HiddenContent isPrivateKey value={privateKey} />
+          <Button
+            className="flex items-center justify-center bg-neutral-800 p-2"
+            onClick={onDelete}
+            type="button"
+          >
+            <TrashSVG />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-3 py-5 text-sm text-white/70"
+          onClick={handleStorePrivateKey}
+          type="button"
+          variant="default"
+        >
+          <Plus />
+          Store Private Key
+        </Button>
+      )}
     </div>
   )
 }

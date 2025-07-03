@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Environment, SecretVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { RollbackSVG } from '@public/svg/shared'
+import { decrypt } from '@keyshade/common'
 import {
   Sheet,
   SheetContent,
@@ -22,6 +23,7 @@ import {
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import {
   Accordion,
   AccordionItem,
@@ -39,6 +41,9 @@ function Loader() {
 }
 
 export default function SecretRevisionsSheet(): React.JSX.Element {
+  const [decryptedRevisions, setDecryptedRevisions] = useState<
+    Record<number, string>
+  >({})
   const [isSecretRevisionsOpen, setIsSecretRevisionsOpen] = useAtom(
     secretRevisionsOpenAtom
   )
@@ -51,20 +56,17 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
     selectedSecretRollbackVersionAtom
   )
   const [revisions, setRevisions] = useAtom(revisionsOfSecretAtom)
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
-    [selectedProject]
-  )
+  const isDecrypted = useMemo(() => Boolean(projectPrivateKey), [projectPrivateKey])
 
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().secretController.getRevisionsOfSecret({
         environmentSlug,
-        secretSlug: selectedSecret!.secret.slug,
-        decryptValue: isDecrypted
+        secretSlug: selectedSecret!.secret.slug
       })
   )
 
@@ -109,6 +111,32 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
       })
     }
   }, [environments, getAllRevisionsOfSecret, selectedSecret, setRevisions])
+
+  useEffect(() => {
+    if (!projectPrivateKey || !revisions.length) return
+
+    revisions.forEach(({ versions }) => {
+      versions.forEach((revision) => {
+        if (decryptedRevisions[revision.version]) return
+
+        decrypt(projectPrivateKey, revision.value)
+          .then((decrypted) => {
+            setDecryptedRevisions((prev) => ({
+              ...prev,
+              [revision.version]: decrypted
+            }))
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console -- console.error is used for debugging
+            console.error('Decryption failed:', error)
+            setDecryptedRevisions((prev) => ({
+              ...prev,
+              [revision.version]: ''
+            }))
+          })
+      })
+    })
+  }, [projectPrivateKey, revisions, decryptedRevisions])
 
   return (
     <Sheet
@@ -167,7 +195,10 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                           >
                             <div className="flex w-full flex-row justify-between">
                               <div className="font-semibold">
-                                {isDecrypted ? revision.value : 'Hidden'}
+                                {isDecrypted
+                                  ? decryptedRevisions[revision.version] ||
+                                    'Decrypting...'
+                                  : 'Hidden'}
                               </div>
                               <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
                                 v{revision.version}
