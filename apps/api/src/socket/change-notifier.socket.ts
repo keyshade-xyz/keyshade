@@ -168,10 +168,23 @@ export default class ChangeNotifier
         )}`
       )
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error('Registration failed:', error)
+
+      // Extract a meaningful error message
+      let errorMessage: string
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      } else {
+        errorMessage = 'An unknown error occurred during registration'
+      }
+
+      this.logger.error(`Sending error message to client: ${errorMessage}`)
+
       client.emit('client-registered', {
         success: false,
-        message: error.message
+        message: errorMessage
       })
     }
   }
