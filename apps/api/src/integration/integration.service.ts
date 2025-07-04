@@ -11,6 +11,7 @@ import {
   EventSource,
   EventType,
   Integration,
+  IntegrationType,
   Project,
   Workspace
 } from '@prisma/client'
@@ -28,6 +29,7 @@ import {
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
+import { BaseIntegration } from './plugins/base.integration'
 
 @Injectable()
 export class IntegrationService {
@@ -72,6 +74,49 @@ export class IntegrationService {
       `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
     )
 
+    // Check if only environments are provided
+    if (
+      dto.environmentSlugs &&
+      dto.environmentSlugs.length > 0 &&
+      !dto.projectSlug
+    ) {
+      this.logger.error(
+        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slugs: ${dto.environmentSlugs}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not provide environment without project',
+          'Environment can only be provided if project is also provided'
+        )
+      )
+    }
+
+    // Create the integration object
+    this.logger.log(`Creating integration object of type ${dto.type}`)
+    let integrationObject = IntegrationFactory.createIntegrationWithType(
+      dto.type,
+      this.prisma
+    )
+
+    this.validateEnvironmentSupport(
+      integrationObject,
+      dto.type,
+      dto.environmentSlugs
+    )
+
+    // Validate project support
+    if (integrationObject.isProjectRequired() && !dto.projectSlug) {
+      this.logger.error(
+        `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not create integration without private key',
+          'Private key is required for this integration type'
+        )
+      )
+    }
+
     // Check if the user is permitted to create integrations in the workspace
     this.logger.log(`Checking user access to workspace ${workspaceSlug}`)
     const workspace =
@@ -84,13 +129,6 @@ export class IntegrationService {
 
     // Check if integration with the same name already exists
     await this.existsByNameAndWorkspaceId(dto.name, workspace)
-
-    // Create the integration object
-    this.logger.log(`Creating integration object of type ${dto.type}`)
-    let integrationObject = IntegrationFactory.createIntegrationWithType(
-      dto.type,
-      this.prisma
-    )
 
     let project: Project | null = null
     let privateKey: string | null = null
@@ -110,6 +148,7 @@ export class IntegrationService {
           ? project.privateKey
           : dto.privateKey
 
+      // Validate private key support
       if (!privateKey && integrationObject.isPrivateKeyRequired()) {
         this.logger.error(
           `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
@@ -121,33 +160,6 @@ export class IntegrationService {
           )
         )
       }
-    } else if (integrationObject.isProjectRequired()) {
-      this.logger.error(
-        `Can not create integration ${dto.type} without project. Project slug: ${dto.projectSlug}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not create integration without project',
-          'Project is required for this integration type'
-        )
-      )
-    }
-
-    // Check if only environments are provided
-    if (
-      dto.environmentSlugs &&
-      dto.environmentSlugs.length > 0 &&
-      !dto.projectSlug
-    ) {
-      this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slugs: ${dto.environmentSlugs}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not provide environment without project',
-          'Environment can only be provided if project is also provided'
-        )
-      )
     }
 
     // Check if the user has READ authority over the environments
@@ -165,16 +177,6 @@ export class IntegrationService {
           })
         environments.push(environment)
       }
-    } else if (integrationObject.areEnvironmentsRequired()) {
-      this.logger.error(
-        `Can not create integration ${dto.type} without environment. Environment slugs: ${dto.environmentSlugs}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not create integration without environments',
-          'Environment is required for this integration type'
-        )
-      )
     }
 
     // Check for permitted events
@@ -312,12 +314,17 @@ export class IntegrationService {
       integrationObject.validateMetadataParameters(dto.metadata, true)
 
     // Check if the name of the integration is being changed, and if so, check if the new name is unique
-    if (dto.name) {
-      await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
-    }
+    dto.name &&
+      (await this.existsByNameAndWorkspaceId(dto.name, integration.workspace))
 
     let environments: Array<Environment> | null = null
     if (dto.environmentSlugs) {
+      this.validateEnvironmentSupport(
+        integrationObject,
+        integration.type,
+        dto.environmentSlugs
+      )
+
       // Check if only environments are provided and the integration has no project associated from prior
       if (!integration.projectId) {
         this.logger.error(
@@ -724,6 +731,51 @@ export class IntegrationService {
       this.logger.log(
         `Integration with name ${name} does not exist in workspace ${workspace.slug}`
       )
+    }
+  }
+
+  /**
+   * Validates the environment support for an integration based on its type and environment slugs.
+   * Throws a BadRequestException if the required environment conditions are not met.
+   *
+   * @param integrationObject The integration object to validate.
+   * @param type The type of the integration.
+   * @param environmentSlugs Optional array of environment slugs associated with the integration.
+   */
+
+  private validateEnvironmentSupport(
+    integrationObject: BaseIntegration,
+    type: IntegrationType,
+    environmentSlugs?: Environment['slug'][]
+  ) {
+    // Validate environment requirement
+    switch (integrationObject.environmentSupport()) {
+      case 'atleast-one':
+        if (!environmentSlugs || environmentSlugs.length < 1) {
+          this.logger.error(
+            `Can not create integration ${type} without environment.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration without environment',
+              'Environment is required for this integration type'
+            )
+          )
+        }
+        break
+      case 'single':
+        if (!environmentSlugs || environmentSlugs.length > 1) {
+          this.logger.error(
+            `Can not create integration ${type} with multiple environments.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration with multiple environments',
+              'Single environment is required for this integration type'
+            )
+          )
+        }
+        break
     }
   }
 }
