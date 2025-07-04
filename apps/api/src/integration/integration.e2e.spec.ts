@@ -28,6 +28,7 @@ import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import nock = require('nock')
+import { CreateIntegration } from './dto/create.integration/create.integration'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -649,6 +650,52 @@ describe('Integration Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
     )
+  })
+
+  describe('Validate Config (metadata-only) Tests', () => {
+    const endpoint = '/integration/validate-config'
+    const validDto: CreateIntegration = {
+      name: 'Validation Test',
+      type: IntegrationType.DISCORD,
+      metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should succeed validating metadata on create when DTO is valid', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.json()).toEqual({ success: true })
+    })
+
+    it('should fail validating metadata on create if webhook URL is unreachable', async () => {
+      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+
+      nock(origin)
+        .post(pathname || '/')
+        .reply(404)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toBeGreaterThanOrEqual(400)
+      expect(response.statusCode).toBeLessThan(500)
+    })
   })
 
   describe('Delete Integration Tests', () => {
