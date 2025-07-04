@@ -13,7 +13,7 @@ import {
 import { IntegrationService } from './integration.service'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateIntegration } from './dto/create.integration/create.integration'
-import { Authority } from '@prisma/client'
+import { Authority, Integration } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -119,7 +119,7 @@ export class IntegrationController {
     )
   }
 
-  @Post(':workspaceSlug/validate-config')
+  @Post('validate-config')
   @HttpCode(HttpStatus.OK)
   @RequiredApiKeyAuthorities(
     Authority.CREATE_INTEGRATION,
@@ -130,12 +130,14 @@ export class IntegrationController {
   async testIntegration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration,
-    @Param('workspaceSlug') workspaceSlug: string
+    @Query('isCreate') isCreate: boolean,
+    @Query('integrationSlug') integrationSlug?: Integration['slug']
   ) {
     return await this.integrationService.validateIntegrationMetadata(
       user,
       dto,
-      workspaceSlug
+      isCreate,
+      integrationSlug
     )
   }
 }

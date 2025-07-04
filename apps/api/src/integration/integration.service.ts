@@ -2,7 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  NotFoundException
 } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
 import {
@@ -66,12 +67,28 @@ export class IntegrationService {
       `User ${user.id} attempted to create integration ${dto.name} in workspace ${workspaceSlug}`
     )
 
-    const {
-      environments,
-      workspaceId,
-      project,
-      privateKey: effectivePrivateKey
-    } = await this.validateIntegrationConfiguration(user, dto, workspaceSlug)
+    const workspace =
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
+        entity: { slug: workspaceSlug },
+        authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
+      })
+    const workspaceId = workspace.id
+
+    await this.existsByNameAndWorkspaceId(dto.name, workspace)
+
+    let integrationObject = IntegrationFactory.createIntegrationWithType(
+      dto.type,
+      this.prisma
+    )
+
+    const { project, privateKey, environments } =
+      await this.validateIntegrationConfiguration(
+        user,
+        dto,
+        integrationObject,
+        true
+      )
 
     // Create the integration
     this.logger.log(`Creating integration: ${dto.name}`)
@@ -134,11 +151,11 @@ export class IntegrationService {
 
     // Initialize the integration
     this.logger.log(`Initializing integration: ${integration.id}`)
-    const integrationObject = IntegrationFactory.createIntegration(
+    integrationObject = IntegrationFactory.createIntegration(
       integration,
       this.prisma
     )
-    integrationObject.init(effectivePrivateKey, event.id)
+    integrationObject.init(privateKey, event.id)
 
     delete integration.environments
     return integration
@@ -184,6 +201,10 @@ export class IntegrationService {
       })
     const integrationId = integration.id
 
+    if (dto.name) {
+      await this.existsByNameAndWorkspaceId(dto.name, integration.workspace)
+    }
+
     // Create the integration object
     this.logger.log(`Creating integration object of type ${integration.type}`)
     const integrationObject = IntegrationFactory.createIntegrationWithType(
@@ -191,52 +212,13 @@ export class IntegrationService {
       this.prisma
     )
 
-    // Check for permitted events
-    dto.notifyOn && integrationObject.validatePermittedEvents(dto.notifyOn)
-
-    // Check for authentication parameters
-    dto.metadata &&
-      integrationObject.validateMetadataParameters(dto.metadata, true)
-
-    // Check if the name of the integration is being changed, and if so, check if the new name is unique
-    dto.name &&
-      (await this.existsByNameAndWorkspaceId(dto.name, integration.workspace))
-
-    let environments: Array<Environment> | null = null
-    if (dto.environmentSlugs) {
-      this.validateEnvironmentSupport(
-        integrationObject,
-        integration.type,
-        dto.environmentSlugs
-      )
-
-      // Check if only environments are provided and the integration has no project associated from prior
-      if (!integration.projectId) {
-        this.logger.error(
-          `Can not provide environment without project. Environment slug: ${dto.environmentSlugs}`
-        )
-        throw new BadRequestException(
-          constructErrorBody(
-            'Can not provide environment without project',
-            'Environment can only be provided if project is also provided'
-          )
-        )
-      }
-
-      // If the environment is being changed, check if the user has READ authority over the new environment
-      this.logger.log(
-        `Checking user access to environments ${dto.environmentSlugs.join(', ')}`
-      )
-      environments = await Promise.all(
-        dto.environmentSlugs.map((environmentSlug) =>
-          this.authorizationService.authorizeUserAccessToEnvironment({
-            user,
-            entity: { slug: environmentSlug },
-            authorities: [Authority.READ_ENVIRONMENT]
-          })
-        )
-      )
-    }
+    const { environments } = await this.validateIntegrationConfiguration(
+      user,
+      dto,
+      integrationObject,
+      false,
+      integration
+    )
 
     // Update the integration
     this.logger.log(`Updating integration: ${integration.id}`)
@@ -671,176 +653,298 @@ export class IntegrationService {
   /**
    * Tests a new integration in the given workspace. The user needs to have
    * `CREATE_INTEGRATION` and `READ_WORKSPACE` authority in the workspace.
+   * Validate only metadata and event subscriptions for an integration.
    *
-   * Check `validateIntegrationCreation` for more details regarding validation.
+   * This method skips project and environment resolution entirely, focusing on
+   * permitted events, metadata parameter validation and live configuration tests.
    *
-   * @param user The user creating the integration
-   * @param dto The integration data
-   * @param workspaceSlug The slug of the workspace the integration is being
-   * created in
-   * @param privateKey: The private key of the project the integration is being
-   * @returns { success: true } if the integration configuration is valid
+   * @param user - The authenticated user performing metadata validation.
+   * @param dto - CreateIntegration or UpdateIntegration DTO containing optional
+   *   notifyOn and metadata fields.
+   * @param isCreate - True if validating for a new integration; false for update.
+   * @param integrationSlug - Slug of the existing integration (required when isCreate is false).
+   * @returns A promise resolving to { success: true } upon successful validation.
+   * @throws BadRequestException if integrationSlug is missing when updating.
+   * @throws UnauthorizedException if the user is not authorized to update the integration.
+   * @throws BadRequestException if event subscriptions or metadata parameters are invalid.
+   * @throws BadRequestException if live configuration testing via validateConfiguration fails.
    */
   async validateIntegrationMetadata(
     user: AuthenticatedUser,
-    dto: CreateIntegration,
-    workspaceSlug: Workspace['slug']
-  ) {
+    dto: CreateIntegration | UpdateIntegration,
+    isCreate: boolean,
+    integrationSlug?: Integration['slug']
+  ): Promise<{ success: true }> {
     this.logger.log(
-      `User ${user.id} is testing configuration of integration ${dto.name} in workspace ${workspaceSlug}`
+      `User ${user.id} is metadata‐validating integration ${dto.name} ` +
+        (isCreate ? `(new)` : `(existing ${integrationSlug})`)
     )
 
-    await this.validateIntegrationConfiguration(user, dto, workspaceSlug)
+    let integrationObject: BaseIntegration
+    if (isCreate) {
+      integrationObject = IntegrationFactory.createIntegrationWithType(
+        (dto as CreateIntegration).type,
+        this.prisma
+      )
+    } else {
+      if (!integrationSlug) {
+        throw new BadRequestException(
+          constructErrorBody(
+            'Missing integrationSlug on update test',
+            'integrationSlug is required for update‐validation'
+          )
+        )
+      }
+      const existing =
+        await this.authorizationService.authorizeUserAccessToIntegration({
+          user,
+          entity: { slug: integrationSlug },
+          authorities: [Authority.UPDATE_INTEGRATION]
+        })
+      integrationObject = IntegrationFactory.createIntegrationWithType(
+        existing.type,
+        this.prisma
+      )
+    }
+
+    await this.validateEventsAndMetadataParams(dto, integrationObject, isCreate)
 
     return { success: true }
   }
 
   /**
-   * If the integration is of type `PROJECT`, the user needs to have `READ_PROJECT`
-   * authority in the project specified by `projectSlug`.
+   * Validate integration configuration for create or update.
    *
-   * If the integration is of type `ENVIRONMENT`, the user needs to have `READ_ENVIRONMENT`
-   * authority in the environment specified by `environmentSlug`.
+   * This method orchestrates project resolution, private key resolution (on creation),
+   * environment resolution, and event/metadata parameter validation.
    *
-   * If the integration is of type `PROJECT` and `environmentSlug` is provided,
-   * the user needs to have `READ_ENVIRONMENT` authority in the environment specified
-   * by `environmentSlug`.
-   *
-   * The integration configuration is then verified through the `validateConfiguration`
-   * method of the integration plugin.
-   *
-   * @param user The user creating the integration
-   * @param dto The integration data
-   * @param workspaceSlug The slug of the workspace the integration is being
-   * created in
-   * @returns environments, project, workspaceId
+   * @param user - The authenticated user performing the operation.
+   * @param dto - Data transfer object for creating or updating an integration.
+   * @param integrationObject - Instance of BaseIntegration for this integration type.
+   * @param isCreate - True if this is a create operation, false for update.
+   * @param existingIntegration - The existing Integration entity (only for updates).
+   * @returns An object containing:
+   *   - project: The authorized Project or null.
+   *   - privateKey: The resolved private key or null.
+   *   - environments: Array of authorized Environment entities.
    */
   private async validateIntegrationConfiguration(
     user: AuthenticatedUser,
-    dto: CreateIntegration,
-    workspaceSlug: Workspace['slug']
-  ) {
-    this.logger.log(`Checking user access to workspace ${workspaceSlug}`)
-    const workspace =
-      await this.authorizationService.authorizeUserAccessToWorkspace({
-        user,
-        entity: { slug: workspaceSlug },
-        authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
-      })
-    const workspaceId = workspace.id
+    dto: CreateIntegration | UpdateIntegration,
+    integrationObject: BaseIntegration,
+    isCreate: boolean,
+    existingIntegration?: Integration
+  ): Promise<{
+    project: Project | null
+    privateKey: string | null
+    environments: Environment[]
+  }> {
+    const project = await this.resolveProject(
+      user,
+      dto,
+      integrationObject,
+      isCreate,
+      existingIntegration
+    )
+    const privateKey = isCreate
+      ? this.resolvePrivateKey(
+          dto as CreateIntegration,
+          integrationObject,
+          project
+        )
+      : null
 
-    // Check if integration with the same name already exists
-    await this.existsByNameAndWorkspaceId(dto.name, workspace)
-
-    // Create the integration object
-    this.logger.log(`Creating integration object of type ${dto.type}`)
-    let integrationObject = IntegrationFactory.createIntegrationWithType(
-      dto.type,
-      this.prisma
+    const environments = await this.resolveEnvironments(
+      user,
+      dto,
+      isCreate,
+      integrationObject,
+      project
     )
 
-    let project: Project | null = null
-    let privateKey: string | null = null
-    const environments: Array<Environment> | null = []
+    await this.validateEventsAndMetadataParams(dto, integrationObject, isCreate)
 
-    // Check if the user has READ authority over the project
-    if (dto.projectSlug) {
+    return { project, privateKey, environments }
+  }
+
+  /**
+   * Resolve and authorize the project for an integration.
+   *
+   * On creation, requires dto.projectSlug. On update, uses existingIntegration.projectId.
+   * Throws if a project is required but missing.
+   *
+   * @param user - The authenticated user.
+   * @param dto - DTO for integration.
+   * @param integrationObject - Instance of BaseIntegration.
+   * @param isCreate - True for create operations, false for update.
+   * @param existing - Existing Integration entity (for update scenarios).
+   * @returns The authorized Project entity or null if none.
+   * @throws BadRequestException if project is required but not provided.
+   * @throws NotFoundException if the existing project cannot be found.
+   */
+  private async resolveProject(
+    user: AuthenticatedUser,
+    dto: CreateIntegration | UpdateIntegration,
+    integrationObject: BaseIntegration,
+    isCreate: boolean,
+    existing?: Integration
+  ): Promise<Project | null> {
+    if ('projectSlug' in dto && dto.projectSlug) {
       this.logger.log(`Checking user access to project ${dto.projectSlug}`)
-      project = await this.authorizationService.authorizeUserAccessToProject({
+      return this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: dto.projectSlug },
         authorities: [Authority.READ_PROJECT]
       })
+    }
 
-      privateKey =
-        project.storePrivateKey && project.privateKey
-          ? project.privateKey
-          : dto.privateKey
-
-      if (!privateKey && integrationObject.isPrivateKeyRequired()) {
-        this.logger.error(
-          `Can not create integration ${dto.type} without private key. Project slug: ${dto.projectSlug}`
-        )
-        throw new BadRequestException(
+    if (!isCreate && existing?.projectId) {
+      this.logger.log(`Using existing project ${existing.projectId} on update`)
+      const proj = await this.prisma.project.findUnique({
+        where: { id: existing.projectId }
+      })
+      if (!proj) {
+        throw new NotFoundException(
           constructErrorBody(
-            'Can not create integration without private key',
-            'Private key is required for this integration type'
+            'Project not found',
+            `Project ${existing.projectId} not found`
           )
         )
       }
-    } else if (integrationObject.isProjectRequired()) {
-      this.logger.error(
-        `Can not create integration ${dto.type} without project. Project slug: ${dto.projectSlug}`
-      )
+      return this.authorizationService.authorizeUserAccessToProject({
+        user,
+        entity: { slug: proj.slug },
+        authorities: [Authority.READ_PROJECT]
+      })
+    }
+
+    if (isCreate && integrationObject.isProjectRequired()) {
       throw new BadRequestException(
         constructErrorBody(
-          'Can not create integration without project',
-          'Project is required for this integration type'
+          'Project required',
+          'You must specify a project for this integration type'
         )
       )
     }
 
-    // Check if only environments are provided
-    if (
-      dto.environmentSlugs &&
-      dto.environmentSlugs.length > 0 &&
-      !dto.projectSlug
-    ) {
-      this.logger.error(
-        `Can not provide environment without project. Project slug: ${dto.projectSlug}. Environment slugs: ${dto.environmentSlugs}`
-      )
+    return null
+  }
+
+  /**
+   * Determine the private key to use when creating an integration.
+   *
+   * Uses the project's stored private key if configured; otherwise falls back
+   * to dto.privateKey. Throws if a key is required but none is provided.
+   *
+   * @param dto - CreateIntegration DTO containing an optional privateKey.
+   * @param integrationObject - Instance of BaseIntegration for this type.
+   * @param project - The resolved Project or null.
+   * @returns The chosen private key string, or null if none.
+   * @throws BadRequestException if a private key is required but missing.
+   */
+  private resolvePrivateKey(
+    dto: CreateIntegration,
+    integrationObject: BaseIntegration,
+    project: Project | null
+  ): string | null {
+    const candidate =
+      project?.storePrivateKey && project.privateKey
+        ? project.privateKey
+        : dto.privateKey
+
+    if (!candidate && integrationObject.isPrivateKeyRequired()) {
       throw new BadRequestException(
         constructErrorBody(
-          'Can not provide environment without project',
-          'Environment can only be provided if project is also provided'
+          'Private key required',
+          'This integration type needs a private key'
         )
       )
     }
+    return candidate ?? null
+  }
 
-    // Check if the user has READ authority over the environments
-    if (dto.environmentSlugs) {
-      for (const environmentSlug of dto.environmentSlugs) {
-        this.logger.log(
-          `Checking user access to environment ${environmentSlug}`
+  /**
+   * Resolve and authorize environments for an integration.
+   *
+   * Validates each slug via the authorization service. Throws if environments
+   * are required but none are provided, or if a project context is missing.
+   *
+   * @param user - The authenticated user.
+   * @param dto - Integration DTO with optional environmentSlugs.
+   * @param isCreate - True for create, false for update.
+   * @param integrationObject - Instance of BaseIntegration.
+   * @param project - The resolved Project or null.
+   * @returns Array of authorized Environment entities (possibly empty).
+   * @throws BadRequestException if no project when slugs provided or if environments
+   *   are required on creation but none given.
+   */
+  private async resolveEnvironments(
+    user: AuthenticatedUser,
+    dto: CreateIntegration | UpdateIntegration,
+    isCreate: boolean,
+    integrationObject: BaseIntegration,
+    project: Project | null
+  ): Promise<Environment[]> {
+    const slugs = 'environmentSlugs' in dto ? (dto.environmentSlugs ?? []) : []
+    if (slugs.length) {
+      if (!project) {
+        throw new BadRequestException(
+          constructErrorBody(
+            'Environment without project',
+            'You need a project before assigning environments'
+          )
         )
-
-        const environment =
-          await this.authorizationService.authorizeUserAccessToEnvironment({
+      }
+      return Promise.all(
+        slugs.map((slug) => {
+          this.logger.log(`Checking access to environment ${slug}`)
+          return this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environmentSlug },
+            entity: { slug },
             authorities: [Authority.READ_ENVIRONMENT]
           })
-        environments.push(environment)
-      }
-    } else if (integrationObject.areEnvironmentsRequired()) {
-      this.logger.error(
-        `Can not create integration ${dto.type} without environment. Environment slugs: ${dto.environmentSlugs}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not create integration without environments',
-          'Environment is required for this integration type'
-        )
+        })
       )
     }
 
-    // Check for permitted events
-    this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
-    integrationObject.validatePermittedEvents(dto.notifyOn)
+    if (isCreate && integrationObject.areEnvironmentsRequired()) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Environments required',
+          'This integration type needs at least one environment'
+        )
+      )
+    }
+    return []
+  }
 
-    // Check for authentication parameters
-    this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
-    integrationObject.validateMetadataParameters(dto.metadata)
+  /**
+   * Validate metadata parameters, permitted events and live configuration testing.
+   *
+   * @param dto - CreateIntegration or UpdateIntegration DTO.
+   * @param integration - The BaseIntegration instance responsible for validation logic.
+   * @param isUpdate - True if this invocation is part of a create operation;
+   *   false if part of update.
+   * @returns A promise that resolves when all validations complete.
+   * @throws BadRequestException if event subscriptions or metadata parameters are invalid.
+   * @throws BadRequestException if live configuration testing via validateConfiguration fails.
+   */
+  private async validateEventsAndMetadataParams(
+    dto: CreateIntegration | UpdateIntegration,
+    integration: BaseIntegration,
+    isCreate: boolean
+  ): Promise<void> {
+    if ('notifyOn' in dto && dto.notifyOn) {
+      this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
+      integration.validatePermittedEvents(dto.notifyOn)
+    }
 
-    // Test the configuration of the integration
-    this.logger.log(`Testing configuration for integration: ${dto.name}`)
+    if ('metadata' in dto && dto.metadata) {
+      this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
+      integration.validateMetadataParameters(dto.metadata, !isCreate)
 
-    await integrationObject.validateConfiguration(dto.metadata)
-
-    this.logger.log(
-      `Configuration for integration ${dto.name} correctly validated by ${user.id} in workspace ${workspaceId}`
-    )
-
-    return { environments, project, workspaceId, privateKey }
+      this.logger.log(`Testing configuration for integration: ${dto.name}`)
+      await integration.validateConfiguration(dto.metadata)
+    }
   }
 }
