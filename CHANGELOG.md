@@ -1,3 +1,9 @@
+## [2.28.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.28.1-stage.1) (2025-07-04)
+
+### 🐛 Bug Fixes
+
+* **platfrom:** Project overview & [secure]-variable revision screen ([#1052](https://github.com/keyshade-xyz/keyshade/issues/1052)) ([aca6f38](https://github.com/keyshade-xyz/keyshade/commit/aca6f3853af2de56071bae6e1b7190d77f0b473e))
+
 ## [2.28.0](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0...v2.28.0) (2025-07-02)
 
 ### 🚀 Features

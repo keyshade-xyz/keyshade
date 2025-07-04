@@ -39,12 +39,7 @@ function OverviewPage(): React.JSX.Element {
     storePrivateKey: boolean
     keys: { publicKey: string; privateKey: string }
   }>()
-  const {
-    projectPrivateKey,
-    hasServerStoredKey,
-    setHasServerStoredKey,
-    loading
-  } = useProjectPrivateKey(selectedProject)
+  const { projectPrivateKey, loading } = useProjectPrivateKey(selectedProject)
 
   useEffect(() => {
     if (regeneratedKeys) {
@@ -89,7 +84,6 @@ function OverviewPage(): React.JSX.Element {
             <TooltipProvider>
               {/* Setup privatekey in atom */}
               <LocalKeySetup
-                isStoredOnServer={hasServerStoredKey}
                 onDelete={() => setDeleteKeyDialogOpen(true)}
                 onOpenSetupDialog={() => setLocalKeyDialogOpen(true)}
                 privateKey={projectPrivateKey}
@@ -105,9 +99,7 @@ function OverviewPage(): React.JSX.Element {
 
               {/* store private key in keyshade db */}
               <ServerKeySetup
-                isStoredOnServer={hasServerStoredKey}
                 onDelete={() => setDeleteKeyDialogOpen(true)}
-                onKeyStored={() => setHasServerStoredKey(true)}
                 onOpenStoreDialog={() => setServerKeyDialogOpen(true)}
                 privateKey={projectPrivateKey}
                 projectSlug={selectedProject.slug}
@@ -145,7 +137,6 @@ function OverviewPage(): React.JSX.Element {
       <ConfirmDeleteKeyDialog
         currentProject={selectedProject.slug}
         isOpen={deleteKeyDialogOpen}
-        isStoredOnServer={hasServerStoredKey}
         onClose={() => setDeleteKeyDialogOpen(false)}
       />
       {/* View and download project keys dialog */}
