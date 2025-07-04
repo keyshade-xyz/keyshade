@@ -44,7 +44,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { VariableService } from '@/variable/variable.service'
-import { decrypt, encrypt } from '@/common/cryptography'
+import { decrypt, encrypt, sDecrypt } from '@/common/cryptography'
 import {
   ConfigurationAddedEventMetadata,
   ConfigurationDeletedEventMetadata,
@@ -595,7 +595,7 @@ export class SecretService {
       project.storePrivateKey &&
       (project.privateKey !== null || project.privateKey !== undefined)
     const plainTextValue = canBeDecrypted
-      ? await decrypt(project.privateKey, secretValue)
+      ? await decrypt(sDecrypt(project.privateKey), secretValue)
       : null
     const ultimateSecretValue = canBeDecrypted ? plainTextValue : secretValue
 
@@ -643,7 +643,7 @@ export class SecretService {
 
     const currentRevision = secret.versions.find(
       (version) => version.version === rollbackVersion
-    )!
+    )
 
     return {
       ...result,
