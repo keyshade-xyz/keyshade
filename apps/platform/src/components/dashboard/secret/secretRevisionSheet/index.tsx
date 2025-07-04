@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Environment, SecretVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { RollbackSVG } from '@public/svg/shared'
@@ -60,8 +60,6 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const isDecrypted = useMemo(() => Boolean(projectPrivateKey), [projectPrivateKey])
-
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().secretController.getRevisionsOfSecret({
@@ -113,27 +111,34 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
   }, [environments, getAllRevisionsOfSecret, selectedSecret, setRevisions])
 
   useEffect(() => {
-    if (!projectPrivateKey || !revisions.length) return
+    if (!revisions.length) return
 
     revisions.forEach(({ versions }) => {
       versions.forEach((revision) => {
         if (decryptedRevisions[revision.version]) return
 
-        decrypt(projectPrivateKey, revision.value)
-          .then((decrypted) => {
-            setDecryptedRevisions((prev) => ({
-              ...prev,
-              [revision.version]: decrypted
-            }))
-          })
-          .catch((error) => {
-            // eslint-disable-next-line no-console -- console.error is used for debugging
-            console.error('Decryption failed:', error)
-            setDecryptedRevisions((prev) => ({
-              ...prev,
-              [revision.version]: ''
-            }))
-          })
+        if (projectPrivateKey) {
+          decrypt(projectPrivateKey, revision.value)
+            .then((decrypted) => {
+              setDecryptedRevisions((prev) => ({
+                ...prev,
+                [revision.version]: decrypted
+              }))
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console -- console.error is used for debugging
+              console.error('Decryption failed:', error)
+              setDecryptedRevisions((prev) => ({
+                ...prev,
+                [revision.version]: 'Hidden'
+              }))
+            })
+        } else {
+          setDecryptedRevisions((prev) => ({
+            ...prev,
+            [revision.version]: 'Hidden'
+          }))
+        }
       })
     })
   }, [projectPrivateKey, revisions, decryptedRevisions])
@@ -195,10 +200,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                           >
                             <div className="flex w-full flex-row justify-between">
                               <div className="font-semibold">
-                                {isDecrypted
-                                  ? decryptedRevisions[revision.version] ||
-                                    'Decrypting...'
-                                  : 'Hidden'}
+                                {decryptedRevisions[revision.version]}
                               </div>
                               <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
                                 v{revision.version}

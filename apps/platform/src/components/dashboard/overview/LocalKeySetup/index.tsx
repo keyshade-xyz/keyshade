@@ -1,6 +1,7 @@
 import React from 'react'
 import { Info, Plus } from 'lucide-react'
 import { TrashSVG } from '@public/svg/shared'
+import { useAtomValue } from 'jotai'
 import { Button } from '@/components/ui/button'
 import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 import {
@@ -8,21 +9,21 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { privateKeyStorageTypeAtom } from '@/store'
 
 interface LocalKeySetupProps {
   privateKey: string | null
-  isStoredOnServer: boolean
   onOpenSetupDialog: () => void
   onDelete: () => void
 }
 
 function LocalKeySetup({
   privateKey,
-  isStoredOnServer,
   onOpenSetupDialog,
   onDelete
 }: LocalKeySetupProps): React.JSX.Element {
-  const isPrivateKeyStored = privateKey && !isStoredOnServer
+  const privateKeyStorageType = useAtomValue(privateKeyStorageTypeAtom)
+  const isPrivateKeyStored = privateKeyStorageType === 'IN_ATOM'
 
   return (
     <div
@@ -46,7 +47,7 @@ function LocalKeySetup({
       </div>
       {isPrivateKeyStored ? (
         <div className="flex items-center justify-between gap-1">
-          <HiddenContent isPrivateKey value={privateKey} />
+          <HiddenContent isPrivateKey value={privateKey!} />
           <Button
             className="flex items-center justify-center bg-neutral-800 p-2"
             onClick={onDelete}
@@ -58,7 +59,7 @@ function LocalKeySetup({
       ) : (
         <Button
           className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-3 py-5 text-sm text-white/70"
-          disabled={Boolean(privateKey !== null && isStoredOnServer)}
+          disabled={Boolean(privateKeyStorageType === 'IN_DB')}
           onClick={onOpenSetupDialog}
           type="button"
           variant="default"
