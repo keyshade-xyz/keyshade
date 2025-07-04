@@ -44,7 +44,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { VariableService } from '@/variable/variable.service'
-import { encrypt } from '@/common/cryptography'
+import { decrypt, encrypt } from '@/common/cryptography'
 import {
   ConfigurationAddedEventMetadata,
   ConfigurationDeletedEventMetadata,
@@ -205,7 +205,7 @@ export class SecretService {
               environmentId: environmentSlugToIdMap.get(environmentSlug),
               name: dto.name,
               value,
-              isPlaintext: project.storePrivateKey
+              isPlaintext: true
             } as ChangeNotificationEvent)
           )
           this.logger.log(
@@ -591,6 +591,13 @@ export class SecretService {
     )
 
     const secretValue = secret.versions[rollbackVersion - 1].value
+    const canBeDecrypted =
+      project.storePrivateKey &&
+      (project.privateKey !== null || project.privateKey !== undefined)
+    const plainTextValue = canBeDecrypted
+      ? await decrypt(project.privateKey, secretValue)
+      : null
+    const ultimateSecretValue = canBeDecrypted ? plainTextValue : secretValue
 
     try {
       this.logger.log(
@@ -602,8 +609,8 @@ export class SecretService {
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: secretValue,
-          isPlaintext: project.storePrivateKey
+          value: ultimateSecretValue,
+          isPlaintext: canBeDecrypted
         } as ChangeNotificationEvent)
       )
       this.logger.log(
@@ -624,9 +631,9 @@ export class SecretService {
           oldName: secret.name,
           newName: secret.name,
           values: {
-            [environment.slug]: secretValue
+            [environment.slug]: ultimateSecretValue
           },
-          isPlaintext: project.storePrivateKey && project.privateKey !== null,
+          isPlaintext: canBeDecrypted,
           isSecret: true
         } as ConfigurationUpdatedEventMetadata,
         workspaceId: secret.project.workspaceId
@@ -1169,7 +1176,7 @@ export class SecretService {
             environmentId: updatedVersion.environment.id,
             name: updatedSecret.name,
             value: updatedVersion.value,
-            isPlaintext: true
+            isPlaintext: false
           } as ChangeNotificationEvent)
         )
         this.logger.log(
