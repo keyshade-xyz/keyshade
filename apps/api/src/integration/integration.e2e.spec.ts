@@ -556,6 +556,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to update the integration', async () => {
+      createDummyWebhookUrlInterceptor()
+
       // Update the integration
       const result = await app.inject({
         method: 'PUT',
