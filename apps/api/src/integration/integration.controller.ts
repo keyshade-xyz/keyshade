@@ -3,7 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query
@@ -11,7 +14,7 @@ import {
 import { IntegrationService } from './integration.service'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { CreateIntegration } from './dto/create.integration/create.integration'
-import { Authority } from '@prisma/client'
+import { Authority, Integration } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -113,6 +116,28 @@ export class IntegrationController {
   ) {
     return await this.integrationService.deleteIntegration(
       user,
+      integrationSlug
+    )
+  }
+
+  @Post('validate-config')
+  @HttpCode(HttpStatus.OK)
+  @RequiredApiKeyAuthorities(
+    Authority.CREATE_INTEGRATION,
+    Authority.READ_WORKSPACE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
+  async testIntegration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateIntegration,
+    @Query('isCreate', ParseBoolPipe) isCreate: boolean,
+    @Query('integrationSlug') integrationSlug?: Integration['slug']
+  ) {
+    return await this.integrationService.validateIntegrationMetadata(
+      user,
+      dto,
+      isCreate,
       integrationSlug
     )
   }
