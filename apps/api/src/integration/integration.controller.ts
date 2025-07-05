@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query
@@ -130,7 +131,7 @@ export class IntegrationController {
   async testIntegration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration,
-    @Query('isCreate') isCreate: boolean,
+    @Query('isCreate', ParseBoolPipe) isCreate: boolean,
     @Query('integrationSlug') integrationSlug?: Integration['slug']
   ) {
     return await this.integrationService.validateIntegrationMetadata(
