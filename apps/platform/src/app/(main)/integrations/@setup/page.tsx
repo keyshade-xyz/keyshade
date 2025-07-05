@@ -36,7 +36,7 @@ export default function SetupIntegration({
       </div>
 
       <p className="mb-6 text-white/60">
-        Connect your environment with {integrationType} to automate workflows
+        Connect your environment with {integrationName} to automate workflows
         and keep your systems in sync.
       </p>
 
