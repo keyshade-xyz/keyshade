@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Environment, VariableVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
 import { RollbackSVG } from '@public/svg/shared'
@@ -14,7 +14,6 @@ import {
   environmentsOfProjectAtom,
   selectedVariableAtom,
   variableRevisionsOpenAtom,
-  selectedProjectAtom,
   rollbackVariableOpenAtom,
   selectedVariableEnvironmentAtom,
   selectedVariableRollbackVersionAtom,
@@ -44,7 +43,6 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
   )
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const environments = useAtomValue(environmentsOfProjectAtom)
-  const selectedProject = useAtomValue(selectedProjectAtom)
   const setIsRollbackVariableOpen = useSetAtom(rollbackVariableOpenAtom)
   const setSelectedVariableEnvironment = useSetAtom(
     selectedVariableEnvironmentAtom
@@ -55,11 +53,6 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
   const [revisions, setRevisions] = useAtom(revisionsOfVariableAtom)
 
   const [isLoading, setIsLoading] = useState(true)
-
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
-    [selectedProject]
-  )
 
   const getAllRevisionsOfVariable = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -170,7 +163,7 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                           >
                             <div className="flex w-full flex-row justify-between">
                               <div className="font-semibold">
-                                {isDecrypted ? revision.value : 'Hidden'}
+                                {revision.value}
                               </div>
                               <div className="rounded-lg bg-sky-500/30 px-2 text-sky-500">
                                 v{revision.version}

@@ -593,7 +593,8 @@ export class SecretService {
     const secretValue = secret.versions[rollbackVersion - 1].value
     const canBeDecrypted =
       project.storePrivateKey &&
-      (project.privateKey !== null || project.privateKey !== undefined)
+      project.privateKey !== null &&
+      project.privateKey !== undefined
     const plainTextValue = canBeDecrypted
       ? await decrypt(sDecrypt(project.privateKey), secretValue)
       : null
