@@ -119,6 +119,9 @@ export const localProjectPrivateKeyAtom = atom<
     key: ProjectWithTierLimitAndCount['privateKey']
   }[]
 >([])
+export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(
+  'NONE'
+)
 
 export const workspaceProjectCountAtom = atom<number>(0)
 export const workspaceMemberCountAtom = atom<number>(0)

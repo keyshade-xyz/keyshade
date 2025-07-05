@@ -1,6 +1,7 @@
 import React from 'react'
 import { Info, Plus } from 'lucide-react'
 import { TrashSVG } from '@public/svg/shared'
+import { useAtomValue } from 'jotai'
 import { Button } from '@/components/ui/button'
 import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 import {
@@ -8,36 +9,26 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { privateKeyStorageTypeAtom } from '@/store'
 
 interface LocalKeySetupProps {
   privateKey: string | null
-  isStoredOnServer: boolean
   onOpenSetupDialog: () => void
   onDelete: () => void
 }
 
 function LocalKeySetup({
   privateKey,
-  isStoredOnServer,
   onOpenSetupDialog,
   onDelete
 }: LocalKeySetupProps): React.JSX.Element {
-  if (privateKey && !isStoredOnServer) {
-    return (
-      <div className="flex justify-between gap-1">
-        <HiddenContent isPrivateKey value={privateKey} />
-        <Button
-          className="flex items-center justify-center bg-neutral-800 p-2"
-          onClick={onDelete}
-          type="button"
-        >
-          <TrashSVG />
-        </Button>
-      </div>
-    )
-  }
+  const privateKeyStorageType = useAtomValue(privateKeyStorageTypeAtom)
+  const isPrivateKeyStored = privateKeyStorageType === 'IN_ATOM'
+
   return (
-    <div className="flex justify-between gap-1.5 rounded-lg bg-white/10 p-3">
+    <div
+      className={`flex justify-between gap-2 rounded-lg bg-white/10 p-3 ${isPrivateKeyStored && 'flex-col gap-3'}`}
+    >
       <div>
         <h1 className="text-lg font-medium text-white">
           Do you wanna setup private key?{' '}
@@ -54,16 +45,29 @@ function LocalKeySetup({
           </Tooltip>
         </h1>
       </div>
-      <Button
-        className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-3 py-5 text-sm text-white/70"
-        disabled={Boolean(privateKey !== null && isStoredOnServer)}
-        onClick={onOpenSetupDialog}
-        type="button"
-        variant="default"
-      >
-        <Plus />
-        <div className="font-bold">Setup Private Key</div>
-      </Button>
+      {isPrivateKeyStored ? (
+        <div className="flex items-center justify-between gap-1">
+          <HiddenContent isPrivateKey value={privateKey!} />
+          <Button
+            className="flex items-center justify-center bg-neutral-800 p-2"
+            onClick={onDelete}
+            type="button"
+          >
+            <TrashSVG />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          className="flex w-fit items-center gap-1 rounded-md bg-neutral-800 px-3 py-5 text-sm text-white/70"
+          disabled={Boolean(privateKeyStorageType === 'IN_DB')}
+          onClick={onOpenSetupDialog}
+          type="button"
+          variant="default"
+        >
+          <Plus />
+          <div className="font-bold">Setup Private Key</div>
+        </Button>
+      )}
     </div>
   )
 }
