@@ -1,3 +1,9 @@
+## [2.29.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.1...v2.29.0-stage.2) (2025-07-05)
+
+### 🐛 Bug Fixes
+
+* **api:** Remove sensitive data logging in lambda integration ([#1055](https://github.com/keyshade-xyz/keyshade/issues/1055)) ([9dc3dd1](https://github.com/keyshade-xyz/keyshade/commit/9dc3dd10ff01201bd89a8d736bd3e65e96b47af0))
+
 ## [2.29.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.1-stage.1...v2.29.0-stage.1) (2025-07-05)
 
 ### 🚀 Features
