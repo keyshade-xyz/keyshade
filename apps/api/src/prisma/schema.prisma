@@ -136,6 +136,7 @@ enum IntegrationType {
   GITHUB
   GITLAB
   VERCEL
+  AWS_LAMBDA
 }
 
 enum AuthProvider {

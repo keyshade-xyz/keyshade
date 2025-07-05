@@ -6,6 +6,7 @@ import {
   Project
 } from '@prisma/client'
 import {
+  EnvironmentSupportType,
   IntegrationEventData,
   VercelIntegrationMetadata
 } from '../integration.types'
@@ -17,7 +18,7 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { decryptMetadata, makeTimedRequest } from '@/common/util'
-import { InternalServerErrorException } from '@nestjs/common'
+import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
 
@@ -47,12 +48,12 @@ export class VercelIntegration extends BaseIntegration {
     return true
   }
 
-  public areEnvironmentsRequired(): boolean {
+  public isPrivateKeyRequired(): boolean {
     return true
   }
 
-  public isPrivateKeyRequired(): boolean {
-    return true
+  public environmentSupport(): EnvironmentSupportType {
+    return 'atleast-one'
   }
 
   public async init(
@@ -65,16 +66,16 @@ export class VercelIntegration extends BaseIntegration {
 
     const integration = this.getIntegration<VercelIntegrationMetadata>()
 
+    this.logger.log('Adding project private key to Vercel project...')
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: integration.id,
+      title: 'Adding KS_PRIVATE_KEY to Vercel project'
+    })
+
     // Add the project's private key to the Vercel project
     try {
-      this.logger.log('Adding project private key to Vercel project...')
-
-      const { id: integrationRunId } = await this.registerIntegrationRun({
-        eventId,
-        integrationId: integration.id,
-        title: 'Adding KS_PRIVATE_KEY to Vercel project'
-      })
-
       // Add new environment variables
       const { response, duration } = await makeTimedRequest(() =>
         this.vercel.projects.createProjectEnv({
@@ -107,7 +108,15 @@ export class VercelIntegration extends BaseIntegration {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
       )
-      throw new InternalServerErrorException(error)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error instanceof Error ? error.message : String(error)
+      )
+
+      throw new BadRequestException(error)
     }
   }
 
@@ -115,69 +124,75 @@ export class VercelIntegration extends BaseIntegration {
     switch (data.eventType) {
       case EventType.SECRET_ADDED:
       case EventType.VARIABLE_ADDED:
-        /**
-         * We have 3 cases in here:
-         * 1. The configuration has no records that were added to it
-         * 2. The configuration has only one record
-         * 3. The configuration has multiple records.
-         *
-         * For 1 - we don't make an API call.
-         * For 2 and 3, we make an API call.
-         */
-        const addEventMetadata =
-          decryptMetadata<ConfigurationAddedEventMetadata>(data.event.metadata)
-
-        await this.addEnvironmentalVariable(addEventMetadata, data.event.id)
+        await this.delegateConfigurationAddedEvent(data)
         break
 
       case EventType.SECRET_UPDATED:
       case EventType.VARIABLE_UPDATED:
-        /**
-         * We have 4 cases in here:
-         * 1. The name of a configuration got updated
-         * 2. A new version was created for an existing environment
-         * 3. A new version was created for a non-existing environment
-         * 4. A version was rolled back for an existing environment
-         */
-
-        const updateEventMetadata =
-          decryptMetadata<ConfigurationUpdatedEventMetadata>(
-            data.event.metadata
-          )
-
-        // Update the name of the environment
-        await this.updateEnvironmentalVariableNameAndDescription(
-          updateEventMetadata,
-          data.event.id
-        )
-
-        // Update the value of the environment
-        await this.addEnvironmentalVariable(
-          {
-            ...updateEventMetadata,
-            name: updateEventMetadata.newName
-          },
-          data.event.id
-        )
+        await this.delegateConfigurationUpdatedEvent(data)
         break
 
       case EventType.SECRET_DELETED:
       case EventType.VARIABLE_DELETED:
-        const deleteEventMetadata =
-          decryptMetadata<ConfigurationDeletedEventMetadata>(
-            data.event.metadata
-          )
-
-        await this.deleteEnvironmentalVariable(
-          deleteEventMetadata,
-          data.event.id
-        )
+        await this.delegateConfigurationDeletedEvent(data)
         break
+
       default:
         this.logger.warn(
           `Event type ${data.eventType} not supported for Vercel integration.`
         )
     }
+  }
+
+  /**
+   * We have 3 cases in here:
+   * 1. The configuration has no records that were added to it
+   * 2. The configuration has only one record
+   * 3. The configuration has multiple records.
+   *
+   * For 1 - we don't make an API call.
+   * For 2 and 3, we make an API call.
+   */
+  private async delegateConfigurationAddedEvent(data: IntegrationEventData) {
+    const addEventMetadata = decryptMetadata<ConfigurationAddedEventMetadata>(
+      data.event.metadata
+    )
+
+    await this.addEnvironmentalVariable(addEventMetadata, data.event.id)
+  }
+
+  /**
+   * We have 4 cases in here:
+   * 1. The name of a configuration got updated
+   * 2. A new version was created for an existing environment
+   * 3. A new version was created for a non-existing environment
+   * 4. A version was rolled back for an existing environment
+   */
+  private async delegateConfigurationUpdatedEvent(data: IntegrationEventData) {
+    const updateEventMetadata =
+      decryptMetadata<ConfigurationUpdatedEventMetadata>(data.event.metadata)
+
+    // Update the name of the environment
+    await this.updateEnvironmentalVariableNameAndDescription(
+      updateEventMetadata,
+      data.event.id
+    )
+
+    // Update the value of the environment
+    await this.addEnvironmentalVariable(
+      {
+        ...updateEventMetadata,
+        name: updateEventMetadata.newName
+      },
+      data.event.id
+    )
+  }
+
+  private async delegateConfigurationDeletedEvent(data: IntegrationEventData) {
+    const deleteEventMetadata =
+      decryptMetadata<ConfigurationDeletedEventMetadata>(data.event.metadata)
+
+    await this.deleteEnvironmentalVariable(deleteEventMetadata, data.event.id)
   }
 
   /**
@@ -202,7 +217,7 @@ export class VercelIntegration extends BaseIntegration {
     // Only make an API call if there are environment variables
     if (Object.entries(data.values).length === 0) {
       this.logger.log(
-        'No environment variables found while adding secret. Skipping Vercel API call.'
+        'No environment variables found while adding configuration. Skipping Vercel API call.'
       )
       return
     }
@@ -233,7 +248,7 @@ export class VercelIntegration extends BaseIntegration {
       return
     }
 
-    let totalDuration = 0
+    let totalDuration: number = 0
 
     const { id: integrationRunId } = await this.registerIntegrationRun({
       eventId,
@@ -346,7 +361,7 @@ export class VercelIntegration extends BaseIntegration {
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.FAILED,
-        0,
+        totalDuration,
         error instanceof Error ? error.message : String(error)
       )
     }
@@ -446,9 +461,7 @@ export class VercelIntegration extends BaseIntegration {
     const integration = this.getIntegration<VercelIntegrationMetadata>()
     const metadata = integration.metadata
 
-    this.logger.log(
-      `Deleting environment variable ${data.name} across ${metadata.environments.length} environments`
-    )
+    this.logger.log(`Attempting to delete environment variable ${data.name}`)
 
     this.logger.log(
       `Filtering out environments that are not part of the integration...`
@@ -568,7 +581,7 @@ export class VercelIntegration extends BaseIntegration {
 
     return {
       envs: response['envs'],
-      duration: duration
+      duration
     }
   }
 

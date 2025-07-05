@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/context-menu'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import ErrorCard from '@/components/shared/error-card'
+import { formatText } from '@/lib/utils'
 
 type ErrorMessage = { header: string; body: string } | null
 
@@ -123,23 +124,29 @@ function IntegrationList() {
               <ContextMenuTrigger>
                 <Link href={`/integrations?details=${integration.slug}`}>
                   <div className="flex h-[6rem] items-center justify-between rounded-lg bg-white/5 px-5 py-4 transition-all duration-150 ease-out hover:bg-white/10">
-                    <div className="flex items-center gap-x-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
+                    <div className="flex min-w-0 flex-1 items-center gap-x-4">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-neutral-700">
                         <IntegrationIcon
                           className="h-6 w-6"
                           type={integration.type}
                         />
                       </div>
-                      <div>
-                        <h2 className="text-lg font-semibold">
+                      <div className="min-w-0 flex-1">
+                        <h2
+                          className="truncate text-lg font-semibold"
+                          title={integration.name}
+                        >
                           {integration.name}
                         </h2>
-                        <p className="text-sm text-white/60">
-                          {integration.type}
+                        <p
+                          className="truncate text-sm text-white/60"
+                          title={formatText(integration.type)}
+                        >
+                          {formatText(integration.type)}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start justify-center gap-x-2">
+                    <div className="flex w-2/5 flex-shrink-0 items-start justify-center gap-x-2 pl-4">
                       <CopyToClipboard text={integration.slug} />
                     </div>
                   </div>

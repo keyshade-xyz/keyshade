@@ -23,6 +23,7 @@ function IntegrationDetailsPage({
 }) {
   const router = useRouter()
   const [showAllEvents, setShowAllEvents] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [selectedIntegration, setSelectedIntegration] = useAtom(
     selectedIntegrationAtom
@@ -49,13 +50,19 @@ function IntegrationDetailsPage({
     if (!integrationSlug) {
       return
     }
-    getIntegrationDetails().then(({ data, success }) => {
-      if (success && data) {
-        setSelectedIntegration(data)
-      } else {
-        router.push('/integrations')
-      }
-    })
+
+    setIsLoading(true)
+    getIntegrationDetails()
+      .then(({ data, success }) => {
+        if (success && data) {
+          setSelectedIntegration(data)
+        } else {
+          router.push('/integrations')
+        }
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }, [getIntegrationDetails, integrationSlug, router, setSelectedIntegration])
 
   const refreshIntegrationData = useCallback(() => {
@@ -66,7 +73,7 @@ function IntegrationDetailsPage({
     })
   }, [getIntegrationDetails, setSelectedIntegration])
 
-  if (!selectedIntegration) {
+  if (isLoading || !selectedIntegration) {
     return <IntegrationLoader />
   }
 

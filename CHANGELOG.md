@@ -1,3 +1,9 @@
+## [2.29.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.1-stage.1...v2.29.0-stage.1) (2025-07-05)
+
+### 🚀 Features
+
+* AWS Lambda Integration added ([#1053](https://github.com/keyshade-xyz/keyshade/issues/1053)) ([4484261](https://github.com/keyshade-xyz/keyshade/commit/44842612752f7ab6d56c591022d8edd846b8b31e))
+
 ## [2.28.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.28.1-stage.1) (2025-07-04)
 
 ### 🐛 Bug Fixes

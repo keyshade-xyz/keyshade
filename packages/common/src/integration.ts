@@ -15,6 +15,7 @@ export interface IntegrationConfig {
   metadataFields: MetadataField[]
   envMapping: boolean
   privateKeyRequired: boolean
+  maxEnvironmentsCount: 'single' | 'any'
 }
 
 interface GroupItem {
@@ -99,6 +100,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     events: eventGroups,
     envMapping: false,
     privateKeyRequired: false,
+    maxEnvironmentsCount: 'any',
     metadataFields: [
       {
         name: 'Webhook URL',
@@ -114,6 +116,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     events: eventGroups,
     envMapping: false,
     privateKeyRequired: false,
+    maxEnvironmentsCount: 'any',
     metadataFields: [
       {
         name: 'Bot Token',
@@ -144,6 +147,7 @@ export const Integrations: Record<string, IntegrationConfig> = {
     events: selectedEventGroups,
     envMapping: true,
     privateKeyRequired: true,
+    maxEnvironmentsCount: 'any',
     metadataFields: [
       {
         name: 'Token',
@@ -164,6 +168,40 @@ export const Integrations: Record<string, IntegrationConfig> = {
         requestFieldName: 'environments',
         placeholder: 'production,staging',
         isEnvironment: true
+      }
+    ]
+  },
+  AWS_LAMBDA: {
+    name: 'AWS Lambda',
+    type: 'AWS_LAMBDA',
+    events: selectedEventGroups,
+    envMapping: false,
+    privateKeyRequired: true,
+    maxEnvironmentsCount: 'single',
+    metadataFields: [
+      {
+        name: 'Region',
+        description: 'The AWS region where the Lambda function is deployed',
+        requestFieldName: 'region',
+        placeholder: 'us-east-1'
+      },
+      {
+        name: 'Access Key ID',
+        description: 'The AWS access key ID for authentication',
+        requestFieldName: 'accessKeyId',
+        placeholder: 'AKIA...'
+      },
+      {
+        name: 'Secret Access Key',
+        description: 'The AWS secret access key for authentication',
+        requestFieldName: 'secretAccessKey',
+        placeholder: 'your-secret-access-key'
+      },
+      {
+        name: 'Function Name',
+        description: 'The name of the AWS Lambda function to invoke',
+        requestFieldName: 'lambdaFunctionName',
+        placeholder: 'my-lambda-function'
       }
     ]
   }

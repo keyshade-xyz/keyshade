@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input'
 interface IntegrationMetadataProps {
   integrationType: IntegrationTypeEnum
   initialMetadata?: Record<string, unknown>
+  integrationName: string
   onChange: (metadata: Record<string, string>) => void
 }
 
 function IntegrationMetadata({
   integrationType,
   initialMetadata = {},
+  integrationName,
   onChange
 }: IntegrationMetadataProps): JSX.Element {
   const metadataFields = useMemo(
@@ -40,7 +42,7 @@ function IntegrationMetadata({
   return (
     <div className="flex flex-col gap-y-2">
       <h3 className="font-medium capitalize text-white">
-        {integrationType} Configuration
+        {integrationName} Configuration
       </h3>
       <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
         {metadataFields

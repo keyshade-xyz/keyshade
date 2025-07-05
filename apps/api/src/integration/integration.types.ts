@@ -45,6 +45,15 @@ export interface IntegrationRunData {
 export interface IntegrationMetadata extends Record<string, unknown> {}
 
 /**
+ * Integration metadata that would be common to all AWS integrations
+ */
+export interface BaseAWSIntegrationMetadata extends IntegrationMetadata {
+  region: string
+  accessKeyId: string
+  secretAccessKey: string
+}
+
+/**
  * Discord Integration Data
  * @property webhookUrl The webhook URL that will be used to send messages to Discord.
  */
@@ -73,6 +82,11 @@ export interface VercelIntegrationMetadata extends IntegrationMetadata {
       vercelCustomEnvironmentId?: string
     }
   >
+}
+
+export interface AWSLambdaIntegrationMetadata
+  extends BaseAWSIntegrationMetadata {
+  lambdaFunctionName: string
 }
 
 export interface IntegrationWithLastUpdatedBy extends Integration {
@@ -107,3 +121,5 @@ export interface IntegrationWithLastUpdatedByAndReferences
     slug: string
   } | null
 }
+
+export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'
