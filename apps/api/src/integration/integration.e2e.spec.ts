@@ -661,6 +661,8 @@ describe('Integration Controller Tests', () => {
       notifyOn: [EventType.WORKSPACE_UPDATED]
     }
 
+    let existingIntegration: Integration
+
     afterEach(() => {
       nock.cleanAll()
     })
@@ -695,6 +697,108 @@ describe('Integration Controller Tests', () => {
 
       expect(response.statusCode).toBeGreaterThanOrEqual(400)
       expect(response.statusCode).toBeLessThan(500)
+    })
+
+    it('should succeed validating metadata on update when DTO is valid', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      existingIntegration = await integrationService.createIntegration(
+        user1,
+        {
+          ...validDto,
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false&integrationSlug=${existingIntegration.slug}`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: {
+          metadata: validDto.metadata,
+          notifyOn: validDto.notifyOn
+        }
+      })
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.json()).toEqual({ success: true })
+    })
+
+    it('should return 400 if integrationSlug is missing on update', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toContain('integrationSlug is required')
+    })
+
+    it('should return 401 if user is not authorized to update that integration', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      existingIntegration = await integrationService.createIntegration(
+        user1,
+        {
+          ...validDto,
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false&integrationSlug=${existingIntegration.slug}`,
+        headers: { 'x-e2e-user-email': user2.email },
+        payload: {
+          metadata: validDto.metadata,
+          notifyOn: validDto.notifyOn
+        }
+      })
+
+      expect(response.statusCode).toEqual(401)
+    })
+
+    it('should return 400 if notifyOn contains an event the integration does not permit', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      const badDto = {
+        ...validDto,
+        notifyOn: ['A-NOT-PERMITTED-EVENT']
+      }
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: badDto
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toMatch(
+        /Event not supported by integration/
+      )
+    })
+
+    it('should return 400 if metadata params fail validation', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: {
+          ...validDto,
+          metadata: {}
+        }
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toMatch(/Missing metadata parameter/)
     })
   })
 
