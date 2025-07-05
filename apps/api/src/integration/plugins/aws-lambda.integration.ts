@@ -268,9 +268,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       }
 
       // Update the environmental variable in the Lambda function
-      this.logger.log(
-        `Adding ${data.name} to Lambda function with value ${value}...`
-      )
+      this.logger.log(`Adding ${data.name} to Lambda function`)
       const updateEnvironmentVariableDuration =
         await this.updateLambdaFunctionConfiguration(
           metadata.lambdaFunctionName,
@@ -280,15 +278,13 @@ export class AWSLambdaIntegration extends BaseIntegration {
           }
         )
       totalDuration += updateEnvironmentVariableDuration
-      this.logger.log(
-        `Added ${data.name} to Lambda function with value ${value}`
-      )
+      this.logger.log(`Added ${data.name} to Lambda function`)
 
       await this.markIntegrationRunAsFinished(
         integrationRunId,
         IntegrationRunStatus.SUCCESS,
         totalDuration,
-        `Added ${data.name} to Lambda function with value ${value}`
+        `Added ${data.name} to Lambda function`
       )
     } catch (error) {
       this.logger.error(
