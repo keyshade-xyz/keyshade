@@ -299,6 +299,9 @@ model Environment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  disabledVariables Variable[] @relation("VariableDisabledForEnvironments")
+  disabledSecrets Secret[] @relation("SecretDisabledForEnvironments")
+
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
@@ -434,6 +437,8 @@ model Secret {
   rotateAfter Int?
   note        String?
 
+  disabledForEnvironments Environment[] @relation("SecretDisabledForEnvironments")
+
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
 
@@ -469,6 +474,8 @@ model Variable {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   note      String?
+
+  disabledForEnvironments Environment[] @relation("VariableDisabledForEnvironments")
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
