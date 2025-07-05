@@ -21,6 +21,18 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn']
+    '@typescript-eslint/no-unused-vars': ['warn'],
+    // '@typescript-eslint/naming-convention': [
+    //   'error',
+    //   {
+    //     selector: 'variableLike',
+    //     format: null,
+    //     custom: {
+    //       regex: '^[a-zA-Z0-9_]+$',
+    //       match: true
+    //     }
+    //   }
+    // ],
+    'id-match': ['error', '^[a-zA-Z0-9_]+$']
   }
 }

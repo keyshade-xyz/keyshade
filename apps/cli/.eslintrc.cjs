@@ -28,6 +28,18 @@ module.exports = {
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
     'space-before-function-paren': 'off',
-    '@typescript-eslint/member-delimiter-style': 'off'
+    '@typescript-eslint/member-delimiter-style': 'off',
+    // '@typescript-eslint/naming-convention': [
+    //   'error',
+    //   {
+    //     selector: 'variableLike',
+    //     format: null,
+    //     custom: {
+    //       regex: '^[a-zA-Z0-9_]+$',
+    //       match: true
+    //     }
+    //   }
+    // ]
+    'id-match': ['error', '^[a-zA-Z0-9_]+$']
   }
 }

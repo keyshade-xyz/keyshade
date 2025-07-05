@@ -23,6 +23,7 @@ module.exports = {
     'no-nested-ternary': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@next/next/no-html-link-for-pages': 'off',
-    'turbo/no-undeclared-env-vars': 'off'
+    'turbo/no-undeclared-env-vars': 'off',
+    'id-match': ['error', '^[a-zA-Z0-9_]+$']
   }
 }
