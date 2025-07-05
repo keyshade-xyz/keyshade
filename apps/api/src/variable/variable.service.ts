@@ -224,6 +224,31 @@ export class VariableService {
     return variable
   }
 
+  async bulkCreateVariables(
+    user: AuthenticatedUser,
+    projectSlug: string,
+    variables: CreateVariable[]
+  ): Promise<VariableWithValues[]> {
+    this.logger.log(
+      `User ${user.id} started bulk creation of ${variables.length} variables in project ${projectSlug}`
+    )
+
+    const created: VariableWithValues[] = []
+
+    for (const variable of variables) {
+      try {
+        const result = await this.createVariable(user, variable, projectSlug)
+        created.push(result)
+      } catch (error) {
+        this.logger.error(
+          `Failed to create variable "${variable.name}": ${error.message}`
+        )
+        throw error
+      }
+    }
+
+    return created
+  }
   /**
    * Updates a variable in a project
    * @param user the user performing the action

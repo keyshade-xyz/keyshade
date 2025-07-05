@@ -15,6 +15,7 @@ import { CreateSecret } from './dto/create.secret/create.secret'
 import { UpdateSecret } from './dto/update.secret/update.secret'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { AuthenticatedUser } from '@/user/user.types'
+import { BulkCreateSecretDto } from './dto/bulk.create.secret/bulk.create.secret'
 
 @Controller('secret')
 export class SecretController {
@@ -28,6 +29,20 @@ export class SecretController {
     @Body() dto: CreateSecret
   ) {
     return await this.secretService.createSecret(user, dto, projectSlug)
+  }
+
+  @Post(':projectSlug/bulk')
+  @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
+  async bulkCreateSecrets(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: string,
+    @Body() dto: BulkCreateSecretDto
+  ) {
+    return await this.secretService.bulkCreateSecrets(
+      user,
+      projectSlug,
+      dto.secrets
+    )
   }
 
   @Put(':secretSlug')
