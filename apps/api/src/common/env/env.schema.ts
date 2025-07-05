@@ -17,6 +17,7 @@ Zod only throws errors if a variable is missing completely from .env
 Use the .optional() property if you are okay with a variable being omitted from .env file
 
 */
+const keyNamingRule = /^[A-Z0-9_]+$/
 
 const sampleRateSchema = (name: string) =>
   z
@@ -189,8 +190,17 @@ const prodSchema = z.object({
 
 export type EnvSchemaType = z.infer<typeof prodSchema>
 
-export const EnvSchema = z.discriminatedUnion('NODE_ENV', [
-  e2eEnvSchema,
-  prodSchema,
-  devSchema
-])
+export const EnvSchema = z
+  .discriminatedUnion('NODE_ENV', [e2eEnvSchema, prodSchema, devSchema])
+  .refine(
+    (data) => {
+      const invalidKeys = Object.keys(data).filter(
+        (key) => !keyNamingRule.test(key)
+      )
+      return invalidKeys.length === 0
+    },
+    {
+      message:
+        'Environment variable names must only contain uppercase characters and underscores.'
+    }
+  )
