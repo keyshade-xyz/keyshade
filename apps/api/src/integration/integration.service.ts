@@ -748,6 +748,10 @@ export class IntegrationService {
     type: IntegrationType,
     environmentSlugs?: Environment['slug'][]
   ) {
+    this.logger.log(
+      `Environment support is ${integrationObject.environmentSupport()} for integration type ${type}. Supplied enviornment slugs: ${environmentSlugs}`
+    )
+
     // Validate environment requirement
     switch (integrationObject.environmentSupport()) {
       case 'atleast-one':
@@ -764,7 +768,7 @@ export class IntegrationService {
         }
         break
       case 'single':
-        if (!environmentSlugs || environmentSlugs.length > 1) {
+        if (!environmentSlugs || environmentSlugs.length !== 1) {
           this.logger.error(
             `Can not create integration ${type} with multiple environments.`
           )
