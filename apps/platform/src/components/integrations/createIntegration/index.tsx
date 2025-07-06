@@ -42,7 +42,7 @@ export default function CreateIntegration(): React.JSX.Element {
             third-party services with ease
           </p>
         </DialogHeader>
-        <div className="grid grid-cols-9 gap-3">
+        <div className="grid grid-cols-7 gap-3">
           {integrations.map(({ name, type }) => (
             <Link
               href={`integrations?setup=${type}`}
@@ -50,8 +50,11 @@ export default function CreateIntegration(): React.JSX.Element {
               onClick={() => setIsCreateIntegrationOpen(false)}
             >
               <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-white/20 bg-white/5 p-4 transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/10 hover:shadow-md">
-                <div className="mb-4 h-16 w-16">
-                  <IntegrationIcon className="h-full w-full" type={type} />
+                <div className="mb-4 h-16 w-16 ">
+                  <IntegrationIcon
+                    className="h-[4.5rem] w-[4.5rem]"
+                    type={type}
+                  />
                 </div>
                 <span className="text-lg font-medium text-white/60">
                   {name}
