@@ -11,6 +11,8 @@ import {
 import {
   CreateVariableRequest,
   CreateVariableResponse,
+  BulkCreateVariableRequest,
+  BulkCreateVariableResponse,
   DeleteVariableRequest,
   DeleteVariableResponse,
   GetAllVariablesOfProjectRequest,
@@ -40,6 +42,19 @@ export default class VariableController {
       headers
     )
     return await parseResponse<CreateVariableResponse>(response)
+  }
+
+  async bulkCreateVariables(
+    request: BulkCreateVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<BulkCreateVariableResponse>> {
+    const response = await this.apiClient.post(
+      `/api/variable/${request.projectSlug}/bulk`,
+      request,
+      headers
+    )
+
+    return await parseResponse<BulkCreateVariableResponse>(response)
   }
 
   async updateVariable(

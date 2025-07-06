@@ -55,6 +55,21 @@ export const CreateVariableRequestSchema = z.object({
 
 export const CreateVariableResponseSchema = VariableSchema
 
+export const BulkCreateVariableRequestSchema = z.object({
+  projectSlug: BaseProjectSchema.shape.slug,
+  variables: z.array(CreateVariableRequestSchema.omit({ projectSlug: true }))
+})
+
+export const BulkCreateVariableResponseSchema = z.object({
+  successful: z.array(VariableSchema),
+  failed: z.array(
+    z.object({
+      name: z.string(),
+      error: z.string()
+    })
+  )
+})
+
 export const UpdateVariableRequestSchema = z.object({
   variableSlug: z.string(),
   name: z.string().optional(),
