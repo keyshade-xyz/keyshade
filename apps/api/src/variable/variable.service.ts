@@ -228,27 +228,32 @@ export class VariableService {
     user: AuthenticatedUser,
     projectSlug: string,
     variables: CreateVariable[]
-  ): Promise<VariableWithValues[]> {
+  ): Promise<{
+    successful: VariableWithValues[]
+    failed: Array<{ name: string; error: string }>
+  }> {
     this.logger.log(
       `User ${user.id} started bulk creation of ${variables.length} variables in project ${projectSlug}`
     )
 
-    const created: VariableWithValues[] = []
+    const successful: VariableWithValues[] = []
+    const failed: Array<{ name: string; error: string }> = []
 
     for (const variable of variables) {
       try {
         const result = await this.createVariable(user, variable, projectSlug)
-        created.push(result)
+        successful.push(result)
       } catch (error) {
         this.logger.error(
           `Failed to create variable "${variable.name}": ${error.message}`
         )
-        throw error
+        failed.push({ name: variable.name, error: error.message })
       }
     }
 
-    return created
+    return { successful, failed }
   }
+
   /**
    * Updates a variable in a project
    * @param user the user performing the action

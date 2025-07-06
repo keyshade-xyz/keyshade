@@ -243,26 +243,30 @@ export class SecretService {
     user: AuthenticatedUser,
     projectSlug: string,
     secrets: CreateSecret[]
-  ): Promise<SecretWithValues[]> {
+  ): Promise<{
+    successful: SecretWithValues[]
+    failed: Array<{ name: string; error: string }>
+  }> {
     this.logger.log(
       `User ${user.id} initiated bulk creation of ${secrets.length} secrets in project ${projectSlug}`
     )
 
-    const createdSecrets: SecretWithValues[] = []
+    const successful: SecretWithValues[] = []
+    const failed: Array<{ name: string; error: string }> = []
 
     for (const secret of secrets) {
       try {
         const result = await this.createSecret(user, secret, projectSlug)
-        createdSecrets.push(result)
+        successful.push(result)
       } catch (err) {
         this.logger.error(
           `Error creating secret "${secret.name}": ${err.message}`
         )
-        throw err
+        failed.push({ name: secret.name, error: err.message })
       }
     }
 
-    return createdSecrets
+    return { successful, failed }
   }
 
   /**
