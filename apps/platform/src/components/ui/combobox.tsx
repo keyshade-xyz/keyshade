@@ -131,7 +131,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="w-[16rem] flex items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
+          className="flex w-[16rem] items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
           role="combobox"
           type="button"
         >
