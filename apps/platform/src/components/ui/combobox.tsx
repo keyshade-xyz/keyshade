@@ -131,7 +131,7 @@ export function Combobox(): React.JSX.Element {
         <button
           aria-controls="popover-content"
           aria-expanded={open}
-          className="flex items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
+          className="w-[16rem] flex items-center justify-between rounded-xl border border-white/10 bg-[#161819] px-[0.6875rem] py-[0.8125rem]"
           role="combobox"
           type="button"
         >
@@ -140,7 +140,7 @@ export function Combobox(): React.JSX.Element {
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-col items-start">
-              <div className="text-lg text-white">
+              <div className="text-start text-lg text-white">
                 {selectedWorkspace?.name ?? 'No workspace'}
               </div>
               <span className="text-xs text-white/55">
@@ -153,7 +153,7 @@ export function Combobox(): React.JSX.Element {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="bg-[#161819] text-white md:w-[16rem]">
+      <PopoverContent className="w-[16rem] bg-[#161819] text-white">
         <div>
           <Command>
             <CommandInput placeholder="Type a command or search..." />
