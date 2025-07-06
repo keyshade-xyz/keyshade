@@ -156,7 +156,9 @@ function PriceCard({
           </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>last {versionControl} versions</div>
+            <div>
+              last {versionControl < 0 ? 'Unlimited' : versionControl} versions
+            </div>
           </div>
           {snapshots > 0 && (
             <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
@@ -166,7 +168,9 @@ function PriceCard({
           )}
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{auditlogs} days of audit logs</div>
+            <div>
+              {auditlogs < 0 ? 'Unlimited' : auditlogs} days of audit logs
+            </div>
           </div>
 
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
