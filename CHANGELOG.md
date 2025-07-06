@@ -1,3 +1,9 @@
+## [2.29.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.2...v2.29.0-stage.3) (2025-07-06)
+
+### 🐛 Bug Fixes
+
+* **api:** Lambda integration environment variable conflict ([3163076](https://github.com/keyshade-xyz/keyshade/commit/3163076f0e14c1e9717322da4ce0a87316fd2f07))
+
 ## [2.29.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.1...v2.29.0-stage.2) (2025-07-05)
 
 ### 🐛 Bug Fixes
