@@ -5,7 +5,8 @@ export const integrationTypeEnum = z.enum([
   'SLACK',
   'GITHUB',
   'GITLAB',
-  'VERCEL'
+  'VERCEL',
+  'AWS_LAMBDA'
 ])
 
 export const expiresAfterEnum = z.enum(['never', '24', '168', '720', '8760'])

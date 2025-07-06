@@ -6,6 +6,7 @@ import {
   IntegrationType
 } from '@prisma/client'
 import {
+  EnvironmentSupportType,
   IntegrationEventData,
   IntegrationMetadata,
   IntegrationRunData,
@@ -131,12 +132,12 @@ export abstract class BaseIntegration {
     return false
   }
 
-  public areEnvironmentsRequired(): boolean {
+  public isPrivateKeyRequired(): boolean {
     return false
   }
 
-  public isPrivateKeyRequired(): boolean {
-    return false
+  public environmentSupport(): EnvironmentSupportType {
+    return 'any'
   }
 
   // WARNING: DO NOT OVERRIDE
