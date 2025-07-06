@@ -92,9 +92,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       const addPrivateKeyDuration =
         await this.updateLambdaFunctionConfiguration(
           integration.metadata.lambdaFunctionName,
-          {
-            KS_PRIVATE_KEY: sEncrypt(privateKey)
-          }
+          new Map([['KS_PRIVATE_KEY', sEncrypt(privateKey)]])
         )
 
       this.logger.log('Added project private key to Lambda function')
@@ -269,13 +267,11 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
       // Update the environmental variable in the Lambda function
       this.logger.log(`Adding ${data.name} to Lambda function`)
+      existingEnvironmentalValues.set(data.name, value)
       const updateEnvironmentVariableDuration =
         await this.updateLambdaFunctionConfiguration(
           metadata.lambdaFunctionName,
-          {
-            ...existingEnvironmentalValues,
-            [data.name]: value
-          }
+          existingEnvironmentalValues
         )
       totalDuration += updateEnvironmentVariableDuration
       this.logger.log(`Added ${data.name} to Lambda function`)
@@ -334,9 +330,11 @@ export class AWSLambdaIntegration extends BaseIntegration {
       this.logger.log(
         `Updating environment variable ${data.oldName} to ${data.newName} in Lambda function...`
       )
-      existingEnvironmentalValues[data.newName] =
-        existingEnvironmentalValues[data.oldName]
-      delete existingEnvironmentalValues[data.oldName]
+      existingEnvironmentalValues.set(
+        data.newName,
+        existingEnvironmentalValues.get(data.oldName)
+      )
+      existingEnvironmentalValues.delete(data.oldName)
 
       const updateEnvironmentVariableDuration =
         await this.updateLambdaFunctionConfiguration(
@@ -411,7 +409,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
       this.logger.log(
         `Deleting environment variable ${data.name} in Lambda function...`
       )
-      delete existingEnvironmentalValues[data.name]
+      existingEnvironmentalValues.delete(data.name)
 
       const updateEnvironmentVariableDuration =
         await this.updateLambdaFunctionConfiguration(
@@ -444,7 +442,7 @@ export class AWSLambdaIntegration extends BaseIntegration {
   }
 
   private async getAllEnvironmentalValues(functionName: string): Promise<{
-    existingEnvironmentalValues: Record<string, string>
+    existingEnvironmentalValues: Map<string, string>
     duration: number
   }> {
     this.lambda = this.getLambdaClient()
@@ -460,10 +458,18 @@ export class AWSLambdaIntegration extends BaseIntegration {
     const { response, duration } = await makeTimedRequest(() =>
       this.lambda.send(command)
     )
-    const existingEnvironmentalValues = response.Environment?.Variables || {}
+    const existingEnvironmentalValues = new Map<string, string>(
+      Object.entries(response.Environment?.Variables || {})
+    )
+
+    console.log('existingEnvironmentalValues', existingEnvironmentalValues)
+    console.log(
+      'response.Environment?.Variables',
+      response.Environment?.Variables
+    )
 
     this.logger.log(
-      `Fetched ${Object.keys(existingEnvironmentalValues).length} environment variables from Lambda function`
+      `Fetched ${existingEnvironmentalValues.size} environment variables from Lambda function`
     )
 
     return {
@@ -474,18 +480,18 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
   private async updateLambdaFunctionConfiguration(
     functionName: string,
-    envVars: Record<string, string>
+    envVars: Map<string, string>
   ): Promise<number> {
     this.lambda = this.getLambdaClient()
 
     this.logger.log(
-      `Updating Lambda function configuration with ${Object.keys(envVars).length} environment variables...`
+      `Updating Lambda function configuration with ${envVars.size} environment variables...`
     )
 
     const command = new UpdateFunctionConfigurationCommand({
       FunctionName: functionName,
       Environment: {
-        Variables: envVars
+        Variables: Object.fromEntries(envVars)
       }
     })
 
@@ -498,10 +504,10 @@ export class AWSLambdaIntegration extends BaseIntegration {
   }
 
   private getPrivateKeyFromEnvironmentalValues(
-    envVars: Record<string, string>
+    envVars: Map<string, string>
   ): string | null {
-    const privateKey = envVars.KS_PRIVATE_KEY
-      ? sDecrypt(envVars.KS_PRIVATE_KEY)
+    const privateKey = envVars.has('KS_PRIVATE_KEY')
+      ? sDecrypt(envVars.get('KS_PRIVATE_KEY'))
       : null
     if (!privateKey) {
       this.logger.error('Project private key not found in Lambda function')
