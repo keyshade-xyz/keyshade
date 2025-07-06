@@ -1,3 +1,9 @@
+## [2.29.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.3...v2.29.0-stage.4) (2025-07-06)
+
+### 🐛 Bug Fixes
+
+* update policy ([#1059](https://github.com/keyshade-xyz/keyshade/issues/1059)) ([755fd01](https://github.com/keyshade-xyz/keyshade/commit/755fd01796043b14e2a938cc06ca531fb881816c))
+
 ## [2.29.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.2...v2.29.0-stage.3) (2025-07-06)
 
 ### 🐛 Bug Fixes
