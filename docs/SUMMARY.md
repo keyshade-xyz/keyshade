@@ -31,6 +31,8 @@
   - [Go](integration/languages/set-up-with-go.md)
   - [Python](integration/languages/set-up-with-python.md)
   - [Rust](integration/languages/set-up-with-rust.md)
+- Platforms
+  - [Set up Keyshade with AWS Lambda](integration/frameworks/set-up-with-aws.md)
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
