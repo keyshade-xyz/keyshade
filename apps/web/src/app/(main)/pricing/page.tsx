@@ -7,7 +7,8 @@ import PriceCard from '@/components/pricing/card'
 import { PriceCardsData, tabsData } from '@/constants/pricing'
 
 function About(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<string>(tabsData[0].id)
+  const defaultTab = tabsData.find((tab) => tab.default)?.id ?? tabsData[0].id
+  const [activeTab, setActiveTab] = useState<string>(defaultTab)
 
   return (
     <div className="relative flex flex-col items-center justify-center ">
@@ -51,7 +52,7 @@ function About(): React.JSX.Element {
                 snapshots={card.snapshots}
                 spaceAccessSpecifier={card.spaceAccessSpecifier}
                 spaceEnvironment={card.spaceEnvironment}
-                spaceIntegerations={card.spaceIntegerations}
+                spaceIntegrations={card.spaceIntegrations}
                 spaceLiveSupport={card.spaceLiveSupport}
                 spaceProjects={card.spaceProjects}
                 spaceSecrets={card.spaceSecrets}

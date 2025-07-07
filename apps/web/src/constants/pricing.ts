@@ -2,7 +2,7 @@ import type { PriceCardDataType, PriceTabDataType } from '@/types'
 
 export const tabsData: PriceTabDataType = [
   { id: 'monthly', label: 'Monthly' },
-  { id: 'yearly', label: 'Yearly', tag: '-20%', special: true }
+  { id: 'yearly', label: 'Yearly', tag: '-20%', special: true, default: true }
 ]
 
 export const PriceCardsData: PriceCardDataType = [
@@ -18,7 +18,7 @@ export const PriceCardsData: PriceCardDataType = [
     versionControl: 5,
     snapshots: 0,
     spaceEnvironment: 3,
-    spaceIntegerations: 3,
+    spaceIntegrations: 3,
     spaceAccessSpecifier: 'Only Public or Private',
     auditlogs: 7,
     spaceUsers: 3,
@@ -56,8 +56,8 @@ export const PriceCardsData: PriceCardDataType = [
     versionControl: 20,
     snapshots: 10,
     spaceEnvironment: 5,
-    spaceIntegerations: 10,
-    spaceAccessSpecifier: 'All Types',
+    spaceIntegrations: 10,
+    spaceAccessSpecifier: 'All Types of',
     auditlogs: 15,
     spaceUsers: 10, // -1 => Unlimited
     customRoles: 20,
@@ -95,9 +95,9 @@ export const PriceCardsData: PriceCardDataType = [
     versionControl: 50,
     snapshots: 30,
     spaceEnvironment: -1,
-    spaceIntegerations: 30,
+    spaceIntegrations: 30,
     auditlogs: 60,
-    spaceAccessSpecifier: 'All Types',
+    spaceAccessSpecifier: 'All Types of',
     spaceUsers: 40, // -1 => Unlimited
     customRoles: 50,
     miscFeatures: [
@@ -134,8 +134,8 @@ export const PriceCardsData: PriceCardDataType = [
     snapshots: -1, // -1 => Unlimited
     auditlogs: -1, // -1 => Unlimited
     spaceEnvironment: -1,
-    spaceIntegerations: -1,
-    spaceAccessSpecifier: 'All Types',
+    spaceIntegrations: -1,
+    spaceAccessSpecifier: 'All Types of',
     spaceUsers: -1, // -1 => Unlimited
     customRoles: -1,
     miscFeatures: [

@@ -11,7 +11,7 @@ export interface PriceCardPropsType {
   spaceVariables: number
   versionControl: number
   auditlogs: number
-  spaceIntegerations: number
+  spaceIntegrations: number
   spaceLiveSupport: string
 
   customRoles: number
@@ -31,6 +31,7 @@ export interface PriceTabPropsType {
   label: string
   tag?: string
   special?: boolean
+  default?: boolean
 }
 
 export type PriceTabDataType = PriceTabPropsType[]
