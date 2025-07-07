@@ -128,7 +128,7 @@ export class IntegrationController {
     Authority.READ_PROJECT,
     Authority.READ_ENVIRONMENT
   )
-  async testIntegration(
+  async validateIntegrationConfiguration(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateIntegration | UpdateIntegration,
     @Query('isCreate', ParseBoolPipe) isCreate: boolean,
