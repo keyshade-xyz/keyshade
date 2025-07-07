@@ -1,3 +1,75 @@
+## [2.30.0](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.30.0-stage.1 [skip ci] ([0d817de](https://github.com/keyshade-xyz/keyshade/commit/0d817de9c8b415d2d869dde8a485b408f824396d))
+* **release:** 2.30.0-stage.2 [skip ci] ([c93b931](https://github.com/keyshade-xyz/keyshade/commit/c93b931609b19670be7a9afead5f6fa275759521))
+
+## [2.30.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0-stage.1...v2.30.0-stage.2) (2025-07-07)
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+## [2.30.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0-stage.1) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
+## [2.29.0](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.29.0) (2025-07-06)
+
+### 🚀 Features
+
+* AWS Lambda Integration added ([#1053](https://github.com/keyshade-xyz/keyshade/issues/1053)) ([4484261](https://github.com/keyshade-xyz/keyshade/commit/44842612752f7ab6d56c591022d8edd846b8b31e))
+
+### 🐛 Bug Fixes
+
+* **api:** Lambda integration environment variable conflict ([3163076](https://github.com/keyshade-xyz/keyshade/commit/3163076f0e14c1e9717322da4ce0a87316fd2f07))
+* **api:** Remove sensitive data logging in lambda integration ([#1055](https://github.com/keyshade-xyz/keyshade/issues/1055)) ([9dc3dd1](https://github.com/keyshade-xyz/keyshade/commit/9dc3dd10ff01201bd89a8d736bd3e65e96b47af0))
+* **platfrom:** Project overview & [secure]-variable revision screen ([#1052](https://github.com/keyshade-xyz/keyshade/issues/1052)) ([aca6f38](https://github.com/keyshade-xyz/keyshade/commit/aca6f3853af2de56071bae6e1b7190d77f0b473e))
+* update policy ([#1059](https://github.com/keyshade-xyz/keyshade/issues/1059)) ([755fd01](https://github.com/keyshade-xyz/keyshade/commit/755fd01796043b14e2a938cc06ca531fb881816c))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.28.1-stage.1 [skip ci] ([31e9cb9](https://github.com/keyshade-xyz/keyshade/commit/31e9cb94829e5171e6778fcb0c05b6845bbeb039))
+* **release:** 2.29.0-stage.1 [skip ci] ([9619518](https://github.com/keyshade-xyz/keyshade/commit/9619518518da09ed55965249bdf634b74caeb661))
+* **release:** 2.29.0-stage.2 [skip ci] ([a32de5a](https://github.com/keyshade-xyz/keyshade/commit/a32de5a6ef3c18d2cf46888ba6dbed3bfc5d168e))
+* **release:** 2.29.0-stage.3 [skip ci] ([a7cea12](https://github.com/keyshade-xyz/keyshade/commit/a7cea124fcedd62afeb0a117b244c86457410983))
+* **release:** 2.29.0-stage.4 [skip ci] ([ce84e30](https://github.com/keyshade-xyz/keyshade/commit/ce84e301612b60cde9e55c3055b53a4cac6fa532))
+
+## [2.29.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.3...v2.29.0-stage.4) (2025-07-06)
+
+### 🐛 Bug Fixes
+
+* update policy ([#1059](https://github.com/keyshade-xyz/keyshade/issues/1059)) ([755fd01](https://github.com/keyshade-xyz/keyshade/commit/755fd01796043b14e2a938cc06ca531fb881816c))
+
+## [2.29.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.2...v2.29.0-stage.3) (2025-07-06)
+
+### 🐛 Bug Fixes
+
+* **api:** Lambda integration environment variable conflict ([3163076](https://github.com/keyshade-xyz/keyshade/commit/3163076f0e14c1e9717322da4ce0a87316fd2f07))
+
+## [2.29.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0-stage.1...v2.29.0-stage.2) (2025-07-05)
+
+### 🐛 Bug Fixes
+
+* **api:** Remove sensitive data logging in lambda integration ([#1055](https://github.com/keyshade-xyz/keyshade/issues/1055)) ([9dc3dd1](https://github.com/keyshade-xyz/keyshade/commit/9dc3dd10ff01201bd89a8d736bd3e65e96b47af0))
+
+## [2.29.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.1-stage.1...v2.29.0-stage.1) (2025-07-05)
+
+### 🚀 Features
+
+* AWS Lambda Integration added ([#1053](https://github.com/keyshade-xyz/keyshade/issues/1053)) ([4484261](https://github.com/keyshade-xyz/keyshade/commit/44842612752f7ab6d56c591022d8edd846b8b31e))
+
 ## [2.28.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.28.1-stage.1) (2025-07-04)
 
 ### 🐛 Bug Fixes
