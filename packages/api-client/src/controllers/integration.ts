@@ -10,7 +10,9 @@ import {
   GetIntegrationRequest,
   GetIntegrationResponse,
   UpdateIntegrationRequest,
-  UpdateIntegrationResponse
+  UpdateIntegrationResponse,
+  ValidateIntegrationConfigurationRequest,
+  ValidateIntegrationConfigurationResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { ClientResponse } from '@keyshade/schema'
@@ -92,5 +94,22 @@ export default class IntegrationController {
       headers
     )
     return await parseResponse<DeleteIntegrationResponse>(response)
+  }
+
+  async validateIntegrationConfiguration(
+    request: ValidateIntegrationConfigurationRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<ValidateIntegrationConfigurationResponse>> {
+    const url =
+      `/api/integration/validate-config?` +
+      (request.isCreate ? 'isCreate=true' : '?isCreate=false') +
+      (request.isCreate === false
+        ? `&integrationSlug=${request.integrationSlug}`
+        : '')
+
+    const response = await this.apiClient.post(url, request, headers)
+    return await parseResponse<ValidateIntegrationConfigurationResponse>(
+      response
+    )
   }
 }
