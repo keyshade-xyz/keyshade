@@ -1,5 +1,5 @@
 ---
-description: How to set up Keyshade with AWS Lambda for secure runtime secrets and environment variables — automatically sync your secrets to Lambda functions.
+description: How to set up Keyshade with AWS Lambda to automatically sync your secrets and variables to Lambda functions.
 ---
 
 # Set up Keyshade with AWS Lambda
@@ -31,34 +31,34 @@ You can either create a new Lambda function or use and existing one. Based on yo
 Create a Lambda function using the AWS Console:
 
 1. **Sign in to AWS Console**
-   - Go to the [AWS Lambda Console](https://console.aws.amazon.com/lambda/) and Sign In to you account.
-   - Click **"Create function"**
+- Go to the [AWS Lambda Console](https://console.aws.amazon.com/lambda/) and Sign In to you account.
+- Click **"Create function"**
 
 2. **Configure Basic Information**
-   - Choose **"Author from scratch"**
-   - **Function name**: Enter a descriptive name (e.g., `keyshade-demo-function`)
-   - **Runtime**: Choose your preferred runtime (e.g., Node.js 20.x, Python 3.12, etc.)
-   - **Architecture**: Select x86_64 or arm64 based on your needs
+- Choose **"Author from scratch"**
+- **Function name**: Enter a descriptive name (e.g., `keyshade-demo-function`)
+- **Runtime**: Choose your preferred runtime (e.g., Node.js 20.x, Python 3.12, etc.)
+- **Architecture**: Select x86_64 or arm64 based on your needs
 
 3. **Set Permissions**
-   - **Execution role**: Choose "Create a new role with basic Lambda permissions"
-   - This creates a basic execution role that allows your function to write logs to CloudWatch
+- **Execution role**: Choose "Create a new role with basic Lambda permissions"
+- This creates a basic execution role that allows your function to write logs to CloudWatch
 
 4. **Advanced Settings** (Optional)
-   - Configure VPC, environment variables, tags, etc., as needed for your use case
-   - You can leave these as default for testing purposes
+- Configure VPC, environment variables, tags, etc., as needed for your use case
+- You can leave these as default for testing purposes
 
 5. **Create Function**
-   - Click **"Create function"**
-   - Note down your function's ARN (Amazon Resource Name) - you'll need this later
+- Click **"Create function"**
+- Note down your function's ARN (Amazon Resource Name) - you'll need this later
 
 ### Using an Existing Lambda Function
 
 If you're using an existing Lambda function:
 
-1. Navigate to your function in the [AWS Lambda Console](https://console.aws.amazon.com/lambda/)
-2. Note down the function's ARN from the function overview
-3. Ensure you have the necessary permissions to modify the function's configuration
+- Navigate to your function in the [AWS Lambda Console](https://console.aws.amazon.com/lambda/)
+- Note down the function's ARN from the function overview
+- Ensure you have the necessary permissions to modify the function's configuration
 
 ## Set Up IAM Roles and Policies
 
@@ -67,13 +67,13 @@ Keyshade needs specific permissions to update your Lambda function's environment
 ### Create an IAM Policy
 
 1. **Navigate to IAM Console**
-   - Go to [AWS IAM Console](https://console.aws.amazon.com/iam/)
-   - Click **"Policies"** in the left sidebar
-   - Click **"Create policy"**
+- Go to [AWS IAM Console](https://console.aws.amazon.com/iam/)
+- Click **"Policies"** in the left sidebar
+- Click **"Create policy"**
 
 2. **Define Policy Permissions**
-   - Click the **"JSON"** tab
-   - Replace the default policy with the following:
+- Click the **"JSON"** tab
+- Replace the default policy with the following:
 
 ```json
 {
@@ -93,27 +93,27 @@ Keyshade needs specific permissions to update your Lambda function's environment
 ```
 
 3. **Replace Placeholders**
-   - `<<REGION>>`: Your AWS region (e.g., `us-east-1`, `eu-west-1`)
-   - `<<ACCOUNT_ID>>`: Your AWS account ID (12-digit number)
-   - `<<LAMBDA_FUNCTION_NAME>>`: Your Lambda function name
+- `<<REGION>>`: Your AWS region (e.g., `us-east-1`, `eu-west-1`)
+- `<<ACCOUNT_ID>>`: Your AWS account ID (12-digit number)
+- `<<LAMBDA_FUNCTION_NAME>>`: Your Lambda function name
 
-   **Example:**
-   ```json
-   "Resource": "arn:aws:lambda:us-east-1:123456789012:function:keyshade-demo-function"
-   ```
+**Example:**
+```json
+"Resource": "arn:aws:lambda:us-east-1:123456789012:function:keyshade-demo-function"
+```
 
 4. **Complete Policy Creation**
-   - Click **"Next"**
-   - **Policy name**: Enter a descriptive name (e.g., `KeyshadeUpdateLambdaPolicy`)
-   - **Description**: "Allows Keyshade to update Lambda function environment variables"
-   - Click **"Create policy"**
+- Click **"Next"**
+- **Policy name**: Enter a descriptive name (e.g., `KeyshadeUpdateLambdaPolicy`)
+- **Description**: "Allows Keyshade to update Lambda function environment variables"
+- Click **"Create policy"**
 
 ### Understanding the Policy
 
 This policy grants Keyshade the minimum required permissions:
 
-- **`lambda:UpdateFunctionConfiguration`**: Allows updating environment variables
-- **`lambda:GetFunctionConfiguration`**: Allows reading current configuration
+- `lambda:UpdateFunctionConfiguration`: Allows updating environment variables
+- `lambda:GetFunctionConfiguration`: Allows reading current configuration
 - **Resource restriction**: Limits access to only your specific Lambda function
 
 ## Configure AWS Access
@@ -123,70 +123,70 @@ You can either create a new IAM user specifically for Keyshade or use an existin
 ### Option 1: Create a New IAM User
 
 1. **Create User**
-   - In the IAM Console, click **"Users"** → **"Create user"**
-   - **User name**: Enter a descriptive name (e.g., `keyshade-lambda-user`)
-   - **Access type**: Select "Programmatic access"
-   - Click **"Next"**
+- In the IAM Console, click **"Users"** → **"Create user"**
+- **User name**: Enter a descriptive name (e.g., `keyshade-lambda-user`)
+- **Access type**: Select "Programmatic access"
+- Click **"Next"**
 
 2. **Attach Permissions**
-   - Click **"Attach policies directly"**
-   - Search for and select the policy you created earlier (`KeyshadeUpdateLambdaPolicy`)
-   - Click **"Next"**
+- Click **"Attach policies directly"**
+- Search for and select the policy you created earlier (`KeyshadeUpdateLambdaPolicy`)
+- Click **"Next"**
 
 3. **Review and Create**
-   - Review the configuration
-   - Click **"Create user"**
+- Review the configuration
+- Click **"Create user"**
 
 4. **Save Credentials**
-   - **Important**: Copy and securely store the **Access Key ID** and **Secret Access Key**
-   - These will be needed for Keyshade configuration
-   - You won't be able to see the Secret Access Key again
+- **Important**: Copy and securely store the **Access Key ID** and **Secret Access Key**
+- These will be needed for Keyshade configuration
+- You won't be able to see the Secret Access Key again
 
 ### Option 2: Use an Existing IAM User
 
 1. **Navigate to User**
-   - In the IAM Console, click **"Users"**
-   - Select your existing user
+- In the IAM Console, click **"Users"**
+- Select your existing user
 
 2. **Attach Policy**
-   - Click the **"Permissions"** tab
-   - Click **"Add permissions"** → **"Attach policies directly"**
-   - Search for and select `KeyshadeUpdateLambdaPolicy`
-   - Click **"Add permissions"**
+- Click the **"Permissions"** tab
+- Click **"Add permissions"** → **"Attach policies directly"**
+- Search for and select `KeyshadeUpdateLambdaPolicy`
+- Click **"Add permissions"**
 
 3. **Generate Access Keys** (if needed)
-   - Click the **"Security credentials"** tab
-   - In the "Access keys" section, click **"Create access key"**
-   - Choose **"Application running outside AWS"**
-   - Click **"Next"** → **"Create access key"**
-   - Copy and securely store the credentials
+- Click the **"Security credentials"** tab
+- In the "Access keys" section, click **"Create access key"**
+- Choose **"Application running outside AWS"**
+- Click **"Next"** → **"Create access key"**
+- Copy and securely store the credentials
 
 ## Create a Keyshade Project and Add Secrets
 
 1. **Access Keyshade Dashboard**
-   - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
-   - Sign in to your account
+- Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+- Sign in to your account
 
 2. **Create or Select Project**
-   - Click **"Create Project"** [(Refer the docs)](../../getting-started/adding-your-first-secret-and-variable.md) or select an existing project
-   - Name your project (e.g., `lambda-secrets-project`)
+- Click **"Create Project"** [(Refer the docs)](../../getting-started/adding-your-first-secret-and-variable.md) or select an existing project
+- Name your project (e.g., `lambda-secrets-project`)
 
 3. **Add Secrets and Variables**
+
 > 💡 **Secrets vs Variables:**
 >
 >* **Secrets** are sensitive credentials like API keys or tokens. These are encrypted at rest.
 >
 >* **Variables** are non-sensitive configs like ports, flags, or feature toggles. These are stored as-is.
 
-   - Click the **"Secrets"** tab to add your secrets
-   - Click the **"Variables"** tab to add your variables
-   - Example secrets/variables:
-     - Secret: `DATABASE_PASSWORD`, `API_KEY` 
-     - Variable: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`
+- Click the **"Secrets"** tab to add your secrets
+- Click the **"Variables"** tab to add your variables
+- Example Secret: `DATABASE_PASSWORD`, `API_KEY` 
+- Example Variable: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`
 
 4. **Configure Environment**
-   - Ensure you have at least one environment (e.g., `development`, `production`)
-   - **Important**: Each AWS Lambda integration can only sync with one environment
+- Ensure you have at least one environment (e.g., `development`, `production`)
+- **Important**: Each AWS Lambda integration can only sync with one environment
 
 
 ## Configure Keyshade Integration
@@ -194,36 +194,36 @@ You can either create a new IAM user specifically for Keyshade or use an existin
 ### Access Integration Settings
 
 1. **Navigate to Integrations**
-   - In your Keyshade project dashboard
-   - Click **"Integrations"** in the left sidebar
-   - Click **"Add Integration"**
+- In your Keyshade project dashboard
+- Click **"Integrations"** in the left sidebar
+- Click **"Add Integration"**
 
 2. **Select AWS Lambda**
-   - Choose **"AWS Lambda"** from the available integrations
-   - Click **"Configure"**
+- Choose **"AWS Lambda"** from the available integrations
+- Click **"Configure"**
 
 ### Configure Integration Settings
 
 Fill in the following configuration details:
 
-#### Basic Configuration
+Basic Configuration:
 - **Integration Name**: Enter a descriptive name (e.g., `Production Lambda Sync`)
 - **Description**: Optional description of this integration
 
-#### Event Triggers
+Event Triggers:
 Select when Keyshade should sync secrets to Lambda:
 - **Secret Events**: Get notified about all secret-related events
 - **Variable Events**: Get notified about all variable-related events
 
 > 💡 **Tip**: Enable all triggers for complete synchronization
 
-#### AWS Lambda Configuration
+AWS Lambda Configuration:
 - **AWS Region**: Your Lambda function's region (e.g., `us-east-1`)
 - **Access Key ID**: The AWS access key ID you created earlier
 - **Secret Access Key**: The corresponding secret access key
 - **Lambda Function Name**: Exact name of your Lambda function
 
-#### Keyshade Configuration
+Keyshade Configuration:
 - **Project**: Your Keyshade project (auto-selected)
 - **Environment**: Choose the environment to sync (e.g., `production`)
 - **Private Key**: Your project's private key for secure access
@@ -233,35 +233,35 @@ Select when Keyshade should sync secrets to Lambda:
 ### Test the Integration
 
 1. **Save Configuration**
-   - Click **"Save Integration"**
-   - Keyshade will validate the AWS credentials and Lambda access
+- Click **"Save Integration"**
+- Keyshade will validate the AWS credentials and Lambda access
 
 2. **Trigger a Test Sync**
-   - Click **"Test Integration"** to perform a manual sync
-   - Check the integration logs for any errors
+- Click **"Test Integration"** to perform a manual sync
+- Check the integration logs for any errors
 
 3. **Verify in AWS Console**
-   - Go to your Lambda function in the AWS Console
-   - Click the **"Configuration"** tab
-   - Click **"Environment variables"**
-   - Confirm that your Keyshade secrets and variables appear as environment variables
+- Go to your Lambda function in the AWS Console
+- Click the **"Configuration"** tab
+- Click **"Environment variables"**
+- Confirm that your Keyshade secrets and variables appear as environment variables
 
 ## Test Secret Synchronization
 
 ### Update a Secret in Keyshade
 
 1. **Modify a Secret**
-   - In your Keyshade project, go to the **"Secrets"** tab
-   - Click on an existing secret or create a new one
-   - Update the value and save
+- In your Keyshade project, go to the **"Secrets"** tab
+- Click on an existing secret or create a new one
+- Update the value and save
 
 2. **Verify Automatic Sync**
-   - The integration should automatically trigger based on your event trigger settings
-   - Check the integration logs in Keyshade for sync status
+- The integration should automatically trigger based on your event trigger settings
+- Check the integration logs in Keyshade for sync status
 
 3. **Confirm in Lambda**
-   - Refresh your Lambda function's environment variables in the AWS Console
-   - The updated value should appear within a few moments
+- Refresh your Lambda function's environment variables in the AWS Console
+- The updated value should appear within a few moments
 
 ### Test with a Lambda Function
 
@@ -284,17 +284,17 @@ export const handler = async (event) => {
 ### Test the Function
 
 1. **Deploy the Code**
-   - Copy the example code to your Lambda function
-   - Click **"Deploy"**
+- Copy the example code to your Lambda function
+- Click **"Deploy"**
 
 2. **Create a Test Event**
-   - Click **"Test"**
-   - Create a new test event (default settings are fine)
-   - Click **"Test"**
+- Click **"Test"**
+- Create a new test event (default settings are fine)
+- Click **"Test"**
 
 3. **Verify Response**
-   - Check the execution result
-   - Confirm that secrets show as "Secret loaded" and variables display their values
+- Check the execution result
+- Confirm that secrets show as "Secret loaded" and variables display their values
 
 ## Troubleshooting
 
