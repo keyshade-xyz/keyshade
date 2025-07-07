@@ -130,7 +130,7 @@ export class IntegrationController {
   )
   async testIntegration(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateIntegration,
+    @Body() dto: CreateIntegration | UpdateIntegration,
     @Query('isCreate', ParseBoolPipe) isCreate: boolean,
     @Query('integrationSlug') integrationSlug?: Integration['slug']
   ) {
