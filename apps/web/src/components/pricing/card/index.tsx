@@ -24,7 +24,12 @@ function PriceCard({
   spaceEnvironment,
   spaceLiveSupport,
   miscFeatures,
-  PricingType
+  PricingType,
+  versionControl,
+  snapshots,
+  customRoles,
+  auditlogs,
+  spaceVariables
 }: Readonly<PriceCardPropsType>): React.JSX.Element {
   const returnButtonLabel = (): string => {
     if (price === 0) {
@@ -91,7 +96,7 @@ function PriceCard({
             </div>
             {price > 0 ? (
               <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-                {PricingType === 'monthly' ? '/ month' : '/ year'}
+                / month {PricingType === 'yearly' && ', billed yearly'}
               </div>
             ) : null}
           </div>
@@ -119,6 +124,12 @@ function PriceCard({
             <UserSVG />
             <div>{spaceUsers < 0 ? 'Unlimited' : spaceUsers} Users</div>
           </div>
+          <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {customRoles < 0 ? 'Unlimited' : customRoles} Custom Roles
+            </div>
+          </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
@@ -133,8 +144,32 @@ function PriceCard({
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
+              {spaceVariables < 0 ? 'Unlimited' : spaceVariables} Variables
+            </div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
               {spaceIntegerations < 0 ? 'Unlimited' : spaceIntegerations}{' '}
               Integerations
+            </div>
+          </div>
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              last {versionControl < 0 ? 'Unlimited' : versionControl} versions
+            </div>
+          </div>
+          {snapshots > 0 && (
+            <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+              <UserSVG />
+              <div>access to {snapshots} snapshots</div>
+            </div>
+          )}
+          <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
+            <UserSVG />
+            <div>
+              {auditlogs < 0 ? 'Unlimited' : auditlogs} days of audit logs
             </div>
           </div>
 
@@ -144,12 +179,10 @@ function PriceCard({
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">
-            <SupportSVG />
-            {spaceLiveSupport ? (
-              <div> Email & Live Support</div>
-            ) : (
-              <div> Email Support</div>
-            )}
+            <div className="flex w-fit">
+              <SupportSVG />
+            </div>
+            <div>{spaceLiveSupport}</div>
           </div>
         </div>
 
