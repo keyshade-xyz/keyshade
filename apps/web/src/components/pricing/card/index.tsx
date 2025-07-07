@@ -19,7 +19,7 @@ function PriceCard({
   spaceProjects,
   spaceUsers,
   spaceAccessSpecifier,
-  spaceIntegerations,
+  spaceIntegrations,
   spaceSecrets,
   spaceEnvironment,
   spaceLiveSupport,
@@ -88,7 +88,7 @@ function PriceCard({
             Free
           </div>
         ) : (
-          <div className="mt-2 flex flex-row items-end justify-start gap-1  text-sm sm:mt-4">
+          <div className="mt-2 flex flex-row items-center justify-start gap-1  text-sm sm:mt-4">
             <div className="text-xl text-white/80 md:text-3xl">
               {price < 0
                 ? 'Custom Pricing'
@@ -150,8 +150,8 @@ function PriceCard({
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
             <div>
-              {spaceIntegerations < 0 ? 'Unlimited' : spaceIntegerations}{' '}
-              Integerations
+              {spaceIntegrations < 0 ? 'Unlimited' : spaceIntegrations}{' '}
+              integrations
             </div>
           </div>
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">

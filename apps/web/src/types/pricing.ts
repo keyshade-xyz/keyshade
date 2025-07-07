@@ -11,7 +11,7 @@ export interface PriceCardPropsType {
   spaceVariables: number
   versionControl: number
   auditlogs: number
-  spaceIntegerations: number
+  spaceIntegrations: number
   spaceLiveSupport: string
 
   customRoles: number

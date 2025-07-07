@@ -52,7 +52,7 @@ function About(): React.JSX.Element {
                 snapshots={card.snapshots}
                 spaceAccessSpecifier={card.spaceAccessSpecifier}
                 spaceEnvironment={card.spaceEnvironment}
-                spaceIntegerations={card.spaceIntegerations}
+                spaceIntegrations={card.spaceIntegrations}
                 spaceLiveSupport={card.spaceLiveSupport}
                 spaceProjects={card.spaceProjects}
                 spaceSecrets={card.spaceSecrets}
