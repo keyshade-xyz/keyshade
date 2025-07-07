@@ -1,3 +1,9 @@
+## [2.30.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0-stage.1) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
 ## [2.29.0](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.29.0) (2025-07-06)
 
 ### 🚀 Features
