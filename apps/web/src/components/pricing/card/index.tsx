@@ -96,7 +96,7 @@ function PriceCard({
             </div>
             {price > 0 ? (
               <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-                per user/month {PricingType === 'yearly' && ', billed yearly'}
+                per user/month
               </div>
             ) : null}
           </div>
