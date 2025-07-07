@@ -96,7 +96,7 @@ function PriceCard({
             </div>
             {price > 0 ? (
               <div className="text-brandBlue/80 mb-1 text-sm font-light sm:font-normal">
-                / month {PricingType === 'yearly' && ', billed yearly'}
+                per user/month {PricingType === 'yearly' && ', billed yearly'}
               </div>
             ) : null}
           </div>
@@ -175,7 +175,7 @@ function PriceCard({
 
           <div className="text-brandBlue/80 mt-3 flex flex-row gap-2 text-sm">
             <UserSVG />
-            <div>{spaceAccessSpecifier} Of Access Specifier </div>
+            <div>{spaceAccessSpecifier} Access Specifier </div>
           </div>
 
           <div className="text-brandBlue/80 mt-1 flex flex-row gap-2 text-sm">

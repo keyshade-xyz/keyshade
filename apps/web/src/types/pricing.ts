@@ -31,6 +31,7 @@ export interface PriceTabPropsType {
   label: string
   tag?: string
   special?: boolean
+  default?: boolean
 }
 
 export type PriceTabDataType = PriceTabPropsType[]
