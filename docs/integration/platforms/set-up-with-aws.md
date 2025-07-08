@@ -299,7 +299,9 @@ export const handler = async (event) => {
 
 3. **Verify Response**
     - Check the execution result
-    - Confirm that secrets show as "Secret loaded" and variables display their values
+    - Confirm that secrets and variables show as below
+
+![Example Test Output](../../../blob/aws-guide-test-output.png)
 
 ## Troubleshooting
 
