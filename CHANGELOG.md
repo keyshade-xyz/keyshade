@@ -1,3 +1,9 @@
+## [2.31.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0...v2.31.0-stage.1) (2025-07-08)
+
+### 🚀 Features
+
+* **api:** add bulk upload support for [secure]s and variables ([#1054](https://github.com/keyshade-xyz/keyshade/issues/1054)) ([91aa299](https://github.com/keyshade-xyz/keyshade/commit/91aa29922a0c8a6746df08abd377ab995c9af741))
+
 ## [2.30.0](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0) (2025-07-07)
 
 ### 🚀 Features
