@@ -238,18 +238,18 @@ Select when Keyshade should sync secrets to Lambda:
 ### Test the Integration
 
 1. **Save Configuration**
-  - Click **"Save Integration"**
-  - Keyshade will validate the AWS credentials and Lambda access
+    - Click **"Save Integration"**
+    - Keyshade will validate the AWS credentials and Lambda access
 
 2. **Trigger a Test Sync**
-  - Click **"Test Integration"** to perform a manual sync
-  - Check the integration logs for any errors
+    - Click **"Test Integration"** to perform a manual sync
+    - Check the integration logs for any errors
 
 3. **Verify in AWS Console**
-  - Go to your Lambda function in the AWS Console
-  - Click the **"Configuration"** tab
-  - Click **"Environment variables"**
-  - Confirm that your Keyshade secrets and variables appear as environment variables
+    - Go to your Lambda function in the AWS Console
+    - Click the **"Configuration"** tab
+    - Click **"Environment variables"**
+    - Confirm that your Keyshade secrets and variables appear as environment variables
 
 ## Test Secret Synchronization
 
