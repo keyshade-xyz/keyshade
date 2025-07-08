@@ -32,7 +32,7 @@
   - [Python](integration/languages/set-up-with-python.md)
   - [Rust](integration/languages/set-up-with-rust.md)
 - Platforms
-  - [Set up Keyshade with AWS Lambda](integration/platforms/set-up-with-aws.md)
+  - [AWS Lambda](integration/platforms/set-up-with-aws.md)
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
