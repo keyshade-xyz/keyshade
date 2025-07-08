@@ -1,5 +1,5 @@
 ---
-description: How to set up Keyshade in a Next.js app for secure runtime secrets — no more .env files.
+description: How to set up Keyshade in a Next.js app.
 ---
 
 # Set up Keyshade with Next.js
