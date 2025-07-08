@@ -239,6 +239,36 @@ export class SecretService {
     return secret
   }
 
+  async bulkCreateSecrets(
+    user: AuthenticatedUser,
+    projectSlug: string,
+    secrets: CreateSecret[]
+  ): Promise<{
+    successful: SecretWithValues[]
+    failed: Array<{ name: string; error: string }>
+  }> {
+    this.logger.log(
+      `User ${user.id} initiated bulk creation of ${secrets.length} secrets in project ${projectSlug}`
+    )
+
+    const successful: SecretWithValues[] = []
+    const failed: Array<{ name: string; error: string }> = []
+
+    for (const secret of secrets) {
+      try {
+        const result = await this.createSecret(user, secret, projectSlug)
+        successful.push(result)
+      } catch (err) {
+        this.logger.error(
+          `Error creating secret "${secret.name}": ${err.message}`
+        )
+        failed.push({ name: secret.name, error: err.message })
+      }
+    }
+
+    return { successful, failed }
+  }
+
   /**
    * Updates a secret in a project
    * @param user the user performing the action

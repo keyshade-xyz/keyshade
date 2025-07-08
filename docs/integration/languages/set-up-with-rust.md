@@ -1,5 +1,5 @@
 ---
-description: How to set up Keyshade in a Rust app for secure runtime secrets — no more .env files.
+description: How to set up Keyshade in a Rust app.
 ---
 
 # Set up Keyshade with Rust
