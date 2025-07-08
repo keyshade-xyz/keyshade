@@ -17,7 +17,9 @@ import {
   GetAllVariablesOfEnvironmentResponseSchema,
   DeleteEnvironmentValueOfVariableRequestSchema,
   DeleteEnvironmentValueOfVariableResponseSchema,
-  VariableVersionSchema
+  VariableVersionSchema,
+  BulkCreateVariableRequestSchema,
+  BulkCreateVariableResponseSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
@@ -27,6 +29,13 @@ export type CreateVariableRequest = z.infer<typeof CreateVariableRequestSchema>
 
 export type CreateVariableResponse = z.infer<
   typeof CreateVariableResponseSchema
+>
+
+export type BulkCreateVariableRequest = z.infer<
+  typeof BulkCreateVariableRequestSchema
+>
+export type BulkCreateVariableResponse = z.infer<
+  typeof BulkCreateVariableResponseSchema
 >
 
 export type UpdateVariableRequest = z.infer<typeof UpdateVariableRequestSchema>
