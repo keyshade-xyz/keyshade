@@ -1,3 +1,36 @@
+## [2.31.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0...v2.31.0-stage.1) (2025-07-08)
+
+### 🚀 Features
+
+* **api:** add bulk upload support for [secure]s and variables ([#1054](https://github.com/keyshade-xyz/keyshade/issues/1054)) ([91aa299](https://github.com/keyshade-xyz/keyshade/commit/91aa29922a0c8a6746df08abd377ab995c9af741))
+
+## [2.30.0](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.30.0-stage.1 [skip ci] ([0d817de](https://github.com/keyshade-xyz/keyshade/commit/0d817de9c8b415d2d869dde8a485b408f824396d))
+* **release:** 2.30.0-stage.2 [skip ci] ([c93b931](https://github.com/keyshade-xyz/keyshade/commit/c93b931609b19670be7a9afead5f6fa275759521))
+
+## [2.30.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0-stage.1...v2.30.0-stage.2) (2025-07-07)
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+## [2.30.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0-stage.1) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
 ## [2.29.0](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.29.0) (2025-07-06)
 
 ### 🚀 Features
