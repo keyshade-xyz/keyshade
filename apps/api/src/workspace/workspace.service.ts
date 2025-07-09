@@ -13,7 +13,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  Logger
+  Logger,
+  OnModuleInit
 } from '@nestjs/common'
 import {
   Authority,
@@ -32,14 +33,14 @@ import { UpdateWorkspace } from './dto/update.workspace/update.workspace'
 import { AuthenticatedUser } from '@/user/user.types'
 import { UpdateBlacklistedIpAddresses } from './dto/update.blacklistedIpAddresses/update.blacklistedIpAddresses'
 import {
-  WorkspaceWithLastUpdatedByAndOwner,
-  WorkspaceWithLastUpdatedByAndOwnerAndProjects
+  WorkspaceWithLastUpdatedByAndOwnerAndProjects,
+  WorkspaceWithLastUpdatedByAndOwnerAndSubscription
 } from './workspace.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 
 @Injectable()
-export class WorkspaceService {
+export class WorkspaceService implements OnModuleInit {
   private readonly logger = new Logger(WorkspaceService.name)
 
   constructor(
@@ -48,6 +49,41 @@ export class WorkspaceService {
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator
   ) {}
+
+  /**
+   * Keeps the workspace and its dependent records in sync with
+   * database changes. Here's a list of things it does for now:
+   * - creates a subscription for every workspace that doesn't have one
+   */
+  async onModuleInit() {
+    // Create default subscriptions for workspaces that don't have one
+    this.logger.log('Fetching workspaces without any subscription...')
+    const workspacesWithoutSubscriptiion = await this.prisma.workspace.findMany(
+      {
+        where: {
+          subscription: null
+        }
+      }
+    )
+    this.logger.log(
+      `Found ${workspacesWithoutSubscriptiion.length} workspaces without any subscription`
+    )
+
+    const createSubscriptionOps = []
+    for (const workspace of workspacesWithoutSubscriptiion) {
+      this.logger.log(`Creating a subscription for workspace ${workspace.slug}`)
+      createSubscriptionOps.push(
+        this.prisma.subscription.create({
+          data: {
+            workspaceId: workspace.id,
+            userId: workspace.ownerId
+          }
+        })
+      )
+    }
+    await this.prisma.$transaction(createSubscriptionOps)
+    this.logger.log('Finished creating subscriptions for workspaces')
+  }
 
   /**
    * Creates a new workspace for the given user.
@@ -92,7 +128,7 @@ export class WorkspaceService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: UpdateWorkspace
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
     this.logger.log(
       `User ${user.id} attempted to update a workspace ${workspaceSlug}`
     )
@@ -147,6 +183,17 @@ export class WorkspaceService {
             id: true,
             name: true,
             profilePictureUrl: true
+          }
+        },
+        subscription: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
           }
         }
       }
@@ -388,6 +435,18 @@ export class WorkspaceService {
         entity: { slug: workspaceSlug },
         authorities: [Authority.WORKSPACE_ADMIN]
       })
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to export workspace data of disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {}
@@ -975,15 +1034,19 @@ export class WorkspaceService {
     totalProjects: number
     maxAllowedMembers: number
     totalMembers: number
+    maxAllowedIntegrations: number
+    totalIntegrations: number
+    maxAllowedRoles: number
+    totalRoles: number
   }> {
     this.logger.log(
       `Parsing workspace item limits for workspace ${workspaceId}`
     )
 
-    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
     // Get the tier limit for the members in the workspace
+    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
     const maxAllowedMembers =
-      this.tierLimitService.getMemberTierLimit(workspaceId)
+      await this.tierLimitService.getMemberTierLimit(workspaceId)
 
     // Get total members in the workspace
     const totalMembers = await this.prisma.workspaceMember.count({
@@ -993,10 +1056,10 @@ export class WorkspaceService {
     })
     this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
 
-    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
     // Get project tier limit
+    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
     const maxAllowedProjects =
-      this.tierLimitService.getProjectTierLimit(workspaceId)
+      await this.tierLimitService.getProjectTierLimit(workspaceId)
 
     // Get total projects in the workspace
     const totalProjects = await this.prisma.project.count({
@@ -1008,11 +1071,45 @@ export class WorkspaceService {
       `Found ${totalProjects} projects in workspace ${workspaceId}`
     )
 
+    // Get integration tier limit
+    this.logger.log(
+      `Getting integration tier limit for workspace ${workspaceId}`
+    )
+    const maxAllowedIntegrations =
+      await this.tierLimitService.getIntegrationTierLimit(workspaceId)
+
+    // Get total integrations in the workspace
+    const totalIntegrations = await this.prisma.integration.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(
+      `Found ${totalIntegrations} integrations in workspace ${workspaceId}`
+    )
+
+    // Get roles tier limit
+    this.logger.log(`Getting role tier limit for workspace ${workspaceId}`)
+    const maxAllowedRoles =
+      await this.tierLimitService.getRoleTierLimit(workspaceId)
+
+    // Get total roles in the workspace
+    const totalRoles = await this.prisma.workspaceRole.count({
+      where: {
+        workspaceId
+      }
+    })
+    this.logger.log(`Found ${totalRoles} roles in workspace ${workspaceId}`)
+
     return {
       maxAllowedMembers,
       totalMembers,
       maxAllowedProjects,
-      totalProjects
+      totalProjects,
+      maxAllowedIntegrations,
+      totalIntegrations,
+      maxAllowedRoles,
+      totalRoles
     }
   }
 }

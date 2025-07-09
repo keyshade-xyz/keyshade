@@ -50,6 +50,7 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 
 @Injectable()
 export class SecretService {
@@ -98,6 +99,12 @@ export class SecretService {
         authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create a secret ${dto.name} in a disabled workspace`
+    )
 
     // Check if more secrets can be created in the project
     await this.tierLimitService.checkSecretLimitReached(project)
@@ -317,7 +324,22 @@ export class SecretService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      await checkForDisabledWorkspace(
+        secret.project.workspaceId,
+        this.prisma,
+        `User ${user.id} attempted to update a disabled workspace`
+      )
+
       for (const entry of dto.entries) {
+        const environmentId = environmentSlugToIdMap.get(entry.environmentSlug)
+
+        // Check for secret revision tier limit
+        await this.tierLimitService.checkConfigurationVersionLimitReached(
+          secret,
+          environmentId,
+          'secret'
+        )
+
         // Fetch the latest version of the secret for the environment
         this.logger.log(
           `Fetching the latest version of secret ${secretSlug} for environment ${entry.environmentSlug}`
@@ -325,7 +347,7 @@ export class SecretService {
         const latestVersion = await this.prisma.secretVersion.findFirst({
           where: {
             secretId: secret.id,
-            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
+            environmentId
           },
           select: {
             version: true
@@ -346,7 +368,7 @@ export class SecretService {
               value: await encrypt(secret.project.publicKey, entry.value),
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
+              environmentId,
               secretId: secret.id
             },
             select: {
@@ -889,13 +911,15 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
-    const secretsWithEnvironmentalValues = new Set<{
+    const secretsWithEnvironmentalValuesAndTierLimit = new Set<{
       secret: Partial<Secret>
       values: {
         environment: {
           name: Environment['name']
           id: Environment['id']
           slug: Environment['slug']
+          maxAllowedRevisions: number
+          totalRevisions: number
         }
         value: SecretVersion['value']
         version: SecretVersion['version']
@@ -907,6 +931,12 @@ export class SecretService {
         createdOn: SecretVersion['createdOn']
       }[]
     }>()
+
+    // Fetch max allowed revisions for configurations in the workspace
+    const maxAllowedRevisions =
+      await this.tierLimitService.getConfigurationVersionTierLimit(
+        project.workspaceId
+      )
 
     for (const secret of secrets) {
       // Logic to update the map:
@@ -920,6 +950,8 @@ export class SecretService {
             id: Environment['id']
             slug: Environment['slug']
             name: Environment['name']
+            maxAllowedRevisions: number
+            totalRevisions: number
           }
           createdBy: {
             id: User['id']
@@ -933,19 +965,35 @@ export class SecretService {
         const environmentId = secretVersion.environment.id
         const existingSecretVersion = envIdToSecretVersionMap.get(environmentId)
 
-        if (!existingSecretVersion) {
-          envIdToSecretVersionMap.set(environmentId, secretVersion)
-        } else {
-          if (existingSecretVersion.version < secretVersion.version) {
-            envIdToSecretVersionMap.set(environmentId, secretVersion)
+        // Fetch total revisions in the environment for the secret
+        const totalRevisions = await this.prisma.secretVersion.count({
+          where: {
+            secretId: secret.id,
+            environmentId
           }
+        })
+
+        const secretVersionWithTierLimit = {
+          ...secretVersion,
+          environment: {
+            ...secretVersion.environment,
+            maxAllowedRevisions,
+            totalRevisions
+          }
+        }
+
+        if (
+          !existingSecretVersion ||
+          existingSecretVersion.version < secretVersion.version
+        ) {
+          envIdToSecretVersionMap.set(environmentId, secretVersionWithTierLimit)
         }
       }
 
       delete secret.versions
 
       // Add the secret to the map
-      secretsWithEnvironmentalValues.add({
+      secretsWithEnvironmentalValuesAndTierLimit.add({
         secret,
         values: await Promise.all(
           Array.from(envIdToSecretVersionMap.values()).map(
@@ -953,7 +1001,10 @@ export class SecretService {
               environment: {
                 id: secretVersion.environment.id,
                 name: secretVersion.environment.name,
-                slug: secretVersion.environment.slug
+                slug: secretVersion.environment.slug,
+                maxAllowedRevisions:
+                  secretVersion.environment.maxAllowedRevisions,
+                totalRevisions: secretVersion.environment.totalRevisions
               },
               value: secretVersion.value,
               version: secretVersion.version,
@@ -969,7 +1020,9 @@ export class SecretService {
       })
     }
 
-    const items = Array.from(secretsWithEnvironmentalValues.values())
+    const items = Array.from(
+      secretsWithEnvironmentalValuesAndTierLimit.values()
+    )
 
     // Calculate pagination metadata
     const totalCount = await this.prisma.secret.count({

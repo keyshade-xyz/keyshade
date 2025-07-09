@@ -1,4 +1,4 @@
-import { User, Workspace, WorkspaceMember } from '@prisma/client'
+import { Subscription, User, Workspace, WorkspaceMember } from '@prisma/client'
 
 export interface WorkspaceWithLastUpdateBy extends Workspace {
   lastUpdatedBy: {
@@ -18,7 +18,12 @@ export interface WorkspaceWithLastUpdatedByAndOwner
   }
 }
 
-export interface WorkspaceWithLastUpdatedByAndOwnerAndProjects
+export interface WorkspaceWithLastUpdatedByAndOwnerAndSubscription
   extends WorkspaceWithLastUpdatedByAndOwner {
+  subscription: Subscription
+}
+
+export interface WorkspaceWithLastUpdatedByAndOwnerAndProjects
+  extends WorkspaceWithLastUpdatedByAndOwnerAndSubscription {
   projects: number
 }

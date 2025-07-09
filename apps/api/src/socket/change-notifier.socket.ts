@@ -1,4 +1,4 @@
-import { Inject, Logger, UseGuards } from '@nestjs/common'
+import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common'
 import {
   ConnectedSocket,
   MessageBody,
@@ -25,6 +25,7 @@ import { AuthGuard } from '@/auth/guard/auth/auth.guard'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { AuthenticatedUser } from '@/user/user.types'
+import { constructErrorBody } from '@/common/util'
 
 // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
@@ -124,19 +125,30 @@ export default class ChangeNotifier
 
     try {
       // Check if the user has access to the workspace
-      this.logger.log('Checking user access to workspace')
-      await this.authorizationService.authorizeUserAccessToWorkspace({
-        user,
-        entity: { slug: data.workspaceSlug },
-        authorities: [
-          Authority.READ_WORKSPACE,
-          Authority.READ_VARIABLE,
-          Authority.READ_SECRET
-        ]
-      })
+      this.logger.log(`Checking user access to workspace ${data.workspaceSlug}`)
+      const workspace =
+        await this.authorizationService.authorizeUserAccessToWorkspace({
+          user,
+          entity: { slug: data.workspaceSlug },
+          authorities: [
+            Authority.READ_WORKSPACE,
+            Authority.READ_VARIABLE,
+            Authority.READ_SECRET
+          ]
+        })
+
+      if (workspace.isDisabled) {
+        this.logger.log(`Workspace ${workspace.slug} is disabled`)
+        throw new BadRequestException(
+          constructErrorBody(
+            'This workspace has been disabled',
+            'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          )
+        )
+      }
 
       // Check if the user has access to the project
-      this.logger.log('Checking user access to project')
+      this.logger.log(`Checking user access to project ${data.projectSlug}`)
       await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: data.projectSlug },
@@ -144,7 +156,9 @@ export default class ChangeNotifier
       })
 
       // Check if the user has access to the environment
-      this.logger.log('Checking user access to environment')
+      this.logger.log(
+        `Checking user access to environment ${data.environmentSlug}`
+      )
       const environment =
         await this.authorizationService.authorizeUserAccessToEnvironment({
           user,

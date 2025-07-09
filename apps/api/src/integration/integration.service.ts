@@ -127,6 +127,18 @@ export class IntegrationService {
       })
     const workspaceId = workspace.id
 
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create integration ${dto.name} in disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
+
     // Check if integration with the same name already exists
     await this.existsByNameAndWorkspaceId(dto.name, workspace)
 

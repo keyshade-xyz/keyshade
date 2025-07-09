@@ -46,6 +46,7 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { SecretService } from '@/secret/secret.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 
 @Injectable()
 export class VariableService {
@@ -94,6 +95,12 @@ export class VariableService {
         authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create variable ${dto.name} in disabled workspace ${project.workspaceId}`
+    )
 
     // Check if more variables are allowed in the project
     await this.tierLimitService.checkVariableLimitReached(project)
@@ -302,7 +309,22 @@ export class VariableService {
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
+      await checkForDisabledWorkspace(
+        variable.project.workspaceId,
+        this.prisma,
+        `User ${user.id} attempted to update variable ${variableSlug} in disabled workspace ${variable.project.workspaceId}`
+      )
+
       for (const entry of dto.entries) {
+        const environmentId = environmentSlugToIdMap.get(entry.environmentSlug)
+
+        // Check for secret revision tier limit
+        await this.tierLimitService.checkConfigurationVersionLimitReached(
+          variable,
+          environmentId,
+          'variable'
+        )
+
         // Fetch the latest version of the variable for the environment
         this.logger.log(
           `Fetching latest version of variable ${variableSlug} for environment ${entry.environmentSlug}`
@@ -310,7 +332,7 @@ export class VariableService {
         const latestVersion = await this.prisma.variableVersion.findFirst({
           where: {
             variableId: variable.id,
-            environmentId: environmentSlugToIdMap.get(entry.environmentSlug)
+            environmentId
           },
           select: {
             version: true
@@ -331,7 +353,7 @@ export class VariableService {
               value: entry.value,
               version: latestVersion ? latestVersion.version + 1 : 1,
               createdById: user.id,
-              environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
+              environmentId,
               variableId: variable.id
             },
             select: {
@@ -736,12 +758,13 @@ export class VariableService {
     this.logger.log(
       `Checking if user has permissions to get all variables of project ${projectSlug}`
     )
-    const { id: projectId } =
+    const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: projectSlug },
         authorities: [Authority.READ_VARIABLE]
       })
+    const projectId = project.id
 
     this.logger.log(`Getting all variables of project ${projectSlug}`)
     const variables = await this.prisma.variable.findMany({
@@ -791,13 +814,15 @@ export class VariableService {
       `Got all variables of project ${projectSlug}. Count: ${variables.length}`
     )
 
-    const variablesWithEnvironmentalValues = new Set<{
+    const variablesWithEnvironmentalValuesAndTierLimit = new Set<{
       variable: Partial<Variable>
       values: {
         environment: {
           name: Environment['name']
           id: Environment['id']
           slug: Environment['slug']
+          maxAllowedRevisions: number
+          totalRevisions: number
         }
         value: VariableVersion['value']
         version: VariableVersion['version']
@@ -809,6 +834,12 @@ export class VariableService {
         createdOn: VariableVersion['createdOn']
       }[]
     }>()
+
+    // Fetch max allowed revisions for configurations in the workspace
+    const maxAllowedRevisions =
+      await this.tierLimitService.getConfigurationVersionTierLimit(
+        project.workspaceId
+      )
 
     for (const variable of variables) {
       // Logic to update the map:
@@ -822,6 +853,8 @@ export class VariableService {
             id: Environment['id']
             slug: Environment['slug']
             name: Environment['name']
+            maxAllowedRevisions: number
+            totalRevisions: number
           }
           createdBy: {
             id: User['id']
@@ -836,19 +869,38 @@ export class VariableService {
         const existingVariableVersion =
           envIdToVariableVersionMap.get(environmentId)
 
-        if (!existingVariableVersion) {
-          envIdToVariableVersionMap.set(environmentId, variableVersion)
-        } else {
-          if (existingVariableVersion.version < variableVersion.version) {
-            envIdToVariableVersionMap.set(environmentId, variableVersion)
+        // Fetch total revisions in the environment for the variable
+        const totalRevisions = await this.prisma.variableVersion.count({
+          where: {
+            variableId: variable.id,
+            environmentId
           }
+        })
+
+        const variableVersionWithTierLimit = {
+          ...variableVersion,
+          environment: {
+            ...variableVersion.environment,
+            maxAllowedRevisions,
+            totalRevisions
+          }
+        }
+
+        if (
+          !existingVariableVersion ||
+          existingVariableVersion.version < variableVersion.version
+        ) {
+          envIdToVariableVersionMap.set(
+            environmentId,
+            variableVersionWithTierLimit
+          )
         }
       }
 
       delete variable.versions
 
       // Add the variable to the map
-      variablesWithEnvironmentalValues.add({
+      variablesWithEnvironmentalValuesAndTierLimit.add({
         variable,
         values: await Promise.all(
           Array.from(envIdToVariableVersionMap.values()).map(
@@ -856,7 +908,10 @@ export class VariableService {
               environment: {
                 id: variableVersion.environment.id,
                 name: variableVersion.environment.name,
-                slug: variableVersion.environment.slug
+                slug: variableVersion.environment.slug,
+                maxAllowedRevisions:
+                  variableVersion.environment.maxAllowedRevisions,
+                totalRevisions: variableVersion.environment.totalRevisions
               },
               value: variableVersion.value,
               version: variableVersion.version,
@@ -872,7 +927,9 @@ export class VariableService {
       })
     }
 
-    const items = Array.from(variablesWithEnvironmentalValues.values())
+    const items = Array.from(
+      variablesWithEnvironmentalValuesAndTierLimit.values()
+    )
 
     //calculate metadata
     const totalCount = await this.prisma.variable.count({

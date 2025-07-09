@@ -19,10 +19,7 @@ import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integra
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
-import {
-  WorkspaceWithLastUpdateBy,
-  WorkspaceWithLastUpdatedByAndOwner
-} from '@/workspace/workspace.types'
+import { WorkspaceWithLastUpdatedByAndOwnerAndSubscription } from '@/workspace/workspace.types'
 import { associateWorkspaceOwnerDetails } from '@/common/workspace'
 
 @Injectable()
@@ -42,13 +39,13 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverWorkspace(
     params: AuthorizationParams
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over workspace for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
     )
 
-    let workspace: WorkspaceWithLastUpdateBy
+    let workspace
 
     try {
       if (entity.slug) {
@@ -63,6 +60,17 @@ export class AuthorityCheckerService {
                 id: true,
                 name: true,
                 profilePictureUrl: true
+              }
+            },
+            subscription: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profilePictureUrl: true
+                  }
+                }
               }
             }
           }
@@ -80,6 +88,17 @@ export class AuthorityCheckerService {
                 id: true,
                 name: true,
                 profilePictureUrl: true
+              }
+            },
+            subscription: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profilePictureUrl: true
+                  }
+                }
               }
             }
           }
@@ -117,7 +136,10 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access workspace ${workspace.slug} for authorities ${authorities}`
     )
 
-    return await associateWorkspaceOwnerDetails(workspace, this.prisma)
+    return {
+      ...(await associateWorkspaceOwnerDetails(workspace, this.prisma)),
+      subscription: workspace.subscription
+    }
   }
 
   /**

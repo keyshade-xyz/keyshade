@@ -158,6 +158,21 @@ enum IntegrationRunStatus {
   FAILED
 }
 
+enum SubscriptionPlanType {
+  FREE
+  HACKER
+  TEAM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  UNPAID
+}
+
 model Event {
   id          String         @id @default(cuid())
   source      EventSource
@@ -213,53 +228,64 @@ model User {
   isOnboardingFinished Boolean       @default(false)
   isAdmin              Boolean       @default(false)
   authProvider         AuthProvider?
-  subscription         Subscription?
   joinedOn             DateTime      @default(now())
   referralCode         String        @unique
 
-  workspaceMembers WorkspaceMember[]
-  workspaces       Workspace[]
-  apiKeys          ApiKey[]
-  otp              Otp?
-  notifications    Notification[]
-  secrets          Secret[] // Stores the secrets the user updated
-  variables        Variable[] // Stores the variables the user updated
-  projects         Project[] // Stores the projects the user updated
-  environments     Environment[] // Stores the environments the user updated
-  secretVersion    SecretVersion[]
-  variableVersion  VariableVersion[]
-  events           Event[]
-  integrations     Integration[] // Stores the integrations the user updated
-  emailPreference  EmailPreference?
+  workspaceMembers  WorkspaceMember[]
+  workspaces        Workspace[]
+  apiKeys           ApiKey[]
+  otp               Otp?
+  notifications     Notification[]
+  secrets           Secret[] // Stores the secrets the user updated
+  variables         Variable[] // Stores the variables the user updated
+  projects          Project[] // Stores the projects the user updated
+  environments      Environment[] // Stores the environments the user updated
+  secretVersion     SecretVersion[]
+  variableVersion   VariableVersion[]
+  events            Event[]
+  integrations      Integration[] // Stores the integrations the user updated
+  emailPreference   EmailPreference?
   onboardingAnswers OnboardingAnswers?
+  subscriptions     Subscription[]
 
-  referredById         String?       
-  referredBy           User?         @relation("UserReferrals", fields: [referredById], references: [id])
-  referredUsers        User[]        @relation("UserReferrals")
+  referredById  String?
+  referredBy    User?   @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers User[]  @relation("UserReferrals")
 
   @@index([email], name: "email")
 }
 
 model OnboardingAnswers {
-  id   String @id @default(cuid())
-  role String?
-  industry String?
-  teamSize String?
+  id           String  @id @default(cuid())
+  role         String?
+  industry     String?
+  teamSize     String?
   productStage String?
-  useCase String?
-  heardFrom String?
+  useCase      String?
+  heardFrom    String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique
 }
 
 model Subscription {
-  id       String  @id @default(cuid())
-  plan     String
-  isActive Boolean @default(true)
+  id                   String                @id @default(cuid())
+  plan                 SubscriptionPlanType  @default(FREE)
+  status               SubscriptionStatus    @default(INCOMPLETE)
+  seatsBooked          Int                   @default(3)
+  isAnnual             Boolean               @default(false)
+  activatedOn          DateTime              @default(now())
+  renewsOn             DateTime?
+  vendorSubscriptionId String?
+  vendorCustomerId     String?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
+  userId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String    @unique
+
+  @@index([vendorSubscriptionId])
 }
 
 model Integration {
@@ -276,15 +302,15 @@ model Integration {
   lastUpdatedById String?
 
   // An integration will always be tied to a workspace
-  workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  workspaceId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String
 
   // An integration may or may not have relations with projects
-  project       Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  projectId     String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  projectId String?
 
   // An integration may or may not have relations with environments of the project
-  environments  Environment[]
+  environments Environment[]
 
   integrationTrigger IntegrationRun[]
 
@@ -325,7 +351,6 @@ model Project {
   publicKey       String
   privateKey      String? // We store this only if the user wants us to do so! 
   storePrivateKey Boolean            @default(false)
-  isDisabled      Boolean            @default(false) // This is set to true when the user stops his subscription and still has premium features in use
   accessLevel     ProjectAccessLevel @default(PRIVATE)
   isForked        Boolean            @default(false)
 
@@ -510,16 +535,19 @@ model Otp {
 }
 
 model Workspace {
-  id                     String   @id @default(cuid())
+  id                     String        @id @default(cuid())
   name                   String
-  slug                   String   @unique
-  isFreeTier             Boolean  @default(true)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  slug                   String        @unique
+  isFreeTier             Boolean       @default(true)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
   ownerId                String
-  isDefault              Boolean  @default(false)
+  isDefault              Boolean       @default(false)
   icon                   String?
   blacklistedIpAddresses String[]
+  isDisabled             Boolean       @default(false) // This is set to true when the user stops their subscription and still has premium features in use
+  workspaceLockdownIn    DateTime?
+  subscription           Subscription?
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -549,16 +577,16 @@ model UserEmailChange {
 }
 
 model EmailPreference {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  marketing   Boolean  @default(true)
-  activity    Boolean  @default(true)
-  critical    Boolean  @default(true)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  marketing Boolean @default(true)
+  activity  Boolean @default(true)
+  critical  Boolean @default(true)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   @@index([userId, id], name: "userEmailPreference")
 }

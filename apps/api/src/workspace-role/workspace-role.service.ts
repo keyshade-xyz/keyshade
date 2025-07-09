@@ -55,10 +55,7 @@ export class WorkspaceRoleService {
     this.logger.log(
       `Creating workspace role ${dto.name} for workspace ${workspaceSlug}. UserID: ${user.id}`
     )
-    if (
-      dto.authorities &&
-      dto.authorities.includes(Authority.WORKSPACE_ADMIN)
-    ) {
+    if (dto.authorities?.includes(Authority.WORKSPACE_ADMIN)) {
       this.logger.warn(
         `Attempt to create workspace role ${dto.name} for workspace ${workspaceSlug} with workspace admin authority. UserID: ${user.id}`
       )
@@ -77,6 +74,18 @@ export class WorkspaceRoleService {
         authorities: [Authority.CREATE_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create workspace role for disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     if (await this.checkWorkspaceRoleExists(workspace, dto.name)) {
       throw new ConflictException(

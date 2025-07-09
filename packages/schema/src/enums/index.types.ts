@@ -10,7 +10,8 @@ import {
   integrationRunStatusEnum,
   integrationTypeEnum,
   projectAccessLevelEnum,
-  rotateAfterEnum
+  rotateAfterEnum,
+  subscriptionPlanEnum
 } from '.'
 
 export type AuthorityEnum = z.infer<typeof authorityEnum>
@@ -33,4 +34,6 @@ export type IntegrationTypeEnum = z.infer<typeof integrationTypeEnum>
 
 export type AuthProviderEnum = z.infer<typeof authProviderEnum>
 
-export type integrationRunStatusEnum = z.infer<typeof integrationRunStatusEnum>
+export type IntegrationRunStatusEnum = z.infer<typeof integrationRunStatusEnum>
+
+export type SubscriptionPlanTypeEnum = z.infer<typeof subscriptionPlanEnum>
