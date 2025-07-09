@@ -45,11 +45,14 @@ export default class RunCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
     }
+
+    console.log('Inside keyshade run action function')
+    console.log('Options: ', options['environment-slug'])
 
     // @ts-expect-error -- false positive, might be an error on commander.js
     // args return string[][] instead of string[]
