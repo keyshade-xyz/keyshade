@@ -14,6 +14,7 @@ export const PolarProvider: Provider = {
       !process.env.POLAR_WEBHOOK_SECRET
     ) {
       logger.warn('Polar credentials are not set. Skipping intialization...')
+      return null
     } else {
       return new Polar({
         accessToken: process.env.POLAR_API_KEY,

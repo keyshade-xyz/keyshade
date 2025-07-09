@@ -33,6 +33,7 @@ import { WebhookSubscriptionRevokedPayload } from '@polar-sh/sdk/models/componen
 import { randomUUID } from 'crypto'
 import { SubscriptionCancellation } from './dto/subscription-cancellation.dto'
 import dayjs from 'dayjs'
+import { Cron, CronExpression } from '@nestjs/schedule'
 
 @Injectable()
 export class PolarPaymentGatewayService extends PaymentGatewayService {
@@ -102,7 +103,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         paymentProcessor: 'stripe',
         products: [productId],
         label: paymentLinkLabel,
-        requireBillingAddress: true,
+        requireBillingAddress: false,
         successUrl: `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspaceSlug}`
       })
       this.logger.log(`Payment link generated with ID: ${id}`)
@@ -346,6 +347,28 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       this.logger.error(`Error processing webhook: ${error.message}`)
       throw new ForbiddenException(error)
     }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async deleteUnusedPaymentLinks(): Promise<void> {
+    this.logger.log('Deleting unused payment links...')
+
+    const { result } = await this.polarClient.checkoutLinks.list({
+      sorting: ['-created_at'],
+      limit: 50
+    })
+
+    this.logger.log(`Found ${result.items.length} payment links`)
+
+    for (const paymentLink of result.items) {
+      this.logger.log(`Deleting payment link ${paymentLink.id}...`)
+      await this.polarClient.checkoutLinks.delete({
+        id: paymentLink.id
+      })
+      this.logger.log(`Payment link ${paymentLink.id} deleted`)
+    }
+
+    this.logger.log('Unused payment links deleted')
   }
 
   private async processSubscriptionCancelled(

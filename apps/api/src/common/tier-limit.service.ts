@@ -583,14 +583,9 @@ export class TierLimitService {
   }
 
   /**
-   * Retrieves the tier limits for a given workspace based on its subscription plan.
-   * It checks if a trial period is activated and determines the appropriate
-   * subscription plan to use for tier limits. The maximum number of members allowed
-   * is determined by the seats booked in the subscription.
-   *
-   * @param workspaceId The ID of the workspace to retrieve tier limits for.
-   * @returns A promise that resolves to an object containing the tier limits
-   * with the maximum members allowed for the workspace.
+   * Retrieves the tier limit for a given workspace, including the maximum number of members
+   * @param workspaceId the ID of the workspace
+   * @returns the tier limit for the workspace, including the maximum number of members
    */
   private async getWorkspaceTierLimit(
     workspaceId: Workspace['id']
@@ -603,10 +598,6 @@ export class TierLimitService {
     })
     this.logger.log(
       `Found subscription ${subscription.id} for workspace ${workspaceId}`
-    )
-
-    this.logger.log(
-      `Checking if trial has been activated for workspace ${workspaceId}`
     )
 
     const subscriptionPlan = subscription.plan
