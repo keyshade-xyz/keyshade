@@ -1,3 +1,36 @@
+## [2.28.0](https://github.com/keyshade-xyz/keyshade/compare/v2.27.0...v2.28.0) (2025-07-02)
+
+### 🚀 Features
+
+* **cli:** Bumped CLI to v3.2.1 ([734865b](https://github.com/keyshade-xyz/keyshade/commit/734865b7f9e6187fcaf22629a9a38a67f9477ed5))
+* **cli:** Revamp CLI outputs ([#1040](https://github.com/keyshade-xyz/keyshade/issues/1040)) ([1d94f51](https://github.com/keyshade-xyz/keyshade/commit/1d94f5190899a1bdf762de1d65ecd452d823fbff))
+* **platform:** Integration setup private key ([#1036](https://github.com/keyshade-xyz/keyshade/issues/1036)) ([465c2d1](https://github.com/keyshade-xyz/keyshade/commit/465c2d13a13d0879dd5478b980a8cec8bb7720cb))
+* **platform:** Updated Project Overview & Import from env files ([#1045](https://github.com/keyshade-xyz/keyshade/issues/1045)) ([02c9183](https://github.com/keyshade-xyz/keyshade/commit/02c918331c527e52be876d45261883049ad1722f))
+
+### 🐛 Bug Fixes
+
+* **cli:** Crash on [secure] decryption due to missing private key ([#1037](https://github.com/keyshade-xyz/keyshade/issues/1037)) ([a90aba1](https://github.com/keyshade-xyz/keyshade/commit/a90aba1d382c9e81f13d08990d5d3a41c6419a79))
+* **platform:** Bug fixes ([#1034](https://github.com/keyshade-xyz/keyshade/issues/1034)) ([ac56a0f](https://github.com/keyshade-xyz/keyshade/commit/ac56a0fadef78f0176f2cd366ef13522b1098716))
+* **platform:** docker build fix ([#1048](https://github.com/keyshade-xyz/keyshade/issues/1048)) ([4d9f05e](https://github.com/keyshade-xyz/keyshade/commit/4d9f05eb91d490a60717109ead6a5431263090a7))
+
+### 📚 Documentation
+
+* Add Go Integration Guide ([#1047](https://github.com/keyshade-xyz/keyshade/issues/1047)) ([c8a47c5](https://github.com/keyshade-xyz/keyshade/commit/c8a47c509212b7bcf483d1859e44ae451d3eb9a2))
+* Add NextJS guide ([#1023](https://github.com/keyshade-xyz/keyshade/issues/1023)) ([fe25553](https://github.com/keyshade-xyz/keyshade/commit/fe25553c90e240c2162078d913fb7e234c7075d3))
+* Add Node.js Integration Guide ([#1041](https://github.com/keyshade-xyz/keyshade/issues/1041)) ([0626f22](https://github.com/keyshade-xyz/keyshade/commit/0626f2293c2c354e5dce766d7e396e2870ceb56c))
+* Add Python Integration Guide ([#1042](https://github.com/keyshade-xyz/keyshade/issues/1042)) ([0c13c7b](https://github.com/keyshade-xyz/keyshade/commit/0c13c7bb7110f07474282661ec827d2b8147819c))
+* Add Rust Integration Guide ([#1046](https://github.com/keyshade-xyz/keyshade/issues/1046)) ([c3a4307](https://github.com/keyshade-xyz/keyshade/commit/c3a430767f789261144b83a9822c2e707a18a2e5))
+* Next.js Integration Guide Minor Changes ([#1044](https://github.com/keyshade-xyz/keyshade/issues/1044)) ([7a84998](https://github.com/keyshade-xyz/keyshade/commit/7a84998edc9bffef5f85e8fc4826661cfd9b60f3))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.28.0-stage.1 [skip ci] ([afcdf85](https://github.com/keyshade-xyz/keyshade/commit/afcdf85e1716dd17c9bc9541eee8a62bc82081a8))
+* **release:** 2.28.0-stage.2 [skip ci] ([dc68fe9](https://github.com/keyshade-xyz/keyshade/commit/dc68fe9fafd7a05a447c363e73d031abb9385592))
+* **release:** 2.28.0-stage.3 [skip ci] ([48d490d](https://github.com/keyshade-xyz/keyshade/commit/48d490d3e7b5c8d84febfbeaffc89dfd6323a9a6))
+* **release:** 2.28.0-stage.4 [skip ci] ([4bb39b8](https://github.com/keyshade-xyz/keyshade/commit/4bb39b873325c9711a6175091cfd1d628ec5376b))
+* **release:** 2.28.0-stage.5 [skip ci] ([4b809b8](https://github.com/keyshade-xyz/keyshade/commit/4b809b8e12b1091daa4ac489b0f4a9b8dcfc7a69))
+* **release:** 2.28.0-stage.6 [skip ci] ([5b3ecdd](https://github.com/keyshade-xyz/keyshade/commit/5b3ecdde285e37c416625eabd07496cfd0133b49))
+
 ## [2.28.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0-stage.5...v2.28.0-stage.6) (2025-07-02)
 
 ### 🐛 Bug Fixes

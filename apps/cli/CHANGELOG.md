@@ -219,3 +219,14 @@
 
 - Updated `keyshade project import` to have better feedback
 - Modified Logger functions and implement new table function, revamping cli outputs
+
+## 3.2.1
+
+### Minor Changes
+
+- Updated `keyshade project import` to have better feedback
+- Modified Logger functions and implement new table function, revamping cli outputs
+
+### Patches
+
+- Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
