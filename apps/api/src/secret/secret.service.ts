@@ -683,6 +683,109 @@ export class SecretService {
   }
 
   /**
+   * Disables a secret in a given environment
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret to disable
+   * @param environmentSlug the slug of the environment in which the secret will be disabled
+   * @returns void
+   */
+  async disableSecret(
+    user: AuthenticatedUser,
+    secretSlug: Secret['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to disable secret ${secretSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to disable secret ${secretSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_SECRET]
+      })
+
+    // Fetch the secret
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
+      entity: { slug: secretSlug },
+      authorities: [Authority.UPDATE_SECRET]
+    })
+
+    // Disable the secret if not already disabled
+    await this.prisma.disabledEnvironmentOfSecret.upsert({
+      where: {
+        secretId_environmentId: {
+          secretId: secret.id,
+          environmentId: environment.id
+        }
+      },
+      update: {},
+      create: {
+        secretId: secret.id,
+        environmentId: environment.id
+      }
+    })
+
+    this.logger.log(
+      `Disabled secret ${secretSlug} in environment ${environmentSlug}`
+    )
+  }
+
+  /**
+   * Enables a secret in a given environment
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret to enable
+   * @param environmentSlug the slug of the environment in which the secret will be enabled
+   * @returns void
+   */
+  async enableSecret(
+    user: AuthenticatedUser,
+    secretSlug: Secret['slug'],
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to enable secret ${secretSlug} in environment ${environmentSlug}`
+    )
+
+    // Fetch the environment
+    this.logger.log(
+      `Checking if user has permissions to enable secret ${secretSlug} in environment ${environmentSlug}`
+    )
+    const environment =
+      await this.authorizationService.authorizeUserAccessToEnvironment({
+        user,
+        entity: { slug: environmentSlug },
+        authorities: [Authority.UPDATE_SECRET]
+      })
+
+    // Fetch the secret
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
+      entity: { slug: secretSlug },
+      authorities: [Authority.UPDATE_SECRET]
+    })
+
+    // Disable the secret if not already disabled
+    await this.prisma.disabledEnvironmentOfSecret.delete({
+      where: {
+        secretId_environmentId: {
+          secretId: secret.id,
+          environmentId: environment.id
+        }
+      }
+    })
+
+    this.logger.log(
+      `Enabled secret ${secretSlug} in environment ${environmentSlug}`
+    )
+  }
+
+  /**
    * Deletes a secret from a project
    * @param user the user performing the action
    * @param secretSlug the slug of the secret to delete

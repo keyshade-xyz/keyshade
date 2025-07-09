@@ -71,6 +71,34 @@ export class VariableController {
     )
   }
 
+  @Put(':variableSlug/disable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
+  async disableVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.disableVariable(
+      user,
+      variableSlug,
+      environmentSlug
+    )
+  }
+
+  @Put(':variableSlug/enable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
+  async enableVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.variableService.enableVariable(
+      user,
+      variableSlug,
+      environmentSlug
+    )
+  }
+
   @Delete(':variableSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async deleteEnvironmentValueOfVariable(
