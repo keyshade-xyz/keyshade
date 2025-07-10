@@ -1,5 +1,5 @@
 ---
-description: How to integrate Keyshade with Vercel.
+description: How to integrate Keyshade with Vercel
 ---
 
 # Set up Keyshade with Vercel
@@ -212,4 +212,4 @@ To confirm the integration is working:
 
 _Your Vercel deployments are now securely powered by Keyshade — no manual environment variable configuration, no secrets in your repository, and seamless environment management across all deployment stages._
 
-> Ready to explore more integrations? Check out [Integrations Hub](/docs/integrations)!
+> Using AWS Lambda? Check out our [AWS Lambda Integration Guide](/docs/integration/platforms/set-up-with-aws.md) to securely manage secrets in your serverless functions.
