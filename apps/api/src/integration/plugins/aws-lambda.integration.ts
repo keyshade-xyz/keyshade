@@ -534,4 +534,6 @@ export class AWSLambdaIntegration extends BaseIntegration {
 
     return this.lambda
   }
+
+  public async validateConfiguration(metadata: AWSLambdaIntegrationMetadata) {}
 }
