@@ -112,6 +112,20 @@ export const RollBackSecretResponseSchema = z.object({
   currentRevision: SecretVersionSchema
 })
 
+export const DisableSecretRequestSchema = z.object({
+  secretSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const DisableSecretResponseSchema = z.void()
+
+export const EnableSecretRequestSchema = z.object({
+  secretSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const EnableSecretResponseSchema = z.void()
+
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
   projectSlug: BaseProjectSchema.shape.slug
 })
