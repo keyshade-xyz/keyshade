@@ -158,10 +158,10 @@ export default function ProjectEnvironmentMapping({
       updateMappings((prevMappings) => {
         const updated = { ...prevMappings }
         if (isSelected) {
-          const { [environment.name]: _removed, ...rest } = updated
+          const { [environment.slug]: _removed, ...rest } = updated
           return rest
         }
-        updated[environment.name] = { vercelSystemEnvironment: 'development' }
+        updated[environment.slug] = { vercelSystemEnvironment: 'development' }
         return updated
       })
 
@@ -180,44 +180,44 @@ export default function ProjectEnvironmentMapping({
   }
 
   const handleVercelEnvironmentChange = (
-    envName: string,
+    envSlug: string,
     systemEnvironment: string
   ) => {
     updateMappings((prev) => ({
       ...prev,
-      [envName]: {
-        ...prev[envName],
+      [envSlug]: {
+        ...prev[envSlug],
         vercelSystemEnvironment:
           systemEnvironment === 'custom'
             ? undefined
             : (systemEnvironment as VercelSystemEnvironment),
         vercelCustomEnvironmentId:
           systemEnvironment === 'custom'
-            ? prev[envName].vercelCustomEnvironmentId || ''
+            ? prev[envSlug].vercelCustomEnvironmentId || ''
             : undefined
       }
     }))
   }
 
-  const handleCustomIdChange = (envName: string, customId: string) => {
+  const handleCustomIdChange = (envSlug: string, customId: string) => {
     updateMappings((prev) => ({
       ...prev,
-      [envName]: {
-        ...prev[envName],
+      [envSlug]: {
+        ...prev[envSlug],
         vercelCustomEnvironmentId: customId
       }
     }))
   }
 
-  const getVercelEnvironmentType = (envName: string) => {
-    const mapping = environmentMappings[envName]
+  const getVercelEnvironmentType = (envSlug: string) => {
+    const mapping = environmentMappings[envSlug]
     return mapping.vercelCustomEnvironmentId !== undefined
       ? 'custom'
       : mapping.vercelSystemEnvironment || 'development'
   }
 
-  const getCustomId = (envName: string) =>
-    environmentMappings[envName].vercelCustomEnvironmentId || ''
+  const getCustomId = (envSlug: string) =>
+    environmentMappings[envSlug].vercelCustomEnvironmentId || ''
 
   const isEnvironmentSelected = (envId: string) =>
     selectedEnvironments.some((env) => env.id === envId)
@@ -342,9 +342,9 @@ export default function ProjectEnvironmentMapping({
                       </label>
                       <Select
                         onValueChange={(value) =>
-                          handleVercelEnvironmentChange(env.name, value)
+                          handleVercelEnvironmentChange(env.slug, value)
                         }
-                        value={getVercelEnvironmentType(env.name)}
+                        value={getVercelEnvironmentType(env.slug)}
                       >
                         <SelectTrigger
                           className="h-8 border-white/20 bg-white/10 text-sm text-white"
@@ -365,7 +365,7 @@ export default function ProjectEnvironmentMapping({
                       </Select>
                     </div>
 
-                    {getVercelEnvironmentType(env.name) === 'custom' && (
+                    {getVercelEnvironmentType(env.slug) === 'custom' && (
                       <div>
                         <label
                           className="mb-1 block text-sm text-white/70"
@@ -377,11 +377,11 @@ export default function ProjectEnvironmentMapping({
                           className="h-8 border-white/20 bg-white/10 text-sm text-white placeholder-white/50"
                           id={`custom-env-id-${env.id}`}
                           onChange={(e) =>
-                            handleCustomIdChange(env.name, e.target.value)
+                            handleCustomIdChange(env.slug, e.target.value)
                           }
                           placeholder="Enter custom environment ID"
                           type="text"
-                          value={getCustomId(env.name)}
+                          value={getCustomId(env.slug)}
                         />
                       </div>
                     )}
