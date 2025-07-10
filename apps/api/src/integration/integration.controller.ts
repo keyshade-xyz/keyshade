@@ -23,6 +23,28 @@ import { AuthenticatedUser } from '@/user/user.types'
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 
+  @Post('validate-config')
+  @HttpCode(HttpStatus.OK)
+  @RequiredApiKeyAuthorities(
+    Authority.CREATE_INTEGRATION,
+    Authority.READ_WORKSPACE,
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT
+  )
+  async validateIntegrationConfiguration(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateIntegration | UpdateIntegration,
+    @Query('isCreate', ParseBoolPipe) isCreate: boolean,
+    @Query('integrationSlug') integrationSlug?: Integration['slug']
+  ) {
+    return await this.integrationService.validateIntegrationMetadata(
+      user,
+      dto,
+      isCreate,
+      integrationSlug
+    )
+  }
+
   @Post(':workspaceSlug')
   @RequiredApiKeyAuthorities(
     Authority.CREATE_INTEGRATION,
@@ -116,28 +138,6 @@ export class IntegrationController {
   ) {
     return await this.integrationService.deleteIntegration(
       user,
-      integrationSlug
-    )
-  }
-
-  @Post('validate-config')
-  @HttpCode(HttpStatus.OK)
-  @RequiredApiKeyAuthorities(
-    Authority.CREATE_INTEGRATION,
-    Authority.READ_WORKSPACE,
-    Authority.READ_PROJECT,
-    Authority.READ_ENVIRONMENT
-  )
-  async validateIntegrationConfiguration(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateIntegration | UpdateIntegration,
-    @Query('isCreate', ParseBoolPipe) isCreate: boolean,
-    @Query('integrationSlug') integrationSlug?: Integration['slug']
-  ) {
-    return await this.integrationService.validateIntegrationMetadata(
-      user,
-      dto,
-      isCreate,
       integrationSlug
     )
   }
