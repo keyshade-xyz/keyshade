@@ -24,15 +24,15 @@
 
 ## Integrations 
 
-- Frameworks
-  - [Next.js](integration/frameworks/set-up-with-nextjs.md)
-  - [Node.js](integration/frameworks/set-up-with-nodejs.md)
-- Languages
-  - [Go](integration/languages/set-up-with-go.md)
-  - [Python](integration/languages/set-up-with-python.md)
-  - [Rust](integration/languages/set-up-with-rust.md)
-- Platforms
-  - [AWS Lambda](integration/platforms/set-up-with-aws.md)
+* Frameworks
+  * [Next.js](integration/frameworks/set-up-with-nextjs.md)
+  * [Node.js](integration/frameworks/set-up-with-nodejs.md)
+* Languages
+  * [Go](integration/languages/set-up-with-go.md)
+  * [Python](integration/languages/set-up-with-python.md)
+  * [Rust](integration/languages/set-up-with-rust.md)
+* Platforms
+  * [AWS Lambda](integration/platforms/set-up-with-aws.md)
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
