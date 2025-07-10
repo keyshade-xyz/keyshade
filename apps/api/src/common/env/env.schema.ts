@@ -109,7 +109,11 @@ const devSchema = z.object({
   THROTTLE_LIMIT: z.string().transform((val) => parseInt(val, 10)),
 
   LOGTAIL_API_TOKEN: z.string().optional(),
-  LOGTAIL_API_ENDPOINT: z.string().optional()
+  LOGTAIL_API_ENDPOINT: z.string().optional(),
+
+  POLAR_BASE_URL: z.string().url().optional(),
+  POLAR_API_KEY: z.string().optional(),
+  POLAR_WEBHOOK_SECRET: z.string().optional()
 })
 
 const prodSchema = z.object({
@@ -184,7 +188,11 @@ const prodSchema = z.object({
   FEEDBACK_FORWARD_EMAIL: z.string().email().min(5),
 
   LOGTAIL_API_TOKEN: z.string().optional(),
-  LOGTAIL_API_ENDPOINT: z.string().optional()
+  LOGTAIL_API_ENDPOINT: z.string().optional(),
+
+  POLAR_BASE_URL: z.string().url().optional(),
+  POLAR_API_KEY: z.string().optional(),
+  POLAR_WEBHOOK_SECRET: z.string().optional()
 })
 
 export type EnvSchemaType = z.infer<typeof prodSchema>

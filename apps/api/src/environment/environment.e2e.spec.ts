@@ -214,7 +214,8 @@ describe('Environment Controller Tests', () => {
       // Create the number of environments that the tier limit allows
       for (
         let x = 100;
-        x < 100 + tierLimitService.getEnvironmentTierLimit(project1.id) - 2; // Subtract 2 for the environments created above
+        x <
+        100 + (await tierLimitService.getEnvironmentTierLimit(project1.id)) - 2; // Subtract 2 for the environments created above
         x++
       ) {
         await environmentService.createEnvironment(
