@@ -100,14 +100,20 @@ export default class IntegrationController {
     request: ValidateIntegrationConfigurationRequest,
     headers?: Record<string, string>
   ): Promise<ClientResponse<ValidateIntegrationConfigurationResponse>> {
+    const {
+      isCreate,
+      integrationSlug = '',
+      ...bodyPayload
+    } = request as ValidateIntegrationConfigurationRequest & {
+      integrationSlug?: string
+    }
+
     const url =
       `/api/integration/validate-config?` +
-      (request.isCreate ? 'isCreate=true' : '?isCreate=false') +
-      (request.isCreate === false
-        ? `&integrationSlug=${request.integrationSlug}`
-        : '')
+      (isCreate ? 'isCreate=true' : 'isCreate=false') +
+      (isCreate === false ? `&integrationSlug=${integrationSlug}` : '')
 
-    const response = await this.apiClient.post(url, request, headers)
+    const response = await this.apiClient.post(url, bodyPayload, headers)
     return await parseResponse<ValidateIntegrationConfigurationResponse>(
       response
     )
