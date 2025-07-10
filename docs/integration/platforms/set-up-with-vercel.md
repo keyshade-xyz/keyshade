@@ -144,13 +144,8 @@ Now that the integration is set up, add your secrets and environment variables t
 3. Click the **"Variables"** tab to add your variables.
 
 > Example Secrets: `DATABASE_PASSWORD`, `API_KEY`, `STRIPE_SECRET_KEY`
-> Example Variables: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`, `NEXT_PUBLIC_API_URL`
-
-
-> 💡 **Secrets vs Variables:**
 >
-> - **Secrets** are sensitive credentials that are encrypted at rest
-> - **Variables** are non-sensitive configurations stored as plaintext
+> Example Variables: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`, `NEXT_PUBLIC_API_URL`
 
 ## Redeploy Your Vercel Project
 
