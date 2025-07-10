@@ -19,7 +19,7 @@ Here's what this guide covers:
 - [Set up the Vercel integration](#create-the-vercel-integration) in the Keyshade dashboard
 - [Configure Vercel API token and project ID](#gather-vercel-configuration-details)
 - [Map Keyshade environments to Vercel environments](#step-4-map-environments)
-- [Redeploy your project](#redeploy-your-vercel-project) with automatic environment variable injection
+<!-- - [Redeploy your project](#redeploy-your-vercel-project) with automatic environment variable injection -->
 
 > 💡 If you're not familiar with how Keyshade works, we recommend starting with [What is Keyshade?](/docs/getting-started/introduction.md)
 
@@ -113,21 +113,36 @@ Fill in the integration details:
 Map your Keyshade environments to Vercel environments:
 
 **Available Vercel Environments:**
-- **Development:** For local development and preview deployments
-- **Preview:** For preview deployments (branch deployments)
-- **Production:** For production deployments
-- **Custom:** For any custom environments you've configured
+
+* **Development:** For local development and preview deployments
+* **Preview:** For preview deployments (branch deployments)
+* **Production:** For production deployments
+* **Custom:** For any custom environments you've configured
+
+    > ⚠️ **Note:** Custom environments require a [Vercel Pro or Enterprise plan](https://vercel.com/pricing). If you're on a supported plan, you'll need to manually copy the `environmentId` from your Vercel dashboard.
+    >
+    > Unlike standard environments (development, preview, production), **Keyshade will prompt you to enter the `environmentId` when selecting a custom environment during integration setup**.
+    >
+    > Refer to [Vercel’s documentation on custom environments](https://vercel.com/docs/deployments/environments#custom-environments) for guidance on creating and managing them.
 
 **Mapping Examples:**
-- Keyshade `development` → Vercel `development`
-- Keyshade `staging` → Vercel `preview`
-- Keyshade `production` → Vercel `production`
+
+* Keyshade `development` → Vercel `development`
+* Keyshade `staging` → Vercel `preview`
+* Keyshade `production` → Vercel `production`
 
 ### Step 5: Create Integration
 
 1. Review your configuration
 2. Click **"Create Integration"**
 3. Wait for the integration to be successfully created
+
+Once the integration is complete, you can **verify that it worked** by visiting your **Vercel project’s Environment Variables** section. You should see a variable named `KS_PRIVATE_KEY`.
+
+> ℹ️ **What is `KS_PRIVATE_KEY`?**
+> This value is automatically injected by Keyshade. It's essential for your app to securely access any protected data managed by Keyshade.
+
+If you don’t see the variable or the integration fails, try restarting the setup and double-checking your environment mappings.
 
 ## Add Your Secrets and Variables
 
@@ -147,7 +162,7 @@ Now that the integration is set up, add your secrets and environment variables t
 >
 > Example Variables: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`, `NEXT_PUBLIC_API_URL`
 
-## Redeploy Your Vercel Project
+<!--## Redeploy Your Vercel Project
 
 After setting up the integration and adding your secrets/variables, trigger a redeployment:
 
@@ -156,7 +171,7 @@ After setting up the integration and adding your secrets/variables, trigger a re
 3. Click **"Redeploy"** on your latest deployment
 4. Or push a new commit to trigger automatic redeployment
 
-Keyshade will automatically inject your environment variables during the deployment process.
+Keyshade will automatically inject your environment variables during the deployment process.-->
 
 ## Verify the Integration
 
@@ -207,6 +222,15 @@ To confirm the integration is working:
 - Review Vercel deployment logs for specific error messages
 - Verify that all required environment variables are present in Keyshade
 - Check for any syntax errors in your environment variable values
+
+### Reach Out to Us
+
+Still stuck? We’re here to help.
+
+* 📧 Email us at: [support@keyshade.xyz](mailto:support@keyshade.xyz)
+* 💬 Join our community on [Discord](https://discord.com/invite/mV9PsXsjaH)
+
+Don't hesitate to reach out — we're happy to help with setup, debugging, or general questions.
 
 **You're All Set 🎊**
 
