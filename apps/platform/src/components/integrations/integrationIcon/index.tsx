@@ -27,7 +27,16 @@ function IntegrationIcon({ type, className }: IntegrationIconProps) {
   const normalizedType = type.toUpperCase()
 
   const IconComponent = intgrationIcon[normalizedType] || IntegrationSVG
-  return <IconComponent className={cn(className)} />
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-center rounded-lg bg-white p-1.5',
+        className
+      )}
+    >
+      <IconComponent />
+    </div>
+  )
 }
 
 export default IntegrationIcon

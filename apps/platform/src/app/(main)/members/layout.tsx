@@ -37,7 +37,7 @@ function DetailedMemberPage(): React.JSX.Element {
 
   return (
     <main>
-      <div className="flex flex-col gap-y-10">
+      <div className="flex flex-col gap-2">
         <PageTitle title={`${currentWorkspace?.name} | Members`} />
         <MembersHeader />
 

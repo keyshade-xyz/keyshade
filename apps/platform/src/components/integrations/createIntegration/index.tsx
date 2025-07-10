@@ -1,69 +1,114 @@
-'use client'
-import React, { useMemo } from 'react'
-import { useAtom } from 'jotai'
-import Link from 'next/link'
+import React, { useState } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { KeyshadeBigSVG } from '@public/svg/auth'
+import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
 import { Integrations } from '@keyshade/common'
-import { AddSVG } from '@public/svg/shared'
 import IntegrationIcon from '../integrationIcon'
+import SetupIntegration from '../integrationSetup'
+import { formatText } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog'
-import { createIntegrationOpenAtom } from '@/store'
+import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
 
-export default function CreateIntegration(): React.JSX.Element {
-  const [isCreateIntegrationOpen, setIsCreateIntegrationOpen] = useAtom(
-    createIntegrationOpenAtom
-  )
-  const handleToggel = () => {
-    setIsCreateIntegrationOpen((prev) => !prev)
+function CreateIntegration(): React.JSX.Element {
+  const integrationType = useAtomValue(createIntegrationTypeAtom)
+  const setCreateIntegrationModelOpen = useSetAtom(createIntegrationOpenAtom)
+
+  const [setupModelOpen, setSetupModelOpen] = useState<boolean>(false)
+
+  if (!integrationType) {
+    return (
+      <div className="text-center text-gray-500">No integration selected</div>
+    )
+  }
+  const integrationName = formatText(integrationType)
+  const integrationConfig = Integrations[integrationType]
+
+  const integrationPermissions =
+    integrationConfig.events?.map(
+      (group) => `Get notified about ${group.name.toLowerCase()}`
+    ) || []
+
+  const handleClose = () => {
+    setCreateIntegrationModelOpen(false)
   }
 
-  const integrations = useMemo(() => Object.values(Integrations), [])
+  const handleNext = () => {
+    setSetupModelOpen(true)
+  }
 
+  const handleSetupOpenChange = (open: boolean) => {
+    setSetupModelOpen(open)
+    if (!open) {
+      setCreateIntegrationModelOpen(false)
+    }
+  }
   return (
-    <Dialog onOpenChange={handleToggel} open={isCreateIntegrationOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <AddSVG /> Add Integration
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="flex h-[80vh] max-w-6xl flex-col gap-6 overflow-y-auto p-3">
-        <DialogHeader className="border-b border-white/20 p-2 pb-6">
-          <DialogTitle className="text-2xl font-bold">
-            Integrate third-party services
-          </DialogTitle>
-          <p className="mt-2 text-white/50">
-            Sync up your project&apos;s secrets, variables, and environment with
-            third-party services with ease
-          </p>
-        </DialogHeader>
-        <div className="grid grid-cols-7 gap-3">
-          {integrations.map(({ name, type }) => (
-            <Link
-              href={`integrations?setup=${type}`}
-              key={name}
-              onClick={() => setIsCreateIntegrationOpen(false)}
-            >
-              <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-white/20 bg-white/5 p-4 transition-all duration-300 hover:scale-105 hover:border-white/30 hover:bg-white/10 hover:shadow-md">
-                <div className="mb-4 h-16 w-16 ">
-                  <IntegrationIcon
-                    className="h-[4.5rem] w-[4.5rem]"
-                    type={type}
-                  />
-                </div>
-                <span className="text-lg font-medium text-white/60">
-                  {name}
-                </span>
+    <div>
+      <Dialog onOpenChange={handleSetupOpenChange} open={!setupModelOpen}>
+        <DialogContent className="max-w-md bg-[#18181B] text-white">
+          <DialogHeader className="flex flex-col items-center justify-between gap-5 pb-4">
+            <div className="flex w-full items-center justify-center gap-3">
+              <div className="rounded-xl bg-white/10 p-2">
+                <KeyshadeBigSVG height="55" viewBox="0 0 130 120" width="55" />
               </div>
-            </Link>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
+              <ArrowLeftRight className="h-6 w-6" />
+              <IntegrationIcon
+                className="h-[4.5rem] w-[4.5rem] p-4"
+                type={integrationType}
+              />
+            </div>
+            <DialogTitle>
+              <div className="flex flex-col items-center justify-center text-center">
+                <h2 className="mb-2 text-xl font-semibold">
+                  Integrate Keyshade with {integrationName}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  Connect Keyshade with {integrationName} to send real-time
+                  project updates directly to your server.
+                </p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-3 border-y border-white/20 py-4">
+              <h3 className="text-sm font-medium">Keyshade would do</h3>
+              <div className="space-y-2">
+                {integrationPermissions.map((permission) => (
+                  <div className="flex items-center gap-2" key={permission}>
+                    <CheckSquare2 className="h-4 w-4" />
+                    <span className="text-sm text-white/60">{permission}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between">
+              <Button onClick={handleClose} variant="secondary">
+                How it works
+              </Button>
+              <Button onClick={handleNext} variant="secondary">
+                Next
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <SetupIntegration
+        integrationName={integrationName}
+        integrationType={integrationType}
+        onOpenChange={handleSetupOpenChange}
+        open={setupModelOpen}
+      />
+    </div>
   )
 }
+
+export default CreateIntegration

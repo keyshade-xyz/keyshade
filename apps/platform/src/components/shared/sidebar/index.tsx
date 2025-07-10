@@ -30,7 +30,7 @@ function Sidebar(): JSX.Element {
       name: 'Members',
       icon: <TeamSVG />,
       link: '/members?tab=joined',
-      matchTo: '/members'
+      matchTo: '/members?tab=joined'
     },
     {
       name: 'Roles',
@@ -41,8 +41,8 @@ function Sidebar(): JSX.Element {
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
-      link: '/integrations',
-      matchTo: '/integrations'
+      link: '/integrations?tab=overview',
+      matchTo: '/integrations?tab=overview'
     },
     {
       name: 'Settings',

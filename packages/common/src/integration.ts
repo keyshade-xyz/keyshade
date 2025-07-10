@@ -10,12 +10,14 @@ export interface MetadataField {
 
 export interface IntegrationConfig {
   name: string
+  description: string
+  isActive: boolean
   type: IntegrationTypeEnum
-  events: GroupItem[]
-  metadataFields: MetadataField[]
-  envMapping: boolean
-  privateKeyRequired: boolean
-  maxEnvironmentsCount: 'single' | 'any'
+  events?: GroupItem[]
+  metadataFields?: MetadataField[]
+  envMapping?: boolean
+  privateKeyRequired?: boolean
+  maxEnvironmentsCount?: 'single' | 'any'
 }
 
 interface GroupItem {
@@ -96,6 +98,8 @@ const selectedEventGroups: GroupItem[] = [eventGroups[3], eventGroups[4]]
 export const Integrations: Record<string, IntegrationConfig> = {
   DISCORD: {
     name: 'Discord',
+    description:
+      'Connect Keyshade with Discord to send real-time project updates directly to your server.',
     type: 'DISCORD',
     events: eventGroups,
     envMapping: false,
@@ -108,10 +112,13 @@ export const Integrations: Record<string, IntegrationConfig> = {
         requestFieldName: 'webhookUrl',
         placeholder: 'https://discordapp.com/api/webhooks/.....'
       }
-    ]
+    ],
+    isActive: true
   },
   SLACK: {
     name: 'Slack',
+    description:
+      'Get instant notifications in your Slack workspace whenever a change occurs in your Keyshade environment.',
     type: 'SLACK',
     events: eventGroups,
     envMapping: false,
@@ -139,10 +146,13 @@ export const Integrations: Record<string, IntegrationConfig> = {
         requestFieldName: 'channelId',
         placeholder: 'KS1234567'
       }
-    ]
+    ],
+    isActive: true
   },
   VERCEL: {
     name: 'Vercel',
+    description:
+      'Seamlessly link Keyshade with Vercel to manage environment variables and sync secrets during deployments.',
     type: 'VERCEL',
     events: selectedEventGroups,
     envMapping: true,
@@ -169,10 +179,13 @@ export const Integrations: Record<string, IntegrationConfig> = {
         placeholder: 'production,staging',
         isEnvironment: true
       }
-    ]
+    ],
+    isActive: true
   },
   AWS_LAMBDA: {
     name: 'AWS Lambda',
+    description:
+      'Connect Keyshade with AWS Lambda to trigger serverless functions in response to events.',
     type: 'AWS_LAMBDA',
     events: selectedEventGroups,
     envMapping: false,
@@ -203,6 +216,28 @@ export const Integrations: Record<string, IntegrationConfig> = {
         requestFieldName: 'lambdaFunctionName',
         placeholder: 'my-lambda-function'
       }
-    ]
+    ],
+    isActive: true
+  },
+  NETLIFY: {
+    name: 'Netlify',
+    description:
+      'Integrate Keyshade with Netlify to manage environment variables and sync secrets during deployments.',
+    type: 'NETLIFY',
+    isActive: false
+  },
+  GITHUB: {
+    name: 'GitHub',
+    description:
+      'Connect Keyshade with GitHub to automate workflows and manage secrets in your repositories.',
+    type: 'GITHUB',
+    isActive: false
+  },
+  GITLAB: {
+    name: 'GitLab',
+    description:
+      'Integrate Keyshade with GitLab to manage environment variables and sync secrets during deployments.',
+    type: 'GITLAB',
+    isActive: false
   }
 }

@@ -150,6 +150,7 @@ export const rollbackSecretOpenAtom = atom<boolean>(false)
 
 export const selectedIntegrationAtom = atom<Integration | null>(null)
 export const createIntegrationOpenAtom = atom<boolean>(false)
+export const createIntegrationTypeAtom = atom<Integration['type'] | null>(null)
 export const editIntegrationOpenAtom = atom<boolean>(false)
 export const deleteIntegrationOpenAtom = atom<boolean>(false)
 

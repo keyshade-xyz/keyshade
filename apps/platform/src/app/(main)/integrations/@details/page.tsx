@@ -16,11 +16,7 @@ import { formatDate } from '@/lib/utils'
 import { editIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 
-function IntegrationDetailsPage({
-  integrationSlug
-}: {
-  integrationSlug: string
-}) {
+function IntegrationDetailsPage() {
   const router = useRouter()
   const [showAllEvents, setShowAllEvents] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -31,13 +27,17 @@ function IntegrationDetailsPage({
   const [isEditIntegrationsOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
+  const integrationSlug = selectedIntegration?.slug
 
-  const getIntegrationDetails = useHttp(() =>
-    ControllerInstance.getInstance().integrationController.getIntegration(
+  const getIntegrationDetails = useHttp(() => {
+    if (!integrationSlug) {
+      throw new Error('integrationSlug is required')
+    }
+    return ControllerInstance.getInstance().integrationController.getIntegration(
       { integrationSlug },
       {}
     )
-  )
+  })
 
   const handleEditIntegration = useCallback(() => {
     if (!selectedIntegration) return
@@ -150,7 +150,7 @@ function IntegrationDetailsPage({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <CopyToClipboard text={integrationSlug} />
+              <CopyToClipboard text={integrationSlug!} />
             </div>
           </div>
         </div>

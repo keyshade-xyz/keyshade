@@ -20,7 +20,7 @@ export default function EventTriggersInput({
   const [showAllGroups, setShowAllGroups] = useState(false)
 
   const eventGroups = useMemo(
-    () => Integrations[integrationType].events,
+    () => Integrations[integrationType].events!,
     [integrationType]
   )
 

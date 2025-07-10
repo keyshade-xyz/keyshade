@@ -33,6 +33,11 @@ interface FormState {
   manualPrivateKey: string
 }
 
+export enum IntegrationStep {
+  BasicInfo = 'basic_info',
+  ProjectEnvironment = 'project_environment'
+}
+
 const initialFormState: FormState = {
   name: '',
   selectedEvents: new Set(),
@@ -49,6 +54,9 @@ export function useSetupIntegration(
   integrationName: string
 ) {
   const [formState, setFormState] = useState<FormState>(initialFormState)
+  const [currentStep, setCurrentStep] = useState<IntegrationStep>(
+    IntegrationStep.BasicInfo
+  )
   const [isLoading, setIsLoading] = useState(false)
   const formStateRef = useRef<FormState>(formState)
 
@@ -71,6 +79,7 @@ export function useSetupIntegration(
       projectSlug
     })
   )
+
   const createIntegration = useHttp(() => {
     const currentState = formStateRef.current
     const finalMetadata = isMappingRequired
@@ -125,6 +134,7 @@ export function useSetupIntegration(
 
   const resetFormData = useCallback(() => {
     setFormState(initialFormState)
+    setCurrentStep(IntegrationStep.BasicInfo)
   }, [])
 
   // Event handlers
@@ -180,7 +190,7 @@ export function useSetupIntegration(
     [updateFormState]
   )
 
-  const validateForm = useCallback(
+  const validateBasicInfo = useCallback(
     (state: FormState) => {
       if (!state.name.trim()) {
         toast.error('Name of integration is required')
@@ -192,15 +202,6 @@ export function useSetupIntegration(
         return false
       }
 
-      if (
-        maxEnvironmentsCount === 'single' &&
-        state.selectedEnvironments.length === 0
-      ) {
-        toast.error('At least one environment is required')
-        return false
-      }
-
-      // Metadata validation
       const finalMetadata = isMappingRequired
         ? { ...state.metadata, environments: state.mappings }
         : state.metadata
@@ -227,6 +228,21 @@ export function useSetupIntegration(
         return false
       }
 
+      return true
+    },
+    [isMappingRequired]
+  )
+
+  const validateProjectEnvironment = useCallback(
+    (state: FormState) => {
+      if (
+        maxEnvironmentsCount === 'single' &&
+        state.selectedEnvironments.length === 0
+      ) {
+        toast.error('At least one environment is required')
+        return false
+      }
+
       if (
         state.selectedProjectSlug &&
         isPrivateKeyRequired &&
@@ -239,21 +255,32 @@ export function useSetupIntegration(
 
       return true
     },
-    [
-      maxEnvironmentsCount,
-      isMappingRequired,
-      isPrivateKeyRequired,
-      projectPrivateKey
-    ]
+    [maxEnvironmentsCount, isPrivateKeyRequired, projectPrivateKey]
   )
 
+  const handleNextStep = useCallback(() => {
+    const currentState = formStateRef.current
+
+    if (currentStep === IntegrationStep.BasicInfo) {
+      if (validateBasicInfo(currentState)) {
+        setCurrentStep(IntegrationStep.ProjectEnvironment)
+      }
+    }
+  }, [currentStep, validateBasicInfo])
+
+  const handlePreviousStep = useCallback(() => {
+    if (currentStep === IntegrationStep.ProjectEnvironment) {
+      setCurrentStep(IntegrationStep.BasicInfo)
+    }
+  }, [currentStep])
+
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent): Promise<boolean> => {
       e.preventDefault()
 
       const currentState = formStateRef.current
 
-      if (!validateForm(currentState)) return
+      if (!validateProjectEnvironment(currentState)) return false
 
       setIsLoading(true)
 
@@ -263,18 +290,28 @@ export function useSetupIntegration(
           toast.success(`${integrationName} integration created successfully!`)
           resetFormData()
           router.push('/integrations')
+          return true
         }
+        return false
       } catch (error) {
         toast.error('Failed to create integration. Please try again.')
+        return false
       } finally {
         setIsLoading(false)
       }
     },
-    [createIntegration, integrationName, router, resetFormData, validateForm]
+    [
+      createIntegration,
+      integrationName,
+      router,
+      resetFormData,
+      validateProjectEnvironment
+    ]
   )
 
   return {
     formState,
+    currentStep,
     isLoading,
     config: {
       isMappingRequired,
@@ -291,7 +328,9 @@ export function useSetupIntegration(
       handleProjectChange,
       handleEnvironmentChange,
       handleMappingsChange,
-      handleManualPrivateKeyChange
+      handleManualPrivateKeyChange,
+      handleNextStep,
+      handlePreviousStep
     }
   }
 }
