@@ -770,15 +770,21 @@ export class SecretService {
       authorities: [Authority.UPDATE_SECRET]
     })
 
-    // Disable the secret if not already disabled
-    await this.prisma.disabledEnvironmentOfSecret.delete({
-      where: {
-        secretId_environmentId: {
-          secretId: secret.id,
-          environmentId: environment.id
+    // Enable the secret
+    try {
+      await this.prisma.disabledEnvironmentOfSecret.delete({
+        where: {
+          secretId_environmentId: {
+            secretId: secret.id,
+            environmentId: environment.id
+          }
         }
-      }
-    })
+      })
+    } catch (error) {
+      this.logger.log(
+        `Secret ${secretSlug} is not disabled in ${environmentSlug}`
+      )
+    }
 
     this.logger.log(
       `Enabled secret ${secretSlug} in environment ${environmentSlug}`
