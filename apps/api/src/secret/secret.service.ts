@@ -1164,6 +1164,12 @@ export class SecretService {
           some: {
             environmentId
           }
+        },
+        // Ignore disabled secrets
+        DisabledEnvironmentOfSecret: {
+          none: {
+            environmentId
+          }
         }
       },
       include: {
