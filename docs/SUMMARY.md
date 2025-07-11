@@ -33,6 +33,7 @@
   - [Rust](integration/languages/set-up-with-rust.md)
 - Platforms
   - [AWS Lambda](integration/platforms/set-up-with-aws.md)
+  - [Vercel](integration/platforms/set-up-with-vercel.md)
 
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
