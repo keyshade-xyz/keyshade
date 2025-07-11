@@ -20,6 +20,7 @@ import { PageTitle } from '@/components/common/page-title'
 import { useGetAllProjects } from '@/hooks/api/use-get-all-projects'
 import ProjectLoader from '@/components/main/ProjectLoader'
 import ProjectEmpty from '@/components/main/ProjectEmpty'
+import Visible from '@/components/common/visible'
 
 function ProjectItemComponent(item: GetAllProjectsResponse['items'][number]) {
   return <ProjectCard project={item} />
@@ -49,9 +50,9 @@ export default function Index(): React.JSX.Element {
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace?.name} | Dashboard`} />
       <div className="flex items-center justify-between">
-        {!isProjectsEmpty ? (
+        <Visible if={!isProjectsEmpty}>
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
-        ) : null}
+        </Visible>
         <CreateProjectDialogue />
       </div>
 
@@ -67,7 +68,9 @@ export default function Index(): React.JSX.Element {
         </ProjectEmpty>
       </ProjectLoader>
 
-      {isDeleteProjectOpen && selectedProject ? <ConfirmDeleteProject /> : null}
+      <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>
+          <ConfirmDeleteProject />
+      </Visible>
 
       <EditProjectSheet />
       <ExportProjectConfigurationsDialog />
