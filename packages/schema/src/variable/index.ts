@@ -112,6 +112,20 @@ export const RollBackVariableResponseSchema = z.object({
   currentRevision: VariableVersionSchema
 })
 
+export const DisableVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const DisableVariableResponseSchema = z.void()
+
+export const EnableVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const EnableVariableResponseSchema = z.void()
+
 export const DeleteVariableRequestSchema = z.object({
   variableSlug: z.string()
 })

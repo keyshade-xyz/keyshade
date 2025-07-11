@@ -19,7 +19,11 @@ import {
   DeleteEnvironmentValueOfSecretResponseSchema,
   SecretVersionSchema,
   BulkCreateSecretResponseSchema,
-  BulkCreateSecretRequestSchema
+  BulkCreateSecretRequestSchema,
+  DisableSecretRequestSchema,
+  DisableSecretResponseSchema,
+  EnableSecretRequestSchema,
+  EnableSecretResponseSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
@@ -58,6 +62,14 @@ export type RollBackSecretRequest = z.infer<typeof RollBackSecretRequestSchema>
 export type RollBackSecretResponse = z.infer<
   typeof RollBackSecretResponseSchema
 >
+
+export type DisableSecretRequest = z.infer<typeof DisableSecretRequestSchema>
+
+export type DisableSecretResponse = z.infer<typeof DisableSecretResponseSchema>
+
+export type EnableSecretRequest = z.infer<typeof EnableSecretRequestSchema>
+
+export type EnableSecretResponse = z.infer<typeof EnableSecretResponseSchema>
 
 export type GetAllSecretsOfProjectRequest = z.infer<
   typeof GetAllSecretsOfProjectRequestSchema
