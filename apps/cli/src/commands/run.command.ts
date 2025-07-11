@@ -4,7 +4,8 @@ import { io } from 'socket.io-client'
 import { spawn } from 'child_process'
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
@@ -17,6 +18,8 @@ import type {
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
+
+// TODO: Add optional --environment flag
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -43,11 +46,29 @@ export default class RunCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--environment-slug <string>',
+        description: 'Environment slug to configure'
+      }
+    ]
+  }
+
+  async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
     }
+
+    console.log('environment slug: ', options.environmentSlug)
+
+    // TODO: Verify environment exists.
+
+    // TODO: Change environment slug in keyshade.json.
+
+    // TODO: Update documentation.
 
     // @ts-expect-error -- false positive, might be an error on commander.js
     // args return string[][] instead of string[]
