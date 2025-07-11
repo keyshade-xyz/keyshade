@@ -679,7 +679,7 @@ export class VariableService {
   }
 
   /**
-   * Disables a secret in a given environment
+   * Disables a variable in a given environment
    * @param user the user performing the action
    * @param variableSlug the slug of the variable to disable
    * @param environmentSlug the slug of the environment in which the variable will be disabled
@@ -768,15 +768,21 @@ export class VariableService {
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
-    // Disable the variable if not already disabled
-    await this.prisma.disabledEnvironmentOfVariable.delete({
-      where: {
-        variableId_environmentId: {
-          variableId: variable.id,
-          environmentId: environment.id
+    // Enable the variable
+    try {
+      await this.prisma.disabledEnvironmentOfVariable.delete({
+        where: {
+          variableId_environmentId: {
+            variableId: variable.id,
+            environmentId: environment.id
+          }
         }
-      }
-    })
+      })
+    } catch (error) {
+      this.logger.log(
+        `Variable ${variableSlug} is not disabled in ${environmentSlug}`
+      )
+    }
 
     this.logger.log(
       `Enabled variable ${variableSlug} in environment ${environmentSlug}`
@@ -1181,6 +1187,12 @@ export class VariableService {
         projectId,
         versions: {
           some: {
+            environmentId
+          }
+        },
+        // Ignore disabled variables
+        DisabledEnvironmentOfVariable: {
+          none: {
             environmentId
           }
         }
