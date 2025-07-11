@@ -297,7 +297,6 @@ describe('Variable Controller Tests', () => {
         },
         project1.slug
       )
-
       const response = await app.inject({
         method: 'POST',
         url: `/variable/${project1.slug}/bulk`,
@@ -319,7 +318,6 @@ describe('Variable Controller Tests', () => {
           'x-e2e-user-email': user1.email
         }
       })
-
       expect(response.statusCode).toBe(201)
       const body = response.json()
 
@@ -327,7 +325,7 @@ describe('Variable Controller Tests', () => {
       expect(body.failed.length).toBe(1)
 
       expect(body.failed[0].name).toBe('Bulk Conflicting Variable')
-      expect(body.successful[0].name).toBe('Bulk Unique Variable')
+      expect(body.successful[0].variable.name).toBe('Bulk Unique Variable')
     })
 
     it('should reject bulk create if all variables are invalid', async () => {

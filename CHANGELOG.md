@@ -1,3 +1,9 @@
+## [2.31.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.3...v2.31.0-stage.4) (2025-07-10)
+
+### 🐛 Bug Fixes
+
+* API e2e test & store private key loaclly ([#1067](https://github.com/keyshade-xyz/keyshade/issues/1067)) ([95b9e3a](https://github.com/keyshade-xyz/keyshade/commit/95b9e3a7dedfcd7de959e9c3c4c862b4afff84d8))
+
 ## [2.31.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.2...v2.31.0-stage.3) (2025-07-10)
 
 ### 🐛 Bug Fixes
