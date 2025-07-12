@@ -74,7 +74,7 @@ export interface VercelIntegrationMetadata extends IntegrationMetadata {
   // Vercel project's ID for which the configuration will be managed
   projectId: string
 
-  // Vercel environments mapping with keyshade environment names
+  // Vercel environments mapping with keyshade environment slugs
   environments: Record<
     Environment['slug'],
     {

@@ -83,6 +83,14 @@ function Tiers() {
         maxCount: selectedWorkspace?.maxAllowedMembers
       }
     ]
+  } else if (pathname === '/integrations') {
+    limits = [
+      {
+        title: 'Projects',
+        currentCount: projectCount,
+        maxCount: selectedWorkspace?.maxAllowedProjects
+      }
+    ]
   } else if (tab === 'overview') {
     limits = [
       {

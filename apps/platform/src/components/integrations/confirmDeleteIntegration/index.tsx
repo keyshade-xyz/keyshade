@@ -1,26 +1,29 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import { TrashSVG } from '@public/svg/shared'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog'
+import { useRouter } from 'next/navigation'
 import { deleteIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 export default function DeleteIntegrationDialog() {
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useAtom(
     deleteIntegrationOpenAtom
   )
   const selectedIntegration = useAtomValue(selectedIntegrationAtom)
+  const router = useRouter()
+  const [confirmed, setConfirmed] = useState(false)
 
   const deleteIntegration = useHttp((integrationSlug: string) => {
     return ControllerInstance.getInstance().integrationController.deleteIntegration(
@@ -31,58 +34,78 @@ export default function DeleteIntegrationDialog() {
   })
 
   const handleDeleteIntegration = useCallback(async () => {
-    if (!selectedIntegration) return
+    if (!selectedIntegration || !confirmed) return
     try {
       const { success } = await deleteIntegration(selectedIntegration.slug)
       if (success) {
         toast.success('Integration deleted successfully')
-        setIsDeleteIntegrationOpen(false)
+        router.push('/integrations?tab=all')
       }
     } catch (error) {
       toast.error('Error deleting integration')
+    } finally {
+      setIsDeleteIntegrationOpen(false)
+      setConfirmed(false)
     }
-    setIsDeleteIntegrationOpen(false)
-  }, [setIsDeleteIntegrationOpen, deleteIntegration, selectedIntegration])
+  }, [
+    setIsDeleteIntegrationOpen,
+    deleteIntegration,
+    selectedIntegration,
+    confirmed,
+    router
+  ])
 
   const handleClose = useCallback(() => {
     setIsDeleteIntegrationOpen(false)
+    setConfirmed(false)
   }, [setIsDeleteIntegrationOpen])
 
   return (
-    <AlertDialog
+    <Dialog
       aria-hidden={!isDeleteIntegrationOpen}
       onOpenChange={handleClose}
       open={isDeleteIntegrationOpen}
     >
-      <AlertDialogContent className="rounded-lg border border-white/25 bg-[#18181B] ">
-        <AlertDialogHeader>
-          <div className="flex items-center gap-x-3">
-            <TrashSVG />
-            <AlertDialogTitle className="text-lg font-semibold">
-              Do you really want to delete{' '}
-              <span>{selectedIntegration?.name}</span> integration?
-            </AlertDialogTitle>
-          </div>
-          <AlertDialogDescription className="text-sm font-normal leading-5 text-[#71717A]">
-            This action cannot be undone. This will permanently delete your
+      <DialogContent className="rounded-md border-transparent bg-[#18181B]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-medium">
+            Delete an integration
+          </DialogTitle>
+          <DialogDescription className="text-sm font-normal leading-5 text-white/50">
+            Remove any Keyshade-generated credentials or configurations (like
+            private keys) from the integration platform when deleting this
             integration.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            className="rounded-md bg-[#F4F4F5] text-black hover:bg-[#F4F4F5]/80 hover:text-black"
-            onClick={handleClose}
-          >
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            className="rounded-md bg-[#DC2626] text-white hover:bg-[#DC2626]/80"
+          </DialogDescription>
+          <div className="flex gap-2 border-y-[0.5px] border-white/20 py-3">
+            <Checkbox
+              checked={confirmed}
+              className="mt-1 h-5 w-5 rounded border-[0.2px] border-white/40 bg-[#242528] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
+              id="confirm-delete-integration"
+              onCheckedChange={(checked) => setConfirmed(Boolean(checked))}
+            />
+
+            <Label
+              className="ml-2 flex w-3/4 flex-col"
+              htmlFor="confirm-delete-integration"
+            >
+              <p className="text-lg">Delete Integration</p>
+              <p className="text-sm leading-5 text-white/50">
+                This will remove the private key and any related resources on
+                the 3rd party platform.
+              </p>
+            </Label>
+          </div>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            disabled={!confirmed}
             onClick={handleDeleteIntegration}
+            variant="destructive"
           >
-            Yes, delete Integration
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
