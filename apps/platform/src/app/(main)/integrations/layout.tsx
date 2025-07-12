@@ -5,8 +5,8 @@ import { useAtomValue } from 'jotai'
 import IntegrationsPage from './@created/page'
 import AllAvailableIntegrations from './@overview/page'
 import IntegrationDetailsPage from './@details/page'
-import { selectedWorkspaceAtom } from '@/store'
 import { PageTitle } from '@/components/common/page-title'
+import { selectedWorkspaceAtom } from '@/store'
 
 function DetailedIntegrationPage(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)

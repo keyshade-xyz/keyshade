@@ -1,5 +1,5 @@
-import { EmptyIntegrationSVG } from '@public/svg/shared'
 import { useRouter } from 'next/navigation'
+import { EmptyIntegrationSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 
 export default function EmptyIntegration(): React.JSX.Element {

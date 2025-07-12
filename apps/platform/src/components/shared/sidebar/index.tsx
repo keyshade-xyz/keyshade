@@ -9,8 +9,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import TierLimit from './tierLimit'
 import SidebarTab from './sidebarTab'
+import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { Button } from '@/components/ui/button'

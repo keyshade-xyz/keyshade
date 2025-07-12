@@ -1,7 +1,7 @@
 import type { Integration, IntegrationRun } from '@keyshade/schema'
 import React, { useCallback, useState, useRef } from 'react'
-import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
 import { Clock, RefreshCcw } from 'lucide-react'
+import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { formatDate, formatTime } from '@/lib/utils'
 import {
