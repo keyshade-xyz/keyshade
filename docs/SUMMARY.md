@@ -24,14 +24,14 @@
 
 ## Integrations 
 
-- Frameworks
+- [Frameworks](integration/frameworks/README.md)
   - [Next.js](integration/frameworks/set-up-with-nextjs.md)
   - [Node.js](integration/frameworks/set-up-with-nodejs.md)
-- Languages
+- [Languages](integration/languages/README.md)
   - [Go](integration/languages/set-up-with-go.md)
   - [Python](integration/languages/set-up-with-python.md)
   - [Rust](integration/languages/set-up-with-rust.md)
-- Platforms
+- [Platforms]((integration/platforms/README.md))
   - [AWS Lambda](integration/platforms/set-up-with-aws.md)
   - [Vercel](integration/platforms/set-up-with-vercel.md)
 
