@@ -41,6 +41,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { TierLimitService } from '@/common/tier-limit.service'
 import { VariableModule } from '@/variable/variable.module'
 import { VariableService } from '@/variable/variable.service'
+import { randomBytes } from 'crypto'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -61,6 +62,16 @@ describe('Secret Controller Tests', () => {
   let secret1: Secret
 
   const USER_IP_ADDRESS = '127.0.0.1'
+
+  Object.defineProperty(global, 'crypto', {
+    value: {
+      getRandomValues: jest.fn().mockImplementation((array: Uint8Array) => {
+        const randomValues = randomBytes(array.length)
+        array.set(randomValues)
+        return array
+      })
+    }
+  })
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({

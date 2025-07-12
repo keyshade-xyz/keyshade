@@ -164,4 +164,4 @@ Now, visit `http://localhost:3000` to see the public API URL rendered in the bro
 
 _Your Next.js app is now securely powered by Keyshade — no `.env` files, no leaking secrets, and no environment mismatches._
 
-<!-- > Ready to deploy? Check out [Keyshade with Vercel](/docs/integrations/?/vercel.md) for a seamless production setup. -->
+> Ready to deploy? Check out [Keyshade with Vercel](/docs/integration/platforms/set-up-with-vercel.md) for a seamless production setup.

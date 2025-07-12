@@ -1,3 +1,26 @@
+## [2.31.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.3...v2.31.0-stage.4) (2025-07-10)
+
+### 🐛 Bug Fixes
+
+* API e2e test & store private key loaclly ([#1067](https://github.com/keyshade-xyz/keyshade/issues/1067)) ([95b9e3a](https://github.com/keyshade-xyz/keyshade/commit/95b9e3a7dedfcd7de959e9c3c4c862b4afff84d8))
+
+## [2.31.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.2...v2.31.0-stage.3) (2025-07-10)
+
+### 🐛 Bug Fixes
+
+* **platform:** Vercel integration was created using wrong environment metadata ([#1066](https://github.com/keyshade-xyz/keyshade/issues/1066)) ([784a046](https://github.com/keyshade-xyz/keyshade/commit/784a046960f31b61d738733ecf4a73c6a87716cc))
+
+## [2.31.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.1...v2.31.0-stage.2) (2025-07-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** Breaking UI in the Workspace Card  ([#1061](https://github.com/keyshade-xyz/keyshade/issues/1061)) ([f0accd1](https://github.com/keyshade-xyz/keyshade/commit/f0accd1ca499d3644ecec538cc54eab873722b5e))
+
+### 📚 Documentation
+
+* Added AWS Lambda Integration Guide and Updated SUMMARY.md ([#1063](https://github.com/keyshade-xyz/keyshade/issues/1063)) ([fa7cf29](https://github.com/keyshade-xyz/keyshade/commit/fa7cf29ee9d4e7dceeaa1a72d7a98f3cae7f0613))
+* Fixed Naming of Guide Docs Under Integrations ([#1064](https://github.com/keyshade-xyz/keyshade/issues/1064)) ([c46dcf6](https://github.com/keyshade-xyz/keyshade/commit/c46dcf65a738872c57306fe647bd8016cd1a7425))
+
 ## [2.31.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0...v2.31.0-stage.1) (2025-07-08)
 
 ### 🚀 Features

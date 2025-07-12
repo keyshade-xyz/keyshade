@@ -30,10 +30,10 @@ export function HiddenContent({ isPrivateKey, value }: HiddenContentProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const maskedValue = value.replace(/./g, '•')
+  const maskedValue = (value || '').replace(/./g, '•')
 
   return (
-    <div className="relative flex items-center flex-1">
+    <div className="relative flex flex-1 items-center">
       <Input
         className={isPrivateKey ? 'pr-20' : 'pr-12'}
         readOnly
