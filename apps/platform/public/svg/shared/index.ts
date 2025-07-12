@@ -39,6 +39,13 @@ import DiscordSVG from './discord.svg'
 import SlackSVG from './slack.svg'
 import VercelSVG from './vercel.svg'
 import LambdaSVG from './lambda.svg'
+import AmplifySVG from './Amplify.svg'
+import NetlifySVG from './netlify.svg'
+import DigitalOceanSVG from './digital-ocean.svg'
+import HerokuSVG from './heroku.svg'
+import RailwaySVG from './railway.svg'
+import FlyioSVG from './flyio.svg'
+import GitHubSVG from './github.svg'
 import EmptyIntegrationSVG from './emptyIntegration.svg'
 import PendingSVG from './pending.svg'
 
@@ -85,5 +92,12 @@ export {
   SlackSVG,
   PendingSVG,
   VercelSVG,
-  LambdaSVG
+  LambdaSVG,
+  AmplifySVG,
+  NetlifySVG,
+  DigitalOceanSVG,
+  HerokuSVG,
+  RailwaySVG,
+  FlyioSVG,
+  GitHubSVG
 }

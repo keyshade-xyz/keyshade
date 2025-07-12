@@ -28,7 +28,7 @@ interface GroupItem {
 }
 
 export interface VercelEnvironmentMapping {
-  [environmentName: string]: {
+  [environmentSlug: string]: {
     vercelSystemEnvironment?: 'production' | 'preview' | 'development'
     vercelCustomEnvironmentId?: string
   }
@@ -170,14 +170,6 @@ export const Integrations: Record<string, IntegrationConfig> = {
         description: 'The ID of the Vercel project to integrate with',
         requestFieldName: 'projectId',
         placeholder: 'your-vercel-project-id'
-      },
-      {
-        name: 'Environments',
-        description:
-          'The environments to integrate with (e.g., production, staging)',
-        requestFieldName: 'environments',
-        placeholder: 'production,staging',
-        isEnvironment: true
       }
     ],
     isActive: true
@@ -219,6 +211,13 @@ export const Integrations: Record<string, IntegrationConfig> = {
     ],
     isActive: true
   },
+  AWS_AMPLIFY: {
+    name: 'AWS Amplify',
+    description:
+      'Connect Keyshade with AWS Amplify to manage environment variables and sync secrets during deployments.',
+    type: 'AWS_AMPLIFY',
+    isActive: false
+  },
   NETLIFY: {
     name: 'Netlify',
     description:
@@ -226,18 +225,39 @@ export const Integrations: Record<string, IntegrationConfig> = {
     type: 'NETLIFY',
     isActive: false
   },
+  DIGITAL_OCEAN: {
+    name: 'Digital Ocean',
+    description:
+      'Integrate Keyshade with Digital Ocean to manage environment variables and sync secrets during deployments.',
+    type: 'DIGITAL_OCEAN',
+    isActive: false
+  },
+  HEROKU: {
+    name: 'Heroku',
+    description:
+      'Connect Keyshade with Heroku to manage environment variables and sync secrets during deployments.',
+    type: 'HEROKU',
+    isActive: false
+  },
+  RAILWAY: {
+    name: 'Railway',
+    description:
+      'Integrate Keyshade with Railway to manage environment variables and sync secrets during deployments.',
+    type: 'RAILWAY',
+    isActive: false
+  },
+  FLYIO: {
+    name: 'Fly.io',
+    description:
+      'Connect Keyshade with Fly.io to manage environment variables and sync secrets during deployments.',
+    type: 'FLYIO',
+    isActive: false
+  },
   GITHUB: {
     name: 'GitHub',
     description:
       'Connect Keyshade with GitHub to automate workflows and manage secrets in your repositories.',
     type: 'GITHUB',
-    isActive: false
-  },
-  GITLAB: {
-    name: 'GitLab',
-    description:
-      'Integrate Keyshade with GitLab to manage environment variables and sync secrets during deployments.',
-    type: 'GITLAB',
     isActive: false
   }
 }

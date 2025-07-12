@@ -10,7 +10,7 @@ interface EventTriggersInputProps {
   onChange: (checkedEvents: Set<EventTypeEnum>) => void
   integrationType: IntegrationTypeEnum
 }
-const INITIAL_GROUP_COUNT = 4
+const INITIAL_GROUP_COUNT = 2
 
 export default function EventTriggersInput({
   selectedEvents,
@@ -78,21 +78,33 @@ export default function EventTriggersInput({
         className="space-y-4 rounded-lg border border-white/10 p-4"
         id="select-events"
       >
-        <div className="flex items-center space-x-3 border-b border-white/10 pb-3">
-          <Checkbox
-            checked={selectedEvents.size === allEvents.length}
-            className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
-            id="select-all"
-            onCheckedChange={(checked) => selectAll(checked === true)}
-          />
-          <label
-            className="cursor-pointer text-sm font-semibold text-white/90"
-            htmlFor="select-all"
-          >
-            Select All Events
-          </label>
-        </div>
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="flex w-3/4 items-center space-x-3">
+            <Checkbox
+              checked={selectedEvents.size === allEvents.length}
+              className="rounded-[4px] border border-white/10 bg-neutral-700 text-black data-[state=checked]:border-[#18181B] data-[state=checked]:bg-white/90 data-[state=checked]:text-black"
+              id="select-all"
+              onCheckedChange={(checked) => selectAll(checked === true)}
+            />
+            <label
+              className="cursor-pointer text-sm font-semibold text-white/90"
+              htmlFor="select-all"
+            >
+              Select All Events
+            </label>
+          </div>
 
+          {eventGroups.length > INITIAL_GROUP_COUNT && (
+            <Button
+              className="my-0 h-fit p-0 text-white/50 hover:bg-transparent hover:text-white/60"
+              onClick={() => setShowAllGroups(!showAllGroups)}
+              type="button"
+              variant="ghost"
+            >
+              {showAllGroups ? 'Show Less' : 'Show More'}
+            </Button>
+          )}
+        </div>
         <div className="space-y-5">
           {visibleGroups.map((group) => (
             <div className="" key={group.name}>
@@ -120,19 +132,6 @@ export default function EventTriggersInput({
             </div>
           ))}
         </div>
-
-        {eventGroups.length > INITIAL_GROUP_COUNT && (
-          <div className="flex w-full justify-end">
-            <Button
-              className="text-white/50 hover:bg-transparent hover:text-white/60"
-              onClick={() => setShowAllGroups(!showAllGroups)}
-              type="button"
-              variant="ghost"
-            >
-              {showAllGroups ? 'Show Less' : 'Show More'}
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -1,11 +1,12 @@
 'use client'
 import React, { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import type { EventTypeEnum } from '@keyshade/schema'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
 import { Integrations } from '@keyshade/common'
-import ProjectEnvironmentMapping from '../ProjectEnvironmentMapping'
+import ProjectEnvironmentSelect from '../projectEnvironmentSelect'
+import ProjectEnvironmentInput from '../projectEnvironmentInput'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,7 +17,6 @@ import {
   SheetTitle,
   SheetFooter
 } from '@/components/ui/sheet'
-import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
 import IntegrationMetadata from '@/components/integrations/integrationMetadata'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
 import { useHttp } from '@/hooks/use-http'
@@ -31,7 +31,9 @@ function UpdateIntegration({
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
-  const selectedIntegration = useAtomValue(selectedIntegrationAtom)
+  const [selectedIntegration, setSelectedIntegration] = useAtom(
+    selectedIntegrationAtom
+  )
 
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -45,6 +47,9 @@ function UpdateIntegration({
   const integrationType = selectedIntegration?.type
   const isMappingRequired = integrationType
     ? Integrations[integrationType].envMapping
+    : false
+  const isPrivateKeyRequired = integrationType
+    ? Integrations[integrationType].privateKeyRequired
     : false
 
   useEffect(() => {
@@ -141,6 +146,7 @@ function UpdateIntegration({
 
         if (success && data) {
           toast.success(`Integration updated successfully!`)
+          setSelectedIntegration(data)
           setIsEditIntegrationOpen(false)
           onUpdateSuccess?.()
         }
@@ -156,7 +162,8 @@ function UpdateIntegration({
       onUpdateSuccess,
       isMappingRequired,
       metadata,
-      envMappings
+      envMappings,
+      setSelectedIntegration
     ]
   )
 
@@ -168,9 +175,9 @@ function UpdateIntegration({
     setSelectedEnvironments(environmentSlugs)
   }
 
-  const handleKeyMappingChange = (mappings: VercelEnvironmentMapping) => {
-    setEnvMappings(mappings)
-  }
+  // const handleKeyMappingChange = (mappings: VercelEnvironmentMapping) => {
+  //   setEnvMappings(mappings)
+  // }
 
   if (!selectedIntegration || !integrationType) return null
 
@@ -216,23 +223,24 @@ function UpdateIntegration({
 
           <IntegrationMetadata
             initialMetadata={metadata}
+            integrationName={selectedIntegration.name}
             integrationType={integrationType}
             onChange={setMetadata}
           />
 
           {/* Specify Project and Environment(optional) */}
-          {isMappingRequired ? (
-            <ProjectEnvironmentMapping
-              initialEnvironments={selectedIntegration.environments}
-              initialProject={selectedIntegration.project}
+          {isPrivateKeyRequired ? (
+            <ProjectEnvironmentSelect
+              isKeyMappingNeeded={Boolean(isMappingRequired)}
               isProjectDisabled
-              keyMapping={envMappings}
-              onEnvironmentChange={handleEnvironmentChange}
-              onKeyMappingChange={handleKeyMappingChange}
+              projectPrivateKey={selectedIntegration.metadata.privateKey}
+              //todo: initial projects and environments aren't fetching
             />
           ) : (
             <ProjectEnvironmentInput
-              initialEnvironments={selectedIntegration.environments}
+              initialEnvironments={
+                selectedIntegration.environments ?? undefined
+              }
               initialProject={selectedIntegration.project}
               isProjectDisabled
               onEnvironmentChange={handleEnvironmentChange}
