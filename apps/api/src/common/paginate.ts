@@ -40,7 +40,7 @@ export const paginate = (
   relativeUrl: string,
   query: QueryOptions,
   defaultQuery?: Record<string, any>
-) => {
+): PaginatedMetadata => {
   if (!query.limit) return {} as PaginatedMetadata
   let defaultQueryStr = ''
   if (defaultQuery) {

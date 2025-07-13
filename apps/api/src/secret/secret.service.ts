@@ -39,7 +39,11 @@ import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { getSecretWithValues, generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { SecretWithProject, SecretWithValues } from './secret.types'
+import {
+  HydratedSecret,
+  SecretWithProject,
+  SecretWithValues
+} from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
@@ -878,39 +882,11 @@ export class SecretService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        },
-        versions: {
-          select: {
-            value: true,
-            version: true,
-            environment: {
-              select: {
-                name: true,
-                id: true,
-                slug: true
-              }
-            },
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
+      select: {
+        slug: true
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       }
@@ -918,6 +894,18 @@ export class SecretService {
     this.logger.log(
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
+
+    const hydratedSecrets: HydratedSecret[] = []
+
+    for (const { slug } of secrets) {
+      hydratedSecrets.push(
+        await this.authorizationService.authorizeUserAccessToSecret({
+          user,
+          entity: { slug },
+          authorities: [Authority.READ_SECRET]
+        })
+      )
+    }
 
     const secretsWithEnvironmentalValues = new Set<{
       secret: Partial<Secret>
@@ -938,7 +926,7 @@ export class SecretService {
       }[]
     }>()
 
-    for (const secret of secrets) {
+    for (const secret of hydratedSecrets) {
       // Logic to update the map:
       // 1. If the environment ID is not present in the key, insert the environment ID and the secret version
       // 2. If the environment ID is already present, check if the existing secret version is lesser than the new secret version.
@@ -959,42 +947,65 @@ export class SecretService {
         }
       >()
 
+      // Maintain a list of environments that the user is and is not allowed to access
+      const environmentAccessibilityMap: Map<Environment['id'], boolean> =
+        new Map()
+
       for (const secretVersion of secret.versions) {
+        const environmentSlug = secretVersion.environment.slug
+
+        if (!environmentAccessibilityMap.has(secretVersion.environment.id)) {
+          try {
+            await this.authorizationService.authorizeUserAccessToEnvironment({
+              user,
+              entity: {
+                slug: environmentSlug
+              },
+              authorities: [Authority.READ_ENVIRONMENT]
+            })
+            environmentAccessibilityMap.set(secretVersion.environment.id, true)
+          } catch (error) {
+            environmentAccessibilityMap.set(secretVersion.environment.id, false)
+          }
+        }
+
+        if (!environmentAccessibilityMap.get(secretVersion.environment.id)) {
+          continue
+        }
+
         const environmentId = secretVersion.environment.id
         const existingSecretVersion = envIdToSecretVersionMap.get(environmentId)
 
-        if (!existingSecretVersion) {
+        if (
+          !existingSecretVersion ||
+          existingSecretVersion.version < secretVersion.version
+        ) {
           envIdToSecretVersionMap.set(environmentId, secretVersion)
-        } else {
-          if (existingSecretVersion.version < secretVersion.version) {
-            envIdToSecretVersionMap.set(environmentId, secretVersion)
-          }
         }
       }
 
       delete secret.versions
+      delete secret.project
 
       // Add the secret to the map
       secretsWithEnvironmentalValues.add({
         secret,
-        values: await Promise.all(
-          Array.from(envIdToSecretVersionMap.values()).map(
-            async (secretVersion) => ({
-              environment: {
-                id: secretVersion.environment.id,
-                name: secretVersion.environment.name,
-                slug: secretVersion.environment.slug
-              },
-              value: secretVersion.value,
-              version: secretVersion.version,
-              createdBy: {
-                id: secretVersion.createdBy.id,
-                name: secretVersion.createdBy.name,
-                profilePictureUrl: secretVersion.createdBy.profilePictureUrl
-              },
-              createdOn: secretVersion.createdOn
-            })
-          )
+        values: Array.from(envIdToSecretVersionMap.values()).map(
+          (secretVersion) => ({
+            environment: {
+              id: secretVersion.environment.id,
+              name: secretVersion.environment.name,
+              slug: secretVersion.environment.slug
+            },
+            value: secretVersion.value,
+            version: secretVersion.version,
+            createdBy: {
+              id: secretVersion.createdBy.id,
+              name: secretVersion.createdBy.name,
+              profilePictureUrl: secretVersion.createdBy.profilePictureUrl
+            },
+            createdOn: secretVersion.createdOn
+          })
         )
       })
     }

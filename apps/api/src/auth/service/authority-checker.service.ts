@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'
 import { EnvironmentWithProject } from '@/environment/environment.types'
 import { ProjectWithSecrets } from '@/project/project.types'
-import { SecretWithProjectAndVersion } from '@/secret/secret.types'
+import { HydratedSecret } from '@/secret/secret.types'
 import {
   getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
@@ -435,10 +435,10 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverSecret(
     params: AuthorizationParams
-  ): Promise<SecretWithProjectAndVersion> {
+  ): Promise<HydratedSecret> {
     const { user, entity, authorities } = params
 
-    let secret: SecretWithProjectAndVersion
+    let secret: Omit<HydratedSecret, 'entitlements'>
 
     this.logger.log(
       `Checking authority over secret for user ${user.id}, entity ${JSON.stringify(
@@ -447,6 +447,13 @@ export class AuthorityCheckerService {
     )
 
     const secretIncludeQuery = {
+      lastUpdatedBy: {
+        select: {
+          id: true,
+          name: true,
+          profilePictureUrl: true
+        }
+      },
       versions: {
         select: {
           value: true,
@@ -520,11 +527,19 @@ export class AuthorityCheckerService {
       user.id
     )
 
+    const entitlements: HydratedSecret['entitlements'] = {
+      canDelete: permittedAuthorities.has(Authority.DELETE_SECRET),
+      canUpdate: permittedAuthorities.has(Authority.UPDATE_SECRET)
+    }
+
     this.logger.log(
       `User ${user.id} is cleared to access secret ${secret.slug} for authorities ${authorities}`
     )
 
-    return secret
+    return {
+      ...secret,
+      entitlements
+    }
   }
 
   /**

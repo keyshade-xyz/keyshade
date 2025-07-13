@@ -3,7 +3,7 @@ import { AuthorityCheckerService } from './authority-checker.service'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { EnvironmentWithProject } from '@/environment/environment.types'
 import { VariableWithProjectAndVersion } from '@/variable/variable.types'
-import { SecretWithProjectAndVersion } from '@/secret/secret.types'
+import { HydratedSecret } from '@/secret/secret.types'
 import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
@@ -118,7 +118,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToSecret(
     params: AuthorizationParams
-  ): Promise<SecretWithProjectAndVersion> {
+  ): Promise<HydratedSecret> {
     const secret =
       await this.authorityCheckerService.checkAuthorityOverSecret(params)
 

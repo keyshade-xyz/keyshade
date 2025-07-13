@@ -6,6 +6,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { ProjectService } from '@/project/project.service'
 import { WorkspaceService } from '@/workspace/workspace.service'
 import {
+  Authority,
   Environment,
   EventSeverity,
   EventSource,
@@ -15,7 +16,8 @@ import {
   ProjectAccessLevel,
   Secret,
   SecretVersion,
-  Workspace
+  Workspace,
+  WorkspaceRole
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
@@ -42,6 +44,11 @@ import { TierLimitService } from '@/common/tier-limit.service'
 import { VariableModule } from '@/variable/variable.module'
 import { VariableService } from '@/variable/variable.service'
 import { randomBytes } from 'crypto'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
+import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
+import { SecretWithValues } from './secret.types'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -54,6 +61,8 @@ describe('Secret Controller Tests', () => {
   let userService: UserService
   let tierLimitService: TierLimitService
   let variableService: VariableService
+  let workspaceMembershipService: WorkspaceMembershipService
+  let workspaceRoleService: WorkspaceRoleService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
@@ -83,7 +92,9 @@ describe('Secret Controller Tests', () => {
         EnvironmentModule,
         SecretModule,
         UserModule,
-        VariableModule
+        VariableModule,
+        WorkspaceMembershipModule,
+        WorkspaceRoleModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -104,6 +115,8 @@ describe('Secret Controller Tests', () => {
     userService = moduleRef.get(UserService)
     tierLimitService = moduleRef.get(TierLimitService)
     variableService = moduleRef.get(VariableService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -932,15 +945,15 @@ describe('Secret Controller Tests', () => {
         }
       })
 
-      // expect(response.json().count).toEqual(2)
+      expect(response.json().count).toEqual(2)
 
-      // versions = await prisma.secretVersion.findMany({
-      //   where: {
-      //     secretId: secret1.id
-      //   }
-      // })
+      versions = await prisma.secretVersion.findMany({
+        where: {
+          secretId: secret1.id
+        }
+      })
 
-      // expect(versions.length).toBe(1)
+      expect(versions.length).toBe(1)
     })
   })
 
@@ -958,23 +971,13 @@ describe('Secret Controller Tests', () => {
       expect(response.json().items.length).toBe(1)
 
       const { secret, values } = response.json().items[0]
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: secret1.updatedAt.toISOString(),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
+
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe(secret1.name)
+      expect(secret.slug).toBe(secret1.slug)
+      expect(secret.lastUpdatedBy).toBeDefined()
+      expect(secret.entitlements).toBeDefined()
+
       expect(values.length).toBe(1)
 
       const value = values[0]
@@ -1024,23 +1027,9 @@ describe('Secret Controller Tests', () => {
 
       const { secret, values } = response.json().items[0]
 
-      expect(secret).toStrictEqual({
-        id: secret1.id,
-        name: secret1.name,
-        slug: secret1.slug,
-        note: secret1.note,
-        projectId: project1.id,
-        lastUpdatedById: secret1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: secret1.createdAt.toISOString(),
-        updatedAt: expect.any(String),
-        rotateAfter: secret1.rotateAfter,
-        rotateAt: secret1.rotateAt.toISOString()
-      })
+      expect(secret.id).toBe(secret1.id)
+      expect(secret.name).toBe('Secret 1')
+      expect(secret.slug).toBe(secret1.slug)
       expect(values.length).toBe(1)
 
       const value = values[0]
@@ -1088,6 +1077,209 @@ describe('Secret Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
+    })
+
+    describe('Access Control tests', () => {
+      let workspace: Workspace
+      let project: Project
+      let environment: Environment
+      let role: WorkspaceRole
+      let secret: SecretWithValues
+
+      beforeEach(async () => {
+        // Create a workspace
+        workspace = await workspaceService.createWorkspace(user1, {
+          name: 'My workspace',
+          icon: '🤓'
+        })
+
+        // Create a project
+        project = await projectService.createProject(user1, workspace.slug, {
+          name: 'My project',
+          accessLevel: ProjectAccessLevel.PRIVATE
+        })
+
+        // Get the default environment of the project
+        environment = await prisma.environment.findFirst({
+          where: {
+            projectId: project.id
+          }
+        })
+
+        // Create a secret
+        secret = await secretService.createSecret(
+          user1,
+          {
+            name: 'My secret',
+            note: 'My secret note',
+            entries: [
+              {
+                value: 'My secret value',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project.slug
+        )
+
+        // Create a role with full visibility to project and secrets
+        role = await workspaceRoleService.createWorkspaceRole(
+          user1,
+          workspace.slug,
+          {
+            name: 'Role 1',
+            authorities: [
+              Authority.READ_SECRET,
+              Authority.READ_PROJECT,
+              Authority.DELETE_SECRET,
+              Authority.UPDATE_SECRET,
+              Authority.READ_ENVIRONMENT
+            ],
+            projectEnvironments: [
+              {
+                projectSlug: project.slug,
+                environmentSlugs: [environment.slug]
+              }
+            ]
+          }
+        )
+
+        // Invite user 2 to the workspace
+        await workspaceMembershipService.inviteUsersToWorkspace(
+          user1,
+          workspace.slug,
+          [
+            {
+              email: user2.email,
+              roleSlugs: [role.slug]
+            }
+          ]
+        )
+
+        // Accept the invitation
+        await workspaceMembershipService.acceptInvitation(user2, workspace.slug)
+      })
+
+      it('should only be able to fetch values of environment that the user has access to', async () => {
+        // Create another environment in the project
+        const environment2 = await environmentService.createEnvironment(
+          user1,
+          {
+            name: 'Environment 2'
+          },
+          project.slug
+        )
+
+        // Update the secret to have a version in the 2nd environment
+        await secretService.updateSecret(user1, secret.secret.slug, {
+          entries: [
+            {
+              environmentSlug: environment2.slug,
+              value: 'Value 2'
+            }
+          ]
+        })
+
+        // Fetch all secrets of the project
+        const response = await app.inject({
+          method: 'GET',
+          url: `/secret/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        const secretData = response.json().items[0]
+        expect(secretData.values).toHaveLength(1)
+
+        // Update the role to give access to the 2nd environment
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          projectEnvironments: [
+            {
+              projectSlug: project.slug,
+              environmentSlugs: [environment.slug, environment2.slug]
+            }
+          ]
+        })
+
+        // Fetch all secrets of the project
+        const response2 = await app.inject({
+          method: 'GET',
+          url: `/secret/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        const secretData2 = response2.json().items[0]
+        expect(secretData2.values).toHaveLength(2)
+      })
+
+      it('should have the correct entitlements', async () => {
+        // Fetch all secrets of the project
+        let response = await app.inject({
+          method: 'GET',
+          url: `/secret/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        let secretData = response.json().items[0]
+        expect(secretData.secret.entitlements).toEqual({
+          canUpdate: true,
+          canDelete: true
+        })
+
+        // Remove DELETE_SECRET authority from the role
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          authorities: [
+            Authority.READ_SECRET,
+            Authority.READ_PROJECT,
+            Authority.UPDATE_SECRET,
+            Authority.READ_ENVIRONMENT
+          ]
+        })
+
+        // Fetch all secrets of the project
+        response = await app.inject({
+          method: 'GET',
+          url: `/secret/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        secretData = response.json().items[0]
+        expect(secretData.secret.entitlements).toEqual({
+          canUpdate: true,
+          canDelete: false
+        })
+
+        // Remove UPDATE_SECRET authority from the role
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          authorities: [
+            Authority.READ_SECRET,
+            Authority.READ_PROJECT,
+            Authority.READ_ENVIRONMENT
+          ]
+        })
+
+        // Fetch all secrets of the project
+        response = await app.inject({
+          method: 'GET',
+          url: `/secret/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        secretData = response.json().items[0]
+        expect(secretData.secret.entitlements).toEqual({
+          canUpdate: false,
+          canDelete: false
+        })
+      })
     })
   })
 
