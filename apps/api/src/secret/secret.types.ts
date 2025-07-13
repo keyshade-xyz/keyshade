@@ -35,9 +35,10 @@ export interface SecretWithEntitlements extends Secret {
   }
 }
 
-export type HydratedSecret = SecretWithProject &
-  SecretWithVersion &
-  SecretWithEntitlements
+export interface HydratedSecret
+  extends SecretWithProject,
+    SecretWithVersion,
+    SecretWithEntitlements {}
 
 export interface SecretWithValues {
   secret: Secret & { lastUpdatedBy: { id: string; name: string } }

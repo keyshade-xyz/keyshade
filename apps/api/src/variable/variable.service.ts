@@ -799,14 +799,19 @@ export class VariableService {
     const hydratedVariables: HydratedVariable[] = []
 
     for (const { slug } of variables) {
-      hydratedVariables.push(
-        await this.authorizationService.authorizeUserAccessToVariable({
-          user,
-          entity: { slug },
-          authorities: [Authority.READ_VARIABLE]
-        })
-      )
+      try {
+        hydratedVariables.push(
+          await this.authorizationService.authorizeUserAccessToVariable({
+            user,
+            entity: { slug },
+            authorities: [Authority.READ_VARIABLE]
+          })
+        )
+      } catch (_ignored) {}
     }
+    this.logger.log(
+      `Hydrated ${hydratedVariables.length} variables of project ${projectSlug}`
+    )
 
     const variablesWithEnvironmentalValues = new Set<{
       variable: Partial<Variable>

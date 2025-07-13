@@ -898,14 +898,19 @@ export class SecretService {
     const hydratedSecrets: HydratedSecret[] = []
 
     for (const { slug } of secrets) {
-      hydratedSecrets.push(
-        await this.authorizationService.authorizeUserAccessToSecret({
-          user,
-          entity: { slug },
-          authorities: [Authority.READ_SECRET]
-        })
-      )
+      try {
+        hydratedSecrets.push(
+          await this.authorizationService.authorizeUserAccessToSecret({
+            user,
+            entity: { slug },
+            authorities: [Authority.READ_SECRET]
+          })
+        )
+      } catch (_ignored) {}
     }
+    this.logger.log(
+      `Hydrated ${hydratedSecrets.length} secrets of project ${projectSlug}`
+    )
 
     const secretsWithEnvironmentalValues = new Set<{
       secret: Partial<Secret>

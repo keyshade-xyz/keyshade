@@ -1,7 +1,7 @@
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { ProjectWithSecrets } from '@/project/project.types'
-import { EnvironmentWithProject } from '@/environment/environment.types'
+import { HydratedEnvironment } from '@/environment/environment.types'
 import { HydratedVariable } from '@/variable/variable.types'
 import { HydratedSecret } from '@/secret/secret.types'
 import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
@@ -74,7 +74,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToEnvironment(
     params: AuthorizationParams
-  ): Promise<EnvironmentWithProject> {
+  ): Promise<HydratedEnvironment> {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment(params)
 

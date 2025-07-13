@@ -21,6 +21,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { HydratedEnvironment } from './environment.types'
 
 @Injectable()
 export class EnvironmentService {
@@ -322,7 +323,7 @@ export class EnvironmentService {
 
     // Get the environments for the required page
     this.logger.log(`Fetching environments of project ${projectSlug}`)
-    const items = await this.prisma.environment.findMany({
+    const environments = await this.prisma.environment.findMany({
       where: {
         projectId,
         name: {
@@ -330,33 +331,48 @@ export class EnvironmentService {
         }
       },
       select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            email: true,
-            profilePictureUrl: true,
-            name: true
-          }
-        }
-      },
-      skip: page * limit,
-      take: limitMaxItemsPerPage(limit),
-      orderBy: {
-        [sort]: order
+        slug: true
       }
     })
     this.logger.log(
-      `Environments of project ${projectSlug} fetched. Count: ${items.length}`
+      `Environments of project ${projectSlug} fetched. Count: ${environments.length}`
     )
 
+    const hydratedEnvironments: HydratedEnvironment[] = []
+    for (const environment of environments) {
+      try {
+        hydratedEnvironments.push(
+          await this.authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            entity: { slug: environment.slug },
+            authorities: [Authority.READ_ENVIRONMENT]
+          })
+        )
+      } catch (_ignored) {}
+    }
+    this.logger.log(
+      `Hydrated ${hydratedEnvironments.length} environments of project ${projectSlug}`
+    )
+
+    // Apply pagination on the environments
+    this.logger.log(
+      `Applying pagination to environments of project ${projectSlug}`
+    )
+    const paginatedEnvironments = hydratedEnvironments
+      .filter((environment) =>
+        search
+          ? environment.name.toLowerCase().includes(search.toLowerCase())
+          : true
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(page * limit, (page + 1) * limit)
+      .map((environment) => {
+        delete environment.project
+        return environment
+      })
+
     // Parse the secret and variable counts for each environment
-    for (const environment of items) {
+    for (const environment of hydratedEnvironments) {
       const secretCount = await this.getSecretCount(environment.id)
       const variableCount = await this.getVariableCount(environment.id)
       environment['secrets'] = secretCount
@@ -367,14 +383,7 @@ export class EnvironmentService {
     this.logger.log(
       `Calculating metadata for environments of project ${projectSlug}`
     )
-    const totalCount = await this.prisma.environment.count({
-      where: {
-        projectId,
-        name: {
-          contains: search
-        }
-      }
-    })
+    const totalCount = hydratedEnvironments.length
     const metadata = paginate(totalCount, `/environment/all/${projectSlug}`, {
       page,
       limit: limitMaxItemsPerPage(limit),
@@ -386,7 +395,7 @@ export class EnvironmentService {
       `Metadata calculated for environments of project ${projectSlug}`
     )
 
-    return { items, metadata }
+    return { paginatedEnvironments, metadata }
   }
 
   /**

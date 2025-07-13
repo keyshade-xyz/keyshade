@@ -473,6 +473,7 @@ describe('Environment Controller Tests', () => {
       expect(response.json().name).toBe('Environment 1')
       expect(response.json().slug).toBe(environment1.slug)
       expect(response.json().description).toBe('Environment 1 description')
+      expect(response.json().entitlements).toBeDefined()
     })
 
     it('should not be able to fetch an environment that does not exist', async () => {

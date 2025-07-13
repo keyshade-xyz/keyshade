@@ -35,9 +35,10 @@ export interface VariableWithEntitlements extends Variable {
   }
 }
 
-export type HydratedVariable = VariableWithProject &
-  VariableWithVersion &
-  VariableWithEntitlements
+export interface HydratedVariable
+  extends VariableWithProject,
+    VariableWithVersion,
+    VariableWithEntitlements {}
 
 export interface VariableWithValues {
   variable: Variable & { lastUpdatedBy: { id: string; name: string } }

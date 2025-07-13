@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
+const EnvironmentEntitlementSchema = z.object({
+  canUpdate: z.boolean(),
+  canDelete: z.boolean()
+})
+
 export const EnvironmentSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -38,7 +43,15 @@ export const GetEnvironmentRequestSchema = z.object({
   slug: EnvironmentSchema.shape.slug
 })
 
-export const GetEnvironmentResponseSchema = EnvironmentSchema
+export const GetEnvironmentResponseSchema = EnvironmentSchema.extend({
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    profilePictureUrl: z.string().nullable()
+  }),
+  entitlements: EnvironmentEntitlementSchema
+})
 
 export const GetAllEnvironmentsOfProjectRequestSchema =
   PageRequestSchema.extend({
@@ -54,7 +67,8 @@ export const GetAllEnvironmentsOfProjectResponseSchema = PageResponseSchema(
       profilePictureUrl: z.string().nullable()
     }),
     secrets: z.number(),
-    variables: z.number()
+    variables: z.number(),
+    entitlements: EnvironmentEntitlementSchema
   })
 )
 

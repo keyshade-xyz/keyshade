@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { EnvironmentWithProject } from '@/environment/environment.types'
+import { HydratedEnvironment } from '@/environment/environment.types'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { HydratedSecret } from '@/secret/secret.types'
 import {
@@ -252,7 +252,7 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverEnvironment(
     params: AuthorizationParams
-  ): Promise<EnvironmentWithProject> {
+  ): Promise<HydratedEnvironment> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over environment for user ${user.id}, entity ${JSON.stringify(
@@ -260,7 +260,18 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
-    let environment: EnvironmentWithProject
+    let environment: Omit<HydratedEnvironment, 'entitlements'>
+
+    const environmentIncludeQuery = {
+      project: true,
+      lastUpdatedBy: {
+        select: {
+          id: true,
+          name: true,
+          profilePictureUrl: true
+        }
+      }
+    }
 
     try {
       if (entity.slug) {
@@ -269,9 +280,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: {
-            project: true
-          }
+          include: environmentIncludeQuery
         })
       } else {
         this.logger.log(`Fetching environment by name ${entity.name}`)
@@ -280,9 +289,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             project: { workspace: { members: { some: { userId: user.id } } } }
           },
-          include: {
-            project: true
-          }
+          include: environmentIncludeQuery
         })
       }
     } catch (error) {
@@ -316,10 +323,18 @@ export class AuthorityCheckerService {
       user.id
     )
 
+    const entitlements: HydratedSecret['entitlements'] = {
+      canDelete: permittedAuthorities.has(Authority.DELETE_ENVIRONMENT),
+      canUpdate: permittedAuthorities.has(Authority.UPDATE_ENVIRONMENT)
+    }
+
     this.logger.log(
       `User ${user.id} is cleared to access environment ${environment.slug} for authorities ${authorities}`
     )
-    return environment
+    return {
+      ...environment,
+      entitlements
+    }
   }
 
   /**
