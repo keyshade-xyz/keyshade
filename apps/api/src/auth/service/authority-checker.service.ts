@@ -1,5 +1,5 @@
 import { Authority, ProjectAccessLevel } from '@prisma/client'
-import { VariableWithProjectAndVersion } from '@/variable/variable.types'
+import { HydratedVariable } from '@/variable/variable.types'
 import {
   Injectable,
   InternalServerErrorException,
@@ -333,7 +333,7 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverVariable(
     params: AuthorizationParams
-  ): Promise<VariableWithProjectAndVersion> {
+  ): Promise<HydratedVariable> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over variable for user ${user.id}, entity ${JSON.stringify(
@@ -341,9 +341,16 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
-    let variable: VariableWithProjectAndVersion
+    let variable: Omit<HydratedVariable, 'entitlements'>
 
     const variableIncludeQuery = {
+      lastUpdatedBy: {
+        select: {
+          id: true,
+          name: true,
+          profilePictureUrl: true
+        }
+      },
       versions: {
         select: {
           value: true,
@@ -417,11 +424,19 @@ export class AuthorityCheckerService {
       user.id
     )
 
+    const entitlements: HydratedSecret['entitlements'] = {
+      canDelete: permittedAuthorities.has(Authority.DELETE_VARIABLE),
+      canUpdate: permittedAuthorities.has(Authority.UPDATE_VARIABLE)
+    }
+
     this.logger.log(
       `User ${user.id} is cleared to access variable ${variable.slug} for authorities ${authorities}`
     )
 
-    return variable
+    return {
+      ...variable,
+      entitlements
+    }
   }
 
   /**

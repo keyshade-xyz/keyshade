@@ -6,10 +6,6 @@ import {
   VariableVersion
 } from '@prisma/client'
 
-export interface VariableWithValue extends Variable {
-  value: string
-}
-
 export interface VariableWithVersion extends Variable {
   versions: {
     environment: {
@@ -32,8 +28,16 @@ export interface VariableWithProject extends Variable {
   project: Project
 }
 
-export type VariableWithProjectAndVersion = VariableWithProject &
-  VariableWithVersion
+export interface VariableWithEntitlements extends Variable {
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+}
+
+export type HydratedVariable = VariableWithProject &
+  VariableWithVersion &
+  VariableWithEntitlements
 
 export interface VariableWithValues {
   variable: Variable & { lastUpdatedBy: { id: string; name: string } }

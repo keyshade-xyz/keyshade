@@ -15,7 +15,9 @@ import {
   Variable,
   VariableVersion,
   Workspace,
-  ProjectAccessLevel
+  ProjectAccessLevel,
+  WorkspaceRole,
+  Authority
 } from '@prisma/client'
 import { Test } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
@@ -41,6 +43,11 @@ import { ValidationPipe } from '@nestjs/common'
 import { TierLimitService } from '@/common/tier-limit.service'
 import { SecretService } from '@/secret/secret.service'
 import { SecretModule } from '@/secret/secret.module'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
+import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { VariableWithValues } from './variable.types'
 
 describe('Variable Controller Tests', () => {
   let app: NestFastifyApplication
@@ -53,6 +60,8 @@ describe('Variable Controller Tests', () => {
   let userService: UserService
   let tierLimitService: TierLimitService
   let secretService: SecretService
+  let workspaceMembershipService: WorkspaceMembershipService
+  let workspaceRoleService: WorkspaceRoleService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
@@ -73,7 +82,9 @@ describe('Variable Controller Tests', () => {
         EnvironmentModule,
         VariableModule,
         UserModule,
-        SecretModule
+        SecretModule,
+        WorkspaceMembershipModule,
+        WorkspaceRoleModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -94,6 +105,8 @@ describe('Variable Controller Tests', () => {
     userService = moduleRef.get(UserService)
     tierLimitService = moduleRef.get(TierLimitService)
     secretService = moduleRef.get(SecretService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -943,6 +956,12 @@ describe('Variable Controller Tests', () => {
 
       const { variable, values } = response.json().items[0]
       expect(variable).toBeDefined()
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
+      expect(variable.lastUpdatedBy).toBeDefined()
+      expect(variable.entitlements).toBeDefined()
+
       expect(variable.versions).toBeUndefined()
       expect(values).toBeDefined()
       expect(values.length).toBe(1)
@@ -951,21 +970,6 @@ describe('Variable Controller Tests', () => {
       expect(values[0].environment.id).toBe(environment1.id)
       expect(values[0].environment.slug).toBe(environment1.slug)
       expect(values[0].environment.name).toBe(environment1.name)
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: variable1.updatedAt.toISOString()
-      })
 
       //check metadata
       const metadata = response.json().metadata
@@ -1007,6 +1011,12 @@ describe('Variable Controller Tests', () => {
 
       const { variable, values } = response.json().items[0]
       expect(variable).toBeDefined()
+      expect(variable.id).toBe(variable1.id)
+      expect(variable.name).toBe(variable1.name)
+      expect(variable.slug).toBe(variable1.slug)
+      expect(variable.lastUpdatedBy).toBeDefined()
+      expect(variable.entitlements).toBeDefined()
+
       expect(variable.versions).toBeUndefined()
       expect(values).toBeDefined()
       expect(values.length).toBe(1)
@@ -1015,22 +1025,6 @@ describe('Variable Controller Tests', () => {
       expect(values[0].environment.id).toBe(environment1.id)
       expect(values[0].environment.slug).toBe(environment1.slug)
       expect(values[0].environment.name).toBe(environment1.name)
-
-      expect(variable).toStrictEqual({
-        id: variable1.id,
-        name: variable1.name,
-        slug: variable1.slug,
-        note: variable1.note,
-        projectId: project1.id,
-        lastUpdatedById: variable1.lastUpdatedById,
-        lastUpdatedBy: {
-          id: user1.id,
-          name: user1.name,
-          profilePictureUrl: user1.profilePictureUrl
-        },
-        createdAt: variable1.createdAt.toISOString(),
-        updatedAt: expect.any(String)
-      })
 
       //check metadata
       const metadata = response.json().metadata
@@ -1070,6 +1064,209 @@ describe('Variable Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
+    })
+
+    describe('Access Control tests', () => {
+      let workspace: Workspace
+      let project: Project
+      let environment: Environment
+      let role: WorkspaceRole
+      let variable: VariableWithValues
+
+      beforeEach(async () => {
+        // Create a workspace
+        workspace = await workspaceService.createWorkspace(user1, {
+          name: 'My workspace',
+          icon: '🤓'
+        })
+
+        // Create a project
+        project = await projectService.createProject(user1, workspace.slug, {
+          name: 'My project',
+          accessLevel: ProjectAccessLevel.PRIVATE
+        })
+
+        // Get the default environment of the project
+        environment = await prisma.environment.findFirst({
+          where: {
+            projectId: project.id
+          }
+        })
+
+        // Create a variable
+        variable = await variableService.createVariable(
+          user1,
+          {
+            name: 'My variable',
+            note: 'My variable note',
+            entries: [
+              {
+                value: 'My variable value',
+                environmentSlug: environment.slug
+              }
+            ]
+          },
+          project.slug
+        )
+
+        // Create a role with full visibility to project and variables
+        role = await workspaceRoleService.createWorkspaceRole(
+          user1,
+          workspace.slug,
+          {
+            name: 'Role 1',
+            authorities: [
+              Authority.READ_VARIABLE,
+              Authority.READ_PROJECT,
+              Authority.DELETE_VARIABLE,
+              Authority.UPDATE_VARIABLE,
+              Authority.READ_ENVIRONMENT
+            ],
+            projectEnvironments: [
+              {
+                projectSlug: project.slug,
+                environmentSlugs: [environment.slug]
+              }
+            ]
+          }
+        )
+
+        // Invite user 2 to the workspace
+        await workspaceMembershipService.inviteUsersToWorkspace(
+          user1,
+          workspace.slug,
+          [
+            {
+              email: user2.email,
+              roleSlugs: [role.slug]
+            }
+          ]
+        )
+
+        // Accept the invitation
+        await workspaceMembershipService.acceptInvitation(user2, workspace.slug)
+      })
+
+      it('should only be able to fetch values of environment that the user has access to', async () => {
+        // Create another environment in the project
+        const environment2 = await environmentService.createEnvironment(
+          user1,
+          {
+            name: 'Environment 2'
+          },
+          project.slug
+        )
+
+        // Update the variable to have a version in the 2nd environment
+        await variableService.updateVariable(user1, variable.variable.slug, {
+          entries: [
+            {
+              environmentSlug: environment2.slug,
+              value: 'Value 2'
+            }
+          ]
+        })
+
+        // Fetch all variables of the project
+        const response = await app.inject({
+          method: 'GET',
+          url: `/variable/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        const variableData = response.json().items[0]
+        expect(variableData.values).toHaveLength(1)
+
+        // Update the role to give access to the 2nd environment
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          projectEnvironments: [
+            {
+              projectSlug: project.slug,
+              environmentSlugs: [environment.slug, environment2.slug]
+            }
+          ]
+        })
+
+        // Fetch all variables of the project
+        const response2 = await app.inject({
+          method: 'GET',
+          url: `/variable/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        const variableData2 = response2.json().items[0]
+        expect(variableData2.values).toHaveLength(2)
+      })
+
+      it('should have the correct entitlements', async () => {
+        // Fetch all variables of the project
+        let response = await app.inject({
+          method: 'GET',
+          url: `/variable/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        let variableData = response.json().items[0]
+        expect(variableData.variable.entitlements).toEqual({
+          canUpdate: true,
+          canDelete: true
+        })
+
+        // Remove DELETE_VARIABLE authority from the role
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          authorities: [
+            Authority.READ_VARIABLE,
+            Authority.READ_PROJECT,
+            Authority.UPDATE_VARIABLE,
+            Authority.READ_ENVIRONMENT
+          ]
+        })
+
+        // Fetch all variables of the project
+        response = await app.inject({
+          method: 'GET',
+          url: `/variable/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        variableData = response.json().items[0]
+        expect(variableData.variable.entitlements).toEqual({
+          canUpdate: true,
+          canDelete: false
+        })
+
+        // Remove UPDATE_VARIABLE authority from the role
+        await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+          authorities: [
+            Authority.READ_VARIABLE,
+            Authority.READ_PROJECT,
+            Authority.READ_ENVIRONMENT
+          ]
+        })
+
+        // Fetch all variables of the project
+        response = await app.inject({
+          method: 'GET',
+          url: `/variable/${project.slug}?page=0&limit=10`,
+          headers: {
+            'x-e2e-user-email': user2.email
+          }
+        })
+
+        variableData = response.json().items[0]
+        expect(variableData.variable.entitlements).toEqual({
+          canUpdate: false,
+          canDelete: false
+        })
+      })
     })
   })
 

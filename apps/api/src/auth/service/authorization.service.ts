@@ -2,7 +2,7 @@ import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { EnvironmentWithProject } from '@/environment/environment.types'
-import { VariableWithProjectAndVersion } from '@/variable/variable.types'
+import { HydratedVariable } from '@/variable/variable.types'
 import { HydratedSecret } from '@/secret/secret.types'
 import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -96,7 +96,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToVariable(
     params: AuthorizationParams
-  ): Promise<VariableWithProjectAndVersion> {
+  ): Promise<HydratedVariable> {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable(params)
 

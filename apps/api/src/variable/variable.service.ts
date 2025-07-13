@@ -37,7 +37,7 @@ import {
 } from '@/common/util'
 import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
-import { VariableWithValues } from './variable.types'
+import { HydratedVariable, VariableWithValues } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import {
@@ -773,7 +773,9 @@ export class VariableService {
         authorities: [Authority.READ_VARIABLE]
       })
 
-    this.logger.log(`Getting all variables of project ${projectSlug}`)
+    this.logger.log(
+      `Fetching all variables of project ${projectSlug} with search query ${search}`
+    )
     const variables = await this.prisma.variable.findMany({
       where: {
         projectId,
@@ -781,35 +783,8 @@ export class VariableService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        },
-        versions: {
-          select: {
-            value: true,
-            version: true,
-            environment: {
-              select: {
-                name: true,
-                id: true,
-                slug: true
-              }
-            },
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
+      select: {
+        slug: true
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
@@ -818,8 +793,20 @@ export class VariableService {
       }
     })
     this.logger.log(
-      `Got all variables of project ${projectSlug}. Count: ${variables.length}`
+      `Fetched ${variables.length} variables of project ${projectSlug}`
     )
+
+    const hydratedVariables: HydratedVariable[] = []
+
+    for (const { slug } of variables) {
+      hydratedVariables.push(
+        await this.authorizationService.authorizeUserAccessToVariable({
+          user,
+          entity: { slug },
+          authorities: [Authority.READ_VARIABLE]
+        })
+      )
+    }
 
     const variablesWithEnvironmentalValues = new Set<{
       variable: Partial<Variable>
@@ -840,7 +827,7 @@ export class VariableService {
       }[]
     }>()
 
-    for (const variable of variables) {
+    for (const variable of hydratedVariables) {
       // Logic to update the map:
       // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
       // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
@@ -861,7 +848,38 @@ export class VariableService {
         }
       >()
 
+      // Maintain a list of environments that the user is and is not allowed to access
+      const environmentAccessibilityMap: Map<Environment['id'], boolean> =
+        new Map()
+
       for (const variableVersion of variable.versions) {
+        const environmentSlug = variableVersion.environment.slug
+
+        if (!environmentAccessibilityMap.has(variableVersion.environment.id)) {
+          try {
+            await this.authorizationService.authorizeUserAccessToEnvironment({
+              user,
+              entity: {
+                slug: environmentSlug
+              },
+              authorities: [Authority.READ_ENVIRONMENT]
+            })
+            environmentAccessibilityMap.set(
+              variableVersion.environment.id,
+              true
+            )
+          } catch (error) {
+            environmentAccessibilityMap.set(
+              variableVersion.environment.id,
+              false
+            )
+          }
+        }
+
+        if (!environmentAccessibilityMap.get(variableVersion.environment.id)) {
+          continue
+        }
+
         const environmentId = variableVersion.environment.id
         const existingVariableVersion =
           envIdToVariableVersionMap.get(environmentId)
@@ -876,35 +894,34 @@ export class VariableService {
       }
 
       delete variable.versions
+      delete variable.project
 
       // Add the variable to the map
       variablesWithEnvironmentalValues.add({
         variable,
-        values: await Promise.all(
-          Array.from(envIdToVariableVersionMap.values()).map(
-            async (variableVersion) => ({
-              environment: {
-                id: variableVersion.environment.id,
-                name: variableVersion.environment.name,
-                slug: variableVersion.environment.slug
-              },
-              value: variableVersion.value,
-              version: variableVersion.version,
-              createdBy: {
-                id: variableVersion.createdBy.id,
-                name: variableVersion.createdBy.name,
-                profilePictureUrl: variableVersion.createdBy.profilePictureUrl
-              },
-              createdOn: variableVersion.createdOn
-            })
-          )
+        values: Array.from(envIdToVariableVersionMap.values()).map(
+          (variableVersion) => ({
+            environment: {
+              id: variableVersion.environment.id,
+              name: variableVersion.environment.name,
+              slug: variableVersion.environment.slug
+            },
+            value: variableVersion.value,
+            version: variableVersion.version,
+            createdBy: {
+              id: variableVersion.createdBy.id,
+              name: variableVersion.createdBy.name,
+              profilePictureUrl: variableVersion.createdBy.profilePictureUrl
+            },
+            createdOn: variableVersion.createdOn
+          })
         )
       })
     }
 
     const items = Array.from(variablesWithEnvironmentalValues.values())
 
-    //calculate metadata
+    // Calculate pagination metadata
     const totalCount = await this.prisma.variable.count({
       where: {
         projectId,

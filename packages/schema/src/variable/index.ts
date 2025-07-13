@@ -122,8 +122,16 @@ export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
   projectSlug: BaseProjectSchema.shape.slug
 })
 
-export const GetAllVariablesOfProjectResponseSchema =
-  PageResponseSchema(VariableSchema)
+export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
+  VariableSchema.extend({
+    secret: VariableSchema.shape.variable.extend({
+      entitlements: z.object({
+        canUpdate: z.boolean(),
+        canDelete: z.boolean()
+      })
+    })
+  })
+)
 
 export const GetRevisionsOfVariableRequestSchema =
   PageRequestSchema.partial().extend({
