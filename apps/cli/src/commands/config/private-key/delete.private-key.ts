@@ -20,11 +20,6 @@ export default class DeletePrivateKey extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
       {
-        short: '-w',
-        long: '--workspace <string>',
-        description: 'Workspace slug'
-      },
-      {
         short: '-p',
         long: '--project <string>',
         description: 'Project slug'
@@ -33,22 +28,22 @@ export default class DeletePrivateKey extends BaseCommand {
   }
 
   async action({ options }: CommandActionData): Promise<void> {
-    const { workspace, project } = options
+    const { project } = options
 
-    if (!workspace || !project) {
+    if (!project) {
       throw new Error('Workspace and project slugs are required.')
     }
 
     const privateKeys = await fetchPrivateKeyConfig()
 
-    if (!privateKeys[`${workspace}_${project}`]) {
+    if (!privateKeys[project]) {
       throw new Error(
         'Private key not found for this project and workspace combo.'
       )
     }
 
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete privateKeys[`${workspace}_${project}`]
+    delete privateKeys[project]
 
     await writePrivateKeyConfig(privateKeys)
   }

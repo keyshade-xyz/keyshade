@@ -2,7 +2,10 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue } from 'jotai'
-import type { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
+import type { EventTypeEnum } from '@keyshade/schema'
+import type { VercelEnvironmentMapping } from '@keyshade/common'
+import { Integrations } from '@keyshade/common'
+import ProjectEnvironmentMapping from '../ProjectEnvironmentMapping'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +23,11 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { editIntegrationOpenAtom, selectedIntegrationAtom } from '@/store'
 
-function UpdateIntegration() {
+function UpdateIntegration({
+  onUpdateSuccess
+}: {
+  onUpdateSuccess?: () => void
+}) {
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
@@ -31,40 +38,50 @@ function UpdateIntegration() {
   const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
     new Set()
   )
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string | null>(
-    null
-  )
-  const [metadata, setMetadata] = useState<Record<string, string>>({})
+  const [selectedEnvironments, setSelectedEnvironments] = useState<string[]>([])
+  const [envMappings, setEnvMappings] = useState<VercelEnvironmentMapping>({})
+  const [metadata, setMetadata] = useState<Record<string, unknown>>({})
 
-  // Load initial data when selectedIntegration changes
+  const integrationType = selectedIntegration?.type
+  const isMappingRequired = integrationType
+    ? Integrations[integrationType].envMapping
+    : false
+
   useEffect(() => {
     if (selectedIntegration) {
       setName(selectedIntegration.name || '')
       setSelectedEvents(new Set(selectedIntegration.notifyOn))
       setMetadata(selectedIntegration.metadata)
 
-      if (selectedIntegration.project) {
-        setSelectedProject(selectedIntegration.project.slug)
+      if (
+        selectedIntegration.environments &&
+        selectedIntegration.environments.length > 0
+      ) {
+        setSelectedEnvironments(
+          selectedIntegration.environments.map((env) => env.slug)
+        )
       }
 
-      if (selectedIntegration.environment) {
-        setSelectedEnvironment(selectedIntegration.environment.slug)
+      if (selectedIntegration.metadata.environments) {
+        setEnvMappings(
+          selectedIntegration.metadata
+            .environments as unknown as VercelEnvironmentMapping
+        )
       }
     }
   }, [selectedIntegration])
 
-  const updateIntegration = useHttp(() => {
+  const updateIntegration = useHttp((finalMetadata) => {
     return ControllerInstance.getInstance().integrationController.updateIntegration(
       {
         integrationSlug: selectedIntegration!.slug,
         name:
           name.trim() === selectedIntegration!.name ? undefined : name.trim(),
-        type: selectedIntegration!.type,
         notifyOn: Array.from(selectedEvents),
-        metadata,
-        ...(selectedProject ? { projectSlug: selectedProject } : {}),
-        ...(selectedEnvironment ? { environmentSlug: selectedEnvironment } : {})
+        metadata: finalMetadata as Record<string, string>,
+        ...(selectedEnvironments.length > 0
+          ? { environmentSlugs: selectedEnvironments }
+          : {})
       }
     )
   })
@@ -77,41 +94,88 @@ function UpdateIntegration() {
         return
       }
       if (selectedEvents.size === 0) {
-        toast.error('Select at least one event type')
+        toast.error('At least one event trigger is required')
+        return
+      }
+
+      const finalMetadata = isMappingRequired
+        ? {
+            ...metadata,
+            environments: envMappings
+          }
+        : metadata
+
+      if (Object.keys(finalMetadata).length === 0) {
+        toast.error('Configuration metadata is required')
+        return
+      }
+
+      const isEmptyValue = (value: unknown): boolean => {
+        if (typeof value === 'string' && value.trim() === '') {
+          return true
+        }
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).length === 0
+        ) {
+          return true
+        }
+
+        return false
+      }
+
+      const hasEmptyValues = Object.values(finalMetadata).some(isEmptyValue)
+
+      if (hasEmptyValues) {
+        toast.error('All configuration fields are required and cannot be empty')
         return
       }
 
       setIsLoading(true)
 
       try {
-        const { success, data } = await updateIntegration()
+        const { success, data } = await updateIntegration(
+          finalMetadata as Record<string, string>
+        )
 
         if (success && data) {
           toast.success(`Integration updated successfully!`)
           setIsEditIntegrationOpen(false)
+          onUpdateSuccess?.()
         }
       } finally {
         setIsLoading(false)
       }
     },
-    [name, selectedEvents, updateIntegration, setIsEditIntegrationOpen]
+    [
+      name,
+      selectedEvents,
+      updateIntegration,
+      setIsEditIntegrationOpen,
+      onUpdateSuccess,
+      isMappingRequired,
+      metadata,
+      envMappings
+    ]
   )
 
   const handleCancel = () => {
     setIsEditIntegrationOpen(false)
   }
 
-  if (!selectedIntegration) return null
+  const handleEnvironmentChange = (environmentSlugs: string[]) => {
+    setSelectedEnvironments(environmentSlugs)
+  }
 
-  const integrationType = selectedIntegration.type as IntegrationTypeEnum
+  const handleKeyMappingChange = (mappings: VercelEnvironmentMapping) => {
+    setEnvMappings(mappings)
+  }
+
+  if (!selectedIntegration || !integrationType) return null
 
   return (
-    <Sheet
-      onOpenChange={() => {
-        setIsEditIntegrationOpen((prev) => !prev)
-      }}
-      open={isEditIntegrationOpen}
-    >
+    <Sheet open={isEditIntegrationOpen}>
       <SheetContent className="min-w-[600px] overflow-y-auto border-white/15 bg-[#222425]">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-2xl text-white">
@@ -141,6 +205,7 @@ function UpdateIntegration() {
           </div>
 
           {/* Event Triggers Input Component */}
+
           <EventTriggersInput
             integrationType={integrationType}
             onChange={setSelectedEvents}
@@ -148,6 +213,7 @@ function UpdateIntegration() {
           />
 
           {/* Setup integration metadata */}
+
           <IntegrationMetadata
             initialMetadata={metadata}
             integrationType={integrationType}
@@ -155,12 +221,23 @@ function UpdateIntegration() {
           />
 
           {/* Specify Project and Environment(optional) */}
-          <ProjectEnvironmentInput
-            initialEnvironment={selectedIntegration.environment}
-            initialProject={selectedIntegration.project}
-            onEnvironmentChange={setSelectedEnvironment}
-            onProjectChange={setSelectedProject}
-          />
+          {isMappingRequired ? (
+            <ProjectEnvironmentMapping
+              initialEnvironments={selectedIntegration.environments}
+              initialProject={selectedIntegration.project}
+              isProjectDisabled
+              keyMapping={envMappings}
+              onEnvironmentChange={handleEnvironmentChange}
+              onKeyMappingChange={handleKeyMappingChange}
+            />
+          ) : (
+            <ProjectEnvironmentInput
+              initialEnvironments={selectedIntegration.environments}
+              initialProject={selectedIntegration.project}
+              isProjectDisabled
+              onEnvironmentChange={handleEnvironmentChange}
+            />
+          )}
 
           <SheetFooter className="flex justify-end gap-3 pt-4">
             <Button onClick={handleCancel} type="button" variant="outline">

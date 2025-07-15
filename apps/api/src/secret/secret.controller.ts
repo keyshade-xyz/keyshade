@@ -15,6 +15,7 @@ import { CreateSecret } from './dto/create.secret/create.secret'
 import { UpdateSecret } from './dto/update.secret/update.secret'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { AuthenticatedUser } from '@/user/user.types'
+import { BulkCreateSecretDto } from './dto/bulk.create.secret/bulk.create.secret'
 
 @Controller('secret')
 export class SecretController {
@@ -28,6 +29,20 @@ export class SecretController {
     @Body() dto: CreateSecret
   ) {
     return await this.secretService.createSecret(user, dto, projectSlug)
+  }
+
+  @Post(':projectSlug/bulk')
+  @RequiredApiKeyAuthorities(Authority.CREATE_SECRET)
+  async bulkCreateSecrets(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: string,
+    @Body() dto: BulkCreateSecretDto
+  ) {
+    return await this.secretService.bulkCreateSecrets(
+      user,
+      projectSlug,
+      dto.secrets
+    )
   }
 
   @Put(':secretSlug')
@@ -46,15 +61,13 @@ export class SecretController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
     @Param('rollbackVersion') rollbackVersion: number,
-    @Query('environmentSlug') environmentSlug: string,
-    @Query('decryptValue') decryptValue: boolean
+    @Query('environmentSlug') environmentSlug: string
   ) {
     return await this.secretService.rollbackSecret(
       user,
       secretSlug,
       environmentSlug,
-      rollbackVersion,
-      decryptValue
+      rollbackVersion
     )
   }
 
@@ -90,13 +103,11 @@ export class SecretController {
     @Query('limit') limit: number = 10,
     @Query('sort') sort: string = 'name',
     @Query('order') order: string = 'asc',
-    @Query('search') search: string = '',
-    @Query('decryptValue') decryptValue: boolean = false
+    @Query('search') search: string = ''
   ) {
     return await this.secretService.getAllSecretsOfProject(
       user,
       projectSlug,
-      decryptValue,
       page,
       limit,
       sort,
@@ -111,7 +122,6 @@ export class SecretController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('secretSlug') secretSlug: string,
     @Param('environmentSlug') environmentSlug: string,
-    @Query('decryptValue') decryptValue: boolean = false,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
     @Query('order') order: 'asc' | 'desc' = 'desc'
@@ -120,7 +130,6 @@ export class SecretController {
       user,
       secretSlug,
       environmentSlug,
-      decryptValue,
       page,
       limit,
       order

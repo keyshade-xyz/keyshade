@@ -4,6 +4,9 @@ import { InternalServerErrorException, Logger } from '@nestjs/common'
 import { Otp, PrismaClient, User } from '@prisma/client'
 import { Response } from 'express'
 import * as crypto from 'crypto'
+import { sDecrypt, sEncrypt } from './cryptography'
+import { Entry } from './dto/entry.dto'
+import { Environment } from '@keyshade/schema'
 
 /**
  * Limits the given limit to a maximum number of items per page.
@@ -139,6 +142,12 @@ export const constructErrorBody = (header: string, body: string): string => {
   })
 }
 
+/**
+ * Wraps a promise-returning function in a call that times the duration of the request.
+ *
+ * @param func - The function to call.
+ * @returns A promise that resolves to an object with the response of the function and the duration of the request.
+ */
 export const makeTimedRequest = async <T>(
   func: () => Promise<T>
 ): Promise<{ response: T; duration: number }> => {
@@ -151,4 +160,107 @@ export const makeTimedRequest = async <T>(
     response,
     duration
   }
+}
+
+/**
+ * Encrypts the given metadata.
+ *
+ * This function serializes the metadata into a JSON string and then encrypts it.
+ * If the metadata is not provided, it returns undefined.
+ *
+ * @param metadata - The metadata to encrypt.
+ * @returns The encrypted metadata as a string, or undefined if no metadata is provided.
+ */
+export const encryptMetadata = (
+  metadata: Record<string, unknown>
+): string | undefined => {
+  if (!metadata) {
+    return undefined
+  }
+  return sEncrypt(JSON.stringify(metadata))
+}
+
+/**
+ * Decrypts the given encrypted metadata.
+ *
+ * This function decrypts the given string and then parses it into a JSON object.
+ * If the given string is empty, it returns undefined.
+ *
+ * @param encryptedMetadata - The encrypted metadata to decrypt.
+ * @returns The decrypted metadata as a JSON object, or undefined if the given string is empty.
+ */
+export const decryptMetadata = <T extends Record<string, unknown>>(
+  encryptedMetadata: string
+): T | undefined => {
+  if (!encryptedMetadata) {
+    return undefined
+  }
+  return JSON.parse(sDecrypt(encryptedMetadata))
+}
+
+/**
+ * Maps an array of entries into an object where the keys are the environment names
+ * and the values are the entry values.
+ *
+ * If the given array is empty, it returns an empty object.
+ *
+ * @param entries - The array of entries to map.
+ * @returns An object with the environment names as keys and the entry values as values.
+ */
+export const mapEntriesToEventMetadata = (
+  entries?: Entry[]
+): Record<Environment['name'], string> => {
+  return entries
+    ? entries.reduce(
+        (acc, entry) => {
+          acc[entry.environmentSlug] = entry.value
+          return acc
+        },
+        {} as Record<string, string>
+      )
+    : {}
+}
+
+/**
+ * Generates a random referral code that is unique for all users.
+ *
+ * @param prisma A PrismaClient instance
+ * @returns A string representing the generated referral code
+ * @throws {InternalServerErrorException} If it cannot generate a unique referral code
+ */
+export const generateReferralCode = async (
+  prisma: PrismaClient
+): Promise<string> => {
+  const logger = new Logger('generateReferralCode')
+  logger.log('Generating referral code')
+  let referralCode: string | null
+  let tries = 0
+
+  do {
+    referralCode = crypto
+      .randomBytes(6)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 8)
+    tries++
+  } while (
+    (await prisma.user.count({
+      where: { referralCode }
+    })) > 0 &&
+    tries < 10
+  )
+
+  if (tries === 10) {
+    logger.error('Ran out of referral codes')
+    throw new InternalServerErrorException(
+      constructErrorBody(
+        'Ran out of referral codes',
+        'Could not generate a unique referral code'
+      )
+    )
+  }
+
+  logger.log(`Generated referral code: ${referralCode} in ${tries} tries`)
+
+  return referralCode
 }

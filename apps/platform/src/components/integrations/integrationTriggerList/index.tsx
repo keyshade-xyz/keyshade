@@ -1,6 +1,6 @@
 import type { Integration, IntegrationRun } from '@keyshade/schema'
-import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
 import React, { useCallback } from 'react'
+import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { formatDate, formatTime } from '@/lib/utils'
 import {
@@ -76,7 +76,7 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
           <h4 className="font-semibold">Logs</h4>
           {hasLog ? (
             <div className="mt-1 max-h-32 overflow-y-auto text-sm">
-              <p className="whitespace-pre-wrap text-white/80">{eventLog}</p>
+              <p className="whitespace-pre-wrap text-black/80">{eventLog}</p>
             </div>
           ) : (
             <p className="mt-1 text-sm">No log available</p>

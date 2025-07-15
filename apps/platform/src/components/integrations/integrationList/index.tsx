@@ -1,9 +1,9 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import type { Integration } from '@keyshade/schema'
 import Link from 'next/link'
-import IntegrationIcon from '../integrationIcon'
 import EmptyIntegration from '../emptyIntegration'
+import IntegrationIcon from '../integrationIcon'
 import {
   deleteIntegrationOpenAtom,
   editIntegrationOpenAtom,
@@ -21,11 +21,28 @@ import {
   ContextMenuTrigger
 } from '@/components/ui/context-menu'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
+import ErrorCard from '@/components/shared/error-card'
+import { formatText } from '@/lib/utils'
+
+type ErrorMessage = { header: string; body: string } | null
+
+function IntegrationListItemSkeleton(): React.JSX.Element {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+      <div className="h-20 w-[23%] rounded-lg bg-white/5" />
+    </div>
+  )
+}
 
 function IntegrationList() {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [integrations, setIntegrations] = useAtom(integrationsOfWorkspaceAtom)
   const setSelectedIntegration = useSetAtom(selectedIntegrationAtom)
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
+  const [loading, setLoading] = useState<boolean>(true)
   const [isEditIntegrationOpen, setIsEditIntegrationOpen] = useAtom(
     editIntegrationOpenAtom
   )
@@ -39,14 +56,28 @@ function IntegrationList() {
       {}
     )
   )
+
   useEffect(() => {
-    getAllIntegrations().then(({ data, success }) => {
-      if (success && data) {
-        setIntegrations(data.items)
-      }
-    })
+    if (selectedWorkspace?.slug) {
+      getAllIntegrations()
+        .then(({ data, success, error }) => {
+          if (success && data) {
+            setIntegrations(data.items)
+          }
+          if (error) {
+            const errorMsg = error.message
+            const parsedError = JSON.parse(errorMsg) as ErrorMessage
+            setErrorMessage(parsedError)
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
   }, [
+    selectedWorkspace,
     getAllIntegrations,
+    selectedWorkspace?.slug,
     setIntegrations,
     isEditIntegrationOpen,
     isDeleteIntegrationOpen
@@ -70,6 +101,20 @@ function IntegrationList() {
     [setSelectedIntegration, setIsDeleteIntegrationOpen]
   )
 
+  if (loading) {
+    return (
+      <div className="flex animate-pulse flex-col gap-y-4">
+        <IntegrationListItemSkeleton />
+        <IntegrationListItemSkeleton />
+      </div>
+    )
+  }
+  if (!hasIntegrations && errorMessage) {
+    return (
+      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
+    )
+  }
+
   return (
     <div className="flex h-full w-full justify-center">
       {hasIntegrations ? (
@@ -79,23 +124,29 @@ function IntegrationList() {
               <ContextMenuTrigger>
                 <Link href={`/integrations?details=${integration.slug}`}>
                   <div className="flex h-[6rem] items-center justify-between rounded-lg bg-white/5 px-5 py-4 transition-all duration-150 ease-out hover:bg-white/10">
-                    <div className="flex items-center gap-x-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-700">
+                    <div className="flex min-w-0 flex-1 items-center gap-x-4">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-neutral-700">
                         <IntegrationIcon
                           className="h-6 w-6"
                           type={integration.type}
                         />
                       </div>
-                      <div>
-                        <h2 className="text-lg font-semibold">
+                      <div className="min-w-0 flex-1">
+                        <h2
+                          className="truncate text-lg font-semibold"
+                          title={integration.name}
+                        >
                           {integration.name}
                         </h2>
-                        <p className="text-sm text-white/60">
-                          {integration.type}
+                        <p
+                          className="truncate text-sm text-white/60"
+                          title={formatText(integration.type)}
+                        >
+                          {formatText(integration.type)}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start justify-center gap-x-2">
+                    <div className="flex w-2/5 flex-shrink-0 items-start justify-center gap-x-2 pl-4">
                       <CopyToClipboard text={integration.slug} />
                     </div>
                   </div>

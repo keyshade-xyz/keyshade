@@ -1,6 +1,5 @@
 import {
   EventType,
-  Integration,
   IntegrationRunStatus,
   IntegrationType
 } from '@prisma/client'
@@ -11,13 +10,29 @@ import {
 import { App } from '@slack/bolt'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import { makeTimedRequest } from '@/common/util'
+import { decryptMetadata, makeTimedRequest } from '@/common/util'
 import { InternalServerErrorException } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private app: App
-  constructor(integrationType: IntegrationType, prisma: PrismaService) {
-    super(integrationType, prisma)
+  private readonly app: App
+
+  constructor(prisma: PrismaService) {
+    super(IntegrationType.SLACK, prisma)
+
+    if (!this.app && this.integration) {
+      const metadata = decryptMetadata<SlackIntegrationMetadata>(
+        this.integration.metadata
+      )
+      this.app = new App({
+        token: metadata.botToken,
+        signingSecret: metadata.signingSecret
+      })
+    }
+  }
+
+  public init(): Promise<void> {
+    // TODO: implement this
+    return Promise.resolve()
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -58,26 +73,18 @@ export class SlackIntegration extends BaseIntegration {
     return new Set(['botToken', 'signingSecret', 'channelId'])
   }
 
-  async emitEvent(
-    data: IntegrationEventData,
-    metadata: SlackIntegrationMetadata,
-    integrationId: Integration['id']
-  ): Promise<void> {
+  async emitEvent(data: IntegrationEventData): Promise<void> {
     this.logger.log(`Emitting event to Slack: ${data.title}`)
+
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
 
     try {
       const { id: integrationRunId } = await this.registerIntegrationRun({
-        eventId: data.eventId,
-        integrationId,
+        eventId: data.event.id,
+        integrationId: integration.id,
         title: 'Posting message to Slack'
       })
 
-      if (!this.app) {
-        this.app = new App({
-          token: metadata.botToken,
-          signingSecret: metadata.signingSecret
-        })
-      }
       const block = [
         {
           type: 'header',
@@ -123,7 +130,7 @@ export class SlackIntegration extends BaseIntegration {
 
       const { response, duration } = await makeTimedRequest(() =>
         this.app.client.chat.postMessage({
-          channel: metadata.channelId,
+          channel: integration.metadata.channelId,
           blocks: block,
           text: data.title
         })

@@ -1,21 +1,25 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
+  ParseEnumPipe,
   Post,
   Put,
   Query
 } from '@nestjs/common'
 import { ProjectService } from './project.service'
 import { CurrentUser } from '@/decorators/user.decorator'
-import { Authority, Project, Workspace } from '@prisma/client'
+import { Authority, Environment, Project, Workspace } from '@prisma/client'
 import { CreateProject } from './dto/create.project/create.project'
 import { UpdateProject } from './dto/update.project/update.project'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { ForkProject } from './dto/fork.project/fork.project'
 import { AuthenticatedUser } from '@/user/user.types'
+import { ExportFormat } from './project.types'
 
 @Controller('project')
 export class ProjectController {
@@ -118,6 +122,37 @@ export class ProjectController {
       sort,
       order,
       search
+    )
+  }
+
+  @Get(':projectSlug/export-configurations')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_PROJECT,
+    Authority.READ_SECRET,
+    Authority.READ_VARIABLE,
+    Authority.READ_ENVIRONMENT
+  )
+  async exportProjectConfigurations(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('projectSlug') projectSlug: Project['slug'],
+    @Query('environmentSlugs', new ParseArrayPipe({ items: String }))
+    environmentSlugs: Environment['slug'][],
+    @Query(
+      'format',
+      new ParseEnumPipe(ExportFormat, {
+        exceptionFactory: () =>
+          new BadRequestException(
+            `Invalid format provided. Supported formats: ${Object.values(ExportFormat).join(', ')}`
+          )
+      })
+    )
+    format: ExportFormat
+  ) {
+    return await this.service.exportProjectConfigurations(
+      user,
+      projectSlug,
+      environmentSlugs,
+      format
     )
   }
 }

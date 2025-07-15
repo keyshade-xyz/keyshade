@@ -221,6 +221,18 @@ export class WorkspaceMembershipService {
         authorities: [Authority.ADD_USER]
       })
 
+    if (workspace.isDefault) {
+      this.log.error(
+        `Cannot add members to default workspace ${workspace.name} (${workspace.slug})`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Cannot add members to default workspace',
+          'You cannot add members to the default workspace'
+        )
+      )
+    }
+
     // Check if more members can be added to the workspace
     await this.tierLimitService.checkMemberLimitReached(workspace)
 

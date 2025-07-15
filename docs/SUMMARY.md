@@ -22,6 +22,20 @@
 - [Run](cli/run.md)
 - [Scan](cli/scan.md)
 
+## Integrations 
+
+- [Frameworks](integration/frameworks/README.md)
+  - [Next.js](integration/frameworks/set-up-with-nextjs.md)
+  - [Node.js](integration/frameworks/set-up-with-nodejs.md)
+- [Languages](integration/languages/README.md)
+  - [Go](integration/languages/set-up-with-go.md)
+  - [Python](integration/languages/set-up-with-python.md)
+  - [Rust](integration/languages/set-up-with-rust.md)
+- [Platforms](integration/platforms/README.md)
+  - [AWS Lambda](integration/platforms/set-up-with-aws.md)
+  - [Vercel](integration/platforms/set-up-with-vercel.md)
+
+
 ## 🥰 CONTRIBUTING TO KEYSHADE
 
 - [Summary](contributing-to-keyshade/summary.md)

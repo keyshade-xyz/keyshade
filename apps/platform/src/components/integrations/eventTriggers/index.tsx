@@ -29,6 +29,13 @@ export default function EventTriggersInput({
     [eventGroups]
   )
 
+  if (Integrations[integrationType].envMapping === true) {
+    if (selectedEvents.size !== allEvents.length) {
+      onChange(new Set(allEvents))
+    }
+    return null
+  }
+
   const toggleGroup = (groupItems: EventTypeEnum[]) => {
     const allGroupSelected = groupItems.every((event) =>
       selectedEvents.has(event)

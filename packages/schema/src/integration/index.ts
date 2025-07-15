@@ -27,12 +27,14 @@ export const IntegrationSchema = z.object({
       slug: BaseProjectSchema.shape.slug
     })
     .nullable(),
-  environment: z
-    .object({
-      id: EnvironmentSchema.shape.id,
-      name: EnvironmentSchema.shape.name,
-      slug: EnvironmentSchema.shape.slug
-    })
+  environments: z
+    .array(
+      z.object({
+        id: EnvironmentSchema.shape.id,
+        name: EnvironmentSchema.shape.name,
+        slug: EnvironmentSchema.shape.slug
+      })
+    )
     .nullable(),
   workspace: WorkspaceSchema,
   lastUpdatedBy: z.object({
@@ -61,19 +63,19 @@ export const CreateIntegrationRequestSchema = z.object({
   type: IntegrationSchema.shape.type,
   notifyOn: IntegrationSchema.shape.notifyOn.min(1).optional(),
   metadata: z.record(z.string()),
-  environmentSlug: EnvironmentSchema.shape.slug.optional()
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug.optional()),
+  privateKey: z.string().optional()
 })
 
 export const CreateIntegrationResponseSchema = IntegrationSchema
 
-export const UpdateIntegrationRequestSchema =
-  CreateIntegrationRequestSchema.partial()
-    .omit({
-      workspaceSlug: true
-    })
-    .extend({
-      integrationSlug: IntegrationSchema.shape.slug
-    })
+export const UpdateIntegrationRequestSchema = z.object({
+  integrationSlug: IntegrationSchema.shape.slug,
+  name: z.string().optional(),
+  notifyOn: IntegrationSchema.shape.notifyOn.optional(),
+  metadata: z.record(z.string()).optional(),
+  environmentSlugs: z.array(EnvironmentSchema.shape.slug).optional()
+})
 
 export const UpdateIntegrationResponseSchema = IntegrationSchema
 

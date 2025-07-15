@@ -15,7 +15,6 @@ import {
   globalSearchDataAtom,
   rollbackSecretOpenAtom,
   secretRevisionsOpenAtom,
-  shouldRevealSecretEnabled,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
@@ -54,8 +53,7 @@ export default function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
-  const { projectPrivateKey } = useProjectPrivateKey()
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   useEffect(() => {
     if (!selectedProject) return
@@ -65,7 +63,6 @@ export default function SecretPage(): React.JSX.Element {
     ControllerInstance.getInstance()
       .secretController.getAllSecretsOfProject({
         projectSlug: selectedProject.slug,
-        decryptValue: isDecrypted,
         page,
         limit: SECRET_PAGE_SIZE
       })
@@ -99,7 +96,7 @@ export default function SecretPage(): React.JSX.Element {
         }))
       })
       .finally(() => setIsLoading(false))
-  }, [selectedProject, page, isDecrypted, setGlobalSearchData, setSecrets])
+  }, [selectedProject, page, setGlobalSearchData, setSecrets])
 
   const handleLoadMore = () => {
     setPage((prev) => prev + 1)
@@ -151,7 +148,6 @@ export default function SecretPage(): React.JSX.Element {
                       isHighlighted &&
                       'animate-highlight'
                   )}
-                  isDecrypted={isDecrypted}
                   key={secretData.secret.id}
                   privateKey={projectPrivateKey}
                   secretData={secretData}

@@ -1,14 +1,14 @@
 'use client'
-import React, { Suspense } from 'react'
+import React from 'react'
 import { useAtomValue } from 'jotai'
 import { useSearchParams } from 'next/navigation'
 import { Integrations } from '@keyshade/common'
 import type { IntegrationTypeEnum } from '@keyshade/schema'
 import SetupIntegration from './@setup/page'
-import IntegrationsPage from './page'
+import IntegrationsPage from './@overview/page'
 import IntegrationDetailsPage from './@details/page'
-import { PageTitle } from '@/components/common/page-title'
 import { selectedWorkspaceAtom } from '@/store'
+import { PageTitle } from '@/components/common/page-title'
 
 function IntegrationsContent(): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -21,30 +21,23 @@ function IntegrationsContent(): React.JSX.Element {
   const isDetails = Boolean(integrationSlug)
 
   return (
-    <main>
-      <div className="flex flex-col gap-y-10">
+    <div className="flex flex-col gap-y-10">
         <PageTitle title={`${currentWorkspace?.name} | Integrations`} />
-        {isDetails ? (
-          <IntegrationDetailsPage integrationSlug={integrationSlug!} />
-        ) : isSetup ? (
-          <SetupIntegration
+
+        {isDetails ? <IntegrationDetailsPage integrationSlug={integrationSlug!} /> : null}
+        {isSetup ? <SetupIntegration
             integrationName={Integrations[setupType].name}
             integrationType={setupType as IntegrationTypeEnum}
-          />
-        ) : (
-          <IntegrationsPage />
-        )}
+          /> : null}
+        {!isDetails && !isSetup && <IntegrationsPage />}
       </div>
-    </main>
   )
 }
 
 export default function IntegrationsLayout(): React.JSX.Element {
   return (
     <main>
-      <Suspense fallback={null}>
-        <IntegrationsContent />
-      </Suspense>
+      <IntegrationsContent />
     </main>
   )
 }

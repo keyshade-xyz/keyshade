@@ -6,8 +6,8 @@ import type {
   CommandActionData,
   CommandOption
 } from '@/types/command/command.types'
-import Table from 'cli-table'
-// import * as colors from 'colors'
+import { Table } from '@/util/table'
+import { Logger } from '@/util/logger'
 
 export default class ListProfile extends BaseCommand {
   private profiles: ProfileConfig
@@ -52,52 +52,35 @@ export default class ListProfile extends BaseCommand {
     defaultProfile: string,
     verbose: boolean
   ) {
-    const table = new Table({
-      chars: {
-        top: '═',
-        'top-mid': '╤',
-        'top-left': '╔',
-        'top-right': '╗',
-        bottom: '═',
-        'bottom-mid': '╧',
-        'bottom-left': '╚',
-        'bottom-right': '╝',
-        left: '║',
-        'left-mid': '╟',
-        mid: '─',
-        'mid-mid': '┼',
-        right: '║',
-        'right-mid': '╢',
-        middle: '│'
-      }
-    })
+    const profileKeys = Object.keys(profiles)
 
-    if (verbose) {
-      const profileList = []
-      Object.keys(profiles).forEach((profile) => {
-        profileList.push([
-          `${defaultProfile === profile ? `${profile} (default)` : profile}`,
-          `${profiles[profile].apiKey}`,
-          `${profiles[profile].baseUrl}`,
-          `${profiles[profile].metrics_enabled ? 'Yes' : 'No'}`
-        ])
-      })
-      table.push(
-        ['Profile', 'API Key', 'Base URL', 'Metrics Enabled'],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        ...profileList
-      )
-    } else {
-      const profileList = []
-      Object.keys(profiles).forEach((profile) => {
-        profileList.push([
-          `${defaultProfile === profile ? `${profile} (default)` : profile}`
-        ])
-      })
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      table.push(['Profile'], ...profileList)
+    if (profileKeys.length === 0) {
+      Logger.info('No profiles found')
+      return
     }
 
-    console.log(table.toString())
+    if (verbose) {
+      const headers = [
+        '👤 Profile',
+        '🔑 API Key',
+        '🌐 Base URL',
+        '📊 Metrics Enabled'
+      ]
+      const rows = profileKeys.map((profile) => [
+        defaultProfile === profile ? `✔️ ${profile}` : profile,
+        profiles[profile].apiKey,
+        profiles[profile].baseUrl,
+        profiles[profile].metrics_enabled ? 'Yes' : 'No'
+      ])
+
+      Table.render(headers, rows)
+    } else {
+      const headers = ['👤 Profile']
+      const rows = profileKeys.map((profile) => [
+        defaultProfile === profile ? `✔️ ${profile}` : profile
+      ])
+
+      Table.render(headers, rows)
+    }
   }
 }

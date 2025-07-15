@@ -4,7 +4,7 @@ import type {
   CommandOption
 } from '@/types/command/command.types'
 import BaseCommand from '../base.command'
-import { confirm, text } from '@clack/prompts'
+import { confirm, text, multiselect } from '@clack/prompts'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import fs from 'node:fs/promises'
@@ -46,6 +46,7 @@ export default class ImportFromEnv extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
+    const startTime = performance.now()
 
     try {
       const parsedOptions = await this.parseOptions(options)
@@ -61,21 +62,76 @@ export default class ImportFromEnv extends BaseCommand {
         return
       }
 
-      const secretsAndVariables = secretDetector.scanJsObject(envVariables)
+      let secretsAndVariables = secretDetector.scanJsObject(envVariables)
 
       Logger.info(
         'Detected secrets:\n' +
           Object.entries(secretsAndVariables.secrets)
-            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+            .map(([key, value], index) => {
+              return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+            })
             .join('\n') +
           '\n'
       )
       Logger.info(
         'Detected variables:\n' +
           Object.entries(secretsAndVariables.variables)
-            .map(([key, value]) => key + ' = ' + JSON.stringify(value))
+            .map(([key, value], index) => {
+              return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+            })
             .join('\n')
       )
+
+      const toggleClassification = await confirm({
+        message:
+          'Do you want to toggle the classification of the detected secrets and variables? (y/N)',
+        initialValue: false
+      })
+      if (toggleClassification) {
+        const selectedSecrets = await multiselect({
+          message:
+            'Select all the keys that you want to classify as "Secret" (press Space to select, Enter to confirm):',
+          options: Object.entries(envVariables).map(([key]) => ({
+            value: key,
+            label: `${key}`
+          })),
+          initialValues: Object.keys(secretsAndVariables.secrets)
+        })
+
+        const newSecrets: Record<string, string> = {}
+        const newVariables: Record<string, string> = {}
+
+        for (const [key, value] of Object.entries(envVariables)) {
+          if (Array.isArray(selectedSecrets) && selectedSecrets.includes(key)) {
+            newSecrets[key] = typeof value === 'string' ? value.trim() : value
+          } else {
+            newVariables[key] = typeof value === 'string' ? value.trim() : value
+          }
+        }
+
+        secretsAndVariables = {
+          secrets: newSecrets,
+          variables: newVariables
+        }
+
+        Logger.info(
+          'Updated secrets:\n' +
+            Object.entries(secretsAndVariables.secrets)
+              .map(([key, value], index) => {
+                return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+              })
+              .join('\n') +
+            '\n'
+        )
+        Logger.info(
+          'Updated variables:\n' +
+            Object.entries(secretsAndVariables.variables)
+              .map(([key, value], index) => {
+                return `${index + 1}. ${key} = ${JSON.stringify(value)}`
+              })
+              .join('\n')
+        )
+      }
 
       const confirmImport = await confirm({
         message:
@@ -99,60 +155,99 @@ export default class ImportFromEnv extends BaseCommand {
       let noOfSecrets = 0
       let noOfVariables = 0
       const errors: string[] = []
-      for (const [key, value] of Object.entries(secretsAndVariables.secrets)) {
-        const { error, success } =
-          await ControllerInstance.getInstance().secretController.createSecret(
-            {
-              projectSlug,
-              name: key,
-              entries: [
-                {
-                  value,
-                  environmentSlug
-                }
-              ]
-            },
-            this.headers
+
+      const secretEntries = Object.entries(secretsAndVariables.secrets)
+      const variableEntries = Object.entries(secretsAndVariables.variables)
+      const totalSecrets = secretEntries.length
+      const totalVariables = variableEntries.length
+
+      if (totalSecrets > 0) {
+        for (let i = 0; i < secretEntries.length; i++) {
+          const [key, value] = secretEntries[i]
+          const current = i + 1
+
+          Logger.info(
+            `🔐 Importing secrets ${current}/${totalSecrets} - ${key}`
           )
 
-        if (success) {
-          ++noOfSecrets
-        } else {
-          errors.push(
-            `Failed to create secret for ${key}. Error: ${error.message}.`
-          )
+          const { error, success } =
+            await ControllerInstance.getInstance().secretController.createSecret(
+              {
+                projectSlug,
+                name: key,
+                entries: [
+                  {
+                    value,
+                    environmentSlug
+                  }
+                ]
+              },
+              this.headers
+            )
+
+          if (success) {
+            ++noOfSecrets
+          } else {
+            errors.push(
+              `Failed to create secret for ${key}. Error: ${error.message}.`
+            )
+          }
         }
+        Logger.success('Done importing secrets')
       }
 
-      for (const [key, value] of Object.entries(
-        secretsAndVariables.variables
-      )) {
-        const { error, success } =
-          await ControllerInstance.getInstance().variableController.createVariable(
-            {
-              projectSlug,
-              name: key,
-              entries: [
-                {
-                  value,
-                  environmentSlug
-                }
-              ]
-            },
-            this.headers
+      if (totalVariables > 0) {
+        for (let i = 0; i < variableEntries.length; i++) {
+          const [key, value] = variableEntries[i]
+          const current = i + 1
+
+          Logger.info(
+            `🔧 Importing variables ${current}/${totalVariables} - ${key}`
           )
 
-        if (success) {
-          ++noOfVariables
-        } else {
-          errors.push(
-            `Failed to create variable for ${key}. Error: ${error.message}.`
-          )
+          const { error, success } =
+            await ControllerInstance.getInstance().variableController.createVariable(
+              {
+                projectSlug,
+                name: key,
+                entries: [
+                  {
+                    value,
+                    environmentSlug
+                  }
+                ]
+              },
+              this.headers
+            )
+
+          if (success) {
+            ++noOfVariables
+          } else {
+            errors.push(
+              `Failed to create variable for ${key}. Error: ${error.message}.`
+            )
+          }
         }
+        Logger.success('Done importing variables')
       }
-      Logger.info(
-        `Imported ${noOfSecrets} secrets and ${noOfVariables} variables.`
-      )
+
+      const endTime = performance.now()
+      const duration = ((endTime - startTime) / 1000).toFixed(2)
+      const totalImported = noOfSecrets + noOfVariables
+
+      Logger.section([
+        `🔐 Secrets imported: ${noOfSecrets}`,
+        `🔧 Variables imported: ${noOfVariables}`,
+        `📈 Total imported: ${totalImported}`,
+        `⏱️  Total time: ${duration}s`
+      ])
+
+      if (errors.length > 0) {
+        Logger.warn('Some imports failed:')
+        errors.forEach((error) => {
+          Logger.warn(error)
+        })
+      }
     } catch (error) {
       const errorMessage = (error as Error)?.message
       Logger.error(

@@ -37,6 +37,8 @@ import InvitationSVG from './invitation.svg'
 import ErrorInfoSVG from './errorInfo.svg'
 import DiscordSVG from './discord.svg'
 import SlackSVG from './slack.svg'
+import VercelSVG from './vercel.svg'
+import LambdaSVG from './lambda.svg'
 import EmptyIntegrationSVG from './emptyIntegration.svg'
 import PendingSVG from './pending.svg'
 
@@ -81,5 +83,7 @@ export {
   ErrorInfoSVG,
   DiscordSVG,
   SlackSVG,
-  PendingSVG
+  PendingSVG,
+  VercelSVG,
+  LambdaSVG
 }

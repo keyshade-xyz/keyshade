@@ -22,6 +22,7 @@
     "unit": "pnpm db:generate-types && jest --config=jest.config.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.840.0",
     "@logtail/node": "^0.5.4",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.0",
@@ -42,6 +43,7 @@
     "@slack/bolt": "^3.22.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "@supabase/supabase-js": "^2.39.6",
+    "@vercel/sdk": "^1.7.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",

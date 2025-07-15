@@ -7,7 +7,6 @@ export interface ChangeNotifierRegistration {
 export interface ChangeNotification {
   name: string
   value: string
-  isPlaintext: boolean
 }
 
 export interface ChangeNotificationEvent extends ChangeNotification {

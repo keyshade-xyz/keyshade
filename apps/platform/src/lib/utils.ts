@@ -30,6 +30,13 @@ export function formatTime(date: string): string {
   return dayjs(date).format('HH:mm')
 }
 
+export function formatText(type: string): string {
+  return type
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
 export function parseUpdatedEnvironmentValues(
   oldValues: Variable['values'],
   newValues: Record<string, string>

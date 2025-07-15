@@ -24,6 +24,7 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
+  exportConfigOpenAtom,
   selectedProjectAtom,
   selectedWorkspaceAtom
 } from '@/store'
@@ -51,6 +52,7 @@ export default function ProjectCard({
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -70,6 +72,11 @@ export default function ProjectCard({
   const handleDeleteProject = () => {
     setSelectedProject(project)
     setIsDeleteProjectOpen(true)
+  }
+
+  const handleExportConfiguration = () => {
+    setSelectedProject(project)
+    setIsExportConfigurationDialogOpen(true)
   }
 
   const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
@@ -146,6 +153,10 @@ export default function ProjectCard({
         </ContextMenuItem>
         <ContextMenuItem inset onClick={handleCopyToClipboard}>
           Copy slug
+        </ContextMenuItem>
+        <ContextMenuSeparator className="bg-white/15" />
+        <ContextMenuItem inset onClick={handleExportConfiguration}>
+          Export configuration
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem inset onClick={handleEditProject}>

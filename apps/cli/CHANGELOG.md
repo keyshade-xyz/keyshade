@@ -147,3 +147,86 @@
 ### Patches
 
 - `keyshade run` wouldn't decrypt secrets if the project didn't store the private key
+
+## 3.1.0-stage.1
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
+
+## 3.1.0-stage.2
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
+
+## 3.1.0-stage.3
+
+### Minor Changes
+
+- Updated secret-related commands to decrypt secrets on local device ONLY
+- `keyshade run` command decrypts all secrets locally
+- Updated private key config to map to project slugs only, removing workspace slug
+
+## 3.1.0
+
+### Minor Changes
+
+- Added `keyshade project export` command to export secrets and variables to a file
+- Updated secret-related commands to decrypt secrets on local device ONLY
+- `keyshade run` command decrypts all secrets locally
+- Updated private key config to map to project slugs only, removing workspace slug
+
+### Patches
+
+- Updated `Keyshade project import` command to allow user to secret secrets or variable after initial scan
+
+## 3.2.0-stage.1
+
+## Minor Changes
+
+- Added `keyshade integration` base command
+
+## 3.2.0-stage.2
+
+### Patches
+
+- Updated `keyshade run` command to parse command without quotes
+- Run command exits when the command passed is a one-time only command
+- Updated `keyshade run` command to kill child command upon ctrl+c
+
+## 3.2.0
+
+### Minor Changes
+
+- Added `keyshade integration` base command
+
+### Patches
+
+- Updated `keyshade run` command to parse command without quotes
+- Run command exits when the command passed is a one-time only command
+- Updated `keyshade run` command to kill child command upon ctrl+c
+
+## 3.2.1-stage.1
+
+### Patches
+
+- Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
+
+## 3.2.1-stage.2
+
+### Minor Changes
+
+- Updated `keyshade project import` to have better feedback
+- Modified Logger functions and implement new table function, revamping cli outputs
+
+## 3.2.1
+
+### Minor Changes
+
+- Updated `keyshade project import` to have better feedback
+- Modified Logger functions and implement new table function, revamping cli outputs
+
+### Patches
+
+- Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands

@@ -119,6 +119,9 @@ export const localProjectPrivateKeyAtom = atom<
     key: ProjectWithTierLimitAndCount['privateKey']
   }[]
 >([])
+export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(
+  'NONE'
+)
 
 export const workspaceProjectCountAtom = atom<number>(0)
 export const workspaceMemberCountAtom = atom<number>(0)
@@ -129,6 +132,7 @@ export const projectVariableCountAtom = atom<number>(0)
 export const createProjectOpenAtom = atom<boolean>(false)
 export const editProjectOpenAtom = atom<boolean>(false)
 export const deleteProjectOpenAtom = atom<boolean>(false)
+export const exportConfigOpenAtom = atom<boolean>(false)
 
 export const createVariableOpenAtom = atom<boolean>(false)
 export const editVariableOpenAtom = atom<boolean>(false)
@@ -139,7 +143,6 @@ export const rollbackVariableOpenAtom = atom<boolean>(false)
 
 export const createSecretOpenAtom = atom<boolean>(false)
 export const editSecretOpenAtom = atom<boolean>(false)
-export const shouldRevealSecretEnabled = atom<boolean>(false)
 export const deleteSecretOpenAtom = atom<boolean>(false)
 export const deleteEnvironmentValueOfSecretOpenAtom = atom<boolean>(false)
 export const secretRevisionsOpenAtom = atom<boolean>(false)

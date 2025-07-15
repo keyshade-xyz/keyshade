@@ -101,7 +101,7 @@ export default function EmailSettings(): React.JSX.Element {
   return (
     <>
       {user ? (
-        <div className="flex max-w-[20vw] flex-col gap-2">
+        <div className="flex max-w-md flex-col gap-2">
           <div className="flex flex-col gap-2">
             <div className="text-xl font-semibold">Email</div>
             <span className="text-sm text-white/70">

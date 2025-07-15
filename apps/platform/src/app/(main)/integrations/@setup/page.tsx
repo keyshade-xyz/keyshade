@@ -1,23 +1,13 @@
 'use client'
-import React, { useState, useCallback } from 'react'
-import { toast } from 'sonner'
-import { useAtomValue } from 'jotai'
-import type {
-  Environment,
-  EventTypeEnum,
-  Integration,
-  IntegrationTypeEnum,
-  Project
-} from '@keyshade/schema'
-import { useRouter } from 'next/navigation'
+import React from 'react'
+import type { IntegrationTypeEnum } from '@keyshade/schema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import ProjectEnvironmentInput from '@/components/integrations/projectEnvironmentInput'
+import ProjectEnvironmentMapping from '@/components/integrations/ProjectEnvironmentMapping'
 import IntegrationForm from '@/components/integrations/integrationMetadata'
 import EventTriggersInput from '@/components/integrations/eventTriggers'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
-import { selectedWorkspaceAtom } from '@/store'
+import { useSetupIntegration } from '@/hooks/use-integration'
 
 interface SetupIntegrationProps {
   integrationType: IntegrationTypeEnum
@@ -28,66 +18,14 @@ export default function SetupIntegration({
   integrationType,
   integrationName
 }: SetupIntegrationProps) {
-  const [name, setName] = useState<Integration['name']>('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
-    new Set()
-  )
-  const [selectedProjectSlug, setSelectedProjectSlug] = useState<
-    Project['slug'] | null
-  >(null)
-  const [selectedEnvironment, setSelectedEnvironment] = useState<
-    Environment['slug'] | null
-  >(null)
-  const [metadata, setMetadata] = useState<Record<string, string>>({})
-  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
-
-  const router = useRouter()
-
-  const createIntegration = useHttp(() =>
-    ControllerInstance.getInstance().integrationController.createIntegration({
-      name,
-      type: integrationType.toUpperCase() as IntegrationTypeEnum,
-      metadata,
-      workspaceSlug: selectedWorkspace!.slug,
-      notifyOn: Array.from(selectedEvents),
-      projectSlug: selectedProjectSlug ?? undefined,
-      environmentSlug: selectedEnvironment ?? undefined
-    })
-  )
-
-  const resetFormData = () => {
-    setName('')
-    setSelectedEvents(new Set())
-    setSelectedProjectSlug(null)
-    setSelectedEnvironment(null)
-    setMetadata({})
-  }
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!name.trim()) {
-        toast.error('Name of integration is required')
-        return
-      }
-
-      setIsLoading(true)
-
-      try {
-        const { success, data } = await createIntegration()
-
-        if (success && data) {
-          toast.success(`${integrationName} integration created!`)
-          resetFormData()
-        }
-      } finally {
-        setIsLoading(false)
-        router.push('/integrations')
-      }
-    },
-    [name, createIntegration, integrationName, router]
-  )
+  const {
+    formState,
+    isLoading,
+    config,
+    projectPrivateKey,
+    privateKeyLoading,
+    handlers
+  } = useSetupIntegration(integrationType, integrationName)
 
   return (
     <div className="mr-auto max-w-7xl p-6 text-white">
@@ -98,11 +36,12 @@ export default function SetupIntegration({
       </div>
 
       <p className="mb-6 text-white/60">
-        Connect your environment with {integrationType} to automate workflows
+        Connect your environment with {integrationName} to automate workflows
         and keep your systems in sync.
       </p>
 
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-6" onSubmit={handlers.handleSubmit}>
+        {/* Integration Name */}
         <div>
           <label
             className="mb-2 block font-medium text-white"
@@ -112,32 +51,55 @@ export default function SetupIntegration({
           </label>
           <Input
             id="integration-name"
-            onChange={(e) => setName(e.currentTarget.value)}
+            onChange={(e) => handlers.handleNameChange(e.currentTarget.value)}
             placeholder="Name of Integration"
-            value={name}
+            value={formState.name}
           />
         </div>
 
-        {/* Event Triggers Input Component */}
+        {/* Event Triggers */}
         <EventTriggersInput
           integrationType={integrationType}
-          onChange={setSelectedEvents}
-          selectedEvents={selectedEvents}
+          onChange={handlers.handleEventsChange}
+          selectedEvents={formState.selectedEvents}
         />
 
-        {/* Setup integration metadata */}
+        {/* Integration Metadata */}
         <IntegrationForm
-          initialMetadata={metadata}
+          initialMetadata={formState.metadata}
+          integrationName={integrationName}
           integrationType={integrationType}
-          onChange={setMetadata}
+          onChange={handlers.handleMetadataChange}
         />
 
-        {/* Specify Project and Environment(optional) */}
-        <ProjectEnvironmentInput
-          onEnvironmentChange={setSelectedEnvironment}
-          onProjectChange={setSelectedProjectSlug}
-        />
+        {/* Project and Environment Selection */}
+        {config.isMappingRequired ? (
+          <ProjectEnvironmentMapping
+            keyMapping={formState.mappings}
+            manualPrivateKey={formState.manualPrivateKey}
+            onEnvironmentChange={handlers.handleEnvironmentChange}
+            onKeyMappingChange={handlers.handleMappingsChange}
+            onManualPrivateKeyChange={handlers.handleManualPrivateKeyChange}
+            onProjectChange={handlers.handleProjectChange}
+            privateKeyLoading={privateKeyLoading}
+            projectPrivateKey={projectPrivateKey}
+            selectedProject={formState.selectedProject}
+          />
+        ) : (
+          <ProjectEnvironmentInput
+            isMultiEnvironment={config.maxEnvironmentsCount === 'any'}
+            manualPrivateKey={formState.manualPrivateKey}
+            onEnvironmentChange={handlers.handleEnvironmentChange}
+            onManualPrivateKeyChange={handlers.handleManualPrivateKeyChange}
+            onProjectChange={handlers.handleProjectChange}
+            privateKeyLoading={privateKeyLoading}
+            privateKeyRequired={config.isPrivateKeyRequired}
+            projectPrivateKey={projectPrivateKey}
+            selectedProject={formState.selectedProject}
+          />
+        )}
 
+        {/* Submit Button */}
         <Button
           className="self-end"
           disabled={isLoading}

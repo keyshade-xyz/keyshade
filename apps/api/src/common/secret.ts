@@ -1,22 +1,11 @@
 import { SecretWithValues } from '@/secret/secret.types'
-import { decrypt } from '@keyshade/common'
 
 export async function getSecretWithValues(
   secretWithVersion: SecretWithValues['secret'] & {
     versions: SecretWithValues['values']
-  },
-  shouldBePlaintext?: boolean,
-  privateKey?: string
+  }
 ): Promise<SecretWithValues> {
   const values = secretWithVersion.versions
-
-  if (shouldBePlaintext && privateKey) {
-    await Promise.all(
-      values.map(async (value) => {
-        value.value = await decrypt(privateKey, value.value)
-      })
-    )
-  }
 
   delete secretWithVersion.versions
   const secret = secretWithVersion

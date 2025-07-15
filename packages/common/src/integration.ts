@@ -5,6 +5,7 @@ export interface MetadataField {
   description?: string
   requestFieldName: string
   placeholder?: string
+  isEnvironment?: boolean
 }
 
 export interface IntegrationConfig {
@@ -12,6 +13,9 @@ export interface IntegrationConfig {
   type: IntegrationTypeEnum
   events: GroupItem[]
   metadataFields: MetadataField[]
+  envMapping: boolean
+  privateKeyRequired: boolean
+  maxEnvironmentsCount: 'single' | 'any'
 }
 
 interface GroupItem {
@@ -19,6 +23,13 @@ interface GroupItem {
   description: string
   level: number
   items: EventTypeEnum[]
+}
+
+export interface VercelEnvironmentMapping {
+  [environmentSlug: string]: {
+    vercelSystemEnvironment?: 'production' | 'preview' | 'development'
+    vercelCustomEnvironmentId?: string
+  }
 }
 
 const eventGroups: GroupItem[] = [
@@ -80,20 +91,16 @@ const eventGroups: GroupItem[] = [
   }
 ]
 
-// const CONFIGURATION_EVENTS: EventTypeEnum[] = [
-//   'VARIABLE_ADDED',
-//   'VARIABLE_DELETED',
-//   'VARIABLE_UPDATED',
-//   'SECRET_ADDED',
-//   'SECRET_DELETED',
-//   'SECRET_UPDATED'
-// ]
+const selectedEventGroups: GroupItem[] = [eventGroups[3], eventGroups[4]]
 
 export const Integrations: Record<string, IntegrationConfig> = {
   DISCORD: {
     name: 'Discord',
     type: 'DISCORD',
     events: eventGroups,
+    envMapping: false,
+    privateKeyRequired: false,
+    maxEnvironmentsCount: 'any',
     metadataFields: [
       {
         name: 'Webhook URL',
@@ -107,6 +114,9 @@ export const Integrations: Record<string, IntegrationConfig> = {
     name: 'Slack',
     type: 'SLACK',
     events: eventGroups,
+    envMapping: false,
+    privateKeyRequired: false,
+    maxEnvironmentsCount: 'any',
     metadataFields: [
       {
         name: 'Bot Token',
@@ -128,6 +138,70 @@ export const Integrations: Record<string, IntegrationConfig> = {
           'The channel ID Keyshade will use to make requests to Slack',
         requestFieldName: 'channelId',
         placeholder: 'KS1234567'
+      }
+    ]
+  },
+  VERCEL: {
+    name: 'Vercel',
+    type: 'VERCEL',
+    events: selectedEventGroups,
+    envMapping: true,
+    privateKeyRequired: true,
+    maxEnvironmentsCount: 'any',
+    metadataFields: [
+      {
+        name: 'Token',
+        description: 'The token Keyshade will use to make requests to Vercel',
+        requestFieldName: 'token',
+        placeholder: 'your-vercel-token'
+      },
+      {
+        name: 'Project ID',
+        description: 'The ID of the Vercel project to integrate with',
+        requestFieldName: 'projectId',
+        placeholder: 'your-vercel-project-id'
+      },
+      {
+        name: 'Environments',
+        description:
+          'The environments to integrate with (e.g., production, staging)',
+        requestFieldName: 'environments',
+        placeholder: 'production,staging',
+        isEnvironment: true
+      }
+    ]
+  },
+  AWS_LAMBDA: {
+    name: 'AWS Lambda',
+    type: 'AWS_LAMBDA',
+    events: selectedEventGroups,
+    envMapping: false,
+    privateKeyRequired: true,
+    maxEnvironmentsCount: 'single',
+    metadataFields: [
+      {
+        name: 'Region',
+        description: 'The AWS region where the Lambda function is deployed',
+        requestFieldName: 'region',
+        placeholder: 'us-east-1'
+      },
+      {
+        name: 'Access Key ID',
+        description: 'The AWS access key ID for authentication',
+        requestFieldName: 'accessKeyId',
+        placeholder: 'AKIA...'
+      },
+      {
+        name: 'Secret Access Key',
+        description: 'The AWS secret access key for authentication',
+        requestFieldName: 'secretAccessKey',
+        placeholder: 'your-secret-access-key'
+      },
+      {
+        name: 'Function Name',
+        description: 'The name of the AWS Lambda function to invoke',
+        requestFieldName: 'lambdaFunctionName',
+        placeholder: 'my-lambda-function'
       }
     ]
   }

@@ -8,6 +8,8 @@ import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
 import formatDate from '@/util/date-formatter'
+import { Table } from '@/util/table'
+import chalk from 'chalk'
 
 export default class ListVariable extends BaseCommand {
   getName(): string {
@@ -19,7 +21,14 @@ export default class ListVariable extends BaseCommand {
   }
 
   getOptions(): CommandOption[] {
-    return PAGINATION_OPTION
+    return [
+      {
+        short: '-v',
+        long: '--verbose',
+        description: 'Prints detailed information about each variable'
+      },
+      ...PAGINATION_OPTION
+    ]
   }
 
   getArguments(): CommandArgument[] {
@@ -48,6 +57,13 @@ export default class ListVariable extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
+    const { verbose } = options
+    if (!projectSlug) {
+      Logger.error('Project slug is required')
+      return
+    }
+    Logger.header(`Fetching all variables for ${projectSlug}...`)
+    console.log('')
     const { data, error, success } =
       await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
         {
@@ -59,21 +75,51 @@ export default class ListVariable extends BaseCommand {
 
     if (success) {
       const variables = data.items
+
       if (variables.length > 0) {
-        variables.forEach(({ variable, values }) => {
-          Logger.info(`- ${variable.name} (${variable.slug})`)
-          values.forEach(
-            ({ environment, value, version, createdOn, createdBy }) => {
-              Logger.info(
-                `  | ${environment.name} (${environment.slug}): ${value} (version ${version})`
-              )
-              Logger.info(
-                `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
-              )
-              Logger.info('')
-            }
-          )
-        })
+        if (verbose) {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value',
+            '🗓️ Created On',
+            '👤 Created By'
+          ]
+
+          variables.forEach(({ variable, values }) => {
+            Logger.info(` - ${chalk.bold(variable.name)}(${variable.slug})`)
+            const rows = values.map(
+              ({ environment, value, version, createdOn, createdBy }) => [
+                `${variable.name}(${variable.slug})`,
+                environment.name,
+                String(version),
+                value,
+                formatDate(createdOn),
+                createdBy.name
+              ]
+            )
+            Table.render(headers, rows)
+          })
+        } else {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value'
+          ]
+
+          variables.forEach(({ variable, values }) => {
+            Logger.info(` - ${chalk.bold(variable.name)}(${variable.slug})`)
+            const rows = values.map(({ environment, value, version }) => [
+              `${variable.name}(${variable.slug})`,
+              environment.name,
+              String(version),
+              value
+            ])
+            Table.render(headers, rows)
+          })
+        }
       } else {
         Logger.info('No variables found')
       }

@@ -3,8 +3,8 @@ import React, { useCallback, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
+import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

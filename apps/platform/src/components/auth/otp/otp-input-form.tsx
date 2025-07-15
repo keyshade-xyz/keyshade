@@ -1,4 +1,3 @@
-import { LoadingSVG } from '@public/svg/shared'
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useState } from 'react'
@@ -8,6 +7,7 @@ import { useAtom } from 'jotai'
 import { useRouter } from 'next/navigation'
 import { posthog } from 'posthog-js'
 import Cookies from 'js-cookie'
+import { LoadingSVG } from '@public/svg/shared'
 import {
   InputOTP,
   InputOTPGroup,
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { userAtom } from '@/store'
+import { isEmailValid } from '@/lib/is-email-valid'
 
 interface OtpInputFormProps {
   isLoading: boolean
@@ -44,21 +45,18 @@ export default function OtpInputForm({
     throw new Error('User not set in context')
   })
 
-  const handleVerifyOTP = async (): Promise<void> => {
+  const handleVerifyOTP = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault()
+
     if (!user) {
       throw new Error('User not set in context')
     }
 
-    const emailResult = z.string().email().safeParse(user.email)
-    const alphanumeric = z
-      .string()
-      .length(6)
-      .refine((value) => /^[a-z0-9]+$/i.test(value), {
-        message: 'OTP must be alphanumeric'
-      })
-    const otpResult = alphanumeric.safeParse(otp)
+    const isOtpValid = isAlphanumeric(otp)
 
-    if (!emailResult.success || !otpResult.success) {
+    if (!isEmailValid(user.email) || !isOtpValid) {
       toast.error('Invalid OTP', {
         description: (
           <p className="text-xs text-red-300">
@@ -98,8 +96,29 @@ export default function OtpInputForm({
     }
   }
 
+  const isAlphanumeric = (value: string): boolean => {
+    const result = z
+      .string()
+      .length(6)
+      .refine((str) => /^[a-z0-9]+$/i.test(str), {
+        message: 'OTP must be alphanumeric'
+      })
+      .safeParse(value)
+
+    return result.success
+  }
+
+  const isButtonDisabled = (): boolean => {
+    return (
+      isLoading ||
+      otp.length !== 6 ||
+      !isAlphanumeric(otp) ||
+      !isEmailValid(user?.email)
+    )
+  }
+
   return (
-    <form className="flex w-[17rem] flex-col gap-3">
+    <form className="flex w-[17rem] flex-col gap-3" onSubmit={handleVerifyOTP}>
       <div>
         <InputOTP
           maxLength={6}
@@ -123,7 +142,7 @@ export default function OtpInputForm({
         </InputOTP>
       </div>
 
-      <Button className="w-full" disabled={isLoading} onClick={handleVerifyOTP}>
+      <Button className="w-full" disabled={isButtonDisabled()} type="submit">
         {isLoading ? <LoadingSVG className="w-10" /> : 'Verify'}
       </Button>
     </form>

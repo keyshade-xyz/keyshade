@@ -8,6 +8,10 @@ import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import formatDate from '@/util/date-formatter'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
+import { fetchPrivateKey } from '@/util/configuration'
+import { decrypt } from '@/util/decrypt'
+import { Table } from '@/util/table'
+import chalk from 'chalk'
 
 export default class ListSecret extends BaseCommand {
   getName(): string {
@@ -34,10 +38,9 @@ export default class ListSecret extends BaseCommand {
   getOptions(): CommandOption[] {
     return [
       {
-        short: '-d',
-        long: '--decrypt-value',
-        description:
-          'Set this to true if the project contains the private key. If set to true, the values of the secret will be in plaintext format'
+        short: '-v',
+        long: '--verbose',
+        description: 'Prints detailed information about each secret'
       },
       ...PAGINATION_OPTION
     ]
@@ -49,9 +52,6 @@ export default class ListSecret extends BaseCommand {
   List all secrets under a project
   keyshade secret list project-1
 
-  Decrypt values while listing
-  keyshade secret list project-1 --decrypt-value
-
   Pagination options
   keyshade secret list project-1 --page 1 --limit 10
   `
@@ -59,13 +59,18 @@ export default class ListSecret extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
-    const { decryptValue, paginationOptions } = await this.parseInput(options)
+    const { verbose } = options
+    if (!projectSlug) {
+      Logger.error('Project slug is required')
+      return
+    }
+    const { paginationOptions } = await this.parseInput(options)
+    const projectPrivateKey = await fetchPrivateKey(projectSlug)
 
     const { data, error, success } =
       await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
         {
           projectSlug,
-          decryptValue,
           ...paginationOptions
         },
         this.headers
@@ -73,21 +78,63 @@ export default class ListSecret extends BaseCommand {
 
     if (success) {
       const secrets = data.items
+      Logger.header(`Fetching all secrets for ${projectSlug}...`)
       if (secrets.length > 0) {
-        secrets.forEach(({ secret, values }) => {
-          Logger.info(`- ${secret.name} (${secret.slug})`)
-          values.forEach(
-            ({ environment, value, version, createdOn, createdBy }) => {
-              Logger.info(
-                `  | ${environment.name} (${environment.slug}): ${decryptValue ? value : 'Hidden'} (version ${version})`
+        if (verbose) {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value',
+            '🗓️ Created On',
+            '👤 Created By'
+          ]
+          for (const { secret, values } of secrets) {
+            Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
+            const rows = await Promise.all(
+              values.map(
+                async ({
+                  environment,
+                  value,
+                  version,
+                  createdOn,
+                  createdBy
+                }) => [
+                  `${secret.name}(${secret.slug})`,
+                  environment.name,
+                  String(version),
+                  projectPrivateKey
+                    ? await decrypt(projectPrivateKey, value)
+                    : 'Hidden',
+                  formatDate(createdOn),
+                  createdBy.name
+                ]
               )
-              Logger.info(
-                `  | Created on ${formatDate(createdOn)} by ${createdBy.name}`
-              )
-              Logger.info('')
-            }
-          )
-        })
+            )
+            Table.render(headers, rows)
+          }
+        } else {
+          const headers = [
+            '📑 Variable',
+            '📦 Environment',
+            '📊 Version',
+            '💾 Value'
+          ]
+          for (const { secret, values } of secrets) {
+            Logger.info(` - ${chalk.bold(secret.name)}(${secret.slug})`)
+            const rows = await Promise.all(
+              values.map(async ({ environment, value, version }) => [
+                `${secret.name}(${secret.slug})`,
+                environment.name,
+                String(version),
+                projectPrivateKey
+                  ? await decrypt(projectPrivateKey, value)
+                  : 'Hidden'
+              ])
+            )
+            Table.render(headers, rows)
+          }
+        }
       } else {
         Logger.info('No secrets found')
       }
@@ -97,12 +144,10 @@ export default class ListSecret extends BaseCommand {
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    decryptValue: boolean
     paginationOptions: CommandActionData['options']
   }> {
-    const { decryptValue = false, ...paginationOptions } = options // defaults to false
+    const { ...paginationOptions } = options // defaults to false
     return {
-      decryptValue,
       paginationOptions
     }
   }

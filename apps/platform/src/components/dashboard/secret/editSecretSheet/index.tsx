@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import { decrypt } from '@keyshade/common'
 import {
@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import {
   editSecretOpenAtom,
   secretsOfProjectAtom,
-  shouldRevealSecretEnabled,
+  selectedProjectAtom,
   selectedSecretAtom
 } from '@/store'
 import ControllerInstance from '@/lib/controller-instance'
@@ -33,10 +33,10 @@ import {
 export default function EditSecretSheet(): JSX.Element {
   const [isEditSecretSheetOpen, setIsEditSecretSheetOpen] =
     useAtom(editSecretOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
-  const isDecrypted = useAtomValue(shouldRevealSecretEnabled)
-  const { projectPrivateKey } = useProjectPrivateKey()
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   const [requestData, setRequestData] = useState<{
     name: string | undefined
@@ -46,9 +46,7 @@ export default function EditSecretSheet(): JSX.Element {
     note: selectedSecretData?.secret.note || ''
   })
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [environmentValues, setEnvironmentValues] = useState<
-    Record<string, string>
-  >(
+  const environmentValues = useMemo<Record<string, string>>(
     () =>
       selectedSecretData?.values.reduce(
         (acc, entry) => {
@@ -56,7 +54,8 @@ export default function EditSecretSheet(): JSX.Element {
           return acc
         },
         {} as Record<string, string>
-      ) || {}
+      ) || {},
+    [selectedSecretData?.values]
   )
   const [decryptedValues, setDecryptedValues] = useState<
     Record<string, string>
@@ -65,7 +64,6 @@ export default function EditSecretSheet(): JSX.Element {
   useEffect(() => {
     // decrypt environment values
     if (!projectPrivateKey) return
-    if (isDecrypted) return
 
     Object.entries(environmentValues).forEach(([slug, encrypted]) => {
       if (decryptedValues[slug]) return
@@ -86,7 +84,7 @@ export default function EditSecretSheet(): JSX.Element {
           }))
         })
     })
-  }, [projectPrivateKey, environmentValues, isDecrypted, decryptedValues])
+  }, [projectPrivateKey, environmentValues, decryptedValues])
 
   const updateSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.updateSecret({
@@ -99,10 +97,8 @@ export default function EditSecretSheet(): JSX.Element {
       note: requestData.note?.trim() || undefined,
       entries: parseUpdatedEnvironmentValues(
         selectedSecretData!.values,
-        isDecrypted ? environmentValues : decryptedValues
-      ),
-      decryptValue: isDecrypted,
-      privateKey: projectPrivateKey || undefined
+        decryptedValues
+      )
     })
   )
 
@@ -216,12 +212,8 @@ export default function EditSecretSheet(): JSX.Element {
             />
           </div>
           <EnvironmentValueEditor
-            environmentValues={
-              isDecrypted ? environmentValues : decryptedValues
-            }
-            setEnvironmentValues={
-              isDecrypted ? setEnvironmentValues : setDecryptedValues
-            }
+            environmentValues={decryptedValues}
+            setEnvironmentValues={setDecryptedValues}
           />
         </div>
         <SheetFooter className="py-3">

@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   Logger,
@@ -32,7 +32,8 @@ import { paginate } from '@/common/paginate'
 import {
   addHoursToDate,
   constructErrorBody,
-  limitMaxItemsPerPage
+  limitMaxItemsPerPage,
+  mapEntriesToEventMetadata
 } from '@/common/util'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
@@ -42,7 +43,13 @@ import { SecretWithProject, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
-import { decrypt, encrypt } from '@keyshade/common'
+import { VariableService } from '@/variable/variable.service'
+import { decrypt, encrypt, sDecrypt } from '@/common/cryptography'
+import {
+  ConfigurationAddedEventMetadata,
+  ConfigurationDeletedEventMetadata,
+  ConfigurationUpdatedEventMetadata
+} from '@/event/event.types'
 
 @Injectable()
 export class SecretService {
@@ -54,6 +61,8 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    @Inject(forwardRef(() => VariableService))
+    private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
     readonly redisClient: {
       publisher: RedisClientType
@@ -96,20 +105,22 @@ export class SecretService {
     // Check if the secret with the same name already exists in the project
     await this.secretExists(dto.name, project)
 
+    // Check if a variable with the same name already exists in the project
+    await this.variableService.variableExists(dto.name, project)
+
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
       `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
     )
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     // Create the secret
     this.logger.log(`Creating secret ${dto.name} in project ${projectSlug}`)
@@ -180,11 +191,31 @@ export class SecretService {
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const secret = await getSecretWithValues(
-      secretData,
-      project.storePrivateKey && project.privateKey !== null,
-      project.privateKey
-    )
+    const secret = await getSecretWithValues(secretData)
+
+    if (dto.entries && dto.entries.length > 0) {
+      try {
+        for (const { environmentSlug, value } of dto.entries) {
+          this.logger.log(
+            `Publishing secret creation to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+          )
+          await this.redis.publish(
+            CHANGE_NOTIFIER_RSC,
+            JSON.stringify({
+              environmentId: environmentSlugToIdMap.get(environmentSlug),
+              name: dto.name,
+              value,
+              isPlaintext: true
+            } as ChangeNotificationEvent)
+          )
+          this.logger.log(
+            `Published secret update to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+          )
+        }
+      } catch (error) {
+        this.logger.error(`Error publishing secret update to Redis: ${error}`)
+      }
+    }
 
     await createEvent(
       {
@@ -194,17 +225,48 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          secretId: secret.secret.id,
-          name: secret.secret.name,
-          projectId,
-          projectName: project.name
-        },
+          name: secretData.name,
+          description: secretData.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isSecret: true,
+          isPlaintext: true
+        } as ConfigurationAddedEventMetadata,
         workspaceId: project.workspaceId
       },
       this.prisma
     )
 
     return secret
+  }
+
+  async bulkCreateSecrets(
+    user: AuthenticatedUser,
+    projectSlug: string,
+    secrets: CreateSecret[]
+  ): Promise<{
+    successful: SecretWithValues[]
+    failed: Array<{ name: string; error: string }>
+  }> {
+    this.logger.log(
+      `User ${user.id} initiated bulk creation of ${secrets.length} secrets in project ${projectSlug}`
+    )
+
+    const successful: SecretWithValues[] = []
+    const failed: Array<{ name: string; error: string }> = []
+
+    for (const secret of secrets) {
+      try {
+        const result = await this.createSecret(user, secret, projectSlug)
+        successful.push(result)
+      } catch (err) {
+        this.logger.error(
+          `Error creating secret "${secret.name}": ${err.message}`
+        )
+        failed.push({ name: secret.name, error: err.message })
+      }
+    }
+
+    return { successful, failed }
   }
 
   /**
@@ -237,17 +299,19 @@ export class SecretService {
     )
 
     // Check if the secret with the same name already exists in the project
-    dto.name && (await this.secretExists(dto.name, secret.project))
+    await this.secretExists(dto.name, secret.project)
+
+    // Check if a variable with the same name already exists in the project
+    await this.variableService.variableExists(dto.name, secret.project)
 
     // Check if the user has access to the environments
-    const environmentSlugToIdMap = shouldCreateRevisions
-      ? await getEnvironmentIdToSlugMap(
-          dto,
-          user,
-          secret.project,
-          this.authorizationService
-        )
-      : new Map<string, string>()
+    const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
+      dto,
+      user,
+      secret.project,
+      this.authorizationService,
+      shouldCreateRevisions
+    )
 
     const op = []
 
@@ -261,9 +325,7 @@ export class SecretService {
         },
         data: {
           name: dto.name,
-          slug: dto.name
-            ? await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET')
-            : undefined,
+          slug: await this.slugGenerator.generateEntitySlug(dto.name, 'SECRET'),
           note: dto.note,
           ...(dto.rotateAfter
             ? {
@@ -352,23 +414,6 @@ export class SecretService {
       updatedVersions: updatedVersions
     }
 
-    // Decrypt the secret values before sending only if one of the conditions are met:
-    // 1. The user has requested to decrypt the secret values
-    // 2. The project stores the private key OR
-    // 3. The user has provided the private key
-    if (
-      dto.decryptValue &&
-      ((secret.project.storePrivateKey && secret.project.privateKey) ||
-        dto.privateKey)
-    ) {
-      for (const version of updatedVersions) {
-        version.value = await decrypt(
-          secret.project.privateKey ?? dto.privateKey,
-          version.value
-        )
-      }
-    }
-
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
       for (const entry of dto.entries) {
@@ -402,11 +447,13 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret updated`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          oldName: secret.name,
+          newName: updatedSecret.name,
+          description: updatedSecret.note,
+          values: mapEntriesToEventMetadata(dto.entries),
+          isPlaintext: true,
+          isSecret: true
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -464,15 +511,13 @@ export class SecretService {
       {
         triggeredBy: user,
         entity: secret,
-        type: EventType.SECRET_UPDATED,
+        type: EventType.SECRET_DELETED,
         source: EventSource.SECRET,
         title: `Secret updated`,
         metadata: {
-          secretId: secret.id,
           name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          environments: [environmentSlug]
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -491,8 +536,7 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
-    rollbackVersion: SecretVersion['version'],
-    decryptValue: boolean
+    rollbackVersion: SecretVersion['version']
   ) {
     this.logger.log(
       `User ${user.id} attempted to rollback secret ${secretSlug} to version ${rollbackVersion}`
@@ -541,8 +585,12 @@ export class SecretService {
       )
     }
 
-    // Sorting is in ascending order of dates. So the last element is the latest version
-    const maxVersion = secret.versions[secret.versions.length - 1].version
+    let maxVersion = 0
+    for (const element of secret.versions) {
+      if (element.version > maxVersion) {
+        maxVersion = element.version
+      }
+    }
     this.logger.log(
       `Latest version of secret ${secretSlug} in environment ${environmentSlug} is ${maxVersion}. Rollback version is ${rollbackVersion}`
     )
@@ -572,19 +620,28 @@ export class SecretService {
       `Rolled back secret ${secretSlug} to version ${rollbackVersion}`
     )
 
+    const secretValue = secret.versions[rollbackVersion - 1].value
+    const canBeDecrypted =
+      project.storePrivateKey &&
+      project.privateKey !== null &&
+      project.privateKey !== undefined
+    const plainTextValue = canBeDecrypted
+      ? await decrypt(sDecrypt(project.privateKey), secretValue)
+      : null
+    const ultimateSecretValue = canBeDecrypted ? plainTextValue : secretValue
+
     try {
       this.logger.log(
         `Publishing secret update to Redis for secret ${secretSlug} in environment ${environmentSlug}`
       )
+
       await this.redis.publish(
         CHANGE_NOTIFIER_RSC,
         JSON.stringify({
           environmentId,
           name: secret.name,
-          value: project.storePrivateKey
-            ? await decrypt(project.privateKey, secret.versions[0].value)
-            : secret.versions[0].value,
-          isPlaintext: project.storePrivateKey
+          value: ultimateSecretValue,
+          isPlaintext: canBeDecrypted
         } as ChangeNotificationEvent)
       )
       this.logger.log(
@@ -602,11 +659,14 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret rolled back`,
         metadata: {
-          secretId: secret.id,
-          name: secret.name,
-          projectId: secret.projectId,
-          projectName: secret.project.name
-        },
+          oldName: secret.name,
+          newName: secret.name,
+          values: {
+            [environment.slug]: ultimateSecretValue
+          },
+          isPlaintext: canBeDecrypted,
+          isSecret: true
+        } as ConfigurationUpdatedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -614,14 +674,7 @@ export class SecretService {
 
     const currentRevision = secret.versions.find(
       (version) => version.version === rollbackVersion
-    )!
-
-    if (decryptValue && project.storePrivateKey) {
-      currentRevision.value = await decrypt(
-        project.privateKey,
-        currentRevision.value
-      )
-    }
+    )
 
     return {
       ...result,
@@ -648,6 +701,11 @@ export class SecretService {
       authorities: [Authority.DELETE_SECRET]
     })
 
+    const secretVersionEnvironments = new Set<Environment['slug']>()
+    for (const version of secret.versions) {
+      secretVersionEnvironments.add(version.environment.slug)
+    }
+
     // Delete the secret
     this.logger.log(`Deleting secret ${secretSlug}`)
     await this.prisma.secret.delete({
@@ -665,8 +723,9 @@ export class SecretService {
         entity: secret,
         title: `Secret deleted`,
         metadata: {
-          secretId: secret.id
-        },
+          name: secret.name,
+          environments: Array.from(secretVersionEnvironments)
+        } as ConfigurationDeletedEventMetadata,
         workspaceId: secret.project.workspaceId
       },
       this.prisma
@@ -678,7 +737,6 @@ export class SecretService {
    * @param user the user performing the action
    * @param secretSlug the slug of the secret
    * @param environmentSlug the slug of the environment
-   * @param decryptValue whether to decrypt the secret values or not
    * @param page the page of items to return
    * @param limit the number of items to return per page
    * @param order the order of the items. Default is 'desc'
@@ -688,7 +746,6 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     environmentSlug: Environment['slug'],
-    decryptValue: boolean,
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
@@ -719,9 +776,6 @@ export class SecretService {
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
-
-    // Check if the secret can be decrypted
-    await this.checkAutoDecrypt(decryptValue, secret.project)
 
     // Get the revisions
     this.logger.log(
@@ -761,14 +815,6 @@ export class SecretService {
       `Fetched ${items.length} revisions of secret ${secretSlug} in environment ${environmentSlug}`
     )
 
-    // Decrypt the values
-    if (decryptValue) {
-      this.logger.log(`Decrypting values of secret ${secretSlug}`)
-      for (const item of items) {
-        item.value = await decrypt(secret.project.privateKey, item.value)
-      }
-    }
-
     const totalCount = await this.prisma.secretVersion.count({
       where: {
         secretId: secretId,
@@ -789,7 +835,6 @@ export class SecretService {
    * Gets all secrets of a project
    * @param user the user performing the action
    * @param projectSlug the slug of the project
-   * @param decryptValue whether to decrypt the secret values or not
    * @param page the page of items to return
    * @param limit the number of items to return per page
    * @param sort the field to sort the results by
@@ -800,7 +845,6 @@ export class SecretService {
   async getAllSecretsOfProject(
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
-    decryptValue: boolean,
     page: number,
     limit: number,
     sort: string,
@@ -822,9 +866,6 @@ export class SecretService {
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
-
-    // Check if the secret values can be decrypted
-    await this.checkAutoDecrypt(decryptValue, project)
 
     // Get the secrets
     this.logger.log(
@@ -944,9 +985,7 @@ export class SecretService {
                 name: secretVersion.environment.name,
                 slug: secretVersion.environment.slug
               },
-              value: decryptValue
-                ? await decrypt(project.privateKey, secretVersion.value)
-                : secretVersion.value,
+              value: secretVersion.value,
               version: secretVersion.version,
               createdBy: {
                 id: secretVersion.createdBy.id,
@@ -972,18 +1011,13 @@ export class SecretService {
       }
     })
 
-    const metadata = paginate(
-      totalCount,
-      `/secret/${projectSlug}`,
-      {
-        page,
-        limit: limitMaxItemsPerPage(limit),
-        sort,
-        order,
-        search
-      },
-      { decryptValue }
-    )
+    const metadata = paginate(totalCount, `/secret/${projectSlug}`, {
+      page,
+      limit: limitMaxItemsPerPage(limit),
+      sort,
+      order,
+      search
+    })
 
     return { items, metadata }
   }
@@ -1061,10 +1095,7 @@ export class SecretService {
     for (const secret of secrets) {
       response.push({
         name: secret.name,
-        value: project.storePrivateKey
-          ? await decrypt(project.privateKey, secret.versions[0].value)
-          : secret.versions[0].value,
-        isPlaintext: project.storePrivateKey
+        value: secret.versions[0].value
       })
     }
 
@@ -1176,7 +1207,7 @@ export class SecretService {
             environmentId: updatedVersion.environment.id,
             name: updatedSecret.name,
             value: updatedVersion.value,
-            isPlaintext: true
+            isPlaintext: false
           } as ChangeNotificationEvent)
         )
         this.logger.log(
@@ -1216,7 +1247,12 @@ export class SecretService {
    * @param secretName the name of the secret to check
    * @param project the project to check the secret in
    */
-  private async secretExists(secretName: Secret['name'], project: Project) {
+  async secretExists(
+    secretName: Secret['name'] | null | undefined,
+    project: Project
+  ) {
+    if (!secretName) return
+
     this.logger.log(
       `Checking if secret ${secretName} exists in project ${project.slug}`
     )
@@ -1235,43 +1271,8 @@ export class SecretService {
         constructErrorBody('Secret already exists', errorMessage)
       )
     }
-  }
-
-  /**
-   * Checks if the project is allowed to decrypt secret values
-   * @param decryptValue whether to decrypt the secret values or not
-   * @param project the project to check
-   * @throws {BadRequestException} if the project does not store the private key and decryptValue is true
-   * @throws {NotFoundException} if the project does not have a private key and decryptValue is true
-   */
-  private async checkAutoDecrypt(decryptValue: boolean, project: Project) {
     this.logger.log(
-      `Checking if secret values can be decrypted for project ${project.slug}`
-    )
-
-    if (decryptValue) {
-      // Check if the project is allowed to store the private key
-      if (!project.storePrivateKey) {
-        const errorMessage = `Project ${project.slug} does not store the private key`
-        this.logger.error(errorMessage)
-        throw new BadRequestException(
-          constructErrorBody('Can not decrypt secret values', errorMessage)
-        )
-      }
-
-      // Check if the project has a private key. This is just to ensure that we don't run into any
-      // problems while decrypting the secret
-      if (!project.privateKey) {
-        const errorMessage = `Project ${project.slug} does not have a private key`
-        this.logger.error(errorMessage)
-        throw new NotFoundException(
-          constructErrorBody('Can not decrypt secret values', errorMessage)
-        )
-      }
-    }
-
-    this.logger.log(
-      `Secret values can be decrypted for project ${project.slug}`
+      `Secret ${secretName} does not exist in project ${project.slug}`
     )
   }
 }
