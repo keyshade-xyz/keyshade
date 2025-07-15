@@ -10,7 +10,7 @@ import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { AuthorizationParams } from '../auth.types'
-import { WorkspaceWithLastUpdatedByAndOwner } from '@/workspace/workspace.types'
+import { WorkspaceWithLastUpdatedByAndOwnerAndSubscription } from '@/workspace/workspace.types'
 
 @Injectable()
 export class AuthorizationService {
@@ -32,7 +32,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToWorkspace(
     params: AuthorizationParams
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace(params)
 

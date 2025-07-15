@@ -238,7 +238,8 @@ describe('Project Controller Tests', () => {
       // Create the number of projects that the tier limit allows
       for (
         let x = 100;
-        x < 100 + tierLimitService.getProjectTierLimit(workspace1.id) - 2; // Subtract 2 for the projects created above
+        x <
+        100 + (await tierLimitService.getProjectTierLimit(workspace1.id)) - 2; // Subtract 2 for the projects created above
         x++
       ) {
         await projectService.createProject(user1, workspace1.slug, {
@@ -489,7 +490,6 @@ describe('Project Controller Tests', () => {
       expect(project.storePrivateKey).toBe(project1.storePrivateKey)
       expect(project.workspaceId).toBe(project1.workspaceId)
       expect(project.lastUpdatedById).toBe(project1.lastUpdatedById)
-      expect(project.isDisabled).toBe(project1.isDisabled)
       expect(project.accessLevel).toBe(project1.accessLevel)
       expect(project.publicKey).toBe(project1.publicKey)
       expect(project.privateKey).toBe(project1.privateKey)
@@ -940,7 +940,6 @@ describe('Project Controller Tests', () => {
       expect(project.storePrivateKey).toBe(globalProject.storePrivateKey)
       expect(project.workspaceId).toBe(globalProject.workspaceId)
       expect(project.lastUpdatedById).toBe(globalProject.lastUpdatedById)
-      expect(project.isDisabled).toBe(globalProject.isDisabled)
       expect(project.accessLevel).toBe(globalProject.accessLevel)
       expect(project.publicKey).toBe(globalProject.publicKey)
       expect(project.privateKey).toBe(globalProject.privateKey)
@@ -968,7 +967,6 @@ describe('Project Controller Tests', () => {
       expect(project.storePrivateKey).toBe(internalProject.storePrivateKey)
       expect(project.workspaceId).toBe(internalProject.workspaceId)
       expect(project.lastUpdatedById).toBe(internalProject.lastUpdatedById)
-      expect(project.isDisabled).toBe(internalProject.isDisabled)
       expect(project.accessLevel).toBe(internalProject.accessLevel)
       expect(project.publicKey).toBe(internalProject.publicKey)
       expect(project.privateKey).toBe(internalProject.privateKey)
@@ -1200,7 +1198,6 @@ describe('Project Controller Tests', () => {
     expect(project.storePrivateKey).toBe(privateProject.storePrivateKey)
     expect(project.workspaceId).toBe(privateProject.workspaceId)
     expect(project.lastUpdatedById).toBe(privateProject.lastUpdatedById)
-    expect(project.isDisabled).toBe(privateProject.isDisabled)
     expect(project.accessLevel).toBe(privateProject.accessLevel)
     expect(project.publicKey).toBe(privateProject.publicKey)
     expect(project.privateKey).toBe(privateProject.privateKey)
