@@ -34,11 +34,14 @@ export const VariableSchema = z.object({
       id: UserSchema.shape.id,
       name: UserSchema.shape.name,
       profilePictureUrl: UserSchema.shape.profilePictureUrl
+    }),
+    entitlements: z.object({
+      canUpdate: z.boolean(),
+      canDelete: z.boolean()
     })
   }),
   values: z.array(VariableVersionSchema)
 })
-
 export const CreateVariableRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
   name: z.string(),
@@ -122,16 +125,8 @@ export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
   projectSlug: BaseProjectSchema.shape.slug
 })
 
-export const GetAllVariablesOfProjectResponseSchema = PageResponseSchema(
-  VariableSchema.extend({
-    secret: VariableSchema.shape.variable.extend({
-      entitlements: z.object({
-        canUpdate: z.boolean(),
-        canDelete: z.boolean()
-      })
-    })
-  })
-)
+export const GetAllVariablesOfProjectResponseSchema =
+  PageResponseSchema(VariableSchema)
 
 export const GetRevisionsOfVariableRequestSchema =
   PageRequestSchema.partial().extend({

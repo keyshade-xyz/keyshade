@@ -36,6 +36,10 @@ export const SecretSchema = z.object({
       id: UserSchema.shape.id,
       name: UserSchema.shape.name,
       profilePictureUrl: UserSchema.shape.profilePictureUrl
+    }),
+    entitlements: z.object({
+      canUpdate: z.boolean(),
+      canDelete: z.boolean()
     })
   }),
   values: z.array(SecretVersionSchema)
@@ -116,16 +120,8 @@ export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
   projectSlug: BaseProjectSchema.shape.slug
 })
 
-export const GetAllSecretsOfProjectResponseSchema = PageResponseSchema(
-  SecretSchema.extend({
-    secret: SecretSchema.shape.secret.extend({
-      entitlements: z.object({
-        canUpdate: z.boolean(),
-        canDelete: z.boolean()
-      })
-    })
-  })
-)
+export const GetAllSecretsOfProjectResponseSchema =
+  PageResponseSchema(SecretSchema)
 
 export const GetRevisionsOfSecretRequestSchema =
   PageRequestSchema.partial().extend({

@@ -6,7 +6,17 @@ import {
   User
 } from '@prisma/client'
 
-export interface SecretWithVersion extends Secret {
+export interface HydratedSecret extends Secret {
+  lastUpdatedBy: {
+    id: User['id']
+    name: User['name']
+    profilePictureUrl: User['profilePictureUrl']
+  }
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+  project: Project
   versions: {
     environment: {
       id: Environment['id']
@@ -24,24 +34,8 @@ export interface SecretWithVersion extends Secret {
   }[]
 }
 
-export interface SecretWithProject extends Secret {
-  project: Project
-}
-
-export interface SecretWithEntitlements extends Secret {
-  entitlements: {
-    canUpdate: boolean
-    canDelete: boolean
-  }
-}
-
-export interface HydratedSecret
-  extends SecretWithProject,
-    SecretWithVersion,
-    SecretWithEntitlements {}
-
 export interface SecretWithValues {
-  secret: Secret & { lastUpdatedBy: { id: string; name: string } }
+  secret: HydratedSecret
   values: Array<{
     environment: {
       id: string

@@ -6,7 +6,17 @@ import {
   VariableVersion
 } from '@prisma/client'
 
-export interface VariableWithVersion extends Variable {
+export interface HydratedVariable extends Variable {
+  lastUpdatedBy: {
+    id: string
+    name: string
+    profilePictureUrl: string
+  }
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
+  project: Project
   versions: {
     environment: {
       id: Environment['id']
@@ -24,24 +34,8 @@ export interface VariableWithVersion extends Variable {
   }[]
 }
 
-export interface VariableWithProject extends Variable {
-  project: Project
-}
-
-export interface VariableWithEntitlements extends Variable {
-  entitlements: {
-    canUpdate: boolean
-    canDelete: boolean
-  }
-}
-
-export interface HydratedVariable
-  extends VariableWithProject,
-    VariableWithVersion,
-    VariableWithEntitlements {}
-
 export interface VariableWithValues {
-  variable: Variable & { lastUpdatedBy: { id: string; name: string } }
+  variable: HydratedVariable
   values: Array<{
     environment: {
       id: string

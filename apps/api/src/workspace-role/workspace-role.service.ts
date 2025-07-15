@@ -723,8 +723,7 @@ export class WorkspaceRoleService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspaceRole.workspaceId,
       userId,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     if (

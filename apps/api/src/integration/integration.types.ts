@@ -89,37 +89,33 @@ export interface AWSLambdaIntegrationMetadata
   lambdaFunctionName: string
 }
 
-export interface IntegrationWithLastUpdatedBy extends Integration {
+export type IntegrationWithEnvironmentsAndMetadata<
+  T extends IntegrationMetadata
+> = Omit<HydratedIntegration, 'metadata'> & {
+  metadata: T
+}
+
+export interface HydratedIntegration extends Integration {
   lastUpdatedBy: {
     id: string
     name: string
     profilePictureUrl: string
   }
-}
-
-export interface IntegrationWithEnvironments extends Integration {
-  environments: {
-    id: string
-    name: string
-    slug: string
-  }[]
-}
-
-export type IntegrationWithEnvironmentsAndMetadata<
-  T extends IntegrationMetadata
-> = Omit<IntegrationWithEnvironments, 'metadata'> & {
-  metadata: T
-}
-
-export interface IntegrationWithLastUpdatedByAndReferences
-  extends IntegrationWithLastUpdatedBy,
-    IntegrationWithEnvironments {
+  entitlements: {
+    canUpdate: boolean
+    canDelete: boolean
+  }
   workspace: Workspace
   project: {
     id: string
     name: string
     slug: string
   } | null
+  environments: {
+    id: string
+    name: string
+    slug: string
+  }[]
 }
 
 export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'

@@ -39,11 +39,7 @@ import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { getSecretWithValues, generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import {
-  HydratedSecret,
-  SecretWithProject,
-  SecretWithValues
-} from './secret.types'
+import { HydratedSecret, SecretWithValues } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
@@ -54,6 +50,8 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { EntitlementService } from '@/common/entitlement.service'
 
 @Injectable()
 export class SecretService {
@@ -65,6 +63,7 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    private readonly entitlementService: EntitlementService,
     @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
@@ -162,46 +161,23 @@ export class SecretService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        versions: {
-          select: {
-            environment: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            value: true,
-            version: true,
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
-      }
+      include: InclusionQuery.Secret
     })
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const secret = await getSecretWithValues(secretData)
+    const hydratedSecret = await this.entitlementService.entitleSecret({
+      secret: secretData,
+      user,
+      project
+    })
+    const secretWithValues = await getSecretWithValues(hydratedSecret)
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing secret creation to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+            `Publishing secret creation to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -213,7 +189,7 @@ export class SecretService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published secret update to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+            `Published secret update to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -224,13 +200,13 @@ export class SecretService {
     await createEvent(
       {
         triggeredBy: user,
-        entity: secret.secret,
+        entity: secretWithValues.secret,
         type: EventType.SECRET_ADDED,
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          name: secretData.name,
-          description: secretData.note,
+          name: hydratedSecret.name,
+          description: hydratedSecret.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: true,
           isPlaintext: true
@@ -240,7 +216,7 @@ export class SecretService {
       this.prisma
     )
 
-    return secret
+    return secretWithValues
   }
 
   async bulkCreateSecrets(
@@ -882,9 +858,7 @@ export class SecretService {
           contains: search
         }
       },
-      select: {
-        slug: true
-      },
+      include: InclusionQuery.Secret,
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -897,16 +871,14 @@ export class SecretService {
 
     const hydratedSecrets: HydratedSecret[] = []
 
-    for (const { slug } of secrets) {
-      try {
-        hydratedSecrets.push(
-          await this.authorizationService.authorizeUserAccessToSecret({
-            user,
-            entity: { slug },
-            authorities: [Authority.READ_SECRET]
-          })
-        )
-      } catch (_ignored) {}
+    for (const secret of secrets) {
+      hydratedSecrets.push(
+        await this.entitlementService.entitleSecret({
+          project,
+          user,
+          secret
+        })
+      )
     }
     this.logger.log(
       `Hydrated ${hydratedSecrets.length} secrets of project ${projectSlug}`
@@ -990,7 +962,6 @@ export class SecretService {
       }
 
       delete secret.versions
-      delete secret.project
 
       // Add the secret to the map
       secretsWithEnvironmentalValues.add({
@@ -1136,9 +1107,7 @@ export class SecretService {
           lt: currentTime
         }
       },
-      include: {
-        project: true
-      }
+      include: InclusionQuery.Secret
     })
     this.logger.log(
       `Fetched ${secrets.length} secrets that have reached their rotation time`
@@ -1150,7 +1119,9 @@ export class SecretService {
     this.logger.log('Secrets rotation complete')
   }
 
-  private async rotateSecret(secret: SecretWithProject): Promise<void> {
+  private async rotateSecret(
+    secret: Omit<HydratedSecret, 'entitlements'>
+  ): Promise<void> {
     const op = []
 
     // Update the secret

@@ -46,6 +46,8 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { SecretService } from '@/secret/secret.service'
+import { EntitlementService } from '@/common/entitlement.service'
+import { InclusionQuery } from '@/common/inclusion-query'
 
 @Injectable()
 export class VariableService {
@@ -57,6 +59,7 @@ export class VariableService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    private readonly entitlementService: EntitlementService,
     @Inject(forwardRef(() => SecretService))
     private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
@@ -149,40 +152,25 @@ export class VariableService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        versions: {
-          select: {
-            environment: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            version: true,
-            value: true
-          }
-        }
-      }
+      include: InclusionQuery.Variable
     })
 
     this.logger.log(
       `Created variable ${variableData.name} in project ${project.slug}`
     )
 
-    const variable = getVariableWithValues(variableData)
+    const hydratedVariable = await this.entitlementService.entitleVariable({
+      project,
+      user,
+      variable: variableData
+    })
+    const variableWithValues = getVariableWithValues(hydratedVariable)
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing variable creation to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+            `Publishing variable creation to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -194,7 +182,7 @@ export class VariableService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published variable update to Redis for variable ${variableData.slug} in environment ${environmentSlug}`
+            `Published variable update to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -205,13 +193,13 @@ export class VariableService {
     await createEvent(
       {
         triggeredBy: user,
-        entity: variable.variable,
+        entity: variableWithValues.variable,
         type: EventType.VARIABLE_ADDED,
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          name: variableData.name,
-          description: variable.variable.note,
+          name: hydratedVariable.name,
+          description: variableWithValues.variable.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: false,
           isPlaintext: true
@@ -221,7 +209,7 @@ export class VariableService {
       this.prisma
     )
 
-    return variable
+    return variableWithValues
   }
 
   async bulkCreateVariables(
@@ -783,9 +771,7 @@ export class VariableService {
           contains: search
         }
       },
-      select: {
-        slug: true
-      },
+      include: InclusionQuery.Variable,
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -798,16 +784,14 @@ export class VariableService {
 
     const hydratedVariables: HydratedVariable[] = []
 
-    for (const { slug } of variables) {
-      try {
-        hydratedVariables.push(
-          await this.authorizationService.authorizeUserAccessToVariable({
-            user,
-            entity: { slug },
-            authorities: [Authority.READ_VARIABLE]
-          })
-        )
-      } catch (_ignored) {}
+    for (const variable of variables) {
+      hydratedVariables.push(
+        await this.entitlementService.entitleVariable({
+          project: variable.project,
+          user,
+          variable
+        })
+      )
     }
     this.logger.log(
       `Hydrated ${hydratedVariables.length} variables of project ${projectSlug}`
@@ -889,12 +873,11 @@ export class VariableService {
         const existingVariableVersion =
           envIdToVariableVersionMap.get(environmentId)
 
-        if (!existingVariableVersion) {
+        if (
+          !existingVariableVersion ||
+          existingVariableVersion.version < variableVersion.version
+        ) {
           envIdToVariableVersionMap.set(environmentId, variableVersion)
-        } else {
-          if (existingVariableVersion.version < variableVersion.version) {
-            envIdToVariableVersionMap.set(environmentId, variableVersion)
-          }
         }
       }
 

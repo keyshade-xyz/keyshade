@@ -4,7 +4,7 @@ import { ProjectWithSecrets } from '@/project/project.types'
 import { HydratedEnvironment } from '@/environment/environment.types'
 import { HydratedVariable } from '@/variable/variable.types'
 import { HydratedSecret } from '@/secret/secret.types'
-import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
+import { HydratedIntegration } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -81,6 +81,7 @@ export class AuthorizationService {
     const workspace = await this.getWorkspace(environment.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
+    delete environment.project
 
     return environment
   }
@@ -103,6 +104,7 @@ export class AuthorizationService {
     const workspace = await this.getWorkspace(variable.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
+    delete variable.project
 
     return variable
   }
@@ -125,6 +127,7 @@ export class AuthorizationService {
     const workspace = await this.getWorkspace(secret.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
+    delete secret.project
 
     return secret
   }
@@ -140,11 +143,12 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToIntegration(
     params: AuthorizationParams
-  ): Promise<IntegrationWithLastUpdatedByAndReferences> {
+  ): Promise<HydratedIntegration> {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration(params)
 
     this.checkUserHasAccessToWorkspace(params.user, integration.workspace)
+    delete integration.workspace
 
     return integration
   }

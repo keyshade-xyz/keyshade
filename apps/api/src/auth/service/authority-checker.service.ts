@@ -15,7 +15,7 @@ import {
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
-import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
+import { HydratedIntegration } from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
@@ -24,12 +24,17 @@ import {
   WorkspaceWithLastUpdatedByAndOwner
 } from '@/workspace/workspace.types'
 import { associateWorkspaceOwnerDetails } from '@/common/workspace'
+import { EntitlementService } from '@/common/entitlement.service'
+import { InclusionQuery } from '@/common/inclusion-query'
 
 @Injectable()
 export class AuthorityCheckerService {
   private readonly logger = new Logger(AuthorityCheckerService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly entitlementService: EntitlementService
+  ) {}
 
   /**
    * Checks if the user has the required authorities to access the given workspace.
@@ -103,8 +108,7 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       workspace.id,
       user.id,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     this.checkHasPermissionOverEntity(
@@ -198,8 +202,7 @@ export class AuthorityCheckerService {
       await getCollectiveWorkspaceAuthorities(
         project.workspaceId,
         user.id,
-        this.prisma,
-        this.logger
+        this.prisma
       )
 
     const projectAccessLevel = project.accessLevel
@@ -358,38 +361,6 @@ export class AuthorityCheckerService {
 
     let variable: Omit<HydratedVariable, 'entitlements'>
 
-    const variableIncludeQuery = {
-      lastUpdatedBy: {
-        select: {
-          id: true,
-          name: true,
-          profilePictureUrl: true
-        }
-      },
-      versions: {
-        select: {
-          value: true,
-          version: true,
-          createdOn: true,
-          environment: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          },
-          createdBy: {
-            select: {
-              id: true,
-              name: true,
-              profilePictureUrl: true
-            }
-          }
-        }
-      },
-      project: true
-    }
-
     try {
       if (entity.slug) {
         this.logger.log(`Fetching variable by slug ${entity.slug}`)
@@ -397,7 +368,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: variableIncludeQuery
+          include: InclusionQuery.Variable
         })
       } else {
         this.logger.log(`Fetching variable by name ${entity.name}`)
@@ -406,7 +377,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             project: { workspace: { members: { some: { userId: user.id } } } }
           },
-          include: variableIncludeQuery
+          include: InclusionQuery.Variable
         })
       }
     } catch (error) {
@@ -439,19 +410,16 @@ export class AuthorityCheckerService {
       user.id
     )
 
-    const entitlements: HydratedSecret['entitlements'] = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_VARIABLE),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_VARIABLE)
-    }
-
     this.logger.log(
       `User ${user.id} is cleared to access variable ${variable.slug} for authorities ${authorities}`
     )
 
-    return {
-      ...variable,
-      entitlements
-    }
+    return await this.entitlementService.entitleVariable({
+      project: variable.project,
+      user,
+      permittedAuthorities,
+      variable
+    })
   }
 
   /**
@@ -476,38 +444,6 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
-    const secretIncludeQuery = {
-      lastUpdatedBy: {
-        select: {
-          id: true,
-          name: true,
-          profilePictureUrl: true
-        }
-      },
-      versions: {
-        select: {
-          value: true,
-          version: true,
-          createdOn: true,
-          environment: {
-            select: {
-              id: true,
-              name: true,
-              slug: true
-            }
-          },
-          createdBy: {
-            select: {
-              id: true,
-              name: true,
-              profilePictureUrl: true
-            }
-          }
-        }
-      },
-      project: true
-    }
-
     try {
       if (entity.slug) {
         this.logger.log(`Fetching secret by slug ${entity.slug}`)
@@ -515,7 +451,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: secretIncludeQuery
+          include: InclusionQuery.Secret
         })
       } else {
         this.logger.log(`Fetching secret by name ${entity.name}`)
@@ -524,7 +460,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             project: { workspace: { members: { some: { userId: user.id } } } }
           },
-          include: secretIncludeQuery
+          include: InclusionQuery.Secret
         })
       }
     } catch (error) {
@@ -557,19 +493,16 @@ export class AuthorityCheckerService {
       user.id
     )
 
-    const entitlements: HydratedSecret['entitlements'] = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_SECRET),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_SECRET)
-    }
-
     this.logger.log(
       `User ${user.id} is cleared to access secret ${secret.slug} for authorities ${authorities}`
     )
 
-    return {
-      ...secret,
-      entitlements
-    }
+    return await this.entitlementService.entitleSecret({
+      secret,
+      project: secret.project,
+      user,
+      permittedAuthorities
+    })
   }
 
   /**
@@ -583,13 +516,13 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverIntegration(
     params: AuthorizationParams
-  ): Promise<IntegrationWithLastUpdatedByAndReferences> {
+  ): Promise<HydratedIntegration> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over integration for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
     )
 
-    let integration: IntegrationWithLastUpdatedByAndReferences | null
+    let integration: Omit<HydratedIntegration, 'entitlements'>
 
     try {
       if (entity.slug) {
@@ -598,30 +531,7 @@ export class AuthorityCheckerService {
           where: {
             slug: entity.slug
           },
-          include: {
-            workspace: true,
-            project: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            environments: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            lastUpdatedBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            }
-          }
+          include: InclusionQuery.Integration
         })
       } else {
         this.logger.log(`Fetching integration by name ${entity.name}`)
@@ -630,30 +540,7 @@ export class AuthorityCheckerService {
             name: entity.name,
             workspace: { members: { some: { userId: user.id } } }
           },
-          include: {
-            workspace: true,
-            project: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            environments: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            lastUpdatedBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            }
-          }
+          include: InclusionQuery.Integration
         })
       }
     } catch (error) {
@@ -674,8 +561,7 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
       integration.workspaceId,
       user.id,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     this.logger.log(
@@ -721,7 +607,13 @@ export class AuthorityCheckerService {
     this.logger.log(
       `User ${user.id} is cleared to access integration ${integration.slug} for authorities ${authorities}`
     )
-    return integration
+
+    return await this.entitlementService.entitleIntegration({
+      integration,
+      workspaceId: integration.workspaceId,
+      user,
+      permittedAuthorities
+    })
   }
 
   /**
