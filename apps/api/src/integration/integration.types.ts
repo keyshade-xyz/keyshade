@@ -76,7 +76,7 @@ export interface VercelIntegrationMetadata extends IntegrationMetadata {
 
   // Vercel environments mapping with keyshade environment names
   environments: Record<
-    Environment['name'],
+    Environment['slug'],
     {
       vercelSystemEnvironment?: 'production' | 'preview' | 'development'
       vercelCustomEnvironmentId?: string

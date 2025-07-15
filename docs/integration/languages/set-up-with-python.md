@@ -1,5 +1,5 @@
 ---
-description: How to set up Keyshade in a Python app for secure runtime secrets — no more .env files.
+description: How to set up Keyshade in a Python app.
 ---
 
 # Set up Keyshade with Python

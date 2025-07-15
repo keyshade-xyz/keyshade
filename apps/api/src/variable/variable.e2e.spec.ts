@@ -257,6 +257,101 @@ describe('Variable Controller Tests', () => {
       expect(variable).toBeDefined()
     })
 
+    it('should bulk create multiple variables successfully', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Bulk Variable 1',
+              note: 'Bulk Var 1 note',
+              entries: [{ value: 'v1', environmentSlug: environment1.slug }]
+            },
+            {
+              name: 'Bulk Variable 2',
+              note: 'Bulk Var 2 note',
+              entries: [{ value: 'v2', environmentSlug: environment1.slug }]
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body.successful).toHaveLength(2)
+      expect(body.failed).toHaveLength(0)
+    })
+
+    it('should handle partial failure in bulk variable creation', async () => {
+      await variableService.createVariable(
+        user1,
+        {
+          name: 'Bulk Conflicting Variable',
+          note: 'Existing Var',
+          entries: [{ value: 'x', environmentSlug: environment1.slug }]
+        },
+        project1.slug
+      )
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: 'Bulk Conflicting Variable',
+              note: 'duplicate note',
+              entries: [{ value: 'v', environmentSlug: environment1.slug }]
+            },
+            {
+              name: 'Bulk Unique Variable',
+              note: 'unique note',
+              entries: [{ value: 'unique', environmentSlug: environment1.slug }]
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body.successful.length).toBe(1)
+      expect(body.failed.length).toBe(1)
+
+      expect(body.failed[0].name).toBe('Bulk Conflicting Variable')
+      expect(body.successful[0].variable.name).toBe('Bulk Unique Variable')
+    })
+
+    it('should reject bulk create if all variables are invalid', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/variable/${project1.slug}/bulk`,
+        payload: {
+          variables: [
+            {
+              name: '',
+              entries: [{ value: 'v', environmentSlug: environment1.slug }]
+            },
+            {
+              name: '   ',
+              entries: [{ value: 'v', environmentSlug: environment1.slug }]
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should not be able to create variables if tier limit is reached', async () => {
       // Create variables until tier limit is reached
       for (

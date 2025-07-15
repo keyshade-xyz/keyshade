@@ -1,3 +1,59 @@
+## [2.31.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.3...v2.31.0-stage.4) (2025-07-10)
+
+### 🐛 Bug Fixes
+
+* API e2e test & store private key loaclly ([#1067](https://github.com/keyshade-xyz/keyshade/issues/1067)) ([95b9e3a](https://github.com/keyshade-xyz/keyshade/commit/95b9e3a7dedfcd7de959e9c3c4c862b4afff84d8))
+
+## [2.31.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.2...v2.31.0-stage.3) (2025-07-10)
+
+### 🐛 Bug Fixes
+
+* **platform:** Vercel integration was created using wrong environment metadata ([#1066](https://github.com/keyshade-xyz/keyshade/issues/1066)) ([784a046](https://github.com/keyshade-xyz/keyshade/commit/784a046960f31b61d738733ecf4a73c6a87716cc))
+
+## [2.31.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.1...v2.31.0-stage.2) (2025-07-09)
+
+### 🐛 Bug Fixes
+
+* **platform:** Breaking UI in the Workspace Card  ([#1061](https://github.com/keyshade-xyz/keyshade/issues/1061)) ([f0accd1](https://github.com/keyshade-xyz/keyshade/commit/f0accd1ca499d3644ecec538cc54eab873722b5e))
+
+### 📚 Documentation
+
+* Added AWS Lambda Integration Guide and Updated SUMMARY.md ([#1063](https://github.com/keyshade-xyz/keyshade/issues/1063)) ([fa7cf29](https://github.com/keyshade-xyz/keyshade/commit/fa7cf29ee9d4e7dceeaa1a72d7a98f3cae7f0613))
+* Fixed Naming of Guide Docs Under Integrations ([#1064](https://github.com/keyshade-xyz/keyshade/issues/1064)) ([c46dcf6](https://github.com/keyshade-xyz/keyshade/commit/c46dcf65a738872c57306fe647bd8016cd1a7425))
+
+## [2.31.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0...v2.31.0-stage.1) (2025-07-08)
+
+### 🚀 Features
+
+* **api:** add bulk upload support for [secure]s and variables ([#1054](https://github.com/keyshade-xyz/keyshade/issues/1054)) ([91aa299](https://github.com/keyshade-xyz/keyshade/commit/91aa29922a0c8a6746df08abd377ab995c9af741))
+
+## [2.30.0](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.30.0-stage.1 [skip ci] ([0d817de](https://github.com/keyshade-xyz/keyshade/commit/0d817de9c8b415d2d869dde8a485b408f824396d))
+* **release:** 2.30.0-stage.2 [skip ci] ([c93b931](https://github.com/keyshade-xyz/keyshade/commit/c93b931609b19670be7a9afead5f6fa275759521))
+
+## [2.30.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.30.0-stage.1...v2.30.0-stage.2) (2025-07-07)
+
+### 🐛 Bug Fixes
+
+* **web:** Pricing page update ([#1062](https://github.com/keyshade-xyz/keyshade/issues/1062)) ([43e6d1c](https://github.com/keyshade-xyz/keyshade/commit/43e6d1c9777ed524cb4e065b675d020b9ed7d5f3))
+
+## [2.30.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.29.0...v2.30.0-stage.1) (2025-07-07)
+
+### 🚀 Features
+
+* **web:** Pricing page update ([#1060](https://github.com/keyshade-xyz/keyshade/issues/1060)) ([5df6d9c](https://github.com/keyshade-xyz/keyshade/commit/5df6d9c9b3efc651e1d54ee1f0e50cc3d736b61c))
+
 ## [2.29.0](https://github.com/keyshade-xyz/keyshade/compare/v2.28.0...v2.29.0) (2025-07-06)
 
 ### 🚀 Features

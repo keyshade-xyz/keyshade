@@ -41,6 +41,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { TierLimitService } from '@/common/tier-limit.service'
 import { VariableModule } from '@/variable/variable.module'
 import { VariableService } from '@/variable/variable.service'
+import { randomBytes } from 'crypto'
 
 describe('Secret Controller Tests', () => {
   let app: NestFastifyApplication
@@ -61,6 +62,16 @@ describe('Secret Controller Tests', () => {
   let secret1: Secret
 
   const USER_IP_ADDRESS = '127.0.0.1'
+
+  Object.defineProperty(global, 'crypto', {
+    value: {
+      getRandomValues: jest.fn().mockImplementation((array: Uint8Array) => {
+        const randomValues = randomBytes(array.length)
+        array.set(randomValues)
+        return array
+      })
+    }
+  })
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -300,6 +311,99 @@ describe('Secret Controller Tests', () => {
       expect(body.values[0].value).not.toBe('Secret 2 value')
       expect(body.values[0].environment.id).toBe(environment1.id)
       expect(body.values[0].environment.slug).toBe(environment1.slug)
+    })
+
+    it('should bulk create multiple secrets successfully', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'Bulk Secret 1',
+              note: 'Bulk 1 note',
+              entries: [{ value: 'v1', environmentSlug: environment1.slug }],
+              rotateAfter: '24'
+            },
+            {
+              name: 'Bulk Secret 2',
+              note: 'Bulk 2 note',
+              entries: [{ value: 'v2', environmentSlug: environment1.slug }],
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body.successful).toHaveLength(2)
+      expect(body.failed).toHaveLength(0)
+    })
+
+    it('should handle partial failure in bulk secret creation', async () => {
+      await secretService.createSecret(
+        user1,
+        {
+          name: 'Duplicate Secret',
+          entries: [{ environmentSlug: environment1.slug, value: 'foo' }],
+          rotateAfter: '24'
+        },
+        project1.slug
+      )
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: 'New Secret',
+              entries: [{ value: 'v1', environmentSlug: environment1.slug }],
+              rotateAfter: '24'
+            },
+            {
+              name: 'Duplicate Secret',
+              entries: [{ value: 'v2', environmentSlug: environment1.slug }],
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+      const body = response.json()
+
+      expect(body.successful).toHaveLength(1)
+      expect(body.failed).toHaveLength(1)
+      expect(body.failed[0].name).toBe('Duplicate Secret')
+    })
+
+    it('should reject bulk create if all secrets are invalid', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `/secret/${project1.slug}/bulk`,
+        payload: {
+          secrets: [
+            {
+              name: ' ',
+              rotateAfter: '24'
+            }
+          ]
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
     })
 
     it('should not be able to create secrets if tier limit is reached', async () => {

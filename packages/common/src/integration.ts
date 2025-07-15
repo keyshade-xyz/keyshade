@@ -26,7 +26,7 @@ interface GroupItem {
 }
 
 export interface VercelEnvironmentMapping {
-  [environmentName: string]: {
+  [environmentSlug: string]: {
     vercelSystemEnvironment?: 'production' | 'preview' | 'development'
     vercelCustomEnvironmentId?: string
   }
