@@ -142,7 +142,7 @@ export class AuthService {
     })
     this.logger.log(`OTP deleted for ${email}`)
 
-    this.cache.setUser(user) // Save user to cache
+    this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
 
     const token = await this.generateToken(user.id)
@@ -182,7 +182,7 @@ export class AuthService {
 
     const token = await this.generateToken(user.id)
 
-    this.cache.setUser(user) // Save user to cache
+    this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
 
     return {
@@ -292,6 +292,44 @@ export class AuthService {
 
   private async generateToken(id: string) {
     return await this.jwt.signAsync({ id })
+  }
+
+  async sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      userAgent: string
+      location?: string
+    }
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          email: true,
+          emailPreference: true
+        }
+      })
+
+      if (!user) {
+        this.logger.warn(`Login notification skipped: user ${email} not found`)
+        return
+      }
+
+      if (user.emailPreference?.activity === false) {
+        this.logger.log(
+          `Login notification skipped: activity emails disabled for ${email}`
+        )
+        return
+      }
+
+      await this.mailService.sendLoginNotification(email, data)
+      this.logger.log(`Login notification sent to ${email}`)
+    } catch (err) {
+      this.logger.error(
+        `Failed to send login notification to ${email}: ${err.message}`
+      )
+    }
   }
 
   /**

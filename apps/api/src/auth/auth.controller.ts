@@ -63,9 +63,35 @@ export class AuthController {
   async validateOtp(
     @Query('email') email: string,
     @Query('otp') otp: string,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
+    @Req() req: any
   ) {
-    return setCookie(response, await this.authService.validateOtp(email, otp))
+    const ip =
+      req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown'
+    const userAgent = req.headers['user-agent'] || 'Unknown'
+
+    let location = 'Unknown'
+    try {
+      const geoRes = await fetch(`https://ipapi.co/${ip}/json/`)
+      const geoData = await geoRes.json()
+      location =
+        [geoData.city, geoData.region, geoData.country_name]
+          .filter(Boolean)
+          .join(', ') || 'Unknown'
+      //this.logger.log('geoData:', geoData)
+    } catch (e) {
+      // fallback is 'Unknown'
+    }
+
+    const sessionData = await this.authService.validateOtp(email, otp)
+
+    await this.authService.sendLoginNotification(email, {
+      ip: ip.toString(),
+      userAgent,
+      location
+    })
+
+    return setCookie(response, sessionData)
   }
 
   /* istanbul ignore next */
@@ -102,7 +128,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITHUB,
-      res
+      res,
+      req
     )
   }
 
@@ -139,7 +166,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITLAB,
-      res
+      res,
+      req
     )
   }
 
@@ -158,44 +186,47 @@ export class AuthController {
   }
 
   /* istanbul ignore next */
-  @Public()
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleOAuthCallback(@Req() req: any, @Res() res: Response) {
-    const { emails, displayName: name, photos } = req.user
-
-    if (!emails.length) {
-      throw new UnprocessableEntityException(
-        'Email information is missing from the OAuth provider data.'
-      )
-    }
-    const email = emails[0].value
-    const profilePictureUrl = photos[0]?.value
-
-    await this.handleOAuthProcess(
-      email,
-      name,
-      profilePictureUrl,
-      AuthProvider.GOOGLE,
-      res
-    )
-  }
-
-  /* istanbul ignore next */
   private async handleOAuthProcess(
     email: string,
     name: string,
     profilePictureUrl: string,
     oauthProvider: AuthProvider,
-    response: Response
+    response: Response,
+    req?: any
   ) {
     try {
+      const ip =
+        req?.headers['x-forwarded-for'] ||
+        req?.socket?.remoteAddress ||
+        'Unknown'
+      const userAgent = req?.headers['user-agent'] || 'Unknown'
+
+      let location = 'Unknown'
+      try {
+        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`)
+        const geoData = await geoRes.json()
+        location =
+          [geoData.city, geoData.region, geoData.country_name]
+            .filter(Boolean)
+            .join(', ') || 'Unknown'
+        //this.logger.log('🌍 geoData:', geoData)
+      } catch (e) {
+        // fallback is 'Unknown'
+      }
+
       const data = await this.authService.handleOAuthLogin(
         email,
         name,
         profilePictureUrl,
         oauthProvider
       )
+
+      await this.authService.sendLoginNotification(email, {
+        ip: ip.toString(),
+        userAgent,
+        location
+      })
+
       const user = setCookie(response, data)
       sendOAuthSuccessRedirect(response, user)
     } catch (error) {
