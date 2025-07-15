@@ -4,9 +4,14 @@ import { io } from 'socket.io-client'
 import { spawn } from 'child_process'
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
-import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
+import {
+  fetchPrivateKey,
+  fetchProjectRootConfig,
+  writeProjectRootConfig
+} from '@/util/configuration'
 import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
@@ -14,9 +19,13 @@ import type {
   RunData
 } from '@/types/command/run.types'
 
+import { type ProjectRootConfig } from '@/types/index.types'
+
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
+
+// TODO: Add optional --environment flag
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -43,11 +52,65 @@ export default class RunCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--environment-slug <string>',
+        description: 'Environment slug to configure'
+      }
+    ]
+  }
+
+  // Pulled code from update.config.ts
+  async updateEnvironmentConfig(options: Record<string, any>): Promise<void> {
+    // Check if keyshade.json is present
+    const projectRootConfig = await fetchProjectRootConfig()
+
+    // Parse input
+    const updatedConfig = await this.parseInput(options, projectRootConfig)
+
+    // Update keyshade.json
+    await writeProjectRootConfig(updatedConfig)
+
+    Logger.info('Configuration updated successfully! Current configuration:')
+    Object.entries(updatedConfig).forEach(([key, value]) => {
+      Logger.info(`  | ${key}: ${value}`)
+    })
+  }
+
+  // Pulled this from update.config.ts
+  private async parseInput(
+    options: CommandActionData['options'],
+    projectRootConfig: ProjectRootConfig
+  ): Promise<ProjectRootConfig> {
+    return {
+      workspace: options.workspace || projectRootConfig.workspace,
+      project: options.project || projectRootConfig.project,
+      environment: options.environment || projectRootConfig.environment,
+      quitOnDecryptionFailure:
+        options.quitOnDecryptionFailure ||
+        projectRootConfig.quitOnDecryptionFailure
+    }
+  }
+
+  async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
     }
+
+    console.log('environment slug: ', options.environmentSlug)
+    // TODO: Verify environment exists?
+
+    // TODO: Change environment slug in keyshade.json.
+    if (options.environmentSlug) {
+      await this.updateEnvironmentConfig({
+        environment: options.environmentSlug
+      })
+    }
+
+    // TODO: Update documentation.
 
     // @ts-expect-error -- false positive, might be an error on commander.js
     // args return string[][] instead of string[]
