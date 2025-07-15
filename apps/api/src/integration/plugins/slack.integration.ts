@@ -10,8 +10,15 @@ import {
 import { App } from '@slack/bolt'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import { decryptMetadata, makeTimedRequest } from '@/common/util'
-import { InternalServerErrorException } from '@nestjs/common'
+import {
+  constructErrorBody,
+  decryptMetadata,
+  makeTimedRequest
+} from '@/common/util'
+import {
+  BadRequestException,
+  InternalServerErrorException
+} from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
   private readonly app: App
@@ -158,5 +165,45 @@ export class SlackIntegration extends BaseIntegration {
     }
   }
 
-  public async validateConfiguration(metadata: SlackIntegrationMetadata) {}
+  public async validateConfiguration(metadata: SlackIntegrationMetadata) {
+    this.logger.log(
+      `Validating Slack integration (channel: ${metadata.channelId})`
+    )
+
+    const testApp = new App({
+      token: metadata.botToken,
+      signingSecret: metadata.signingSecret
+    })
+
+    const testBlocks = [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*Keyshade integration test successful!*'
+        }
+      }
+    ]
+
+    const { response, duration } = await makeTimedRequest(() =>
+      testApp.client.chat.postMessage({
+        channel: metadata.channelId,
+        blocks: testBlocks,
+        text: 'Keyshade integration test'
+      })
+    )
+
+    this.logger.log(
+      `Slack validation responded ${response.ok ? 'OK' : 'FAIL'} in ${duration}ms`
+    )
+
+    if (!response.ok) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Slack webhook validation failed',
+          response.error ?? 'Unknown error'
+        )
+      )
+    }
+  }
 }
