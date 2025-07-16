@@ -29,11 +29,14 @@ export const WorkspaceInvitationEmail = ({
   )
 
   const previewText = forRegisteredUser
-    ? 'Welcome Back! Join Your Workspace'
-    : 'You are Invited to Join the Workspace'
+    ? 'Welcome Back! Join Your Keyshade Workspace'
+    : 'You are Invited to Join the Keyshade Workspace'
 
   return (
     <BaseEmailTemplate previewText={previewText} heading={previewText}>
+      <Text style={{ ...text, marginTop: '32px' }}>
+        <strong>Welcome to Keyshade</strong>
+      </Text>
       <Text style={text}>Dear User,</Text>
       <Text style={text}>
         We're excited to inform you that you've been invited to join a workspace
@@ -50,13 +53,63 @@ export const WorkspaceInvitationEmail = ({
           <strong>Invited On:</strong> {formattedInvitedOnDate}
         </Text>
       </Section>
-      <Text style={text}>
-        Join the project by clicking the button below - we're excited to have
-        you!
-      </Text>
+      <Text style={text}>Join the project by clicking the button below!</Text>
       <Button href={actionUrl} style={ctaButton}>
         Get started
       </Button>
+      <Text style={{ ...text, marginTop: '32px' }}>
+        <strong>What happens next?</strong>
+      </Text>
+
+      <Text style={text}>
+        Once you're in, you'll unlock everything Keyshade has to offer — like
+        secure secret sharing, CLI magic, and zero `.env` horror stories.
+      </Text>
+
+      <Text style={text}>
+        If you’re new here, these quick links will help you get up to speed:
+      </Text>
+
+      <ul>
+        <li>
+          <Text style={text}>
+            🚀{' '}
+            <a href="https://docs.keyshade.xyz/" target="_blank">
+              What is Keyshade?
+            </a>{' '}
+            — Understand what we’re fixing and why it matters.
+          </Text>
+        </li>
+        <li>
+          <Text style={text}>
+            🚀{' '}
+            <a
+              href="https://docs.keyshade.xyz/getting-started/introduction"
+              target="_blank"
+            >
+              Getting Started Guide
+            </a>{' '}
+            — Set up Keyshade in your app in minutes.
+          </Text>
+        </li>
+        <li>
+          <Text style={text}>
+            🚀{' '}
+            <a
+              href="https://docs.keyshade.xyz/cli/introduction"
+              target="_blank"
+            >
+              CLI Overview
+            </a>{' '}
+            — Learn how to push, pull, and sync secrets like a pro.
+          </Text>
+        </li>
+      </ul>
+
+      <Text style={text}>
+        Welcome aboard! You're one step closer to never hearing "wait, did you
+        commit the .env to GitHub?" again.
+      </Text>
     </BaseEmailTemplate>
   )
 }
