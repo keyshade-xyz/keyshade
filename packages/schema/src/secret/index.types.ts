@@ -23,7 +23,9 @@ import {
   DisableSecretRequestSchema,
   DisableSecretResponseSchema,
   EnableSecretRequestSchema,
-  EnableSecretResponseSchema
+  EnableSecretResponseSchema,
+  getAllDisabledEnvironmentsOfSecretRequestSchema,
+  getAllDisabledEnvironmentsOfSecretResponseSchema
 } from '.'
 
 export type Secret = z.infer<typeof SecretSchema>
@@ -70,6 +72,14 @@ export type DisableSecretResponse = z.infer<typeof DisableSecretResponseSchema>
 export type EnableSecretRequest = z.infer<typeof EnableSecretRequestSchema>
 
 export type EnableSecretResponse = z.infer<typeof EnableSecretResponseSchema>
+
+export type GetAllDisabledEnvironmentsOfSecretRequest = z.infer<
+  typeof getAllDisabledEnvironmentsOfSecretRequestSchema
+>
+
+export type GetAllDisabledEnvironmentsOfSecretResponse = z.infer<
+  typeof getAllDisabledEnvironmentsOfSecretResponseSchema
+>
 
 export type GetAllSecretsOfProjectRequest = z.infer<
   typeof GetAllSecretsOfProjectRequestSchema

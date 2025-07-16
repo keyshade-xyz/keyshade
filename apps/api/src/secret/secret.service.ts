@@ -792,6 +792,46 @@ export class SecretService {
   }
 
   /**
+   * Gets all disabled environments of a secret
+   * @param user the user performing the action
+   * @param secretSlug the slug of the secret
+   * @returns an array of environment IDs where the secret is disabled
+   */
+  async getAllDisabledEnvironmentsOfSecret(
+    user: AuthenticatedUser,
+    secretSlug: Secret['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all disabled environments of secret ${secretSlug}`
+    )
+
+    // Fetch the secret
+    const secret = await this.authorizationService.authorizeUserAccessToSecret({
+      user,
+      entity: { slug: secretSlug },
+      authorities: [Authority.READ_SECRET]
+    })
+
+    const secretId = secret.id
+
+    // Get the environments
+    const environments = this.prisma.environment.findMany({
+      where: {
+        DisabledEnvironmentOfSecret: {
+          some: {
+            secretId
+          }
+        }
+      },
+      select: {
+        id: true
+      }
+    })
+
+    return (await environments).map((env) => env.id)
+  }
+
+  /**
    * Deletes a secret from a project
    * @param user the user performing the action
    * @param secretSlug the slug of the secret to delete

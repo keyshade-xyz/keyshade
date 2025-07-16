@@ -126,6 +126,14 @@ export const EnableSecretRequestSchema = z.object({
 
 export const EnableSecretResponseSchema = z.void()
 
+export const getAllDisabledEnvironmentsOfSecretRequestSchema = z.object({
+  secretSlug: z.string()
+})
+
+export const getAllDisabledEnvironmentsOfSecretResponseSchema = z.array(
+  z.string()
+)
+
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
   projectSlug: BaseProjectSchema.shape.slug
 })

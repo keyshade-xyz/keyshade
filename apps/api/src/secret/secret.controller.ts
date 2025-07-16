@@ -99,6 +99,18 @@ export class SecretController {
     )
   }
 
+  @Get(':secretSlug/disabled')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
+  async getAllDisabledEnvironmentsOfSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string
+  ) {
+    return await this.secretService.getAllDisabledEnvironmentsOfSecret(
+      user,
+      secretSlug
+    )
+  }
+
   @Delete(':secretSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async deleteEnvironmentValueOfSecret(
