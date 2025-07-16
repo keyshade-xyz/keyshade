@@ -11,9 +11,7 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
-
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
+import type { PartialEnvironment, PartialProject } from '@/types'
 
 interface SimpleProjectEnvironmentInputProps {
   initialProject?: PartialProject | null
@@ -167,7 +165,8 @@ export default function ProjectEnvironmentInput({
         <div className="max-h-40 overflow-y-auto rounded-md border border-white/10 p-2">
           {!selectedProject ? (
             <div className="px-2 py-4 text-sm text-white/60">
-              Please select a project first {isProjectDisabled ? '(disabled)' : null}
+              Please select a project first{' '}
+              {isProjectDisabled ? '(disabled)' : null}
             </div>
           ) : environments.length > 0 ? (
             environments.map((env) => (

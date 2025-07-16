@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- ESLint incorrectly flags totalEventsCount comparison as always truthy */
 
-import type { Environment, Project } from '@keyshade/schema'
 import { useState, useEffect, useCallback } from 'react'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -11,6 +10,7 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
+import type { PartialEnvironment, PartialProject } from '@/types'
 
 export type VercelEnvironmentMapping = Record<
   string,
@@ -19,10 +19,6 @@ export type VercelEnvironmentMapping = Record<
     vercelCustomEnvironmentId?: string
   }
 >
-
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
-
 interface UpdateKeyMappingProps {
   initialProject: PartialProject
   initialEnvironments: PartialEnvironment[]
@@ -197,7 +193,8 @@ export default function UpdateKeyMapping({
                     </label>
                   </div>
 
-                  {selected ? <div className="ml-6 mt-2 space-y-3">
+                  {selected ? (
+                    <div className="ml-6 mt-2 space-y-3">
                       <div className="flex flex-col items-start gap-2">
                         <label
                           className="block text-sm text-white/70"
@@ -247,7 +244,8 @@ export default function UpdateKeyMapping({
                           />
                         </div>
                       )}
-                    </div> : null}
+                    </div>
+                  ) : null}
                 </div>
               )
             })

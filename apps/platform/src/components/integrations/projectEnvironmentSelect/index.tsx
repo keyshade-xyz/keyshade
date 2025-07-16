@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- ESLint incorrectly flags totalEventsCount comparison as always falsy */
 
-import type { Environment, Project } from '@keyshade/schema'
+import type { Project } from '@keyshade/schema'
 import { useAtom, useAtomValue } from 'jotai'
 import { useState, useEffect, useCallback } from 'react'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
@@ -15,10 +15,11 @@ import {
   SelectItem
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
-type VercelSystemEnvironment = 'development' | 'preview' | 'production'
+import type {
+  PartialEnvironment,
+  PartialProject,
+  VercelSystemEnvironment
+} from '@/types'
 
 interface CombinedProjectEnvironmentProps {
   isProjectDisabled?: boolean

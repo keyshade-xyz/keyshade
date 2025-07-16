@@ -1,4 +1,4 @@
-import type { Environment, Project } from '@keyshade/schema'
+import type { Environment } from '@keyshade/schema'
 import { useState, useEffect, useCallback } from 'react'
 import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
@@ -9,9 +9,7 @@ import {
   SelectContent,
   SelectItem
 } from '@/components/ui/select'
-
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
+import type { PartialEnvironment, PartialProject } from '@/types'
 
 interface UpdateEnvironmentProps {
   initialProject: PartialProject
