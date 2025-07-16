@@ -73,8 +73,11 @@ export const WorkspaceInvitationEmail = ({
       <ul>
         <li>
           <Text style={text}>
-            🚀{' '}
-            <a href="https://docs.keyshade.xyz/" target="_blank">
+            <a
+              href="https://docs.keyshade.xyz/"
+              target="_blank"
+              aria-label="Documentation: What is Keyshade?"
+            >
               What is Keyshade?
             </a>{' '}
             — Understand what we’re fixing and why it matters.
@@ -82,10 +85,10 @@ export const WorkspaceInvitationEmail = ({
         </li>
         <li>
           <Text style={text}>
-            🚀{' '}
             <a
               href="https://docs.keyshade.xyz/getting-started/introduction"
               target="_blank"
+              aria-label="Documentation: Getting Started Guide"
             >
               Getting Started Guide
             </a>{' '}
@@ -94,10 +97,10 @@ export const WorkspaceInvitationEmail = ({
         </li>
         <li>
           <Text style={text}>
-            🚀{' '}
             <a
               href="https://docs.keyshade.xyz/cli/introduction"
               target="_blank"
+              aria-label="Documentation: CLI Overview"
             >
               CLI Overview
             </a>{' '}
