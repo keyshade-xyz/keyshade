@@ -76,6 +76,7 @@ export const WorkspaceInvitationEmail = ({
             <a
               href="https://docs.keyshade.xyz/"
               target="_blank"
+              rel="noopener noreferrer"
               aria-label="Documentation: What is Keyshade?"
             >
               What is Keyshade?
@@ -88,6 +89,7 @@ export const WorkspaceInvitationEmail = ({
             <a
               href="https://docs.keyshade.xyz/getting-started/introduction"
               target="_blank"
+              rel="noopener noreferrer"
               aria-label="Documentation: Getting Started Guide"
             >
               Getting Started Guide
@@ -100,6 +102,7 @@ export const WorkspaceInvitationEmail = ({
             <a
               href="https://docs.keyshade.xyz/cli/introduction"
               target="_blank"
+              rel="noopener noreferrer"
               aria-label="Documentation: CLI Overview"
             >
               CLI Overview
