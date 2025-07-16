@@ -6,7 +6,8 @@ import type { EventTypeEnum } from '@keyshade/schema'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
 import { Integrations } from '@keyshade/common'
 import ProjectEnvironmentInput from '../projectEnvironmentInput'
-import ProjectEnvironmentSelect from '../projectEnvironmentSelect'
+import UpdateKeyMapping from '../updateKeymapping'
+import UpdateEnvironment from '../updateEnvironment'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -43,7 +44,6 @@ function UpdateIntegration({
   const [selectedEnvironments, setSelectedEnvironments] = useState<string[]>([])
   const [envMappings, setEnvMappings] = useState<VercelEnvironmentMapping>({})
   const [metadata, setMetadata] = useState<Record<string, unknown>>({})
-
   const integrationType = selectedIntegration?.type
   const isMappingRequired = integrationType
     ? Integrations[integrationType].envMapping
@@ -175,10 +175,6 @@ function UpdateIntegration({
     setSelectedEnvironments(environmentSlugs)
   }
 
-  // const handleKeyMappingChange = (mappings: VercelEnvironmentMapping) => {
-  //   setEnvMappings(mappings)
-  // }
-
   if (!selectedIntegration || !integrationType) return null
 
   return (
@@ -212,7 +208,6 @@ function UpdateIntegration({
           </div>
 
           {/* Event Triggers Input Component */}
-
           <EventTriggersInput
             integrationType={integrationType}
             onChange={setSelectedEvents}
@@ -220,7 +215,6 @@ function UpdateIntegration({
           />
 
           {/* Setup integration metadata */}
-
           <IntegrationMetadata
             initialMetadata={metadata}
             integrationName={selectedIntegration.name}
@@ -230,12 +224,21 @@ function UpdateIntegration({
 
           {/* Specify Project and Environment(optional) */}
           {isPrivateKeyRequired ? (
-            <ProjectEnvironmentSelect
-              isKeyMappingNeeded={Boolean(isMappingRequired)}
-              isProjectDisabled
-              projectPrivateKey={selectedIntegration.metadata.privateKey}
-              //todo: initial projects and environments aren't fetching
-            />
+            isMappingRequired ? (
+              <UpdateKeyMapping
+                initialEnvironments={selectedIntegration.environments!}
+                initialMapping={envMappings}
+                initialProject={selectedIntegration.project!}
+                onEnvSlugsChange={handleEnvironmentChange}
+                onMappingChange={setEnvMappings}
+              />
+            ) : (
+              <UpdateEnvironment
+                initialEnvironments={selectedIntegration.environments!}
+                initialProject={selectedIntegration.project!}
+                onEnvironmentChange={handleEnvironmentChange}
+              />
+            )
           ) : (
             <ProjectEnvironmentInput
               initialEnvironments={

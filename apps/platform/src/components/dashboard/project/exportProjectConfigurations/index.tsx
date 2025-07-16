@@ -28,8 +28,9 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
   const { isExportConfigurationDialogOpen, handleSheetChange } =
     useExportProjectDialog(resetForm, selectedProject)
 
+  const projectSlug = selectedProject?.slug
   const { handleExport, isLoading } = useExportConfigurations(
-    selectedProject!.slug,
+    projectSlug ?? '',
     formData,
     validateForm
   )
