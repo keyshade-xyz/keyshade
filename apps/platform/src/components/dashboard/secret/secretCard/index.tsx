@@ -31,15 +31,20 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import {
+  Switch
+} from '@/components/ui/switch'
+import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
   secretRevisionsOpenAtom,
   selectedSecretAtom,
-  selectedSecretEnvironmentAtom
+  selectedSecretEnvironmentAtom,
+  //disableSecretOpenAtom
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface SecretCardProps {
   secretData: Secret
@@ -61,10 +66,15 @@ export default function SecretCard({
     deleteEnvironmentValueOfSecretOpenAtom
   )
   const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
+  //const setIsDisableSecretOpen = useSetAtom(disableSecretOpenAtom)
   const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
     selectedSecretEnvironmentAtom
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
+  //const [isSecretDisabled, setIsSecretDisabled] = useState<boolean>(false)
+  const disabledEnvironments = ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret({
+    secretSlug: secret.slug
+  })
   const [decryptedValues, setDecryptedValues] = useState<
     Record<Environment['id'], string>
   >({})
@@ -108,6 +118,27 @@ export default function SecretCard({
       'You successfully copied the slug.'
     )
   }
+
+  const handleToggleDisableSecretClick = async (
+    environmentSlug: Environment['slug'],
+    checked: boolean
+  ) => {
+    if (selectedSecretEnvironment === environmentSlug && checked) {
+      await ControllerInstance.getInstance().secretController.enableSecret({
+        secretSlug: secret.slug,
+        environmentSlug
+      })
+      //setIsSecretDisabled(false)
+    } else {
+      await ControllerInstance.getInstance().secretController.disableSecret({
+        secretSlug: secret.slug,
+        environmentSlug
+      })
+      //setIsSecretDisabled(true)
+    }
+    setSelectedSecretEnvironment(environmentSlug)
+  }
+
   const handleRevealEnvironmentValueOfSecretClick = (
     environment: Environment['slug']
   ) => {
@@ -211,6 +242,8 @@ export default function SecretCard({
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
+                  const isDisabled = 
+                    value.environment.slug in disabledEnvironments
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -229,6 +262,15 @@ export default function SecretCard({
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
+                          <Switch
+                            checked={!isDisabled}
+                            onCheckedChange={(checked) => {
+                              handleToggleDisableSecretClick(
+                                value.environment.slug,
+                                checked
+                              )
+                            }}
+                          />
                           {privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
