@@ -1,7 +1,11 @@
 import type { Integration, IntegrationRun } from '@keyshade/schema'
 import React, { useCallback, useState, useRef } from 'react'
 import { Clock, RefreshCcw } from 'lucide-react'
-import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
+import {
+  ErrorTriggerSVG,
+  RefreshTriggerSVG,
+  SuccessTriggerSVG
+} from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { formatDate, formatTime } from '@/lib/utils'
 import {
@@ -106,11 +110,11 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
           <div className="flex items-start gap-3">
             <div className="flex h-full items-center pt-2">
               {trigger.status === 'SUCCESS' ? (
-                <VectorSVG />
+                <SuccessTriggerSVG />
               ) : trigger.status === `RUNNING` ? (
-                <PendingSVG />
+                <RefreshTriggerSVG />
               ) : (
-                <ErrorSVG />
+                <ErrorTriggerSVG />
               )}
             </div>
             <div>
