@@ -168,10 +168,47 @@ export default class ChangeNotifier
         )}`
       )
     } catch (error) {
-      this.logger.error(error)
+      // User friendly feedback on error
+      let errorMessage = 'An unknown error occurred.'
+
+      if (error instanceof Error) {
+        // If the error is an instance of Error, we can get the message directly
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        // If the error is a string, use it directly
+        errorMessage = error
+      } else if (typeof error === 'object' && error !== null) {
+        // If the error is an object, we can try to parse it
+        const messageToParse = error.response?.message || error.message // Fallback to message if response is not available
+        if (messageToParse) {
+          // If the message is a string, we can parse it
+          try {
+            // Parse the JSON message to get header and body
+            const parsedMessage = JSON.parse(messageToParse)
+            if (parsedMessage.header && parsedMessage.body) {
+              errorMessage = `${parsedMessage.header}: ${parsedMessage.body}`
+            } else {
+              // If the message doesn't have header and body, use it directly
+              errorMessage = messageToParse
+            }
+          } catch {
+            // If JSON parsing fails, use the raw message
+            errorMessage = messageToParse
+          }
+        } else {
+          // If the message is not a string, stringify it
+          errorMessage = JSON.stringify(error)
+        }
+      }
+
+      this.logger.error({
+        message: 'Error during client registration',
+        body: error
+      })
+
       client.emit('client-registered', {
         success: false,
-        message: error as string
+        message: errorMessage
       })
     }
   }

@@ -169,16 +169,42 @@ export default class RunCommand extends BaseCommand {
             this.environmentSlug = data.environment
             Logger.info('Successfully registered to API')
           } else {
-            let errorText: string
+            // Extract meaningful error message
+            let errorMessage = 'Unknown error'
 
-            try {
-              const { header, body } = JSON.parse(registrationResponse.message)
-              errorText = `${header}: ${body}`
-            } catch {
-              errorText = `Error registering to API: ${registrationResponse.message}`
+            if (typeof registrationResponse.message === 'string') {
+              // if it is just a string
+              // use it directly
+              errorMessage = registrationResponse.message
+            } else if (
+              typeof registrationResponse.message === 'object' &&
+              registrationResponse.message !== null
+            ) {
+              // if the message is an object and not null
+              // Attempt to parse the message if it's a JSON string
+              // Handle nested error structure
+              const msgObj = registrationResponse.message as any
+              const nestedMessage = msgObj.response?.message || msgObj.message // Fallback to message if response is not available
+
+              if (typeof nestedMessage === 'string') {
+                try {
+                  const parsed = JSON.parse(nestedMessage)
+                  if (parsed.header && parsed.body) {
+                    errorMessage = `${parsed.header}: ${parsed.body}`
+                  } else {
+                    errorMessage = nestedMessage
+                  }
+                } catch {
+                  // if parsing fails, fallback to string representation
+                  errorMessage = nestedMessage
+                }
+              } else {
+                // If the message is not a string, stringify it
+                errorMessage = JSON.stringify(msgObj)
+              }
             }
 
-            Logger.error(errorText)
+            Logger.error(`Error registering to API: ${errorMessage}`)
             process.exit(1)
           }
         }
