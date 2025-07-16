@@ -60,16 +60,16 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
           </Button>
         </div>
       </div>
-      <div className="flex justify-between">
-        <div className="mr-2 flex w-3/4 items-center gap-3 border-t border-white/10 pt-4">
-          {selectedIntegration.lastUpdatedBy ? <div>
+      <div className="flex justify-between border-t border-white/10 pt-4">
+        <div className="mr-2 flex w-3/4 items-center gap-3">
+          {selectedIntegration.lastUpdatedBy ? <div className="flex items-center gap-2">
               <AvatarComponent
                 name={selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                 profilePictureUrl={
                   selectedIntegration.lastUpdatedBy.profilePictureUrl || ''
                 }
               />
-              <div className="flex flex-col text-sm text-white/70">
+              <div className="flex text-sm text-white/70">
                 <div>
                   Last updated by{' '}
                   <span className="font-semibold text-white">
