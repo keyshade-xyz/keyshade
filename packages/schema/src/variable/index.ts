@@ -126,6 +126,14 @@ export const EnableVariableRequestSchema = z.object({
 
 export const EnableVariableResponseSchema = z.void()
 
+export const getAllDisabledEnvironmentsOfVariableRequestSchema = z.object({
+  variableSlug: z.string()
+})
+
+export const getAllDisabledEnvironmentsOfVariableResponseSchema = z.array(
+  z.string()
+)
+
 export const DeleteVariableRequestSchema = z.object({
   variableSlug: z.string()
 })

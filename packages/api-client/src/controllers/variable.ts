@@ -19,6 +19,8 @@ import {
   DisableVariableResponse,
   EnableVariableRequest,
   EnableVariableResponse,
+  GetAllDisabledEnvironmentsOfVariableRequest,
+  GetAllDisabledEnvironmentsOfVariableResponse,
   GetAllVariablesOfProjectRequest,
   GetAllVariablesOfProjectResponse,
   GetRevisionsOfVariableRequest,
@@ -123,6 +125,20 @@ export default class VariableController {
     )
 
     return await parseResponse<EnableVariableResponse>(response)
+  }
+
+  async getAllDisabledEnvironmentsOfVariable(
+    request: GetAllDisabledEnvironmentsOfVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllDisabledEnvironmentsOfVariableResponse>> {
+    const response = await this.apiClient.get(
+      `/api/variable/${request.variableSlug}/disabled`,
+      headers
+    )
+
+    return await parseResponse<GetAllDisabledEnvironmentsOfVariableResponse>(
+      response
+    )
   }
 
   async deleteVariable(

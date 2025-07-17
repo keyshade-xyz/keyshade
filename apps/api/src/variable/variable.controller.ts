@@ -99,6 +99,18 @@ export class VariableController {
     )
   }
 
+  @Get(':variableSlug/disabled')
+  @RequiredApiKeyAuthorities(Authority.READ_VARIABLE)
+  async getAllDisabledEnvironmentsOfVariable(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('variableSlug') variableSlug: string
+  ) {
+    return await this.variableService.getAllDisabledEnvironmentsOfVariable(
+      user,
+      variableSlug
+    )
+  }
+
   @Delete(':variableSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_VARIABLE)
   async deleteEnvironmentValueOfVariable(

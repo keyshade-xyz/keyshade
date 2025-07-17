@@ -790,6 +790,47 @@ export class VariableService {
   }
 
   /**
+   * Gets all disabled environments of a variable
+   * @param user the user performing the action
+   * @param variableSlug the slug of the variable
+   * @returns an array of environment IDs where the variable is disabled
+   */
+  async getAllDisabledEnvironmentsOfVariable(
+    user: AuthenticatedUser,
+    variableSlug: Variable['slug']
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to get all disabled environments of variable ${variableSlug}`
+    )
+
+    // Fetch the variable
+    const variable =
+      await this.authorizationService.authorizeUserAccessToVariable({
+        user,
+        entity: { slug: variableSlug },
+        authorities: [Authority.READ_VARIABLE]
+      })
+
+    const variableId = variable.id
+
+    // Get the environments
+    const environments = this.prisma.environment.findMany({
+      where: {
+        DisabledEnvironmentOfVariable: {
+          some: {
+            variableId
+          }
+        }
+      },
+      select: {
+        id: true
+      }
+    })
+
+    return (await environments).map((env) => env.id)
+  }
+
+  /**
    * Deletes a variable from a project.
    * @param user the user performing the action
    * @param variableSlug the slug of the variable to delete

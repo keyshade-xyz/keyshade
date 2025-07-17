@@ -23,7 +23,9 @@ import {
   DisableVariableRequestSchema,
   DisableVariableResponseSchema,
   EnableVariableRequestSchema,
-  EnableVariableResponseSchema
+  EnableVariableResponseSchema,
+  getAllDisabledEnvironmentsOfVariableRequestSchema,
+  getAllDisabledEnvironmentsOfVariableResponseSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
@@ -76,6 +78,14 @@ export type EnableVariableRequest = z.infer<typeof EnableVariableRequestSchema>
 
 export type EnableVariableResponse = z.infer<
   typeof EnableVariableResponseSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableRequest = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableRequestSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableResponse = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableResponseSchema
 >
 
 export type DeleteVariableRequest = z.infer<typeof DeleteVariableRequestSchema>
