@@ -22,4 +22,12 @@ The command to run your application. This command is run in the same shell as th
 
 ## Options
 
-The function accepts no local options. However, the global flags can be used with this command.
+- `--environment <environment>`  
+  (Optional) Override the environment specified in `keyshade.json` for this run. This allows you to run your application in a different environment without modifying your configuration file.
+
+  **Example:**
+  ```bash
+  keyshade run --environment staging "npm run dev"
+  ```
+
+You can also use any global flags with this command.
