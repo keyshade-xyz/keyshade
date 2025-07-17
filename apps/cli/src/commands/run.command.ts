@@ -18,9 +18,6 @@ import type {
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
-import ControllerInstance from '@/util/controller-instance'
-
-// TODO: Add optional --environment flag
 
 export default class RunCommand extends BaseCommand {
   private processEnvironmentalVariables = {}
@@ -57,53 +54,23 @@ export default class RunCommand extends BaseCommand {
     ]
   }
 
-  private async updateEnvironment(environmentSlug: string): Promise<void> {
-    Logger.info('Updating Environment...')
-
-    const {
-      success,
-      error,
-      data: environment
-    } = await ControllerInstance.getInstance().environmentController.updateEnvironment(
-      {
-        name: 'environment',
-        description: 'environmentSlug',
-        slug: environmentSlug
-      },
-      this.headers
-    )
-
-    if (success) {
-      Logger.info('Environment updated successfully')
-      Logger.info(
-        `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
-      )
-    } else {
-      this.logError(error)
-    }
-  }
-
   async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
     }
-    console.log(':^).. testing testing')
-    console.log('environment slug: ', options.environmentSlug)
-    // TODO: Verify environment exists?
-
-    // TODO: Change environment slug in keyshade.json.
-    if (options.environmentSlug) {
-      await this.updateEnvironment(options.environmentSlug)
-    }
-
-    // TODO: Update documentation.
 
     // @ts-expect-error -- false positive, might be an error on commander.js
     // args return string[][] instead of string[]
     this.command = args[0].join(' ')
 
     const configurations = await this.fetchConfigurations()
+
+    // If the user passed in an environment, override the one in our configurations object
+    if (options.environment) {
+      configurations.environment = options.environment
+    }
+
     await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
