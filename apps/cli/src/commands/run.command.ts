@@ -7,11 +7,7 @@ import type {
   CommandArgument,
   CommandOption
 } from '@/types/command/command.types'
-import {
-  fetchPrivateKey,
-  fetchProjectRootConfig,
-  writeProjectRootConfig
-} from '@/util/configuration'
+import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
 import type {
   ClientRegisteredResponse,
@@ -19,11 +15,10 @@ import type {
   RunData
 } from '@/types/command/run.types'
 
-import { type ProjectRootConfig } from '@/types/index.types'
-
 import { decrypt } from '@/util/decrypt'
 
 import { SecretController, VariableController } from '@keyshade/api-client'
+import ControllerInstance from '@/util/controller-instance'
 
 // TODO: Add optional --environment flag
 
@@ -62,35 +57,29 @@ export default class RunCommand extends BaseCommand {
     ]
   }
 
-  // Pulled code from update.config.ts
-  async updateEnvironmentConfig(options: Record<string, any>): Promise<void> {
-    // Check if keyshade.json is present
-    const projectRootConfig = await fetchProjectRootConfig()
+  private async updateEnvironment(environmentSlug: string): Promise<void> {
+    Logger.info('Updating Environment...')
 
-    // Parse input
-    const updatedConfig = await this.parseInput(options, projectRootConfig)
+    const {
+      success,
+      error,
+      data: environment
+    } = await ControllerInstance.getInstance().environmentController.updateEnvironment(
+      {
+        name: 'environment',
+        description: 'environmentSlug',
+        slug: environmentSlug
+      },
+      this.headers
+    )
 
-    // Update keyshade.json
-    await writeProjectRootConfig(updatedConfig)
-
-    Logger.info('Configuration updated successfully! Current configuration:')
-    Object.entries(updatedConfig).forEach(([key, value]) => {
-      Logger.info(`  | ${key}: ${value}`)
-    })
-  }
-
-  // Pulled this from update.config.ts
-  private async parseInput(
-    options: CommandActionData['options'],
-    projectRootConfig: ProjectRootConfig
-  ): Promise<ProjectRootConfig> {
-    return {
-      workspace: options.workspace || projectRootConfig.workspace,
-      project: options.project || projectRootConfig.project,
-      environment: options.environment || projectRootConfig.environment,
-      quitOnDecryptionFailure:
-        options.quitOnDecryptionFailure ||
-        projectRootConfig.quitOnDecryptionFailure
+    if (success) {
+      Logger.info('Environment updated successfully')
+      Logger.info(
+        `Environment Slug: ${environment.slug}, Name: ${environment.name}, Description: ${environment.description}`
+      )
+    } else {
+      this.logError(error)
     }
   }
 
@@ -99,15 +88,13 @@ export default class RunCommand extends BaseCommand {
     if (args.length === 0) {
       throw new Error('No command provided')
     }
-
+    console.log(':^).. testing testing')
     console.log('environment slug: ', options.environmentSlug)
     // TODO: Verify environment exists?
 
     // TODO: Change environment slug in keyshade.json.
     if (options.environmentSlug) {
-      await this.updateEnvironmentConfig({
-        environment: options.environmentSlug
-      })
+      await this.updateEnvironment(options.environmentSlug)
     }
 
     // TODO: Update documentation.
