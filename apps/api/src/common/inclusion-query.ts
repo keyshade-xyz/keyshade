@@ -5,7 +5,8 @@ export const InclusionQuery = {
       select: {
         id: true,
         name: true,
-        slug: true
+        slug: true,
+        workspaceId: true
       }
     },
     environments: {
@@ -52,7 +53,17 @@ export const InclusionQuery = {
         }
       }
     },
-    project: true
+    project: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        workspaceId: true,
+        publicKey: true,
+        privateKey: true,
+        storePrivateKey: true
+      }
+    }
   },
   Variable: {
     lastUpdatedBy: {
@@ -83,6 +94,30 @@ export const InclusionQuery = {
         }
       }
     },
-    project: true
+    project: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        workspaceId: true
+      }
+    }
+  },
+  Environment: {
+    project: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        workspaceId: true
+      }
+    },
+    lastUpdatedBy: {
+      select: {
+        id: true,
+        name: true,
+        profilePictureUrl: true
+      }
+    }
   }
 }

@@ -4,7 +4,7 @@ import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
 import { UserSchema } from '@/user'
 
-export const VariableVersionSchema = z.object({
+export const VariableRevisionSchema = z.object({
   version: z.number(),
   value: z.string(),
   createdOn: z.string().datetime(),
@@ -40,7 +40,7 @@ export const VariableSchema = z.object({
       canDelete: z.boolean()
     })
   }),
-  values: z.array(VariableVersionSchema)
+  versions: z.array(VariableRevisionSchema)
 })
 export const CreateVariableRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
@@ -87,15 +87,7 @@ export const UpdateVariableRequestSchema = z.object({
     .optional()
 })
 
-export const UpdateVariableResponseSchema = z.object({
-  variable: VariableSchema.shape.variable.pick({
-    id: true,
-    name: true,
-    slug: true,
-    note: true
-  }),
-  updatedVersions: z.array(VariableVersionSchema)
-})
+export const UpdateVariableResponseSchema = VariableSchema
 
 export const DeleteEnvironmentValueOfVariableRequestSchema = z.object({
   variableSlug: z.string(),
@@ -112,7 +104,7 @@ export const RollBackVariableRequestSchema = z.object({
 
 export const RollBackVariableResponseSchema = z.object({
   count: z.number(),
-  currentRevision: VariableVersionSchema
+  currentRevision: VariableRevisionSchema
 })
 
 export const DeleteVariableRequestSchema = z.object({
@@ -135,7 +127,7 @@ export const GetRevisionsOfVariableRequestSchema =
   })
 
 export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
-  VariableVersionSchema
+  VariableRevisionSchema
 )
 
 export const GetAllVariablesOfEnvironmentRequestSchema = z.object({

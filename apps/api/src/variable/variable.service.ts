@@ -13,7 +13,6 @@ import {
   EventSource,
   EventType,
   Project,
-  User,
   Variable,
   VariableVersion
 } from '@prisma/client'
@@ -23,11 +22,8 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import {
-  ChangeNotification,
-  ChangeNotificationEvent
-} from '@/socket/socket.types'
-import { paginate } from '@/common/paginate'
+import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { createEvent } from '@/common/event'
 import {
@@ -35,9 +31,12 @@ import {
   limitMaxItemsPerPage,
   mapEntriesToEventMetadata
 } from '@/common/util'
-import { getVariableWithValues } from '@/common/variable'
 import { AuthenticatedUser } from '@/user/user.types'
-import { HydratedVariable, VariableWithValues } from './variable.types'
+import {
+  HydratedVariable,
+  RawEntitledVariable,
+  VariableRevision
+} from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import {
@@ -81,7 +80,7 @@ export class VariableService {
     user: AuthenticatedUser,
     dto: CreateVariable,
     projectSlug: Project['slug']
-  ): Promise<VariableWithValues> {
+  ): Promise<HydratedVariable> {
     this.logger.log(
       `User ${user.id} attempted to create variable ${dto.name} in project ${projectSlug}`
     )
@@ -102,10 +101,10 @@ export class VariableService {
     await this.tierLimitService.checkVariableLimitReached(project)
 
     // Check if a variable with the same name already exists in the project
-    await this.variableExists(dto.name, project)
+    await this.variableExists(dto.name, project.id)
 
     // Check if a secret with the same name already exists in the project
-    await this.secretService.secretExists(dto.name, project)
+    await this.secretService.secretExists(dto.name, project.id)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -159,18 +158,22 @@ export class VariableService {
       `Created variable ${variableData.name} in project ${project.slug}`
     )
 
-    const hydratedVariable = await this.entitlementService.entitleVariable({
+    const rawEntitledVariable = await this.entitlementService.entitleVariable({
       project,
       user,
       variable: variableData
     })
-    const variableWithValues = getVariableWithValues(hydratedVariable)
+
+    const hydratedVariable = await this.flattenVariableVersions(
+      rawEntitledVariable,
+      user
+    )
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing variable creation to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
+            `Publishing variable creation to Redis for variable ${rawEntitledVariable.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -182,7 +185,7 @@ export class VariableService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published variable update to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
+            `Published variable update to Redis for variable ${rawEntitledVariable.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -193,13 +196,13 @@ export class VariableService {
     await createEvent(
       {
         triggeredBy: user,
-        entity: variableWithValues.variable,
+        entity: hydratedVariable,
         type: EventType.VARIABLE_ADDED,
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          name: hydratedVariable.name,
-          description: variableWithValues.variable.note,
+          name: rawEntitledVariable.name,
+          description: rawEntitledVariable.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: false,
           isPlaintext: true
@@ -209,7 +212,7 @@ export class VariableService {
       this.prisma
     )
 
-    return variableWithValues
+    return hydratedVariable
   }
 
   async bulkCreateVariables(
@@ -217,14 +220,14 @@ export class VariableService {
     projectSlug: string,
     variables: CreateVariable[]
   ): Promise<{
-    successful: VariableWithValues[]
+    successful: HydratedVariable[]
     failed: Array<{ name: string; error: string }>
   }> {
     this.logger.log(
       `User ${user.id} started bulk creation of ${variables.length} variables in project ${projectSlug}`
     )
 
-    const successful: VariableWithValues[] = []
+    const successful: HydratedVariable[] = []
     const failed: Array<{ name: string; error: string }> = []
 
     for (const variable of variables) {
@@ -253,7 +256,7 @@ export class VariableService {
     user: AuthenticatedUser,
     variableSlug: Variable['slug'],
     dto: UpdateVariable
-  ) {
+  ): Promise<HydratedVariable> {
     this.logger.log(
       `User ${user.id} attempted to update variable ${variableSlug}`
     )
@@ -270,10 +273,10 @@ export class VariableService {
       })
 
     // Check if the variable already exists in the project
-    await this.variableExists(dto.name, variable.project)
+    await this.variableExists(dto.name, variable.projectId)
 
     // Check if a secret with the same name already exists in the project
-    await this.secretService.secretExists(dto.name, variable.project)
+    await this.secretService.secretExists(dto.name, variable.projectId)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -307,12 +310,6 @@ export class VariableService {
           ),
           note: dto.note,
           lastUpdatedById: user.id
-        },
-        select: {
-          id: true,
-          name: true,
-          note: true,
-          slug: true
         }
       })
     )
@@ -351,26 +348,6 @@ export class VariableService {
               createdById: user.id,
               environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               variableId: variable.id
-            },
-            select: {
-              id: true,
-              value: true,
-              version: true,
-              environment: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true
-                }
-              },
-              createdOn: true,
-              createdBy: {
-                select: {
-                  id: true,
-                  name: true,
-                  profilePictureUrl: true
-                }
-              }
             }
           })
         )
@@ -378,14 +355,22 @@ export class VariableService {
     }
 
     // Make the transaction
-    const tx = await this.prisma.$transaction(op)
-    const updatedVariable = tx[0]
-    const updatedVersions = tx.slice(1)
+    await this.prisma.$transaction(op)
 
-    const result = {
-      variable: updatedVariable,
-      updatedVersions: updatedVersions
-    }
+    const updatedVariable = await this.prisma.variable.findUnique({
+      where: {
+        id: variable.id
+      },
+      include: InclusionQuery.Variable
+    })
+
+    const hydratedVariable = await this.flattenVariableVersions(
+      {
+        ...updatedVariable,
+        entitlements: variable.entitlements
+      },
+      user
+    )
 
     // Notify the new variable version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -436,7 +421,7 @@ export class VariableService {
 
     this.logger.log(`User ${user.id} updated variable ${variable.id}`)
 
-    return result
+    return hydratedVariable
   }
 
   /**
@@ -745,7 +730,7 @@ export class VariableService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedVariable>> {
     this.logger.log(
       `User ${user.id} attempted to get all variables of project ${projectSlug}`
     )
@@ -754,12 +739,13 @@ export class VariableService {
     this.logger.log(
       `Checking if user has permissions to get all variables of project ${projectSlug}`
     )
-    const { id: projectId } =
+    const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
         entity: { slug: projectSlug },
         authorities: [Authority.READ_VARIABLE]
       })
+    const projectId = project.id
 
     this.logger.log(
       `Fetching all variables of project ${projectSlug} with search query ${search}`
@@ -785,129 +771,26 @@ export class VariableService {
     const hydratedVariables: HydratedVariable[] = []
 
     for (const variable of variables) {
-      hydratedVariables.push(
-        await this.entitlementService.entitleVariable({
-          project: variable.project,
+      delete variable.project
+
+      const rawEntitledVariable = await this.entitlementService.entitleVariable(
+        {
+          project,
           user,
           variable
-        })
+        }
       )
+
+      const hydratedVariable = await this.flattenVariableVersions(
+        rawEntitledVariable,
+        user
+      )
+
+      hydratedVariables.push(hydratedVariable)
     }
     this.logger.log(
       `Hydrated ${hydratedVariables.length} variables of project ${projectSlug}`
     )
-
-    const variablesWithEnvironmentalValues = new Set<{
-      variable: Partial<Variable>
-      values: {
-        environment: {
-          name: Environment['name']
-          id: Environment['id']
-          slug: Environment['slug']
-        }
-        value: VariableVersion['value']
-        version: VariableVersion['version']
-        createdBy: {
-          id: User['id']
-          name: User['name']
-          profilePictureUrl: User['profilePictureUrl']
-        }
-        createdOn: VariableVersion['createdOn']
-      }[]
-    }>()
-
-    for (const variable of hydratedVariables) {
-      // Logic to update the map:
-      // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
-      // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
-      //    If it is, update the variable version
-      const envIdToVariableVersionMap = new Map<
-        Environment['id'],
-        Partial<VariableVersion> & {
-          environment: {
-            id: Environment['id']
-            slug: Environment['slug']
-            name: Environment['name']
-          }
-          createdBy: {
-            id: User['id']
-            name: User['name']
-            profilePictureUrl: User['profilePictureUrl']
-          }
-        }
-      >()
-
-      // Maintain a list of environments that the user is and is not allowed to access
-      const environmentAccessibilityMap: Map<Environment['id'], boolean> =
-        new Map()
-
-      for (const variableVersion of variable.versions) {
-        const environmentSlug = variableVersion.environment.slug
-
-        if (!environmentAccessibilityMap.has(variableVersion.environment.id)) {
-          try {
-            await this.authorizationService.authorizeUserAccessToEnvironment({
-              user,
-              entity: {
-                slug: environmentSlug
-              },
-              authorities: [Authority.READ_ENVIRONMENT]
-            })
-            environmentAccessibilityMap.set(
-              variableVersion.environment.id,
-              true
-            )
-          } catch (error) {
-            environmentAccessibilityMap.set(
-              variableVersion.environment.id,
-              false
-            )
-          }
-        }
-
-        if (!environmentAccessibilityMap.get(variableVersion.environment.id)) {
-          continue
-        }
-
-        const environmentId = variableVersion.environment.id
-        const existingVariableVersion =
-          envIdToVariableVersionMap.get(environmentId)
-
-        if (
-          !existingVariableVersion ||
-          existingVariableVersion.version < variableVersion.version
-        ) {
-          envIdToVariableVersionMap.set(environmentId, variableVersion)
-        }
-      }
-
-      delete variable.versions
-      delete variable.project
-
-      // Add the variable to the map
-      variablesWithEnvironmentalValues.add({
-        variable,
-        values: Array.from(envIdToVariableVersionMap.values()).map(
-          (variableVersion) => ({
-            environment: {
-              id: variableVersion.environment.id,
-              name: variableVersion.environment.name,
-              slug: variableVersion.environment.slug
-            },
-            value: variableVersion.value,
-            version: variableVersion.version,
-            createdBy: {
-              id: variableVersion.createdBy.id,
-              name: variableVersion.createdBy.name,
-              profilePictureUrl: variableVersion.createdBy.profilePictureUrl
-            },
-            createdOn: variableVersion.createdOn
-          })
-        )
-      })
-    }
-
-    const items = Array.from(variablesWithEnvironmentalValues.values())
 
     // Calculate pagination metadata
     const totalCount = await this.prisma.variable.count({
@@ -927,7 +810,7 @@ export class VariableService {
       search
     })
 
-    return { items, metadata }
+    return { items: hydratedVariables, metadata }
   }
 
   /**
@@ -951,7 +834,7 @@ export class VariableService {
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
-  ) {
+  ): Promise<PaginatedResponse<VariableRevision>> {
     this.logger.log(
       `User ${user.id} attempted to get revisions of variable ${variableSlug} in environment ${environmentSlug}`
     )
@@ -987,25 +870,7 @@ export class VariableService {
         variableId: variableId,
         environmentId: environmentId
       },
-      select: {
-        value: true,
-        version: true,
-        createdOn: true,
-        environment: {
-          select: {
-            id: true,
-            slug: true,
-            name: true
-          }
-        },
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      },
+      select: InclusionQuery.Variable['versions']['select'],
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -1045,7 +910,7 @@ export class VariableService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlug: Environment['slug']
-  ) {
+  ): Promise<Configuration[]> {
     this.logger.log(
       `User ${user.id} attempted to get all variables of project ${projectSlug} and environment ${environmentSlug}`
     )
@@ -1117,14 +982,11 @@ export class VariableService {
       `Fetched ${variables.length} variables for project ${projectSlug} and environment ${environmentSlug}`
     )
 
-    return variables.map(
-      (variable) =>
-        ({
-          name: variable.name,
-          value: variable.versions[0].value,
-          isPlaintext: true
-        }) as ChangeNotification
-    )
+    return variables.map((variable) => ({
+      name: variable.name,
+      value: variable.versions[0].value,
+      isPlaintext: true
+    }))
   }
 
   /**
@@ -1137,23 +999,23 @@ export class VariableService {
    */
   async variableExists(
     variableName: Variable['name'] | null | undefined,
-    project: Project
+    projectId: Project['id']
   ) {
     if (!variableName) return
 
     this.logger.log(
-      `Checking if variable ${variableName} already exists in project ${project.slug}`
+      `Checking if variable ${variableName} already exists in project ${projectId}`
     )
 
     if (
       (await this.prisma.variable.findFirst({
         where: {
           name: variableName,
-          projectId: project.id
+          projectId
         }
       })) !== null
     ) {
-      const errorMessage = `Variable ${variableName} already exists in project ${project.slug}`
+      const errorMessage = `Variable ${variableName} already exists in project ${projectId}`
       this.logger.error(errorMessage)
       throw new ConflictException(
         constructErrorBody('Variable already exists', errorMessage)
@@ -1161,7 +1023,79 @@ export class VariableService {
     }
 
     this.logger.log(
-      `Variable ${variableName} does not exist in project ${project.slug}`
+      `Variable ${variableName} does not exist in project ${projectId}`
     )
+  }
+
+  private async flattenVariableVersions(
+    rawEntitledVariable: RawEntitledVariable,
+    user: AuthenticatedUser
+  ): Promise<HydratedVariable> {
+    // Logic to update the map:
+    // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
+    // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
+    //    If it is, update the variable version
+    const envIdToVariableVersionMap = new Map<
+      Environment['id'],
+      VariableRevision
+    >()
+
+    // Maintain a list of environments that the user is and is not allowed to access
+    const environmentAccessibilityMap: Map<Environment['id'], boolean> =
+      new Map()
+
+    for (const variableVersion of rawEntitledVariable.versions) {
+      const environmentSlug = variableVersion.environment.slug
+
+      if (!environmentAccessibilityMap.has(variableVersion.environment.id)) {
+        try {
+          await this.authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            entity: {
+              slug: environmentSlug
+            },
+            authorities: [Authority.READ_ENVIRONMENT]
+          })
+          environmentAccessibilityMap.set(variableVersion.environment.id, true)
+        } catch (error) {
+          environmentAccessibilityMap.set(variableVersion.environment.id, false)
+        }
+      }
+
+      if (!environmentAccessibilityMap.get(variableVersion.environment.id)) {
+        continue
+      }
+
+      const environmentId = variableVersion.environment.id
+      const existingVariableVersion =
+        envIdToVariableVersionMap.get(environmentId)
+
+      if (
+        !existingVariableVersion ||
+        existingVariableVersion.version < variableVersion.version
+      ) {
+        envIdToVariableVersionMap.set(environmentId, variableVersion)
+      }
+    }
+
+    rawEntitledVariable.versions = Array.from(
+      envIdToVariableVersionMap.values()
+    ).map((variableVersion) => ({
+      environment: {
+        id: variableVersion.environment.id,
+        name: variableVersion.environment.name,
+        slug: variableVersion.environment.slug
+      },
+      value: variableVersion.value,
+      version: variableVersion.version,
+      createdBy: {
+        id: variableVersion.createdBy.id,
+        name: variableVersion.createdBy.name,
+        profilePictureUrl: variableVersion.createdBy.profilePictureUrl
+      },
+      createdOn: variableVersion.createdOn
+    }))
+
+    return rawEntitledVariable
   }
 }

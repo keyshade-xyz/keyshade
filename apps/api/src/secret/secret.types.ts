@@ -6,6 +6,22 @@ import {
   User
 } from '@prisma/client'
 
+export interface SecretRevision {
+  environment: {
+    id: Environment['id']
+    name: Environment['name']
+    slug: Environment['slug']
+  }
+  value: SecretVersion['value']
+  version: SecretVersion['version']
+  createdOn: SecretVersion['createdOn']
+  createdBy: {
+    id: User['id']
+    name: User['name']
+    profilePictureUrl: User['profilePictureUrl']
+  }
+}
+
 export interface HydratedSecret extends Secret {
   lastUpdatedBy: {
     id: User['id']
@@ -16,33 +32,22 @@ export interface HydratedSecret extends Secret {
     canUpdate: boolean
     canDelete: boolean
   }
-  project: Project
-  versions: {
-    environment: {
-      id: Environment['id']
-      name: Environment['name']
-      slug: Environment['slug']
-    }
-    value: SecretVersion['value']
-    version: SecretVersion['version']
-    createdOn: SecretVersion['createdOn']
-    createdBy: {
-      id: User['id']
-      name: User['name']
-      profilePictureUrl: User['profilePictureUrl']
-    }
-  }[]
+  project: {
+    id: Project['id']
+    name: Project['name']
+    slug: Project['slug']
+    workspaceId: Project['workspaceId']
+    publicKey: Project['publicKey']
+    privateKey: Project['privateKey']
+    storePrivateKey: Project['storePrivateKey']
+  }
+  versions: Array<SecretRevision>
 }
 
-export interface SecretWithValues {
-  secret: HydratedSecret
-  values: Array<{
-    environment: {
-      id: string
-      name: string
-      slug: string
-    }
-    value: string
-    version: number
-  }>
+export interface RawSecret extends Omit<HydratedSecret, 'entitlements'> {
+  versions: HydratedSecret['versions']
+}
+
+export interface RawEntitledSecret extends RawSecret {
+  entitlements: HydratedSecret['entitlements']
 }

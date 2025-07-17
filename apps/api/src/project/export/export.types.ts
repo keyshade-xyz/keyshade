@@ -1,10 +1,7 @@
+import { Configuration } from '@/socket/socket.types'
+
 export enum ExportFormat {
   JSON = 'json'
-}
-
-export interface Configuration {
-  name: string
-  value: string
 }
 
 export interface ExportData {

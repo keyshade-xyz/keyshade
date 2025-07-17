@@ -1,5 +1,5 @@
 import { Authority, ProjectAccessLevel } from '@prisma/client'
-import { HydratedVariable } from '@/variable/variable.types'
+import { RawEntitledVariable, RawVariable } from '@/variable/variable.types'
 import {
   Injectable,
   InternalServerErrorException,
@@ -7,15 +7,21 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { HydratedEnvironment } from '@/environment/environment.types'
+import {
+  HydratedEnvironment,
+  RawEnvironment
+} from '@/environment/environment.types'
 import { ProjectWithSecrets } from '@/project/project.types'
-import { HydratedSecret } from '@/secret/secret.types'
+import { RawEntitledSecret, RawSecret } from '@/secret/secret.types'
 import {
   getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from '@/common/collective-authorities'
-import { HydratedIntegration } from '@/integration/integration.types'
+import {
+  HydratedIntegration,
+  RawIntegration
+} from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
@@ -263,7 +269,7 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
-    let environment: Omit<HydratedEnvironment, 'entitlements'>
+    let environment: RawEnvironment
 
     const environmentIncludeQuery = {
       project: true,
@@ -313,8 +319,7 @@ export class AuthorityCheckerService {
     const permittedAuthorities = await getCollectiveEnvironmentAuthorities(
       user.id,
       environment,
-      this.prisma,
-      this.logger
+      this.prisma
     )
 
     this.logger.log(
@@ -326,7 +331,7 @@ export class AuthorityCheckerService {
       user.id
     )
 
-    const entitlements: HydratedSecret['entitlements'] = {
+    const entitlements: HydratedEnvironment['entitlements'] = {
       canDelete: permittedAuthorities.has(Authority.DELETE_ENVIRONMENT),
       canUpdate: permittedAuthorities.has(Authority.UPDATE_ENVIRONMENT)
     }
@@ -351,7 +356,7 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverVariable(
     params: AuthorizationParams
-  ): Promise<HydratedVariable> {
+  ): Promise<RawEntitledVariable> {
     const { user, entity, authorities } = params
     this.logger.log(
       `Checking authority over variable for user ${user.id}, entity ${JSON.stringify(
@@ -359,7 +364,7 @@ export class AuthorityCheckerService {
       )} and authorities ${authorities}`
     )
 
-    let variable: Omit<HydratedVariable, 'entitlements'>
+    let variable: RawVariable
 
     try {
       if (entity.slug) {
@@ -433,10 +438,10 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverSecret(
     params: AuthorizationParams
-  ): Promise<HydratedSecret> {
+  ): Promise<RawEntitledSecret> {
     const { user, entity, authorities } = params
 
-    let secret: Omit<HydratedSecret, 'entitlements'>
+    let secret: RawSecret
 
     this.logger.log(
       `Checking authority over secret for user ${user.id}, entity ${JSON.stringify(
@@ -522,7 +527,7 @@ export class AuthorityCheckerService {
       `Checking authority over integration for user ${user.id}, entity ${JSON.stringify(entity)} and authorities ${authorities}`
     )
 
-    let integration: Omit<HydratedIntegration, 'entitlements'>
+    let integration: RawIntegration
 
     try {
       if (entity.slug) {

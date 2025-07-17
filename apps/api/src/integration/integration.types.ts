@@ -118,4 +118,7 @@ export interface HydratedIntegration extends Integration {
   }[]
 }
 
+export interface RawIntegration
+  extends Omit<HydratedIntegration, 'entitlements'> {}
+
 export type EnvironmentSupportType = 'single' | 'atleast-one' | 'any'

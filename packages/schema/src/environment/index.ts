@@ -1,11 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
-const EnvironmentEntitlementSchema = z.object({
-  canUpdate: z.boolean(),
-  canDelete: z.boolean()
-})
-
 export const EnvironmentSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -14,7 +9,23 @@ export const EnvironmentSchema = z.object({
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   projectId: z.string(),
-  lastUpdatedById: z.string()
+  lastUpdatedById: z.string(),
+  entitlements: z.object({
+    canWrite: z.boolean(),
+    canDelete: z.boolean()
+  }),
+  project: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    workspaceId: z.string()
+  }),
+  lastUpdatedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    profilePictureUrl: z.string().nullable()
+  })
 })
 
 export const CreateEnvironmentRequestSchema = z.object({
@@ -23,14 +34,7 @@ export const CreateEnvironmentRequestSchema = z.object({
   projectSlug: z.string()
 })
 
-export const CreateEnvironmentResponseSchema = EnvironmentSchema.extend({
-  lastUpdatedBy: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    profilePictureUrl: z.string().nullable()
-  })
-})
+export const CreateEnvironmentResponseSchema = EnvironmentSchema
 
 export const UpdateEnvironmentRequestSchema =
   CreateEnvironmentRequestSchema.omit({ projectSlug: true })
@@ -43,34 +47,15 @@ export const GetEnvironmentRequestSchema = z.object({
   slug: EnvironmentSchema.shape.slug
 })
 
-export const GetEnvironmentResponseSchema = EnvironmentSchema.extend({
-  lastUpdatedBy: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    profilePictureUrl: z.string().nullable()
-  }),
-  entitlements: EnvironmentEntitlementSchema
-})
+export const GetEnvironmentResponseSchema = EnvironmentSchema
 
 export const GetAllEnvironmentsOfProjectRequestSchema =
   PageRequestSchema.extend({
     projectSlug: z.string()
   })
 
-export const GetAllEnvironmentsOfProjectResponseSchema = PageResponseSchema(
-  EnvironmentSchema.omit({ projectId: true, lastUpdatedById: true }).extend({
-    lastUpdatedBy: z.object({
-      id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-      profilePictureUrl: z.string().nullable()
-    }),
-    secrets: z.number(),
-    variables: z.number(),
-    entitlements: EnvironmentEntitlementSchema
-  })
-)
+export const GetAllEnvironmentsOfProjectResponseSchema =
+  PageResponseSchema(EnvironmentSchema)
 
 export const DeleteEnvironmentRequestSchema = z.object({
   slug: EnvironmentSchema.shape.slug

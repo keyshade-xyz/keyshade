@@ -93,9 +93,7 @@ export const GetIntegrationRequestSchema = z.object({
   integrationSlug: IntegrationSchema.shape.slug
 })
 
-export const GetIntegrationResponseSchema = IntegrationSchema.extend({
-  workspace: WorkspaceSchema
-})
+export const GetIntegrationResponseSchema = IntegrationSchema
 
 export const GetAllIntegrationRequestSchema = PageRequestSchema.extend({
   workspaceSlug: WorkspaceSchema.shape.slug

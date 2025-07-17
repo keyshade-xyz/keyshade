@@ -5,7 +5,7 @@ import { EnvironmentSchema } from '@/environment'
 import { BaseProjectSchema } from '@/project'
 import { UserSchema } from '@/user'
 
-export const SecretVersionSchema = z.object({
+export const SecretRevisionSchema = z.object({
   value: z.string(),
   version: z.number(),
   createdOn: z.string().datetime(),
@@ -42,7 +42,7 @@ export const SecretSchema = z.object({
       canDelete: z.boolean()
     })
   }),
-  values: z.array(SecretVersionSchema)
+  versions: z.array(SecretRevisionSchema)
 })
 
 export const CreateSecretRequestSchema = z.object({
@@ -82,15 +82,7 @@ export const UpdateSecretRequestSchema =
     secretSlug: z.string()
   })
 
-export const UpdateSecretResponseSchema = z.object({
-  secret: SecretSchema.shape.secret.pick({
-    id: true,
-    name: true,
-    slug: true,
-    note: true
-  }),
-  updatedVersions: z.array(SecretVersionSchema)
-})
+export const UpdateSecretResponseSchema = SecretSchema
 
 export const DeleteEnvironmentValueOfSecretRequestSchema = z.object({
   secretSlug: z.string(),
@@ -113,7 +105,7 @@ export const RollBackSecretRequestSchema = z.object({
 
 export const RollBackSecretResponseSchema = z.object({
   count: z.number(),
-  currentRevision: SecretVersionSchema
+  currentRevision: SecretRevisionSchema
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
@@ -130,7 +122,7 @@ export const GetRevisionsOfSecretRequestSchema =
   })
 
 export const GetRevisionsOfSecretResponseSchema =
-  PageResponseSchema(SecretVersionSchema)
+  PageResponseSchema(SecretRevisionSchema)
 
 export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,

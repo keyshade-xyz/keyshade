@@ -27,7 +27,7 @@ import { constructErrorBody } from './util'
 export const getEnvironmentIdToSlugMap = async (
   dto: CreateSecret | UpdateSecret | CreateVariable | UpdateVariable,
   user: AuthenticatedUser,
-  project: Project,
+  project: Partial<Project>,
   authorizationService: AuthorizationService,
   shouldCreateRevisions: boolean
 ): Promise<Map<string, string>> => {

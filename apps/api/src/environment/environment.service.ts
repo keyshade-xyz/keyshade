@@ -15,13 +15,15 @@ import { CreateEnvironment } from './dto/create.environment/create.environment'
 import { UpdateEnvironment } from './dto/update.environment/update.environment'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { paginate } from '@/common/paginate'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { createEvent } from '@/common/event'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedEnvironment } from './environment.types'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { EntitlementService } from '@/common/entitlement.service'
 
 @Injectable()
 export class EnvironmentService {
@@ -31,7 +33,8 @@ export class EnvironmentService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly entitlementService: EntitlementService
   ) {}
 
   /**
@@ -63,7 +66,7 @@ export class EnvironmentService {
     user: AuthenticatedUser,
     dto: CreateEnvironment,
     projectSlug: Project['slug']
-  ) {
+  ): Promise<HydratedEnvironment> {
     this.logger.log(
       `User ${user.id} attempted to create environment ${dto.name} in project ${projectSlug}`
     )
@@ -110,16 +113,7 @@ export class EnvironmentService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true,
-            email: true
-          }
-        }
-      }
+      include: InclusionQuery.Environment
     })
     this.logger.log(
       `Environment ${environment.name} (${environment.slug}) created in project ${project.name}`
@@ -143,7 +137,10 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return environment
+    return await this.entitlementService.entitleEnvironment({
+      environment,
+      user
+    })
   }
 
   /**
@@ -175,7 +172,7 @@ export class EnvironmentService {
     user: AuthenticatedUser,
     dto: UpdateEnvironment,
     environmentSlug: Environment['slug']
-  ) {
+  ): Promise<HydratedEnvironment> {
     this.logger.log(
       `User ${user.id} attempted to update environment ${environmentSlug}`
     )
@@ -207,7 +204,8 @@ export class EnvironmentService {
           : environment.slug,
         description: dto.description,
         lastUpdatedById: user.id
-      }
+      },
+      include: InclusionQuery.Environment
     })
     this.logger.log(`Environment ${updatedEnvironment.slug} updated`)
 
@@ -230,7 +228,10 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return updatedEnvironment
+    return {
+      ...updatedEnvironment,
+      entitlements: environment.entitlements
+    }
   }
 
   /**
@@ -249,7 +250,7 @@ export class EnvironmentService {
   async getEnvironment(
     user: AuthenticatedUser,
     environmentSlug: Environment['slug']
-  ) {
+  ): Promise<HydratedEnvironment> {
     this.logger.log(
       `User ${user.id} attempted to fetch an environment ${environmentSlug}`
     )
@@ -306,7 +307,7 @@ export class EnvironmentService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedEnvironment>> {
     this.logger.log(
       `User ${user.id} attempted to fetch environments of project ${projectSlug}`
     )
@@ -395,7 +396,7 @@ export class EnvironmentService {
       `Metadata calculated for environments of project ${projectSlug}`
     )
 
-    return { paginatedEnvironments, metadata }
+    return { items: paginatedEnvironments, metadata }
   }
 
   /**
@@ -484,7 +485,13 @@ export class EnvironmentService {
    * @throws ConflictException if an environment with the given name already exists
    * @private
    */
-  private async environmentExists(name: Environment['name'], project: Project) {
+  private async environmentExists(
+    name: Environment['name'],
+    project: {
+      id: Project['id']
+      slug: Project['slug']
+    }
+  ) {
     this.logger.log(
       `Checking if environment ${name} exists in project ${project.slug}`
     )

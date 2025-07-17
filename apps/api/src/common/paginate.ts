@@ -20,6 +20,11 @@ interface QueryOptions {
   search?: string
 }
 
+export interface PaginatedResponse<T> {
+  items: T[]
+  metadata: PaginatedMetadata
+}
+
 //convert query object to query string to use in links
 const getQueryString = (query: QueryOptions) => {
   return Object.keys(query)

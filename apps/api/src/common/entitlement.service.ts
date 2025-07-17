@@ -1,21 +1,22 @@
-import { HydratedIntegration } from '@/integration/integration.types'
+import {
+  HydratedIntegration,
+  RawIntegration
+} from '@/integration/integration.types'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Injectable, Logger } from '@nestjs/common'
+import { Authority, Project, Workspace } from '@prisma/client'
 import {
-  Authority,
-  Integration,
-  Project,
-  Secret,
-  Variable,
-  Workspace
-} from '@prisma/client'
-import {
+  getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
   getCollectiveWorkspaceAuthorities
 } from './collective-authorities'
-import { HydratedSecret } from '@/secret/secret.types'
-import { HydratedVariable } from '@/variable/variable.types'
+import { RawEntitledSecret, RawSecret } from '@/secret/secret.types'
+import { RawEntitledVariable, RawVariable } from '@/variable/variable.types'
+import {
+  HydratedEnvironment,
+  RawEnvironment
+} from '@/environment/environment.types'
 
 type RootEntitlementParams = {
   user: AuthenticatedUser
@@ -24,17 +25,21 @@ type RootEntitlementParams = {
 
 type IntegrationEntitlementParams = RootEntitlementParams & {
   workspaceId: Workspace['id']
-  integration: Integration
+  integration: RawIntegration
 }
 
 type SecretEntitlementParams = RootEntitlementParams & {
-  project: Project
-  secret: Secret
+  project: Partial<Project>
+  secret: RawSecret
 }
 
 type VariableEntitlementParams = RootEntitlementParams & {
-  project: Project
-  variable: Variable
+  project: Partial<Project>
+  variable: RawVariable
+}
+
+type EnvironmentEntitlementParams = RootEntitlementParams & {
+  environment: RawEnvironment
 }
 
 @Injectable()
@@ -75,7 +80,7 @@ export class EntitlementService {
     return {
       ...integration,
       entitlements
-    } as HydratedIntegration
+    }
   }
 
   public async entitleSecret({
@@ -83,7 +88,7 @@ export class EntitlementService {
     user,
     permittedAuthorities,
     secret
-  }: SecretEntitlementParams): Promise<HydratedSecret> {
+  }: SecretEntitlementParams): Promise<RawEntitledSecret> {
     if (!permittedAuthorities) {
       permittedAuthorities = await getCollectiveProjectAuthorities(
         user.id,
@@ -110,7 +115,7 @@ export class EntitlementService {
     return {
       ...secret,
       entitlements
-    } as HydratedSecret
+    }
   }
 
   public async entitleVariable({
@@ -118,7 +123,7 @@ export class EntitlementService {
     user,
     permittedAuthorities,
     variable
-  }: VariableEntitlementParams): Promise<HydratedVariable> {
+  }: VariableEntitlementParams): Promise<RawEntitledVariable> {
     if (!permittedAuthorities) {
       permittedAuthorities = await getCollectiveProjectAuthorities(
         user.id,
@@ -145,6 +150,40 @@ export class EntitlementService {
     return {
       ...variable,
       entitlements
-    } as HydratedVariable
+    }
+  }
+
+  public async entitleEnvironment({
+    environment,
+    user,
+    permittedAuthorities
+  }: EnvironmentEntitlementParams): Promise<HydratedEnvironment> {
+    if (!permittedAuthorities) {
+      permittedAuthorities = await getCollectiveEnvironmentAuthorities(
+        user.id,
+        environment,
+        this.prisma
+      )
+    }
+
+    this.logger.log(
+      `Associating entitlements with environment ${environment.slug} for user ${user.id}`
+    )
+
+    const entitlements = {
+      canDelete: permittedAuthorities.has(Authority.DELETE_ENVIRONMENT),
+      canUpdate: permittedAuthorities.has(Authority.UPDATE_ENVIRONMENT)
+    }
+
+    this.logger.log(
+      `Associated entitlements with environment ${environment.slug} for user ${user.id}: ${JSON.stringify(
+        entitlements
+      )}`
+    )
+
+    return {
+      ...environment,
+      entitlements
+    }
   }
 }

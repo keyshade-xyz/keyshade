@@ -1,25 +1,22 @@
-import { Environment, Project } from '@prisma/client'
+import { Environment, Project, User } from '@prisma/client'
 
-export interface EnvironmentWithProject extends Environment {
-  project: Project
-}
-
-export interface EnvironmentWithLastUpdatedBy extends Environment {
+export interface HydratedEnvironment extends Environment {
   lastUpdatedBy: {
-    id: string
-    name: string
-    profilePictureUrl: string | null
+    id: User['id']
+    name: User['name']
+    profilePictureUrl: User['profilePictureUrl']
   }
-}
-
-export interface EnvironmentWithEntitlements extends Environment {
+  project: {
+    id: Project['id']
+    name: Project['name']
+    slug: Project['slug']
+    workspaceId: Project['workspaceId']
+  }
   entitlements: {
     canUpdate: boolean
     canDelete: boolean
   }
 }
 
-export interface HydratedEnvironment
-  extends EnvironmentWithProject,
-    EnvironmentWithEntitlements,
-    EnvironmentWithLastUpdatedBy {}
+export interface RawEnvironment
+  extends Omit<HydratedEnvironment, 'entitlements'> {}

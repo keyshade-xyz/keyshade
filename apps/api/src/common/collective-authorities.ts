@@ -1,4 +1,4 @@
-import { EnvironmentWithProject } from '@/environment/environment.types'
+import { HydratedEnvironment } from '@/environment/environment.types'
 import { Logger } from '@nestjs/common'
 import {
   Authority,
@@ -69,7 +69,7 @@ export const getCollectiveWorkspaceAuthorities = async (
  */
 export const getCollectiveProjectAuthorities = async (
   userId: User['id'],
-  project: Project,
+  project: Partial<Project>,
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
   const logger = new Logger('getCollectiveProjectAuthorities')
@@ -134,10 +134,11 @@ export const getCollectiveProjectAuthorities = async (
  */
 export const getCollectiveEnvironmentAuthorities = async (
   userId: User['id'],
-  environment: EnvironmentWithProject,
-  prisma: PrismaClient,
-  logger: Logger
+  environment: Omit<HydratedEnvironment, 'entitlements'>,
+  prisma: PrismaClient
 ): Promise<Set<Authority>> => {
+  const logger = new Logger('getCollectiveEnvironmentAuthorities')
+
   logger.log(
     `Getting collective environment authorities for userId: ${userId} and environmentId: ${environment.id}`
   )

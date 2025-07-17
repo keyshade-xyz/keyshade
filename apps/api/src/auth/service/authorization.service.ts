@@ -2,8 +2,8 @@ import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { ProjectWithSecrets } from '@/project/project.types'
 import { HydratedEnvironment } from '@/environment/environment.types'
-import { HydratedVariable } from '@/variable/variable.types'
-import { HydratedSecret } from '@/secret/secret.types'
+import { RawEntitledVariable } from '@/variable/variable.types'
+import { RawEntitledSecret } from '@/secret/secret.types'
 import { HydratedIntegration } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
@@ -97,14 +97,13 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToVariable(
     params: AuthorizationParams
-  ): Promise<HydratedVariable> {
+  ): Promise<RawEntitledVariable> {
     const variable =
       await this.authorityCheckerService.checkAuthorityOverVariable(params)
 
     const workspace = await this.getWorkspace(variable.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
-    delete variable.project
 
     return variable
   }
@@ -120,14 +119,13 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToSecret(
     params: AuthorizationParams
-  ): Promise<HydratedSecret> {
+  ): Promise<RawEntitledSecret> {
     const secret =
       await this.authorityCheckerService.checkAuthorityOverSecret(params)
 
     const workspace = await this.getWorkspace(secret.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
-    delete secret.project
 
     return secret
   }
