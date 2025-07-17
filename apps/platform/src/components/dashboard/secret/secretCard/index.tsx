@@ -30,17 +30,14 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import {
-  Switch
-} from '@/components/ui/switch'
+import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
   secretRevisionsOpenAtom,
   selectedSecretAtom,
-  selectedSecretEnvironmentAtom,
-  //disableSecretOpenAtom
+  selectedSecretEnvironmentAtom
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
@@ -66,15 +63,13 @@ export default function SecretCard({
     deleteEnvironmentValueOfSecretOpenAtom
   )
   const setIsSecretRevisionsOpen = useSetAtom(secretRevisionsOpenAtom)
-  //const setIsDisableSecretOpen = useSetAtom(disableSecretOpenAtom)
   const [selectedSecretEnvironment, setSelectedSecretEnvironment] = useAtom(
     selectedSecretEnvironmentAtom
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
-  //const [isSecretDisabled, setIsSecretDisabled] = useState<boolean>(false)
-  const disabledEnvironments = ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret({
-    secretSlug: secret.slug
-  })
+  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+    new Set()
+  )
   const [decryptedValues, setDecryptedValues] = useState<
     Record<Environment['id'], string>
   >({})
@@ -107,6 +102,26 @@ export default function SecretCard({
   )
 
   useEffect(() => {
+    const fetchDisabled = async () => {
+      try {
+        const res =
+          await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
+            { secretSlug: secret.slug }
+          )
+
+        if (res.success && res.data) {
+          setDisabledEnvironments(new Set(res.data))
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Failed to load disabled environments', error)
+      }
+    }
+
+    fetchDisabled()
+  }, [secret.slug])
+
+  useEffect(() => {
     handleDecryptValues(secretData.values[0]?.environment.slug)
   }, [secretData.values, handleDecryptValues])
 
@@ -121,22 +136,34 @@ export default function SecretCard({
 
   const handleToggleDisableSecretClick = async (
     environmentSlug: Environment['slug'],
+    environmentId: Environment['id'],
     checked: boolean
   ) => {
-    if (selectedSecretEnvironment === environmentSlug && checked) {
-      await ControllerInstance.getInstance().secretController.enableSecret({
+    const controller = ControllerInstance.getInstance().secretController
+
+    if (checked) {
+      // Enable secret
+      await controller.enableSecret({
         secretSlug: secret.slug,
         environmentSlug
       })
-      //setIsSecretDisabled(false)
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.delete(environmentId) // Update local state
+        return next
+      })
     } else {
-      await ControllerInstance.getInstance().secretController.disableSecret({
+      // Disable secret
+      await controller.disableSecret({
         secretSlug: secret.slug,
         environmentSlug
       })
-      //setIsSecretDisabled(true)
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.add(environmentId) // Update local state
+        return next
+      })
     }
-    setSelectedSecretEnvironment(environmentSlug)
   }
 
   const handleRevealEnvironmentValueOfSecretClick = (
@@ -242,8 +269,9 @@ export default function SecretCard({
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
-                  const isDisabled = 
-                    value.environment.slug in disabledEnvironments
+                  const isDisabled = disabledEnvironments.has(
+                    value.environment.id
+                  )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -267,6 +295,7 @@ export default function SecretCard({
                             onCheckedChange={(checked) => {
                               handleToggleDisableSecretClick(
                                 value.environment.slug,
+                                value.environment.id,
                                 checked
                               )
                             }}
