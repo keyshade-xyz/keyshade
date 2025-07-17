@@ -51,8 +51,8 @@ export default class RunCommand extends BaseCommand {
     return [
       {
         short: '-e',
-        long: '--environment-slug <string>',
-        description: 'Environment slug to configure'
+        long: '--environment <slug>',
+        description: 'Environment to configure'
       }
     ]
   }
