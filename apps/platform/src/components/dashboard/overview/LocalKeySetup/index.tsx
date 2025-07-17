@@ -1,7 +1,7 @@
 import React from 'react'
 import { Info, Plus } from 'lucide-react'
-import { TrashSVG } from '@public/svg/shared'
 import { useAtomValue } from 'jotai'
+import { TrashSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
 import { HiddenContent } from '@/components/shared/dashboard/hidden-content'
 import {

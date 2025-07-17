@@ -18,16 +18,15 @@ function SidebarTab({
   matchTo
 }: SidebarTabProps): React.JSX.Element {
   const currentPath = usePathname()
+
   /**
-   * Determines the background color for a tab based on the current active path.
-   * @param tabName - The name of the tab.
-   * @returns The background color for the tab.
+   * Determines if a tab is active based on the current path.
+   * It strips any query parameters from matchTo and checks if
+   * the current path is equal to or starts with that base.
    */
-  const isCurrentActive = (tabName: string): boolean => {
-    if (currentPath === tabName) {
-      return true
-    }
-    return false
+  const isCurrentActive = (matchPattern: string): boolean => {
+    const basePath = matchPattern.split('?')[0]
+    return currentPath === basePath || currentPath.startsWith(`${basePath  }/`)
   }
 
   return (

@@ -9,8 +9,8 @@ import {
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import TierLimit from './tierLimit'
 import SidebarTab from './sidebarTab'
+import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { Button } from '@/components/ui/button'
@@ -30,7 +30,7 @@ function Sidebar(): JSX.Element {
       name: 'Members',
       icon: <TeamSVG />,
       link: '/members?tab=joined',
-      matchTo: '/members'
+      matchTo: '/members?tab=joined'
     },
     {
       name: 'Roles',
@@ -41,8 +41,8 @@ function Sidebar(): JSX.Element {
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
-      link: '/integrations',
-      matchTo: '/integrations'
+      link: '/integrations?tab=overview',
+      matchTo: '/integrations?tab=overview'
     },
     {
       name: 'Settings',

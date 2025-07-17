@@ -14,9 +14,7 @@ import {
   SelectItem
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-
-type PartialProject = Pick<Project, 'id' | 'name' | 'slug'>
-type PartialEnvironment = Pick<Environment, 'id' | 'name' | 'slug'>
+import type { PartialEnvironment, PartialProject } from '@/types'
 
 export type ProjectEnvironmentComboType = Record<
   Project['slug'],
@@ -267,7 +265,6 @@ export default function ProjectEnvironmentSelector({
             <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white">
               {Object.values(projectEnvironmentCombinations)
                 .filter(
-                   
                   ({ project }) => !projectEnvironmentSelection[project.slug]
                 )
                 .map(({ project }) => (

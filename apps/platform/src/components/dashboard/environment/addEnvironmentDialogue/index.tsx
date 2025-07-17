@@ -46,11 +46,15 @@ export default function AddEnvironmentDialogue() {
   const handleAddEnvironment = useCallback(async () => {
     if (selectedProject) {
       // Check if environment name is empty/only whitespace and whether is at least 3 chars length
-      if (newEnvironmentData.environmentName.trim() === '' || newEnvironmentData.environmentName.trim().length < 3) {
+      if (
+        newEnvironmentData.environmentName.trim() === '' ||
+        newEnvironmentData.environmentName.trim().length < 3
+      ) {
         toast.error('Environment name is required', {
           description: (
             <p className="text-xs text-red-300">
-              Please provide a valid name for the environment (not blank and at least has 3 chars).
+              Please provide a valid name for the environment (not blank and at
+              least has 3 chars).
             </p>
           )
         })
