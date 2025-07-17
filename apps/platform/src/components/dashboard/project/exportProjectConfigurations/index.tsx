@@ -1,12 +1,6 @@
-import { useAtom, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
-import type { ExportProjectRequest } from '@keyshade/schema'
-import { toast } from 'sonner'
-import {
-  environmentsOfProjectAtom,
-  exportConfigOpenAtom,
-  selectedProjectAtom
-} from '@/store'
+import ExportProjectFormatInput from './export-project-format-input'
+import ExportProjectEnvironmentInput from './export-project-environment-input'
+import ExportProjectPrivateKeyInput from './export-project-private-key-input'
 import {
   Dialog,
   DialogContent,
@@ -14,177 +8,31 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useHttp } from '@/hooks/use-http'
-import ControllerInstance from '@/lib/controller-instance'
-import { Input } from '@/components/ui/input'
-import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
-
-const formatMap = new Map<
-  string,
-  { label: string; mimeType?: string; extension?: string }
->([
-  ['json', { label: 'JSON', mimeType: 'application/json', extension: 'json' }]
-])
-
-const downloadBase64File = (
-  base64Contents: string,
-  filename: string,
-  mimeType: string
-) => {
-  const decodedString = atob(base64Contents)
-
-  const blob = new Blob([decodedString], { type: mimeType })
-
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  link.click()
-  URL.revokeObjectURL(url)
-}
+import Visible from '@/components/common/visible'
+import { useProjectEnvironments } from '@/hooks/api/use-project-environments'
+import { useExportProjectDialog } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-dialog'
+import { useExportProjectForm } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-form'
+import { useExportConfigurations } from '@/hooks/screen/project/exportProjectConfigurations/use-export-project-configurations'
 
 export default function ExportProjectConfigurationsDialog(): JSX.Element | null {
-  const [isLoading, setIsLoading] = useState(false)
-  const [isExportConfigurationDialogOpen, setIsExportConfigurationDialogOpen] =
-    useAtom(exportConfigOpenAtom)
-  const [selectedProject] = useAtom(selectedProjectAtom)
-  const [environmentsOfProject] = useAtom(environmentsOfProjectAtom)
+  const { environmentsOfProject, selectedProject } = useProjectEnvironments()
 
-  const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const {
+    formData,
+    resetForm,
+    handleEnvironmentToggle,
+    updateFormData,
+    validateForm,
+    browserProjectPrivateKey
+  } = useExportProjectForm()
+  const { isExportConfigurationDialogOpen, handleSheetChange } =
+    useExportProjectDialog(resetForm, selectedProject)
 
-  const [formData, setFormData] = useState<
-    Omit<ExportProjectRequest, 'projectSlug'>
-  >({
-    environmentSlugs: [],
-    format: '',
-    privateKey: ''
-  })
-
-  const { projectPrivateKey: browserProjectPrivateKey } =
-    useProjectPrivateKey(selectedProject)
-
-  const fetchEnvironments = useHttp(() =>
-    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-      {
-        projectSlug: selectedProject!.slug
-      }
-    )
+  const { handleExport, isLoading } = useExportConfigurations(
+    selectedProject?.slug || '',
+    formData,
+    validateForm
   )
-
-  useEffect(() => {
-    if (!selectedProject) return
-
-    fetchEnvironments().then(({ data, success }) => {
-      if (success && data) {
-        setEnvironments(data.items)
-      }
-    })
-  }, [selectedProject, fetchEnvironments, setEnvironments])
-
-  useEffect(() => {
-    if (isExportConfigurationDialogOpen && selectedProject) {
-      setFormData({
-        environmentSlugs: [],
-        format: '',
-        privateKey: ''
-      })
-    }
-  }, [isExportConfigurationDialogOpen, selectedProject])
-
-  const handleSheetChange = (open: boolean) => {
-    setIsExportConfigurationDialogOpen(open)
-  }
-
-  const handleEnvironmentToggle = (slug: string, checked: boolean) => {
-    setFormData((prev) => {
-      const set = new Set(prev.environmentSlugs)
-      if (checked) {
-        set.add(slug)
-      } else {
-        set.delete(slug)
-      }
-      return { ...prev, environmentSlugs: Array.from(set) }
-    })
-  }
-
-  const exportConfigs = useHttp(() => {
-    return ControllerInstance.getInstance().projectController.exportProjectConfigurations(
-      {
-        projectSlug: selectedProject!.slug,
-        environmentSlugs: formData.environmentSlugs,
-        format: formData.format,
-        privateKey: formData.privateKey || browserProjectPrivateKey || undefined
-      }
-    )
-  })
-
-  const handleExport = useCallback(async () => {
-    if (!selectedProject) {
-      toast.error('No project selected')
-      return
-    }
-
-    if (formData.environmentSlugs.length < 1) {
-      toast.error('Please select at least one environment')
-      return
-    }
-    if (!formData.format) {
-      toast.error('Please pick a format')
-      return
-    }
-
-    if (
-      !selectedProject.storePrivateKey &&
-      !formData.privateKey &&
-      !browserProjectPrivateKey
-    ) {
-      toast.error('Private Key is required for this project')
-      return
-    }
-
-    setIsLoading(true)
-    const loadingToastId = toast.loading('Exporting configurations...')
-
-    try {
-      const { data, success } = await exportConfigs()
-
-      if (success && data) {
-        const mimeType =
-          formatMap.get(formData.format)?.mimeType ?? 'text/plain'
-        const extension = formatMap.get(formData.format)?.extension ?? 'txt'
-
-        Object.entries(data).forEach(([envSlug, base64Contents]) => {
-          const filename = `${envSlug}.${extension}`
-          downloadBase64File(base64Contents, filename, mimeType)
-        })
-
-        toast.success('Export request successful. Check your downloads.')
-      }
-    } catch (err) {
-      toast.error('An error occurred during export', { id: loadingToastId })
-    } finally {
-      toast.dismiss(loadingToastId)
-      setIsLoading(false)
-      setIsExportConfigurationDialogOpen(false)
-    }
-  }, [
-    selectedProject,
-    formData.environmentSlugs,
-    formData.format,
-    formData.privateKey,
-    browserProjectPrivateKey,
-    exportConfigs,
-    setIsExportConfigurationDialogOpen
-  ])
 
   if (!selectedProject) {
     return null
@@ -209,65 +57,30 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
 
         <div className="flex flex-col gap-y-8 overflow-auto">
           <div className="flex w-full flex-col gap-4 py-4">
-            <div className="flex flex-col items-start gap-4">
-              <Label htmlFor="format">Export Format</Label>
-              <Select
-                name="format"
-                onValueChange={(value: string) =>
-                  setFormData((prev) => ({ ...prev, format: value }))
+            <ExportProjectFormatInput
+              onFormatChange={(value: string) =>
+                updateFormData({ format: value })
+              }
+              selectValue={formData.format}
+            />
+            <ExportProjectEnvironmentInput
+              environmentSlugs={formData.environmentSlugs}
+              environmentsOfProject={environmentsOfProject}
+              onEnvironmentToggle={(slug: string, checked: boolean) =>
+                handleEnvironmentToggle(slug, checked)
+              }
+            />
+
+            <Visible
+              if={!selectedProject.storePrivateKey && !browserProjectPrivateKey}
+            >
+              <ExportProjectPrivateKeyInput
+                onChange={(value: string) =>
+                  updateFormData({ privateKey: value })
                 }
-                value={formData.format}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent className="bg-neutral-800">
-                  {[...formatMap].map(([value, { label }]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col items-start gap-4">
-              <Label className="mb-2">Choose Environments</Label>
-              <div className="space-y-1">
-                {environmentsOfProject.map(
-                  (env: { slug: string; name: string }) => (
-                    <div className="flex items-center gap-2" key={env.slug}>
-                      <Checkbox
-                        checked={formData.environmentSlugs.includes(env.slug)}
-                        name={`env-${env.slug}`}
-                        onCheckedChange={(checked: boolean) =>
-                          handleEnvironmentToggle(env.slug, checked)
-                        }
-                      />
-                      <Label htmlFor={`env-${env.slug}`}>{env.name}</Label>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-
-            {!selectedProject.storePrivateKey && !browserProjectPrivateKey && (
-              <div className="flex flex-col items-start gap-4">
-                <Label htmlFor="privateKey">Private Key</Label>
-                <Input
-                  id="privateKey"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      privateKey: e.target.value
-                    }))
-                  }
-                  placeholder="Paste private key here"
-                  type="password"
-                  value={formData.privateKey}
-                />
-              </div>
-            )}
+                privateKey={formData.privateKey}
+              />
+            </Visible>
           </div>
         </div>
         <div className="flex h-[2.25rem] w-full justify-end">
