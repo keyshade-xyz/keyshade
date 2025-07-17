@@ -21,6 +21,7 @@ import {
   StepperSeparator,
   StepperTrigger
 } from '@/components/ui/stepper'
+import { redirectTo } from '@/lib/redirect-to'
 
 const nameSchema = z.string().trim().min(1, 'Name is required')
 const totalSteps = 4
@@ -46,8 +47,6 @@ export default function OnboardingStepper() {
     name: user?.name || '',
     profilePictureUrl: user?.profilePictureUrl || ''
   })
-
-  const router = useRouter()
 
   const finishOnboarding = useHttp(() =>
     ControllerInstance.getInstance().userController.finishOnboarding({
@@ -90,7 +89,7 @@ export default function OnboardingStepper() {
         Cookies.set('isOnboardingFinished', 'true')
         setUser(updated)
         posthog.identify()
-        router.push('/')
+        redirectTo('/')
       }
     } finally {
       toast.dismiss()
