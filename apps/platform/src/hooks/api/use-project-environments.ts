@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import type {
   GetAllEnvironmentsOfProjectResponse,
   ProjectWithTierLimitAndCount
@@ -23,7 +23,7 @@ interface UseProjectEnvironmentsReturn {
  * fetch and manage the environments associated with the currently selected project.
  */
 export const useProjectEnvironments = (): UseProjectEnvironmentsReturn => {
-  const [selectedProject] = useAtom(selectedProjectAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
   const [environmentsOfProject, setEnvironmentsOfProject] = useAtom(
     environmentsOfProjectAtom
   )
