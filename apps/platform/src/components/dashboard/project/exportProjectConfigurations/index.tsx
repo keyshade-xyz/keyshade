@@ -29,7 +29,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     useExportProjectDialog(resetForm, selectedProject)
 
   const { handleExport, isLoading } = useExportConfigurations(
-    selectedProject!.slug,
+    selectedProject?.slug || '',
     formData,
     validateForm
   )
