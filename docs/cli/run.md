@@ -23,7 +23,7 @@ The command to run your application. This command is run in the same shell as th
 ## Options
 
 - `--environment <environment>`  
-  (Optional) Override the environment specified in `keyshade.json` for this run. This allows you to run your application in a different environment without modifying your configuration file.
+  (Optional) Override the environment at runtime specified in `keyshade.json` for this run. This allows you to run your application in a different environment without modifying your configuration file.
 
   **Example:**
   ```bash
