@@ -1442,4 +1442,149 @@ describe('Secret Controller Tests', () => {
       expect(secret.value).not.toBe('Secret 20 value')
     })
   })
+
+  describe('Disable/Enable Secret Tests', () => {
+    it('should not be able to disable a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to enable a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to disable a secret that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/non-existent-secret-slug/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a secret that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/non-existent-secret-slug/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to disable a secret in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a secret in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should be able to disable a secret', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      // Re-enabling secret for further tests
+      await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+    })
+
+    it('should be able to enable a secret', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/secret/${secret1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
+
+  describe('Fetch All Disabled Environments Of Secret Tests', () => {
+    it('should not be able to fetch disabled environments of a non-existent secret', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/non-existent-secret-slug/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch disabled environments of a secret it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${secret1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should be able to fetch disabled environments of a secret', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/secret/${secret1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
 })

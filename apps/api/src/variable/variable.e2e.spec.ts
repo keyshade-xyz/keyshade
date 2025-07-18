@@ -1279,4 +1279,149 @@ describe('Variable Controller Tests', () => {
       expect(response.statusCode).toBe(404)
     })
   })
+
+  describe('Disable/Enable Variable Tests', () => {
+    it('should not be able to disable a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to enable a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to disable a variable that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/non-existent-variable-slug/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a variable that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/non-existent-variable-slug/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to disable a variable in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to enable a variable in an invalid environment', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/non-existent-environment-slug`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should be able to disable a variable', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/disable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+
+      // Re-enabling variable for further tests
+      await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+    })
+
+    it('should be able to enable a variable', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/variable/${variable1.slug}/enable/${environment1.slug}`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
+
+  describe('Fetch All Disabled Environments Of Variable Tests', () => {
+    it('should not be able to fetch disabled environments of a non-existent variable', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/non-existent-variable-slug/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to fetch disabled environments of a variable it does not have access to', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${variable1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should be able to fetch disabled environments of a variable', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: `/variable/${variable1.slug}/disabled`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+  })
 })
