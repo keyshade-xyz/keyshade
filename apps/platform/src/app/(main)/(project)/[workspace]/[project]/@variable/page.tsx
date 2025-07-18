@@ -163,6 +163,7 @@ function VariablePage(): React.JSX.Element {
             ) : null}
           </div>
           <Button
+            asChild
             className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
             disabled={isLoading || !hasMore}
             onClick={handleLoadMore}
