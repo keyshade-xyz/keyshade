@@ -20,9 +20,9 @@ export const WorkspaceInvitationEmail = ({
 }: WorkspaceInvitationEmailProps) => {
   const previewText = forRegisteredUser
     ? 'Welcome Back! Join Your Keyshade Workspace'
-    : 'You are Invited to Join the Keyshade Workspace'
+    : 'You are Invited to Join Keyshade Workspace'
 
-  const userName = inviteeName?.trim() || 'There'
+  const userName = inviteeName?.trim() || 'there'
 
   return (
     <BaseEmailTemplate previewText={previewText} heading={previewText}>
@@ -31,8 +31,7 @@ export const WorkspaceInvitationEmail = ({
       </Text>
       <Text style={text}>Hey {userName},</Text>
       <Text style={text}>
-        You have been invited to Workspace:{workspaceName} on Keyshade by{' '}
-        {invitedBy}
+        You have been invited to {workspaceName} on Keyshade by {invitedBy}!
       </Text>
       {/* 
       <Section style={workspaceDetails}>
