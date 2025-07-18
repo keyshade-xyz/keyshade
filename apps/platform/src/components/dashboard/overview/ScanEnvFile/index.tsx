@@ -131,7 +131,7 @@ function ScanEnvModal({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="flex flex-col gap-3 border-b border-white/20 py-3">
+          <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto border-b border-white/20 py-2">
             <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
               <div className="flex items-center gap-2">
                 <SecretSVG height={21} width={21} />
@@ -146,12 +146,12 @@ function ScanEnvModal({
               </div>
               <div className="ml-6 flex flex-wrap gap-1.5">{variablesList}</div>
             </div>
-
-            <p className="text-sm text-white/60">
-              You&apos;re importing a total of {secretsCount + variablesCount}{' '}
-              configuration items.
-            </p>
           </div>
+
+          <p className="text-sm text-white/60">
+            You&apos;re importing a total of {secretsCount + variablesCount}{' '}
+            configuration items.
+          </p>
 
           <div className="flex flex-col gap-y-2 border-b border-white/20 pb-4 pt-3">
             <label
