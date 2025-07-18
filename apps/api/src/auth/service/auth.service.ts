@@ -19,6 +19,13 @@ import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
 
+function normalizeIp(raw: string): string {
+  if (!raw) return 'Unknown'
+  let ip = raw.split(',')[0].trim()
+  if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
+  return ip
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger: LoggerService
@@ -298,14 +305,16 @@ export class AuthService {
     email: string,
     data: {
       ip: string
-      userAgent: string
+      device: string
       location?: string
     }
   ) {
+    const { ip, device, location } = data
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
         select: {
+          id: true,
           email: true,
           emailPreference: true
         }
@@ -316,18 +325,60 @@ export class AuthService {
         return
       }
 
-      if (user.emailPreference?.activity === false) {
+      const activityEmailsEnabled = user.emailPreference?.activity ?? true
+
+      // Take first IP if comma-separated
+      const normalizedIp = normalizeIp(ip)
+
+      const deviceFingerprint = device || 'Unknown'
+
+      const existingSession = await this.prisma.loginSession.findUnique({
+        where: {
+          userId_ipAddress_browser: {
+            userId: user.id,
+            ipAddress: normalizedIp,
+            browser: deviceFingerprint
+          }
+        }
+      })
+
+      const isNew = !existingSession
+
+      if (isNew && activityEmailsEnabled) {
+        await this.mailService.sendLoginNotification(user.email, {
+          ip: normalizedIp,
+          device: deviceFingerprint,
+          location
+        })
+        this.logger.log(`Login notification sent to ${email} (new env).`)
+      } else {
         this.logger.log(
-          `Login notification skipped: activity emails disabled for ${email}`
+          `Login notification skipped for ${email} (existing env or activity disabled).`
         )
-        return
       }
 
-      await this.mailService.sendLoginNotification(email, data)
-      this.logger.log(`Login notification sent to ${email}`)
+      await this.prisma.loginSession.upsert({
+        where: {
+          userId_ipAddress_browser: {
+            userId: user.id,
+            ipAddress: normalizedIp,
+            browser: deviceFingerprint
+          }
+        },
+        update: {
+          geolocation: location
+        },
+        create: {
+          userId: user.id,
+          ipAddress: normalizedIp,
+          browser: deviceFingerprint,
+          geolocation: location
+        }
+      })
     } catch (err) {
       this.logger.error(
-        `Failed to send login notification to ${email}: ${err.message}`
+        `Failed login notification path for ${email}: ${err.message}`,
+        err.stack
       )
     }
   }

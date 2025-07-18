@@ -2,11 +2,11 @@ import { BaseEmailTemplate } from './components/base-email-template'
 
 export const LoginNotificationEmail = ({
   ip,
-  userAgent,
+  device,
   location
 }: {
   ip: string
-  userAgent: string
+  device: string
   location?: string
 }) => {
   return (
@@ -23,7 +23,7 @@ export const LoginNotificationEmail = ({
           <strong>Location:</strong> {location || 'Unknown'}
         </li>
         <li>
-          <strong>Browser:</strong> {userAgent}
+          <strong>Device:</strong> {device}
         </li>
       </ul>
       <p>If this wasn’t you, please reset your password immediately.</p>

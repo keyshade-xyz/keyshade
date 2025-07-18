@@ -58,10 +58,10 @@ export class MockMailService implements IMailService {
 
   async sendLoginNotification(
     email: string,
-    data: { ip: string; userAgent: string; location?: string }
+    data: { ip: string; device: string; location?: string }
   ): Promise<void> {
     this.log.log(
-      `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, UserAgent=${data.userAgent}`
+      `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, Device=${data.device}`
     )
   }
 }

@@ -95,21 +95,21 @@ export class MailService implements IMailService {
     email: string,
     data: {
       ip: string
-      userAgent: string
+      device: string
       location?: string
     }
   ) {
     const html = await render(
       LoginNotificationEmail({
         ip: data.ip,
-        userAgent: data.userAgent,
+        device: data.device,
         location: data.location
       })
     )
 
     await this.transporter.sendMail({
       to: email,
-      subject: 'New Login to Your Keyshade Account',
+      subject: 'New Sign-In Alert for Your Keyshade Account',
       html
     })
   }

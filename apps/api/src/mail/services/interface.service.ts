@@ -34,7 +34,7 @@ export interface IMailService {
     email: string,
     data: {
       ip: string
-      userAgent: string
+      device: string
       location?: string
     }
   ): Promise<void>

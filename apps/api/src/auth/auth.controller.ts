@@ -26,6 +26,7 @@ import {
 } from '@/common/redirect'
 import { setCookie } from '@/common/util'
 import { ThrottlerGuard } from '@nestjs/throttler'
+import { parseLoginRequest } from '@/common/request-utils'
 
 @Controller('auth')
 export class AuthController {
@@ -66,28 +67,13 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Req() req: any
   ) {
-    const ip =
-      req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Unknown'
-    const userAgent = req.headers['user-agent'] || 'Unknown'
-
-    let location = 'Unknown'
-    try {
-      const geoRes = await fetch(`https://ipapi.co/${ip}/json/`)
-      const geoData = await geoRes.json()
-      location =
-        [geoData.city, geoData.region, geoData.country_name]
-          .filter(Boolean)
-          .join(', ') || 'Unknown'
-      //this.logger.log('geoData:', geoData)
-    } catch (e) {
-      // fallback is 'Unknown'
-    }
+    const { ip, device, location } = await parseLoginRequest(req)
 
     const sessionData = await this.authService.validateOtp(email, otp)
 
     await this.authService.sendLoginNotification(email, {
-      ip: ip.toString(),
-      userAgent,
+      ip,
+      device,
       location
     })
 
@@ -195,24 +181,7 @@ export class AuthController {
     req?: any
   ) {
     try {
-      const ip =
-        req?.headers['x-forwarded-for'] ||
-        req?.socket?.remoteAddress ||
-        'Unknown'
-      const userAgent = req?.headers['user-agent'] || 'Unknown'
-
-      let location = 'Unknown'
-      try {
-        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`)
-        const geoData = await geoRes.json()
-        location =
-          [geoData.city, geoData.region, geoData.country_name]
-            .filter(Boolean)
-            .join(', ') || 'Unknown'
-        //this.logger.log('🌍 geoData:', geoData)
-      } catch (e) {
-        // fallback is 'Unknown'
-      }
+      const { ip, device, location } = await parseLoginRequest(req)
 
       const data = await this.authService.handleOAuthLogin(
         email,
@@ -222,8 +191,8 @@ export class AuthController {
       )
 
       await this.authService.sendLoginNotification(email, {
-        ip: ip.toString(),
-        userAgent,
+        ip,
+        device,
         location
       })
 

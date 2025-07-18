@@ -204,6 +204,20 @@ model Notification {
   userId    String
 }
 
+model LoginSession {  
+  id          String   @id @default(cuid())  
+  userId      String  
+  ipAddress   String  
+  browser     String  
+  geolocation String?  
+  createdAt   DateTime @default(now())  
+    
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  
+    
+  @@unique([userId, ipAddress, browser])  
+  @@index([userId])  
+}
+
 model User {
   id                   String        @id @default(cuid())
   email                String        @unique
@@ -231,6 +245,7 @@ model User {
   events           Event[]
   integrations     Integration[] // Stores the integrations the user updated
   emailPreference  EmailPreference?
+  loginSessions    LoginSession[] 
   onboardingAnswers OnboardingAnswers?
 
   referredById         String?       
