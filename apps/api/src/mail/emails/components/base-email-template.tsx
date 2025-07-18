@@ -47,10 +47,6 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
               administrator or our support team.
             </Text>
             <Text style={text}>
-              We appreciate your understanding and thank you for your
-              contributions to the project.
-            </Text>
-            <Text style={text}>
               Cheers,
               <br />
               Team Keyshade

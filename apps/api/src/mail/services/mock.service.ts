@@ -11,7 +11,8 @@ export class MockMailService implements IMailService {
     actionUrl: string,
     invitedBy: string,
     invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void> {
     this.log.log(
       forRegisteredUser

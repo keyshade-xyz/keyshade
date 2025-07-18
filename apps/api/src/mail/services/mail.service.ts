@@ -34,7 +34,8 @@ export class MailService implements IMailService {
     actionUrl: string,
     invitedBy: string,
     invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void> {
     const subject = forRegisteredUser
       ? 'Welcome Back! Join Your Workspace'
@@ -42,10 +43,10 @@ export class MailService implements IMailService {
 
     const body = await render(
       WorkspaceInvitationEmail({
+        inviteeName,
         workspaceName,
         actionUrl,
         invitedBy,
-        invitedOn,
         forRegisteredUser
       })
     )
