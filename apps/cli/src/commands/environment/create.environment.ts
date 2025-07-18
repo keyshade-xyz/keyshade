@@ -8,7 +8,10 @@ import {
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import { type CreateEnvironmentRequest } from '@keyshade/schema'
-import { CreateEnvironmentRequestSchema } from '../../../../../packages/schema/src/environment'
+import {
+  CreateEnvironmentRequestSchema,
+  CreateEnvironmentResponseSchema
+} from '../../../../../packages/schema/src/environment'
 
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -84,9 +87,15 @@ export class CreateEnvironment extends BaseCommand {
     )
 
     if (success) {
-      Logger.info(
-        `Environment created: ${environment.name} (${environment.slug})`
-      )
+      const parsedResponse =
+        CreateEnvironmentResponseSchema.safeParse(environment)
+      if (parsedResponse.success) {
+        Logger.info(
+          `Environment created: ${environment.name} (${environment.slug})`
+        )
+      } else {
+        Logger.error('Invalid server response')
+      }
     } else {
       this.logError(error)
     }
