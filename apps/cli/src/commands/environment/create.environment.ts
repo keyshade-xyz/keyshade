@@ -7,6 +7,8 @@ import {
 } from 'src/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+import { type CreateEnvironmentRequest } from '@keyshade/schema'
+import { CreateEnvironmentRequestSchema } from '../../../../../packages/schema/src/environment'
 
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -53,6 +55,21 @@ export class CreateEnvironment extends BaseCommand {
     if (!projectSlug) {
       Logger.error('Project slug is required')
       return
+    } else if (name.length < 3) {
+      Logger.error('Environment name must be 3 or more characters')
+    }
+
+    const parsedRequest = CreateEnvironmentRequestSchema.safeParse({
+      name,
+      description,
+      projectSlug
+    })
+
+    if (!parsedRequest.success) {
+      for (const issue of parsedRequest.error.issues) {
+        Logger.error(`${issue.message} at ${issue.path.toString()}`)
+      }
+      return
     }
 
     Logger.info('Creating Environment...')
@@ -62,13 +79,13 @@ export class CreateEnvironment extends BaseCommand {
       error,
       success
     } = await ControllerInstance.getInstance().environmentController.createEnvironment(
-      { name, description, projectSlug },
+      parsedRequest.data as CreateEnvironmentRequest,
       this.headers
     )
 
     if (success) {
       Logger.info(
-        `Environment created:${environment.name} (${environment.slug})`
+        `Environment created: ${environment.name} (${environment.slug})`
       )
     } else {
       this.logError(error)
