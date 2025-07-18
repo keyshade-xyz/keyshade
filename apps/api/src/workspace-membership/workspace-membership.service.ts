@@ -62,7 +62,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -217,7 +217,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.ADD_USER]
       })
 
@@ -287,7 +287,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.REMOVE_USER]
       })
 
@@ -392,7 +392,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.UPDATE_USER_ROLE]
       })
 
@@ -522,7 +522,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_USERS]
       })
     //get all members of workspace for page with limit
@@ -692,7 +692,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.REMOVE_USER]
       })
 
@@ -780,7 +780,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_WORKSPACE]
       })
 
@@ -854,7 +854,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_USERS]
       })
 
@@ -880,7 +880,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_WORKSPACE, Authority.ADD_USER]
       })
 

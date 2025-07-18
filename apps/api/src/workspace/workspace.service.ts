@@ -104,7 +104,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.UPDATE_WORKSPACE]
       })
 
@@ -196,7 +196,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.DELETE_WORKSPACE]
       })
 
@@ -249,7 +249,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_USERS]
       })
 
@@ -385,7 +385,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -490,7 +490,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [
           Authority.READ_WORKSPACE,
           Authority.READ_PROJECT,
@@ -663,7 +663,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -694,7 +694,7 @@ export class WorkspaceService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
@@ -941,7 +941,7 @@ export class WorkspaceService {
         hasAuthority =
           await this.authorizationService.authorizeUserAccessToProject({
             user,
-            entity: { slug: project.slug },
+            slug: project.slug,
             authorities: [Authority.READ_PROJECT]
           })
       } catch (_ignored) {

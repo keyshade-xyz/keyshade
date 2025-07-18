@@ -82,7 +82,7 @@ export class ProjectService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.CREATE_PROJECT]
       })
     const workspaceId = workspace.id
@@ -122,28 +122,6 @@ export class ProjectService {
 
     const newProjectId = v4()
 
-    this.logger.log(`Fetching admin role for workspace ${workspace.slug}`)
-    const adminRole = await this.prisma.workspaceRole.findFirst({
-      where: {
-        workspaceId: workspaceId,
-        hasAdminAuthority: true
-      }
-    })
-
-    if (!adminRole) {
-      const errorMessage = `Admin role not found for workspace ${workspace.slug}`
-      this.logger.error(
-        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
-      )
-      throw new BadRequestException(
-        constructErrorBody('Admin role not found', errorMessage)
-      )
-    }
-
-    this.logger.log(
-      `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
-    )
-
     // Create and return the project
     this.logger.log(
       `Creating project ${dto.name} under workspace ${workspace.slug}`
@@ -174,25 +152,8 @@ export class ProjectService {
       }
     })
 
-    const addProjectToAdminRoleOfItsWorkspace =
-      this.prisma.workspaceRole.update({
-        where: {
-          id: adminRole.id
-        },
-        data: {
-          projects: {
-            create: {
-              project: {
-                connect: {
-                  id: newProjectId
-                }
-              }
-            }
-          }
-        }
-      })
-
     const createEnvironmentOps = []
+    const newEnvironmentSlugs = []
 
     // Create and assign the environments provided in the request, if any
     // or create a default environment
@@ -201,14 +162,16 @@ export class ProjectService {
         `Project has ${dto.environments.length} environments to create`
       )
       for (const environment of dto.environments) {
+        const environmentSlug = await this.slugGenerator.generateEntitySlug(
+          environment.name,
+          'ENVIRONMENT'
+        )
+        newEnvironmentSlugs.push(environmentSlug)
         createEnvironmentOps.push(
           this.prisma.environment.create({
             data: {
               name: environment.name,
-              slug: await this.slugGenerator.generateEntitySlug(
-                environment.name,
-                'ENVIRONMENT'
-              ),
+              slug: environmentSlug,
               description: environment.description,
               projectId: newProjectId,
               lastUpdatedById: user.id
@@ -218,6 +181,11 @@ export class ProjectService {
       }
     } else {
       this.logger.log(`Creating default environment for project ${dto.name}`)
+      const environmentSlug = await this.slugGenerator.generateEntitySlug(
+        'default',
+        'ENVIRONMENT'
+      )
+      newEnvironmentSlugs.push(environmentSlug)
       createEnvironmentOps.push(
         this.prisma.environment.create({
           data: {
@@ -236,9 +204,15 @@ export class ProjectService {
 
     const [newProject] = await this.prisma.$transaction([
       createNewProject,
-      addProjectToAdminRoleOfItsWorkspace,
       ...createEnvironmentOps
     ])
+
+    await this.associateProjectWithAdminRole(
+      workspace,
+      user,
+      newProject.id,
+      newEnvironmentSlugs
+    )
 
     await createEvent(
       {
@@ -300,7 +274,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [authority]
       })
 
@@ -513,7 +487,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -526,7 +500,7 @@ export class ProjectService {
       const workspace =
         await this.authorizationService.authorizeUserAccessToWorkspace({
           user,
-          entity: { slug: forkMetadata.workspaceSlug },
+          slug: forkMetadata.workspaceSlug,
           authorities: [Authority.CREATE_PROJECT]
         })
 
@@ -682,7 +656,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
@@ -728,7 +702,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
@@ -752,7 +726,7 @@ export class ProjectService {
     const parentProject =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: forkedFromProject.slug },
+        slug: forkedFromProject.slug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -792,7 +766,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.DELETE_PROJECT]
       })
 
@@ -868,7 +842,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
     const projectId = project.id
@@ -889,7 +863,7 @@ export class ProjectService {
         const allowed =
           (await this.authorizationService.authorizeUserAccessToProject({
             user,
-            entity: { slug: fork.slug },
+            slug: fork.slug,
             authorities: [Authority.READ_PROJECT]
           })) !== null
 
@@ -935,7 +909,7 @@ export class ProjectService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -985,7 +959,7 @@ export class ProjectService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_PROJECT]
       })
     const workspaceId = workspace.id
@@ -1036,7 +1010,7 @@ export class ProjectService {
         hasAuthority =
           await this.authorizationService.authorizeUserAccessToProject({
             user,
-            entity: { slug: project.slug },
+            slug: project.slug,
             authorities: [Authority.READ_PROJECT]
           })
       } catch (_ignored) {
@@ -1535,7 +1509,7 @@ export class ProjectService {
                     Authority.READ_SECRET,
                     Authority.READ_VARIABLE
                   ],
-            entity: { slug: env.slug }
+            slug: env.slug
           })
 
         this.logger.log(
@@ -1724,5 +1698,78 @@ export class ProjectService {
     const fileData = Object.fromEntries(environmentExports)
 
     return fileData
+  }
+
+  /**
+   * Associates a newly created project with the admin role of a workspace.
+   * This is necessary because the admin role is the only role that can be
+   * associated with a project.
+   *
+   * @param workspace The workspace of the project
+   * @param user The user who is creating the project
+   * @param newProjectId The ID of the newly created project
+   * @param newEnvironmentSlugs The slug of the environments of the newly created project
+   *
+   * @throws BadRequestException if the admin role does not exist
+   */
+  private async associateProjectWithAdminRole(
+    workspace: Workspace,
+    user: AuthenticatedUser,
+    newProjectId: Project['id'],
+    newEnvironmentSlugs: Environment['slug'][]
+  ) {
+    this.logger.log(`Associating project ${newProjectId} with admin role`)
+
+    const workspaceId = workspace.id
+
+    this.logger.log(`Fetching admin role for workspace ${workspace.slug}`)
+    const adminRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId,
+        hasAdminAuthority: true
+      }
+    })
+
+    if (!adminRole) {
+      const errorMessage = `Admin role not found for workspace ${workspace.slug}`
+      this.logger.error(
+        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
+      )
+      throw new BadRequestException(
+        constructErrorBody('Admin role not found', errorMessage)
+      )
+    }
+
+    this.logger.log(
+      `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
+    )
+
+    console.log(
+      newEnvironmentSlugs.map((slug) => ({
+        slug
+      }))
+    )
+
+    await this.prisma.workspaceRole.update({
+      where: {
+        id: adminRole.id
+      },
+      data: {
+        projects: {
+          create: {
+            project: {
+              connect: {
+                id: newProjectId
+              }
+            },
+            environments: {
+              connect: newEnvironmentSlugs.map((slug) => ({
+                slug
+              }))
+            }
+          }
+        }
+      }
+    })
   }
 }

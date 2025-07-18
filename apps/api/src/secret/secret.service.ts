@@ -98,7 +98,7 @@ export class SecretService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
@@ -275,7 +275,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -466,7 +466,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
     const environmentId = environment.id
@@ -474,7 +474,7 @@ export class SecretService {
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -534,7 +534,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -545,7 +545,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
     const environmentId = environment.id
@@ -683,7 +683,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.DELETE_SECRET]
     })
 
@@ -746,7 +746,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.READ_SECRET]
     })
     const secretId = secret.id
@@ -758,7 +758,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
@@ -830,7 +830,7 @@ export class SecretService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
@@ -922,7 +922,7 @@ export class SecretService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
@@ -931,7 +931,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
@@ -1196,9 +1196,7 @@ export class SecretService {
         try {
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: {
-              slug: environmentSlug
-            },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
           environmentAccessibilityMap.set(secretVersion.environment.id, true)

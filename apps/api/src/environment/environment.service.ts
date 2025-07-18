@@ -75,7 +75,7 @@ export class EnvironmentService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [
           Authority.CREATE_ENVIRONMENT,
           Authority.READ_ENVIRONMENT,
@@ -94,13 +94,16 @@ export class EnvironmentService {
     this.logger.log(
       `Creating environment ${dto.name} in project ${project.name}`
     )
+
+    const environmentSlug = await this.slugGenerator.generateEntitySlug(
+      dto.name,
+      'ENVIRONMENT'
+    )
+
     const environment = await this.prisma.environment.create({
       data: {
         name: dto.name,
-        slug: await this.slugGenerator.generateEntitySlug(
-          dto.name,
-          'ENVIRONMENT'
-        ),
+        slug: environmentSlug,
         description: dto.description,
         project: {
           connect: {
@@ -115,6 +118,9 @@ export class EnvironmentService {
       },
       include: InclusionQuery.Environment
     })
+
+    await this.associateEnvironmentWithAdminRole(project, user, environmentSlug)
+
     this.logger.log(
       `Environment ${environment.name} (${environment.slug}) created in project ${project.name}`
     )
@@ -180,7 +186,7 @@ export class EnvironmentService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [
           Authority.UPDATE_ENVIRONMENT,
           Authority.READ_ENVIRONMENT,
@@ -259,7 +265,7 @@ export class EnvironmentService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     this.logger.log(`Environment ${environmentSlug} fetched`)
@@ -316,7 +322,7 @@ export class EnvironmentService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     this.logger.log(`Project ${projectSlug} fetched`)
@@ -345,7 +351,7 @@ export class EnvironmentService {
         hydratedEnvironments.push(
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environment.slug },
+            slug: environment.slug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
         )
@@ -428,7 +434,7 @@ export class EnvironmentService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.DELETE_ENVIRONMENT]
       })
     this.logger.log(`Environment ${environmentSlug} fetched`)
@@ -566,5 +572,67 @@ export class EnvironmentService {
       `Found ${variableCount} variables in environment ${environmentId}`
     )
     return variableCount
+  }
+
+  private async associateEnvironmentWithAdminRole(
+    project: Partial<Project>,
+    user: AuthenticatedUser,
+    environmentSlug: Environment['slug']
+  ) {
+    this.logger.log(
+      `Associating environment ${environmentSlug} with admin role`
+    )
+
+    // Add the environment to the list of environment in the project of the admin role
+    const adminRole = await this.prisma.workspaceRole.findFirst({
+      where: {
+        workspaceId: project.workspaceId,
+        hasAdminAuthority: true
+      }
+    })
+
+    if (!adminRole) {
+      const errorMessage = `Admin role not found for workspace ${project.workspaceId}`
+      this.logger.error(
+        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
+      )
+      throw new BadRequestException(
+        constructErrorBody('Admin role not found', errorMessage)
+      )
+    }
+
+    this.logger.log(
+      `Admin role for workspace ${project.workspaceId} is ${adminRole.slug}`
+    )
+
+    // Fetch the existing environments associated with the admin role
+    const { environments: existingEnvironments } =
+      await this.prisma.projectWorkspaceRoleAssociation.findUnique({
+        where: {
+          roleId_projectId: {
+            roleId: adminRole.id,
+            projectId: project.id
+          }
+        },
+        include: {
+          environments: true
+        }
+      })
+    const environmentSlugs = existingEnvironments.map((e) => e.slug)
+    environmentSlugs.push(environmentSlug)
+
+    await this.prisma.projectWorkspaceRoleAssociation.update({
+      where: {
+        roleId_projectId: {
+          roleId: adminRole.id,
+          projectId: project.id
+        }
+      },
+      data: {
+        environments: {
+          connect: environmentSlugs.map((slug) => ({ slug }))
+        }
+      }
+    })
   }
 }

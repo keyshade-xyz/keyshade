@@ -119,5 +119,34 @@ export const InclusionQuery = {
         profilePictureUrl: true
       }
     }
+  },
+  WorkspaceRole: {
+    projects: {
+      select: {
+        project: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            workspaceId: true
+          }
+        },
+        environments: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      }
+    },
+    workspace: true,
+    workspaceMembers: {
+      select: {
+        id: true,
+        roleId: true,
+        workspaceMemberId: true
+      }
+    }
   }
 }

@@ -42,7 +42,7 @@ export const getEnvironmentIdToSlugMap = async (
       const environment =
         await authorizationService.authorizeUserAccessToEnvironment({
           user,
-          entity: { slug: environmentSlug },
+          slug: environmentSlug,
           authorities: [Authority.READ_ENVIRONMENT]
         })
 

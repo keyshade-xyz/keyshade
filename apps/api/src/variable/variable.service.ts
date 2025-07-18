@@ -92,7 +92,7 @@ export class VariableService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.CREATE_VARIABLE]
       })
     const projectId = project.id
@@ -268,7 +268,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -455,7 +455,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
     const environmentId = environment.id
@@ -464,7 +464,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -527,7 +527,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
     const environmentId = environment.id
@@ -539,7 +539,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -674,7 +674,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.DELETE_VARIABLE]
       })
 
@@ -742,7 +742,7 @@ export class VariableService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_VARIABLE]
       })
     const projectId = project.id
@@ -846,7 +846,7 @@ export class VariableService {
     const { id: variableId } =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.READ_VARIABLE]
       })
 
@@ -857,7 +857,7 @@ export class VariableService {
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
@@ -922,7 +922,7 @@ export class VariableService {
     const { id: projectId } =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_VARIABLE]
       })
 
@@ -933,7 +933,7 @@ export class VariableService {
     const { id: environmentId } =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
 
@@ -1051,9 +1051,7 @@ export class VariableService {
         try {
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: {
-              slug: environmentSlug
-            },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
           environmentAccessibilityMap.set(variableVersion.environment.id, true)

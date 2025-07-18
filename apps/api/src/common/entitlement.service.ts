@@ -17,6 +17,10 @@ import {
   HydratedEnvironment,
   RawEnvironment
 } from '@/environment/environment.types'
+import {
+  HydratedWorkspaceRole,
+  RawWorkspaceRole
+} from '@/workspace-role/workspace-role.types'
 
 type RootEntitlementParams = {
   user: AuthenticatedUser
@@ -40,6 +44,10 @@ type VariableEntitlementParams = RootEntitlementParams & {
 
 type EnvironmentEntitlementParams = RootEntitlementParams & {
   environment: RawEnvironment
+}
+
+type WorkspaceRoleEntitlementParams = RootEntitlementParams & {
+  workspaceRole: RawWorkspaceRole
 }
 
 @Injectable()
@@ -67,8 +75,14 @@ export class EntitlementService {
     )
 
     const entitlements = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_INTEGRATION),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_INTEGRATION)
+      canDelete: this.isPermitted(
+        Authority.DELETE_INTEGRATION,
+        permittedAuthorities
+      ),
+      canUpdate: this.isPermitted(
+        Authority.UPDATE_INTEGRATION,
+        permittedAuthorities
+      )
     }
 
     this.logger.log(
@@ -102,8 +116,11 @@ export class EntitlementService {
     )
 
     const entitlements = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_SECRET),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_SECRET)
+      canDelete: this.isPermitted(
+        Authority.DELETE_SECRET,
+        permittedAuthorities
+      ),
+      canUpdate: this.isPermitted(Authority.UPDATE_SECRET, permittedAuthorities)
     }
 
     this.logger.log(
@@ -137,8 +154,14 @@ export class EntitlementService {
     )
 
     const entitlements = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_VARIABLE),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_VARIABLE)
+      canDelete: this.isPermitted(
+        Authority.DELETE_VARIABLE,
+        permittedAuthorities
+      ),
+      canUpdate: this.isPermitted(
+        Authority.UPDATE_VARIABLE,
+        permittedAuthorities
+      )
     }
 
     this.logger.log(
@@ -171,8 +194,14 @@ export class EntitlementService {
     )
 
     const entitlements = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_ENVIRONMENT),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_ENVIRONMENT)
+      canDelete: this.isPermitted(
+        Authority.DELETE_ENVIRONMENT,
+        permittedAuthorities
+      ),
+      canUpdate: this.isPermitted(
+        Authority.UPDATE_ENVIRONMENT,
+        permittedAuthorities
+      )
     }
 
     this.logger.log(
@@ -185,5 +214,63 @@ export class EntitlementService {
       ...environment,
       entitlements
     }
+  }
+
+  public async entitleWorkspaceRole({
+    workspaceRole,
+    user,
+    permittedAuthorities
+  }: WorkspaceRoleEntitlementParams): Promise<HydratedWorkspaceRole> {
+    if (!permittedAuthorities) {
+      permittedAuthorities = await getCollectiveWorkspaceAuthorities(
+        workspaceRole.workspaceId,
+        user.id,
+        this.prisma
+      )
+    }
+
+    this.logger.log(
+      `Associating entitlements with workspace role ${workspaceRole.slug} for user ${user.id}`
+    )
+
+    const entitlements = {
+      canDelete: this.isPermitted(
+        Authority.DELETE_WORKSPACE_ROLE,
+        permittedAuthorities
+      ),
+      canUpdate: this.isPermitted(
+        Authority.UPDATE_WORKSPACE_ROLE,
+        permittedAuthorities
+      )
+    }
+
+    this.logger.log(
+      `Associated entitlements with workspace role ${workspaceRole.slug} for user ${user.id}: ${JSON.stringify(
+        entitlements
+      )}`
+    )
+
+    return {
+      ...workspaceRole,
+      entitlements
+    }
+  }
+
+  /**
+   * Checks if the given authority is present in the set of permitted authorities.
+   *
+   * @param authority The authority to check for permission.
+   * @param permittedAuthorities The set of authorities that are permitted.
+   * @returns true if the authority is included in the permitted authorities or if
+   * the WORKSPACE_ADMIN authority is present; false otherwise.
+   */
+  private isPermitted(
+    authority: Authority,
+    permittedAuthorities: Set<Authority>
+  ) {
+    return (
+      permittedAuthorities.has(authority) ||
+      permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
+    )
   }
 }

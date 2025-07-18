@@ -11,6 +11,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { AuthorizationParams } from '../auth.types'
 import { WorkspaceWithLastUpdatedByAndOwner } from '@/workspace/workspace.types'
+import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
 
 @Injectable()
 export class AuthorizationService {
@@ -149,6 +150,27 @@ export class AuthorizationService {
     delete integration.workspace
 
     return integration
+  }
+
+  /**
+   * Checks if the user is authorized to access the given workspace role.
+   * @param params The authorization parameters
+   * @returns The workspace role if the user is authorized to access it
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the workspace role is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   * @throws ForbiddenException if the user is not authorized to access the workspace role
+   */
+  public async authorizeUserAccessToWorkspaceRole(
+    params: AuthorizationParams
+  ): Promise<HydratedWorkspaceRole> {
+    const workspaceRole =
+      await this.authorityCheckerService.checkAuthorityOverWorkspaceRole(params)
+
+    this.checkUserHasAccessToWorkspace(params.user, workspaceRole.workspace)
+    delete workspaceRole.workspace
+
+    return workspaceRole
   }
 
   /**

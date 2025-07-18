@@ -15,5 +15,5 @@ export type AuthenticatedUserContext = User & {
 export interface AuthorizationParams {
   user: AuthenticatedUser
   authorities: Authority[]
-  entity: { slug?: string; name?: string }
+  slug: string
 }

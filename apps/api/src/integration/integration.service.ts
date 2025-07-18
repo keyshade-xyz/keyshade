@@ -126,7 +126,7 @@ export class IntegrationService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
       })
     const workspaceId = workspace.id
@@ -143,7 +143,7 @@ export class IntegrationService {
       this.logger.log(`Checking user access to project ${dto.projectSlug}`)
       project = await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: dto.projectSlug },
+        slug: dto.projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -176,7 +176,7 @@ export class IntegrationService {
         const environment =
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environmentSlug },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
         environments.push(environment)
@@ -290,7 +290,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.UPDATE_INTEGRATION]
       })
     const integrationId = integration.id
@@ -342,7 +342,7 @@ export class IntegrationService {
         dto.environmentSlugs.map((environmentSlug) =>
           this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environmentSlug },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
         )
@@ -416,7 +416,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
 
@@ -461,7 +461,7 @@ export class IntegrationService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
     const workspaceId = workspace.id
@@ -593,7 +593,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.DELETE_INTEGRATION]
       })
     const integrationId = integration.id
@@ -637,7 +637,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
 
