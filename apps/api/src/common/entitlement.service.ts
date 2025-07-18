@@ -21,6 +21,10 @@ import {
   HydratedWorkspaceRole,
   RawWorkspaceRole
 } from '@/workspace-role/workspace-role.types'
+import {
+  HydratedWorkspaceMember,
+  RawWorkspaceMember
+} from '@/workspace-membership/workspace-membership.types'
 
 type RootEntitlementParams = {
   user: AuthenticatedUser
@@ -50,6 +54,10 @@ type WorkspaceRoleEntitlementParams = RootEntitlementParams & {
   workspaceRole: RawWorkspaceRole
 }
 
+type WorkspaceMemberEntitlementParams = RootEntitlementParams & {
+  workspaceMember: RawWorkspaceMember
+}
+
 @Injectable()
 export class EntitlementService {
   private readonly logger = new Logger(EntitlementService.name)
@@ -74,7 +82,7 @@ export class EntitlementService {
       `Associating entitlements with integration ${integration.slug} for user ${user.id}`
     )
 
-    const entitlements = {
+    const entitlements: HydratedIntegration['entitlements'] = {
       canDelete: this.isPermitted(
         Authority.DELETE_INTEGRATION,
         permittedAuthorities
@@ -115,7 +123,7 @@ export class EntitlementService {
       `Associating entitlements with secret ${secret.slug} for user ${user.id}`
     )
 
-    const entitlements = {
+    const entitlements: RawEntitledSecret['entitlements'] = {
       canDelete: this.isPermitted(
         Authority.DELETE_SECRET,
         permittedAuthorities
@@ -153,7 +161,7 @@ export class EntitlementService {
       `Associating entitlements with variable ${variable.slug} for user ${user.id}`
     )
 
-    const entitlements = {
+    const entitlements: RawEntitledVariable['entitlements'] = {
       canDelete: this.isPermitted(
         Authority.DELETE_VARIABLE,
         permittedAuthorities
@@ -193,7 +201,7 @@ export class EntitlementService {
       `Associating entitlements with environment ${environment.slug} for user ${user.id}`
     )
 
-    const entitlements = {
+    const entitlements: HydratedEnvironment['entitlements'] = {
       canDelete: this.isPermitted(
         Authority.DELETE_ENVIRONMENT,
         permittedAuthorities
@@ -233,7 +241,7 @@ export class EntitlementService {
       `Associating entitlements with workspace role ${workspaceRole.slug} for user ${user.id}`
     )
 
-    const entitlements = {
+    const entitlements: HydratedWorkspaceRole['entitlements'] = {
       canDelete: this.isPermitted(
         Authority.DELETE_WORKSPACE_ROLE,
         permittedAuthorities
@@ -252,6 +260,55 @@ export class EntitlementService {
 
     return {
       ...workspaceRole,
+      entitlements
+    }
+  }
+
+  public async entitleWorkspaceMember({
+    workspaceMember,
+    user,
+    permittedAuthorities
+  }: WorkspaceMemberEntitlementParams): Promise<HydratedWorkspaceMember> {
+    if (!permittedAuthorities) {
+      permittedAuthorities = await getCollectiveWorkspaceAuthorities(
+        workspaceMember.workspaceId,
+        user.id,
+        this.prisma
+      )
+    }
+
+    this.logger.log(
+      `Associating entitlements with workspace member ${workspaceMember.id} for user ${user.id}`
+    )
+
+    const entitlements: HydratedWorkspaceMember['entitlements'] = {
+      canCancelInvitation: this.isPermitted(
+        Authority.ADD_USER,
+        permittedAuthorities
+      ),
+      canResendInvitation: this.isPermitted(
+        Authority.ADD_USER,
+        permittedAuthorities
+      ),
+      canRemove: this.isPermitted(Authority.ADD_USER, permittedAuthorities),
+      canTransferOwnershipTo: this.isPermitted(
+        Authority.WORKSPACE_ADMIN,
+        permittedAuthorities
+      ),
+      canUpdateRoles: this.isPermitted(
+        Authority.UPDATE_USER_ROLE,
+        permittedAuthorities
+      )
+    }
+
+    this.logger.log(
+      `Associated entitlements with workspace member ${workspaceMember.id} for user ${user.id}: ${JSON.stringify(
+        entitlements
+      )}`
+    )
+
+    return {
+      ...workspaceMember,
       entitlements
     }
   }

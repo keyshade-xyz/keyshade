@@ -148,5 +148,14 @@ export const InclusionQuery = {
         workspaceMemberId: true
       }
     }
+  },
+  WorkspaceMember: {
+    user: true,
+    roles: {
+      select: {
+        id: true,
+        role: true
+      }
+    }
   }
 }
