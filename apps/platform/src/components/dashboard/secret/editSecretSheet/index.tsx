@@ -184,6 +184,8 @@ export default function EditSecretSheet(): JSX.Element {
     setIsEditSecretSheetOpen
   ])
 
+  const isSaveDisabled = isLoading || !hasChanges
+
   return (
     <Sheet onOpenChange={setIsEditSecretSheetOpen} open={isEditSecretSheetOpen}>
       <SheetContent className="border-white/15 bg-[#222425]">
@@ -224,7 +226,7 @@ export default function EditSecretSheet(): JSX.Element {
         <SheetFooter>
           <SheetClose asChild>
             <Button
-              disabled={isLoading || !hasChanges}
+              disabled={isSaveDisabled}
               onClick={handleSave}
               variant="secondary"
             >

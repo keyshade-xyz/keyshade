@@ -20,6 +20,7 @@ import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollback
 import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
 import { PageTitle } from '@/components/common/page-title'
 import SecretList from '@/components/dashboard/secret/secretLists'
+import Visible from '@/components/common/visible'
 
 extend(relativeTime)
 
@@ -40,17 +41,22 @@ export default function SecretPage(): React.JSX.Element {
       <PageTitle title={`${selectedProject?.name} | Secrets`} />
       <SecretList projectPrivateKey={projectPrivateKey} />
 
-      {isDeleteSecretOpen && selectedSecret ? <ConfirmDeleteSecret /> : null}
-      {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
-      {isDeleteEnvironmentValueOfSecretOpen && selectedSecret ? (
+      <Visible if={Boolean(isDeleteSecretOpen && selectedSecret)}>
+        <ConfirmDeleteSecret />
+      </Visible>
+
+      <Visible if={Boolean(isEditSecretOpen && selectedSecret)}>
+        <EditSecretSheet />
+      </Visible>
+      <Visible if={Boolean(isDeleteEnvironmentValueOfSecretOpen && selectedSecret)}>
         <ConfirmDeleteEnvironmentValueOfSecretDialog />
-      ) : null}
-      {isSecretRevisionsOpen && selectedSecret ? (
+      </Visible>
+      <Visible if={Boolean(isSecretRevisionsOpen && selectedSecret)}>
         <SecretRevisionsSheet />
-      ) : null}
-      {isRollbackSecretOpen && selectedSecret ? (
+      </Visible>
+      <Visible if={Boolean(isRollbackSecretOpen && selectedSecret)}>
         <ConfirmRollbackSecret />
-      ) : null}
+      </Visible>
     </div>
   )
 }

@@ -17,6 +17,7 @@ import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevi
 import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
 import { PageTitle } from '@/components/common/page-title'
 import VariableList from '@/components/dashboard/variable/variableList'
+import Visible from '@/components/common/visible'
 
 export default function VariablePage(): React.JSX.Element {
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
@@ -34,19 +35,23 @@ export default function VariablePage(): React.JSX.Element {
       <PageTitle title={`${selectedProject?.name} | Variables`} />
       <VariableList />
 
-      {isDeleteVariableOpen && selectedVariable ? (
+      <Visible if={Boolean(isDeleteVariableOpen && selectedVariable)}>
         <ConfirmDeleteVariable />
-      ) : null}
-      {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
-      {isDeleteEnvironmentValueOfVariableOpen && selectedVariable ? (
+      </Visible>
+      <Visible if={Boolean(isEditVariableOpen && selectedVariable)}>
+        <EditVariablSheet />
+      </Visible>
+      <Visible
+        if={Boolean(isDeleteEnvironmentValueOfVariableOpen && selectedVariable)}
+      >
         <ConfirmDeleteEnvironmentValueOfVariableDialog />
-      ) : null}
-      {isVariableRevisionsOpen && selectedVariable ? (
+      </Visible>
+      <Visible if={Boolean(isVariableRevisionsOpen && selectedVariable)}>
         <VariableRevisionsSheet />
-      ) : null}
-      {isRollbackVariableOpen && selectedVariable ? (
+      </Visible>
+      <Visible if={Boolean(isRollbackVariableOpen && selectedVariable)}>
         <ConfirmRollbackVariable />
-      ) : null}
+      </Visible>
     </div>
   )
 }
