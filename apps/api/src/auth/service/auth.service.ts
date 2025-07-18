@@ -18,6 +18,11 @@ import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
+import { createHash } from 'crypto'
+
+function hashIp(ip: string): string {
+  return createHash('sha256').update(ip).digest('hex')
+}
 
 function normalizeIp(raw: string): string {
   if (!raw) return 'Unknown'
@@ -329,14 +334,15 @@ export class AuthService {
 
       // Take first IP if comma-separated
       const normalizedIp = normalizeIp(ip)
+      const ipHash = hashIp(normalizedIp)
 
       const deviceFingerprint = device || 'Unknown'
 
       const existingSession = await this.prisma.loginSession.findUnique({
         where: {
-          userId_ipAddress_browser: {
+          userId_ipHash_browser: {
             userId: user.id,
-            ipAddress: normalizedIp,
+            ipHash,
             browser: deviceFingerprint
           }
         }
@@ -359,9 +365,9 @@ export class AuthService {
 
       await this.prisma.loginSession.upsert({
         where: {
-          userId_ipAddress_browser: {
+          userId_ipHash_browser: {
             userId: user.id,
-            ipAddress: normalizedIp,
+            ipHash,
             browser: deviceFingerprint
           }
         },
@@ -370,7 +376,7 @@ export class AuthService {
         },
         create: {
           userId: user.id,
-          ipAddress: normalizedIp,
+          ipHash,
           browser: deviceFingerprint,
           geolocation: location
         }
