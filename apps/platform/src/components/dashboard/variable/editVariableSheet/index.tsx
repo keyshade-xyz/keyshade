@@ -62,27 +62,42 @@ export default function EditVariablSheet() {
     [selectedVariableData]
   )
 
-  // Check if any values changed
   const hasChanges = useMemo(() => {
     if (!selectedVariableData) return false
 
     const nameChanged = name !== selectedVariableData.variable.name
     const noteChanged = note !== (selectedVariableData.variable.note || '')
-    const envChanged = Object.keys(originalValues).some(
-      (key) => environmentValues[key] !== originalValues[key]
-    )
+
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    const envChanged = Array.from(allEnvironmentSlugs).some((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+      return originalValue !== currentValue
+    })
 
     return nameChanged || noteChanged || envChanged
   }, [name, note, environmentValues, originalValues, selectedVariableData])
 
-  // Get only changed environment values
   const getChangedEnvValues = () => {
     const changed: Record<string, string> = {}
-    Object.keys(originalValues).forEach((key) => {
-      if (environmentValues[key] !== originalValues[key]) {
-        changed[key] = environmentValues[key]
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    Array.from(allEnvironmentSlugs).forEach((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+
+      if (originalValue !== currentValue) {
+        changed[slug] = currentValue
       }
     })
+
     return changed
   }
 

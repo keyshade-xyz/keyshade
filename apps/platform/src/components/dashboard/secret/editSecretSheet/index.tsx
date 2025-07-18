@@ -77,26 +77,41 @@ export default function EditSecretSheet(): JSX.Element {
     decryptValues()
   }, [projectPrivateKey, selectedSecretData])
 
-  // Check if any values changed
   const hasChanges = useMemo(() => {
     if (!selectedSecretData) return false
 
     const nameChanged = name !== selectedSecretData.secret.name
     const noteChanged = note !== (selectedSecretData.secret.note || '')
-    const envChanged = Object.keys(originalValues).some(
-      (key) => environmentValues[key] !== originalValues[key]
-    )
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    const envChanged = Array.from(allEnvironmentSlugs).some((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+      return originalValue !== currentValue
+    })
 
     return nameChanged || noteChanged || envChanged
   }, [name, note, environmentValues, originalValues, selectedSecretData])
 
   const getChangedEnvValues = () => {
     const changed: Record<string, string> = {}
-    Object.keys(originalValues).forEach((key) => {
-      if (environmentValues[key] !== originalValues[key]) {
-        changed[key] = environmentValues[key]
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    Array.from(allEnvironmentSlugs).forEach((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+
+      if (originalValue !== currentValue) {
+        changed[slug] = currentValue
       }
     })
+
     return changed
   }
 
