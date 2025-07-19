@@ -21,13 +21,9 @@ import { UpdateProject } from './dto/update.project/update.project'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { v4 } from 'uuid'
-import {
-  ExportFormat,
-  ProjectWithCounts,
-  ProjectWithSecrets
-} from './project.types'
+import { ExportFormat, HydratedProject } from './project.types'
 import { ForkProject } from './dto/fork.project/fork.project'
-import { paginate } from '@/common/paginate'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import {
   createKeyPair,
   decrypt,
@@ -47,6 +43,8 @@ import SlugGenerator from '@/common/slug-generator.service'
 import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { EntitlementService } from '@/common/entitlement.service'
 
 @Injectable()
 export class ProjectService {
@@ -59,7 +57,8 @@ export class ProjectService {
     private readonly slugGenerator: SlugGenerator,
     private readonly secretService: SecretService,
     private readonly variableService: VariableService,
-    private readonly exportService: ExportService
+    private readonly exportService: ExportService,
+    private readonly entitlementService: EntitlementService
   ) {}
 
   /**
@@ -74,7 +73,7 @@ export class ProjectService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: CreateProject
-  ) {
+  ): Promise<HydratedProject> {
     this.logger.log(`User ${user.id} attempted to create a project ${dto.name}`)
 
     // Check if the workspace exists or not
@@ -141,15 +140,7 @@ export class ProjectService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      }
+      include: InclusionQuery.Project
     })
 
     const createEnvironmentOps = []
@@ -238,10 +229,12 @@ export class ProjectService {
     // in order to not log the private key
     newProject.privateKey = privateKey
 
-    return {
-      ...newProject,
-      ...(await this.parseProjectItemLimits(newProject.id))
-    }
+    return await this.entitlementService.entitleProject({
+      project: newProject,
+      user,
+      tierLimitService: this.tierLimitService,
+      authorizationService: this.authorizationService
+    })
   }
 
   /**
@@ -259,7 +252,7 @@ export class ProjectService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     dto: UpdateProject
-  ) {
+  ): Promise<HydratedProject> {
     this.logger.log(
       `User ${user.id} attempted to update project ${projectSlug}`
     )
@@ -391,7 +384,7 @@ export class ProjectService {
       if (dto.privateKey || project.privateKey) {
         const { txs, newPrivateKey, newPublicKey } =
           await this.updateProjectKeyPair(
-            project,
+            project.id,
             dto.privateKey || sDecrypt(project.privateKey),
             project.storePrivateKey || dto.storePrivateKey
           )
@@ -422,15 +415,7 @@ export class ProjectService {
         ...data,
         lastUpdatedById: user.id
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      }
+      include: InclusionQuery.Project
     })
 
     const [updatedProject] = await this.prisma.$transaction([
@@ -455,11 +440,16 @@ export class ProjectService {
     )
 
     this.logger.debug(`Updated project ${updatedProject.slug}`)
-    return {
-      ...updatedProject,
-      privateKey,
-      publicKey
-    }
+
+    updatedProject.privateKey = privateKey
+    updatedProject.publicKey = publicKey
+
+    return await this.entitlementService.entitleProject({
+      project: updatedProject,
+      tierLimitService: this.tierLimitService,
+      authorizationService: this.authorizationService,
+      user
+    })
   }
 
   /**
@@ -477,7 +467,7 @@ export class ProjectService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     forkMetadata: ForkProject
-  ) {
+  ): Promise<HydratedProject> {
     this.logger.log(`User ${user.id} attempted to fork project ${projectSlug}`)
 
     // Check if the user has the authority to read the project
@@ -562,15 +552,7 @@ export class ProjectService {
         workspaceId,
         lastUpdatedById: userId
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      }
+      include: InclusionQuery.Project
     })
 
     const addProjectToAdminRoleOfItsWorkspace =
@@ -629,7 +611,13 @@ export class ProjectService {
     )
 
     this.logger.debug(`Forked project ${newProject} (${newProject.slug})`)
-    return newProject
+
+    return await this.entitlementService.entitleProject({
+      user,
+      project: newProject,
+      tierLimitService: this.tierLimitService,
+      authorizationService: this.authorizationService
+    })
   }
 
   /**
@@ -831,7 +819,15 @@ export class ProjectService {
     projectSlug: Project['slug'],
     page: number,
     limit: number
-  ) {
+  ): Promise<
+    PaginatedResponse<{
+      id: Project['id']
+      name: Project['name']
+      slug: Project['slug']
+      createdAt: Project['createdAt']
+      updatedAt: Project['updatedAt']
+    }>
+  > {
     this.logger.log(
       `User ${user.id} attempted to get all forks of project ${projectSlug}`
     )
@@ -851,6 +847,13 @@ export class ProjectService {
     const forks = await this.prisma.project.findMany({
       where: {
         forkedFromId: projectId
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        createdAt: true,
+        updatedAt: true
       }
     })
     this.logger.log(`Found ${forks.length} forks of project ${projectSlug}`)
@@ -858,20 +861,23 @@ export class ProjectService {
     this.logger.log(
       `Filtering forks that the user has access to for project ${projectSlug}`
     )
-    const forksAllowed = await Promise.all(
-      forks.map(async (fork) => {
-        const allowed =
-          (await this.authorizationService.authorizeUserAccessToProject({
-            user,
-            slug: fork.slug,
-            authorities: [Authority.READ_PROJECT]
-          })) !== null
-
-        return { fork, allowed }
-      })
-    ).then((results) =>
-      results.filter((result) => result.allowed).map((result) => result.fork)
-    )
+    const forksAllowed: {
+      id: Project['id']
+      name: Project['name']
+      slug: Project['slug']
+      createdAt: Project['createdAt']
+      updatedAt: Project['updatedAt']
+    }[] = []
+    for (const fork of forks) {
+      try {
+        await this.authorizationService.authorizeUserAccessToProject({
+          user,
+          slug: fork.slug,
+          authorities: [Authority.READ_PROJECT]
+        })
+        forksAllowed.push(fork)
+      } catch (_ignored) {}
+    }
     this.logger.log(
       `Found ${forksAllowed.length} forks of project ${projectSlug} that the user has access to`
     )
@@ -900,7 +906,10 @@ export class ProjectService {
    *
    * @throws UnauthorizedException If the user does not have the authority to read the project
    */
-  async getProject(user: AuthenticatedUser, projectSlug: Project['slug']) {
+  async getProject(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug']
+  ): Promise<HydratedProject> {
     this.logger.log(`User ${user.id} attempted to get project ${projectSlug}`)
 
     this.logger.log(
@@ -913,17 +922,10 @@ export class ProjectService {
         authorities: [Authority.READ_PROJECT]
       })
 
-    delete project.secrets
     project.privateKey =
       project.privateKey != null ? sDecrypt(project.privateKey) : null
 
-    return {
-      ...(await this.countEnvironmentsVariablesAndSecretsInProject(
-        project,
-        user
-      )),
-      ...(await this.parseProjectItemLimits(project.id))
-    }
+    return project
   }
 
   /**
@@ -948,7 +950,7 @@ export class ProjectService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedProject>> {
     this.logger.log(
       `User ${user.id} attempted to get all projects of workspace ${workspaceSlug}`
     )
@@ -988,15 +990,7 @@ export class ProjectService {
             }
           ]
         },
-        include: {
-          lastUpdatedBy: {
-            select: {
-              id: true,
-              name: true,
-              profilePictureUrl: true
-            }
-          }
-        }
+        include: InclusionQuery.Project
       })
     ).map((project) => excludeFields(project, 'privateKey', 'publicKey'))
     this.logger.log(
@@ -1025,13 +1019,15 @@ export class ProjectService {
     }
 
     const items = await Promise.all(
-      accessibleProjects.map(async (project) => ({
-        ...(await this.countEnvironmentsVariablesAndSecretsInProject(
-          project,
-          user
-        )),
-        ...(await this.parseProjectItemLimits(project.id))
-      }))
+      accessibleProjects.map(
+        async (project) =>
+          await this.entitlementService.entitleProject({
+            project,
+            user,
+            tierLimitService: this.tierLimitService,
+            authorizationService: this.authorizationService
+          })
+      )
     )
 
     const metadata = paginate(items.length, `/project/all/${workspaceSlug}`, {
@@ -1407,7 +1403,7 @@ export class ProjectService {
    * - `newPublicKey`: the new public key of the project
    */
   private async updateProjectKeyPair(
-    project: ProjectWithSecrets,
+    projectId: Project['id'],
     oldPrivateKey: string,
     storePrivateKey: boolean
   ) {
@@ -1419,13 +1415,18 @@ export class ProjectService {
 
     const txs = []
 
+    const secrets = await this.prisma.secret.findMany({
+      where: {
+        projectId: projectId
+      },
+      include: {
+        versions: true
+      }
+    })
+
     // Re-hash all secrets
-    for (const secret of project.secrets) {
-      const versions = await this.prisma.secretVersion.findMany({
-        where: {
-          secretId: secret.id
-        }
-      })
+    for (const secret of secrets) {
+      const versions = secret.versions
 
       const updatedVersions: Partial<SecretVersion>[] = []
 
@@ -1460,7 +1461,7 @@ export class ProjectService {
     txs.push(
       this.prisma.project.update({
         where: {
-          id: project.id
+          id: projectId
         },
         data: {
           publicKey: newPublicKey,
@@ -1470,173 +1471,6 @@ export class ProjectService {
     )
 
     return { txs, newPrivateKey, newPublicKey }
-  }
-
-  private async countEnvironmentsVariablesAndSecretsInProject(
-    project: Partial<Project>,
-    user: AuthenticatedUser
-  ): Promise<ProjectWithCounts> {
-    this.logger.log(
-      `Counting environments, variables and secrets in project ${project.slug}`
-    )
-
-    this.logger.log(`Fetching all environments of project ${project.slug}`)
-    const allEnvs = await this.prisma.environment.findMany({
-      where: { projectId: project.id }
-    })
-    this.logger.log(
-      `Found ${allEnvs.length} environments in project ${project.slug}`
-    )
-
-    const permittedEnvironments = []
-
-    this.logger.log(
-      `Checking access to all environments of project ${project.slug}`
-    )
-    for (const env of allEnvs) {
-      this.logger.log(
-        `Checking access to environment ${env.slug} of project ${project.slug}`
-      )
-      try {
-        const permittedEnv =
-          await this.authorizationService.authorizeUserAccessToEnvironment({
-            user,
-            authorities:
-              project.accessLevel == ProjectAccessLevel.GLOBAL
-                ? []
-                : [
-                    Authority.READ_ENVIRONMENT,
-                    Authority.READ_SECRET,
-                    Authority.READ_VARIABLE
-                  ],
-            slug: env.slug
-          })
-
-        this.logger.log(
-          `User has access to environment ${env.slug} of project ${project.slug}`
-        )
-        permittedEnvironments.push(permittedEnv)
-      } catch (e) {
-        this.logger.log(
-          `User does not have access to environment ${env.slug} of project ${project.slug}`
-        )
-      }
-    }
-
-    const envPromises = permittedEnvironments.map(async (env: Environment) => {
-      const fetchSecretCount = this.prisma.secret.count({
-        where: {
-          projectId: project.id,
-          versions: { some: { environmentId: env.id } }
-        }
-      })
-
-      const fetchVariableCount = this.prisma.variable.count({
-        where: {
-          projectId: project.id,
-          versions: { some: { environmentId: env.id } }
-        }
-      })
-
-      return this.prisma.$transaction([fetchSecretCount, fetchVariableCount])
-    })
-
-    this.logger.log(
-      `Fetching counts of variables and secrets in project ${project.slug}`
-    )
-    const counts = await Promise.all(envPromises)
-    const secretCount = counts.reduce(
-      (sum, [secretCount]) => sum + secretCount,
-      0
-    )
-    const variableCount = counts.reduce(
-      (sum, [, variableCount]) => sum + variableCount,
-      0
-    )
-    this.logger.log(
-      `Found ${variableCount} variables and ${secretCount} secrets in project ${project.slug}`
-    )
-
-    return {
-      ...project,
-      environmentCount: permittedEnvironments.length,
-      variableCount,
-      secretCount
-    }
-  }
-
-  /**
-   * Returns the project with additional information about the limits of items
-   * in the project and the current count of items.
-   *
-   * @param project The project to parse
-   * @returns The project with the following additional properties:
-   * - maxAllowedEnvironments: The maximum number of environments allowed in the project
-   * - totalEnvironments: The current number of environments in the project
-   * - maxAllowedSecrets: The maximum number of secrets allowed in the project
-   * - totalSecrets: The current number of secrets in the project
-   * - maxAllowedVariables: The maximum number of variables allowed in the project
-   * - totalVariables: The current number of variables in the project
-   */
-  private async parseProjectItemLimits(projectId: Project['id']): Promise<{
-    maxAllowedEnvironments: number
-    totalEnvironments: number
-    maxAllowedSecrets: number
-    totalSecrets: number
-    maxAllowedVariables: number
-    totalVariables: number
-  }> {
-    this.logger.log(`Parsing project item limits for project ${projectId}`)
-
-    this.logger.log(`Getting environment tier limit for project ${projectId}`)
-    // Get the tier limit for environments in the project
-    const maxAllowedEnvironments =
-      this.tierLimitService.getEnvironmentTierLimit(projectId)
-
-    // Get the total number of environments in the project
-    const totalEnvironments = await this.prisma.environment.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(
-      `Found ${totalEnvironments} environments in project ${projectId}`
-    )
-
-    this.logger.log(`Getting secret tier limit for project ${projectId}`)
-    // Get the tier limit for secrets in the project
-    const maxAllowedSecrets =
-      this.tierLimitService.getSecretTierLimit(projectId)
-
-    // Get the total number of secrets in the project
-    const totalSecrets = await this.prisma.secret.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
-
-    this.logger.log(`Getting variable tier limit for project ${projectId}`)
-    // Get the tier limit for variables in the project
-    const maxAllowedVariables =
-      this.tierLimitService.getVariableTierLimit(projectId)
-
-    // Get the total number of variables in the project
-    const totalVariables = await this.prisma.variable.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
-
-    return {
-      maxAllowedEnvironments,
-      totalEnvironments,
-      maxAllowedSecrets,
-      totalSecrets,
-      maxAllowedVariables,
-      totalVariables
-    }
   }
 
   /**

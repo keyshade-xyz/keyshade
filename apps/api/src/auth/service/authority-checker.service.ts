@@ -11,7 +11,6 @@ import {
   HydratedEnvironment,
   RawEnvironment
 } from '@/environment/environment.types'
-import { ProjectWithSecrets } from '@/project/project.types'
 import { RawEntitledSecret, RawSecret } from '@/secret/secret.types'
 import {
   getCollectiveEnvironmentAuthorities,
@@ -36,6 +35,9 @@ import {
   HydratedWorkspaceRole,
   RawWorkspaceRole
 } from '@/workspace-role/workspace-role.types'
+import { HydratedProject, RawProject } from '@/project/project.types'
+import { TierLimitService } from '@/common/tier-limit.service'
+import { AuthorizationService } from './authorization.service'
 
 @Injectable()
 export class AuthorityCheckerService {
@@ -43,7 +45,8 @@ export class AuthorityCheckerService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly entitlementService: EntitlementService
+    private readonly entitlementService: EntitlementService,
+    private readonly tierLimitService: TierLimitService
   ) {}
 
   /**
@@ -122,14 +125,15 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverProject(
-    params: AuthorizationParams
-  ): Promise<ProjectWithSecrets> {
+    params: AuthorizationParams,
+    authorizationService: AuthorizationService
+  ): Promise<HydratedProject> {
     const { user, slug, authorities } = params
     this.logger.log(
       `Checking authority over project for user ${user.id}, slug ${JSON.stringify(slug)} and authorities ${authorities}`
     )
 
-    let project: ProjectWithSecrets
+    let project: RawProject
 
     try {
       this.logger.log(`Fetching project by slug ${slug}`)
@@ -139,6 +143,8 @@ export class AuthorityCheckerService {
         },
         include: {
           secrets: true,
+          variables: true,
+          environments: true,
           lastUpdatedBy: {
             select: {
               id: true,
@@ -149,8 +155,13 @@ export class AuthorityCheckerService {
         }
       })
     } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException(error)
+      this.logger.error('Error while fetching project: ', error)
+      throw new InternalServerErrorException(
+        constructErrorBody(
+          'Uh-oh, something went wrong',
+          'Something went wrong on our end. If the problem persists, please contact us.'
+        )
+      )
     }
 
     if (!project) {
@@ -209,7 +220,17 @@ export class AuthorityCheckerService {
     this.logger.log(
       `User ${user.id} is cleared to access project ${project.slug} for authorities ${authorities}`
     )
-    return project
+
+    return await this.entitlementService.entitleProject({
+      project,
+      tierLimitService: this.tierLimitService,
+      authorizationService,
+      user,
+      permittedAuthorities:
+        projectAccessLevel === ProjectAccessLevel.PRIVATE
+          ? permittedAuthoritiesForProject
+          : permittedAuthoritiesForWorkspace
+    })
   }
 
   /**
@@ -271,18 +292,14 @@ export class AuthorityCheckerService {
       user.id
     )
 
-    const entitlements: HydratedEnvironment['entitlements'] = {
-      canDelete: permittedAuthorities.has(Authority.DELETE_ENVIRONMENT),
-      canUpdate: permittedAuthorities.has(Authority.UPDATE_ENVIRONMENT)
-    }
-
     this.logger.log(
       `User ${user.id} is cleared to access environment ${environment.slug} for authorities ${authorities}`
     )
-    return {
-      ...environment,
-      entitlements
-    }
+    return await this.entitlementService.entitleEnvironment({
+      environment,
+      user,
+      permittedAuthorities
+    })
   }
 
   /**

@@ -1,6 +1,6 @@
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
-import { ProjectWithSecrets } from '@/project/project.types'
+import { HydratedProject } from '@/project/project.types'
 import { HydratedEnvironment } from '@/environment/environment.types'
 import { RawEntitledVariable } from '@/variable/variable.types'
 import { RawEntitledSecret } from '@/secret/secret.types'
@@ -53,9 +53,9 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToProject(
     params: AuthorizationParams
-  ): Promise<ProjectWithSecrets> {
+  ): Promise<HydratedProject> {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject(params)
+      await this.authorityCheckerService.checkAuthorityOverProject(params, this)
 
     const workspace = await this.getWorkspace(project.workspaceId)
 

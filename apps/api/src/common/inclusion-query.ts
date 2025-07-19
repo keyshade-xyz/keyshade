@@ -157,5 +157,17 @@ export const InclusionQuery = {
         role: true
       }
     }
+  },
+  Project: {
+    lastUpdatedBy: {
+      select: {
+        id: true,
+        name: true,
+        profilePictureUrl: true
+      }
+    },
+    secrets: true,
+    variables: true,
+    environments: true
   }
 }
