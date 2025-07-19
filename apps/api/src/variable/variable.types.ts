@@ -44,7 +44,3 @@ export interface HydratedVariable extends Variable {
 export interface RawVariable extends Omit<HydratedVariable, 'entitlements'> {
   versions: HydratedVariable['versions']
 }
-
-export interface RawEntitledVariable extends RawVariable {
-  entitlements: HydratedVariable['entitlements']
-}

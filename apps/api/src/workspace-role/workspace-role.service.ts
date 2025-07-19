@@ -25,7 +25,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedWorkspaceRole, RawWorkspaceRole } from './workspace-role.types'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 
 @Injectable()
@@ -36,7 +36,7 @@ export class WorkspaceRoleService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -117,7 +117,7 @@ export class WorkspaceRoleService {
       (await this.prisma.$transaction(op)).pop()
     )
     const hydratedWorkspaceRole =
-      await this.entitlementService.entitleWorkspaceRole({
+      await this.hydrationService.hydrateWorkspaceRole({
         workspaceRole,
         user
       })
@@ -246,10 +246,10 @@ export class WorkspaceRoleService {
 
     this.logger.log(`${user.email} updated workspace role ${workspaceRoleSlug}`)
 
-    return {
-      ...updatedWorkspaceRole,
-      entitlements: workspaceRole.entitlements
-    }
+    return await this.hydrationService.hydrateWorkspaceRole({
+      workspaceRole: updatedWorkspaceRole,
+      user
+    })
   }
 
   /**
@@ -393,7 +393,7 @@ export class WorkspaceRoleService {
     const hydratedWorkspaceRoles = []
     for (const workspaceRole of items) {
       const hydratedWorkspaceRole =
-        await this.entitlementService.entitleWorkspaceRole({
+        await this.hydrationService.hydrateWorkspaceRole({
           workspaceRole: await this.parseWorkspaceRoleMembers(workspaceRole),
           user
         })

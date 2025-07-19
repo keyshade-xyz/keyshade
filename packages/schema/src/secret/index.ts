@@ -37,7 +37,7 @@ export const SecretSchema = z.object({
       name: UserSchema.shape.name,
       profilePictureUrl: UserSchema.shape.profilePictureUrl
     }),
-    entitlements: z.object({
+    hydrations: z.object({
       canUpdate: z.boolean(),
       canDelete: z.boolean()
     })

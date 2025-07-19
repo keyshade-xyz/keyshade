@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { CustomLoggerService } from './logger.service'
 import { TierLimitService } from './tier-limit.service'
 import SlugGenerator from './slug-generator.service'
-import { EntitlementService } from './entitlement.service'
+import { HydrationService } from './hydration.service'
 
 @Global()
 @Module({
@@ -11,13 +11,13 @@ import { EntitlementService } from './entitlement.service'
     CustomLoggerService,
     TierLimitService,
     SlugGenerator,
-    EntitlementService
+    HydrationService
   ],
   exports: [
     CustomLoggerService,
     TierLimitService,
     SlugGenerator,
-    EntitlementService
+    HydrationService
   ]
 })
 export class CommonModule {}

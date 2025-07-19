@@ -35,7 +35,7 @@ import {
   RawWorkspaceMember
 } from './workspace-membership.types'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -48,7 +48,7 @@ export class WorkspaceMembershipService {
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -76,7 +76,8 @@ export class WorkspaceMembershipService {
     const otherUser = await getUserByEmailOrId(
       otherUserEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     if (otherUser.id === user.id) {
@@ -403,7 +404,8 @@ export class WorkspaceMembershipService {
     const otherUser = await getUserByEmailOrId(
       otherUserEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
@@ -516,7 +518,7 @@ export class WorkspaceMembershipService {
       `Updated role of user ${otherUser.id} in workspace ${workspace.name} (${workspace.id})`
     )
 
-    return await this.entitlementService.entitleWorkspaceMember({
+    return await this.hydrationService.hydrateWorkspaceMember({
       user,
       workspaceMember: membership
     })
@@ -613,7 +615,7 @@ export class WorkspaceMembershipService {
 
     const hydratedMembers: HydratedWorkspaceMember[] = await Promise.all(
       items.map(async (member) => {
-        return await this.entitlementService.entitleWorkspaceMember({
+        return await this.hydrationService.hydrateWorkspaceMember({
           user,
           workspaceMember: member
         })
@@ -694,7 +696,8 @@ export class WorkspaceMembershipService {
     const inviteeUser = await getUserByEmailOrId(
       inviteeEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
@@ -853,7 +856,8 @@ export class WorkspaceMembershipService {
       otherUser = await getUserByEmailOrId(
         otherUserEmail,
         this.prisma,
-        this.slugGenerator
+        this.slugGenerator,
+        this.hydrationService
       )
     } catch (e) {
       return false
@@ -882,7 +886,8 @@ export class WorkspaceMembershipService {
     const member = await getUserByEmailOrId(
       inviteeEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
@@ -1091,7 +1096,8 @@ export class WorkspaceMembershipService {
             authProvider: AuthProvider.EMAIL_OTP
           },
           this.prisma,
-          this.slugGenerator
+          this.slugGenerator,
+          this.hydrationService
         )
 
         rawWorkspaceMember = await this.prisma.$transaction([
@@ -1115,7 +1121,7 @@ export class WorkspaceMembershipService {
       }
 
       hydratedMembers.push(
-        await this.entitlementService.entitleWorkspaceMember({
+        await this.hydrationService.hydrateWorkspaceMember({
           user: currentUser,
           workspaceMember: rawWorkspaceMember
         })

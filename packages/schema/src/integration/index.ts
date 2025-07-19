@@ -42,7 +42,7 @@ export const IntegrationSchema = z.object({
     name: z.string(),
     profilePictureUrl: z.string().nullable()
   }),
-  entitlements: z.object({
+  hydrations: z.object({
     canUpdate: z.boolean(),
     canDelete: z.boolean()
   })

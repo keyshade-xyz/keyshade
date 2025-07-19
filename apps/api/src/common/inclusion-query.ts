@@ -169,5 +169,34 @@ export const InclusionQuery = {
     secrets: true,
     variables: true,
     environments: true
+  },
+  Workspace: {
+    lastUpdatedBy: {
+      select: {
+        id: true,
+        name: true,
+        profilePictureUrl: true
+      }
+    },
+    members: {
+      select: {
+        id: true
+      }
+    },
+    roles: {
+      select: {
+        id: true
+      }
+    },
+    projects: {
+      select: {
+        id: true
+      }
+    },
+    integrations: {
+      select: {
+        id: true
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Authority, ProjectAccessLevel } from '@prisma/client'
-import { RawEntitledVariable, RawVariable } from '@/variable/variable.types'
+import { HydratedVariable, RawVariable } from '@/variable/variable.types'
 import {
   Injectable,
   InternalServerErrorException,
@@ -11,7 +11,7 @@ import {
   HydratedEnvironment,
   RawEnvironment
 } from '@/environment/environment.types'
-import { RawEntitledSecret, RawSecret } from '@/secret/secret.types'
+import { HydratedSecret, RawSecret } from '@/secret/secret.types'
 import {
   getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
@@ -24,12 +24,7 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import { constructErrorBody } from '@/common/util'
 import { AuthorizationParams } from '../auth.types'
-import {
-  WorkspaceWithLastUpdateBy,
-  WorkspaceWithLastUpdatedByAndOwner
-} from '@/workspace/workspace.types'
-import { associateWorkspaceOwnerDetails } from '@/common/workspace'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydratedWorkspace, RawWorkspace } from '@/workspace/workspace.types'
 import { InclusionQuery } from '@/common/inclusion-query'
 import {
   HydratedWorkspaceRole,
@@ -38,6 +33,7 @@ import {
 import { HydratedProject, RawProject } from '@/project/project.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import { AuthorizationService } from './authorization.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class AuthorityCheckerService {
@@ -45,7 +41,7 @@ export class AuthorityCheckerService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly entitlementService: EntitlementService,
+    private readonly hydrationService: HydrationService,
     private readonly tierLimitService: TierLimitService
   ) {}
 
@@ -60,13 +56,13 @@ export class AuthorityCheckerService {
    */
   public async checkAuthorityOverWorkspace(
     params: AuthorizationParams
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<HydratedWorkspace> {
     const { user, slug, authorities } = params
     this.logger.log(
       `Checking authority over workspace for user ${user.id}, slug ${JSON.stringify(slug)} and authorities ${authorities}`
     )
 
-    let workspace: WorkspaceWithLastUpdateBy
+    let workspace: RawWorkspace
 
     try {
       this.logger.log(`Fetching workspace by slug ${slug}`)
@@ -74,15 +70,7 @@ export class AuthorityCheckerService {
         where: {
           slug: slug
         },
-        include: {
-          lastUpdatedBy: {
-            select: {
-              id: true,
-              name: true,
-              profilePictureUrl: true
-            }
-          }
-        }
+        include: InclusionQuery.Workspace
       })
     } catch (error) {
       this.logger.error(error)
@@ -112,7 +100,11 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access workspace ${workspace.slug} for authorities ${authorities}`
     )
 
-    return await associateWorkspaceOwnerDetails(workspace, this.prisma)
+    return await this.hydrationService.hydrateWorkspace({
+      workspace,
+      user,
+      permittedAuthorities
+    })
   }
 
   /**
@@ -125,8 +117,7 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverProject(
-    params: AuthorizationParams,
-    authorizationService: AuthorizationService
+    params: AuthorizationParams
   ): Promise<HydratedProject> {
     const { user, slug, authorities } = params
     this.logger.log(
@@ -141,18 +132,7 @@ export class AuthorityCheckerService {
         where: {
           slug: slug
         },
-        include: {
-          secrets: true,
-          variables: true,
-          environments: true,
-          lastUpdatedBy: {
-            select: {
-              id: true,
-              name: true,
-              profilePictureUrl: true
-            }
-          }
-        }
+        include: InclusionQuery.Project
       })
     } catch (error) {
       this.logger.error('Error while fetching project: ', error)
@@ -221,10 +201,8 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access project ${project.slug} for authorities ${authorities}`
     )
 
-    return await this.entitlementService.entitleProject({
+    return await this.hydrationService.hydrateProject({
       project,
-      tierLimitService: this.tierLimitService,
-      authorizationService,
       user,
       permittedAuthorities:
         projectAccessLevel === ProjectAccessLevel.PRIVATE
@@ -295,7 +273,7 @@ export class AuthorityCheckerService {
     this.logger.log(
       `User ${user.id} is cleared to access environment ${environment.slug} for authorities ${authorities}`
     )
-    return await this.entitlementService.entitleEnvironment({
+    return await this.hydrationService.hydrateEnvironment({
       environment,
       user,
       permittedAuthorities
@@ -312,8 +290,9 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverVariable(
-    params: AuthorizationParams
-  ): Promise<RawEntitledVariable> {
+    params: AuthorizationParams,
+    authorizationService: AuthorizationService
+  ): Promise<HydratedVariable> {
     const { user, slug, authorities } = params
     this.logger.log(
       `Checking authority over variable for user ${user.id}, slug ${JSON.stringify(
@@ -365,8 +344,8 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access variable ${variable.slug} for authorities ${authorities}`
     )
 
-    return await this.entitlementService.entitleVariable({
-      project: variable.project,
+    return await this.hydrationService.hydrateVariable({
+      authorizationService,
       user,
       permittedAuthorities,
       variable
@@ -383,8 +362,9 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverSecret(
-    params: AuthorizationParams
-  ): Promise<RawEntitledSecret> {
+    params: AuthorizationParams,
+    authorizationService: AuthorizationService
+  ): Promise<HydratedSecret> {
     const { user, slug, authorities } = params
 
     let secret: RawSecret
@@ -434,9 +414,9 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access secret ${secret.slug} for authorities ${authorities}`
     )
 
-    return await this.entitlementService.entitleSecret({
+    return await this.hydrationService.hydrateSecret({
       secret,
-      project: secret.project,
+      authorizationService,
       user,
       permittedAuthorities
     })
@@ -534,9 +514,8 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access integration ${integration.slug} for authorities ${authorities}`
     )
 
-    return await this.entitlementService.entitleIntegration({
+    return await this.hydrationService.hydrateIntegration({
       integration,
-      workspaceId: integration.workspaceId,
       user,
       permittedAuthorities
     })
@@ -594,7 +573,7 @@ export class AuthorityCheckerService {
       `User ${user.id} is cleared to access workspace role ${workspaceRole.slug} for authorities ${authorities}`
     )
 
-    return await this.entitlementService.entitleWorkspaceRole({
+    return await this.hydrationService.hydrateWorkspaceRole({
       workspaceRole,
       user,
       permittedAuthorities

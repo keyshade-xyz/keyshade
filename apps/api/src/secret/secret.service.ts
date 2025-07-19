@@ -35,12 +35,7 @@ import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import {
-  HydratedSecret,
-  RawEntitledSecret,
-  RawSecret,
-  SecretRevision
-} from './secret.types'
+import { HydratedSecret, RawSecret, SecretRevision } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
@@ -52,7 +47,7 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class SecretService {
@@ -64,7 +59,7 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService,
+    private readonly hydrationService: HydrationService,
     @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
@@ -167,22 +162,17 @@ export class SecretService {
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const rawEntitledSecret = await this.entitlementService.entitleSecret({
+    const hydratedSecret = await this.hydrationService.hydrateSecret({
       secret: secretData,
       user,
-      project
+      authorizationService: this.authorizationService
     })
-
-    const hydratedSecret = await this.flattenSecretVersions(
-      rawEntitledSecret,
-      user
-    )
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing secret creation to Redis for secret ${rawEntitledSecret.slug} in environment ${environmentSlug}`
+            `Publishing secret creation to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -194,7 +184,7 @@ export class SecretService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published secret update to Redis for secret ${rawEntitledSecret.slug} in environment ${environmentSlug}`
+            `Published secret update to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -210,8 +200,8 @@ export class SecretService {
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          name: rawEntitledSecret.name,
-          description: rawEntitledSecret.note,
+          name: hydratedSecret.name,
+          description: hydratedSecret.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: true,
           isPlaintext: true
@@ -284,15 +274,12 @@ export class SecretService {
       `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${secret.name} is set to ${shouldCreateRevisions}`
     )
 
-    console.log('hereeeeeeee')
     // Check if the secret with the same name already exists in the project
     await this.secretExists(dto.name, secret.projectId)
 
     // Check if a variable with the same name already exists in the project
     await this.variableService.variableExists(dto.name, secret.projectId)
 
-    console.log('hereeeeeeee')
-    console.log('hereeeeeeee')
     // Check if the user has access to the environments
     const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
       dto,
@@ -302,12 +289,10 @@ export class SecretService {
       shouldCreateRevisions
     )
 
-    console.log('hereeeeeeee')
     const op = []
 
     // Update the secret
 
-    console.log('hereeeeeeee')
     // Update the other fields
     op.push(
       this.prisma.secret.update({
@@ -329,7 +314,6 @@ export class SecretService {
       })
     )
 
-    console.log('hereeeeeeee')
     // If new values for various environments are proposed,
     // we want to create new versions for those environments
     if (shouldCreateRevisions) {
@@ -370,7 +354,6 @@ export class SecretService {
       }
     }
 
-    console.log('hereeeeeeee')
     // Make the transaction
     await this.prisma.$transaction(op)
 
@@ -380,14 +363,6 @@ export class SecretService {
       },
       include: InclusionQuery.Secret
     })
-
-    const hydratedSecret = await this.flattenSecretVersions(
-      {
-        ...updatedSecret,
-        entitlements: secret.entitlements
-      },
-      user
-    )
 
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -436,7 +411,11 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
-    return hydratedSecret
+    return await this.hydrationService.hydrateSecret({
+      secret: updatedSecret,
+      user,
+      authorizationService: this.authorizationService
+    })
   }
 
   /**
@@ -862,16 +841,11 @@ export class SecretService {
     for (const secret of secrets) {
       delete secret.project
 
-      const rawEntitledSecret = await this.entitlementService.entitleSecret({
-        project,
+      const hydratedSecret = await this.hydrationService.hydrateSecret({
         user,
-        secret
+        secret,
+        authorizationService: this.authorizationService
       })
-
-      const hydratedSecret = await this.flattenSecretVersions(
-        rawEntitledSecret,
-        user
-      )
 
       hydratedSecrets.push(hydratedSecret)
     }
@@ -1166,78 +1140,5 @@ export class SecretService {
     this.logger.log(
       `Secret ${secretName} does not exist in project ${projectId}`
     )
-  }
-
-  /**
-   * Takes a list of entitled secrets and flattens the versions of the secret to
-   * a single object with the latest version of the secret in each environment
-   * @param rawEntitledSecrets the list of entitled secrets
-   * @param user the user to check access for
-   * @returns a list of flattened secrets
-   */
-  private async flattenSecretVersions(
-    rawEntitledSecret: RawEntitledSecret,
-    user: AuthenticatedUser
-  ): Promise<HydratedSecret> {
-    // Logic to update the map:
-    // 1. If the environment ID is not present in the key, insert the environment ID and the secret version
-    // 2. If the environment ID is already present, check if the existing secret version is lesser than the new secret version.
-    //    If it is, update the secret version
-    const envIdToSecretVersionMap = new Map<Environment['id'], SecretRevision>()
-
-    // Maintain a list of environments that the user is and is not allowed to access
-    const environmentAccessibilityMap: Map<Environment['id'], boolean> =
-      new Map()
-
-    for (const secretVersion of rawEntitledSecret.versions) {
-      const environmentSlug = secretVersion.environment.slug
-
-      if (!environmentAccessibilityMap.has(secretVersion.environment.id)) {
-        try {
-          await this.authorizationService.authorizeUserAccessToEnvironment({
-            user,
-            slug: environmentSlug,
-            authorities: [Authority.READ_ENVIRONMENT]
-          })
-          environmentAccessibilityMap.set(secretVersion.environment.id, true)
-        } catch (error) {
-          environmentAccessibilityMap.set(secretVersion.environment.id, false)
-        }
-      }
-
-      if (!environmentAccessibilityMap.get(secretVersion.environment.id)) {
-        continue
-      }
-
-      const environmentId = secretVersion.environment.id
-      const existingSecretVersion = envIdToSecretVersionMap.get(environmentId)
-
-      if (
-        !existingSecretVersion ||
-        existingSecretVersion.version < secretVersion.version
-      ) {
-        envIdToSecretVersionMap.set(environmentId, secretVersion)
-      }
-    }
-
-    rawEntitledSecret.versions = Array.from(
-      envIdToSecretVersionMap.values()
-    ).map((secretVersion) => ({
-      environment: {
-        id: secretVersion.environment.id,
-        name: secretVersion.environment.name,
-        slug: secretVersion.environment.slug
-      },
-      value: secretVersion.value,
-      version: secretVersion.version,
-      createdBy: {
-        id: secretVersion.createdBy.id,
-        name: secretVersion.createdBy.name,
-        profilePictureUrl: secretVersion.createdBy.profilePictureUrl
-      },
-      createdOn: secretVersion.createdOn
-    }))
-
-    return rawEntitledSecret
   }
 }

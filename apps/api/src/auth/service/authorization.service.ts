@@ -2,16 +2,16 @@ import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
 import { HydratedProject } from '@/project/project.types'
 import { HydratedEnvironment } from '@/environment/environment.types'
-import { RawEntitledVariable } from '@/variable/variable.types'
-import { RawEntitledSecret } from '@/secret/secret.types'
 import { HydratedIntegration } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { AuthorizationParams } from '../auth.types'
-import { WorkspaceWithLastUpdatedByAndOwner } from '@/workspace/workspace.types'
 import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
+import { HydratedVariable } from '@/variable/variable.types'
+import { HydratedSecret } from '@/secret/secret.types'
+import { HydratedWorkspace } from '@/workspace/workspace.types'
 
 @Injectable()
 export class AuthorizationService {
@@ -33,7 +33,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToWorkspace(
     params: AuthorizationParams
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<HydratedWorkspace> {
     const workspace =
       await this.authorityCheckerService.checkAuthorityOverWorkspace(params)
 
@@ -55,7 +55,7 @@ export class AuthorizationService {
     params: AuthorizationParams
   ): Promise<HydratedProject> {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject(params, this)
+      await this.authorityCheckerService.checkAuthorityOverProject(params)
 
     const workspace = await this.getWorkspace(project.workspaceId)
 
@@ -98,9 +98,12 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToVariable(
     params: AuthorizationParams
-  ): Promise<RawEntitledVariable> {
+  ): Promise<HydratedVariable> {
     const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable(params)
+      await this.authorityCheckerService.checkAuthorityOverVariable(
+        params,
+        this
+      )
 
     const workspace = await this.getWorkspace(variable.project.workspaceId)
 
@@ -120,9 +123,11 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToSecret(
     params: AuthorizationParams
-  ): Promise<RawEntitledSecret> {
-    const secret =
-      await this.authorityCheckerService.checkAuthorityOverSecret(params)
+  ): Promise<HydratedSecret> {
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret(
+      params,
+      this
+    )
 
     const workspace = await this.getWorkspace(secret.project.workspaceId)
 

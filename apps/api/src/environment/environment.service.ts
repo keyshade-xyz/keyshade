@@ -23,7 +23,7 @@ import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import { HydratedEnvironment } from './environment.types'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class EnvironmentService {
@@ -34,7 +34,7 @@ export class EnvironmentService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -143,7 +143,7 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return await this.entitlementService.entitleEnvironment({
+    return await this.hydrationService.hydrateEnvironment({
       environment,
       user
     })
@@ -234,10 +234,10 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return {
-      ...updatedEnvironment,
-      entitlements: environment.entitlements
-    }
+    return await this.hydrationService.hydrateEnvironment({
+      environment: updatedEnvironment,
+      user
+    })
   }
 
   /**

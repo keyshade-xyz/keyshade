@@ -976,7 +976,7 @@
 //       expect(secret.name).toBe(secret1.name)
 //       expect(secret.slug).toBe(secret1.slug)
 //       expect(secret.lastUpdatedBy).toBeDefined()
-//       expect(secret.entitlements).toBeDefined()
+//       expect(secret.hydrations).toBeDefined()
 
 //       expect(values.length).toBe(1)
 
@@ -1215,7 +1215,7 @@
 //         expect(secretData2.values).toHaveLength(2)
 //       })
 
-//       it('should have the correct entitlements', async () => {
+//       it('should have the correct hydrations', async () => {
 //         // Fetch all secrets of the project
 //         let response = await app.inject({
 //           method: 'GET',
@@ -1226,7 +1226,7 @@
 //         })
 
 //         let secretData = response.json().items[0]
-//         expect(secretData.secret.entitlements).toEqual({
+//         expect(secretData.secret.hydrations).toEqual({
 //           canUpdate: true,
 //           canDelete: true
 //         })
@@ -1251,7 +1251,7 @@
 //         })
 
 //         secretData = response.json().items[0]
-//         expect(secretData.secret.entitlements).toEqual({
+//         expect(secretData.secret.hydrations).toEqual({
 //           canUpdate: true,
 //           canDelete: false
 //         })
@@ -1275,7 +1275,7 @@
 //         })
 
 //         secretData = response.json().items[0]
-//         expect(secretData.secret.entitlements).toEqual({
+//         expect(secretData.secret.hydrations).toEqual({
 //           canUpdate: false,
 //           canDelete: false
 //         })

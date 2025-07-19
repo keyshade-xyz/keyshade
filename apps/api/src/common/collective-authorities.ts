@@ -1,4 +1,4 @@
-import { HydratedEnvironment } from '@/environment/environment.types'
+import { RawEnvironment } from '@/environment/environment.types'
 import { Logger } from '@nestjs/common'
 import {
   Authority,
@@ -134,7 +134,7 @@ export const getCollectiveProjectAuthorities = async (
  */
 export const getCollectiveEnvironmentAuthorities = async (
   userId: User['id'],
-  environment: Omit<HydratedEnvironment, 'entitlements'>,
+  environment: RawEnvironment,
   prisma: PrismaClient
 ): Promise<Set<Authority>> => {
   const logger = new Logger('getCollectiveEnvironmentAuthorities')

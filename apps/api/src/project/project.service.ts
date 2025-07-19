@@ -44,7 +44,7 @@ import { SecretService } from '@/secret/secret.service'
 import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
 import { InclusionQuery } from '@/common/inclusion-query'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class ProjectService {
@@ -58,7 +58,7 @@ export class ProjectService {
     private readonly secretService: SecretService,
     private readonly variableService: VariableService,
     private readonly exportService: ExportService,
-    private readonly entitlementService: EntitlementService
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -229,11 +229,9 @@ export class ProjectService {
     // in order to not log the private key
     newProject.privateKey = privateKey
 
-    return await this.entitlementService.entitleProject({
+    return await this.hydrationService.hydrateProject({
       project: newProject,
-      user,
-      tierLimitService: this.tierLimitService,
-      authorizationService: this.authorizationService
+      user
     })
   }
 
@@ -444,10 +442,8 @@ export class ProjectService {
     updatedProject.privateKey = privateKey
     updatedProject.publicKey = publicKey
 
-    return await this.entitlementService.entitleProject({
+    return await this.hydrationService.hydrateProject({
       project: updatedProject,
-      tierLimitService: this.tierLimitService,
-      authorizationService: this.authorizationService,
       user
     })
   }
@@ -612,11 +608,9 @@ export class ProjectService {
 
     this.logger.debug(`Forked project ${newProject} (${newProject.slug})`)
 
-    return await this.entitlementService.entitleProject({
+    return await this.hydrationService.hydrateProject({
       user,
-      project: newProject,
-      tierLimitService: this.tierLimitService,
-      authorizationService: this.authorizationService
+      project: newProject
     })
   }
 
@@ -1021,11 +1015,9 @@ export class ProjectService {
     const items = await Promise.all(
       accessibleProjects.map(
         async (project) =>
-          await this.entitlementService.entitleProject({
+          await this.hydrationService.hydrateProject({
             project,
-            user,
-            tierLimitService: this.tierLimitService,
-            authorizationService: this.authorizationService
+            user
           })
       )
     )

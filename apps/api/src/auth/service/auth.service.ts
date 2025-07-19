@@ -18,6 +18,7 @@ import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly cache: CacheService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {
     this.logger = new Logger(AuthService.name)
   }
@@ -79,7 +81,8 @@ export class AuthService {
     const user = await getUserByEmailOrId(
       email,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
@@ -103,7 +106,8 @@ export class AuthService {
     const user = await getUserByEmailOrId(
       email,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     this.logger.log(`Checking if OTP is valid for ${email}`)
@@ -239,7 +243,12 @@ export class AuthService {
 
     this.logger.log(`Checking if user exists with email: ${email}`)
     try {
-      user = await getUserByEmailOrId(email, this.prisma, this.slugGenerator)
+      user = await getUserByEmailOrId(
+        email,
+        this.prisma,
+        this.slugGenerator,
+        this.hydrationService
+      )
     } catch (ignored) {}
 
     // We need to create the user if it doesn't exist yet
@@ -252,7 +261,8 @@ export class AuthService {
           authProvider
         },
         this.prisma,
-        this.slugGenerator
+        this.slugGenerator,
+        this.hydrationService
       )
     }
 

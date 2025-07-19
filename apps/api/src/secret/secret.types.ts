@@ -47,7 +47,3 @@ export interface HydratedSecret extends Secret {
 export interface RawSecret extends Omit<HydratedSecret, 'entitlements'> {
   versions: HydratedSecret['versions']
 }
-
-export interface RawEntitledSecret extends RawSecret {
-  entitlements: HydratedSecret['entitlements']
-}

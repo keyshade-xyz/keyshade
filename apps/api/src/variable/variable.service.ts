@@ -32,11 +32,7 @@ import {
   mapEntriesToEventMetadata
 } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
-import {
-  HydratedVariable,
-  RawEntitledVariable,
-  VariableRevision
-} from './variable.types'
+import { HydratedVariable, VariableRevision } from './variable.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
 import {
@@ -45,7 +41,7 @@ import {
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
 import { SecretService } from '@/secret/secret.service'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 
 @Injectable()
@@ -58,7 +54,7 @@ export class VariableService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService,
+    private readonly hydrationService: HydrationService,
     @Inject(forwardRef(() => SecretService))
     private readonly secretService: SecretService,
     @Inject(REDIS_CLIENT)
@@ -122,7 +118,7 @@ export class VariableService {
 
     // Create the variable
     this.logger.log(`Creating variable ${dto.name} in project ${project.slug}`)
-    const variableData = await this.prisma.variable.create({
+    const variable = await this.prisma.variable.create({
       data: {
         name: dto.name,
         slug: await this.slugGenerator.generateEntitySlug(dto.name, 'VARIABLE'),
@@ -155,25 +151,20 @@ export class VariableService {
     })
 
     this.logger.log(
-      `Created variable ${variableData.name} in project ${project.slug}`
+      `Created variable ${variable.name} in project ${project.slug}`
     )
 
-    const rawEntitledVariable = await this.entitlementService.entitleVariable({
-      project,
+    const hydratedVariable = await this.hydrationService.hydrateVariable({
       user,
-      variable: variableData
+      variable,
+      authorizationService: this.authorizationService
     })
-
-    const hydratedVariable = await this.flattenVariableVersions(
-      rawEntitledVariable,
-      user
-    )
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing variable creation to Redis for variable ${rawEntitledVariable.slug} in environment ${environmentSlug}`
+            `Publishing variable creation to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -185,7 +176,7 @@ export class VariableService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published variable update to Redis for variable ${rawEntitledVariable.slug} in environment ${environmentSlug}`
+            `Published variable update to Redis for variable ${hydratedVariable.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -201,8 +192,8 @@ export class VariableService {
         source: EventSource.VARIABLE,
         title: `Variable created`,
         metadata: {
-          name: rawEntitledVariable.name,
-          description: rawEntitledVariable.note,
+          name: hydratedVariable.name,
+          description: hydratedVariable.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: false,
           isPlaintext: true
@@ -364,13 +355,11 @@ export class VariableService {
       include: InclusionQuery.Variable
     })
 
-    const hydratedVariable = await this.flattenVariableVersions(
-      {
-        ...updatedVariable,
-        entitlements: variable.entitlements
-      },
-      user
-    )
+    const hydratedVariable = await this.hydrationService.hydrateVariable({
+      user,
+      variable: updatedVariable,
+      authorizationService: this.authorizationService
+    })
 
     // Notify the new variable version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -773,18 +762,11 @@ export class VariableService {
     for (const variable of variables) {
       delete variable.project
 
-      const rawEntitledVariable = await this.entitlementService.entitleVariable(
-        {
-          project,
-          user,
-          variable
-        }
-      )
-
-      const hydratedVariable = await this.flattenVariableVersions(
-        rawEntitledVariable,
-        user
-      )
+      const hydratedVariable = await this.hydrationService.hydrateVariable({
+        authorizationService: this.authorizationService,
+        user,
+        variable
+      })
 
       hydratedVariables.push(hydratedVariable)
     }
@@ -1025,75 +1007,5 @@ export class VariableService {
     this.logger.log(
       `Variable ${variableName} does not exist in project ${projectId}`
     )
-  }
-
-  private async flattenVariableVersions(
-    rawEntitledVariable: RawEntitledVariable,
-    user: AuthenticatedUser
-  ): Promise<HydratedVariable> {
-    // Logic to update the map:
-    // 1. If the environment ID is not present in the key, insert the environment ID and the variable version
-    // 2. If the environment ID is already present, check if the existing variable version is lesser than the new variable version.
-    //    If it is, update the variable version
-    const envIdToVariableVersionMap = new Map<
-      Environment['id'],
-      VariableRevision
-    >()
-
-    // Maintain a list of environments that the user is and is not allowed to access
-    const environmentAccessibilityMap: Map<Environment['id'], boolean> =
-      new Map()
-
-    for (const variableVersion of rawEntitledVariable.versions) {
-      const environmentSlug = variableVersion.environment.slug
-
-      if (!environmentAccessibilityMap.has(variableVersion.environment.id)) {
-        try {
-          await this.authorizationService.authorizeUserAccessToEnvironment({
-            user,
-            slug: environmentSlug,
-            authorities: [Authority.READ_ENVIRONMENT]
-          })
-          environmentAccessibilityMap.set(variableVersion.environment.id, true)
-        } catch (error) {
-          environmentAccessibilityMap.set(variableVersion.environment.id, false)
-        }
-      }
-
-      if (!environmentAccessibilityMap.get(variableVersion.environment.id)) {
-        continue
-      }
-
-      const environmentId = variableVersion.environment.id
-      const existingVariableVersion =
-        envIdToVariableVersionMap.get(environmentId)
-
-      if (
-        !existingVariableVersion ||
-        existingVariableVersion.version < variableVersion.version
-      ) {
-        envIdToVariableVersionMap.set(environmentId, variableVersion)
-      }
-    }
-
-    rawEntitledVariable.versions = Array.from(
-      envIdToVariableVersionMap.values()
-    ).map((variableVersion) => ({
-      environment: {
-        id: variableVersion.environment.id,
-        name: variableVersion.environment.name,
-        slug: variableVersion.environment.slug
-      },
-      value: variableVersion.value,
-      version: variableVersion.version,
-      createdBy: {
-        id: variableVersion.createdBy.id,
-        name: variableVersion.createdBy.name,
-        profilePictureUrl: variableVersion.createdBy.profilePictureUrl
-      },
-      createdOn: variableVersion.createdOn
-    }))
-
-    return rawEntitledVariable
   }
 }

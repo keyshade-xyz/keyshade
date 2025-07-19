@@ -30,7 +30,7 @@ import {
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { BaseIntegration } from './plugins/base.integration'
-import { EntitlementService } from '@/common/entitlement.service'
+import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
 
@@ -42,7 +42,7 @@ export class IntegrationService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly entitlementService: EntitlementService
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -237,12 +237,10 @@ export class IntegrationService {
 
     // Initialize the integration
     this.logger.log(`Initializing integration: ${integration.id}`)
-    const hydratedIntegration =
-      await this.entitlementService.entitleIntegration({
-        workspaceId,
-        user,
-        integration
-      })
+    const hydratedIntegration = await this.hydrationService.hydrateIntegration({
+      user,
+      integration
+    })
     integrationObject = IntegrationFactory.createIntegration(
       hydratedIntegration,
       this.prisma
@@ -563,8 +561,7 @@ export class IntegrationService {
       integration.metadata = decryptMetadata(integration.metadata)
       delete integration.workspace
       hydratedIntegrations.push(
-        await this.entitlementService.entitleIntegration({
-          workspaceId,
+        await this.hydrationService.hydrateIntegration({
           user,
           integration
         })

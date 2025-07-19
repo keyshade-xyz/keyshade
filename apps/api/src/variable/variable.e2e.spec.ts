@@ -960,7 +960,7 @@
 //       expect(variable.name).toBe(variable1.name)
 //       expect(variable.slug).toBe(variable1.slug)
 //       expect(variable.lastUpdatedBy).toBeDefined()
-//       expect(variable.entitlements).toBeDefined()
+//       expect(variable.hydrations).toBeDefined()
 
 //       expect(variable.versions).toBeUndefined()
 //       expect(values).toBeDefined()
@@ -1015,7 +1015,7 @@
 //       expect(variable.name).toBe(variable1.name)
 //       expect(variable.slug).toBe(variable1.slug)
 //       expect(variable.lastUpdatedBy).toBeDefined()
-//       expect(variable.entitlements).toBeDefined()
+//       expect(variable.hydrations).toBeDefined()
 
 //       expect(variable.versions).toBeUndefined()
 //       expect(values).toBeDefined()
@@ -1202,7 +1202,7 @@
 //         expect(variableData2.values).toHaveLength(2)
 //       })
 
-//       it('should have the correct entitlements', async () => {
+//       it('should have the correct hydrations', async () => {
 //         // Fetch all variables of the project
 //         let response = await app.inject({
 //           method: 'GET',
@@ -1213,7 +1213,7 @@
 //         })
 
 //         let variableData = response.json().items[0]
-//         expect(variableData.variable.entitlements).toEqual({
+//         expect(variableData.variable.hydrations).toEqual({
 //           canUpdate: true,
 //           canDelete: true
 //         })
@@ -1238,7 +1238,7 @@
 //         })
 
 //         variableData = response.json().items[0]
-//         expect(variableData.variable.entitlements).toEqual({
+//         expect(variableData.variable.hydrations).toEqual({
 //           canUpdate: true,
 //           canDelete: false
 //         })
@@ -1262,7 +1262,7 @@
 //         })
 
 //         variableData = response.json().items[0]
-//         expect(variableData.variable.entitlements).toEqual({
+//         expect(variableData.variable.hydrations).toEqual({
 //           canUpdate: false,
 //           canDelete: false
 //         })
