@@ -4,7 +4,8 @@ import {
   Injectable,
   Logger,
   LoggerService,
-  UnauthorizedException
+  UnauthorizedException,
+  InternalServerErrorException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -19,17 +20,8 @@ import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
 import { createHash } from 'crypto'
-
-function hashIp(ip: string): string {
-  return createHash('sha256').update(ip).digest('hex')
-}
-
-function normalizeIp(raw: string): string {
-  if (!raw) return 'Unknown'
-  let ip = raw.split(',')[0].trim()
-  if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
-  return ip
-}
+import { isIP } from 'is-ip'
+import { UAParser } from 'ua-parser-js'
 
 @Injectable()
 export class AuthService {
@@ -43,6 +35,70 @@ export class AuthService {
     private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
+  }
+
+  // Static helper to hash IP using SHA256
+  private static hashIp(ip: string): string {
+    return createHash('sha256').update(ip).digest('hex')
+  }
+
+  // Static helper to normalize IPs
+  private static normalizeIp(raw: string): string {
+    if (!raw) return 'Unknown'
+    let ip = raw.split(',')[0].trim()
+    if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
+    return ip
+  }
+
+  /**
+   * Parses a login request to extract the user's IP address, device info, and location.
+   * @param req The incoming HTTP request
+   * @returns An object containing the IP, device fingerprint, and location string
+   * @throws {Error} If the IP is invalid or cannot be parsed
+   */
+  public static async parseLoginRequest(req: Request): Promise<{
+    ip: string
+    device: string
+    location: string
+  }> {
+    const rawIp = (
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      (req as any).socket?.remoteAddress ||
+      ''
+    ).trim()
+
+    if (!isIP(rawIp)) {
+      throw new Error(`Invalid IP address: ${rawIp}`)
+    }
+
+    const userAgent = req.headers['user-agent'] || 'Unknown'
+    const parser = new UAParser(userAgent)
+
+    const browser = parser.getBrowser().name || 'Unknown'
+    const os = parser.getOS().name || 'Unknown'
+    const device = `${browser} on ${os}`
+
+    let location = 'Unknown'
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000)
+
+      const res = await fetch(`https://ipwho.is/${rawIp}`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
+      const geo = await res.json()
+      if (geo.success === false) throw new Error(geo.message)
+
+      location =
+        [geo.city, geo.region, geo.country].filter(Boolean).join(', ') ||
+        'Unknown'
+    } catch {
+      location = 'Unknown'
+    }
+
+    return { ip: rawIp, device, location }
   }
 
   /**
@@ -99,16 +155,23 @@ export class AuthService {
 
   /* istanbul ignore next */
   /**
-   * Validates a login code sent to the given email address
-   * @throws {NotFoundException} If the user is not found
-   * @throws {UnauthorizedException} If the login code is invalid
-   * @param email The email address the login code was sent to
-   * @param otp The login code to validate
-   * @returns An object containing the user and a JWT token
+   * Validates a one-time password (OTP) for a given email during login.
+   * - Verifies that the OTP is valid and not expired.
+   * - Deletes the OTP after successful validation.
+   * - Extracts IP, device, and location from the incoming request.
+   * - Sends a login notification email if the login is from a new environment.
+   * - Caches the user session and returns a JWT token.
+   * @param email - The email address the OTP was sent to.
+   * @param otp - The OTP to validate.
+   * @param req - The HTTP request object, used to extract IP/device info.
+   * @throws {NotFoundException} If the user does not exist.
+   * @throws {UnauthorizedException} If the OTP is invalid or expired.
+   * @returns An object containing user info and a JWT token.
    */
   async validateOtp(
     email: string,
-    otp: string
+    otp: string,
+    req: Request
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(`Validating login code for ${email}`)
 
@@ -141,6 +204,7 @@ export class AuthService {
         )
       )
     }
+
     this.logger.log(`OTP is valid for ${email}`)
 
     this.logger.log(`Deleting OTP for ${email}`)
@@ -153,6 +217,10 @@ export class AuthService {
       }
     })
     this.logger.log(`OTP deleted for ${email}`)
+
+    const { ip, device, location } = await AuthService.parseLoginRequest(req)
+
+    await this.sendLoginNotification(email, { ip, device, location })
 
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
@@ -330,12 +398,8 @@ export class AuthService {
         return
       }
 
-      const activityEmailsEnabled = user.emailPreference?.activity ?? true
-
-      // Take first IP if comma-separated
-      const normalizedIp = normalizeIp(ip)
-      const ipHash = hashIp(normalizedIp)
-
+      const normalizedIp = AuthService.normalizeIp(ip)
+      const ipHash = AuthService.hashIp(normalizedIp)
       const deviceFingerprint = device || 'Unknown'
 
       const existingSession = await this.prisma.loginSession.findUnique({
@@ -350,7 +414,7 @@ export class AuthService {
 
       const isNew = !existingSession
 
-      if (isNew && activityEmailsEnabled) {
+      if (isNew) {
         await this.mailService.sendLoginNotification(user.email, {
           ip: normalizedIp,
           device: deviceFingerprint,
@@ -359,7 +423,7 @@ export class AuthService {
         this.logger.log(`Login notification sent to ${email} (new env).`)
       } else {
         this.logger.log(
-          `Login notification skipped for ${email} (existing env or activity disabled).`
+          `Login notification skipped for ${email} (existing env).`
         )
       }
 
@@ -372,13 +436,15 @@ export class AuthService {
           }
         },
         update: {
-          geolocation: location
+          geolocation: location,
+          lastLoggedOnAt: new Date()
         },
         create: {
           userId: user.id,
           ipHash,
           browser: deviceFingerprint,
-          geolocation: location
+          geolocation: location,
+          lastLoggedOnAt: new Date()
         }
       })
     } catch (err) {
@@ -386,6 +452,7 @@ export class AuthService {
         `Failed login notification path for ${email}: ${err.message}`,
         err.stack
       )
+      throw new InternalServerErrorException('Login notification failed')
     }
   }
 

@@ -26,7 +26,6 @@ import {
 } from '@/common/redirect'
 import { setCookie } from '@/common/util'
 import { ThrottlerGuard } from '@nestjs/throttler'
-import { parseLoginRequest } from '@/common/request-utils'
 
 @Controller('auth')
 export class AuthController {
@@ -65,18 +64,9 @@ export class AuthController {
     @Query('email') email: string,
     @Query('otp') otp: string,
     @Res({ passthrough: true }) response: Response,
-    @Req() req: any
+    @Req() req: Request
   ) {
-    const { ip, device, location } = await parseLoginRequest(req)
-
-    const sessionData = await this.authService.validateOtp(email, otp)
-
-    await this.authService.sendLoginNotification(email, {
-      ip,
-      device,
-      location
-    })
-
+    const sessionData = await this.authService.validateOtp(email, otp, req)
     return setCookie(response, sessionData)
   }
 
@@ -181,7 +171,7 @@ export class AuthController {
     req?: any
   ) {
     try {
-      const { ip, device, location } = await parseLoginRequest(req)
+      const { ip, device, location } = await AuthService.parseLoginRequest(req)
 
       const data = await this.authService.handleOAuthLogin(
         email,

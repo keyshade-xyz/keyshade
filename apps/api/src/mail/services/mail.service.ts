@@ -109,7 +109,7 @@ export class MailService implements IMailService {
 
     await this.transporter.sendMail({
       to: email,
-      subject: 'New Sign-In Alert for Your Keyshade Account',
+      subject: 'New Sign-in alert for your Keyshade account',
       html
     })
   }
