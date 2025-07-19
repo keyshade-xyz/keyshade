@@ -27,6 +27,8 @@ import { EnvironmentModule } from '@/environment/environment.module'
 import { EnvironmentService } from '@/environment/environment.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
+import nock = require('nock')
+import { CreateIntegration } from './dto/create.integration/create.integration'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -44,6 +46,14 @@ describe('Integration Controller Tests', () => {
   let environment1: Environment, environment2: Environment
 
   const USER_IP_ADDRESS = '127.0.0.1'
+  const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
+
+  const createDummyWebhookUrlInterceptor = () => {
+    const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+    return nock(origin)
+      .post(pathname || '/')
+      .reply(200)
+  }
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -125,13 +135,15 @@ describe('Integration Controller Tests', () => {
       }
     }
 
+    createDummyWebhookUrlInterceptor()
+
     integration1 = await integrationService.createIntegration(
       user1,
       {
         name: 'Integration 1',
         type: IntegrationType.DISCORD,
         metadata: {
-          webhookUrl: 'DUMMY_URL'
+          webhookUrl: DUMMY_WEBHOOK_URL
         },
         notifyOn: [EventType.WORKSPACE_UPDATED],
         privateKey: 'abc'
@@ -201,7 +213,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 1',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -221,7 +233,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -241,7 +253,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -261,7 +273,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug
@@ -282,7 +294,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: '999999'
@@ -302,7 +314,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: ['123']
@@ -323,7 +335,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: [environment2.slug],
@@ -345,7 +357,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           environmentSlugs: ['999999'],
@@ -357,6 +369,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to create an integration without any project or environment slug', async () => {
+      createDummyWebhookUrlInterceptor()
+
       const result = await app.inject({
         method: 'POST',
         url: `/integration/${workspace1.slug}`,
@@ -367,7 +381,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED]
         }
@@ -451,6 +465,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should not fail to update if the integration has project present and only environmentSlugs is updated', async () => {
+      createDummyWebhookUrlInterceptor()
+
       // Create the integration
       const integration = await integrationService.createIntegration(
         user1,
@@ -458,7 +474,7 @@ describe('Integration Controller Tests', () => {
           name: 'Integration 2',
           type: IntegrationType.DISCORD,
           metadata: {
-            webhookUrl: 'DUMMY_URL'
+            webhookUrl: DUMMY_WEBHOOK_URL
           },
           notifyOn: [EventType.WORKSPACE_UPDATED],
           projectSlug: project1.slug,
@@ -541,6 +557,8 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to update the integration', async () => {
+      createDummyWebhookUrlInterceptor()
+
       // Update the integration
       const result = await app.inject({
         method: 'PUT',
@@ -632,6 +650,156 @@ describe('Integration Controller Tests', () => {
     expect(metadata.links.last).toEqual(
       `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
     )
+  })
+
+  describe('Validate Config (metadata-only) Tests', () => {
+    const endpoint = '/integration/validate-config'
+    const validDto: CreateIntegration = {
+      name: 'Validation Test',
+      type: IntegrationType.DISCORD,
+      metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+      notifyOn: [EventType.WORKSPACE_UPDATED]
+    }
+
+    let existingIntegration: Integration
+
+    afterEach(() => {
+      nock.cleanAll()
+    })
+
+    it('should succeed validating metadata on create when DTO is valid', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.json()).toEqual({ success: true })
+    })
+
+    it('should fail validating metadata on create if webhook URL is unreachable', async () => {
+      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+
+      nock(origin)
+        .post(pathname || '/')
+        .reply(404)
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toBeGreaterThanOrEqual(400)
+      expect(response.statusCode).toBeLessThan(500)
+    })
+
+    it('should succeed validating metadata on update when DTO is valid', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      existingIntegration = await integrationService.createIntegration(
+        user1,
+        {
+          ...validDto,
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false&integrationSlug=${existingIntegration.slug}`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: {
+          metadata: validDto.metadata,
+          notifyOn: validDto.notifyOn
+        }
+      })
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.json()).toEqual({ success: true })
+    })
+
+    it('should return 400 if integrationSlug is missing on update', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: validDto
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toContain('integrationSlug is required')
+    })
+
+    it('should return 401 if user is not authorized to update that integration', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      existingIntegration = await integrationService.createIntegration(
+        user1,
+        {
+          ...validDto,
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+
+      createDummyWebhookUrlInterceptor()
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=false&integrationSlug=${existingIntegration.slug}`,
+        headers: { 'x-e2e-user-email': user2.email },
+        payload: {
+          metadata: validDto.metadata,
+          notifyOn: validDto.notifyOn
+        }
+      })
+
+      expect(response.statusCode).toEqual(401)
+    })
+
+    it('should return 400 if notifyOn contains an event the integration does not permit', async () => {
+      createDummyWebhookUrlInterceptor()
+
+      const badDto = {
+        ...validDto,
+        notifyOn: ['A-NOT-PERMITTED-EVENT']
+      }
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: badDto
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toMatch(
+        /Event not supported by integration/
+      )
+    })
+
+    it('should return 400 if metadata params fail validation', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: `${endpoint}?isCreate=true`,
+        headers: { 'x-e2e-user-email': user1.email },
+        payload: {
+          ...validDto,
+          metadata: {}
+        }
+      })
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.json().message).toMatch(/Missing metadata parameter/)
+    })
   })
 
   describe('Delete Integration Tests', () => {

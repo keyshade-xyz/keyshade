@@ -50,6 +50,7 @@ export function useSetupIntegration(
 ) {
   const [formState, setFormState] = useState<FormState>(initialFormState)
   const [isLoading, setIsLoading] = useState(false)
+  const [isTesting, setIsTesting] = useState(false)
   const formStateRef = useRef<FormState>(formState)
 
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -93,6 +94,83 @@ export function useSetupIntegration(
       }
     )
   })
+
+  const testIntegration = useHttp((finalMetadata: Record<string, string>) => {
+    const state = formStateRef.current
+    const privateKeyToUse =
+      projectPrivateKey || state.manualPrivateKey || undefined
+
+    return ControllerInstance.getInstance().integrationController.validateIntegrationConfiguration(
+      {
+        isCreate: true,
+        type: integrationType.toUpperCase() as IntegrationTypeEnum,
+        name: state.name.trim(),
+        notifyOn: Array.from(state.selectedEvents),
+        metadata: finalMetadata,
+        workspaceSlug: selectedWorkspace!.slug,
+        projectSlug: state.selectedProjectSlug ?? undefined,
+        environmentSlugs: state.selectedEnvironments,
+        ...(isPrivateKeyRequired ? { privateKey: privateKeyToUse } : {})
+      }
+    )
+  })
+
+  const prepareMetadata = useCallback(() => {
+    const state = formStateRef.current
+
+    if (!state.name.trim()) {
+      toast.error('Name of integration is required')
+      return null
+    }
+    if (state.selectedEvents.size === 0) {
+      toast.error('At least one event trigger is required')
+      return null
+    }
+    if (
+      maxEnvironmentsCount === 'single' &&
+      state.selectedEnvironments.length === 0
+    ) {
+      toast.error('At least one environment is required')
+      return null
+    }
+
+    const finalMetadata = isMappingRequired
+      ? { ...state.metadata, environments: state.mappings }
+      : state.metadata
+
+    if (Object.keys(finalMetadata).length === 0) {
+      toast.error('Configuration metadata is required')
+      return null
+    }
+
+    const isEmptyValue = (value: unknown) =>
+      (typeof value === 'string' && value.trim() === '') ||
+      (typeof value === 'object' &&
+        value !== null &&
+        Object.keys(value).length === 0)
+
+    if (Object.values(finalMetadata).some(isEmptyValue)) {
+      toast.error('All configuration fields are required and cannot be empty')
+      return null
+    }
+
+    if (
+      state.selectedProjectSlug &&
+      isPrivateKeyRequired &&
+      !projectPrivateKey &&
+      !state.manualPrivateKey.trim()
+    ) {
+      toast.error('Project private key is required for this integration')
+      return null
+    }
+
+    return finalMetadata as Record<string, string>
+  }, [
+    isMappingRequired,
+    isPrivateKeyRequired,
+    maxEnvironmentsCount,
+    projectPrivateKey
+  ])
 
   useEffect(() => {
     if (formState.selectedProjectSlug) {
@@ -250,13 +328,13 @@ export function useSetupIntegration(
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
-
       const currentState = formStateRef.current
-
       if (!validateForm(currentState)) return
 
-      setIsLoading(true)
+      const finalMetadata = prepareMetadata()
+      if (!finalMetadata) return
 
+      setIsLoading(true)
       try {
         const { success, data } = await createIntegration()
         if (success && data) {
@@ -264,18 +342,57 @@ export function useSetupIntegration(
           resetFormData()
           router.push('/integrations')
         }
-      } catch (error) {
+      } catch {
         toast.error('Failed to create integration. Please try again.')
       } finally {
         setIsLoading(false)
       }
     },
-    [createIntegration, integrationName, router, resetFormData, validateForm]
+    [
+      createIntegration,
+      integrationName,
+      prepareMetadata,
+      router,
+      resetFormData,
+      validateForm
+    ]
   )
+
+  const handleTesting = useCallback(async () => {
+    const finalMetadata = prepareMetadata()
+    if (!finalMetadata) return
+
+    setIsTesting(true)
+    try {
+      const { success, error } = await testIntegration(finalMetadata)
+      if (success) {
+        toast.success('Test event sent successfully!')
+      } else {
+        let msg = 'Test failed. Please check your configuration.'
+        if (error?.message) {
+          try {
+            const parsed = JSON.parse(error.message)
+            msg =
+              parsed.header && parsed.body
+                ? `${parsed.header}: ${parsed.body}`
+                : error.message
+          } catch {
+            msg = error.message
+          }
+        }
+        toast.error(msg)
+      }
+    } catch {
+      toast.error('An error occurred while testing.')
+    } finally {
+      setIsTesting(false)
+    }
+  }, [prepareMetadata, testIntegration])
 
   return {
     formState,
     isLoading,
+    isTesting,
     config: {
       isMappingRequired,
       isPrivateKeyRequired,
@@ -285,6 +402,7 @@ export function useSetupIntegration(
     privateKeyLoading,
     handlers: {
       handleSubmit,
+      handleTesting,
       handleNameChange,
       handleEventsChange,
       handleMetadataChange,
