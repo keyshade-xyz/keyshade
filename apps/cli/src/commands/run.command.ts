@@ -4,7 +4,8 @@ import { io } from 'socket.io-client'
 import { spawn } from 'child_process'
 import type {
   CommandActionData,
-  CommandArgument
+  CommandArgument,
+  CommandOption
 } from '@/types/command/command.types'
 import { fetchPrivateKey, fetchProjectRootConfig } from '@/util/configuration'
 import { Logger } from '@/util/logger'
@@ -43,7 +44,17 @@ export default class RunCommand extends BaseCommand {
     return true
   }
 
-  async action({ args }: CommandActionData): Promise<void> {
+  getOptions(): CommandOption[] {
+    return [
+      {
+        short: '-e',
+        long: '--environment <slug>',
+        description: 'Environment to configure'
+      }
+    ]
+  }
+
+  async action({ options, args }: CommandActionData): Promise<void> {
     // Join all arguments to form the complete command
     if (args.length === 0) {
       throw new Error('No command provided')
@@ -54,6 +65,12 @@ export default class RunCommand extends BaseCommand {
     this.command = args[0].join(' ')
 
     const configurations = await this.fetchConfigurations()
+
+    // If the user passed in an environment, override the one in our configurations object
+    if (options.environment) {
+      configurations.environment = options.environment
+    }
+
     await this.checkApiKeyValidity(this.baseUrl, this.apiKey)
     await this.connectToSocket(configurations)
     await this.sleep(3000)
