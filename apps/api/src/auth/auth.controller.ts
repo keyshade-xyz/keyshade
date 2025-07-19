@@ -63,9 +63,11 @@ export class AuthController {
   async validateOtp(
     @Query('email') email: string,
     @Query('otp') otp: string,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
+    @Req() req: Request
   ) {
-    return setCookie(response, await this.authService.validateOtp(email, otp))
+    const sessionData = await this.authService.validateOtp(email, otp, req)
+    return setCookie(response, sessionData)
   }
 
   /* istanbul ignore next */
@@ -102,7 +104,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITHUB,
-      res
+      res,
+      req
     )
   }
 
@@ -139,7 +142,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GITLAB,
-      res
+      res,
+      req
     )
   }
 
@@ -158,44 +162,30 @@ export class AuthController {
   }
 
   /* istanbul ignore next */
-  @Public()
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleOAuthCallback(@Req() req: any, @Res() res: Response) {
-    const { emails, displayName: name, photos } = req.user
-
-    if (!emails.length) {
-      throw new UnprocessableEntityException(
-        'Email information is missing from the OAuth provider data.'
-      )
-    }
-    const email = emails[0].value
-    const profilePictureUrl = photos[0]?.value
-
-    await this.handleOAuthProcess(
-      email,
-      name,
-      profilePictureUrl,
-      AuthProvider.GOOGLE,
-      res
-    )
-  }
-
-  /* istanbul ignore next */
   private async handleOAuthProcess(
     email: string,
     name: string,
     profilePictureUrl: string,
     oauthProvider: AuthProvider,
-    response: Response
+    response: Response,
+    req?: any
   ) {
     try {
+      const { ip, device, location } = await AuthService.parseLoginRequest(req)
+
       const data = await this.authService.handleOAuthLogin(
         email,
         name,
         profilePictureUrl,
         oauthProvider
       )
+
+      await this.authService.sendLoginNotification(email, {
+        ip,
+        device,
+        location
+      })
+
       const user = setCookie(response, data)
       sendOAuthSuccessRedirect(response, user)
     } catch (error) {
