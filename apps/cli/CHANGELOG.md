@@ -231,7 +231,7 @@
 
 - Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
 
-## 3.2.2
+## 3.2.2-stage.1
 
 ### Minor Changes
 
