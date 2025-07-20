@@ -833,6 +833,62 @@ describe('Integration Controller Tests', () => {
       })
     })
 
+    describe('Vercel configuration tests', () => {
+      const validDtoVercel: CreateIntegration = {
+        name: 'Validation Test',
+        type: IntegrationType.VERCEL,
+        metadata: {
+          token: 'fake-vercel-token',
+          projectId: 'dummy-project-id',
+          environments: {
+            production: { vercelSystemEnvironment: 'production' },
+            preview: { vercelSystemEnvironment: 'preview' }
+          }
+        },
+        notifyOn: [EventType.SECRET_ADDED]
+      }
+
+      it('should fail validating metadata on create if Vercel API is unreachable', async () => {
+        nock('https://api.vercel.com')
+          .get(
+            `/v9/projects/${validDtoVercel.metadata.projectId}/custom-environments`
+          )
+          .query(true)
+          .reply(404)
+
+        const response = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          headers: { 'x-e2e-user-email': user1.email },
+          payload: validDtoVercel
+        })
+
+        expect(nock.isDone()).toBe(true)
+        expect(response.statusCode).toEqual(400)
+      })
+
+      it('should fail validating metadata on create if custom environment ID is invalid', async () => {
+        nock('https://api.vercel.com')
+          .get(
+            `/v9/projects/${validDtoVercel.metadata.projectId}/custom-environments`
+          )
+          .query(true)
+          .reply(200, {
+            environments: [{ id: 'some-other-id', name: 'staging' }]
+          })
+
+        const response = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          headers: { 'x-e2e-user-email': user1.email },
+          payload: validDtoVercel
+        })
+
+        expect(nock.isDone()).toBe(true)
+        expect(response.statusCode).toEqual(400)
+      })
+    })
+
     describe('AWS Lambda configuration tests', () => {
       const lambdaMock = mockClient(LambdaClient)
 
