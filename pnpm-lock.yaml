@@ -319,6 +319,9 @@ importers:
       ajv:
         specifier: ^7
         version: 7.2.4
+      aws-sdk-client-mock:
+        specifier: ^4.1.0
+        version: 4.1.0
       dotenv-cli:
         specifier: ^7.4.2
         version: 7.4.4
@@ -4434,6 +4437,18 @@ packages:
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
 
+  '@sinonjs/fake-timers@11.2.2':
+    resolution: {integrity: sha512-G2piCSxQ7oWOxwGSAyFHfPIsyeJGXYtc6mFbnFA+kRXkiEnTl8c/8jul2S329iFBnDI9HGoeWWAZvuvOkZccgw==}
+
+  '@sinonjs/fake-timers@13.0.5':
+    resolution: {integrity: sha512-36/hTbH2uaWuGVERyC6da9YwGWnzUZXuPro/F2LfsdOsLnCojz/iSH8MxUt/FD2S5XBSVPhmArFUXcpCQ2Hkiw==}
+
+  '@sinonjs/samsam@8.0.2':
+    resolution: {integrity: sha512-v46t/fwnhejRSFTGqbpn9u+LQ9xJDse10gNnPgAcxgdoCDMXj/G2asWAC/8Qs+BAZDicX+MNZouXT1A7c83kVw==}
+
+  '@sinonjs/text-encoding@0.7.3':
+    resolution: {integrity: sha512-DE427ROAphMQzU4ENbliGYrBSYPXF+TtLg9S8vzeA+OF4ZKzoDdzfL8sxuMUGS/lgRhM6j1URSk9ghf7Xo1tyA==}
+
   '@slack/bolt@3.22.0':
     resolution: {integrity: sha512-iKDqGPEJDnrVwxSVlFW6OKTkijd7s4qLBeSufoBsTM0reTyfdp/5izIQVkxNfzjHi3o6qjdYbRXkYad5HBsBog==}
     engines: {node: '>=14.21.3', npm: '>=6.14.18'}
@@ -5207,6 +5222,12 @@ packages:
   '@types/shimmer@1.2.0':
     resolution: {integrity: sha512-UE7oxhQLLd9gub6JKIAhDq06T0F6FnztwMNRvYgjeQSBeMc1ZG/tA47EwfduvkuQS8apbkM/lpLpWsaCeYsXVg==}
 
+  '@types/sinon@17.0.4':
+    resolution: {integrity: sha512-RHnIrhfPO3+tJT0s7cFaXGZvsL4bbR3/k7z3P312qMS4JaS2Tk+KiwiLx1S0rQ56ERj00u1/BtdyVd0FY+Pdew==}
+
+  '@types/sinonjs__fake-timers@8.1.5':
+    resolution: {integrity: sha512-mQkU2jY8jJEF7YHjHvsQO8+3ughTL1mcnn96igfhONmR+fUPSKIkefQYpSe8bsly2Ep7oQbn/6VG5/9/0qcArQ==}
+
   '@types/stack-trace@0.0.33':
     resolution: {integrity: sha512-O7in6531Bbvlb2KEsJ0dq0CHZvc3iWSR5ZYMtvGgnHA56VgriAN/AU2LorfmcvAl2xc9N5fbCTRyMRRl8nd74g==}
 
@@ -5775,6 +5796,9 @@ packages:
     peerDependencies:
       react: '>= 16'
       react-dom: '>= 16'
+
+  aws-sdk-client-mock@4.1.0:
+    resolution: {integrity: sha512-h/tOYTkXEsAcV3//6C1/7U4ifSpKyJvb6auveAepqqNJl6TdZaPFEtKjBQNf8UxQdDP850knB2i/whq4zlsxJw==}
 
   axe-core@4.10.3:
     resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
@@ -6594,6 +6618,10 @@ packages:
 
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
+    engines: {node: '>=0.3.1'}
+
+  diff@5.2.0:
+    resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -8454,6 +8482,9 @@ packages:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
 
+  just-extend@6.2.0:
+    resolution: {integrity: sha512-cYofQu2Xpom82S6qD778jBDpwvvy39s1l/hrYij2u9AMdQcGRpaBu6kY4mVhuno5kJVi1DAz4aiphA2WI1/OAw==}
+
   jwa@1.4.2:
     resolution: {integrity: sha512-eeH5JO+21J78qMvTIDdBXidBd6nG2kZjg5Ohz/1fpa28Z4CcsWUzJ1ZZyFq/3z3N17aZy+ZuBoHljASbL1WfOw==}
 
@@ -8559,6 +8590,10 @@ packages:
 
   lodash.escaperegexp@4.1.2:
     resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
+
+  lodash.get@4.4.2:
+    resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
@@ -9052,6 +9087,9 @@ packages:
         optional: true
       sass:
         optional: true
+
+  nise@6.1.1:
+    resolution: {integrity: sha512-aMSAzLVY7LyeM60gvBS423nBmIPP+Wy7St7hsb+8/fc1HmeoHJfLO8CKse4u3BtOZvQLJghYPI2i/1WZrEj5/g==}
 
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -10405,6 +10443,9 @@ packages:
     resolution: {integrity: sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==}
     engines: {node: '>=10'}
 
+  sinon@18.0.1:
+    resolution: {integrity: sha512-a2N2TDY1uGviajJ6r4D1CyRAkzE9NNVlYOV1wX5xQDuAk0ONgzgRl0EjCQuRCPxOwp13ghsMwt9Gdldujs39qw==}
+
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
@@ -11079,6 +11120,10 @@ packages:
 
   type-detect@4.0.8:
     resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
+    engines: {node: '>=4'}
+
+  type-detect@4.1.0:
+    resolution: {integrity: sha512-Acylog8/luQ8L7il+geoSxhEkazvkslg7PSNKOX59mbB9cOveP5aq9h74Y7YU8yDpJwetzQQrfIwtf4Wp4LKcw==}
     engines: {node: '>=4'}
 
   type-fest@0.20.2:
@@ -15933,6 +15978,22 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
+  '@sinonjs/fake-timers@11.2.2':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+
+  '@sinonjs/fake-timers@13.0.5':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+
+  '@sinonjs/samsam@8.0.2':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+      lodash.get: 4.4.2
+      type-detect: 4.1.0
+
+  '@sinonjs/text-encoding@0.7.3': {}
+
   '@slack/bolt@3.22.0':
     dependencies:
       '@slack/logger': 4.0.0
@@ -16983,6 +17044,12 @@ snapshots:
 
   '@types/shimmer@1.2.0': {}
 
+  '@types/sinon@17.0.4':
+    dependencies:
+      '@types/sinonjs__fake-timers': 8.1.5
+
+  '@types/sinonjs__fake-timers@8.1.5': {}
+
   '@types/stack-trace@0.0.33': {}
 
   '@types/stack-utils@2.0.3': {}
@@ -17688,6 +17755,12 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
       - csstype
+
+  aws-sdk-client-mock@4.1.0:
+    dependencies:
+      '@types/sinon': 17.0.4
+      sinon: 18.0.1
+      tslib: 2.8.1
 
   axe-core@4.10.3: {}
 
@@ -18546,6 +18619,8 @@ snapshots:
   diff-sequences@29.6.3: {}
 
   diff@4.0.2: {}
+
+  diff@5.2.0: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -21098,6 +21173,8 @@ snapshots:
       object.assign: 4.1.7
       object.values: 1.2.1
 
+  just-extend@6.2.0: {}
+
   jwa@1.4.2:
     dependencies:
       buffer-equal-constant-time: 1.0.1
@@ -21219,6 +21296,8 @@ snapshots:
   lodash.debounce@4.0.8: {}
 
   lodash.escaperegexp@4.1.2: {}
+
+  lodash.get@4.4.2: {}
 
   lodash.includes@4.3.0: {}
 
@@ -21863,6 +21942,14 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+
+  nise@6.1.1:
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+      '@sinonjs/fake-timers': 13.0.5
+      '@sinonjs/text-encoding': 0.7.3
+      just-extend: 6.2.0
+      path-to-regexp: 8.2.0
 
   no-case@3.0.4:
     dependencies:
@@ -23312,6 +23399,15 @@ snapshots:
     dependencies:
       semver: 7.7.2
 
+  sinon@18.0.1:
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+      '@sinonjs/fake-timers': 11.2.2
+      '@sinonjs/samsam': 8.0.2
+      diff: 5.2.0
+      nise: 6.1.1
+      supports-color: 7.2.0
+
   sisteransi@1.0.5: {}
 
   skin-tone@2.0.0:
@@ -24094,6 +24190,8 @@ snapshots:
       prelude-ls: 1.2.1
 
   type-detect@4.0.8: {}
+
+  type-detect@4.1.0: {}
 
   type-fest@0.20.2: {}
 
