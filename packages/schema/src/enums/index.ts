@@ -115,3 +115,10 @@ export const integrationRunStatusEnum = z.enum([
   'SUCCESS',
   'FAILURE'
 ])
+
+export const subscriptionPlanEnum = z.enum([
+  'FREE',
+  'HACKER',
+  'TEAM',
+  'ENTERPRISE'
+])

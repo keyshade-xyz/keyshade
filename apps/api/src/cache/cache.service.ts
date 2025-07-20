@@ -10,7 +10,8 @@ export class CacheService implements OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name)
 
   constructor(
-    @Inject(REDIS_CLIENT) private redisClient: { publisher: RedisClientType }
+    @Inject(REDIS_CLIENT)
+    private readonly redisClient: { publisher: RedisClientType }
   ) {}
 
   private getUserKey(userId: string): string {

@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { authorityEnum, projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
+import {
+  authorityEnum,
+  projectAccessLevelEnum,
+  rotateAfterEnum,
+  subscriptionPlanEnum
+} from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 
 export const WorkspaceSchema = z.object({
@@ -13,6 +18,7 @@ export const WorkspaceSchema = z.object({
   createdAt: z.string().datetime(),
   ownerId: z.string(),
   isDefault: z.boolean(),
+  isDisabled: z.boolean(),
   lastUpdatedById: z.string().nullable(),
   lastUpdateBy: z
     .object({
@@ -26,6 +32,21 @@ export const WorkspaceSchema = z.object({
     name: z.string(),
     profilePictureUrl: z.string().nullable(),
     ownedSince: z.string().datetime()
+  }),
+  subscription: z.object({
+    id: z.string(),
+    plan: subscriptionPlanEnum,
+    renewsOn: z.string().datetime().optional(),
+    activatedOn: z.string().datetime(),
+    seatsBooked: z.number(),
+    isAnnual: z.boolean(),
+    trialActivatedOn: z.string().datetime().nullable(),
+    trialPlan: subscriptionPlanEnum.nullable(),
+    user: z.object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
   })
 })
 
@@ -37,7 +58,11 @@ export const WorkspaceWithTierLimitSchema = WorkspaceSchema.extend({
   maxAllowedMembers: z.number(),
   maxAllowedProjects: z.number(),
   totalMembers: z.number(),
-  totalProjects: z.number()
+  totalProjects: z.number(),
+  maxAllowedIntegrations: z.number(),
+  totalIntegrations: z.number(),
+  maxAllowedRoles: z.number(),
+  totalRoles: z.number()
 })
 
 export const WorkspaceWithTierLimitAndProjectCountSchema =

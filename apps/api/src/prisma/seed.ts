@@ -88,7 +88,6 @@ async function main() {
           publicKey: faker.string.alphanumeric(32),
           privateKey: sEncrypt(faker.string.alphanumeric(32)),
           storePrivateKey: true,
-          isDisabled: false,
           workspaceId: workspace.id,
           accessLevel: ProjectAccessLevel.PRIVATE,
           isForked: false,
@@ -108,7 +107,6 @@ async function main() {
           publicKey: faker.string.alphanumeric(32),
           privateKey: sEncrypt(faker.string.alphanumeric(32)),
           storePrivateKey: false,
-          isDisabled: false,
           workspaceId: workspace.id,
           accessLevel: ProjectAccessLevel.GLOBAL,
           workspaceRoles: {

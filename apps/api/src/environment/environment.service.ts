@@ -21,6 +21,7 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 
 @Injectable()
 export class EnvironmentService {
@@ -79,6 +80,12 @@ export class EnvironmentService {
         ]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to create environment ${dto.name} in disabled workspace ${project.workspaceId}`
+    )
 
     // Check if more environments can be created in the project
     await this.tierLimitService.checkEnvironmentLimitReached(project)

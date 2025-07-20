@@ -221,6 +221,18 @@ export class WorkspaceMembershipService {
         authorities: [Authority.ADD_USER]
       })
 
+    if (workspace.isDisabled) {
+      this.log.log(
+        `User ${user.id} attempted to invite users to disabled workspace ${workspace.name} (${workspace.slug})`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
+
     if (workspace.isDefault) {
       this.log.error(
         `Cannot add members to default workspace ${workspace.name} (${workspace.slug})`
@@ -635,6 +647,18 @@ export class WorkspaceMembershipService {
         slug: workspaceSlug
       }
     })
+
+    if (workspace.isDisabled) {
+      this.log.log(
+        `User ${user.id} attempted to accept invitation to disabled workspace ${workspace.name} (${workspace.slug})`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // Update the membership
     await this.prisma.workspaceMember.update({
