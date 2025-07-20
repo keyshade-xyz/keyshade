@@ -681,24 +681,6 @@ describe('Integration Controller Tests', () => {
       expect(response.json()).toEqual({ success: true })
     })
 
-    it('should fail validating metadata on create if webhook URL is unreachable', async () => {
-      const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-
-      nock(origin)
-        .post(pathname || '/')
-        .reply(404)
-
-      const response = await app.inject({
-        method: 'POST',
-        url: `${endpoint}?isCreate=true`,
-        headers: { 'x-e2e-user-email': user1.email },
-        payload: validDto
-      })
-
-      expect(response.statusCode).toBeGreaterThanOrEqual(400)
-      expect(response.statusCode).toBeLessThan(500)
-    })
-
     it('should succeed validating metadata on update when DTO is valid', async () => {
       createDummyWebhookUrlInterceptor()
 
@@ -799,6 +781,51 @@ describe('Integration Controller Tests', () => {
 
       expect(response.statusCode).toEqual(400)
       expect(response.json().message).toMatch(/Missing metadata parameter/)
+    })
+
+    describe('Discord configuration tests', () => {
+      it('should fail validating metadata on create if webhook URL is unreachable', async () => {
+        const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+
+        nock(origin)
+          .post(pathname || '/')
+          .reply(404)
+
+        const response = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          headers: { 'x-e2e-user-email': user1.email },
+          payload: validDto
+        })
+
+        expect(response.statusCode).toEqual(400)
+      })
+    })
+
+    describe('Slack configuration tests', () => {
+      const validDtoSlack: CreateIntegration = {
+        name: 'Validation Test',
+        type: IntegrationType.SLACK,
+        metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
+        notifyOn: [EventType.WORKSPACE_UPDATED]
+      }
+
+      it('should fail validating metadata on create if webhook URL is unreachable', async () => {
+        const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
+
+        nock(origin)
+          .post(pathname || '/')
+          .reply(404)
+
+        const response = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          headers: { 'x-e2e-user-email': user1.email },
+          payload: validDtoSlack
+        })
+
+        expect(response.statusCode).toEqual(400)
+      })
     })
   })
 
