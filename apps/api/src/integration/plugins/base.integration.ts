@@ -161,7 +161,7 @@ export abstract class BaseIntegration {
 
   // WARNING: DO NOT OVERRIDE
   validateMetadataParameters(
-    metadata: Record<string, string>,
+    metadata: Record<string, unknown>,
     partialCheck?: boolean
   ): void {
     if (partialCheck) {
