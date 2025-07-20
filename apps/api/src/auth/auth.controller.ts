@@ -162,6 +162,30 @@ export class AuthController {
   }
 
   /* istanbul ignore next */
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleOAuthCallback(@Req() req: any, @Res() res: Response) {
+    const { emails, displayName: name, photos } = req.user
+
+    if (!emails.length) {
+      throw new UnprocessableEntityException(
+        'Email information is missing from the OAuth provider data.'
+      )
+    }
+    const email = emails[0].value
+    const profilePictureUrl = photos[0]?.value
+
+    await this.handleOAuthProcess(
+      email,
+      name,
+      profilePictureUrl,
+      AuthProvider.GOOGLE,
+      res
+    )
+  }
+
+  /* istanbul ignore next */
   private async handleOAuthProcess(
     email: string,
     name: string,
