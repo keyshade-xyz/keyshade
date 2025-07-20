@@ -10,7 +10,7 @@ export const EnvironmentSchema = z.object({
   createdAt: z.string().datetime(),
   projectId: z.string(),
   lastUpdatedById: z.string(),
-  hydrations: z.object({
+  entitlements: z.object({
     canWrite: z.boolean(),
     canDelete: z.boolean()
   }),

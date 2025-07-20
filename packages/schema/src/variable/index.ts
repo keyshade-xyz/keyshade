@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
-import { BaseProjectSchema } from '@/project'
 import { UserSchema } from '@/user'
 
 export const VariableRevisionSchema = z.object({
@@ -21,29 +20,27 @@ export const VariableRevisionSchema = z.object({
 })
 
 export const VariableSchema = z.object({
-  variable: z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    note: z.string().nullable(),
-    lastUpdatedById: z.string(),
-    projectId: BaseProjectSchema.shape.id,
-    lastUpdatedBy: z.object({
-      id: UserSchema.shape.id,
-      name: UserSchema.shape.name,
-      profilePictureUrl: UserSchema.shape.profilePictureUrl
-    }),
-    hydrations: z.object({
-      canUpdate: z.boolean(),
-      canDelete: z.boolean()
-    })
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  note: z.string().nullable(),
+  lastUpdatedById: z.string(),
+  projectId: z.string(),
+  lastUpdatedBy: z.object({
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
+  }),
+  entitlements: z.object({
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
   }),
   versions: z.array(VariableRevisionSchema)
 })
 export const CreateVariableRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   name: z.string(),
   note: z.string().optional(),
   entries: z
@@ -59,7 +56,7 @@ export const CreateVariableRequestSchema = z.object({
 export const CreateVariableResponseSchema = VariableSchema
 
 export const BulkCreateVariableRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   variables: z.array(CreateVariableRequestSchema.omit({ projectSlug: true }))
 })
 
@@ -114,7 +111,7 @@ export const DeleteVariableRequestSchema = z.object({
 export const DeleteVariableResponseSchema = z.void()
 
 export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: BaseProjectSchema.shape.slug
+  projectSlug: z.string()
 })
 
 export const GetAllVariablesOfProjectResponseSchema =
@@ -131,7 +128,7 @@ export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
 )
 
 export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   environmentSlug: EnvironmentSchema.shape.slug
 })
 

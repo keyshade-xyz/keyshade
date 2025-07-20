@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { rotateAfterEnum } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
-import { BaseProjectSchema } from '@/project'
 import { UserSchema } from '@/user'
 
 export const SecretRevisionSchema = z.object({
@@ -22,25 +21,23 @@ export const SecretRevisionSchema = z.object({
 })
 
 export const SecretSchema = z.object({
-  secret: z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    rotateAt: z.string().datetime().nullable(),
-    note: z.string().nullable(),
-    lastUpdatedById: z.string(),
-    projectId: BaseProjectSchema.shape.id,
-    lastUpdatedBy: z.object({
-      id: UserSchema.shape.id,
-      name: UserSchema.shape.name,
-      profilePictureUrl: UserSchema.shape.profilePictureUrl
-    }),
-    hydrations: z.object({
-      canUpdate: z.boolean(),
-      canDelete: z.boolean()
-    })
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  rotateAt: z.string().datetime().nullable(),
+  note: z.string().nullable(),
+  lastUpdatedById: z.string(),
+  projectId: z.string(),
+  lastUpdatedBy: z.object({
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
+  }),
+  entitlements: z.object({
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
   }),
   versions: z.array(SecretRevisionSchema)
 })
@@ -63,7 +60,7 @@ export const CreateSecretRequestSchema = z.object({
 export const CreateSecretResponseSchema = SecretSchema
 
 export const BulkCreateSecretRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   secrets: z.array(CreateSecretRequestSchema.omit({ projectSlug: true }))
 })
 
@@ -109,7 +106,7 @@ export const RollBackSecretResponseSchema = z.object({
 })
 
 export const GetAllSecretsOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: BaseProjectSchema.shape.slug
+  projectSlug: z.string()
 })
 
 export const GetAllSecretsOfProjectResponseSchema =
@@ -125,7 +122,7 @@ export const GetRevisionsOfSecretResponseSchema =
   PageResponseSchema(SecretRevisionSchema)
 
 export const GetAllSecretsOfEnvironmentRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   environmentSlug: EnvironmentSchema.shape.slug
 })
 

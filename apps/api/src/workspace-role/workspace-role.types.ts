@@ -24,6 +24,7 @@ export interface HydratedWorkspaceRole extends WorkspaceRole {
     canUpdate: boolean
     canDelete: boolean
   }
+  // Deleted before returning
   workspace: Workspace
 }
 

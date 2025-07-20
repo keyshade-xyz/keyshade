@@ -32,6 +32,7 @@ export interface HydratedSecret extends Secret {
     canUpdate: boolean
     canDelete: boolean
   }
+  // Deleted before returning
   project: {
     id: Project['id']
     name: Project['name']

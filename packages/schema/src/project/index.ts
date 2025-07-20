@@ -7,7 +7,7 @@ import {
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
 
-export const BaseProjectSchema = z.object({
+const BaseProjectSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
@@ -28,32 +28,27 @@ export const BaseProjectSchema = z.object({
     profilePictureUrl: z.string().nullable()
   }),
   workspaceId: WorkspaceSchema.shape.id,
-  forkedFromId: z.string().nullable()
-})
-
-const EnvironmentSecretAndVariableCountSchema = z.object({
-  secretCount: z.number(),
-  variableCount: z.number(),
-  environmentCount: z.number()
+  forkedFromId: z.string().nullable(),
+  maxAllowedEnvironments: z.number(),
+  maxAllowedSecrets: z.number(),
+  maxAllowedVariables: z.number(),
+  totalEnvironments: z.number(),
+  totalSecrets: z.number(),
+  totalVariables: z.number(),
+  entitlements: z.object({
+    canReadSecrets: z.boolean(),
+    canCreateSecrets: z.boolean(),
+    canReadVariables: z.boolean(),
+    canCreateVariables: z.boolean(),
+    canReadEnvironments: z.boolean(),
+    canCreateEnvironments: z.boolean(),
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
+  })
 })
 
 export const ProjectSchema = BaseProjectSchema.refine((obj) =>
   obj.isForked ? obj.forkedFromId !== null : obj.forkedFromId === null
-)
-
-export const ProjectWithCountSchema = ProjectSchema.and(
-  EnvironmentSecretAndVariableCountSchema
-)
-
-export const ProjectWithTierLimitAndCountSchema = ProjectWithCountSchema.and(
-  z.object({
-    maxAllowedEnvironments: z.number(),
-    maxAllowedSecrets: z.number(),
-    maxAllowedVariables: z.number(),
-    totalEnvironments: z.number(),
-    totalSecrets: z.number(),
-    totalVariables: z.number()
-  })
 )
 
 export const CreateProjectRequestSchema = z.object({
@@ -67,7 +62,7 @@ export const CreateProjectRequestSchema = z.object({
   accessLevel: projectAccessLevelEnum
 })
 
-export const CreateProjectResponseSchema = ProjectWithTierLimitAndCountSchema
+export const CreateProjectResponseSchema = ProjectSchema
 
 export const UpdateProjectRequestSchema = CreateProjectRequestSchema.partial()
   .omit({
@@ -93,7 +88,7 @@ export const GetProjectRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug
 })
 
-export const GetProjectResponseSchema = ProjectWithTierLimitAndCountSchema
+export const GetProjectResponseSchema = ProjectSchema
 
 export const ForkProjectRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
@@ -127,9 +122,7 @@ export const GetAllProjectsRequestSchema = PageRequestSchema.extend({
   workspaceSlug: WorkspaceSchema.shape.slug
 })
 
-export const GetAllProjectsResponseSchema = PageResponseSchema(
-  ProjectWithTierLimitAndCountSchema
-)
+export const GetAllProjectsResponseSchema = PageResponseSchema(ProjectSchema)
 
 export const ExportProjectConfigurationRequestSchema = z.object({
   projectSlug: BaseProjectSchema.shape.slug,
