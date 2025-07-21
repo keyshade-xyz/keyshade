@@ -19,9 +19,9 @@ import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
-import { createHash } from 'crypto'
 import { isIP } from 'is-ip'
 import { UAParser } from 'ua-parser-js'
+import { toSHA256 } from '@/common/cryptography'
 
 @Injectable()
 export class AuthService {
@@ -35,11 +35,6 @@ export class AuthService {
     private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
-  }
-
-  // Static helper to hash IP using SHA256
-  private static hashIp(ip: string): string {
-    return createHash('sha256').update(ip).digest('hex')
   }
 
   // Static helper to normalize IPs
@@ -83,7 +78,8 @@ export class AuthService {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 3000)
 
-      const res = await fetch(`https://ipwho.is/${rawIp}`, {
+      const url = new URL(`https://ipwho.is/${encodeURIComponent(rawIp)}`)
+      const res = await fetch(url.toString(), {
         signal: controller.signal
       })
       clearTimeout(timeoutId)
@@ -411,7 +407,7 @@ export class AuthService {
       }
 
       const normalizedIp = AuthService.normalizeIp(ip)
-      const ipHash = AuthService.hashIp(normalizedIp)
+      const ipHash = toSHA256(normalizedIp)
       const deviceFingerprint = device || 'Unknown'
 
       const existingSession = await this.prisma.loginSession.findUnique({

@@ -181,7 +181,8 @@ export class AuthController {
       name,
       profilePictureUrl,
       AuthProvider.GOOGLE,
-      res
+      res,
+      req
     )
   }
 
