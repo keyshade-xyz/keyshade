@@ -55,11 +55,11 @@ export class DiscordIntegration extends BaseIntegration {
   }
 
 // Edited Code starts for init 
-public async init(eventId: Event['id']): Promise<void> {
+public async init(eventId: string): Promise<void> {
   const integration = this.getIntegration<DiscordIntegrationMetadata>()
 
   const { id: integrationRunId } = await this.registerIntegrationRun({
-    eventId: eventId, // Use provided event ID
+    eventId: eventId,
     integrationId: integration.id,
     title: 'Initializing Discord integration'
   })
