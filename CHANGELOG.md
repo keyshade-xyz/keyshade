@@ -1,3 +1,15 @@
+## [2.31.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.6...v2.31.0-stage.7) (2025-07-21)
+
+### 🚀 Features
+
+* **api:** send e-mail when user logs in ([#1080](https://github.com/keyshade-xyz/keyshade/issues/1080)) ([461dd72](https://github.com/keyshade-xyz/keyshade/commit/461dd72b7832a8e1491f5010c51f972dddecb2f5))
+
+## [2.31.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.5...v2.31.0-stage.6) (2025-07-20)
+
+### 🚀 Features
+
+* **cli:** Override environment at run time using run commmand ([#1051](https://github.com/keyshade-xyz/keyshade/issues/1051)) ([a991179](https://github.com/keyshade-xyz/keyshade/commit/a991179d3c78e5cc11721249dbaa18eb05253ef0))
+
 ## [2.31.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.4...v2.31.0-stage.5) (2025-07-17)
 
 ### 🐛 Bug Fixes
