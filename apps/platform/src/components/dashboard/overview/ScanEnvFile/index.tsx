@@ -16,12 +16,12 @@ import { useHttp } from '@/hooks/use-http'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 
 interface Environment {
   id: string
@@ -120,38 +120,44 @@ function ScanEnvModal({
 
   return (
     <>
-      <AlertDialog onOpenChange={onClose} open={isOpen}>
-        <AlertDialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
-          <AlertDialogHeader className="border-b border-white/20 pb-4">
-            <AlertDialogTitle className="text-xl font-semibold">
+      <Dialog onOpenChange={onClose} open={isOpen}>
+        <DialogContent className="rounded-lg border border-white/25 bg-[#1E1E1F]">
+          <DialogHeader className="border-b border-white/20 pb-4">
+            <DialogTitle className="text-xl font-semibold">
               Reorganize Selection
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-normal leading-5 text-gray-400">
+            </DialogTitle>
+            <DialogDescription className="text-sm font-normal leading-5 text-gray-400">
               Reorganize secrets and variables before import.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto border-b border-white/20 py-2">
-            <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
-              <div className="flex items-center gap-2">
-                <SecretSVG height={21} width={21} />
-                <p>{secretsCount} secrets to import</p>
+          <div className="flex flex-col gap-1 border-b border-white/20">
+            <div className="flex max-h-[40vh] flex-col gap-3 overflow-y-auto  py-2">
+              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+                <div className="flex items-center gap-2">
+                  <SecretSVG height={21} width={21} />
+                  <p>{secretsCount} secrets to import</p>
+                </div>
+                <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
               </div>
-              <div className="ml-6 flex flex-wrap gap-1.5">{secretsList}</div>
-            </div>
-            <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
-              <div className="flex items-center gap-2">
-                <VariableSVG height={21} width={21} />
-                <p>{variablesCount} variables to import</p>
+              <div className="flex flex-col gap-2 rounded-md bg-[#393A3B] p-2 text-sm text-white">
+                <div className="flex items-center gap-2">
+                  <VariableSVG height={21} width={21} />
+                  <p>{variablesCount} variables to import</p>
+                </div>
+                <div className="ml-6 flex flex-wrap gap-1.5">
+                  {variablesList}
+                </div>
               </div>
-              <div className="ml-6 flex flex-wrap gap-1.5">{variablesList}</div>
             </div>
+            <p className="pb-4 text-sm text-white/60">
+              You&apos;re importing a total of{' '}
+              <span className="font-semibold text-white/80">
+                {secretsCount + variablesCount}
+              </span>{' '}
+              configuration items.
+            </p>
           </div>
-
-          <p className="text-sm text-white/60">
-            You&apos;re importing a total of {secretsCount + variablesCount}{' '}
-            configuration items.
-          </p>
 
           <div className="flex flex-col gap-y-2 border-b border-white/20 pb-4 pt-3">
             <label
@@ -217,8 +223,8 @@ function ScanEnvModal({
               </Button>
             </div>
           </div>
-        </AlertDialogContent>
-      </AlertDialog>
+        </DialogContent>
+      </Dialog>
       <ModifyFileScan
         environmentSlug={selectedEnvironment?.slug || ''}
         isOpen={isModifyModalOpen}
