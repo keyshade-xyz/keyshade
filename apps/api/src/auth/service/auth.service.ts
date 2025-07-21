@@ -19,7 +19,7 @@ import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
 import SlugGenerator from '@/common/slug-generator.service'
-import isIp from 'is-ip'
+import { isIP } from 'class-validator'
 import { UAParser } from 'ua-parser-js'
 import { toSHA256 } from '@/common/cryptography'
 
@@ -62,7 +62,7 @@ export class AuthService {
       ''
     ).trim()
 
-    if (!isIp(rawIp)) {
+    if (!isIP(rawIp)) {
       throw new Error(`Invalid IP address: ${rawIp}`)
     }
 

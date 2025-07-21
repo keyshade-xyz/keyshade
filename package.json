@@ -184,6 +184,7 @@
     "@sentry/profiling-node": "^7.102.0",
     "@types/node": "^20.14.10",
     "chalk": "^4.1.2",
+    "class-validator": "^0.14.1",
     "clsx": "^2.1.0",
     "conventional-changelog-conventionalcommits": "8.0.0",
     "conventional-changelog-writer": "8.1.0",
