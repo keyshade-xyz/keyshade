@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   Logger
 } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -817,10 +818,10 @@ export class IntegrationService {
       )
     } else {
       if (!integrationSlug) {
-        throw new BadRequestException(
+        throw new InternalServerErrorException(
           constructErrorBody(
-            'Missing integrationSlug on update test',
-            'integrationSlug is required for update‐validation'
+            'Uh-oh, something went wront on our end',
+            'We have faced an issue while validating your integration. Please try again later, or get in touch with us at support@keyshade.xyz'
           )
         )
       }
