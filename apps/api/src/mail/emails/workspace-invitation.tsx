@@ -31,7 +31,8 @@ export const WorkspaceInvitationEmail = ({
       </Text>
       <Text style={text}>Hey {userName},</Text>
       <Text style={text}>
-        You have been invited to {workspaceName} on Keyshade by {invitedBy}!
+        You have been invited to <strong>{workspaceName}</strong> on Keyshade by{' '}
+        {invitedBy}!
       </Text>
       {/* 
       <Section style={workspaceDetails}>
@@ -45,7 +46,7 @@ export const WorkspaceInvitationEmail = ({
       */}
       <Text style={text}>Join the project by clicking the button below!</Text>
       <Button href={actionUrl} style={ctaButton}>
-        Get started
+        Accept invite
       </Button>
       <Text style={{ ...text, marginTop: '32px' }}>
         <strong>What happens next?</strong>
