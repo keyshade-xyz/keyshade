@@ -610,6 +610,7 @@ export class VercelIntegration extends BaseIntegration {
     )
 
     try {
+      const { Vercel } = await import('@vercel/sdk')
       const vercel = new Vercel({ bearerToken: metadata.token })
 
       const { response, duration } = await makeTimedRequest(() =>
