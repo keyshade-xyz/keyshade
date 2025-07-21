@@ -143,10 +143,12 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return await this.hydrationService.hydrateEnvironment({
+    const hydratedEnvironment = await this.hydrationService.hydrateEnvironment({
       environment,
       user
     })
+    delete hydratedEnvironment.project
+    return hydratedEnvironment
   }
 
   /**
@@ -234,10 +236,12 @@ export class EnvironmentService {
       this.prisma
     )
 
-    return await this.hydrationService.hydrateEnvironment({
+    const hydratedEnvironment = await this.hydrationService.hydrateEnvironment({
       environment: updatedEnvironment,
       user
     })
+    delete hydratedEnvironment.project
+    return hydratedEnvironment
   }
 
   /**
@@ -348,13 +352,14 @@ export class EnvironmentService {
     const hydratedEnvironments: HydratedEnvironment[] = []
     for (const environment of environments) {
       try {
-        hydratedEnvironments.push(
+        const hydratedEnvironment =
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
             slug: environment.slug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
-        )
+        delete hydratedEnvironment.project
+        hydratedEnvironments.push(hydratedEnvironment)
       } catch (_ignored) {}
     }
     this.logger.log(

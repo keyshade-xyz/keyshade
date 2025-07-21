@@ -82,7 +82,6 @@ export class AuthorizationService {
     const workspace = await this.getWorkspace(environment.project.workspaceId)
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
-    delete environment.project
 
     return environment
   }

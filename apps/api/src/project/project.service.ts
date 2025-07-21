@@ -1570,12 +1570,6 @@ export class ProjectService {
       `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
     )
 
-    console.log(
-      newEnvironmentSlugs.map((slug) => ({
-        slug
-      }))
-    )
-
     await this.prisma.workspaceRole.update({
       where: {
         id: adminRole.id
