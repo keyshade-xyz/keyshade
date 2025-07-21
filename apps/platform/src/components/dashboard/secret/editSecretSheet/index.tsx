@@ -184,6 +184,18 @@ export default function EditSecretSheet(): JSX.Element {
     setIsEditSecretSheetOpen
   ])
 
+  interface HandleInputChangeEvent {
+    target: { value: string }
+  }
+
+  const handleInputChange = useCallback(
+    (field: React.Dispatch<React.SetStateAction<string>>) =>
+      (e: HandleInputChangeEvent) => {
+        field(e.target.value)
+      },
+    []
+  )
+
   const isSaveDisabled = isLoading || !hasChanges
 
   return (
@@ -201,7 +213,7 @@ export default function EditSecretSheet(): JSX.Element {
             <Label htmlFor="name">Secret Name</Label>
             <Input
               id="name"
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleInputChange(setName)}
               placeholder="Enter secret name"
               value={name}
             />
@@ -211,7 +223,7 @@ export default function EditSecretSheet(): JSX.Element {
             <Label htmlFor="note">Note</Label>
             <Textarea
               id="note"
-              onChange={(e) => setNote(e.target.value)}
+              onChange={handleInputChange(setNote)}
               placeholder="Enter note"
               value={note}
             />

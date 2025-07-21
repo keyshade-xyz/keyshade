@@ -18,6 +18,7 @@ import SecretCard from '@/components/dashboard/secret/secretCard'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
+import { useHighlight } from '@/hooks/use-highlight'
 
 interface SecretListProps {
   projectPrivateKey: string | null
@@ -37,8 +38,10 @@ export default function SecretList({
   const isRollbackSecretOpen = useAtomValue(rollbackSecretOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const [isHighlighted, setIsHighlighted] = useState<boolean>(false)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
+
+  // Highlight the secret if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=secrets&highlight=<secretSlug>
+  const { isHighlighted } = useHighlight(highlightSlug, 'secret')
 
   useEffect(() => {
     const shouldRefetch =
@@ -142,17 +145,6 @@ export default function SecretList({
     },
     [projectPrivateKey, highlightSlug, isHighlighted]
   )
-
-  useEffect(() => {
-    if (!highlightSlug) return
-
-    const element = document.getElementById(`secret-${highlightSlug}`)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      setIsHighlighted(true)
-      setTimeout(() => setIsHighlighted(false), 2000)
-    }
-  }, [highlightSlug])
 
   return (
     <div

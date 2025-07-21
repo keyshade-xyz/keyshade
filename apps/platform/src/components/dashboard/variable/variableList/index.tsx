@@ -18,6 +18,7 @@ import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
+import { useHighlight } from '@/hooks/use-highlight'
 
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
@@ -31,8 +32,10 @@ export default function VariableList(): React.JSX.Element {
   const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const [isHighlighted, setIsHighlighted] = useState<boolean>(false)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
+
+  // Highlight the variable if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=variables&highlight=<variableSlug>
+  const { isHighlighted } = useHighlight(highlightSlug, 'variable')
 
   useEffect(() => {
     const shouldRefetch =
@@ -136,17 +139,6 @@ export default function VariableList(): React.JSX.Element {
     },
     [highlightSlug, isHighlighted]
   )
-
-  useEffect(() => {
-    if (!highlightSlug) return
-
-    const element = document.getElementById(`variable-${highlightSlug}`)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      setIsHighlighted(true)
-      setTimeout(() => setIsHighlighted(false), 2000)
-    }
-  }, [highlightSlug])
 
   return (
     <div
