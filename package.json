@@ -171,7 +171,6 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.11",
-    "@common.js/is-ip": "^5.0.1",
     "@keyshade/api-client": "workspace:*",
     "@keyshade/common": "workspace:*",
     "@keyshade/schema": "workspace:*",
@@ -189,7 +188,7 @@
     "conventional-changelog-conventionalcommits": "8.0.0",
     "conventional-changelog-writer": "8.1.0",
     "framer-motion": "^11.2.9",
-    "is-ip": "^4.0.0",
+    "is-ip": "3",
     "million": "^3.0.5",
     "moment": "^2.30.1",
     "sharp": "^0.34.1",

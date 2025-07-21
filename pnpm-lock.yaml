@@ -11,9 +11,6 @@ importers:
       '@changesets/cli':
         specifier: ^2.27.11
         version: 2.29.2
-      '@common.js/is-ip':
-        specifier: ^5.0.1
-        version: 5.0.1
       '@keyshade/api-client':
         specifier: workspace:*
         version: link:packages/api-client
@@ -66,8 +63,8 @@ importers:
         specifier: ^11.2.9
         version: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       is-ip:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: '3'
+        version: 3.1.0
       million:
         specifier: ^3.0.5
         version: 3.1.11(rollup@4.40.0)
@@ -1632,38 +1629,6 @@ packages:
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
-
-  '@common.js/clone-regexp@3.0.0':
-    resolution: {integrity: sha512-+yGOCyovc51v/zE6fK6dja7oMKlT1uwgLdFqw01aVu0ThcUrFhht1bgkIrdimZeCsSHwtqRN5RPREWcBtVG3MA==}
-    engines: {node: '>=12'}
-
-  '@common.js/convert-hrtime@5.0.0':
-    resolution: {integrity: sha512-OcERZX/busWvmcC+72hNpQYcyLEA+A+a2aZ1lZeYfjEi3o9ZleA1kDEwaPcvGiTjbiEKPZVPDushW7Ua5N1FRw==}
-    engines: {node: '>=12'}
-
-  '@common.js/function-timeout@0.1.1':
-    resolution: {integrity: sha512-Lul/6erlc59AzO3mNodOzJKbOWGvJ6XZS/B1KsWDattcaHupkrSyX1ufe7sg5mjF6YiSf1d0ZwixojYg3adARQ==}
-    engines: {node: '>=14.16'}
-
-  '@common.js/ip-regex@5.0.0':
-    resolution: {integrity: sha512-CSCXLZq5Yek98oTWH0wfVke8WzGPGTg2xsS0qjSWcErIEHi8/pX0LlDDCn+k9Z+MTHHd+afd2psuc+WSToZDcQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  '@common.js/is-ip@5.0.1':
-    resolution: {integrity: sha512-p0geWq3vEAI+Dr6pVrYB/QsBmB6mjGFX2Cf9bOFQXTxduV6SzQvJ0+Tw111bONFU47Uq1kDfySFaR2AQc6uFYg==}
-    engines: {node: '>=14.16'}
-
-  '@common.js/is-regexp@3.1.0':
-    resolution: {integrity: sha512-3bjSr6RGuS0FoJPNu8g6bE1ldoNd9gsIt9DfH/k6EpmYOkPjU/FAejHzn3y+LGqUfHzjvYyQIIXh4WR8kpj5kw==}
-    engines: {node: '>=12'}
-
-  '@common.js/super-regex@0.2.0':
-    resolution: {integrity: sha512-WzVmg+yTj+ZrKfh035AWuD5J6WUk5g4wDShWs7PJGMwkVDed4f7Q5i1THIprNx8T+rJKz84EFHtDytVbehnE0Q==}
-    engines: {node: '>=14.16'}
-
-  '@common.js/time-span@5.1.0':
-    resolution: {integrity: sha512-+fhBT53uCfJWrDgCeUVHYTm+UCdQGCaQZro6ufHQ9cpcz4karP1/jVc/LCTMtCWFAL+uloYeZZzpGDf3fpBqaQ==}
-    engines: {node: '>=12'}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -6601,10 +6566,6 @@ packages:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
 
-  clone-regexp@3.0.0:
-    resolution: {integrity: sha512-ujdnoq2Kxb8s3ItNBtnYeXdm07FcU0u8ARAT1lQ2YdMwQC+cdiXX8KoqMVuglztILivceTtp4ivqGSmEmhBUJw==}
-    engines: {node: '>=12'}
-
   clone-response@1.0.3:
     resolution: {integrity: sha512-ROoL94jJH2dUVML2Y/5PEDNaSHgeOdSDicUyS7izcF63G6sTc/FTjLub4b8Il9S8S0beOfYt0TaA5qvFK+w0wA==}
 
@@ -7973,10 +7934,6 @@ packages:
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
-  function-timeout@0.1.1:
-    resolution: {integrity: sha512-0NVVC0TaP7dSTvn1yMiy6d6Q8gifzbvQafO46RtLG/kHJUBNd+pVRGOBoK44wNBvtSPUJRfdVvkFdD3p0xvyZg==}
-    engines: {node: '>=14.16'}
-
   function-timeout@1.0.2:
     resolution: {integrity: sha512-939eZS4gJ3htTHAldmyyuzlrD58P03fHG49v2JfFXbV6OhvZKRC9j2yAtdHw/zrp2zXHuv05zMIy40F0ge7spA==}
     engines: {node: '>=18'}
@@ -8373,9 +8330,9 @@ packages:
     resolution: {integrity: sha512-2dYz766i9HprMBasCMvHMuazJ7u4WzhJwo5kb3iPSiW/iRYV6uPari3zHoqZlnuaR7V1bEiNMxikhp37rdBXbw==}
     engines: {node: '>=12'}
 
-  ip-regex@5.0.0:
-    resolution: {integrity: sha512-fOCG6lhoKKakwv+C6KdsOnGvgXnmgfmp0myi3bcNwj3qfwPAxRKWEuFhvEFF7ceYIz6+1jRZ+yguLFAmUNPEfw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+  ip-regex@4.3.0:
+    resolution: {integrity: sha512-B9ZWJxHHOHUhUjCPrMpLD4xEq35bUTClHM1S6CBU5ixQnkZmwipwgc96vAd7AAGM9TGHvJR+Uss+/Ak6UphK+Q==}
+    engines: {node: '>=8'}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -8489,13 +8446,9 @@ packages:
     resolution: {integrity: sha512-2HvIEKRoqS62guEC+qBjpvRubdX910WCMuJTZ+I9yvqKU2/12eSL549HMwtabb4oupdj2sMP50k+XJfB/8JE6w==}
     engines: {node: '>=8'}
 
-  is-ip@4.0.0:
-    resolution: {integrity: sha512-4B4XA2HEIm/PY+OSpeMBXr8pGWBYbXuHgjMAqrwbLO3CPTCAd9ArEJzBUKGZtk9viY6+aSfadGnWyjY3ydYZkw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  is-ip@5.0.1:
-    resolution: {integrity: sha512-FCsGHdlrOnZQcp0+XT5a+pYowf33itBalCl+7ovNXC/7o5BhIpG14M3OrpPPdBSIQJCm+0M5+9mO7S9VVTTCFw==}
-    engines: {node: '>=14.16'}
+  is-ip@3.1.0:
+    resolution: {integrity: sha512-35vd5necO7IitFPjd/YBeqwWnyDWbuLH9ZXQdMfDA8TEo7pv5X8yfrvVO3xbJbLUlERCMvf6X0hTUamQxCYJ9Q==}
+    engines: {node: '>=8'}
 
   is-map@2.0.3:
     resolution: {integrity: sha512-1Qed0/Hr2m+YqxnM09CjA2d/i6YZNfF6R2oRAOj36eUdS6qIV/huPJNSEpKbupewFs+ZsJlxsjjPbc0/afW6Lw==}
@@ -8531,10 +8484,6 @@ packages:
   is-regex@1.2.1:
     resolution: {integrity: sha512-MjYsKHO5O7mCsmRGxWcLWheFqN9DJ/2TmngvjKXihe6efViPqc274+Fx/4fYj/r03+ESvBdTXK0V6tA3rgez1g==}
     engines: {node: '>= 0.4'}
-
-  is-regexp@3.1.0:
-    resolution: {integrity: sha512-rbku49cWloU5bSMI+zaRaXdQHXnthP6DZ/vLnfdSKyL4zUzuWnomtOEiZZOd+ioQ+avFo/qau3KPTc7Fjy1uPA==}
-    engines: {node: '>=12'}
 
   is-set@2.0.3:
     resolution: {integrity: sha512-iPAjerrse27/ygGLxw+EBR9agv9Y6uLeYVJMu+QNCoouJ1/1ri0mGrcWpfCqFZuzzx3WjtwxG098X+n4OuRkPg==}
@@ -11161,10 +11110,6 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  super-regex@0.2.0:
-    resolution: {integrity: sha512-WZzIx3rC1CvbMDloLsVw0lkZVKJWbrkJ0k1ghKFmcnPrW1+jWbgTkTEWVtD9lMdmI4jZEz40+naBxl1dCUhXXw==}
-    engines: {node: '>=14.16'}
-
   super-regex@1.0.0:
     resolution: {integrity: sha512-CY8u7DtbvucKuquCmOFEKhr9Besln7n9uN8eFbwcoGYWXOMW07u2o8njWaiXt11ylS3qoGF55pILjRmPlbodyg==}
     engines: {node: '>=18'}
@@ -13379,33 +13324,6 @@ snapshots:
 
   '@colors/colors@1.5.0':
     optional: true
-
-  '@common.js/clone-regexp@3.0.0':
-    dependencies:
-      '@common.js/is-regexp': 3.1.0
-
-  '@common.js/convert-hrtime@5.0.0': {}
-
-  '@common.js/function-timeout@0.1.1': {}
-
-  '@common.js/ip-regex@5.0.0': {}
-
-  '@common.js/is-ip@5.0.1':
-    dependencies:
-      '@common.js/ip-regex': 5.0.0
-      '@common.js/super-regex': 0.2.0
-
-  '@common.js/is-regexp@3.1.0': {}
-
-  '@common.js/super-regex@0.2.0':
-    dependencies:
-      '@common.js/clone-regexp': 3.0.0
-      '@common.js/function-timeout': 0.1.1
-      '@common.js/time-span': 5.1.0
-
-  '@common.js/time-span@5.1.0':
-    dependencies:
-      '@common.js/convert-hrtime': 5.0.0
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -17778,7 +17696,7 @@ snapshots:
 
   '@types/is-ip@3.0.0':
     dependencies:
-      is-ip: 5.0.1
+      is-ip: 3.1.0
 
   '@types/is-stream@1.1.0':
     dependencies:
@@ -19021,10 +18939,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-
-  clone-regexp@3.0.0:
-    dependencies:
-      is-regexp: 3.1.0
 
   clone-response@1.0.3:
     dependencies:
@@ -20744,8 +20658,6 @@ snapshots:
 
   function-bind@1.1.2: {}
 
-  function-timeout@0.1.1: {}
-
   function-timeout@1.0.2: {}
 
   function.prototype.name@1.1.8:
@@ -21233,7 +21145,7 @@ snapshots:
       from2: 2.3.0
       p-is-promise: 3.0.0
 
-  ip-regex@5.0.0: {}
+  ip-regex@4.3.0: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -21342,14 +21254,9 @@ snapshots:
 
   is-interactive@1.0.0: {}
 
-  is-ip@4.0.0:
+  is-ip@3.1.0:
     dependencies:
-      ip-regex: 5.0.0
-
-  is-ip@5.0.1:
-    dependencies:
-      ip-regex: 5.0.0
-      super-regex: 0.2.0
+      ip-regex: 4.3.0
 
   is-map@2.0.3: {}
 
@@ -21378,8 +21285,6 @@ snapshots:
       gopd: 1.2.0
       has-tostringtag: 1.0.2
       hasown: 2.0.2
-
-  is-regexp@3.1.0: {}
 
   is-set@2.0.3: {}
 
@@ -24558,12 +24463,6 @@ snapshots:
       mz: 2.7.0
       pirates: 4.0.7
       ts-interface-checker: 0.1.13
-
-  super-regex@0.2.0:
-    dependencies:
-      clone-regexp: 3.0.0
-      function-timeout: 0.1.1
-      time-span: 5.1.0
 
   super-regex@1.0.0:
     dependencies:
