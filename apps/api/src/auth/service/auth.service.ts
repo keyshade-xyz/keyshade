@@ -88,13 +88,25 @@ export class AuthService {
       })
       clearTimeout(timeoutId)
 
+      if (!res.ok) {
+        throw new Error(`Geolocation API error: ${res.statusText}`)
+      }
+
       const geo = await res.json()
-      if (geo.success === false) throw new Error(geo.message)
+      if (!geo.success) throw new Error(geo.message)
 
       location =
         [geo.city, geo.region, geo.country].filter(Boolean).join(', ') ||
         'Unknown'
-    } catch {
+    } catch (err) {
+      const logger = new Logger(AuthService.name)
+      if ((err as any).name === 'AbortError') {
+        logger.warn(`Geolocation request timed out for IP: ${rawIp}`)
+      } else {
+        logger.warn(
+          `Failed to fetch location for IP: ${rawIp} — ${err.message}`
+        )
+      }
       location = 'Unknown'
     }
 
