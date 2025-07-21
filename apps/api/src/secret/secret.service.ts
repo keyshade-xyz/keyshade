@@ -781,9 +781,14 @@ export class SecretService {
         }
       })
     } catch (error) {
-      this.logger.log(
-        `Secret ${secretSlug} is not disabled in ${environmentSlug}`
-      )
+      if (error.code === 'P2025') {
+        this.logger.log(
+          `Secret ${secretSlug} is not disabled in ${environmentSlug}`
+        )
+      } else {
+        this.logger.error(`Error disabling secret ${secretSlug}`)
+        throw error
+      }
     }
 
     this.logger.log(
@@ -815,7 +820,7 @@ export class SecretService {
     const secretId = secret.id
 
     // Get the environments
-    const environments = this.prisma.environment.findMany({
+    const environments = await this.prisma.environment.findMany({
       where: {
         DisabledEnvironmentOfSecret: {
           some: {
@@ -828,7 +833,7 @@ export class SecretService {
       }
     })
 
-    return (await environments).map((env) => env.id)
+    return environments.map((env) => env.id)
   }
 
   /**

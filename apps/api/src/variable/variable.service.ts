@@ -779,9 +779,14 @@ export class VariableService {
         }
       })
     } catch (error) {
-      this.logger.log(
-        `Variable ${variableSlug} is not disabled in ${environmentSlug}`
-      )
+      if (error.code === 'P2025') {
+        this.logger.log(
+          `Variable ${variableSlug} is not disabled in ${environmentSlug}`
+        )
+      } else {
+        this.logger.error(`Error disabling variable ${variableSlug}`)
+        throw error
+      }
     }
 
     this.logger.log(
@@ -814,7 +819,7 @@ export class VariableService {
     const variableId = variable.id
 
     // Get the environments
-    const environments = this.prisma.environment.findMany({
+    const environments = await this.prisma.environment.findMany({
       where: {
         DisabledEnvironmentOfVariable: {
           some: {
@@ -827,7 +832,7 @@ export class VariableService {
       }
     })
 
-    return (await environments).map((env) => env.id)
+    return environments.map((env) => env.id)
   }
 
   /**
