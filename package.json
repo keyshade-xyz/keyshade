@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.31.0-stage.5",
+  "version": "2.31.0-stage.6",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -166,14 +166,14 @@
     "ts-jest": "^29.1.0",
     "tsconfig": "workspace:*",
     "tsconfig-paths": "^4.2.0",
-    "turbo": "^2.3.3"
+    "turbo": "^2.5.5"
   },
   "dependencies": {
     "@changesets/cli": "^2.27.11",
     "@keyshade/api-client": "workspace:*",
+    "@keyshade/common": "workspace:*",
     "@keyshade/schema": "workspace:*",
     "@keyshade/secret-scan": "workspace:*",
-    "@keyshade/common": "workspace:*",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^12.0.0",
     "@semantic-release/git": "^10.0.1",
