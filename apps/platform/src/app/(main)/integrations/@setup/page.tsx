@@ -21,6 +21,7 @@ export default function SetupIntegration({
   const {
     formState,
     isLoading,
+    isTesting,
     config,
     projectPrivateKey,
     privateKeyLoading,
@@ -99,15 +100,25 @@ export default function SetupIntegration({
           />
         )}
 
-        {/* Submit Button */}
-        <Button
-          className="self-end"
-          disabled={isLoading}
-          type="submit"
-          variant="secondary"
-        >
-          {isLoading ? 'Creating...' : 'Create Integration'}
-        </Button>
+        <div className="flex justify-end gap-3 pt-4">
+          <Button
+            disabled={isLoading || isTesting}
+            onClick={handlers.handleTesting}
+            type="button"
+            variant="default"
+          >
+            {isTesting ? 'Testing...' : 'Test Configuration'}
+          </Button>
+          {/* Submit Button */}
+          <Button
+            className="self-end"
+            disabled={isLoading || isTesting}
+            type="submit"
+            variant="secondary"
+          >
+            {isLoading ? 'Creating...' : 'Create Integration'}
+          </Button>
+        </div>
       </form>
     </div>
   )
