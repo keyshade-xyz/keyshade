@@ -4,8 +4,7 @@ import {
   Injectable,
   Logger,
   LoggerService,
-  UnauthorizedException,
-  InternalServerErrorException
+  UnauthorizedException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -254,7 +253,8 @@ export class AuthService {
     email: string,
     name: string,
     profilePictureUrl: string,
-    oauthProvider: AuthProvider
+    oauthProvider: AuthProvider,
+    metadata?: { ip: string; device: string; location?: string }
   ): Promise<UserAuthenticatedResponse> {
     this.logger.log(
       `Handling OAuth login. Email: ${email}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}, OAuthProvider: ${oauthProvider}`
@@ -272,6 +272,10 @@ export class AuthService {
 
     this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
+
+    if (metadata) {
+      await this.sendLoginNotification(email, metadata)
+    }
 
     return {
       ...user,
@@ -460,7 +464,6 @@ export class AuthService {
         `Failed login notification path for ${email}: ${err.message}`,
         err.stack
       )
-      throw new InternalServerErrorException('Login notification failed')
     }
   }
 

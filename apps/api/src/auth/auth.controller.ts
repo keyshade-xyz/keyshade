@@ -202,14 +202,9 @@ export class AuthController {
         email,
         name,
         profilePictureUrl,
-        oauthProvider
+        oauthProvider,
+        { ip, device, location }
       )
-
-      await this.authService.sendLoginNotification(email, {
-        ip,
-        device,
-        location
-      })
 
       const user = setCookie(response, data)
       sendOAuthSuccessRedirect(response, user)
