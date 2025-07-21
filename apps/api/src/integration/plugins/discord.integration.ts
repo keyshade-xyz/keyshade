@@ -58,28 +58,34 @@ export class DiscordIntegration extends BaseIntegration {
   public async init(): Promise<void> {
   const integration = this.getIntegration<DiscordIntegrationMetadata>()
   
-  this.logger.log('Initializing Discord integration')
+  const { id: integrationRunId } = await this.registerIntegrationRun({
+    eventId: 'init', // Special identifier for initialization
+    integrationId: integration.id,
+    title: 'Initializing Discord integration'
+  })
 
-  const { response } = await makeTimedRequest(() =>
+  const { response, duration } = await makeTimedRequest(() =>
     fetch(integration.metadata.webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        content: 'Drum rolls! Keyshade is now configured with this channel'
+        content: '🥁 Keyshade is now configured with this channel'
       })
     })
   )
 
+  await this.markIntegrationRunAsFinished(
+    integrationRunId,
+    response.ok ? IntegrationRunStatus.SUCCESS : IntegrationRunStatus.FAILED,
+    duration,
+    await response.text()
+  )
+
   if (!response.ok) {
-    this.logger.error(
-      `Failed to initialize Discord integration: ${response.status} ${response.statusText}`
-    )
     throw new Error('Failed to initialize Discord integration')
   }
-
-  this.logger.log('Successfully initialized Discord integration')
 }
 
 // Edited Code ends for init 
