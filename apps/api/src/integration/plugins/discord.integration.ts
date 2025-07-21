@@ -55,11 +55,11 @@ export class DiscordIntegration extends BaseIntegration {
   }
 
 // Edited Code starts for init 
-  public async init(): Promise<void> {
+public async init(eventId: Event['id']): Promise<void> {
   const integration = this.getIntegration<DiscordIntegrationMetadata>()
-  
+
   const { id: integrationRunId } = await this.registerIntegrationRun({
-    eventId: 'init', // Special identifier for initialization
+    eventId: eventId, // Use provided event ID
     integrationId: integration.id,
     title: 'Initializing Discord integration'
   })
@@ -71,7 +71,7 @@ export class DiscordIntegration extends BaseIntegration {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        content: '🥁 Keyshade is now configured with this channel'
+        content: '🥁 Keyshade is now configured with this channel!'
       })
     })
   )
@@ -87,7 +87,6 @@ export class DiscordIntegration extends BaseIntegration {
     throw new Error('Failed to initialize Discord integration')
   }
 }
-
 // Edited Code ends for init 
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
