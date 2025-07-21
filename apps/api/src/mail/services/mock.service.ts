@@ -55,4 +55,13 @@ export class MockMailService implements IMailService {
       `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
     )
   }
+
+  async sendLoginNotification(
+    email: string,
+    data: { ip: string; device: string; location?: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, Device=${data.device}`
+    )
+  }
 }
