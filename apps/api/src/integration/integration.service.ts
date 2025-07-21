@@ -790,8 +790,8 @@ export class IntegrationService {
    * @param user - The authenticated user performing metadata validation.
    * @param dto - CreateIntegration or UpdateIntegration DTO containing optional
    *   notifyOn and metadata fields.
-   * @param isCreate - True if validating for a new integration; false for update.
-   * @param integrationSlug - Slug of the existing integration (required when isCreate is false).
+   * @param isIntegrationNew - True if validating for a new integration; false for update.
+   * @param integrationSlug - Slug of the existing integration (required when isIntegrationNew is false).
    * @returns A promise resolving to { success: true } upon successful validation.
    * @throws BadRequestException if integrationSlug is missing when updating.
    * @throws UnauthorizedException if the user is not authorized to update the integration.
@@ -801,16 +801,16 @@ export class IntegrationService {
   async validateIntegrationMetadata(
     user: AuthenticatedUser,
     dto: CreateIntegration | UpdateIntegration,
-    isCreate: boolean,
+    isIntegrationNew: boolean,
     integrationSlug?: Integration['slug']
   ): Promise<{ success: true }> {
     this.logger.log(
       `User ${user.id} is metadata‐validating integration ${dto.name} ` +
-        (isCreate ? `(new)` : `(existing ${integrationSlug})`)
+        (isIntegrationNew ? `(new)` : `(existing ${integrationSlug})`)
     )
 
     let integrationObject: BaseIntegration
-    if (isCreate) {
+    if (isIntegrationNew) {
       integrationObject = IntegrationFactory.createIntegrationWithType(
         (dto as CreateIntegration).type,
         this.prisma
@@ -836,7 +836,11 @@ export class IntegrationService {
       )
     }
 
-    await this.validateEventsAndMetadataParams(dto, integrationObject, isCreate)
+    await this.validateEventsAndMetadataParams(
+      dto,
+      integrationObject,
+      isIntegrationNew
+    )
 
     return { success: true }
   }
@@ -846,7 +850,7 @@ export class IntegrationService {
    *
    * @param dto - CreateIntegration or UpdateIntegration DTO.
    * @param integration - The BaseIntegration instance responsible for validation logic.
-   * @param isUpdate - True if this invocation is part of a create operation;
+   * @param isIntegrationNew - True if this invocation is part of a create operation;
    *   false if part of update.
    * @returns A promise that resolves when all validations complete.
    * @throws BadRequestException if event subscriptions or metadata parameters are invalid.
@@ -855,7 +859,7 @@ export class IntegrationService {
   private async validateEventsAndMetadataParams(
     dto: CreateIntegration | UpdateIntegration,
     integration: BaseIntegration,
-    isCreate: boolean
+    isIntegrationNew: boolean
   ): Promise<void> {
     if ('notifyOn' in dto && dto.notifyOn) {
       this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
@@ -864,7 +868,7 @@ export class IntegrationService {
 
     if ('metadata' in dto && dto.metadata) {
       this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
-      integration.validateMetadataParameters(dto.metadata, !isCreate)
+      integration.validateMetadataParameters(dto.metadata, !isIntegrationNew)
 
       this.logger.log(`Testing configuration for integration: ${dto.name}`)
       await integration.validateConfiguration(dto.metadata)
