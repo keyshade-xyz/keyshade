@@ -171,6 +171,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.11",
+    "@common.js/is-ip": "^5.0.1",
     "@keyshade/api-client": "workspace:*",
     "@keyshade/common": "workspace:*",
     "@keyshade/schema": "workspace:*",
