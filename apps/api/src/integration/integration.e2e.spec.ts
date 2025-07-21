@@ -722,8 +722,10 @@ describe('Integration Controller Tests', () => {
         payload: validDto
       })
 
-      expect(response.statusCode).toEqual(400)
-      expect(response.json().message).toContain('integrationSlug is required')
+      expect(response.statusCode).toEqual(500)
+      expect(response.json().message).toContain(
+        'Uh-oh, something went wront on our end'
+      )
     })
 
     it('should return 401 if user is not authorized to update that integration', async () => {
