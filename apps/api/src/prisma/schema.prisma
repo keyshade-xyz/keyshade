@@ -204,6 +204,21 @@ model Notification {
   userId    String
 }
 
+model LoginSession {  
+  id             String   @id @default(cuid())  
+  userId         String  
+  ipHash         String  
+  browser        String  
+  geolocation    String?  
+  createdAt      DateTime @default(now())
+  lastLoggedOnAt DateTime @default(now())
+    
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  
+    
+  @@unique([userId, ipHash, browser])  
+  @@index([userId])  
+}
+
 model User {
   id                   String        @id @default(cuid())
   email                String        @unique
@@ -216,7 +231,7 @@ model User {
   subscription         Subscription?
   joinedOn             DateTime      @default(now())
   referralCode         String        @unique
-
+  
   workspaceMembers  WorkspaceMember[]
   workspaces        Workspace[]
   apiKeys           ApiKey[]
@@ -231,6 +246,7 @@ model User {
   events            Event[]
   integrations      Integration[] // Stores the integrations the user updated
   emailPreference   EmailPreference?
+  loginSessions    LoginSession[] 
   onboardingAnswers OnboardingAnswers?
 
   referredById  String?

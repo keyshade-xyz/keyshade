@@ -59,6 +59,7 @@
     "rxjs": "^7.8.1",
     "slugify": "^1.6.6",
     "socket.io": "^4.7.5",
+    "ua-parser-js": "^2.0.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
