@@ -57,8 +57,6 @@ export class CreateEnvironment extends BaseCommand {
     if (!projectSlug) {
       Logger.error('Project slug is required')
       return
-    } else if (name.length < 3) {
-      Logger.error('Environment name must be 3 or more characters')
     }
 
     const parsedRequest = CreateEnvironmentRequestSchema.safeParse({
