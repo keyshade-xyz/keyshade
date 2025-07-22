@@ -7,11 +7,10 @@ import {
 } from 'src/types/command/command.types'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
-import { type CreateEnvironmentRequest } from '@keyshade/schema'
 import {
   CreateEnvironmentRequestSchema,
   CreateEnvironmentResponseSchema
-} from '../../../../../packages/schema/src/environment'
+} from '@keyshade/schema/raw'
 
 export class CreateEnvironment extends BaseCommand {
   getName(): string {
@@ -82,7 +81,7 @@ export class CreateEnvironment extends BaseCommand {
       error,
       success
     } = await ControllerInstance.getInstance().environmentController.createEnvironment(
-      parsedRequest.data as CreateEnvironmentRequest,
+      parsedRequest.data,
       this.headers
     )
 
