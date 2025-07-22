@@ -3,7 +3,7 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().trim().min(3),
   slug: z.string(),
   description: z.string().nullable(),
   updatedAt: z.string().datetime(),
