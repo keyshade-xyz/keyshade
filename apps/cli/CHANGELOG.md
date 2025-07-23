@@ -230,3 +230,9 @@
 ### Patches
 
 - Fixed decryption error on `keyshade secret list` and `keyshade secret revisions` commands
+
+## 3.2.2-stage.1
+
+### Minor Changes
+
+- Added `-e/--environment` option to `keyshade run` command to override the environment configuration at runtime

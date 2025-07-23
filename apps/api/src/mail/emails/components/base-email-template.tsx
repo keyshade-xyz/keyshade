@@ -46,10 +46,7 @@ export const BaseEmailTemplate: React.FC<BaseEmailTemplateProps> = ({
               questions regarding this change, please contact your project
               administrator or our support team.
             </Text>
-            <Text style={text}>
-              We appreciate your understanding and thank you for your
-              contributions to the project.
-            </Text>
+            <Text style={text}>We appreciate your understanding.</Text>
             <Text style={text}>
               Cheers,
               <br />
