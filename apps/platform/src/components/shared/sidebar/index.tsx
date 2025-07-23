@@ -1,16 +1,20 @@
 'use client'
 import React from 'react'
+import { useAtomValue } from 'jotai'
 import {
   DashboardSVG,
   IntegrationSVG,
   KeyshadeLogoSVG,
+  RolesSVG,
   SettingsSVG,
   TeamSVG
 } from '@public/svg/shared'
-import { useAtomValue } from 'jotai'
+import TierLimit from './tierLimit'
 import SidebarTab from './sidebarTab'
 import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
+import { Button } from '@/components/ui/button'
+import { TIRE_PLAN, VERSION_BADGE } from '@/constants/sidebar'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -23,34 +27,40 @@ function Sidebar(): JSX.Element {
       matchTo: '/'
     },
     {
-      name: 'Teams',
+      name: 'Members',
       icon: <TeamSVG />,
-      link: '/teams',
-      matchTo: '/teams'
+      link: '/members?tab=joined',
+      matchTo: '/members'
+    },
+    {
+      name: 'Roles',
+      icon: <RolesSVG />,
+      link: '/roles',
+      matchTo: '/roles'
     },
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
-      link: '/',
+      link: '/integrations',
       matchTo: '/integrations'
     },
     {
-      name: 'Workspace Settings',
+      name: 'Settings',
       icon: <SettingsSVG />,
-      link: `/${selectedWorkspace?.slug}/settings`,
-      matchTo: `/${selectedWorkspace?.slug}/settings`
+      link: `/${selectedWorkspace?.slug}`,
+      matchTo: `/${selectedWorkspace?.slug}`
     }
   ]
 
   return (
-    <aside className="m-8 w-[20rem]">
+    <aside className="m-8 w-[14rem]">
       <div className="grid gap-y-[1.88rem]">
         <div className="mt-5 flex items-center justify-between">
           <div className=" flex gap-2 text-xl">
             <KeyshadeLogoSVG /> Keyshade
           </div>
           <div className="rounded bg-white/10 px-2 py-[0.12rem] text-xs font-bold">
-            BETA
+            {VERSION_BADGE}
           </div>
         </div>
         <Combobox />
@@ -66,6 +76,15 @@ function Sidebar(): JSX.Element {
               />
             )
           })}
+        </div>
+        <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
+          <div className="mb-5 flex items-center gap-3">
+            <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
+              {TIRE_PLAN}
+            </Button>
+          </div>
+
+          <TierLimit />
         </div>
       </div>
     </aside>

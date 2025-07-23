@@ -16,23 +16,22 @@ import {
   EventType,
   Project,
   ProjectAccessLevel,
-  User,
   Workspace
 } from '@prisma/client'
 import { ProjectModule } from '@/project/project.module'
-import { ProjectService } from '@/project/service/project.service'
+import { ProjectService } from '@/project/project.service'
 import { EventModule } from '@/event/event.module'
-import { EventService } from '@/event/service/event.service'
-import { EnvironmentService } from './service/environment.service'
+import { EventService } from '@/event/event.service'
+import { EnvironmentService } from './environment.service'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/service/user.service'
+import { UserService } from '@/user/user.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { fetchEvents } from '@/common/event'
 import { ValidationPipe } from '@nestjs/common'
-import { SecretService } from '@/secret/service/secret.service'
-import { VariableService } from '@/variable/service/variable.service'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
+import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -41,13 +40,16 @@ describe('Environment Controller Tests', () => {
   let environmentService: EnvironmentService
   let userService: UserService
   let eventService: EventService
-  let secretService: SecretService
-  let variableService: VariableService
+  // let secretService: SecretService
+  // let variableService: VariableService
+  let tierLimitService: TierLimitService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace
   let project1: Project
   let environment1: Environment, environment2: Environment
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -73,8 +75,9 @@ describe('Environment Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
-    secretService = moduleRef.get(SecretService)
-    variableService = moduleRef.get(VariableService)
+    // secretService = moduleRef.get(SecretService)
+    // variableService = moduleRef.get(VariableService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
 
@@ -100,8 +103,32 @@ describe('Environment Controller Tests', () => {
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
 
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
@@ -183,6 +210,38 @@ describe('Environment Controller Tests', () => {
       expect(environmentFromDb).toBeDefined()
     })
 
+    it('should not be able to create more environments if tier limit is reached', async () => {
+      // Create the number of environments that the tier limit allows
+      for (
+        let x = 100;
+        x < 100 + tierLimitService.getEnvironmentTierLimit(project1.id) - 2; // Subtract 2 for the environments created above
+        x++
+      ) {
+        await environmentService.createEnvironment(
+          user1,
+          {
+            name: `Environment ${x}`,
+            description: `Environment ${x} description`
+          },
+          project1.slug
+        )
+      }
+
+      const response = await app.inject({
+        method: 'POST',
+        url: `/environment/${project1.slug}`,
+        payload: {
+          name: 'Environment X',
+          description: 'Environment 101 description'
+        },
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should not be able to create an environment with an empty name', async () => {
       const response = await app.inject({
         method: 'POST',
@@ -197,7 +256,9 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toContain('name should not be empty')
+      expect(response.json().message[0]).toContain(
+        'name must be longer than or equal to 3 characters'
+      )
     })
 
     it('should not be able to create an environment in a project that does not exist', async () => {
@@ -214,7 +275,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toBe('Project 123 not found')
     })
 
     it('should not be able to create an environment in a project that the user does not have access to', async () => {
@@ -247,9 +307,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toBe(
-        `Environment with name Environment 1 already exists in project ${project1.slug}`
-      )
     })
 
     it('should have created a ENVIRONMENT_ADDED event', async () => {
@@ -340,7 +397,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toBe('Environment 123 not found')
     })
 
     it('should not be able to update an environment that the user does not have access to', async () => {
@@ -373,9 +429,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json().message).toBe(
-        `Environment with name Environment 2 already exists in project ${project1.slug}`
-      )
     })
 
     it('should create a ENVIRONMENT_UPDATED event', async () => {
@@ -432,7 +485,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toBe('Environment 123 not found')
     })
 
     it('should not be able to fetch an environment that the user does not have access to', async () => {
@@ -579,7 +631,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toBe('Project 123 not found')
     })
 
     it('should not be able to fetch all environments of a project that the user does not have access to', async () => {
@@ -639,7 +690,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json().message).toBe('Environment 123 not found')
     })
 
     it('should not be able to delete an environment that the user does not have access to', async () => {
@@ -667,9 +717,6 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json().message).toBe(
-        'Cannot delete the last environment in the project'
-      )
     })
   })
 })

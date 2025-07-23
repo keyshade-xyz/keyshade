@@ -12,7 +12,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ github.ref == 'refs/heads/main' && 'alpha' || 'stage' }}
+      environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'stage' }}
       version: ${{ steps.fetch-tag.outputs.version }}
     steps:
       - name: Checkout
@@ -23,8 +23,16 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
+
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install PNPM
         run: npm i -g pnpm
@@ -61,7 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy API
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -122,6 +129,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
@@ -134,7 +149,7 @@ jobs:
         run: |
           # Run migrations
           pnpm db:generate-types
-          pnpm db:deploy-migrations
+          DATABASE_URL=$DATABASE_URL pnpm db:deploy-migrations
 
   release-sentry-api:
     name: Sentry API
@@ -145,11 +160,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache API Build
+        uses: actions/cache@v3
+        with:
+          path: apps/api/dist
+          key: ${{ runner.os }}-api-dist-${{ hashFiles('apps/api/src/**/*', 'apps/api/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-dist-
 
       - name: Build
         run: pnpm build:api
@@ -176,7 +207,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Platform
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -200,12 +230,20 @@ jobs:
           NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE }}
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${{ needs.release.outputs.environment }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
         run: |
           # Build a docker container and push it to ACR
           echo "Building image..."
           docker build \
             -t $ACR_REGISTRY_URL/$REPOSITORY_NAME:$VERSION \
             --build-arg NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+            --build-arg NEXT_PUBLIC_SENTRY_PLATFORM_DSN=$NEXT_PUBLIC_SENTRY_PLATFORM_DSN \
+            --build-arg NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE=$NEXT_PUBLIC_SENTRY_PLATFORM_PROFILE_SAMPLE_RATE \
+            --build-arg NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE=$NEXT_PUBLIC_SENTRY_PLATFORM_TRACES_SAMPLE_RATE \
+            --build-arg NEXT_PUBLIC_SENTRY_ENVIRONMENT=$NEXT_PUBLIC_SENTRY_ENVIRONMENT \
+            --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
+            --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
             -f apps/platform/Dockerfile .
 
           # Push the image
@@ -243,14 +281,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
 
+      - name: Cache Platform Build
+        uses: actions/cache@v3
+        with:
+          path: apps/platform/.next
+          key: ${{ runner.os }}-platform-next-${{ hashFiles('apps/platform/**/*.[jt]s*', 'apps/platform/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-platform-next-
+
       - name: Build
-        run: pnpm build:api
+        run: pnpm build:platform
 
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
@@ -276,7 +330,6 @@ jobs:
     environment: ${{ needs.release.outputs.environment }}
     name: Deploy Web
     needs: release
-    if: github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
@@ -348,11 +401,27 @@ jobs:
       - name: Install Sentry CLI
         run: npm i -g @sentry/cli
 
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache Web Build
+        uses: actions/cache@v3
+        with:
+          path: apps/web/.next
+          key: ${{ runner.os }}-web-next-${{ hashFiles('apps/web/**/*.[jt]s*', 'apps/web/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-web-next-
 
       - name: Build
         run: pnpm build:api
@@ -377,7 +446,6 @@ jobs:
     needs: release
     name: Publish CLI
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     outputs:
       skip_publish: ${{ steps.check-versions.outputs.skip_publish || 'false' }}
@@ -393,7 +461,12 @@ jobs:
         id: check-versions
         run: |
           current_version=`jq -r '.version' apps/cli/package.json`
-          published_version=`npm show @keyshade/cli version`
+
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            published_version=`npm show @keyshade/cli version`
+          else
+            published_version=`npm show @keyshade/cli@stage version`
+          fi
 
           echo "Current version: $current_version"
           echo "Published version: $published_version"
@@ -406,7 +479,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.check-versions.outputs.skip_publish != 'true'
         with:
-          node-version: '20.x'
+          node-version: 22.x
           registry-url: 'https://registry.npmjs.org'
           scope: '@keyshade'
 
@@ -414,9 +487,27 @@ jobs:
         if: steps.check-versions.outputs.skip_publish != 'true'
         run: npm i -g pnpm
 
+      - name: Cache PNPM store
+        if: steps.check-versions.outputs.skip_publish != 'true'
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         if: steps.check-versions.outputs.skip_publish != 'true'
         run: pnpm install
+
+      - name: Cache CLI Build
+        if: steps.check-versions.outputs.skip_publish != 'true'
+        uses: actions/cache@v3
+        with:
+          path: apps/cli/dist
+          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-dist-
 
       - name: Build
         if: steps.check-versions.outputs.skip_publish != 'true'
@@ -428,7 +519,15 @@ jobs:
 
       - name: Publish
         if: steps.check-versions.outputs.skip_publish != 'true'
-        run: cd apps/cli && npm publish --provenance --access public
+        run: |
+          ## Determine release tag
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            release_tag=latest
+          else
+            release_tag=stage
+          fi
+
+          cd apps/cli && npm publish --provenance --access public --tag $release_tag
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -446,14 +545,30 @@ jobs:
       - name: node
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
+
+      - name: Cache PNPM store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install PNPM
         run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
+
+      - name: Cache CLI Build
+        uses: actions/cache@v3
+        with:
+          path: apps/cli/dist
+          key: ${{ runner.os }}-cli-dist-${{ hashFiles('apps/cli/src/**/*', 'apps/cli/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cli-dist-
 
       - name: Build
         run: pnpm build:api

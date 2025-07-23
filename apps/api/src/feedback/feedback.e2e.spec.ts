@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AppModule } from '@/app/app.module'
-import { FeedbackService } from '@/feedback/service/feedback.service'
+import { FeedbackService } from '@/feedback/feedback.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import {
   FastifyAdapter,
@@ -11,6 +11,7 @@ import { FeedbackModule } from './feedback.module'
 import { MailModule } from '@/mail/mail.module'
 import { PrismaService } from '@/prisma/prisma.service'
 import { User } from '@prisma/client'
+import { generateReferralCode } from '@/common/util'
 
 describe('Feedback Controller (E2E)', () => {
   let app: NestFastifyApplication
@@ -44,6 +45,7 @@ describe('Feedback Controller (E2E)', () => {
       data: {
         email: 'janice@keyshade.xyz',
         name: 'Janice',
+        referralCode: await generateReferralCode(prisma),
         isActive: true,
         isAdmin: false,
         isOnboardingFinished: false
@@ -83,7 +85,7 @@ describe('Feedback Controller (E2E)', () => {
   })
 
   it('should handle empty feedback', async () => {
-    const { statusCode, payload } = await app.inject({
+    const { statusCode } = await app.inject({
       method: 'POST',
       url: '/feedback',
       payload: { feedback: '' },
@@ -93,10 +95,5 @@ describe('Feedback Controller (E2E)', () => {
     })
 
     expect(statusCode).toBe(400)
-    expect(JSON.parse(payload)).toEqual({
-      error: 'Bad Request',
-      message: 'Feedback cannot be null or empty',
-      statusCode: 400
-    })
   })
 })

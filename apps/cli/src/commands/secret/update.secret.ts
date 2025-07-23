@@ -86,14 +86,11 @@ export default class UpdateSecret extends BaseCommand {
     if (success) {
       Logger.info('Secret updated successfully')
     } else {
-      Logger.error(`Failed to update secret: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to update secret.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 
-  private async parseInput(options: any): Promise<{
+  private async parseInput(options: CommandActionData['options']): Promise<{
     name?: string
     note?: string
     rotateAfter?: '24' | '168' | '720' | '8760' | 'never'

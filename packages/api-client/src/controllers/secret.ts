@@ -1,9 +1,17 @@
 import { APIClient } from '@api-client/core/client'
-import { ClientResponse } from '@keyshade/schema'
+import {
+  ClientResponse,
+  DeleteEnvironmentValueOfSecretRequest,
+  DeleteEnvironmentValueOfSecretResponse,
+  GetAllSecretsOfEnvironmentRequest,
+  GetAllSecretsOfEnvironmentResponse
+} from '@keyshade/schema'
 import { parseResponse } from '@api-client/core/response-parser'
 import {
   CreateSecretRequest,
   CreateSecretResponse,
+  BulkCreateSecretRequest,
+  BulkCreateSecretResponse,
   DeleteSecretRequest,
   DeleteSecretResponse,
   GetAllSecretsOfProjectRequest,
@@ -37,6 +45,19 @@ export default class SecretController {
     return await parseResponse<CreateSecretResponse>(response)
   }
 
+  async bulkCreateSecrets(
+    request: BulkCreateSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<BulkCreateSecretResponse>> {
+    const response = await this.apiClient.post(
+      `/api/secret/${request.projectSlug}/bulk`,
+      request,
+      headers
+    )
+
+    return await parseResponse<BulkCreateSecretResponse>(response)
+  }
+
   async updateSecret(
     request: UpdateSecretRequest,
     headers?: Record<string, string>
@@ -48,6 +69,18 @@ export default class SecretController {
     )
 
     return await parseResponse<UpdateSecretResponse>(response)
+  }
+
+  async deleteEnvironmentValueOfSecret(
+    request: DeleteEnvironmentValueOfSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DeleteEnvironmentValueOfSecretResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/secret/${request.secretSlug}/${request.environmentSlug}`,
+      headers
+    )
+
+    return await parseResponse<DeleteEnvironmentValueOfSecretResponse>(response)
   }
 
   async rollbackSecret(
@@ -83,10 +116,7 @@ export default class SecretController {
       `/api/secret/${request.projectSlug}`,
       request
     )
-    const response = await this.apiClient.get(
-      `${url}&decryptValue=${request.decryptValue}`,
-      headers
-    )
+    const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetAllSecretsOfProjectResponse>(response)
   }
@@ -99,11 +129,18 @@ export default class SecretController {
       `/api/secret/${request.secretSlug}/revisions/${request.environmentSlug}`,
       request
     )
-    const response = await this.apiClient.get(
-      `${url}&decryptValue=${request.decryptValue}`,
-      headers
-    )
+    const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetRevisionsOfSecretResponse>(response)
+  }
+
+  async getAllSecretsOfEnvironment(
+    request: GetAllSecretsOfEnvironmentRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllSecretsOfEnvironmentResponse>> {
+    const url = `/api/secret/${request.projectSlug}/${request.environmentSlug}`
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllSecretsOfEnvironmentResponse>(response)
   }
 }

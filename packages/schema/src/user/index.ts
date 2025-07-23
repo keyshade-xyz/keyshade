@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { WorkspaceSchema } from '@/workspace'
+import { authProviderEnum } from '@/enums'
 
 export const UserSchema = z.object({
   id: z.string(),
@@ -9,7 +10,15 @@ export const UserSchema = z.object({
   isActive: z.boolean(),
   isOnboardingFinished: z.boolean(),
   isAdmin: z.boolean(),
-  authProvider: z.string()
+  authProvider: authProviderEnum,
+  joinedOn: z.coerce.date(),
+  referralCode: z.string(),
+  referredById: z.string().nullable(),
+  emailPreference: z.object({
+    marketing: z.boolean(),
+    activity: z.boolean(),
+    critical: z.boolean()
+  })
 })
 
 export const GetSelfResponseSchema = UserSchema.extend({
@@ -19,11 +28,31 @@ export const GetSelfResponseSchema = UserSchema.extend({
 export const UpdateSelfRequestSchema = z.object({
   name: z.string().optional(),
   profilePictureUrl: z.string().optional(),
-  isOnboardingFinished: z.boolean().optional(),
-  email: z.string().email().optional()
+  email: z.string().email().optional(),
+  emailPreferences: z
+    .object({
+      marketing: z.boolean().optional(),
+      activity: z.boolean().optional(),
+      critical: z.boolean().optional()
+    })
+    .optional()
 })
 
 export const UpdateSelfResponseSchema = UserSchema
+
+export const FinishOnboardingRequestSchema = z.object({
+  name: z.string(),
+  profilePictureUrl: z.string().optional(),
+  role: z.string().optional(),
+  industry: z.string().optional(),
+  teamSize: z.string().optional(),
+  productStage: z.string().optional(),
+  useCase: z.string().optional(),
+  heardFrom: z.string().optional(),
+  referralCode: z.string().optional()
+})
+
+export const FinishOnboardingResponseSchema = UserSchema
 
 export const DeleteSelfRequestSchema = z.void()
 

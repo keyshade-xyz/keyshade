@@ -14,7 +14,11 @@ export interface IMailService {
     forRegisteredUser: boolean
   ): Promise<void>
 
-  accountLoginEmail(email: string): Promise<void>
+  accountLoginEmail(
+    email: string,
+    username: string,
+    actionUrl: string
+  ): Promise<void>
 
   adminUserCreateEmail(email: string): Promise<void>
 
@@ -24,5 +28,14 @@ export interface IMailService {
     email: string,
     workspaceName: string,
     removedOn: Date
+  ): Promise<void>
+
+  sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      location?: string
+    }
   ): Promise<void>
 }

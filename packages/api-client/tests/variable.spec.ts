@@ -245,7 +245,7 @@ describe('Get Variable Tests', () => {
     expect(variables.data.items.length).toBe(0)
   })
 
-  it('should be able to fetch revisions of a secret', async () => {
+  it('should be able to fetch revisions of a variable', async () => {
     const revisions = await variableController.getRevisionsOfVariable(
       { variableSlug, environmentSlug: environment.slug },
       { 'x-e2e-user-email': email }

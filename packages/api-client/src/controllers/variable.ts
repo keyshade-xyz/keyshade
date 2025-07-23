@@ -1,10 +1,18 @@
 import { APIClient } from '@api-client/core/client'
 import { parsePaginationUrl } from '@api-client/core/pagination-parser'
 import { parseResponse } from '@api-client/core/response-parser'
-import { ClientResponse } from '@keyshade/schema'
+import {
+  ClientResponse,
+  DeleteEnvironmentValueOfVariableRequest,
+  DeleteEnvironmentValueOfVariableResponse,
+  GetAllVariablesOfEnvironmentRequest,
+  GetAllVariablesOfEnvironmentResponse
+} from '@keyshade/schema'
 import {
   CreateVariableRequest,
   CreateVariableResponse,
+  BulkCreateVariableRequest,
+  BulkCreateVariableResponse,
   DeleteVariableRequest,
   DeleteVariableResponse,
   GetAllVariablesOfProjectRequest,
@@ -26,7 +34,7 @@ export default class VariableController {
 
   async createVariable(
     request: CreateVariableRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<CreateVariableResponse>> {
     const response = await this.apiClient.post(
       `/api/variable/${request.projectSlug}`,
@@ -36,9 +44,22 @@ export default class VariableController {
     return await parseResponse<CreateVariableResponse>(response)
   }
 
+  async bulkCreateVariables(
+    request: BulkCreateVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<BulkCreateVariableResponse>> {
+    const response = await this.apiClient.post(
+      `/api/variable/${request.projectSlug}/bulk`,
+      request,
+      headers
+    )
+
+    return await parseResponse<BulkCreateVariableResponse>(response)
+  }
+
   async updateVariable(
     request: UpdateVariableRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<UpdateVariableResponse>> {
     const response = await this.apiClient.put(
       `/api/variable/${request.variableSlug}`,
@@ -49,9 +70,21 @@ export default class VariableController {
     return await parseResponse<UpdateVariableResponse>(response)
   }
 
+  async deleteEnvironmentValueOfVariable(
+    request: DeleteEnvironmentValueOfVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DeleteEnvironmentValueOfVariableResponse>> {
+    const response = await this.apiClient.delete(
+      `/api/variable/${request.variableSlug}/${request.environmentSlug}`,
+      headers
+    )
+
+    return await parseResponse<DeleteVariableResponse>(response)
+  }
+
   async rollbackVariable(
     request: RollBackVariableRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<RollBackVariableResponse>> {
     const response = await this.apiClient.put(
       `/api/variable/${request.variableSlug}/rollback/${request.version}?environmentSlug=${request.environmentSlug}`,
@@ -64,7 +97,7 @@ export default class VariableController {
 
   async deleteVariable(
     request: DeleteVariableRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<DeleteVariableResponse>> {
     const response = await this.apiClient.delete(
       `/api/variable/${request.variableSlug}`,
@@ -76,7 +109,7 @@ export default class VariableController {
 
   async getAllVariablesOfProject(
     request: GetAllVariablesOfProjectRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<GetAllVariablesOfProjectResponse>> {
     const url = parsePaginationUrl(
       `/api/variable/${request.projectSlug}`,
@@ -89,7 +122,7 @@ export default class VariableController {
 
   async getRevisionsOfVariable(
     request: GetRevisionsOfVariableRequest,
-    headers: Record<string, string>
+    headers?: Record<string, string>
   ): Promise<ClientResponse<GetRevisionsOfVariableResponse>> {
     const url = parsePaginationUrl(
       `/api/variable/${request.variableSlug}/revisions/${request.environmentSlug}`,
@@ -98,5 +131,15 @@ export default class VariableController {
     const response = await this.apiClient.get(url, headers)
 
     return await parseResponse<GetRevisionsOfVariableResponse>(response)
+  }
+
+  async getAllVariablesOfEnvironment(
+    request: GetAllVariablesOfEnvironmentRequest,
+    headers: Record<string, string>
+  ): Promise<ClientResponse<GetAllVariablesOfEnvironmentResponse>> {
+    const url = `/api/variable/${request.projectSlug}/${request.environmentSlug}`
+    const response = await this.apiClient.get(url, headers)
+
+    return await parseResponse<GetAllVariablesOfEnvironmentResponse>(response)
   }
 }

@@ -6,6 +6,7 @@ import {
   type CommandOption
 } from '@/types/command/command.types'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
+import { Table } from '@/util/table'
 
 export default class ListWorkspace extends BaseCommand {
   getName(): string {
@@ -25,7 +26,7 @@ export default class ListWorkspace extends BaseCommand {
   }
 
   async action({ options }: CommandActionData): Promise<void> {
-    Logger.info('Fetching all workspaces...')
+    Logger.header('Fetching all workspaces...')
 
     const { success, data, error } =
       await ControllerInstance.getInstance().workspaceController.getWorkspacesOfUser(
@@ -38,17 +39,18 @@ export default class ListWorkspace extends BaseCommand {
     if (success) {
       const workspaces = data.items
       if (workspaces.length > 0) {
-        data.items.forEach((workspace: any) => {
-          Logger.info(`- ${workspace.name} (${workspace.slug})`)
-        })
+        const headers = ['#', '🏢 Workspace Name', '🆔 Workspace Slug']
+        const rows = workspaces.map((workspace: any, index: number) => [
+          (index + 1).toString(),
+          workspace.name,
+          workspace.slug
+        ])
+        Table.render(headers, rows)
       } else {
         Logger.info('No workspaces found')
       }
     } else {
-      Logger.error(`Failed fetching workspaces: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching workspaces.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

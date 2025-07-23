@@ -1,112 +1,112 @@
 'use client'
 import { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import type {
-  ClientResponse,
-  GetAllEnvironmentsOfProjectResponse
-} from '@keyshade/schema'
-import { toast } from 'sonner'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useAtom, useSetAtom } from 'jotai'
-import VariablePage from './@variable/page'
-import SecretPage from './@secret/page'
+import OverviewPage from './@overview/page'
 import EnvironmentPage from './@environment/page'
+import SecretPage from './@secret/page'
+import VariablePage from './@variable/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
-import { Toaster } from '@/components/ui/sonner'
-import { selectedProjectAtom, environmentsOfProjectAtom } from '@/store'
+import {
+  selectedProjectAtom,
+  environmentsOfProjectAtom,
+  globalSearchDataAtom,
+  projectEnvironmentCountAtom,
+  projectSecretCountAtom,
+  projectVariableCountAtom
+} from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
+import { useHttp } from '@/hooks/use-http'
 
-interface DetailedProjectPageProps {
-  params: { project: string }
-}
-
-function DetailedProjectPage({
-  params
-}: DetailedProjectPageProps): JSX.Element {
-  const [selectedProject, setselectedProject] = useAtom(selectedProjectAtom)
+function DetailedProjectPage(): JSX.Element {
+  const { project: projectSlug }: { project: string } = useParams()
+  const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const setEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
+  const setSecretCount = useSetAtom(projectSecretCountAtom)
+  const setVariableCount = useSetAtom(projectVariableCountAtom)
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
 
-  useEffect(() => {
-    async function getProjectBySlug() {
-      const { success, error, data } =
-        await ControllerInstance.getInstance().projectController.getProject(
-          { projectSlug: params.project },
-          {}
-        )
+  const getProject = useHttp(() =>
+    ControllerInstance.getInstance().projectController.getProject({
+      projectSlug
+    })
+  )
 
-      if (success && data) {
-        setselectedProject(data)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+  const getAllEnvironmentsOfProject = useHttp(() =>
+    ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
+      {
+        projectSlug: selectedProject!.slug
       }
-    }
-
-    getProjectBySlug()
-  }, [params.project, setselectedProject])
+    )
+  )
 
   useEffect(() => {
-    const getAllEnvironments = async () => {
-      if (!selectedProject) {
-        return
-      }
+    if (!projectSlug) return
 
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllEnvironmentsOfProjectResponse> =
-        await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
-        )
-
+    getProject().then(({ data, success, error }) => {
       if (success && data) {
-        setEnvironments(data.items)
+        setSelectedProject(data)
+        setEnvironmentCount(data.totalEnvironments)
+        setSecretCount(data.totalSecrets)
+        setVariableCount(data.totalVariables)
       } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching environments. Check console
-              for more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        throw new Error(JSON.stringify(error))
       }
-    }
+    })
+  }, [
+    getProject,
+    projectSlug,
+    setSelectedProject,
+    setEnvironmentCount,
+    setSecretCount,
+    setVariableCount
+  ])
 
-    getAllEnvironments()
-  }, [selectedProject, setEnvironments])
+  useEffect(() => {
+    selectedProject &&
+      getAllEnvironmentsOfProject().then(({ data, success }) => {
+        if (success && data) {
+          setEnvironments(data.items)
+          setGlobalSearchData((prev) => ({
+            ...prev,
+            environments: data.items.map((env) => ({
+              name: env.name,
+              slug: env.slug,
+              description: env.description
+            }))
+          }))
+        }
+      })
+  }, [
+    getAllEnvironmentsOfProject,
+    selectedProject,
+    setEnvironments,
+    setGlobalSearchData
+  ])
 
   return (
     <main className="flex h-full flex-col gap-4">
-      <div className="flex h-[3.625rem] w-full justify-between p-3 ">
-        <div className="text-3xl">{selectedProject?.name}</div>
-        {tab === 'secret' && <AddSecretDialog />}
-        {tab === 'variable' && <AddVariableDialogue />}
-        {tab === 'environment' && <AddEnvironmentDialogue />}
-      </div>
+      {tab !== 'overview' && (
+        <div className="flex h-[3.625rem] w-full justify-between p-3 ">
+          <div className="text-3xl">{selectedProject?.name}</div>
+          {tab === 'secret' && <AddSecretDialog />}
+          {tab === 'variable' && <AddVariableDialogue />}
+          {tab === 'environment' && <AddEnvironmentDialogue />}
+        </div>
+      )}
 
       <div className="h-full w-full overflow-y-scroll">
+        {tab === 'overview' && <OverviewPage />}
         {tab === 'secret' && <SecretPage />}
         {tab === 'variable' && <VariablePage />}
         {tab === 'environment' && <EnvironmentPage />}
       </div>
-      <Toaster />
     </main>
   )
 }

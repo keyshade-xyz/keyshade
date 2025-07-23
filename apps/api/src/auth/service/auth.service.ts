@@ -4,7 +4,6 @@ import {
   Injectable,
   Logger,
   LoggerService,
-  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
@@ -14,22 +13,99 @@ import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthProvider } from '@prisma/client'
 import { CacheService } from '@/cache/cache.service'
-import { generateOtp } from '@/common/util'
+import { constructErrorBody, generateOtp } from '@/common/util'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { UserWithWorkspace } from '@/user/user.types'
 import { Response } from 'express'
+import SlugGenerator from '@/common/slug-generator.service'
+import { isIP } from 'class-validator'
+import { UAParser } from 'ua-parser-js'
+import { toSHA256 } from '@/common/cryptography'
 
 @Injectable()
 export class AuthService {
   private readonly logger: LoggerService
 
   constructor(
-    @Inject(MAIL_SERVICE) private mailService: IMailService,
+    @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
     private readonly prisma: PrismaService,
-    private jwt: JwtService,
-    private cache: CacheService
+    private readonly jwt: JwtService,
+    private readonly cache: CacheService,
+    private readonly slugGenerator: SlugGenerator
   ) {
     this.logger = new Logger(AuthService.name)
+  }
+
+  // Static helper to normalize IPs
+  private static normalizeIp(raw: string): string {
+    if (!raw) return 'Unknown'
+    let ip = raw.split(',')[0].trim()
+    if (ip.startsWith('::ffff:')) ip = ip.replace('::ffff:', '')
+    return ip
+  }
+
+  /**
+   * Parses a login request to extract the user's IP address, device info, and location.
+   * @param req The incoming HTTP request
+   * @returns An object containing the IP, device fingerprint, and location string
+   * @throws {Error} If the IP is invalid or cannot be parsed
+   */
+  public static async parseLoginRequest(req: Request): Promise<{
+    ip: string
+    device: string
+    location: string
+  }> {
+    const rawIp = (
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      (req as any).socket?.remoteAddress ||
+      ''
+    ).trim()
+
+    if (!isIP(rawIp)) {
+      throw new Error(`Invalid IP address: ${rawIp}`)
+    }
+
+    const userAgent = req.headers['user-agent'] || 'Unknown'
+    const parser = new UAParser(userAgent)
+
+    const browser = parser.getBrowser().name || 'Unknown'
+    const os = parser.getOS().name || 'Unknown'
+    const device = `${browser} on ${os}`
+
+    let location = 'Unknown'
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000)
+
+      const url = new URL(`https://ipwho.is/${encodeURIComponent(rawIp)}`)
+      const res = await fetch(url.toString(), {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
+      if (!res.ok) {
+        throw new Error(`Geolocation API error: ${res.statusText}`)
+      }
+
+      const geo = await res.json()
+      if (!geo.success) throw new Error(geo.message)
+
+      location =
+        [geo.city, geo.region, geo.country].filter(Boolean).join(', ') ||
+        'Unknown'
+    } catch (err) {
+      const logger = new Logger(AuthService.name)
+      if ((err as any).name === 'AbortError') {
+        logger.warn(`Geolocation request timed out for IP: ${rawIp}`)
+      } else {
+        logger.warn(
+          `Failed to fetch location for IP: ${rawIp} — ${err.message}`
+        )
+      }
+      location = 'Unknown'
+    }
+
+    return { ip: rawIp, device, location }
   }
 
   /**
@@ -38,9 +114,16 @@ export class AuthService {
    * @param email The email address to send the login code to
    */
   async sendOtp(email: string): Promise<void> {
+    this.logger.log(`Attempting to send login code to ${email}`)
+
     if (!email || !email.includes('@')) {
       this.logger.error(`Invalid email address: ${email}`)
-      throw new BadRequestException('Please enter a valid email address')
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid email address',
+          'Please enter a valid email address'
+        )
+      )
     }
 
     const user = await this.createUserIfNotExists(email, AuthProvider.EMAIL_OTP)
@@ -56,30 +139,56 @@ export class AuthService {
    * @param email The email address to resend the login code to
    */
   async resendOtp(email: string): Promise<void> {
-    const user = await getUserByEmailOrId(email, this.prisma)
+    this.logger.log(`Attempting to resend login code to ${email}`)
+
+    if (!email || !email.includes('@')) {
+      this.logger.error(`Invalid email address: ${email}`)
+      throw new BadRequestException(
+        constructErrorBody(
+          'Invalid email address',
+          'Please enter a valid email address'
+        )
+      )
+    }
+
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
     const otp = await generateOtp(email, user.id, this.prisma)
     await this.mailService.sendOtp(email, otp.code)
   }
 
   /* istanbul ignore next */
   /**
-   * Validates a login code sent to the given email address
-   * @throws {NotFoundException} If the user is not found
-   * @throws {UnauthorizedException} If the login code is invalid
-   * @param email The email address the login code was sent to
-   * @param otp The login code to validate
-   * @returns An object containing the user and a JWT token
+   * Validates a one-time password (OTP) for a given email during login.
+   * - Verifies that the OTP is valid and not expired.
+   * - Deletes the OTP after successful validation.
+   * - Extracts IP, device, and location from the incoming request.
+   * - Sends a login notification email if the login is from a new environment.
+   * - Caches the user session and returns a JWT token.
+   * @param email - The email address the OTP was sent to.
+   * @param otp - The OTP to validate.
+   * @param req - The HTTP request object, used to extract IP/device info.
+   * @throws {NotFoundException} If the user does not exist.
+   * @throws {UnauthorizedException} If the OTP is invalid or expired.
+   * @returns An object containing user info and a JWT token.
    */
   async validateOtp(
     email: string,
-    otp: string
+    otp: string,
+    req: Request
   ): Promise<UserAuthenticatedResponse> {
-    const user = await getUserByEmailOrId(email, this.prisma)
-    if (!user) {
-      this.logger.error(`User not found: ${email}`)
-      throw new NotFoundException('User not found')
-    }
+    this.logger.log(`Validating login code for ${email}`)
 
+    const user = await getUserByEmailOrId(
+      email,
+      this.prisma,
+      this.slugGenerator
+    )
+
+    this.logger.log(`Checking if OTP is valid for ${email}`)
     const isOtpValid =
       (await this.prisma.otp.findUnique({
         where: {
@@ -95,9 +204,17 @@ export class AuthService {
 
     if (!isOtpValid) {
       this.logger.error(`Invalid login code for ${email}: ${otp}`)
-      throw new UnauthorizedException('Invalid login code')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'Invalid OTP',
+          'The OTP you entered is invalid or has expired. Please try again.'
+        )
+      )
     }
 
+    this.logger.log(`OTP is valid for ${email}`)
+
+    this.logger.log(`Deleting OTP for ${email}`)
     await this.prisma.otp.delete({
       where: {
         userCode: {
@@ -106,7 +223,13 @@ export class AuthService {
         }
       }
     })
-    this.cache.setUser(user) // Save user to cache
+    this.logger.log(`OTP deleted for ${email}`)
+
+    const { ip, device, location } = await AuthService.parseLoginRequest(req)
+
+    await this.sendLoginNotification(email, { ip, device, location })
+
+    this.cache.setUser(user)
     this.logger.log(`User logged in: ${email}`)
 
     const token = await this.generateToken(user.id)
@@ -130,8 +253,13 @@ export class AuthService {
     email: string,
     name: string,
     profilePictureUrl: string,
-    oauthProvider: AuthProvider
+    oauthProvider: AuthProvider,
+    metadata?: { ip: string; device: string; location?: string }
   ): Promise<UserAuthenticatedResponse> {
+    this.logger.log(
+      `Handling OAuth login. Email: ${email}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}, OAuthProvider: ${oauthProvider}`
+    )
+
     // We need to create the user if it doesn't exist yet
     const user = await this.createUserIfNotExists(
       email,
@@ -141,6 +269,13 @@ export class AuthService {
     )
 
     const token = await this.generateToken(user.id)
+
+    this.cache.setUser(user)
+    this.logger.log(`User logged in: ${email}`)
+
+    if (metadata) {
+      await this.sendLoginNotification(email, metadata)
+    }
 
     return {
       ...user,
@@ -155,6 +290,7 @@ export class AuthService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanUpExpiredOtps() {
+    this.logger.log('Cleaning up expired OTPs...')
     try {
       const timeNow = new Date()
       await this.prisma.otp.deleteMany({
@@ -187,10 +323,15 @@ export class AuthService {
     name?: string,
     profilePictureUrl?: string
   ) {
+    this.logger.log(
+      `Creating user if not exists. Email: ${email}, AuthProvider: ${authProvider}, Name: ${name}, ProfilePictureUrl: ${profilePictureUrl}`
+    )
+
     let user: UserWithWorkspace | null
 
+    this.logger.log(`Checking if user exists with email: ${email}`)
     try {
-      user = await getUserByEmailOrId(email, this.prisma)
+      user = await getUserByEmailOrId(email, this.prisma, this.slugGenerator)
     } catch (ignored) {}
 
     // We need to create the user if it doesn't exist yet
@@ -202,15 +343,39 @@ export class AuthService {
           profilePictureUrl,
           authProvider
         },
-        this.prisma
+        this.prisma,
+        this.slugGenerator
       )
     }
 
     // If the user has used OAuth to log in, we need to check if the OAuth provider
     // used in the current login is different from the one stored in the database
     if (user.authProvider !== authProvider) {
-      throw new UnauthorizedException(
-        'The user has signed up with a different authentication provider.'
+      let formattedAuthProvider = ''
+
+      switch (user.authProvider) {
+        case AuthProvider.GOOGLE:
+          formattedAuthProvider = 'Google'
+          break
+        case AuthProvider.GITHUB:
+          formattedAuthProvider = 'GitHub'
+          break
+        case AuthProvider.EMAIL_OTP:
+          formattedAuthProvider = 'Email and OTP'
+          break
+        case AuthProvider.GITLAB:
+          formattedAuthProvider = 'GitLab'
+          break
+      }
+
+      this.logger.error(
+        `User ${email} has signed up with ${user.authProvider}, but attempted to log in with ${authProvider}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Error signing in',
+          `You have already signed up with ${formattedAuthProvider}. Please use the same to sign in.`
+        )
       )
     }
 
@@ -221,11 +386,93 @@ export class AuthService {
     return await this.jwt.signAsync({ id })
   }
 
+  async sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      location?: string
+    }
+  ) {
+    const { ip, device, location } = data
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          emailPreference: true
+        }
+      })
+
+      if (!user) {
+        this.logger.warn(`Login notification skipped: user ${email} not found`)
+        return
+      }
+
+      const normalizedIp = AuthService.normalizeIp(ip)
+      const ipHash = toSHA256(normalizedIp)
+      const deviceFingerprint = device || 'Unknown'
+
+      const existingSession = await this.prisma.loginSession.findUnique({
+        where: {
+          userId_ipHash_browser: {
+            userId: user.id,
+            ipHash,
+            browser: deviceFingerprint
+          }
+        }
+      })
+
+      const isNew = !existingSession
+
+      if (isNew) {
+        await this.mailService.sendLoginNotification(user.email, {
+          ip: normalizedIp,
+          device: deviceFingerprint,
+          location
+        })
+        this.logger.log(`Login notification sent to ${email} (new env).`)
+      } else {
+        this.logger.log(
+          `Login notification skipped for ${email} (existing env).`
+        )
+      }
+
+      await this.prisma.loginSession.upsert({
+        where: {
+          userId_ipHash_browser: {
+            userId: user.id,
+            ipHash,
+            browser: deviceFingerprint
+          }
+        },
+        update: {
+          geolocation: location,
+          lastLoggedOnAt: new Date()
+        },
+        create: {
+          userId: user.id,
+          ipHash,
+          browser: deviceFingerprint,
+          geolocation: location,
+          lastLoggedOnAt: new Date()
+        }
+      })
+    } catch (err) {
+      this.logger.error(
+        `Failed login notification path for ${email}: ${err.message}`,
+        err.stack
+      )
+    }
+  }
+
   /**
    * Clears the token cookie on logout
    * @param res The response object
    */
   async logout(res: Response): Promise<void> {
+    this.logger.log('Logging out user and clearing token cookie.')
     res.clearCookie('token', {
       domain: process.env.DOMAIN ?? 'localhost'
     })

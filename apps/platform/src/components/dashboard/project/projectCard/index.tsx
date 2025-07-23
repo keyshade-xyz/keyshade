@@ -1,6 +1,11 @@
 'use client'
 import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
+import type {
+  ProjectWithCount,
+  ProjectWithTierLimitAndCount
+} from '@keyshade/schema'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   SecretSVG,
   EnvironmentSVG,
@@ -9,8 +14,6 @@ import {
   PrivateSVG,
   InternalSVG
 } from '@public/svg/dashboard'
-import type { ProjectWithCount } from '@keyshade/schema'
-import { useAtomValue, useSetAtom } from 'jotai'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,13 +24,14 @@ import {
 import {
   deleteProjectOpenAtom,
   editProjectOpenAtom,
+  exportConfigOpenAtom,
   selectedProjectAtom,
   selectedWorkspaceAtom
 } from '@/store'
 import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
-  project: ProjectWithCount
+  project: ProjectWithTierLimitAndCount
 }
 
 export default function ProjectCard({
@@ -48,6 +52,17 @@ export default function ProjectCard({
   const setIsDeleteProjectOpen = useSetAtom(deleteProjectOpenAtom)
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(
+      slug,
+      'You copied the slug successfully.',
+      'Unable to copy slug.',
+      'You successfully copied the slug.',
+      'Something went wrong while copying the slug.'
+    )
+  }
 
   const handleEditProject = () => {
     setSelectedProject(project)
@@ -57,6 +72,11 @@ export default function ProjectCard({
   const handleDeleteProject = () => {
     setSelectedProject(project)
     setIsDeleteProjectOpen(true)
+  }
+
+  const handleExportConfiguration = () => {
+    setSelectedProject(project)
+    setIsExportConfigurationDialogOpen(true)
   }
 
   const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
@@ -77,7 +97,7 @@ export default function ProjectCard({
       <ContextMenuTrigger className="flex h-[7rem]">
         <Link
           className="flex h-[7rem] w-full justify-between rounded-xl bg-white/5 px-5 py-4 shadow-lg hover:bg-white/10"
-          href={`${selectedWorkspace?.slug}/${slug}?tab=secret`}
+          href={`${selectedWorkspace?.slug}/${slug}?tab=overview`}
           key={id}
         >
           <div className="flex items-center gap-x-5">
@@ -130,6 +150,13 @@ export default function ProjectCard({
           }}
         >
           Copy link
+        </ContextMenuItem>
+        <ContextMenuItem inset onClick={handleCopyToClipboard}>
+          Copy slug
+        </ContextMenuItem>
+        <ContextMenuSeparator className="bg-white/15" />
+        <ContextMenuItem inset onClick={handleExportConfiguration}>
+          Export configuration
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
         <ContextMenuItem inset onClick={handleEditProject}>

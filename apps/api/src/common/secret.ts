@@ -1,24 +1,12 @@
-import { Secret } from '@prisma/client'
+import { SecretWithValues } from '@/secret/secret.types'
 
-export interface SecretWithValues {
-  secret: Secret & { lastUpdatedBy: { id: string; name: string } }
-  values: Array<{
-    environment: {
-      id: string
-      name: string
-      slug: string
-    }
-    value: string
-    version: number
-  }>
-}
-
-export function getSecretWithValues(
+export async function getSecretWithValues(
   secretWithVersion: SecretWithValues['secret'] & {
     versions: SecretWithValues['values']
   }
-): SecretWithValues {
+): Promise<SecretWithValues> {
   const values = secretWithVersion.versions
+
   delete secretWithVersion.versions
   const secret = secretWithVersion
   return {

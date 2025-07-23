@@ -31,6 +31,14 @@ export const WorkspaceRoleSchema = z.object({
         })
       )
     })
+  ),
+  members: z.array(
+    z.object({
+      name: z.string(),
+      email: z.string().email(),
+      profilePictureUrl: z.string().nullable(),
+      memberSince: z.string().datetime()
+    })
   )
 })
 
@@ -87,6 +95,5 @@ export const GetWorkspaceRolesOfWorkspaceRequestSchema =
     })
   )
 
-export const GetWorkspaceRolesOfWorkspaceResponseSchema = PageResponseSchema(
-  WorkspaceRoleSchema.omit({ projects: true })
-)
+export const GetWorkspaceRolesOfWorkspaceResponseSchema =
+  PageResponseSchema(WorkspaceRoleSchema)

@@ -5,6 +5,7 @@ import type {
 import BaseCommand from '../base.command'
 import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
+import { Table } from '@/util/table'
 
 export default class ListProject extends BaseCommand {
   getName(): string {
@@ -30,6 +31,7 @@ export default class ListProject extends BaseCommand {
 
   async action({ args }: CommandActionData): Promise<void> {
     const [workspaceSlug] = args
+    Logger.header(`Fetching all projects for ${workspaceSlug}...`)
 
     const { data, error, success } =
       await ControllerInstance.getInstance().projectController.getAllProjects(
@@ -43,17 +45,19 @@ export default class ListProject extends BaseCommand {
       const projects = data.items
 
       if (projects.length > 0) {
-        data.items.forEach((project: any) => {
-          Logger.info(`- ${project.name} (${project.slug})`)
-        })
+        const headers = ['#', '📁 Project Name', '🆔 Project Slug']
+        const rows = projects.map((project: any, index: number) => [
+          (index + 1).toString(),
+          project.name,
+          project.slug
+        ])
+
+        Table.render(headers, rows)
       } else {
         Logger.info('No projects found')
       }
     } else {
-      Logger.error(`Failed fetching projects: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching projects.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

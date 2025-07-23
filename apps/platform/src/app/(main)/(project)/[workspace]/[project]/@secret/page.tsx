@@ -1,19 +1,20 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
-import { SecretSVG } from '@public/svg/dashboard'
+import { useSearchParams } from 'next/navigation'
 import { Accordion } from '@/components/ui/accordion'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import ControllerInstance from '@/lib/controller-instance'
 import SecretLoader from '@/components/dashboard/secret/secretLoader'
 import { Button } from '@/components/ui/button'
 import {
-  createSecretOpenAtom,
+  deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
   editSecretOpenAtom,
+  globalSearchDataAtom,
+  rollbackSecretOpenAtom,
+  secretRevisionsOpenAtom,
   secretsOfProjectAtom,
   selectedProjectAtom,
   selectedSecretAtom
@@ -21,65 +22,98 @@ import {
 import ConfirmDeleteSecret from '@/components/dashboard/secret/confirmDeleteSecret'
 import SecretCard from '@/components/dashboard/secret/secretCard'
 import EditSecretSheet from '@/components/dashboard/secret/editSecretSheet'
+import { SECRET_PAGE_SIZE } from '@/lib/constants'
+import EmptySecretListContent from '@/components/dashboard/secret/emptySecretListSection'
+import ConfirmDeleteEnvironmentValueOfSecretDialog from '@/components/dashboard/secret/confirmDeleteEnvironmentValueOfSecret'
+import SecretRevisionsSheet from '@/components/dashboard/secret/secretRevisionSheet'
+import ConfirmRollbackSecret from '@/components/dashboard/secret/confirmRollbackSecret'
+import { cn } from '@/lib/utils'
+import { useProjectPrivateKey } from '@/hooks/use-fetch-privatekey'
+import { PageTitle } from '@/components/common/page-title'
 
 extend(relativeTime)
 
-function SecretPage(): React.JSX.Element {
-  const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
+export default function SecretPage(): React.JSX.Element {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
+
+  const [page, setPage] = useState(0)
+  const [hasMoreSecret, setHasMoreSecret] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isHighlighted, setIsHighlighted] = useState(false)
+
   const isEditSecretOpen = useAtomValue(editSecretOpenAtom)
   const isDeleteSecretOpen = useAtomValue(deleteSecretOpenAtom)
+  const isDeleteEnvironmentValueOfSecretOpen = useAtomValue(
+    deleteEnvironmentValueOfSecretOpenAtom
+  )
+  const isSecretRevisionsOpen = useAtomValue(secretRevisionsOpenAtom)
+  const isRollbackSecretOpen = useAtomValue(rollbackSecretOpenAtom)
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const selectedProject = useAtomValue(selectedProjectAtom)
-  const isDecrypted = useMemo(
-    () => selectedProject?.storePrivateKey === true || false,
-    [selectedProject]
-  )
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   useEffect(() => {
+    if (!selectedProject) return
+
     setIsLoading(true)
 
-    async function getAllSecretsByProjectSlug() {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
+    ControllerInstance.getInstance()
+      .secretController.getAllSecretsOfProject({
+        projectSlug: selectedProject.slug,
+        page,
+        limit: SECRET_PAGE_SIZE
+      })
+      .then(({ data, success }) => {
+        if (!success || !data) return
 
-      const { success, error, data } =
-        await ControllerInstance.getInstance().secretController.getAllSecretsOfProject(
-          { projectSlug: selectedProject.slug, decryptValue: isDecrypted },
-          {}
+        setSecrets((prev) =>
+          page === 0 ? data.items : [...prev, ...data.items]
         )
 
-      if (success && data) {
-        setSecrets(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching secrets. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
+        const nextLink = data.metadata.links.next
+        setHasMoreSecret(nextLink !== null)
+
+        setGlobalSearchData((prev) => ({
+          ...prev,
+          secrets:
+            page === 0
+              ? data.items.map((item) => ({
+                  slug: item.secret.slug,
+                  name: item.secret.name,
+                  note: item.secret.note
+                }))
+              : [
+                  ...prev.secrets,
+                  ...data.items.map((item) => ({
+                    slug: item.secret.slug,
+                    name: item.secret.name,
+                    note: item.secret.note
+                  }))
+                ]
+        }))
+      })
+      .finally(() => setIsLoading(false))
+  }, [selectedProject, page, setGlobalSearchData, setSecrets])
+
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1)
+  }
+
+  useEffect(() => {
+    if (!highlightSlug || secrets.length === 0) return
+
+    const element = document.getElementById(`secret-${highlightSlug}`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setIsHighlighted(true)
+      setTimeout(() => setIsHighlighted(false), 2000)
     }
+  }, [highlightSlug, secrets])
 
-    getAllSecretsByProjectSlug()
-
-    setIsLoading(false)
-  }, [isDecrypted, selectedProject, setSecrets])
-
-  if (isLoading) {
+  if (isLoading && page === 0) {
     return (
       <div className="space-y-4">
         <SecretLoader />
@@ -90,58 +124,67 @@ function SecretPage(): React.JSX.Element {
   }
 
   return (
-    <div className={`flex h-full w-full justify-center `}>
+    <div className="flex h-full w-full justify-center">
+      <PageTitle title={`${selectedProject?.name} | Secrets`} />
       {secrets.length === 0 ? (
-        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-          <SecretSVG width={100} />
-
-          <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
-            <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
-              Declare your first secret
-            </p>
-            <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
-              Declare and store a secret against different environments
-            </p>
-          </div>
-
-          <Button
-            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            onClick={() => setIsCreateSecretOpen(true)}
-          >
-            Create secret
-          </Button>
-        </div>
+        <EmptySecretListContent />
       ) : (
         <div
-          className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteSecretOpen ? 'inert' : ''} `}
+          className={cn(
+            'flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white',
+            isDeleteSecretOpen && 'inert'
+          )}
         >
-          <ScrollArea className="mb-4 h-fit w-full">
+          <div className="flex h-fit w-full flex-col gap-4">
             <Accordion
               className="flex h-fit w-full flex-col gap-4"
               collapsible
               type="single"
             >
-              {secrets.map((secret) => (
+              {secrets.map((secretData) => (
                 <SecretCard
-                  isDecrypted={isDecrypted}
-                  key={secret.secret.id}
-                  secretData={secret}
+                  className={cn(
+                    highlightSlug === secretData.secret.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
+                  )}
+                  key={secretData.secret.id}
+                  privateKey={projectPrivateKey}
+                  secretData={secretData}
                 />
               ))}
             </Accordion>
-          </ScrollArea>
 
-          {/* Delete secret alert dialog */}
+            {isLoading && page > 0 ? (
+              <div className="w-full">
+                <SecretLoader />
+              </div>
+            ) : null}
+          </div>
+
+          <Button
+            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+            disabled={isLoading || !hasMoreSecret}
+            onClick={handleLoadMore}
+          >
+            Load more
+          </Button>
+
           {isDeleteSecretOpen && selectedSecret ? (
             <ConfirmDeleteSecret />
           ) : null}
-
-          {/* Edit secret sheet */}
           {isEditSecretOpen && selectedSecret ? <EditSecretSheet /> : null}
+          {isDeleteEnvironmentValueOfSecretOpen && selectedSecret ? (
+            <ConfirmDeleteEnvironmentValueOfSecretDialog />
+          ) : null}
+          {isSecretRevisionsOpen && selectedSecret ? (
+            <SecretRevisionsSheet />
+          ) : null}
+          {isRollbackSecretOpen && selectedSecret ? (
+            <ConfirmRollbackSecret />
+          ) : null}
         </div>
       )}
     </div>
   )
 }
-
-export default SecretPage

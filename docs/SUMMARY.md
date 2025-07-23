@@ -2,6 +2,15 @@
 
 - [❔ What is keyshade?](README.md)
 
+## Getting Started
+
+- [Introduction](getting-started/introduction.md)
+- [Adding your first secret and variable](getting-started/adding-your-first-secret-and-variable.md)
+- [Installing the CLI](getting-started/installing-the-cli.md)
+- [Setting up your profile](getting-started/setting-up-your-profile.md)
+- [Add keyshade to your project](getting-started/add-keyshade-to-your-project.md)
+- [Running your app](getting-started/running-your-app.md)
+
 ## CLI
 
 - [Introduction](cli/introduction.md)
@@ -12,6 +21,20 @@
 - [Environment](cli/environment.md)
 - [Run](cli/run.md)
 - [Scan](cli/scan.md)
+
+## Integrations 
+
+- [Frameworks](integration/frameworks/README.md)
+  - [Next.js](integration/frameworks/set-up-with-nextjs.md)
+  - [Node.js](integration/frameworks/set-up-with-nodejs.md)
+- [Languages](integration/languages/README.md)
+  - [Go](integration/languages/set-up-with-go.md)
+  - [Python](integration/languages/set-up-with-python.md)
+  - [Rust](integration/languages/set-up-with-rust.md)
+- [Platforms](integration/platforms/README.md)
+  - [AWS Lambda](integration/platforms/set-up-with-aws.md)
+  - [Vercel](integration/platforms/set-up-with-vercel.md)
+
 
 ## 🥰 CONTRIBUTING TO KEYSHADE
 

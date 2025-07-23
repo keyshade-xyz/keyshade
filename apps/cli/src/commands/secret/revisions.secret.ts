@@ -8,6 +8,8 @@ import ControllerInstance from '@/util/controller-instance'
 import { Logger } from '@/util/logger'
 import formatDate from '@/util/date-formatter'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
+import { fetchPrivateKey } from '@/util/configuration'
+import { decrypt } from '@/util/decrypt'
 
 export default class FetchSecretRevisions extends BaseCommand {
   getName(): string {
@@ -36,8 +38,9 @@ export default class FetchSecretRevisions extends BaseCommand {
       },
       {
         short: '-d',
-        long: '--decrypt-value',
-        description: 'Decrypt the value of the secret'
+        long: '--project-slug <string>',
+        description:
+          'Optionally decrypt the value by providing the project slug of the secret'
       },
       ...PAGINATION_OPTION
     ]
@@ -48,9 +51,6 @@ export default class FetchSecretRevisions extends BaseCommand {
 
   Fetch all revisions of a secret
   keyshade secret revisions secret-1 --environment dev
-
-  Decrypt values while listing
-  keyshade secret revisions secret-1 --environment dev --decrypt-value
 
   Pagination options
   keyshade secret revisions secret-1 --environment dev --page 1 --limit 10
@@ -63,7 +63,7 @@ export default class FetchSecretRevisions extends BaseCommand {
 
   async action({ args, options }: CommandActionData): Promise<void> {
     const [secretSlug] = args
-    const { environment, decryptValue, paginationOptions } =
+    const { environment, privateKey, paginationOptions } =
       await this.parseInput(options)
 
     const { data, error, success } =
@@ -71,7 +71,6 @@ export default class FetchSecretRevisions extends BaseCommand {
         {
           secretSlug,
           environmentSlug: environment,
-          decryptValue,
           ...paginationOptions
         },
         this.headers
@@ -83,40 +82,41 @@ export default class FetchSecretRevisions extends BaseCommand {
         Logger.info(
           `Listing revisions of secret ${secretSlug} in environment ${environment}`
         )
-        data.items.forEach((revision) => {
+
+        for (const revision of revisions) {
           Logger.info(
-            `  | ${decryptValue ? revision.value : 'Hidden'} (version ${revision.version})`
+            `  | ${privateKey ? await decrypt(privateKey, revision.value) : 'Hidden'} (version ${revision.version})`
           )
           Logger.info(
             `  | Created on ${formatDate(revision.createdOn)} by ${revision.createdBy.name}`
           )
           Logger.info('')
-        })
+        }
       } else {
         Logger.info('No revisions found')
       }
     } else {
-      Logger.error(`Failed fetching revisions: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed fetching revisions.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 
   private async parseInput(options: CommandActionData['options']): Promise<{
-    decryptValue: boolean
+    privateKey?: string
     environment: string
     paginationOptions: CommandActionData['options']
   }> {
-    const { decryptValue = false, environment, ...paginationOptions } = options // defaults to false
+    const { projectSlug = null, environment, ...paginationOptions } = options // defaults to false
 
     if (!environment) {
       Logger.error('Environment slug is required')
       process.exit(1)
     }
 
+    const privateKey =
+      projectSlug !== null ? await fetchPrivateKey(projectSlug) : null
+
     return {
-      decryptValue,
+      privateKey,
       environment,
       paginationOptions
     }

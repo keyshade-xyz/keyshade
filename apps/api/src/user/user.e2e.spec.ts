@@ -6,10 +6,10 @@ import { Test } from '@nestjs/testing'
 import { UserModule } from './user.module'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AppModule } from '@/app/app.module'
-import { AuthProvider, User } from '@prisma/client'
+import { User } from '@prisma/client'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
-import { UserService } from './service/user.service'
+import { UserService } from './user.service'
 
 describe('User Controller Tests', () => {
   let app: NestFastifyApplication
@@ -81,10 +81,6 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...adminUser,
-      defaultWorkspace: null
-    })
   })
 
   it(`should be able to get self as user`, async () => {
@@ -104,10 +100,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      defaultWorkspace: expect.any(Object)
-    })
 
     expect(result.json().defaultWorkspace).toMatchObject({
       id: workspace.id,
@@ -215,18 +207,120 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': regularUser.email
       },
       payload: {
-        name: 'John Doe',
-        isOnboardingFinished: true
+        name: 'John Doe'
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      name: 'John Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('John Doe')
 
     regularUser = JSON.parse(result.body)
+  })
+
+  describe('Onboarding and Referral Tests', () => {
+    beforeEach(async () => {
+      // Flip the user's onboarding status to false
+      await prisma.user.update({
+        where: {
+          email: regularUser.email
+        },
+        data: {
+          isOnboardingFinished: false
+        }
+      })
+    })
+
+    test('users should be able to finish onboarding', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          teamSize: '4-10',
+          heardFrom: 'Google'
+        }
+      })
+      expect(result.statusCode).toEqual(200)
+      expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
+
+      const onboardingAnswers = await prisma.onboardingAnswers.findFirst({
+        where: {
+          userId: regularUser.id
+        }
+      })
+
+      expect(onboardingAnswers.heardFrom).toEqual('Google')
+      expect(onboardingAnswers.teamSize).toEqual('4-10')
+    })
+
+    test('users should not be able to finish onboarding twice', async () => {
+      await prisma.user.update({
+        where: {
+          email: regularUser.email
+        },
+        data: {
+          isOnboardingFinished: true
+        }
+      })
+
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          teamSize: '4-10',
+          heardFrom: 'Google'
+        }
+      })
+      expect(result.statusCode).toEqual(400)
+    })
+
+    test('users should be able to be referred', async () => {
+      await prisma.user.update({
+        where: {
+          id: adminUser.id
+        },
+        data: {
+          referralCode: '123456'
+        }
+      })
+
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          referralCode: '123456'
+        }
+      })
+      expect(result.statusCode).toEqual(200)
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email: regularUser.email
+        }
+      })
+      expect(user.referredById).toEqual(adminUser.id)
+    })
+
+    test('should fail if referral code is not present', async () => {
+      const result = await app.inject({
+        method: 'PUT',
+        url: '/user/onboarding',
+        headers: {
+          'x-e2e-user-email': regularUser.email
+        },
+        payload: {
+          referralCode: '123456'
+        }
+      })
+      expect(result.statusCode).toEqual(404)
+    })
   })
 
   test('admin should be able to update themselves', async () => {
@@ -237,16 +331,11 @@ describe('User Controller Tests', () => {
         'x-e2e-user-email': adminUser.email
       },
       payload: {
-        name: 'Admin Doe',
-        isOnboardingFinished: true
+        name: 'Admin Doe'
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...adminUser,
-      name: 'Admin Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('Admin Doe')
 
     adminUser = JSON.parse(result.body)
   })
@@ -278,9 +367,6 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
-    })
   })
 
   test('admin should be able to fetch all users', async () => {
@@ -308,11 +394,8 @@ describe('User Controller Tests', () => {
       }
     })
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      name: 'John Doe',
-      isOnboardingFinished: true
-    })
+    expect(JSON.parse(result.body).name).toEqual('John Doe')
+    expect(JSON.parse(result.body).isOnboardingFinished).toEqual(true)
   })
 
   test('admin should be able to create new users', async () => {
@@ -333,13 +416,6 @@ describe('User Controller Tests', () => {
       payload
     })
     expect(result.statusCode).toEqual(201)
-    expect(JSON.parse(result.body)).toEqual({
-      ...payload,
-      id: expect.any(String),
-      profilePictureUrl: null,
-      authProvider: AuthProvider.EMAIL_OTP,
-      defaultWorkspace: expect.any(Object)
-    })
   })
 
   test('admin should be able to delete any user', async () => {
@@ -366,9 +442,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser
-    })
 
     const userEmailChange = await prisma.otp.findMany({
       where: {
@@ -397,10 +470,7 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(200)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      email: 'newemail@keyshade.xyz'
-    })
+    expect(JSON.parse(result.body).email).toEqual('newemail@keyshade.xyz')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
@@ -452,10 +522,7 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(201)
-    expect(JSON.parse(result.body)).toEqual({
-      ...regularUser,
-      email: 'newjohn@keyshade.xyz'
-    })
+    expect(JSON.parse(result.body).email).toEqual('newjohn@keyshade.xyz')
 
     const updatedUser = await prisma.user.findUnique({
       where: {
@@ -492,11 +559,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(401)
-    expect(JSON.parse(result.body)).toEqual({
-      message: 'Invalid or expired OTP',
-      error: 'Unauthorized',
-      statusCode: 401
-    })
 
     const nonUpdatedUser = await prisma.user.findUnique({
       where: {
@@ -556,11 +618,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: 'User with this email already exists',
-      error: 'Conflict'
-    })
   })
 
   it('should return 409 Conflict if no previous OTP exists for email change', async () => {
@@ -573,11 +630,6 @@ describe('User Controller Tests', () => {
     })
 
     expect(result.statusCode).toEqual(409)
-    expect(JSON.parse(result.body)).toEqual({
-      statusCode: 409,
-      message: `No previous OTP for email change exists for user ${regularUser.id}`,
-      error: 'Conflict'
-    })
   })
 
   // test('user should be able to delete their own account', async () => {

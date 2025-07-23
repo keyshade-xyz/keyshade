@@ -14,16 +14,17 @@ import {
   ChangeNotificationEvent,
   ChangeNotifierRegistration
 } from './socket.types'
-import { Authority, User } from '@prisma/client'
+import { Authority } from '@prisma/client'
 import { CurrentUser } from '@/decorators/user.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
+import { AuthorizationService } from '@/auth/service/authorization.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
 import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
 import { AuthGuard } from '@/auth/guard/auth/auth.guard'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { AuthorityCheckerService } from '@/common/authority-checker.service'
+import { AuthenticatedUser } from '@/user/user.types'
 
 // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
@@ -51,7 +52,7 @@ export default class ChangeNotifier
       publisher: RedisClientType
     },
     private readonly prisma: PrismaService,
-    private readonly authorityCheckerService: AuthorityCheckerService
+    private readonly authorizationService: AuthorizationService
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -67,11 +68,12 @@ export default class ChangeNotifier
    * environmentId will receive the update.
    */
   async afterInit() {
-    this.logger.log('Initialized change notifier socket gateway')
+    this.logger.log('Initializing change notifier socket gateway')
     await this.redisSubscriber.subscribe(
       CHANGE_NOTIFIER_RSC,
       this.notifyConfigurationUpdate.bind(this)
     )
+    this.logger.log('Subscribed to configuration update channel')
   }
 
   async handleConnection(client: Socket) {
@@ -97,7 +99,7 @@ export default class ChangeNotifier
   async handleRegister(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChangeNotifierRegistration,
-    @CurrentUser() user: User
+    @CurrentUser() user: AuthenticatedUser
   ) {
     /**
      * This event is emitted from the CLI to register
@@ -114,40 +116,47 @@ export default class ChangeNotifier
      * Finally, we will send an ACK to the client with a status code of 200.
      */
 
+    this.logger.log(
+      `Registering client: ${client.id} for configuration: ${JSON.stringify(
+        data
+      )}`
+    )
+
     try {
       // Check if the user has access to the workspace
-      await this.authorityCheckerService.checkAuthorityOverWorkspace({
-        userId: user.id,
+      this.logger.log('Checking user access to workspace')
+      await this.authorizationService.authorizeUserAccessToWorkspace({
+        user,
         entity: { slug: data.workspaceSlug },
         authorities: [
           Authority.READ_WORKSPACE,
           Authority.READ_VARIABLE,
           Authority.READ_SECRET
-        ],
-        prisma: this.prisma
+        ]
       })
 
       // Check if the user has access to the project
-      await this.authorityCheckerService.checkAuthorityOverProject({
-        userId: user.id,
+      this.logger.log('Checking user access to project')
+      await this.authorizationService.authorizeUserAccessToProject({
+        user,
         entity: { slug: data.projectSlug },
-        authorities: [Authority.READ_PROJECT],
-        prisma: this.prisma
+        authorities: [Authority.READ_PROJECT]
       })
 
       // Check if the user has access to the environment
+      this.logger.log('Checking user access to environment')
       const environment =
-        await this.authorityCheckerService.checkAuthorityOverEnvironment({
-          userId: user.id,
+        await this.authorizationService.authorizeUserAccessToEnvironment({
+          user,
           entity: { slug: data.environmentSlug },
-          authorities: [Authority.READ_ENVIRONMENT],
-          prisma: this.prisma
+          authorities: [Authority.READ_ENVIRONMENT]
         })
 
       // Add the client to the environment
       await this.addClientToEnvironment(client, environment.id)
 
       // Send ACK to client
+      this.logger.log('Sending ACK to client')
       client.emit('client-registered', {
         success: true,
         message: 'Registration Successful'
@@ -168,6 +177,8 @@ export default class ChangeNotifier
   }
 
   private async addClientToEnvironment(client: Socket, environmentId: string) {
+    this.logger.log('Adding client to environment')
+
     await this.prisma.changeNotificationSocketMap.create({
       data: {
         socketId: client.id,
@@ -182,6 +193,8 @@ export default class ChangeNotifier
   }
 
   private async removeClientFromEnvironment(client: Socket) {
+    this.logger.log('Removing client from environment')
+
     // Get the environment that the client was connected to
     const socketMap = await this.prisma.changeNotificationSocketMap.findFirst({
       where: {
@@ -210,6 +223,8 @@ export default class ChangeNotifier
   }
 
   private async notifyConfigurationUpdate(rawData: string) {
+    this.logger.log('Received configuration update notification')
+
     const data = JSON.parse(rawData) as ChangeNotificationEvent
 
     // Get the environment that the entity belongs to

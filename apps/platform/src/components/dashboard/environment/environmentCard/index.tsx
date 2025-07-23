@@ -1,9 +1,8 @@
 'use client'
 
 import type { GetAllEnvironmentsOfProjectResponse } from '@keyshade/schema'
-import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
-import dayjs from 'dayjs'
 import { useSetAtom } from 'jotai'
+import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -15,18 +14,17 @@ import {
   editEnvironmentOpenAtom,
   selectedEnvironmentAtom
 } from '@/store'
-import Slug from '@/components/common/slug'
+import CopyToClipboard from '@/components/common/copy-to-clipboard'
+import { formatDate } from '@/lib/utils'
 
 interface EnvironmentCardProps {
-  environment: GetAllEnvironmentsOfProjectResponse['items'][number]
-}
-
-const formatDate = (date: string): string => {
-  return dayjs(date).format('D MMMM, YYYY')
+  environment: GetAllEnvironmentsOfProjectResponse['items'][number],
+  className?: string
 }
 
 export default function EnvironmentCard({
-  environment
+  environment,
+  className
 }: EnvironmentCardProps): React.JSX.Element {
   const setSelectedEnvironment = useSetAtom(selectedEnvironmentAtom)
   const setIsEditEnvironmentOpen = useSetAtom(editEnvironmentOpenAtom)
@@ -44,15 +42,15 @@ export default function EnvironmentCard({
 
   return (
     <ContextMenu key={environment.id}>
-      <ContextMenuTrigger className="w-full">
-        <div className="flex h-fit flex-col rounded-xl border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%]">
+      <ContextMenuTrigger className="w-full" id={`secret-${environment.slug}`}>
+        <div className={`flex h-fit flex-col rounded-xl overflow-hidden border-[1px] border-white/20 bg-white/[2%] transition-all duration-150 ease-in hover:bg-white/[5%] ${className}`}>
           <div className="flex flex-col gap-y-2 px-6 py-4">
             <div className="flex w-full flex-row flex-wrap items-center justify-between gap-4">
-              <div className="text-2xl">{environment.name}</div>
-              <Slug text={environment.slug} />
+              <div className="text-2xl truncate">{environment.name}</div>
+              <CopyToClipboard text={environment.slug} />
             </div>
             {environment.description ? (
-              <div className="text-sm font-semibold text-white/50">
+              <div className="text-sm truncate font-semibold text-white/50">
                 {environment.description}
               </div>
             ) : null}

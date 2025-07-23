@@ -2,6 +2,7 @@ import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
+import { TrashWhiteSVG } from '@public/svg/shared'
 import {
   Table,
   TableBody,
@@ -23,24 +24,50 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import {
+  deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
-  selectedVariableAtom
+  selectedVariableAtom,
+  selectedVariableEnvironmentAtom,
+  variableRevisionsOpenAtom
 } from '@/store'
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
+import AvatarComponent from '@/components/common/avatar'
+import { copyToClipboard } from '@/lib/clipboard'
 
-export default function VariableCard(
+interface VariableCardProps {
   variableData: GetAllVariablesOfProjectResponse['items'][number]
-) {
+  className?: string
+}
+
+export default function VariableCard({
+  variableData,
+  className
+}: VariableCardProps) {
   const setSelectedVariable = useSetAtom(selectedVariableAtom)
+  const setSelectedVariableEnvironment = useSetAtom(
+    selectedVariableEnvironmentAtom
+  )
   const setIsEditVariableOpen = useSetAtom(editVariableOpenAtom)
   const setIsDeleteVariableOpen = useSetAtom(deleteVariableOpenAtom)
+  const setIsDeleteEnvironmentValueOfVariableOpen = useSetAtom(
+    deleteEnvironmentValueOfVariableOpenAtom
+  )
+  const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
   const { variable, values } = variableData
+  const handleCopyToClipboard = () => {
+    copyToClipboard(
+      variable.slug,
+      'You copied the slug successfully.',
+      'Failed to copy the slug.',
+      'You successfully copied the slug.'
+    )
+  }
 
   const handleEditClick = () => {
     setSelectedVariable(variableData)
@@ -52,27 +79,45 @@ export default function VariableCard(
     setIsDeleteVariableOpen(true)
   }
 
+  const handleDeleteEnvironmentValueOfVariableClick = (environment: string) => {
+    setSelectedVariable(variableData)
+    setSelectedVariableEnvironment(environment)
+    setIsDeleteEnvironmentValueOfVariableOpen(true)
+  }
+
+  const handleRevisionsClick = () => {
+    setSelectedVariable(variableData)
+    setIsVariableRevisionsOpen(true)
+  }
+
   return (
     <ContextMenu key={variable.id}>
       <AccordionItem
-        className="rounded-xl bg-white/5 px-5"
+        className={`rounded-xl bg-white/5 px-5 ${className}`}
+        id={`variable-${variable.slug}`}
         key={variable.id}
         value={variable.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline"
+            className="hover:no-underline overflow-hidden"
             rightChildren={
-              <div className="text-xs text-white/50">
+              <div className="flex items-center gap-x-4 text-xs text-white/50">
                 {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
-                <span className="text-white">
-                  {variable.lastUpdatedBy.name}
-                </span>
+                <div className="flex items-center gap-x-2">
+                  <span className="text-white">
+                    {variable.lastUpdatedBy.name}
+                  </span>
+                  <AvatarComponent
+                    name={variable.lastUpdatedBy.name}
+                    profilePictureUrl={variable.lastUpdatedBy.profilePictureUrl}
+                  />
+                </div>
               </div>
             }
           >
-            <div className="flex gap-x-5">
-              <div className="flex items-center gap-x-4">{variable.name}</div>
+            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
+              <div className="flex items-center gap-x-4 truncate">{variable.name}</div>
               {variable.note ? (
                 <TooltipProvider>
                   <Tooltip>
@@ -89,46 +134,75 @@ export default function VariableCard(
           </AccordionTrigger>
         </ContextMenuTrigger>
         <AccordionContent>
-          <Table className="h-full w-full">
-            <TableHeader className="h-[3.125rem] w-full ">
-              <TableRow className="h-full w-full bg-white/10 ">
-                <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
-                  Environment
-                </TableHead>
-                <TableHead className="h-full text-base font-normal text-white/50">
-                  Value
-                </TableHead>
-                <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
-                  Version
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {values.map((value) => {
-                return (
-                  <TableRow
-                    className="h-[3.125rem] w-full hover:bg-white/5"
-                    key={value.environment.id}
-                  >
-                    <TableCell className="h-full w-[10.25rem] text-base">
-                      {value.environment.name}
-                    </TableCell>
-                    <TableCell className="h-full text-base">
-                      {value.value}
-                    </TableCell>
-                    <TableCell className="h-full px-8 py-4 text-base">
-                      {value.version}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          {values.length > 0 ? (
+            <Table className="h-full w-full">
+              <TableHeader className="h-[3.125rem] w-full ">
+                <TableRow className="h-full w-full bg-white/10 ">
+                  <TableHead className="h-full w-[10.25rem] rounded-tl-xl text-base font-normal text-white/50">
+                    Environment
+                  </TableHead>
+                  <TableHead className="h-full text-base font-normal text-white/50">
+                    Value
+                  </TableHead>
+                  <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                    Version
+                  </TableHead>
+                  <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {values.map((value) => {
+                  return (
+                    <TableRow
+                      className="group h-[3.125rem] w-full hover:bg-white/5"
+                      key={value.environment.id}
+                    >
+                      <TableCell className="h-full w-[10.25rem] text-base">
+                        {value.environment.name}
+                      </TableCell>
+                      <TableCell className="h-full text-base">
+                        {value.value}
+                      </TableCell>
+                      <TableCell className="h-full px-8 py-4 text-base">
+                        {value.version}
+                      </TableCell>
+                      <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
+                        <button
+                          onClick={() =>
+                            handleDeleteEnvironmentValueOfVariableClick(
+                              value.environment.slug
+                            )
+                          }
+                          type="button"
+                        >
+                          <TrashWhiteSVG />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="flex items-center justify-center py-8 text-sm text-white/50">
+              You have not added any values for any environment to this variable
+              yet. Edit the variable to add values.
+            </div>
+          )}
         </AccordionContent>
       </AccordionItem>
-      <ContextMenuContent className="flex h-[6.375rem] w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
-        <ContextMenuItem className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide">
+      <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
+        <ContextMenuItem
+          className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          onSelect={handleRevisionsClick}
+        >
           Show Version History
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="w-[15.938rem] border-b-[0.025rem] border-white/65 py-2 text-xs font-semibold tracking-wide"
+          onSelect={handleCopyToClipboard}
+        >
+          Copy slug
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"

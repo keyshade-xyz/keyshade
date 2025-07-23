@@ -1,22 +1,19 @@
 import 'reflect-metadata'
-import { Transform, Type } from 'class-transformer'
+import { Type } from 'class-transformer'
 import {
   IsArray,
-  IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   ValidateNested
 } from 'class-validator'
-import { TrimString } from '@/decorators/trim-string.decorator'
+import { NonEmptyTrimmedString } from '@/decorators/non-empty-trimmed-string.decorator'
+import { Entry } from '@/common/dto/entry.dto'
 
 export class CreateSecret {
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
+  @NonEmptyTrimmedString()
   name: string
 
-  @IsString()
   @IsOptional()
   @Length(0, 100)
   note?: string
@@ -30,16 +27,4 @@ export class CreateSecret {
   @ValidateNested({ each: true })
   @Type(() => Entry)
   entries?: Entry[]
-}
-
-class Entry {
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
-  environmentSlug: string
-
-  @IsString()
-  @IsNotEmpty()
-  @TrimString()
-  value: string
 }

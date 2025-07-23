@@ -7,6 +7,7 @@ import {
 } from 'src/types/command/command.types'
 import { Logger } from '@/util/logger'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
+import { Table } from '@/util/table'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -42,7 +43,7 @@ export class ListEnvironment extends BaseCommand {
       return
     }
 
-    Logger.info('Fetching all environments...')
+    Logger.header('Fetching all environments...')
 
     const {
       data: environments,
@@ -54,15 +55,15 @@ export class ListEnvironment extends BaseCommand {
     )
 
     if (success) {
-      Logger.info('Fetched environments:')
-      environments.items.forEach((environment: any) => {
-        Logger.info(`- ${environment.name} (${environment.slug})`)
-      })
+      const headers = ['#', '📦 Environment Name', '🆔 Environment Slug']
+      const rows = environments.items.map((environment: any, index: number) => [
+        (index + 1).toString(),
+        environment.name,
+        environment.slug
+      ])
+      Table.render(headers, rows)
     } else {
-      Logger.error(`Failed to fetch environments: ${error.message}`)
-      if (this.metricsEnabled && error?.statusCode === 500) {
-        Logger.report('Failed to fetch environments.\n' + JSON.stringify(error))
-      }
+      this.logError(error)
     }
   }
 }

@@ -5,6 +5,7 @@ import type {
 } from '@/types/index.types'
 import { existsSync } from 'fs'
 import { readFile, writeFile, mkdir } from 'fs/promises'
+import { Logger } from './logger'
 
 export const getOsType = (): 'unix' | 'windows' => {
   return process.platform === 'win32' ? 'windows' : 'unix'
@@ -31,6 +32,7 @@ export const fetchProfileConfig = async (): Promise<ProfileConfig> => {
   if (!existsSync(path)) {
     await ensureDirectoryExists(path)
     await writeFile(path, '{}', 'utf8')
+    Logger.info('~/.keyshade/profiles.json file was created.')
   }
 
   return JSON.parse(await readFile(path, 'utf8'))
@@ -41,6 +43,7 @@ export const fetchPrivateKeyConfig = async (): Promise<PrivateKeyConfig> => {
 
   if (!existsSync(path)) {
     await writeFile(path, '{}', 'utf8')
+    Logger.info('~/.keyshade/private-keys.json file was created.')
   }
 
   return JSON.parse(await readFile(path, 'utf8'))
@@ -50,7 +53,9 @@ export const fetchProjectRootConfig = async (): Promise<ProjectRootConfig> => {
   const path = './keyshade.json'
 
   if (!existsSync(path)) {
-    throw new Error('Project root configuration not found')
+    throw new Error(
+      'Project root configuration not found. Please check if keyshade.json is present in the current directory.'
+    )
   }
 
   return JSON.parse(await readFile(path, 'utf8'))
@@ -84,4 +89,9 @@ const ensureDirectoryExists = async (path: string) => {
   if (!existsSync(parentDirectory)) {
     await mkdir(parentDirectory, { recursive: true })
   }
+}
+
+export const fetchPrivateKey = async (projectSlug: string): Promise<string> => {
+  const privateKeys = await fetchPrivateKeyConfig()
+  return privateKeys[projectSlug]
 }

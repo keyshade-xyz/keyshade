@@ -45,9 +45,13 @@ function Footer(): React.JSX.Element {
                 >
                   <EncryptText TARGET_TEXT="Docs" />
                 </a>
-                <li className="text-white/60 transition-colors hover:text-white">
+                <a className="text-white/60 transition-colors hover:text-white"
+                  href='https://blog.keyshade.xyz/'
+                  rel="noreferrer"
+                  target="_blank"
+                >
                   <EncryptText TARGET_TEXT="Blog" />
-                </li>
+                </a>
               </ul>
             </div>
             <div>
@@ -82,7 +86,9 @@ function Footer(): React.JSX.Element {
                   </Link>
                 </li>
                 <li className="text-white/60 transition-colors hover:text-white">
-                  <EncryptText TARGET_TEXT="Contact" />
+                  <Link href="mailto:support@keyshade.xyz">
+                    <EncryptText TARGET_TEXT="Contact" />
+                  </Link>
                 </li>
               </ul>
             </div>

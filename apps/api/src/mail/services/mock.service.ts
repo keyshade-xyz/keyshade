@@ -28,8 +28,14 @@ export class MockMailService implements IMailService {
     this.log.log(`OTP for ${email} is ${otp}`)
   }
 
-  async accountLoginEmail(email: string): Promise<void> {
-    this.log.log(`Account Login Email for ${email}`)
+  async accountLoginEmail(
+    email: string,
+    username: string,
+    actionUrl: string
+  ): Promise<void> {
+    this.log.log(
+      `Account Login Email for ${email}, username ${username} and action URL ${actionUrl}`
+    )
   }
 
   async feedbackEmail(email: string, feedback: string): Promise<void> {
@@ -47,6 +53,15 @@ export class MockMailService implements IMailService {
   ): Promise<void> {
     this.log.log(
       `User with email ${email} has been removed from the workspace ${workspaceName} on ${removedOn.toISOString()}`
+    )
+  }
+
+  async sendLoginNotification(
+    email: string,
+    data: { ip: string; device: string; location?: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, Device=${data.device}`
     )
   }
 }

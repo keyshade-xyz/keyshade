@@ -1,20 +1,18 @@
 'use client'
 
-import { useEffect } from 'react'
-import type {
-  ClientResponse,
-  GetAllVariablesOfProjectResponse
-} from '@keyshade/schema'
-import { VariableSVG } from '@public/svg/dashboard'
+import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { toast } from 'sonner'
+import { useSearchParams } from 'next/navigation'
 import {
-  createVariableOpenAtom,
   selectedProjectAtom,
   deleteVariableOpenAtom,
   editVariableOpenAtom,
   selectedVariableAtom,
-  variablesOfProjectAtom
+  variablesOfProjectAtom,
+  deleteEnvironmentValueOfVariableOpenAtom,
+  variableRevisionsOpenAtom,
+  rollbackVariableOpenAtom,
+  globalSearchDataAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import ConfirmDeleteVariable from '@/components/dashboard/variable/confirmDeleteVariable'
@@ -22,100 +20,155 @@ import EditVariablSheet from '@/components/dashboard/variable/editVariableSheet'
 import ControllerInstance from '@/lib/controller-instance'
 import { Button } from '@/components/ui/button'
 import { Accordion } from '@/components/ui/accordion'
+import { useHttp } from '@/hooks/use-http'
+import VariableLoader from '@/components/dashboard/variable/variableLoader'
+import { VARIABLES_PAGE_SIZE } from '@/lib/constants'
+import ConfirmDeleteEnvironmentValueOfVariableDialog from '@/components/dashboard/variable/confirmDeleteEnvironmentValueOfVariableDialog'
+import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
+import VariableRevisionsSheet from '@/components/dashboard/variable/variableRevisionsSheet'
+import ConfirmRollbackVariable from '@/components/dashboard/variable/confirmRollbackVariable'
+import { cn } from '@/lib/utils'
+import { PageTitle } from '@/components/common/page-title'
 
 function VariablePage(): React.JSX.Element {
-  const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams.get('highlight')
+  const [isHighlighted, setIsHighlighted] = useState(false)
+
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
+  const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
+    deleteEnvironmentValueOfVariableOpenAtom
+  )
+  const isVariableRevisionsOpen = useAtomValue(variableRevisionsOpenAtom)
+  const isRollbackVariableOpen = useAtomValue(rollbackVariableOpenAtom)
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const [variables, setVariables] = useAtom(variablesOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
+  const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
+
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const getAllVariablesOfProject = useHttp(() =>
+    ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
+      {
+        projectSlug: selectedProject!.slug,
+        page,
+        limit: VARIABLES_PAGE_SIZE
+      },
+      {}
+    )
+  )
 
   useEffect(() => {
-    const getAllVariables = async () => {
-      if (!selectedProject) {
-        toast.error('No project selected', {
-          description: (
-            <p className="text-xs text-red-300">
-              No project selected. Please select a project.
-            </p>
-          )
-        })
-        return
-      }
+    if (selectedProject) {
+      setIsLoading(true)
 
-      const {
-        success,
-        error,
-        data
-      }: ClientResponse<GetAllVariablesOfProjectResponse> =
-        await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
-          { projectSlug: selectedProject.slug },
-          {}
-        )
-
-      if (success && data) {
-        setVariables(data.items)
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while fetching variables. Check console for
-              more info.
-            </p>
-          )
+      getAllVariablesOfProject()
+        .then(({ data, success }) => {
+          if (success && data) {
+            setVariables((prev) =>
+              page === 0 ? data.items : [...prev, ...data.items]
+            )
+            if (data.metadata.links.next === null) {
+              setHasMore(false)
+            }
+            setGlobalSearchData((prev) => ({
+              ...prev,
+              variables: data.items.map((item) => ({
+                slug: item.variable.slug,
+                name: item.variable.name,
+                note: item.variable.note
+              }))
+            }))
+          }
         })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
+        .finally(() => setIsLoading(false))
+    }
+  }, [
+    getAllVariablesOfProject,
+    page,
+    selectedProject,
+    setGlobalSearchData,
+    setVariables
+  ])
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1)
+  }
+
+  useEffect(() => {
+    if (highlightSlug) {
+      // Find and scroll to the element
+      const element = document.getElementById(`variable-${highlightSlug}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setIsHighlighted(true)
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          setIsHighlighted(false)
+        }, 2000)
       }
     }
+  }, [highlightSlug, variables])
 
-    getAllVariables()
-  }, [selectedProject, setVariables])
+  if (isLoading && page === 0) {
+    return (
+      <div className="space-y-4">
+        <VariableLoader />
+        <VariableLoader />
+        <VariableLoader />
+      </div>
+    )
+  }
 
   return (
     <div
       className={` flex h-full w-full ${isDeleteVariableOpen ? 'inert' : ''} `}
     >
+      <PageTitle title={`${selectedProject?.name} | Variables`} />
       {/* Showing this when there are no variables present */}
       {variables.length === 0 ? (
-        <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
-          <VariableSVG width="100" />
-
-          <div className="flex h-[5rem] w-[30.25rem] flex-col items-center justify-center gap-4">
-            <p className="h-[2.5rem] w-[30.25rem] text-center text-[32px] font-[400]">
-              Declare your first variable
-            </p>
-            <p className="h-[1.5rem] w-[30.25rem] text-center text-[16px] font-[500]">
-              Declare and store a variable against different environments
-            </p>
-          </div>
-
-          <Button
-            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-            onClick={() => setIsCreateVariableOpen(true)}
-          >
-            Create variable
-          </Button>
-        </div>
+        <EmptyVariableListContent />
       ) : (
         // Showing this when variables are present
         <div
           className={`flex h-full w-full flex-col items-center justify-start gap-y-8 p-3 text-white ${isDeleteVariableOpen ? 'inert' : ''} `}
         >
-          <Accordion
-            className="flex h-fit w-full flex-col gap-4"
-            collapsible
-            type="single"
+          <div className="flex h-fit w-full flex-col gap-4">
+            <Accordion
+              className="flex h-fit w-full flex-col gap-4"
+              collapsible
+              type="single"
+            >
+              {variables.map((variableData) => (
+                <VariableCard
+                  className={cn(
+                    highlightSlug === variableData.variable.slug &&
+                      isHighlighted &&
+                      'animate-highlight'
+                  )}
+                  key={variableData.variable.id}
+                  variableData={variableData}
+                />
+              ))}
+            </Accordion>
+            {isLoading && page > 0 ? (
+              <div className="w-full">
+                <VariableLoader />
+              </div>
+            ) : null}
+          </div>
+          <Button
+            className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+            disabled={isLoading || !hasMore}
+            onClick={handleLoadMore}
           >
-            {variables.map(({ variable, values }) => (
-              <VariableCard
-                key={variable.id}
-                values={values}
-                variable={variable}
-              />
-            ))}
-          </Accordion>
+            Load more
+          </Button>
           {/* Delete variable alert dialog */}
           {isDeleteVariableOpen && selectedVariable ? (
             <ConfirmDeleteVariable />
@@ -123,6 +176,21 @@ function VariablePage(): React.JSX.Element {
 
           {/* Edit variable sheet */}
           {isEditVariableOpen && selectedVariable ? <EditVariablSheet /> : null}
+
+          {/* Delete environment value of variable alert dialog */}
+          {isDeleteEnvironmentValueOfVariableOpen && selectedVariable ? (
+            <ConfirmDeleteEnvironmentValueOfVariableDialog />
+          ) : null}
+
+          {/* Variable revisions sheet */}
+          {isVariableRevisionsOpen && selectedVariable ? (
+            <VariableRevisionsSheet />
+          ) : null}
+
+          {/* Rollback variable alert dialog */}
+          {isRollbackVariableOpen && selectedVariable ? (
+            <ConfirmRollbackVariable />
+          ) : null}
         </div>
       )}
     </div>

@@ -4,7 +4,9 @@ import {
   ValidateOTPResponse,
   ValidateOTPRequest,
   SendOTPRequest,
-  SendOTPResponse
+  SendOTPResponse,
+  LogOutRequest,
+  LogOutResponse
 } from '@keyshade/schema'
 import { APIClient } from '@api-client/core/client'
 import { parseResponse } from '@api-client/core/response-parser'
@@ -51,5 +53,17 @@ export default class AuthController {
       headers
     )
     return await parseResponse<SendOTPResponse>(response)
+  }
+
+  async logOut(
+    request: LogOutRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<LogOutResponse>> {
+    const response = await this.apiClient.post(
+      '/api/auth/logout',
+      request,
+      headers
+    )
+    return await parseResponse<LogOutResponse>(response)
   }
 }

@@ -12,6 +12,35 @@ import VectorSVG from './vector.svg'
 import ErrorSVG from './Error.svg'
 import TrashSVG from './trash.svg'
 import CopySVG from './copy.svg'
+import CrownSVG from './crown.svg'
+import RolesSVG from './roles.svg'
+import CheckmarkSVG from './checkmark.svg'
+import TrashWhiteSVG from './trash-white.svg'
+import RollbackSVG from './rollback.svg'
+import MinusSquareSVG from './minus-square.svg'
+import EyeOpenSVG from './eye.svg'
+import EyeSlashSVG from './eye-slash.svg'
+import InfoSVG from './info.svg'
+import CloseCircleSVG from './close-circle.svg'
+import EditTwoSVG from './edit-2.svg'
+import MedalStarSVG from './medal-star.svg'
+import UserRemoveSVG from './user-remove.svg'
+import LockSVG from './lock.svg'
+import RegenerateSVG from './regenerate.svg'
+import TickCircleSVG from './tick-circle.svg'
+import LinkSVG from './link.svg'
+import SelectSVG from './select.svg'
+import ArrowUpSVG from './arrowup.svg'
+import ArrowDownSVG from './arrowdown.svg'
+import MobileScreenSVG from './mobile-screen.svg'
+import InvitationSVG from './invitation.svg'
+import ErrorInfoSVG from './errorInfo.svg'
+import DiscordSVG from './discord.svg'
+import SlackSVG from './slack.svg'
+import VercelSVG from './vercel.svg'
+import LambdaSVG from './lambda.svg'
+import EmptyIntegrationSVG from './emptyIntegration.svg'
+import PendingSVG from './pending.svg'
 
 export {
   DropdownSVG,
@@ -27,5 +56,34 @@ export {
   VectorSVG,
   ErrorSVG,
   TrashSVG,
-  CopySVG
+  CopySVG,
+  CrownSVG,
+  RolesSVG,
+  CheckmarkSVG,
+  EyeOpenSVG,
+  EyeSlashSVG,
+  InfoSVG,
+  TrashWhiteSVG,
+  RollbackSVG,
+  MinusSquareSVG,
+  CloseCircleSVG,
+  EditTwoSVG,
+  MedalStarSVG,
+  UserRemoveSVG,
+  LockSVG,
+  RegenerateSVG,
+  TickCircleSVG,
+  LinkSVG,
+  SelectSVG,
+  ArrowUpSVG,
+  ArrowDownSVG,
+  MobileScreenSVG,
+  InvitationSVG,
+  EmptyIntegrationSVG,
+  ErrorInfoSVG,
+  DiscordSVG,
+  SlackSVG,
+  PendingSVG,
+  VercelSVG,
+  LambdaSVG
 }

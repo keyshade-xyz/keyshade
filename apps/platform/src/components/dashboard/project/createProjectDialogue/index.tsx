@@ -1,305 +1,198 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAtom} from 'jotai'
+import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
-import type { CreateProjectRequest } from '@keyshade/schema'
-import { toast } from 'sonner'
-import { useCallback, useMemo, useState } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
+import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
+import CreateProjectName from './create-project-name'
+import CreateProjectDescription from './create-project-description'
+import CreateProjectAccessLevel from './create-project-access-level'
+import CreateProjectStorePrivateKey from './create-project-store-private-key'
+import CreateProjectEnvironmentList from './create-project-environment-list'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
+  DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import ControllerInstance from '@/lib/controller-instance'
-import {
   createProjectOpenAtom,
-  selectedWorkspaceAtom,
-  projectsOfWorkspaceAtom
+  viewAndDownloadProjectKeysOpenAtom,
 } from '@/store'
+import Visible from '@/components/common/visible'
+import { useProjectCreateData } from '@/hooks/screen/project/createProjectDialogue/use-project-create-data'
+import { useCreateNewProject } from '@/hooks/api/use-create-new-project'
 
 export default function CreateProjectDialogue(): JSX.Element {
-  const [projects, setProjects] = useAtom(projectsOfWorkspaceAtom)
+  const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
     createProjectOpenAtom
   )
-  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
 
-  const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
+  const [
+    isViewAndDownloadProjectKeysDialogOpen,
+    setIsViewAndDownloadProjectKeysDialogOpen
+  ] = useAtom(viewAndDownloadProjectKeysOpenAtom)
 
-  // Contains the data for the new project
-  const [newProjectData, setNewProjectData] = useState<CreateProjectRequest>({
-    name: '',
-    workspaceSlug: '',
-    description: '',
-    storePrivateKey: false,
-    environments: [
-      {
-        name: '',
-        description: ''
-      }
-    ],
-    accessLevel: 'PRIVATE'
-  })
+  const [projectSlug, setProjectSlug] = useState<string>('')
+  const [projectKeys, setProjectKeys] = useState<{
+    projectName: string
+    environmentSlug: string
+    storePrivateKey: boolean
+    keys: { publicKey: string; privateKey: string }
+  }>()
 
-  // Function to create a new project
-  const createNewProject = useCallback(async () => {
-    if (selectedWorkspace) {
-      // Filter out environments with empty names
-      const projectData = {
-        ...newProjectData,
-        workspaceSlug: selectedWorkspace.slug,
-        environments:
-          newProjectData.environments?.filter(
-            (env) => env.name.trim() !== ''
-          ) || []
-      }
-
-      const { data, error, success } =
-        await ControllerInstance.getInstance().projectController.createProject(
-          projectData,
-          {}
-        )
-
-      if (success && data) {
-        setProjects([
-          ...projects,
-          {
-            ...data,
-            environmentCount: newProjectData.environments
-              ? newProjectData.environments.length
-              : 0,
-            secretCount: 0,
-            variableCount: 0
-          }
-        ])
-      } else {
-        toast.error('Something went wrong!', {
-          description: (
-            <p className="text-xs text-red-300">
-              Something went wrong while creating the project. Check console for
-              more info.
-            </p>
-          )
-        })
-        // eslint-disable-next-line no-console -- we need to log the error
-        console.error(error)
-      }
-
-      setIsCreateProjectDialogOpen(false)
-    } else {
-      toast.error('No workspace selected')
-    }
-  }, [
-    selectedWorkspace,
+  const {
     newProjectData,
-    projects,
-    setIsCreateProjectDialogOpen,
-    setProjects
-  ])
+    updateEnvironment,
+    deleteEnvironment,
+    createNewEnvironment,
+    updateName,
+    updateDescription,
+    updateAccessLevel,
+    updateStorePrivateKey,
+    resetProjectData
+  } = useProjectCreateData()
 
-  const toggleDialog = useCallback(
-    () => setIsCreateProjectDialogOpen((prev) => !prev),
-    [setIsCreateProjectDialogOpen]
+  const { projects, isLoading, createNewProject } = useCreateNewProject(
+    newProjectData,
+    setProjectKeys,
+    setProjectSlug,
   )
 
+  const toggleDialog = useCallback(() => {
+    setIsCreateProjectDialogOpen((prev) => !prev)
+    if (!isCreateProjectDialogOpen) {
+      resetProjectData()
+    }
+  }, [
+    isCreateProjectDialogOpen,
+    resetProjectData,
+    setIsCreateProjectDialogOpen
+  ])
+
+  useEffect(() => {
+    if (newProjectData.storePrivateKey && privateKeyWarningRef.current) {
+      privateKeyWarningRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [newProjectData.storePrivateKey])
+
+  useEffect(() => {
+    if (projectKeys) {
+      setIsViewAndDownloadProjectKeysDialogOpen(true)
+    }
+  }, [projectKeys, setIsViewAndDownloadProjectKeysDialogOpen])
+
+  const hasNoEnvironments = newProjectData.environments?.length === 0
+
+  const isProjectsEmpty = useMemo(() => projects.length === 0, [projects])
   return (
-    <Dialog
-      onOpenChange={setIsCreateProjectDialogOpen}
-      open={isCreateProjectDialogOpen}
-    >
-      <DialogTrigger>
-        {isProjectsEmpty ? null : (
-          <Button onClick={toggleDialog}>
-            <AddSVG /> Create a new Project
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="h-[39.5rem] w-[28.625rem] rounded-[12px] border bg-[#1E1E1F] ">
-        <div className="flex h-[3.125rem] w-[25.625rem] flex-col items-start justify-center">
-          <DialogHeader className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
-            Create Projects
-          </DialogHeader>
+    <>
+      <Dialog
+        onOpenChange={setIsCreateProjectDialogOpen}
+        open={isCreateProjectDialogOpen}
+      >
+        <DialogTrigger asChild>
+          {isProjectsEmpty ? null : (
+            <Button onClick={toggleDialog}>
+              <AddSVG /> Create a new Project
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="h-[39.5rem] w-[47rem] max-w-full rounded-[12px] border bg-[#1E1E1F] ">
+          <div className="flex h-[3.125rem] w-full flex-col items-start justify-center">
+            <DialogTitle className=" font-geist h-[1.875rem] w-[8.5rem] text-[1.125rem] font-semibold text-white ">
+              Create Project
+            </DialogTitle>
 
-          <DialogDescription className=" font-inter h-[1.25rem] w-[25.625rem] text-[0.875rem] font-normal text-[#D4D4D4]">
-            Create your new project
-          </DialogDescription>
-        </div>
-        <div className="flex flex-col gap-y-8">
-          <div className="flex h-[29.125rem] w-[25.813rem] flex-col gap-[1rem] py-[1rem] ">
-            {/* NAME */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <Label
-                className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
-                htmlFor="name"
-              >
-                Name
-              </Label>
-              <Input
-                className="col-span-3 h-[2.25rem] w-[20rem] "
-                id="name"
-                onChange={(e) => {
-                  setNewProjectData((prev) => ({
-                    ...prev,
-                    name: e.target.value
-                  }))
+            <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
+              Create your new project
+            </DialogDescription>
+          </div>
+          <div className="flex flex-col gap-y-8 overflow-auto">
+            <div className="flex h-[29.125rem] w-full flex-col gap-4 py-4">
+              {/* NAME */}
+              <CreateProjectName
+                onChange={(value) => {
+                  updateName(value)
                 }}
-                placeholder="Enter the name"
               />
-            </div>
 
-            {/* DESCRIPTION */}
-            <div className="flex h-[5.625rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <Label
-                className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
-                htmlFor="name"
-              >
-                Description
-              </Label>
-              <Textarea
-                className="col-span-3 h-[5.625rem] w-[20rem] resize-none gap-[0.25rem]"
-                id="name"
-                onChange={(e) => {
-                  setNewProjectData((prev) => ({
-                    ...prev,
-                    description: e.target.value
-                  }))
+              {/* DESCRIPTION */}
+              <CreateProjectDescription
+                onChange={(value) => {
+                  updateDescription(value)
                 }}
-                placeholder="Enter the name"
               />
-            </div>
 
-            {/* ENV. NAME */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <Label
-                className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
-                htmlFor="envName"
-              >
-                Env. Name
-              </Label>
-              <Input
-                className="col-span-3 h-[2.25rem] w-[20rem] "
-                id="envName"
-                onChange={(e) => {
-                  setNewProjectData((prev) => ({
-                    ...prev,
-                    environments: (prev.environments || []).map((env, index) =>
-                      index === 0 ? { ...env, name: e.target.value } : env
-                    )
-                  }))
+              {/* ACCESS LEVEL */}
+              <CreateProjectAccessLevel
+                onChange={(value) => {
+                  updateAccessLevel(value)
                 }}
-                placeholder="Your project default environment name"
-              />
-            </div>
-
-            {/* ENV. DESCRIPTION */}
-            <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <Label
-                className="font-geist h-[1.25rem] w-[4.813rem] gap-[0.25rem] text-left text-[0.875rem] font-[500]"
-                htmlFor="envDescription"
-              >
-                Env. Description
-              </Label>
-              <Textarea
-                className="col-span-3 h-[4.875rem] w-[20rem] resize-none"
-                id="envDescription"
-                onChange={(e) => {
-                  setNewProjectData((prev) => ({
-                    ...prev,
-                    environments: (prev.environments || []).map((env, index) =>
-                      index === 0
-                        ? { ...env, description: e.target.value }
-                        : env
-                    )
-                  }))
-                }}
-                placeholder="Detailed description about your environment"
-              />
-            </div>
-
-            {/* ACCESS LEVEL */}
-            <div className="flex h-[2.25rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <Label
-                className="font-geist h-[0.875rem] w-[5.5rem] gap-[0.25rem] text-left text-[0.875rem] font-[500] "
-                htmlFor="accessLevel"
-              >
-                Access Level
-              </Label>
-              <Select
                 value={newProjectData.accessLevel}
-                onValueChange={(currValue) => {
-                  setNewProjectData((prevData) => ({
-                    ...prevData,
-                    accessLevel: currValue as 'GLOBAL' | 'INTERNAL' | 'PRIVATE'
-                  }))
+              />
+
+              {/* SWITCH */}
+              <CreateProjectStorePrivateKey
+                checked={newProjectData.storePrivateKey}
+                onChange={(checked) => {
+                  updateStorePrivateKey(checked)
                 }}
-              >
-                <SelectTrigger className=" h-[2.25rem] w-[20rem] rounded-[0.375rem] border-[0.013rem] border-white/10 bg-white/5 focus:border-[#3b82f6]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-[0.013rem] border-white/10 bg-neutral-800 text-white ">
-                  <SelectGroup>
-                    {['GLOBAL', 'INTERNAL', 'PRIVATE'].map((accessValue) => (
-                      <SelectItem
-                        className="group cursor-pointer rounded-sm"
-                        key={accessValue.toUpperCase()}
-                        value={accessValue.toUpperCase()}
-                      >
-                        {accessValue}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+              />
 
-            <div className="flex h-[4.875rem] w-[25.813rem] items-center justify-center gap-[1rem]">
-              <div className="flex h-[2.875rem] w-[22.563rem] flex-col items-start justify-center">
-                <h1 className="font-geist h-[1.5rem] w-[18.688rem] text-[1rem] font-[500]">
-                  Should the private key be saved or not?
-                </h1>
-                <h1 className="font-inter h-[1.25rem] w-[16.563rem] text-[0.8rem] font-normal text-[#A1A1AA] ">
-                  Choose if you want to save your private key
-                </h1>
-              </div>
+              {/* ENVIRONMENTS */}
+              <div className="flex flex-col gap-4">
+                <Label className="text-base font-semibold">Environments</Label>
 
-              <div className="p-[0.125rem]">
-                <Switch
-                  checked={newProjectData.storePrivateKey}
-                  className="h-[1.25rem] w-[2.25rem]"
-                  onCheckedChange={(checked) => {
-                    setNewProjectData((prev) => ({
-                      ...prev,
-                      storePrivateKey: checked
-                    }))
-                  }}
-                />
+                <div className="flex flex-col gap-5">
+                  {/* Environment List */}
+                  <div className="flex flex-col gap-4">
+                    <CreateProjectEnvironmentList
+                      environments={newProjectData.environments}
+                      hasNoEnvironments={hasNoEnvironments}
+                      onChangeDescription={(value, index) => {
+                        updateEnvironment(index, 'description', value)
+                      }}
+                      onChangeName={(value, index) => {
+                        updateEnvironment(index, 'name', value)
+                      }}
+                      onDeleteEnvironment={deleteEnvironment}
+                    />
+                  </div>
+                  <Button
+                    className="flex w-max items-center gap-1 text-sm font-medium"
+                    onClick={createNewEnvironment}
+                    variant="secondary"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="flex h-[2.25rem] w-[25.625rem] justify-end">
-          <Button
-            className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
-            onClick={createNewProject}
-            variant="secondary"
-          >
-            Create project
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="flex h-[2.25rem] w-full justify-end">
+            <Button
+              className="font-inter h-[2.25rem] w-[8rem] rounded-[0.375rem] text-[0.875rem] font-[500]"
+              disabled={isLoading}
+              onClick={createNewProject}
+              variant="secondary"
+            >
+              Create project
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Visible if={isViewAndDownloadProjectKeysDialogOpen}>
+        <ViewAndDownloadProjectKeysDialog
+          isCreated
+          projectKeys={projectKeys}
+          projectSlug={projectSlug}
+        />
+      </Visible>
+    </>
   )
 }

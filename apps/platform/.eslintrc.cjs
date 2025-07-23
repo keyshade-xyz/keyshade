@@ -19,6 +19,10 @@ module.exports = {
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
-    'no-nested-ternary': 'off'
+    '@typescript-eslint/no-unsafe-argument': 1,
+    'no-nested-ternary': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    '@next/next/no-html-link-for-pages': 'off',
+    'turbo/no-undeclared-env-vars': 'off'
   }
 }

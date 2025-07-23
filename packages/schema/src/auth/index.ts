@@ -19,3 +19,7 @@ export const SendOTPRequestSchema = z.object({
 })
 
 export const SendOTPResponseSchema = z.void()
+
+export const LogOutRequestSchema = z.void()
+
+export const LogOutResponseSchema = z.void()

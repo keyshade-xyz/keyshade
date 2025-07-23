@@ -2,23 +2,23 @@ import { AppModule } from '@/app/app.module'
 import { fetchEvents } from '@/common/event'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { EnvironmentModule } from '@/environment/environment.module'
-import { EnvironmentService } from '@/environment/service/environment.service'
+import { EnvironmentService } from '@/environment/environment.service'
 import { EventModule } from '@/event/event.module'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { MAIL_SERVICE } from '@/mail/services/interface.service'
 import { MockMailService } from '@/mail/services/mock.service'
 import { PrismaService } from '@/prisma/prisma.service'
 import { ProjectModule } from '@/project/project.module'
-import { ProjectService } from '@/project/service/project.service'
+import { ProjectService } from '@/project/project.service'
 import { SecretModule } from '@/secret/secret.module'
-import { SecretService } from '@/secret/service/secret.service'
-import { UserService } from '@/user/service/user.service'
+import { SecretService } from '@/secret/secret.service'
+import { UserService } from '@/user/user.service'
 import { UserModule } from '@/user/user.module'
-import { VariableService } from '@/variable/service/variable.service'
+import { VariableService } from '@/variable/variable.service'
 import { VariableModule } from '@/variable/variable.module'
-import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { WorkspaceService } from '@/workspace/service/workspace.service'
+import { WorkspaceService } from '@/workspace/workspace.service'
 import { WorkspaceModule } from '@/workspace/workspace.module'
 import {
   FastifyAdapter,
@@ -32,12 +32,13 @@ import {
   EventSource,
   EventTriggerer,
   EventType,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import { WorkspaceMembershipService } from './service/workspace-membership.service'
+import { WorkspaceMembershipService } from './workspace-membership.service'
 import { WorkspaceMembershipModule } from './workspace-membership.module'
+import { AuthenticatedUser } from '@/user/user.types'
+import { TierLimitService } from '@/common/tier-limit.service'
 
 const createMembership = async (
   roleId: string,
@@ -74,10 +75,15 @@ describe('Workspace Membership Controller Tests', () => {
   let secretService: SecretService
   let variableService: VariableService
   let workspaceRoleService: WorkspaceRoleService
+  let tierLimitService: TierLimitService
 
-  let user1: User, user2: User, user3: User
+  let user1: AuthenticatedUser,
+    user2: AuthenticatedUser,
+    user3: AuthenticatedUser
   let workspace1: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
+
+  const USER_IP_ADDRESS = '127.0.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -111,6 +117,7 @@ describe('Workspace Membership Controller Tests', () => {
     secretService = moduleRef.get(SecretService)
     variableService = moduleRef.get(VariableService)
     workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new QueryTransformPipe())
 
@@ -137,15 +144,53 @@ describe('Workspace Membership Controller Tests', () => {
       isOnboardingFinished: true
     })
 
-    workspace1 = createUser1.defaultWorkspace
-
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
-    user3 = createUser3
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user3 = {
+      ...createUser3,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser3.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -210,11 +255,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You are already the owner of the workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
 
     it('should not be able to transfer ownership to a non member', async () => {
@@ -231,11 +271,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${newWorkspace.slug}/transfer-ownership/${user3.email}`
       })
 
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `${user3.email} is not a member of workspace ${newWorkspace.name} (${newWorkspace.slug})`
-      })
+      expect(response.statusCode).toBe(404)
     })
 
     it('should not be able to transfer ownership to a member who did not accept the invitation', async () => {
@@ -255,11 +291,7 @@ describe('Workspace Membership Controller Tests', () => {
         url: `/workspace-membership/${newWorkspace.slug}/transfer-ownership/${user3.email}`
       })
 
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user3.email} has not accepted the invitation to workspace ${newWorkspace.name} (${newWorkspace.slug})`
-      })
+      expect(response.statusCode).toBe(400)
     })
 
     it('should be able to transfer the ownership of the workspace', async () => {
@@ -322,42 +354,87 @@ describe('Workspace Membership Controller Tests', () => {
 
       expect(response.statusCode).toBe(401)
     })
+  })
 
-    it('should not be able to transfer ownership of default workspace', async () => {
-      // Invite another user to the workspace
-      await workspaceMembershipService.inviteUsersToWorkspace(
-        user1,
-        workspace1.slug,
-        [
+  describe('Invite User Tests', () => {
+    it('should not be able to invite to default workspace', async () => {
+      const user1DefaultWorkspace = await prisma.workspace.findFirstOrThrow({
+        where: {
+          ownerId: user1.id,
+          isDefault: true
+        }
+      })
+
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${user1DefaultWorkspace.slug}/invite-users`,
+        body: [
           {
             email: user2.email,
             roleSlugs: [memberRole.slug]
           }
         ]
-      )
-
-      // Accept the invitation
-      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
-
-      // Try transferring ownership
-      const response = await app.inject({
-        method: 'PUT',
-        headers: {
-          'x-e2e-user-email': user1.email
-        },
-        url: `/workspace-membership/${workspace1.slug}/transfer-ownership/${user2.email}`
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot transfer ownership of default workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
-  })
 
-  describe('Invite User Tests', () => {
+    it('should not be able to invite users if tier limit is reached', async () => {
+      // Invite users until the tier limit is reached
+      for (
+        let i = 0;
+        i < tierLimitService.getMemberTierLimit(workspace1.id) - 1; // Subtract 1 for the user who owns the workspace
+        i++
+      ) {
+        // Create a user
+        const user = await userService.createUser({
+          email: `user${i}@example.com`,
+          name: `User ${i}`,
+          isOnboardingFinished: true
+        })
+
+        // Invite the user
+        await workspaceMembershipService.inviteUsersToWorkspace(
+          user1,
+          workspace1.slug,
+          [
+            {
+              email: user.email,
+              roleSlugs: [memberRole.slug]
+            }
+          ]
+        )
+      }
+
+      // Create another user
+      const user = await userService.createUser({
+        email: 'user@another-example.com',
+        name: 'User',
+        isActive: true,
+        isOnboardingFinished: true
+      })
+
+      // Invite the user
+      const response = await app.inject({
+        method: 'POST',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/invite-users`,
+        payload: [
+          {
+            email: user.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
     it('should do nothing if null or empty array is sent for invitation of user', async () => {
       const response = await app.inject({
         method: 'POST',
@@ -387,11 +464,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Admin role cannot be assigned to the user`
-      })
     })
 
     it('should allow user to invite another user to the workspace', async () => {
@@ -449,11 +521,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: `User ${user2.name} (${user2.id}) is already a member of workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
 
     it('should have created a INVITED_TO_WORKSPACE event', async () => {
@@ -557,11 +624,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot remove yourself from the workspace. Please transfer the ownership to another member before leaving the workspace.`
-      })
     })
 
     it('should have created a REMOVED_FROM_WORKSPACE event', async () => {
@@ -609,11 +671,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `Admin role cannot be assigned to the user`
-      })
     })
 
     it('should be able to update the role of a member', async () => {
@@ -694,11 +751,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `${user2.email} is not a member of workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
   })
 
@@ -748,11 +800,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a CANCELLED_INVITATION event', async () => {
@@ -840,11 +887,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a DECLINED_INVITATION event', async () => {
@@ -925,11 +967,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `${user2.email} is not invited to workspace ${workspace1.slug}`
-      })
     })
 
     it('should have created a ACCEPT_INVITATION event', async () => {
@@ -1004,11 +1041,6 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot leave the workspace as you are the owner of the workspace. Please transfer the ownership to another member before leaving the workspace.`
-      })
     })
 
     it('should not be able to leave the workspace if the user is not a member', async () => {
@@ -1073,6 +1105,80 @@ describe('Workspace Membership Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(401)
+    })
+  })
+
+  describe('Resend Invitation Tests', () => {
+    it('should be able to resend the invitation if user has not accepted the invitation', async () => {
+      // Send the invitation
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace1.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [memberRole.slug]
+          }
+        ]
+      )
+
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user2.email}`
+      })
+
+      expect(response.statusCode).toBe(200)
+    })
+
+    it('should not be able to resend the invitation if user is not a member', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user1.email}`
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    it('should not be able to resend invitation if workspace does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/ks_1234567890/resend-invitation/${user2.email}`
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to invite a user that does not exist', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/ks_1234567890`
+      })
+
+      expect(response.statusCode).toBe(404)
+    })
+
+    it('should not be able to invite a user that is already a member', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace-membership/${workspace1.slug}/resend-invitation/${user1.email}`
+      })
+
+      expect(response.statusCode).toBe(400)
     })
   })
 

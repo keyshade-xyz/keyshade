@@ -15,29 +15,30 @@ import {
   EventTriggerer,
   EventType,
   ProjectAccessLevel,
-  User,
   Workspace,
   WorkspaceRole
 } from '@prisma/client'
-import { EventService } from '@/event/service/event.service'
+import { EventService } from '@/event/event.service'
 import { EventModule } from '@/event/event.module'
 import { UserModule } from '@/user/user.module'
-import { UserService } from '@/user/service/user.service'
-import { WorkspaceService } from './service/workspace.service'
+import { UserService } from '@/user/user.service'
+import { WorkspaceService } from './workspace.service'
 import { QueryTransformPipe } from '@/common/pipes/query.transform.pipe'
 import { ProjectModule } from '@/project/project.module'
 import { EnvironmentModule } from '@/environment/environment.module'
 import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
-import { ProjectService } from '@/project/service/project.service'
-import { EnvironmentService } from '@/environment/service/environment.service'
-import { SecretService } from '@/secret/service/secret.service'
-import { VariableService } from '@/variable/service/variable.service'
-import { WorkspaceRoleService } from '@/workspace-role/service/workspace-role.service'
+import { ProjectService } from '@/project/project.service'
+import { EnvironmentService } from '@/environment/environment.service'
+import { SecretService } from '@/secret/secret.service'
+import { VariableService } from '@/variable/variable.service'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
 import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
-import { WorkspaceMembershipService } from '@/workspace-membership/service/workspace-membership.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
 import { fetchEvents } from '@/common/event'
+import { AuthenticatedUser } from '@/user/user.types'
+import { HttpStatus } from '@nestjs/common'
 
 const createMembership = async (
   roleId: string,
@@ -75,9 +76,12 @@ describe('Workspace Controller Tests', () => {
   let workspaceRoleService: WorkspaceRoleService
   let workspaceMembershipService: WorkspaceMembershipService
 
-  let user1: User, user2: User
+  let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
   let adminRole: WorkspaceRole, memberRole: WorkspaceRole
+
+  const USER_IP_ADDRESS = '127.0.0.1'
+  const BLACKLISTED_IP_ADDRESS = '192.168.0.1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -136,16 +140,42 @@ describe('Workspace Controller Tests', () => {
       name: 'Sadie',
       isOnboardingFinished: true
     })
-
-    workspace1 = createUser1.defaultWorkspace
     workspace2 = createUser2.defaultWorkspace
 
     delete createUser1.defaultWorkspace
     delete createUser2.defaultWorkspace
     delete createUser3.defaultWorkspace
 
-    user1 = createUser1
-    user2 = createUser2
+    user1 = {
+      ...createUser1,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser1.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+    user2 = {
+      ...createUser2,
+      ipAddress: USER_IP_ADDRESS,
+      emailPreference: {
+        id: expect.any(String),
+        userId: createUser2.id,
+        marketing: true,
+        activity: true,
+        critical: true,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }
+    }
+
+    workspace1 = await workspaceService.createWorkspace(user1, {
+      name: 'Workspace 1'
+    })
 
     memberRole = await prisma.workspaceRole.create({
       data: {
@@ -196,7 +226,7 @@ describe('Workspace Controller Tests', () => {
         },
         url: '/workspace',
         payload: {
-          name: 'Workspace 1',
+          name: 'Workspace 11',
           icon: '🤓'
         }
       })
@@ -204,7 +234,7 @@ describe('Workspace Controller Tests', () => {
       expect(response.statusCode).toBe(201)
       const body = response.json()
 
-      expect(body.name).toBe('Workspace 1')
+      expect(body.name).toBe('Workspace 11')
       expect(body.slug).toBeDefined()
       expect(body.icon).toBe('🤓')
       expect(body.ownerId).toBe(user1.id)
@@ -226,19 +256,9 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: 'Workspace already exists'
-      })
     })
 
     it('should let other user to create workspace with same name', async () => {
-      await workspaceService.createWorkspace(user1, {
-        name: 'Workspace 1',
-        icon: '🤓'
-      })
-
       const response = await app.inject({
         method: 'POST',
         headers: {
@@ -339,24 +359,19 @@ describe('Workspace Controller Tests', () => {
       expect(body.icon).toBe('🔥')
     })
 
-    it('should not be able to change the name to an existing workspace or same name', async () => {
+    it('should not allow updating the default workspace name', async () => {
       const response = await app.inject({
         method: 'PUT',
         headers: {
-          'x-e2e-user-email': user1.email
+          'x-e2e-user-email': user2.email
         },
-        url: `/workspace/${workspace1.slug}`,
+        url: `/workspace/${workspace2.slug}`,
         payload: {
-          name: 'My Workspace'
+          name: 'Default'
         }
       })
 
-      expect(response.statusCode).toBe(409)
-      expect(response.json()).toEqual({
-        statusCode: 409,
-        error: 'Conflict',
-        message: 'Workspace already exists'
-      })
+      expect(response.statusCode).toBe(400)
     })
 
     it('should not allow external user to update a workspace', async () => {
@@ -411,6 +426,10 @@ describe('Workspace Controller Tests', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.json().name).toEqual(workspace1.name)
+      expect(response.json().maxAllowedMembers).toBeDefined()
+      expect(response.json().maxAllowedProjects).toBeDefined()
+      expect(response.json().totalProjects).toBe(0)
+      expect(response.json().totalMembers).toBe(1)
     })
 
     it('should not be able to fetch the workspace by slug if user is not a member', async () => {
@@ -428,7 +447,9 @@ describe('Workspace Controller Tests', () => {
 
   describe('Get All Workspace Of User Tests', () => {
     it('should be able to fetch all the workspaces the user is a member of', async () => {
+      // Create the invitation, but don't accept it.
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+
       const response = await app.inject({
         method: 'GET',
         headers: {
@@ -438,7 +459,15 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json().items.length).toEqual(2)
+      expect(response.json().items.length).toEqual(1)
+
+      const workspaceJson = response.json().items[0]
+
+      expect(workspaceJson.name).toEqual('My Workspace')
+      expect(workspaceJson.maxAllowedMembers).toBeDefined()
+      expect(workspaceJson.maxAllowedProjects).toBeDefined()
+      expect(workspaceJson.totalProjects).toBe(0)
+      expect(workspaceJson.totalMembers).toBe(1)
 
       //check metadata
       const metadata = response.json().metadata
@@ -482,6 +511,9 @@ describe('Workspace Controller Tests', () => {
 
     it('should be able to fetch the 2nd page of the workspaces the user is a member of', async () => {
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
+      // Accept the invitation
+      await workspaceMembershipService.acceptInvitation(user2, workspace1.slug)
+
       const response = await app.inject({
         method: 'GET',
         headers: {
@@ -531,6 +563,7 @@ describe('Workspace Controller Tests', () => {
       expect(body.items[0].workspace.slug).not.toBe(workspace2.slug)
       expect(body.items[0]).toEqual({
         invitedOn: expect.any(String),
+        invitationAccepted: false,
         workspace: {
           icon: workspace1.icon,
           id: workspace1.id,
@@ -613,6 +646,107 @@ describe('Workspace Controller Tests', () => {
     })
   })
 
+  describe('Get Blacklisted IP Addresses Tests', () => {
+    it('should not be able to fetch blacklisted IP addresses by user', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should be able to fetch blacklisted IP addresses by workspace administrator', async () => {
+      await prisma.workspace.update({
+        where: {
+          id: workspace1.id
+        },
+        data: {
+          blacklistedIpAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      const response = await app.inject({
+        method: 'GET',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.OK)
+
+      const blacklistedIpAddresses = response.json()
+
+      expect(blacklistedIpAddresses).toHaveLength(1)
+      expect(blacklistedIpAddresses[0]).toBe(BLACKLISTED_IP_ADDRESS)
+    })
+  })
+
+  describe('Update Blacklisted IP Addresses Tests', () => {
+    it('should not be able to update blacklisted IP addresses by user', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user2.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should not be able to update blacklisted IP addresses by workspace administrator from a blacklisted IP address', async () => {
+      await prisma.workspace.update({
+        where: {
+          id: workspace1.id
+        },
+        data: {
+          blacklistedIpAddresses: [USER_IP_ADDRESS]
+        }
+      })
+
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: []
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.UNAUTHORIZED)
+    })
+
+    it('should be able to update blacklisted IP addresses by workspace administrator', async () => {
+      const response = await app.inject({
+        method: 'PUT',
+        headers: {
+          'x-e2e-user-email': user1.email
+        },
+        url: `/workspace/${workspace1.slug}/blacklistedIpAddresses`,
+        payload: {
+          ipAddresses: [BLACKLISTED_IP_ADDRESS]
+        }
+      })
+
+      expect(response.statusCode).toBe(HttpStatus.OK)
+
+      const updatedBlacklistedIpAddresses = response.json()
+
+      expect(updatedBlacklistedIpAddresses).toHaveLength(1)
+      expect(updatedBlacklistedIpAddresses[0]).toBe(BLACKLISTED_IP_ADDRESS)
+    })
+  })
+
   describe('Export Data Tests', () => {
     it('should not be able to export data of a non-existing workspace', async () => {
       const response = await app.inject({
@@ -624,11 +758,6 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace abc not found`
-      })
     })
 
     it('should not be able to export data of a workspace it is not a member of', async () => {
@@ -698,29 +827,28 @@ describe('Workspace Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(404)
-      expect(response.json()).toEqual({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Workspace 123 not found`
-      })
     })
 
     it('should not be able to delete the default workspace', async () => {
+      const user1DefaultWorkspace = await prisma.workspace.findUnique({
+        where: {
+          name_ownerId: {
+            name: 'My Workspace',
+            ownerId: user1.id
+          }
+        }
+      })
+
       // Try deleting the default workspace
       const response = await app.inject({
         method: 'DELETE',
         headers: {
           'x-e2e-user-email': user1.email
         },
-        url: `/workspace/${workspace1.slug}`
+        url: `/workspace/${user1DefaultWorkspace.slug}`
       })
 
       expect(response.statusCode).toBe(400)
-      expect(response.json()).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: `You cannot delete the default workspace ${workspace1.name} (${workspace1.slug})`
-      })
     })
   })
 

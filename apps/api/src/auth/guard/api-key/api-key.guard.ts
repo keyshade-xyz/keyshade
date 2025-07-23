@@ -11,6 +11,7 @@ import { Observable } from 'rxjs'
 import { AuthenticatedUserContext } from '../../auth.types'
 import { FORBID_API_KEY } from '@/decorators/forbid-api-key.decorator'
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator'
+import { constructErrorBody } from '@/common/util'
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -70,11 +71,21 @@ export class ApiKeyGuard implements CanActivate {
     )
 
     if (forbidApiKey && user.isAuthViaApiKey) {
-      throw new UnauthorizedException('API key authentication is forbidden.')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'API Key forbidden',
+          'API key authentication is forbidden for this route'
+        )
+      )
     }
 
     if (!user.apiKeyAuthorities) {
-      throw new UnauthorizedException('The API key has no authorities.')
+      throw new UnauthorizedException(
+        constructErrorBody(
+          'No authorities in API key',
+          'The API key has no authorities.'
+        )
+      )
     }
 
     if (user.apiKeyAuthorities.has(Authority.ADMIN)) {
@@ -84,7 +95,10 @@ export class ApiKeyGuard implements CanActivate {
     for (const requiredAuthority of requiredAuthorities) {
       if (!user.apiKeyAuthorities.has(requiredAuthority)) {
         throw new UnauthorizedException(
-          `The API key is missing the required authority: ${requiredAuthority}`
+          constructErrorBody(
+            'API Key missing authorities',
+            `The API key is missing the required authority: ${requiredAuthority}`
+          )
         )
       }
     }

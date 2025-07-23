@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
 }
 
@@ -135,6 +135,8 @@ enum IntegrationType {
   SLACK
   GITHUB
   GITLAB
+  VERCEL
+  AWS_LAMBDA
 }
 
 enum AuthProvider {
@@ -150,6 +152,12 @@ enum ProjectAccessLevel {
   PRIVATE
 }
 
+enum IntegrationRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
 model Event {
   id          String         @id @default(cuid())
   source      EventSource
@@ -157,7 +165,7 @@ model Event {
   severity    EventSeverity
   type        EventType
   timestamp   DateTime       @default(now())
-  metadata    Json
+  metadata    String
   title       String
   description String?
   itemId      String?
@@ -166,6 +174,23 @@ model Event {
   userId      String?
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   workspaceId String?
+
+  integrationTrigger IntegrationRun[]
+}
+
+model IntegrationRun {
+  id          String               @id @default(cuid())
+  title       String
+  duration    Int
+  triggeredAt DateTime
+  logs        String?
+  status      IntegrationRunStatus
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  eventId String
+
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  integrationId String
 }
 
 model Notification {
@@ -179,6 +204,21 @@ model Notification {
   userId    String
 }
 
+model LoginSession {  
+  id             String   @id @default(cuid())  
+  userId         String  
+  ipHash         String  
+  browser        String  
+  geolocation    String?  
+  createdAt      DateTime @default(now())
+  lastLoggedOnAt DateTime @default(now())
+    
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  
+    
+  @@unique([userId, ipHash, browser])  
+  @@index([userId])  
+}
+
 model User {
   id                   String        @id @default(cuid())
   email                String        @unique
@@ -189,6 +229,8 @@ model User {
   isAdmin              Boolean       @default(false)
   authProvider         AuthProvider?
   subscription         Subscription?
+  joinedOn             DateTime      @default(now())
+  referralCode         String        @unique
 
   workspaceMembers WorkspaceMember[]
   workspaces       Workspace[]
@@ -202,8 +244,29 @@ model User {
   secretVersion    SecretVersion[]
   variableVersion  VariableVersion[]
   events           Event[]
+  integrations     Integration[] // Stores the integrations the user updated
+  emailPreference  EmailPreference?
+  loginSessions    LoginSession[] 
+  onboardingAnswers OnboardingAnswers?
+
+  referredById         String?       
+  referredBy           User?         @relation("UserReferrals", fields: [referredById], references: [id])
+  referredUsers        User[]        @relation("UserReferrals")
 
   @@index([email], name: "email")
+}
+
+model OnboardingAnswers {
+  id   String @id @default(cuid())
+  role String?
+  industry String?
+  teamSize String?
+  productStage String?
+  useCase String?
+  heardFrom String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
 }
 
 model Subscription {
@@ -219,21 +282,27 @@ model Integration {
   id        String          @id @default(cuid())
   name      String
   slug      String          @unique
-  metadata  Json
+  metadata  String
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   type      IntegrationType
   notifyOn  EventType[]
 
+  lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  lastUpdatedById String?
+
   // An integration will always be tied to a workspace
   workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   workspaceId   String
+
   // An integration may or may not have relations with projects
   project       Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   projectId     String?
-  // An integration may or may not have relations with environments
-  environment   Environment? @relation(fields: [environmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  environmentId String?
+
+  // An integration may or may not have relations with environments of the project
+  environments  Environment[]
+
+  integrationTrigger IntegrationRun[]
 
   @@unique([workspaceId, name])
 }
@@ -457,15 +526,16 @@ model Otp {
 }
 
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  isFreeTier  Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  ownerId     String
-  isDefault   Boolean  @default(false)
-  icon        String?
+  id                     String   @id @default(cuid())
+  name                   String
+  slug                   String   @unique
+  isFreeTier             Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  ownerId                String
+  isDefault              Boolean  @default(false)
+  icon                   String?
+  blacklistedIpAddresses String[]
 
   lastUpdatedBy   User?   @relation(fields: [lastUpdatedById], references: [id], onUpdate: Cascade, onDelete: SetNull)
   lastUpdatedById String?
@@ -492,4 +562,19 @@ model UserEmailChange {
   otp      Otp    @relation(fields: [otpId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   otpId    String @unique
   newEmail String
+}
+
+model EmailPreference {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  marketing   Boolean  @default(true)
+  activity    Boolean  @default(true)
+  critical    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  
+  @@index([userId, id], name: "userEmailPreference")
 }
