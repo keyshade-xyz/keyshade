@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition -- ESLint incorrectly flags totalEventsCount comparison as always truthy */
-
 import React, { useCallback } from 'react'
 import { EditTwoSVG, TrashWhiteSVG } from '@public/svg/shared'
 import type { Integration } from '@keyshade/schema'
@@ -10,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import AvatarComponent from '@/components/common/avatar'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import { deleteIntegrationOpenAtom, editIntegrationOpenAtom } from '@/store'
+import Visible from '@/components/common/visible'
 
 interface IntegrationDetailsProps {
   selectedIntegration: Integration
@@ -62,7 +61,8 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
       </div>
       <div className="flex justify-between border-t border-white/10 pt-4">
         <div className="mr-2 flex w-3/4 items-center gap-3">
-          {selectedIntegration.lastUpdatedBy ? <div className="flex items-center gap-2">
+          <Visible if={Boolean(selectedIntegration.lastUpdatedBy)}>
+            <div className="flex items-center gap-2">
               <AvatarComponent
                 name={selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                 profilePictureUrl={
@@ -83,7 +83,8 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
                   )}
                 </div>
               </div>
-            </div> : null}
+            </div>
+          </Visible>
         </div>
         <div className="flex w-1/4 items-center justify-end">
           <CopyToClipboard text={selectedIntegration.slug} />

@@ -7,6 +7,7 @@ import IntegrationIcon from '../integrationIcon'
 import CreateIntegration from '../createIntegration'
 import { Button } from '@/components/ui/button'
 import { createIntegrationOpenAtom, createIntegrationTypeAtom } from '@/store'
+import Visible from '@/components/common/visible'
 
 export default function IntegrationServices(): React.JSX.Element {
   const integrations = useMemo(() => Object.values(Integrations), [])
@@ -22,10 +23,11 @@ export default function IntegrationServices(): React.JSX.Element {
     },
     [setCreateIntegrationModelOpen, setCreateIntegrationType]
   )
+  const hasIntegrations = integrations.length > 0
 
   return (
     <div>
-      {integrations.length > 0 && (
+      <Visible if={hasIntegrations}>
         <div className="grid grid-cols-3 gap-5">
           {integrations.map((integration) => {
             const isActive = integration.isActive
@@ -57,10 +59,12 @@ export default function IntegrationServices(): React.JSX.Element {
             )
           })}
         </div>
-      )}
+      </Visible>
 
       {/* create Integration flow */}
-      {createIntegrationModelOpen ? <CreateIntegration /> : null}
+      <Visible if={createIntegrationModelOpen}>
+        <CreateIntegration />
+      </Visible>
     </div>
   )
 }

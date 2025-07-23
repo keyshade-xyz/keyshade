@@ -1,6 +1,7 @@
 import type { Integration } from '@keyshade/schema'
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import Visible from '@/components/common/visible'
 
 interface EventSubscriptionsProps {
   selectedIntegration: Integration
@@ -31,13 +32,13 @@ function EventSubscriptions({ selectedIntegration }: EventSubscriptionsProps) {
               key={event}
             >
               {event
-                .replace(/_/g, ' ')
+                .replace(/_/g, ' ') // Replace underscores with spaces
                 .toLowerCase()
                 .replace(/\b\w/g, (l) => l.toUpperCase())}
             </span>
           ))}
         </div>
-        {totalEventsCount > INITIAL_EVENTS_COUNT && (
+        <Visible if={totalEventsCount > INITIAL_EVENTS_COUNT}>
           <Button
             className="bg-blue-400/w0 border border-white/20 text-sm font-medium text-blue-400 transition-colors hover:bg-transparent hover:text-blue-500"
             onClick={() => setShowAllEvents(!showAllEvents)}
@@ -46,7 +47,7 @@ function EventSubscriptions({ selectedIntegration }: EventSubscriptionsProps) {
               ? 'Show less'
               : `Show ${totalEventsCount - INITIAL_EVENTS_COUNT} more`}
           </Button>
-        )}
+        </Visible>
       </div>
     </div>
   )

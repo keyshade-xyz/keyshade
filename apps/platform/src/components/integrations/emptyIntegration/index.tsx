@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button'
 export default function EmptyIntegration(): React.JSX.Element {
   const router = useRouter()
 
+  const handleCreateIntegration = () => {
+    router.push('/integrations?tab=overview')
+  }
+
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
       <EmptyIntegrationSVG width="120" />
@@ -21,7 +25,7 @@ export default function EmptyIntegration(): React.JSX.Element {
 
       <Button
         className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-        onClick={() => router.push('/integrations?tab=overview')}
+        onClick={handleCreateIntegration}
       >
         Create Integration
       </Button>

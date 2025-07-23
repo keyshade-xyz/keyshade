@@ -4,6 +4,7 @@ import type { EventTypeEnum, IntegrationTypeEnum } from '@keyshade/schema'
 import { Integrations } from '@keyshade/common'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
+import Visible from '@/components/common/visible'
 
 interface EventTriggersInputProps {
   selectedEvents: Set<EventTypeEnum>
@@ -94,7 +95,7 @@ export default function EventTriggersInput({
             </label>
           </div>
 
-          {eventGroups.length > INITIAL_GROUP_COUNT && (
+          <Visible if={eventGroups.length > INITIAL_GROUP_COUNT}>
             <Button
               className="my-0 h-fit p-0 text-white/50 hover:bg-transparent hover:text-white/60"
               onClick={() => setShowAllGroups(!showAllGroups)}
@@ -103,7 +104,7 @@ export default function EventTriggersInput({
             >
               {showAllGroups ? 'Show Less' : 'Show More'}
             </Button>
-          )}
+          </Visible>
         </div>
         <div className="space-y-5">
           {visibleGroups.map((group) => (

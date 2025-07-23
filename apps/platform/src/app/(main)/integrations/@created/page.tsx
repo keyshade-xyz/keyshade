@@ -26,7 +26,6 @@ function IntegrationsPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Integrations list */}
       <IntegrationList />
     </div>
   )

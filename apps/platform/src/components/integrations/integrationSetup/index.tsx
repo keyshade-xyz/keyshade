@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import Visible from '@/components/common/visible'
 
 interface SetupIntegrationProps {
   integrationType: IntegrationTypeEnum
@@ -30,7 +31,15 @@ export default function SetupIntegration({
   open,
   onOpenChange
 }: SetupIntegrationProps) {
-  const [currentStep, setCurrentStep] = useState(1)
+  enum Step {
+    IntegrationSetupStep,
+    ProjectEnvironmentStep
+  }
+
+  const [currentStep, setCurrentStep] = useState<Step>(
+    Step.IntegrationSetupStep
+  )
+
   const {
     formState,
     isLoading,
@@ -41,35 +50,35 @@ export default function SetupIntegration({
   } = useSetupIntegration(integrationType, integrationName)
 
   const handleNext = () => {
-    if (!formState.name.trim()) {
+    const isNameEmpty = formState.name.trim() === ''
+    const noEventsSelected = formState.selectedEvents.size === 0
+    const isMetadataMissing = Object.keys(formState.metadata).length === 0
+    const hasEmptyMetadataValues = Object.values(formState.metadata).some(
+      (value) =>
+        (typeof value === 'string' && value.trim() === '') ||
+        (typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).length === 0)
+    )
+
+    if (isNameEmpty) {
       toast.error('Integration name is required')
       return
     }
-    if (formState.selectedEvents.size === 0) {
+    if (noEventsSelected) {
       toast.error('At least one event must be selected')
       return
     }
-    if (Object.keys(formState.metadata).length === 0) {
+    if (isMetadataMissing) {
       toast.error('Integration metadata is required')
       return
     }
-    const hasEmptyValues = Object.values(formState.metadata).some((value) => {
-      if (typeof value === 'string' && value.trim() === '') return true
-      if (
-        typeof value === 'object' &&
-        value !== null &&
-        Object.keys(value).length === 0
-      )
-        return true
-      return false
-    })
-
-    if (hasEmptyValues) {
+    if (hasEmptyMetadataValues) {
       toast.error('All configuration fields are required')
-      return false
+      return
     }
 
-    setCurrentStep(2)
+    setCurrentStep(Step.ProjectEnvironmentStep)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,7 +87,7 @@ export default function SetupIntegration({
 
     if (success) {
       onOpenChange?.(false)
-      setCurrentStep(1)
+      setCurrentStep(Step.IntegrationSetupStep)
     }
   }
 
@@ -96,7 +105,7 @@ export default function SetupIntegration({
         </DialogHeader>
 
         <div className="border-t border-white/20">
-          {currentStep === 1 && (
+          <Visible if={currentStep === Step.IntegrationSetupStep}>
             <div className="flex flex-col gap-6 py-4">
               {/* Integration Name */}
               <div>
@@ -130,9 +139,9 @@ export default function SetupIntegration({
                 onChange={handlers.handleMetadataChange}
               />
             </div>
-          )}
+          </Visible>
 
-          {currentStep === 2 && (
+          <Visible if={currentStep === Step.ProjectEnvironmentStep}>
             <div className="flex flex-col gap-6 py-4">
               {/* Project and Environment Selection */}
               {config.isPrivateKeyRequired ? (
@@ -148,19 +157,19 @@ export default function SetupIntegration({
                 />
               )}
             </div>
-          )}
+          </Visible>
         </div>
 
         <div className="flex w-full justify-between border-t border-white/20 pt-4">
           <Button variant="secondary">Need Help?</Button>
 
-          {currentStep === 1 && (
+          <Visible if={currentStep === Step.IntegrationSetupStep}>
             <Button onClick={handleNext} type="button" variant="secondary">
               Continue
             </Button>
-          )}
+          </Visible>
 
-          {currentStep === 2 && (
+          <Visible if={currentStep === Step.ProjectEnvironmentStep}>
             <Button
               disabled={isLoading}
               onClick={handleSubmit}
@@ -168,7 +177,7 @@ export default function SetupIntegration({
             >
               {isLoading ? 'Creating...' : 'Create Integration'}
             </Button>
-          )}
+          </Visible>
         </div>
       </DialogContent>
     </Dialog>

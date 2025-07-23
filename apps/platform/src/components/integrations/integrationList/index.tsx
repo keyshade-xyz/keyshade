@@ -36,6 +36,8 @@ function IntegrationList() {
   const [loading, setLoading] = useState<boolean>(true)
   const router = useRouter()
 
+  const MAX_INTEGRATION_NAME_LENGTH = 25
+
   const getAllIntegrations = useHttp(() =>
     ControllerInstance.getInstance().integrationController.getAllIntegrations(
       { workspaceSlug: selectedWorkspace!.slug },
@@ -124,8 +126,8 @@ function IntegrationList() {
                     className="truncate text-xl font-semibold"
                     title={integration.name}
                   >
-                    {integration.name.length > 25
-                      ? `${integration.name.slice(0, 25)}…`
+                    {integration.name.length > MAX_INTEGRATION_NAME_LENGTH
+                      ? `${integration.name.slice(0, MAX_INTEGRATION_NAME_LENGTH)}…`
                       : integration.name}
                   </h2>
                   <p

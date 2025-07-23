@@ -1,4 +1,3 @@
- 
 'use client'
 import { useAtom, useAtomValue } from 'jotai'
 import { useRouter } from 'next/navigation'
@@ -83,10 +82,12 @@ function IntegrationDetailsPage() {
         <EventSubscriptions selectedIntegration={selectedIntegration} />
 
         {/* Project and Environment Info */}
-        {currentWorkspace ? <ProjectEnvironmentList
+        {currentWorkspace ? (
+          <ProjectEnvironmentList
             currentWorkspace={currentWorkspace}
             selectedIntegration={selectedIntegration}
-          /> : null}
+          />
+        ) : null}
       </div>
 
       {/* Integration Trigger List Component */}
