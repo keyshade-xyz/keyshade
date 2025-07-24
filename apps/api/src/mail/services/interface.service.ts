@@ -29,4 +29,13 @@ export interface IMailService {
     workspaceName: string,
     removedOn: Date
   ): Promise<void>
+
+  sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      location?: string
+    }
+  ): Promise<void>
 }

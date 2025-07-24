@@ -1,3 +1,30 @@
+## [2.31.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.6...v2.31.0-stage.7) (2025-07-21)
+
+### 🚀 Features
+
+* **api:** send e-mail when user logs in ([#1080](https://github.com/keyshade-xyz/keyshade/issues/1080)) ([461dd72](https://github.com/keyshade-xyz/keyshade/commit/461dd72b7832a8e1491f5010c51f972dddecb2f5))
+
+## [2.31.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.5...v2.31.0-stage.6) (2025-07-20)
+
+### 🚀 Features
+
+* **cli:** Override environment at run time using run commmand ([#1051](https://github.com/keyshade-xyz/keyshade/issues/1051)) ([a991179](https://github.com/keyshade-xyz/keyshade/commit/a991179d3c78e5cc11721249dbaa18eb05253ef0))
+
+## [2.31.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.4...v2.31.0-stage.5) (2025-07-17)
+
+### 🐛 Bug Fixes
+
+* **platform:** skip redirection not working ([#1074](https://github.com/keyshade-xyz/keyshade/issues/1074)) ([86b661a](https://github.com/keyshade-xyz/keyshade/commit/86b661a0aa58b5e8e83e7d02ea45c91c21ccc014))
+
+### 📚 Documentation
+
+* Added Vercel Integration Guide and Updated SUMMARY.md and Added… ([#1068](https://github.com/keyshade-xyz/keyshade/issues/1068)) ([ba473fb](https://github.com/keyshade-xyz/keyshade/commit/ba473fb606af500433aca801bfd64a67eea7c069))
+* Integration Dropdown Pages README.md Created ([#1071](https://github.com/keyshade-xyz/keyshade/issues/1071)) ([dc2a936](https://github.com/keyshade-xyz/keyshade/commit/dc2a936ca20fd2b061d52e0674211ea7f9be0869))
+
+### 🔨 Code Refactoring
+
+* **platform:** Housekeeping ([#1070](https://github.com/keyshade-xyz/keyshade/issues/1070)) ([958b58a](https://github.com/keyshade-xyz/keyshade/commit/958b58a06e6662f4dcff43be91cf5ee32b7d459e))
+
 ## [2.31.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.3...v2.31.0-stage.4) (2025-07-10)
 
 ### 🐛 Bug Fixes
