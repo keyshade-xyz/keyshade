@@ -353,6 +353,7 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         response.failed.map(({ error }) => error.message).join('\n')
       )
+      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -438,6 +439,7 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         ''
       )
+      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -554,6 +556,7 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         ''
       )
+      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -598,5 +601,73 @@ export class VercelIntegration extends BaseIntegration {
     }
 
     return this.vercel
+  }
+
+  private async triggerRedeploy(): Promise<void> {
+    const integration = this.getIntegration<VercelIntegrationMetadata>()
+
+    const projectId: string = integration.metadata.projectId as string
+    const teamId: string = integration.metadata.teamId as string
+
+    this.vercel = await this.getVercelClient()
+
+    try {
+      this.logger.log(
+        `[VERCEL] Fetching latest READY deployment for ${projectId}...`
+      )
+
+      const { deployments } = await this.vercel.deployments.getDeployments({
+        projectId,
+        teamId,
+        state: 'READY',
+        target: 'production',
+        limit: 1
+      })
+
+      const latest = deployments?.[0]
+      const deploymentId = latest?.uid
+      if (!deploymentId) {
+        this.logger.warn(
+          `[VERCEL] No valid deployment UID found, skipping redeploy.`
+        )
+        return
+      }
+
+      const fullDeployment = await this.vercel.deployments.getDeployment({
+        idOrUrl: deploymentId,
+        teamId
+      })
+
+      const {
+        id,
+        name,
+        target,
+        projectId: deploymentProjectId,
+        meta
+      } = fullDeployment as {
+        id: string
+        name: string
+        target?: string | null
+        projectId: string
+        meta?: Record<string, string>
+      }
+
+      this.logger.log(`[VERCEL] Triggering redeploy from deployment ID: ${id}`)
+      const result = await this.vercel.deployments.createDeployment({
+        teamId,
+        requestBody: {
+          deploymentId: id,
+          name,
+          project: deploymentProjectId,
+          target: target ?? 'production',
+          meta: meta ?? {},
+          withLatestCommit: true
+        }
+      })
+
+      this.logger.log(`[VERCEL] Redeployment triggered: ${result.url}`)
+    } catch (err) {
+      this.logger.error(`[VERCEL] Redeployment failed`, err)
+    }
   }
 }
