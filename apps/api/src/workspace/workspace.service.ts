@@ -153,7 +153,8 @@ export class WorkspaceService {
 
     return this.hydrationService.hydrateWorkspace({
       workspace: updatedWorkspace,
-      user
+      user,
+      authorizationService: this.authorizationService
     })
   }
 
@@ -312,7 +313,8 @@ export class WorkspaceService {
           async (item) =>
             await this.hydrationService.hydrateWorkspace({
               workspace: item,
-              user
+              user,
+              authorizationService: this.authorizationService
             })
         )
       ),

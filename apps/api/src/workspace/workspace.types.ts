@@ -12,6 +12,7 @@ export interface HydratedWorkspace extends Workspace {
   totalProjects: number
   maxAllowedMembers: number
   totalMembers: number
+  projects: number
   entitlements: {
     canReadProjects: boolean
     canCreateProjects: boolean
@@ -38,6 +39,7 @@ export interface RawWorkspace
     | 'totalProjects'
     | 'maxAllowedMembers'
     | 'totalMembers'
+    | 'projects'
   > {
   members: Partial<WorkspaceMember>[]
   roles: Partial<WorkspaceRole>[]

@@ -490,15 +490,21 @@ export class IntegrationService {
       include: {
         projects: {
           include: {
-            project: true
+            project: true,
+            environments: true
           }
         }
       }
     })
-    const projectIds =
-      workspaceRoles
-        .map((role) => role.projects.map((p) => p.projectId))
-        .flat() || []
+    const projectIds: Project['id'][] = []
+    const environmentIds: Environment['id'][] = []
+
+    for (const { projects } of workspaceRoles) {
+      projectIds.push(...projects.map((p) => p.projectId))
+      environmentIds.push(
+        ...projects.flatMap((p) => p.environments.map((e) => e.id))
+      )
+    }
 
     // Get all integrations in the workspace
     const integrations = await this.prisma.integration.findMany({
@@ -516,7 +522,14 @@ export class IntegrationService {
               in: projectIds
             }
           }
-        ]
+        ],
+        environments: {
+          every: {
+            id: {
+              in: environmentIds
+            }
+          }
+        }
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),

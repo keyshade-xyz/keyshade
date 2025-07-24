@@ -71,10 +71,12 @@ type WorkspaceMemberHydrationParams = RootHydrationParams & {
 
 type ProjectHydrationParams = RootHydrationParams & {
   project: RawProject
+  authorizationService: AuthorizationService
 }
 
 type WorkspaceHydrationParams = RootHydrationParams & {
   workspace: RawWorkspace
+  authorizationService?: AuthorizationService // Will be null when creating a workspace
 }
 
 @Injectable()
@@ -419,7 +421,8 @@ export class HydrationService {
   public async hydrateProject({
     project,
     user,
-    permittedAuthorities
+    permittedAuthorities,
+    authorizationService
   }: ProjectHydrationParams): Promise<HydratedProject> {
     if (!permittedAuthorities) {
       permittedAuthorities =
@@ -478,6 +481,11 @@ export class HydrationService {
     )
 
     const tierLimits = await this.computeProjectLimits(project)
+    const projectResources = await this.countAuthorizedProjectResources(
+      project,
+      user,
+      authorizationService
+    )
 
     delete project.environments
     delete project.variables
@@ -486,6 +494,7 @@ export class HydrationService {
     const hydratedProject: HydratedProject = {
       ...project,
       ...tierLimits,
+      ...projectResources,
       entitlements
     }
 
@@ -495,7 +504,8 @@ export class HydrationService {
   public async hydrateWorkspace({
     workspace,
     user,
-    permittedAuthorities
+    permittedAuthorities,
+    authorizationService
   }: WorkspaceHydrationParams): Promise<HydratedWorkspace> {
     if (!permittedAuthorities) {
       permittedAuthorities = await getCollectiveWorkspaceAuthorities(
@@ -545,6 +555,15 @@ export class HydrationService {
     }
 
     const tierLimits = await this.computeWorkspaceLimits(workspace)
+    const workspaceResources = authorizationService
+      ? await this.countAuthorizedWorkspaceResources(
+          workspace,
+          user,
+          authorizationService
+        )
+      : {
+          projects: 0
+        }
 
     this.logger.log(
       `Associated entitlements with workspace ${workspace.slug} for user ${user.id}: ${JSON.stringify(
@@ -560,6 +579,7 @@ export class HydrationService {
     return {
       ...workspace,
       ...tierLimits,
+      ...workspaceResources,
       entitlements,
       isDefault: workspace.isDefault && workspace.ownerId === user.id
     }
@@ -653,7 +673,6 @@ export class HydrationService {
    * @returns A promise that resolves to an object containing the workspace with
    * tier limits, including maximum allowed and total members and projects.
    */
-
   private async computeWorkspaceLimits(workspace: RawWorkspace): Promise<{
     maxAllowedProjects: number
     totalProjects: number
@@ -690,6 +709,164 @@ export class HydrationService {
       totalMembers,
       maxAllowedProjects,
       totalProjects
+    }
+  }
+
+  /**
+   * Count the number of authorized environments, variables and secrets in a project.
+   *
+   * This function will check if the user has access to each environment in the project
+   * and then fetch the counts of variables and secrets for each permitted environment.
+   *
+   * @param project The project to count the resources of.
+   * @param user The user to check the access for.
+   * @param authorizationService The authorization service to use for checking access.
+   * @returns A promise that resolves with an object containing the counts of environments,
+   * variables and secrets the user has access to in the project.
+   */
+  public async countAuthorizedProjectResources(
+    project: RawProject,
+    user: AuthenticatedUser,
+    authorizationService: AuthorizationService
+  ): Promise<{
+    secrets: number
+    variables: number
+    environments: number
+  }> {
+    this.logger.log(
+      `Counting environments, variables and secrets in project ${project.slug}`
+    )
+
+    this.logger.log(`Fetching all environments of project ${project.slug}`)
+    const allEnvs = await this.prisma.environment.findMany({
+      where: { projectId: project.id }
+    })
+    this.logger.log(
+      `Found ${allEnvs.length} environments in project ${project.slug}`
+    )
+
+    const permittedEnvironments = []
+
+    this.logger.log(
+      `Checking access to all environments of project ${project.slug}`
+    )
+    for (const env of allEnvs) {
+      this.logger.log(
+        `Checking access to environment ${env.slug} of project ${project.slug}`
+      )
+      try {
+        const permittedEnv =
+          await authorizationService.authorizeUserAccessToEnvironment({
+            user,
+            authorities:
+              project.accessLevel == ProjectAccessLevel.GLOBAL
+                ? []
+                : [
+                    Authority.READ_ENVIRONMENT,
+                    Authority.READ_SECRET,
+                    Authority.READ_VARIABLE
+                  ],
+            slug: env.slug
+          })
+
+        this.logger.log(
+          `User has access to environment ${env.slug} of project ${project.slug}`
+        )
+        permittedEnvironments.push(permittedEnv)
+      } catch (e) {
+        this.logger.log(
+          `User does not have access to environment ${env.slug} of project ${project.slug}`
+        )
+      }
+    }
+
+    const envPromises = permittedEnvironments.map(async (env: Environment) => {
+      const fetchSecretCount = this.prisma.secret.count({
+        where: {
+          projectId: project.id,
+          versions: { some: { environmentId: env.id } }
+        }
+      })
+
+      const fetchVariableCount = this.prisma.variable.count({
+        where: {
+          projectId: project.id,
+          versions: { some: { environmentId: env.id } }
+        }
+      })
+
+      return this.prisma.$transaction([fetchSecretCount, fetchVariableCount])
+    })
+
+    this.logger.log(
+      `Fetching counts of variables and secrets in project ${project.slug}`
+    )
+    const counts = await Promise.all(envPromises)
+    const secretCount = counts.reduce(
+      (sum, [secretCount]) => sum + secretCount,
+      0
+    )
+    const variableCount = counts.reduce(
+      (sum, [, variableCount]) => sum + variableCount,
+      0
+    )
+    this.logger.log(
+      `Found ${variableCount} variables and ${secretCount} secrets in project ${project.slug}`
+    )
+
+    return {
+      environments: permittedEnvironments.length,
+      secrets: secretCount,
+      variables: variableCount
+    }
+  }
+
+  /**
+   * Counts the number of resources of a given type that are accessible to the
+   * given user in the given workspace.
+   *
+   * @param workspace The workspace to count resources in.
+   * @param user The user to check access for.
+   * @param authorizationService The authorization service to use for checking
+   * access.
+   *
+   * @returns An object with the count of accessible projects.
+   */
+  private async countAuthorizedWorkspaceResources(
+    workspace: RawWorkspace,
+    user: AuthenticatedUser,
+    authorizationService: AuthorizationService
+  ): Promise<{
+    projects: number
+  }> {
+    const projects = await this.prisma.project.findMany({
+      where: {
+        workspaceId: workspace.id
+      }
+    })
+
+    let accessibleProjectCount = 0
+
+    for (const project of projects) {
+      let hasAuthority = null
+      try {
+        hasAuthority = await authorizationService.authorizeUserAccessToProject({
+          user,
+          slug: project.slug,
+          authorities: [Authority.READ_PROJECT]
+        })
+      } catch (_ignored) {
+        this.logger.log(
+          `User ${user.id} does not have access to project ${project.slug}`
+        )
+      }
+
+      if (hasAuthority) {
+        accessibleProjectCount++
+      }
+    }
+    return {
+      projects: accessibleProjectCount
     }
   }
 

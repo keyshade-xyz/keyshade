@@ -35,7 +35,10 @@ export class AuthorizationService {
     params: AuthorizationParams
   ): Promise<HydratedWorkspace> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace(params)
+      await this.authorityCheckerService.checkAuthorityOverWorkspace(
+        params,
+        this
+      )
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -55,7 +58,7 @@ export class AuthorizationService {
     params: AuthorizationParams
   ): Promise<HydratedProject> {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject(params)
+      await this.authorityCheckerService.checkAuthorityOverProject(params, this)
 
     const workspace = await this.getWorkspace(project.workspaceId)
 
