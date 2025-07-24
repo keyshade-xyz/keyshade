@@ -81,6 +81,9 @@ export default class ChangeNotifier
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}.`)
+    this.logger.log(
+      `Auth headers - x-keyshade-token: ${client.handshake.headers['x-keyshade-token'] ? 'present' : 'missing'}`
+    )
   }
 
   async handleDisconnect(client: Socket) {
@@ -223,7 +226,7 @@ export default class ChangeNotifier
               messageToParse.message || JSON.stringify(messageToParse)
           }
         } else {
-          // Last resort: try to extract useful information from the error object
+          // Try to extract useful information from the error object
           if (error.statusCode && error.error) {
             errorMessage = `${error.statusCode}: ${error.error}`
           } else if (error.code && error.detail) {

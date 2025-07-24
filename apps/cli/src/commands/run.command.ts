@@ -112,8 +112,9 @@ export default class RunCommand extends BaseCommand {
 
   private async connectToSocket(data: RunData) {
     Logger.info('Connecting to socket...')
-    const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
-    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
+    // Fix: Parse the full host from baseUrl, not just the last segment
+    const url = new URL(this.baseUrl)
+    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${url.host}/change-notifier`
     const privateKey = data.privateKey
     const quitOnDecryptionFailure = data.quitOnDecryptionFailure
 
@@ -173,14 +174,13 @@ export default class RunCommand extends BaseCommand {
             let errorMessage = 'Unknown error'
 
             if (typeof registrationResponse.message === 'string') {
-              // if it is just a string
-              // use it directly
+              // If it is just a string, use it directly
               errorMessage = registrationResponse.message
             } else if (
               typeof registrationResponse.message === 'object' &&
               registrationResponse.message !== null
             ) {
-              // if the message is an object and not null
+              // If the message is an object and not null
               // Attempt to parse the message if it's a JSON string
               // Handle nested error structure
               const msgObj = registrationResponse.message as any
@@ -195,13 +195,16 @@ export default class RunCommand extends BaseCommand {
                     errorMessage = nestedMessage
                   }
                 } catch {
-                  // if parsing fails, fallback to string representation
+                  // If parsing fails, fallback to string representation
                   errorMessage = nestedMessage
                 }
               } else {
                 // If the message is not a string, stringify it
                 errorMessage = JSON.stringify(msgObj)
               }
+            } else {
+              // Handle other types (undefined, null, etc.)
+              errorMessage = String(registrationResponse.message)
             }
 
             Logger.error(`Error registering to API: ${errorMessage}`)
