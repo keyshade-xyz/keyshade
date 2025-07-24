@@ -609,6 +609,13 @@ export class VercelIntegration extends BaseIntegration {
     const projectId: string = integration.metadata.projectId as string
     const teamId: string = integration.metadata.teamId as string
 
+    if (!projectId || !teamId) {
+      this.logger.warn(
+        '[VERCEL] Missing projectId or teamId, skipping redeploy'
+      )
+      return
+    }
+
     this.vercel = await this.getVercelClient()
 
     try {
