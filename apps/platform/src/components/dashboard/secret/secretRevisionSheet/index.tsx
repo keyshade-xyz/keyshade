@@ -2,8 +2,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import type { Environment, SecretVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
-import { RollbackSVG } from '@public/svg/shared'
 import { decrypt } from '@keyshade/common'
+import { RollbackSVG } from '@public/svg/shared'
 import {
   Sheet,
   SheetContent,
