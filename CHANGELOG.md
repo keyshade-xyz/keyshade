@@ -1,3 +1,13 @@
+## [2.31.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.7...v2.31.0-stage.8) (2025-07-25)
+
+### 🚀 Features
+
+* **api:** update workspace invitation email ([#1077](https://github.com/keyshade-xyz/keyshade/issues/1077)) ([7b0d2f1](https://github.com/keyshade-xyz/keyshade/commit/7b0d2f1df5ccc9d739644e769a170ba431329d5d))
+
+### 🐛 Bug Fixes
+
+* **platform:** Updating Secret/Variable in One Environment Also Increments Version in Another ([#1078](https://github.com/keyshade-xyz/keyshade/issues/1078)) ([37eb430](https://github.com/keyshade-xyz/keyshade/commit/37eb430d1f5cc55ca9949a514116e576f9bbcb3a))
+
 ## [2.31.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.6...v2.31.0-stage.7) (2025-07-21)
 
 ### 🚀 Features
