@@ -1,3 +1,9 @@
+## [2.31.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.8...v2.31.0-stage.9) (2025-07-25)
+
+### 🚀 Features
+
+* **platform:** Revamp integration pages ([#1072](https://github.com/keyshade-xyz/keyshade/issues/1072)) ([21235f3](https://github.com/keyshade-xyz/keyshade/commit/21235f3dc07b4cd756a1b83470fb0f3bed0db0c3))
+
 ## [2.31.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.7...v2.31.0-stage.8) (2025-07-25)
 
 ### 🚀 Features
