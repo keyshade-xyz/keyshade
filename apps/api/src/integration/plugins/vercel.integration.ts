@@ -159,6 +159,8 @@ export class VercelIntegration extends BaseIntegration {
     )
 
     await this.addEnvironmentalVariable(addEventMetadata, data.event.id)
+
+    await this.triggerRedeploy(data.event.id)
   }
 
   /**
@@ -186,6 +188,8 @@ export class VercelIntegration extends BaseIntegration {
       },
       data.event.id
     )
+
+    await this.triggerRedeploy(data.event.id)
   }
 
   private async delegateConfigurationDeletedEvent(data: IntegrationEventData) {
@@ -193,6 +197,8 @@ export class VercelIntegration extends BaseIntegration {
       decryptMetadata<ConfigurationDeletedEventMetadata>(data.event.metadata)
 
     await this.deleteEnvironmentalVariable(deleteEventMetadata, data.event.id)
+
+    await this.triggerRedeploy(data.event.id)
   }
 
   /**
@@ -353,7 +359,6 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         response.failed.map(({ error }) => error.message).join('\n')
       )
-      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -439,7 +444,6 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         ''
       )
-      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -556,7 +560,6 @@ export class VercelIntegration extends BaseIntegration {
         totalDuration,
         ''
       )
-      await this.triggerRedeploy()
     } catch (error) {
       this.logger.error(
         error instanceof Error ? `Error: ${error.message}` : String(error)
@@ -603,29 +606,25 @@ export class VercelIntegration extends BaseIntegration {
     return this.vercel
   }
 
-  private async triggerRedeploy(): Promise<void> {
+  private async triggerRedeploy(eventId: Event['id']): Promise<void> {
     const integration = this.getIntegration<VercelIntegrationMetadata>()
-
-    const projectId: string = integration.metadata.projectId as string
-    const teamId: string = integration.metadata.teamId as string
-
-    if (!projectId || !teamId) {
-      this.logger.warn(
-        '[VERCEL] Missing projectId or teamId, skipping redeploy'
-      )
-      return
-    }
+    const projectId: string = integration.metadata.projectId
 
     this.vercel = await this.getVercelClient()
 
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: integration.id,
+      title: `Triggering Vercel redeploy for project ${projectId}`
+    })
+
+    let duration = 0
+
     try {
-      this.logger.log(
-        `[VERCEL] Fetching latest READY deployment for ${projectId}...`
-      )
+      this.logger.log(`Fetching latest READY deployment for ${projectId}...`)
 
       const { deployments } = await this.vercel.deployments.getDeployments({
         projectId,
-        teamId,
         state: 'READY',
         target: 'production',
         limit: 1
@@ -634,16 +633,22 @@ export class VercelIntegration extends BaseIntegration {
       const latest = deployments?.[0]
       const deploymentId = latest?.uid
       if (!deploymentId) {
-        this.logger.warn(
-          `[VERCEL] No valid deployment UID found, skipping redeploy.`
+        this.logger.warn(`No valid deployment UID found, skipping redeploy.`)
+
+        await this.markIntegrationRunAsFinished(
+          integrationRunId,
+          IntegrationRunStatus.FAILED,
+          duration,
+          'No valid deployment UID found for redeployment.'
         )
         return
       }
 
-      const fullDeployment = await this.vercel.deployments.getDeployment({
-        idOrUrl: deploymentId,
-        teamId
-      })
+      const { duration: fetchDuration, response: fullDeployment } =
+        await makeTimedRequest(() =>
+          this.vercel.deployments.getDeployment({ idOrUrl: deploymentId })
+        )
+      duration += fetchDuration
 
       const {
         id,
@@ -659,22 +664,40 @@ export class VercelIntegration extends BaseIntegration {
         meta?: Record<string, string>
       }
 
-      this.logger.log(`[VERCEL] Triggering redeploy from deployment ID: ${id}`)
-      const result = await this.vercel.deployments.createDeployment({
-        teamId,
-        requestBody: {
-          deploymentId: id,
-          name,
-          project: deploymentProjectId,
-          target: target ?? 'production',
-          meta: meta ?? {},
-          withLatestCommit: true
-        }
-      })
+      this.logger.log(`Triggering redeploy from deployment ID: ${id}`)
 
-      this.logger.log(`[VERCEL] Redeployment triggered: ${result.url}`)
+      const { duration: redeployDuration, response: result } =
+        await makeTimedRequest(() =>
+          this.vercel.deployments.createDeployment({
+            requestBody: {
+              deploymentId: id,
+              name,
+              project: deploymentProjectId,
+              target: target ?? 'production',
+              meta: meta ?? {},
+              withLatestCommit: true
+            }
+          })
+        )
+      duration += redeployDuration
+
+      this.logger.log(`Redeployment triggered: ${result.url}`)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.SUCCESS,
+        duration,
+        ''
+      )
     } catch (err) {
-      this.logger.error(`[VERCEL] Redeployment failed`, err)
+      this.logger.error(`Redeployment failed`, err)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        duration,
+        err instanceof Error ? err.message : String(err)
+      )
     }
   }
 }
