@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import secretDetector from '@keyshade/secret-scan'
 import { parse as parseDotenv } from 'dotenv'
 import type { Project } from '@keyshade/schema'
+import { SecretSVG, VariableSVG } from '@public/svg/dashboard'
 import ImportConfiguration from '../ImportConfiguration'
 import ModifyFileScan from '../ModifyFileScan'
 import {

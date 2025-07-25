@@ -2,8 +2,8 @@
 import React, { useEffect, Suspense } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useSearchParams } from 'next/navigation'
-import InvitedMemberPage from './@invited/page'
 import JoinedMemberPage from './@joined/page'
+import InvitedMemberPage from './@invited/page'
 import MembersHeader from '@/components/members/membersHeader'
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
@@ -37,7 +37,7 @@ function DetailedMemberPage(): React.JSX.Element {
 
   return (
     <main>
-      <div className="flex flex-col gap-y-10">
+      <div className="flex flex-col gap-2">
         <PageTitle title={`${currentWorkspace?.name} | Members`} />
         <MembersHeader />
 
