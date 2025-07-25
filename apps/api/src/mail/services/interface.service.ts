@@ -11,7 +11,8 @@ export interface IMailService {
     projectUrl: string,
     invitedBy: string,
     invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void>
 
   accountLoginEmail(
