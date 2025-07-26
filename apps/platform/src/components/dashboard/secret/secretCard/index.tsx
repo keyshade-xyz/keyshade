@@ -52,7 +52,7 @@ export default function SecretCard({
   privateKey,
   className
 }: SecretCardProps) {
-  const { secret, values } = secretData
+  const { versions } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
@@ -69,10 +69,13 @@ export default function SecretCard({
     Record<Environment['id'], string>
   >({})
 
+  const canUpdateSecret = secretData.entitlements.canUpdate
+  const canDeleteSecret = secretData.entitlements.canDelete
+
   const handleDecryptValues = useCallback(
     (environmentSlug: Environment['slug']) => {
       if (!privateKey) return
-      const targetValue = values.find(
+      const targetValue = versions.find(
         (value) => value.environment.slug === environmentSlug
       )
       if (!targetValue) return
@@ -93,16 +96,16 @@ export default function SecretCard({
           }))
         })
     },
-    [privateKey, values]
+    [privateKey, versions]
   )
 
   useEffect(() => {
-    handleDecryptValues(secretData.values[0]?.environment.slug)
-  }, [secretData.values, handleDecryptValues])
+    handleDecryptValues(secretData.versions[0]?.environment.slug)
+  }, [secretData.versions, handleDecryptValues])
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
-      secret.slug,
+      secretData.slug,
       'You copied the slug successfully.',
       'Failed to copy the slug.',
       'You successfully copied the slug.'
@@ -147,23 +150,25 @@ export default function SecretCard({
     <ContextMenu>
       <AccordionItem
         className={`rounded-xl bg-white/5 px-5 ${className}`}
-        id={`secret-${secretData.secret.slug}`}
-        key={secret.id}
-        value={secret.id}
+        id={`secret-${secretData.slug}`}
+        key={secretData.id}
+        value={secretData.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
             className="overflow-hidden hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
+                {dayjs(secretData.updatedAt).toNow(true)} ago by{' '}
                 <div className="flex items-center gap-x-2">
                   <span className="text-white">
-                    {secret.lastUpdatedBy.name}
+                    {secretData.lastUpdatedBy.name}
                   </span>
                   <AvatarComponent
-                    name={secret.lastUpdatedBy.name}
-                    profilePictureUrl={secret.lastUpdatedBy.profilePictureUrl}
+                    name={secretData.lastUpdatedBy.name}
+                    profilePictureUrl={
+                      secretData.lastUpdatedBy.profilePictureUrl
+                    }
                   />
                 </div>
               </div>
@@ -172,16 +177,16 @@ export default function SecretCard({
             <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
               <div className="flex items-center gap-x-4 truncate">
                 {/* <SecretLogoSVG /> */}
-                {secret.name}
+                {secretData.name}
               </div>
-              {secret.note ? (
+              {secretData.note ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                      <p>{secret.note}</p>
+                      <p>{secretData.note}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -190,7 +195,7 @@ export default function SecretCard({
           </AccordionTrigger>
         </ContextMenuTrigger>
         <AccordionContent>
-          {values.length > 0 ? (
+          {versions.length > 0 ? (
             <Table className="h-full w-full">
               <TableHeader className="h-[3.125rem] w-full">
                 <TableRow className="h-[3.125rem] w-full bg-white/10">
@@ -207,7 +212,7 @@ export default function SecretCard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {values.map((value) => {
+                {versions.map((value) => {
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
@@ -271,6 +276,7 @@ export default function SecretCard({
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
+          disabled={!canUpdateSecret}
           onSelect={handleRevisionsClick}
         >
           Show Version History
@@ -283,12 +289,14 @@ export default function SecretCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!canUpdateSecret}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!canDeleteSecret}
           onSelect={handleDeleteClick}
         >
           Delete
