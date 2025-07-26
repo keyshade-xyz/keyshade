@@ -760,14 +760,13 @@ export class VariableService {
     const hydratedVariables: HydratedVariable[] = []
 
     for (const variable of variables) {
-      delete variable.project
-
       const hydratedVariable = await this.hydrationService.hydrateVariable({
         authorizationService: this.authorizationService,
         user,
         variable
       })
 
+      delete variable.project
       hydratedVariables.push(hydratedVariable)
     }
     this.logger.log(

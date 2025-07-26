@@ -839,14 +839,13 @@ export class SecretService {
     const hydratedSecrets: HydratedSecret[] = []
 
     for (const secret of secrets) {
-      delete secret.project
-
       const hydratedSecret = await this.hydrationService.hydrateSecret({
         user,
         secret,
         authorizationService: this.authorizationService
       })
 
+      delete secret.project
       hydratedSecrets.push(hydratedSecret)
     }
     this.logger.log(
