@@ -54,10 +54,40 @@ export class DiscordIntegration extends BaseIntegration {
     return new Set(['webhookUrl'])
   }
 
-  public init(): Promise<void> {
-    // TODO: Send a text message to the discord channel confirming keyshade was added
-    return Promise.resolve()
+// Edited Code starts for init 
+public async init(eventId: string): Promise<void> {
+  const integration = this.getIntegration<DiscordIntegrationMetadata>()
+
+  const { id: integrationRunId } = await this.registerIntegrationRun({
+    eventId: eventId,
+    integrationId: integration.id,
+    title: 'Initializing Discord integration'
+  })
+
+  const { response, duration } = await makeTimedRequest(() =>
+    fetch(integration.metadata.webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        content: '🥁 Keyshade is now configured with this channel!'
+      })
+    })
+  )
+
+  await this.markIntegrationRunAsFinished(
+    integrationRunId,
+    response.ok ? IntegrationRunStatus.SUCCESS : IntegrationRunStatus.FAILED,
+    duration,
+    await response.text()
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to initialize Discord integration')
   }
+}
+// Edited Code ends for init 
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
     this.logger.log(`Emitting event to Discord: ${data.title}`)
