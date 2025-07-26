@@ -21,7 +21,7 @@ export default function EventTriggersInput({
   const [showAllGroups, setShowAllGroups] = useState(false)
 
   const eventGroups = useMemo(
-    () => Integrations[integrationType].events!,
+    () => Integrations[integrationType].events,
     [integrationType]
   )
 
@@ -30,7 +30,7 @@ export default function EventTriggersInput({
     [eventGroups]
   )
 
-  if (Integrations[integrationType].envMapping === true) {
+  if (Integrations[integrationType].envMapping) {
     if (selectedEvents.size !== allEvents.length) {
       onChange(new Set(allEvents))
     }

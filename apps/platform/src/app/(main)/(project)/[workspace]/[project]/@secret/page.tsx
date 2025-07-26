@@ -48,7 +48,9 @@ export default function SecretPage(): React.JSX.Element {
       <Visible if={Boolean(isEditSecretOpen && selectedSecret)}>
         <EditSecretSheet />
       </Visible>
-      <Visible if={Boolean(isDeleteEnvironmentValueOfSecretOpen && selectedSecret)}>
+      <Visible
+        if={Boolean(isDeleteEnvironmentValueOfSecretOpen && selectedSecret)}
+      >
         <ConfirmDeleteEnvironmentValueOfSecretDialog />
       </Visible>
       <Visible if={Boolean(isSecretRevisionsOpen && selectedSecret)}>

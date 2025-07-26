@@ -96,9 +96,9 @@ export default function SecretList({
           setGlobalSearchData((prev) => ({
             ...prev,
             secrets: response.data!.items.map((item) => ({
-              slug: item.secret.slug,
-              name: item.secret.name,
-              note: item.secret.note
+              slug: item.slug,
+              name: item.name,
+              note: item.note
             }))
           }))
         }
@@ -134,7 +134,7 @@ export default function SecretList({
       return (
         <SecretCard
           className={cn(
-            highlightSlug === secretData.secret.slug &&
+            highlightSlug === secretData.slug &&
               isHighlighted &&
               'animate-highlight'
           )}
@@ -164,7 +164,7 @@ export default function SecretList({
             emptyComponent={<EmptySecretListContent />}
             fetchFunction={fetchSecrets}
             itemComponent={renderSecretCard}
-            itemKey={(secretData) => secretData.secret.id}
+            itemKey={(secretData) => secretData.id}
             itemsPerPage={10}
             key={refetchTrigger}
           />

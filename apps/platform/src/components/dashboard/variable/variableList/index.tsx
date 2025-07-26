@@ -70,7 +70,6 @@ export default function VariableList(): React.JSX.Element {
           }
         }
       }
-
       try {
         const response =
           await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
@@ -91,9 +90,9 @@ export default function VariableList(): React.JSX.Element {
           setGlobalSearchData((prev) => ({
             ...prev,
             variables: response.data!.items.map((item) => ({
-              slug: item.variable.slug,
-              name: item.variable.name,
-              note: item.variable.note
+              slug: item.slug,
+              name: item.name,
+              note: item.note
             }))
           }))
         }
@@ -129,7 +128,7 @@ export default function VariableList(): React.JSX.Element {
       return (
         <VariableCard
           className={cn(
-            highlightSlug === variableData.variable.slug &&
+            highlightSlug === variableData.slug &&
               isHighlighted &&
               'animate-highlight'
           )}
@@ -158,7 +157,7 @@ export default function VariableList(): React.JSX.Element {
             emptyComponent={<EmptyVariableListContent />}
             fetchFunction={fetchVariables}
             itemComponent={renderVariableCard}
-            itemKey={(variableData) => variableData.variable.id}
+            itemKey={(variableData) => variableData.id}
             itemsPerPage={10}
             key={refetchTrigger}
           />

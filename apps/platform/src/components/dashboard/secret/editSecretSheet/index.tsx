@@ -36,10 +36,9 @@ export default function EditSecretSheet(): JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
-  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
-
-  const [name, setName] = useState(selectedSecretData?.secret.name || '')
-  const [note, setNote] = useState(selectedSecretData?.secret.note || '')
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject || null)
+  const [name, setName] = useState(selectedSecretData?.name || '')
+  const [note, setNote] = useState(selectedSecretData?.note || '')
   const [isLoading, setIsLoading] = useState(false)
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
@@ -53,7 +52,7 @@ export default function EditSecretSheet(): JSX.Element {
 
     const decryptValues = async () => {
       const decrypted: Record<string, string> = {}
-      const decryptionPromises = selectedSecretData.values.map(
+      const decryptionPromises = selectedSecretData.versions.map(
         async (entry) => {
           try {
             const decryptedValue = await decrypt(projectPrivateKey, entry.value)
@@ -80,8 +79,8 @@ export default function EditSecretSheet(): JSX.Element {
   const hasChanges = useMemo(() => {
     if (!selectedSecretData) return false
 
-    const nameChanged = name !== selectedSecretData.secret.name
-    const noteChanged = note !== (selectedSecretData.secret.note || '')
+    const nameChanged = name !== selectedSecretData.name
+    const noteChanged = note !== (selectedSecretData.note || '')
     const allEnvironmentSlugs = new Set([
       ...Object.keys(originalValues),
       ...Object.keys(environmentValues)
@@ -120,15 +119,12 @@ export default function EditSecretSheet(): JSX.Element {
     const hasEnvChanges = Object.keys(changedEnvValues).length > 0
 
     return ControllerInstance.getInstance().secretController.updateSecret({
-      secretSlug: selectedSecretData!.secret.slug,
-      name: name !== selectedSecretData!.secret.name ? name.trim() : undefined,
-      note:
-        note !== (selectedSecretData!.secret.note || '')
-          ? note.trim()
-          : undefined,
+      secretSlug: selectedSecretData!.slug,
+      name: name !== selectedSecretData!.name ? name.trim() : undefined,
+      note: note !== (selectedSecretData!.note || '') ? note.trim() : undefined,
       entries: hasEnvChanges
         ? parseUpdatedEnvironmentValues(
-            selectedSecretData!.values.filter((v) =>
+            selectedSecretData!.versions.filter((v) =>
               Object.prototype.hasOwnProperty.call(
                 changedEnvValues,
                 v.environment.slug
@@ -154,14 +150,11 @@ export default function EditSecretSheet(): JSX.Element {
 
         setSecrets((prev) =>
           prev.map((s) => {
-            if (s.secret.slug === selectedSecretData.secret.slug) {
+            if (s.slug === selectedSecretData.slug) {
               return {
                 ...s,
-                secret: { ...s.secret, name, note, slug: data.secret.slug },
-                values: mergeExistingEnvironments(
-                  s.values,
-                  data.updatedVersions
-                )
+                secret: { name, note, slug: data.slug },
+                versions: mergeExistingEnvironments(s.versions, data.versions)
               }
             }
             return s

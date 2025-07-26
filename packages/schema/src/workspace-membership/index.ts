@@ -4,6 +4,35 @@ import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { WorkspaceSchema } from '@/workspace'
 import { UserSchema } from '@/user'
 
+export const WorkspaceMemberSchema = z.object({
+  id: z.string(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable()
+  }),
+  roles: z.array(
+    z.object({
+      id: z.string(),
+      role: z.object({
+        id: z.string(),
+        slug: z.string(),
+        name: z.string(),
+        description: z.string().nullable(),
+        colorCode: z.string().nullable(),
+        authorities: z.array(authorityEnum)
+      })
+    })
+  ),
+  entitlements: z.object({
+    canUpdateRoles: z.boolean(),
+    canTransferOwnershipTo: z.boolean(),
+    canRemove: z.boolean(),
+    canCancelInvitation: z.boolean(),
+    canResendInvitation: z.boolean()
+  })
+})
+
 export const CreateWorkspaceMemberSchema = z.object({
   email: z.string().email(),
   roleSlugs: z.array(z.string())
@@ -21,7 +50,7 @@ export const InviteUsersRequestSchema = z.object({
   members: z.array(CreateWorkspaceMemberSchema)
 })
 
-export const InviteUsersResponseSchema = z.void()
+export const InviteUsersResponseSchema = z.array(WorkspaceMemberSchema)
 
 export const RemoveUsersRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug,
@@ -36,7 +65,7 @@ export const UpdateMemberRoleRequestSchema = z.object({
   roleSlugs: z.array(z.string())
 })
 
-export const UpdateMemberRoleResponseSchema = z.void()
+export const UpdateMemberRoleResponseSchema = WorkspaceMemberSchema
 
 export const AcceptInvitationRequestSchema = z.object({
   workspaceSlug: WorkspaceSchema.shape.slug
@@ -82,28 +111,5 @@ export const GetMembersRequestSchema = PageRequestSchema.extend({
 })
 
 export const GetMembersResponseSchema = PageResponseSchema(
-  z.object({
-    id: z.string(),
-    user: UserSchema,
-    roles: z.array(
-      z.object({
-        id: z.string(),
-        role: z.object({
-          id: z.string(),
-          slug: z.string(),
-          name: z.string(),
-          description: z.string().nullable(),
-          colorCode: z.string().nullable(),
-          authorities: z.array(authorityEnum),
-          projects: z.array(
-            z.object({
-              id: z.string()
-            })
-          )
-        })
-      })
-    ),
-    invitationAccepted: z.boolean(),
-    createdOn: z.string().datetime()
-  })
+  WorkspaceMemberSchema
 )

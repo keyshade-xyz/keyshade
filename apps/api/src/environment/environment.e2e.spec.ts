@@ -9,6 +9,7 @@ import {
 } from '@nestjs/platform-fastify'
 import { PrismaService } from '@/prisma/prisma.service'
 import {
+  Authority,
   Environment,
   EventSeverity,
   EventSource,
@@ -16,7 +17,8 @@ import {
   EventType,
   Project,
   ProjectAccessLevel,
-  Workspace
+  Workspace,
+  WorkspaceRole
 } from '@prisma/client'
 import { ProjectModule } from '@/project/project.module'
 import { ProjectService } from '@/project/project.service'
@@ -32,6 +34,13 @@ import { SecretModule } from '@/secret/secret.module'
 import { VariableModule } from '@/variable/variable.module'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
+import { WorkspaceModule } from '@/workspace/workspace.module'
+import { WorkspaceService } from '@/workspace/workspace.service'
+import { WorkspaceRoleModule } from '@/workspace-role/workspace-role.module'
+import { WorkspaceRoleService } from '@/workspace-role/workspace-role.service'
+import { WorkspaceMembershipService } from '@/workspace-membership/workspace-membership.service'
+import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
+import { HydratedEnvironment } from './environment.types'
 
 describe('Environment Controller Tests', () => {
   let app: NestFastifyApplication
@@ -40,8 +49,9 @@ describe('Environment Controller Tests', () => {
   let environmentService: EnvironmentService
   let userService: UserService
   let eventService: EventService
-  // let secretService: SecretService
-  // let variableService: VariableService
+  let workspaceService: WorkspaceService
+  let workspaceRoleService: WorkspaceRoleService
+  let workspaceMembershipService: WorkspaceMembershipService
   let tierLimitService: TierLimitService
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
@@ -60,7 +70,10 @@ describe('Environment Controller Tests', () => {
         EnvironmentModule,
         UserModule,
         SecretModule,
-        VariableModule
+        VariableModule,
+        WorkspaceModule,
+        WorkspaceRoleModule,
+        WorkspaceMembershipModule
       ]
     })
       .overrideProvider(MAIL_SERVICE)
@@ -75,8 +88,9 @@ describe('Environment Controller Tests', () => {
     eventService = moduleRef.get(EventService)
     environmentService = moduleRef.get(EnvironmentService)
     userService = moduleRef.get(UserService)
-    // secretService = moduleRef.get(SecretService)
-    // variableService = moduleRef.get(VariableService)
+    workspaceService = moduleRef.get(WorkspaceService)
+    workspaceRoleService = moduleRef.get(WorkspaceRoleService)
+    workspaceMembershipService = moduleRef.get(WorkspaceMembershipService)
     tierLimitService = moduleRef.get(TierLimitService)
 
     app.useGlobalPipes(new ValidationPipe(), new QueryTransformPipe())
@@ -208,6 +222,40 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(environmentFromDb).toBeDefined()
+    })
+
+    it('should add the environment to the workspace admin role', async () => {
+      // Create an environment
+      const environment = await environmentService.createEnvironment(
+        user1,
+        {
+          name: 'Environment 3',
+          description: 'Environment 3 description'
+        },
+        project1.slug
+      )
+
+      // Fetch the admin role
+      const adminRole = await prisma.workspaceRole.findUnique({
+        where: {
+          workspaceId_name: {
+            workspaceId: project1.workspaceId,
+            name: 'Admin'
+          }
+        },
+        include: {
+          projects: {
+            include: {
+              environments: true
+            }
+          }
+        }
+      })
+
+      const environmentSlugs = adminRole.projects[0].environments.map(
+        (e) => e.slug
+      )
+      expect(environmentSlugs).toContain(environment.slug)
     })
 
     it('should not be able to create more environments if tier limit is reached', async () => {
@@ -352,18 +400,10 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({
-        id: environment1.id,
-        name: 'Environment 1 Updated',
-        slug: expect.any(String),
-        description: 'Environment 1 description updated',
-        projectId: project1.id,
-        lastUpdatedById: user1.id,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String)
-      })
+      const environment: HydratedEnvironment = response.json()
 
-      environment1 = response.json()
+      expect(environment.name).toBe('Environment 1 Updated')
+      expect(environment.description).toBe('Environment 1 description updated')
     })
 
     it('should update the slug if name is updated', async () => {
@@ -473,6 +513,7 @@ describe('Environment Controller Tests', () => {
       expect(response.json().name).toBe('Environment 1')
       expect(response.json().slug).toBe(environment1.slug)
       expect(response.json().description).toBe('Environment 1 description')
+      expect(response.json().entitlements).toBeDefined()
     })
 
     it('should not be able to fetch an environment that does not exist', async () => {
@@ -526,100 +567,6 @@ describe('Environment Controller Tests', () => {
         `/environment/all/${project1.slug}?page=0&limit=10&sort=name&order=asc&search=`
       )
     })
-
-    // it('should be able to get the count of secrets and variables in an environment', async () => {
-    //   // Add secrets to the environment
-    //   const secret1 = await secretService.createSecret(
-    //     user1,
-    //     {
-    //       name: 'Secret 1',
-    //       entries: [
-    //         {
-    //           value: 'Secret 1 value',
-    //           environmentSlug: environment1.slug
-    //         }
-    //       ]
-    //     },
-    //     project1.slug
-    //   )
-    //   await secretService.createSecret(
-    //     user1,
-    //     {
-    //       name: 'Secret 2',
-    //       entries: [
-    //         {
-    //           value: 'Secret 2 value',
-    //           environmentSlug: environment1.slug
-    //         }
-    //       ]
-    //     },
-    //     project1.slug
-    //   )
-
-    //   // Add variables to the environment
-    //   const variable1 = await variableService.createVariable(
-    //     user1,
-    //     {
-    //       name: 'Variable 1',
-    //       entries: [
-    //         {
-    //           value: 'Variable 1 value',
-    //           environmentSlug: environment1.slug
-    //         }
-    //       ]
-    //     },
-    //     project1.slug
-    //   )
-    //   await variableService.createVariable(
-    //     user1,
-    //     {
-    //       name: 'Variable 2',
-    //       entries: [
-    //         {
-    //           value: 'Variable 2 value',
-    //           environmentSlug: environment1.slug
-    //         }
-    //       ]
-    //     },
-    //     project1.slug
-    //   )
-
-    //   // Update the value of a secret to add a SecretVersion
-    //   await secretService.updateSecret(user1, secret1.secret.slug, {
-    //     entries: [
-    //       {
-    //         value: 'Updated Secret 1 value',
-    //         environmentSlug: environment1.slug
-    //       }
-    //     ]
-    //   })
-
-    //   // Update the value of a variable to add a VariableVersion
-    //   await variableService.updateVariable(user1, variable1.variable.slug, {
-    //     entries: [
-    //       {
-    //         value: 'Updated Variable 1 value',
-    //         environmentSlug: environment1.slug
-    //       }
-    //     ]
-    //   })
-
-    //   const response = await app.inject({
-    //     method: 'GET',
-    //     url: `/environment/all/${project1.slug}?page=0&limit=10`,
-    //     headers: {
-    //       'x-e2e-user-email': user1.email
-    //     }
-    //   })
-
-    //   expect(response.statusCode).toBe(200)
-    //   const devEnvironment = response
-    //     .json()
-    //     .items.find((env: Environment) => env.slug === environment1.slug)
-
-    //   expect(devEnvironment.secrets).toBe(2)
-    //   expect(devEnvironment.variables).toBe(2)
-    // })
 
     it('should not be able to fetch all environments of a project that does not exist', async () => {
       const response = await app.inject({
@@ -717,6 +664,182 @@ describe('Environment Controller Tests', () => {
       })
 
       expect(response.statusCode).toBe(400)
+    })
+  })
+
+  describe('Access Control tests', () => {
+    let workspace: Workspace
+    let project: Project
+    let environment: Environment
+    let role: WorkspaceRole
+
+    beforeEach(async () => {
+      // Create a workspace
+      workspace = await workspaceService.createWorkspace(user1, {
+        name: 'My workspace',
+        icon: '🤓'
+      })
+
+      // Create a project
+      project = await projectService.createProject(user1, workspace.slug, {
+        name: 'My project',
+        accessLevel: ProjectAccessLevel.PRIVATE
+      })
+
+      // Fetch the environment of the project
+      environment = await prisma.environment.findFirst({
+        where: {
+          projectId: project.id
+        }
+      })
+
+      // Create a role with full visibility to project and secrets
+      role = await workspaceRoleService.createWorkspaceRole(
+        user1,
+        workspace.slug,
+        {
+          name: 'Role 1',
+          authorities: [
+            Authority.READ_ENVIRONMENT,
+            Authority.READ_PROJECT,
+            Authority.DELETE_ENVIRONMENT,
+            Authority.UPDATE_ENVIRONMENT,
+            Authority.CREATE_ENVIRONMENT
+          ],
+          projectEnvironments: [
+            {
+              projectSlug: project.slug,
+              environmentSlugs: [environment.slug]
+            }
+          ]
+        }
+      )
+
+      // Invite user 2 to the workspace
+      await workspaceMembershipService.inviteUsersToWorkspace(
+        user1,
+        workspace.slug,
+        [
+          {
+            email: user2.email,
+            roleSlugs: [role.slug]
+          }
+        ]
+      )
+
+      // Accept the invitation
+      await workspaceMembershipService.acceptInvitation(user2, workspace.slug)
+    })
+
+    it('should only be able to fetch environments the user has access to', async () => {
+      // Create another environment in the project
+      const environment2 = await environmentService.createEnvironment(
+        user1,
+        {
+          name: 'Environment 2'
+        },
+        project.slug
+      )
+
+      // Fetch all environments of the project
+      const response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      const environmentData = response.json().items
+      expect(environmentData).toHaveLength(1)
+
+      // Update the role to give access to the 2nd environment
+      await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+        projectEnvironments: [
+          {
+            projectSlug: project.slug,
+            environmentSlugs: [environment.slug, environment2.slug]
+          }
+        ]
+      })
+
+      // Fetch all environments of the project
+      const response2 = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      const environmentData2 = response2.json().items
+      expect(environmentData2).toHaveLength(2)
+    })
+
+    it('should have the correct entitlements', async () => {
+      // Fetch all environments of the project
+      let response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      let environmentData = response.json().items[0]
+      expect(environmentData.entitlements).toEqual({
+        canUpdate: true,
+        canDelete: true
+      })
+
+      // Remove DELETE_ENVIRONMENT authority from the role
+      await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+        authorities: [
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT,
+          Authority.UPDATE_ENVIRONMENT,
+          Authority.CREATE_ENVIRONMENT
+        ]
+      })
+
+      // Fetch all environments of the project
+      response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      environmentData = response.json().items[0]
+      expect(environmentData.entitlements).toEqual({
+        canUpdate: true,
+        canDelete: false
+      })
+
+      // Remove UPDATE_ENVIRONMENT authority from the role
+      await workspaceRoleService.updateWorkspaceRole(user1, role.slug, {
+        authorities: [
+          Authority.READ_ENVIRONMENT,
+          Authority.READ_PROJECT,
+          Authority.CREATE_ENVIRONMENT
+        ]
+      })
+
+      // Fetch all environments of the project
+      response = await app.inject({
+        method: 'GET',
+        url: `/environment/all/${project.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user2.email
+        }
+      })
+
+      environmentData = response.json().items[0]
+      expect(environmentData.entitlements).toEqual({
+        canUpdate: false,
+        canDelete: false
+      })
     })
   })
 })

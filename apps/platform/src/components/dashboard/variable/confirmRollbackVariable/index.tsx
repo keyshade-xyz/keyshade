@@ -42,7 +42,7 @@ export default function ConfirmRollbackVariable() {
     ControllerInstance.getInstance().variableController.rollbackVariable({
       environmentSlug: selectedVariableEnvironment!,
       version: selectedVariableRollbackVersion!,
-      variableSlug: selectedVariable!.variable.slug
+      variableSlug: selectedVariable!.slug
     })
   )
 
@@ -97,8 +97,8 @@ export default function ConfirmRollbackVariable() {
 
           setVariables((prev) =>
             prev.map((s) => {
-              if (s.variable.slug === selectedVariable.variable.slug) {
-                s.values = s.values.map((v) => {
+              if (s.slug === selectedVariable.slug) {
+                s.versions = s.versions.map((v) => {
                   if (v.environment.slug === selectedVariableEnvironment) {
                     return data.currentRevision
                   }

@@ -14,8 +14,8 @@ import {
 } from '@/store'
 import ConfirmDeleteWorkspace from '@/components/dashboard/workspace/confirmDeleteWorkspace'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
-import AvatarComponent from '@/components/common/avatar'
-import { formatDate } from '@/lib/utils'
+// import AvatarComponent from '@/components/common/avatar'
+// import { formatDate } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { useHttp } from '@/hooks/use-http'
@@ -75,7 +75,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const isDisableLeave =
     memberCount === 1 ||
     selectedWorkspace?.isDefault ||
-    user?.id === selectedWorkspace?.ownedBy.id
+    user?.id === selectedWorkspace?.ownedBy?.id
 
   function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
@@ -96,9 +96,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     ControllerInstance.getInstance().workspaceController.updateWorkspace({
       workspaceSlug: selectedWorkspace!.slug,
       icon: workspaceData.icon,
-      name: workspaceData.name === selectedWorkspace?.name
-        ? undefined
-        : workspaceData.name
+      name:
+        workspaceData.name === selectedWorkspace?.name
+          ? undefined
+          : workspaceData.name
     })
   )
 
@@ -125,7 +126,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
           if (workspaceFromStorage?.id === selectedWorkspace.id) {
             setSelectedWorkspaceToStorage({
-              ...workspaceFromStorage,
+              ...(workspaceFromStorage ?? selectedWorkspace),
               name: data.name,
               slug: data.slug,
               icon: data.icon
@@ -200,8 +201,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
             <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
               {/* <div className="mb-2 flex flex-row gap-x-2">
               </div> */}
-              <h1 className="text-2xl font-bold truncate">{selectedWorkspace?.name}</h1>
-              {selectedWorkspace ? (
+              <h1 className="truncate text-2xl font-bold">
+                {selectedWorkspace?.name}
+              </h1>
+              {/* {selectedWorkspace ? (
                 <div className="flex flex-row gap-x-2 text-white/60">
                   <div className="flex flex-row gap-x-1 text-sm">
                     <span>Last updated by</span>
@@ -230,13 +233,13 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                     </span>
                   </div>
                 </div>
-              ) : null}
+              ) : null} */}
             </div>
             <div className="h-fit overflow-hidden">
               <CopyToClipboard text={selectedWorkspace?.slug || ''} />
             </div>
           </div>
-          {selectedWorkspace ? (
+          {/* {selectedWorkspace ? (
             <div className="mt-2 flex flex-row items-center gap-x-2 rounded-md border-[1px] border-white/20 p-2 text-sm text-white/60">
               <AvatarComponent
                 name={selectedWorkspace.ownedBy.name}
@@ -252,7 +255,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 </span>
               </span>
             </div>
-          ) : null}
+          ) : null} */}
         </section>
 
         <Separator className="bg-white/20" />
@@ -351,7 +354,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 >
                   {selectedWorkspace?.isDefault ? (
                     <p>This is your default workspace. You can not leave it.</p>
-                  ) : user?.id === selectedWorkspace?.ownedBy.id ? (
+                  ) : user?.id === selectedWorkspace?.ownedBy?.id ? (
                     <p>
                       You are the owner of this workspace. You can not leave
                       workspace without transferring ownership.

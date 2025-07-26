@@ -38,7 +38,7 @@ export function formatText(type: string): string {
 }
 
 export function parseUpdatedEnvironmentValues(
-  oldValues: Variable['values'],
+  oldValues: Variable['versions'] | SecretVersion[],
   newValues: Record<string, string>
 ): {
   value: string

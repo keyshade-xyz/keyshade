@@ -18,6 +18,7 @@ import { getUserByEmailOrId } from '@/common/user'
 import { Request } from 'express'
 import { constructErrorBody } from '@/common/util'
 import SlugGenerator from '@/common/slug-generator.service'
+import { HydrationService } from '@/common/hydration.service'
 
 const X_E2E_USER_EMAIL = 'x-e2e-user-email'
 const X_KEYSHADE_TOKEN = 'x-keyshade-token'
@@ -31,7 +32,8 @@ export class AuthGuard implements CanActivate {
     private readonly prisma: PrismaService,
     private readonly reflector: Reflector,
     private readonly cache: CacheService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -82,7 +84,8 @@ export class AuthGuard implements CanActivate {
       const user = await getUserByEmailOrId(
         email,
         this.prisma,
-        this.slugGenerator
+        this.slugGenerator,
+        this.hydrationService
       )
 
       userContext = {
@@ -143,7 +146,8 @@ export class AuthGuard implements CanActivate {
             const user = await getUserByEmailOrId(
               payload['id'],
               this.prisma,
-              this.slugGenerator
+              this.slugGenerator,
+              this.hydrationService
             )
 
             userContext = {

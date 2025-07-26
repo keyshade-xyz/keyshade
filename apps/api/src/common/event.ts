@@ -20,6 +20,7 @@ import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody, encryptMetadata } from './util'
 import { PrismaService } from '@/prisma/prisma.service'
 import { EventMetadata } from '@/event/event.types'
+import { InclusionQuery } from './inclusion-query'
 
 /**
  * Creates a new event and saves it to the database.
@@ -153,9 +154,7 @@ export const createEvent = async (
           has: data.type
         }
       },
-      include: {
-        environments: true
-      }
+      include: InclusionQuery.Integration
     })
 
     logger.log(

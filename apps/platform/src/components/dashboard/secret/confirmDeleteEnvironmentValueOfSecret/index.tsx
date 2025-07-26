@@ -37,7 +37,7 @@ export default function ConfirmDeleteEnvironmentValueOfSecretDialog(): React.JSX
   const deleteEnvironmentValueOfSecret = useHttp(() =>
     ControllerInstance.getInstance().secretController.deleteEnvironmentValueOfSecret(
       {
-        secretSlug: selectedSecret!.secret.slug,
+        secretSlug: selectedSecret!.slug,
         environmentSlug: selectedSecretEnvironment!
       }
     )
@@ -73,10 +73,10 @@ export default function ConfirmDeleteEnvironmentValueOfSecretDialog(): React.JSX
           // Remove the environment value from the state
           setSecretsOfProject((prev) =>
             prev.map((secret) => {
-              if (secret.secret.slug === selectedSecret.secret.slug) {
+              if (secret.slug === selectedSecret.slug) {
                 return {
                   ...secret,
-                  values: secret.values.filter(
+                  versions: secret.versions.filter(
                     (value) =>
                       value.environment.slug !== selectedSecretEnvironment
                   )
