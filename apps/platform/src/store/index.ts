@@ -3,6 +3,7 @@ import { atomWithStorage } from 'jotai/utils'
 import type {
   ApiKey,
   Environment,
+  EventTypeEnum,
   GetAllEnvironmentsOfProjectResponse,
   GetAllProjectsResponse,
   GetAllWorkspacesOfUserResponse,
@@ -15,6 +16,7 @@ import type {
   VariableVersion,
   WorkspaceRole
 } from '@keyshade/schema'
+import type { VercelEnvironmentMapping } from '@keyshade/common'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
 
@@ -48,6 +50,45 @@ export const globalSearchDataAtom = atom<{
 })
 
 export const allWorkspacesAtom = atom<GetAllProjectsResponse[]>([])
+
+type PartialProject = Pick<
+  GetAllProjectsResponse['items'][number],
+  'slug' | 'storePrivateKey' | 'privateKey'
+>
+
+export const integrationFormAtom = atom<{
+  name: string
+  selectedEvents: Set<EventTypeEnum>
+  selectedProjectSlug: GetAllProjectsResponse['items'][number]['slug'] | null
+  selectedProject: PartialProject | null
+  selectedEnvironments: Environment['slug'][]
+  metadata: Record<string, unknown>
+  mappings: VercelEnvironmentMapping
+  manualPrivateKey: string
+}>({
+  name: '',
+  selectedEvents: new Set<EventTypeEnum>(),
+  selectedProjectSlug: null,
+  selectedProject: null,
+  selectedEnvironments: [],
+  metadata: {},
+  mappings: {},
+  manualPrivateKey: ''
+})
+
+export const resetIntegrationFormAtom = atom(null, (get, set) => {
+  set(integrationFormAtom, {
+    name: '',
+    selectedEvents: new Set<EventTypeEnum>(),
+    selectedProjectSlug: null,
+    selectedProject: null,
+    selectedEnvironments: [],
+    metadata: {},
+    mappings: {},
+    manualPrivateKey: ''
+  })
+})
+
 export const selectedWorkspaceAtom =
   atom<GetAllWorkspacesOfUserResponse | null>(null)
 
@@ -146,6 +187,8 @@ export const rollbackSecretOpenAtom = atom<boolean>(false)
 
 export const selectedIntegrationAtom = atom<Integration | null>(null)
 export const createIntegrationOpenAtom = atom<boolean>(false)
+export const integrationLoadingAtom = atom<boolean>(false)
+export const createIntegrationTypeAtom = atom<Integration['type'] | null>(null)
 export const editIntegrationOpenAtom = atom<boolean>(false)
 export const deleteIntegrationOpenAtom = atom<boolean>(false)
 

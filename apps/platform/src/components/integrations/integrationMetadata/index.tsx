@@ -38,6 +38,9 @@ function IntegrationMetadata({
   const handleInputChange = (fieldKey: string, value: string) => {
     setMetadata((prev) => ({ ...prev, [fieldKey]: value }))
   }
+  if (!metadataFields) {
+    return <>No metadata fields available</>
+  }
 
   return (
     <div className="flex flex-col gap-y-2">
@@ -45,9 +48,8 @@ function IntegrationMetadata({
         {integrationName} Configuration
       </h3>
       <div className="flex flex-col gap-y-4 rounded-lg border border-white/10  p-4">
-        {metadataFields
-          .filter((field) => !field.isEnvironment)
-          .map(({ name, requestFieldName, description, placeholder }) => (
+        {metadataFields.map(
+          ({ name, requestFieldName, description, placeholder }) => (
             <div className="flex flex-col gap-y-1" key={requestFieldName}>
               <label
                 className="font-medium text-white"
@@ -68,7 +70,8 @@ function IntegrationMetadata({
                 value={metadata[requestFieldName]}
               />
             </div>
-          ))}
+          )
+        )}
       </div>
     </div>
   )

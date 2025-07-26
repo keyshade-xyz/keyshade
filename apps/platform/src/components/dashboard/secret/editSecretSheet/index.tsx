@@ -36,195 +36,208 @@ export default function EditSecretSheet(): JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
-  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
-
-  const [requestData, setRequestData] = useState<{
-    name: string | undefined
-    note: string | undefined
-  }>({
-    name: selectedSecretData?.secret.name,
-    note: selectedSecretData?.secret.note || ''
-  })
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const environmentValues = useMemo<Record<string, string>>(
-    () =>
-      selectedSecretData?.values.reduce(
-        (acc, entry) => {
-          acc[entry.environment.slug] = entry.value
-          return acc
-        },
-        {} as Record<string, string>
-      ) || {},
-    [selectedSecretData?.values]
+  const { projectPrivateKey } = useProjectPrivateKey(
+    selectedProject?.items[0] || null
   )
-  const [decryptedValues, setDecryptedValues] = useState<
+  const [name, setName] = useState(selectedSecretData?.name || '')
+  const [note, setNote] = useState(selectedSecretData?.note || '')
+  const [isLoading, setIsLoading] = useState(false)
+  const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >({})
-
-  useEffect(() => {
-    // decrypt environment values
-    if (!projectPrivateKey) return
-
-    Object.entries(environmentValues).forEach(([slug, encrypted]) => {
-      if (decryptedValues[slug]) return
-
-      decrypt(projectPrivateKey, encrypted)
-        .then((decrypted) => {
-          setDecryptedValues((prev) => ({
-            ...prev,
-            [slug]: decrypted
-          }))
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Decryption failed:', error)
-          setDecryptedValues((prev) => ({
-            ...prev,
-            [slug]: ''
-          }))
-        })
-    })
-  }, [projectPrivateKey, environmentValues, decryptedValues])
-
-  const updateSecret = useHttp(() =>
-    ControllerInstance.getInstance().secretController.updateSecret({
-      secretSlug: selectedSecretData!.secret.slug,
-      name:
-        !requestData.name?.trim() ||
-        requestData.name === selectedSecretData!.secret.name
-          ? undefined
-          : requestData.name.trim(),
-      note: requestData.note?.trim() || undefined,
-      entries: parseUpdatedEnvironmentValues(
-        selectedSecretData!.values,
-        decryptedValues
-      )
-    })
+  const [originalValues, setOriginalValues] = useState<Record<string, string>>(
+    {}
   )
 
-  const handleClose = useCallback(() => {
-    setIsEditSecretSheetOpen(false)
-  }, [setIsEditSecretSheetOpen])
+  useEffect(() => {
+    if (!projectPrivateKey || !selectedSecretData) return
 
-  const handleUpdateSecret = useCallback(async () => {
-    if (selectedSecretData) {
-      setIsLoading(true)
-      toast.loading('Updating secret...')
-
-      try {
-        const { success, data } = await updateSecret()
-
-        if (success && data) {
-          toast.success('Secret edited successfully', {
-            description: (
-              <p className="text-xs text-emerald-300">
-                You successfully edited the secret
-              </p>
-            )
-          })
-
-          // Update the secret in the store
-          setSecrets((prev) => {
-            const newSecrets = prev.map((s) => {
-              if (s.secret.slug === selectedSecretData.secret.slug) {
-                return {
-                  ...s,
-                  secret: {
-                    ...s.secret,
-                    name: requestData.name || s.secret.name,
-                    note: requestData.note || s.secret.note,
-                    slug: data.secret.slug
-                  },
-                  values: mergeExistingEnvironments(
-                    s.values,
-                    data.updatedVersions
-                  )
-                }
-              }
-              return s
-            })
-            return newSecrets
-          })
+    const decryptValues = async () => {
+      const decrypted: Record<string, string> = {}
+      const decryptionPromises = selectedSecretData.versions.map(
+        async (entry) => {
+          try {
+            const decryptedValue = await decrypt(projectPrivateKey, entry.value)
+            return { slug: entry.environment.slug, value: decryptedValue }
+          } catch (error) {
+            return { slug: entry.environment.slug, value: '' }
+          }
         }
-      } finally {
-        setIsLoading(false)
-        toast.dismiss()
-        handleClose()
+      )
+
+      const results = await Promise.all(decryptionPromises)
+
+      results.forEach(({ slug, value }) => {
+        decrypted[slug] = value
+      })
+
+      setEnvironmentValues(decrypted)
+      setOriginalValues(decrypted)
+    }
+
+    decryptValues()
+  }, [projectPrivateKey, selectedSecretData])
+
+  const hasChanges = useMemo(() => {
+    if (!selectedSecretData) return false
+
+    const nameChanged = name !== selectedSecretData.name
+    const noteChanged = note !== (selectedSecretData.note || '')
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    const envChanged = Array.from(allEnvironmentSlugs).some((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+      return originalValue !== currentValue
+    })
+
+    return nameChanged || noteChanged || envChanged
+  }, [name, note, environmentValues, originalValues, selectedSecretData])
+
+  const getChangedEnvValues = () => {
+    const changed: Record<string, string> = {}
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    Array.from(allEnvironmentSlugs).forEach((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+
+      if (originalValue !== currentValue) {
+        changed[slug] = currentValue
       }
+    })
+
+    return changed
+  }
+
+  const updateSecret = useHttp(() => {
+    const changedEnvValues = getChangedEnvValues()
+    const hasEnvChanges = Object.keys(changedEnvValues).length > 0
+
+    return ControllerInstance.getInstance().secretController.updateSecret({
+      secretSlug: selectedSecretData!.slug,
+      name: name !== selectedSecretData!.name ? name.trim() : undefined,
+      note: note !== (selectedSecretData!.note || '') ? note.trim() : undefined,
+      entries: hasEnvChanges
+        ? parseUpdatedEnvironmentValues(
+            selectedSecretData!.versions.filter((v) =>
+              Object.prototype.hasOwnProperty.call(
+                changedEnvValues,
+                v.environment.slug
+              )
+            ),
+            changedEnvValues
+          )
+        : undefined
+    })
+  })
+
+  const handleSave = useCallback(async () => {
+    if (!selectedSecretData || !hasChanges) return
+
+    setIsLoading(true)
+    toast.loading('Updating secret...')
+
+    try {
+      const { success, data } = await updateSecret()
+
+      if (success && data) {
+        toast.success('Secret updated successfully')
+
+        setSecrets((prev) =>
+          prev.map((s) => {
+            if (s.slug === selectedSecretData.slug) {
+              return {
+                ...s,
+                secret: { name, note, slug: data.slug },
+                versions: mergeExistingEnvironments(s.versions, data.versions)
+              }
+            }
+            return s
+          })
+        )
+
+        setIsEditSecretSheetOpen(false)
+      }
+    } finally {
+      setIsLoading(false)
+      toast.dismiss()
     }
   }, [
     selectedSecretData,
+    hasChanges,
     updateSecret,
     setSecrets,
-    requestData.name,
-    requestData.note,
-    handleClose
+    name,
+    note,
+    setIsEditSecretSheetOpen
   ])
 
+  interface HandleInputChangeEvent {
+    target: { value: string }
+  }
+
+  const handleInputChange = useCallback(
+    (field: React.Dispatch<React.SetStateAction<string>>) =>
+      (e: HandleInputChangeEvent) => {
+        field(e.target.value)
+      },
+    []
+  )
+
+  const isSaveDisabled = isLoading || !hasChanges
+
   return (
-    <Sheet
-      onOpenChange={(open) => {
-        setIsEditSecretSheetOpen(open)
-      }}
-      open={isEditSecretSheetOpen}
-    >
+    <Sheet onOpenChange={setIsEditSecretSheetOpen} open={isEditSecretSheetOpen}>
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
-          <SheetTitle className="text-white">Edit this secret</SheetTitle>
+          <SheetTitle className="text-white">Edit Secret</SheetTitle>
           <SheetDescription className="text-white/60">
-            Edit the secret name or the note
+            Edit the secret name and note, and manage environment values.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-x-4 gap-y-6 py-8">
-          <div className="flex flex-col items-start gap-x-4 gap-y-3">
-            <Label className="text-right" htmlFor="name">
-              Secret Name
-            </Label>
+
+        <div className="grid gap-6 py-8">
+          <div className="space-y-2">
+            <Label htmlFor="name">Secret Name</Label>
             <Input
-              className="col-span-3 h-[2.75rem]"
               id="name"
-              onChange={(e) => {
-                setRequestData((prev) => ({
-                  ...prev,
-                  name: e.target.value
-                }))
-              }}
-              placeholder="Enter the key of the secret"
-              value={requestData.name}
+              onChange={handleInputChange(setName)}
+              placeholder="Enter secret name"
+              value={name}
             />
           </div>
 
-          <div className="flex flex-col items-start gap-x-4 gap-y-3">
-            <Label className="text-right" htmlFor="name">
-              Extra Note
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="note">Note</Label>
             <Textarea
-              className="col-span-3 h-[2.75rem]"
-              id="name"
-              onChange={(e) => {
-                setRequestData((prev) => ({
-                  ...prev,
-                  note: e.target.value
-                }))
-              }}
-              placeholder="Enter the note of the secret"
-              value={requestData.note}
+              id="note"
+              onChange={handleInputChange(setNote)}
+              placeholder="Enter note"
+              value={note}
             />
           </div>
+
           <EnvironmentValueEditor
-            environmentValues={decryptedValues}
-            setEnvironmentValues={setDecryptedValues}
+            environmentValues={environmentValues}
+            setEnvironmentValues={setEnvironmentValues}
           />
         </div>
-        <SheetFooter className="py-3">
+
+        <SheetFooter>
           <SheetClose asChild>
             <Button
-              className="font-semibold"
-              disabled={isLoading}
-              onClick={handleUpdateSecret}
+              disabled={isSaveDisabled}
+              onClick={handleSave}
               variant="secondary"
             >
-              Save changes
+              Save Changes
             </Button>
           </SheetClose>
         </SheetFooter>
