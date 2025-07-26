@@ -1,3 +1,9 @@
+## [2.31.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.9...v2.31.0-stage.10) (2025-07-26)
+
+### 🐛 Bug Fixes
+
+* **api:**  Vercel integration won't auto reload after configs are changes/added/deleted ([#1086](https://github.com/keyshade-xyz/keyshade/issues/1086)) ([628e205](https://github.com/keyshade-xyz/keyshade/commit/628e205d94be3c4cf065a79a6cd0c76946df764a))
+
 ## [2.31.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.8...v2.31.0-stage.9) (2025-07-25)
 
 ### 🚀 Features
