@@ -1,3 +1,9 @@
+## [2.31.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.10...v2.31.0-stage.11) (2025-07-26)
+
+### 🚀 Features
+
+* add feature to "disable" a certain configuration ([#1050](https://github.com/keyshade-xyz/keyshade/issues/1050)) ([97f74fa](https://github.com/keyshade-xyz/keyshade/commit/97f74fa3f731530b3715fbee26e8a225559e938c))
+
 ## [2.31.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0-stage.9...v2.31.0-stage.10) (2025-07-26)
 
 ### 🐛 Bug Fixes
