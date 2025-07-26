@@ -53,16 +53,18 @@ export default function SecretPage(): React.JSX.Element {
   const [secrets, setSecrets] = useAtom(secretsOfProjectAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
-  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
+
+  const currentProject = selectedProject?.items[0] || null
+  const { projectPrivateKey } = useProjectPrivateKey(currentProject)
 
   useEffect(() => {
-    if (!selectedProject) return
+    if (!currentProject) return
 
     setIsLoading(true)
 
     ControllerInstance.getInstance()
       .secretController.getAllSecretsOfProject({
-        projectSlug: selectedProject.slug,
+        projectSlug: currentProject.slug,
         page,
         limit: SECRET_PAGE_SIZE
       })
@@ -81,22 +83,22 @@ export default function SecretPage(): React.JSX.Element {
           secrets:
             page === 0
               ? data.items.map((item) => ({
-                  slug: item.secret.slug,
-                  name: item.secret.name,
-                  note: item.secret.note
+                  slug: item.slug,
+                  name: item.name,
+                  note: item.note
                 }))
               : [
                   ...prev.secrets,
                   ...data.items.map((item) => ({
-                    slug: item.secret.slug,
-                    name: item.secret.name,
-                    note: item.secret.note
+                    slug: item.slug,
+                    name: item.name,
+                    note: item.note
                   }))
                 ]
         }))
       })
       .finally(() => setIsLoading(false))
-  }, [selectedProject, page, setGlobalSearchData, setSecrets])
+  }, [selectedProject, page, setGlobalSearchData, setSecrets, currentProject])
 
   const handleLoadMore = () => {
     setPage((prev) => prev + 1)
@@ -125,7 +127,7 @@ export default function SecretPage(): React.JSX.Element {
 
   return (
     <div className="flex h-full w-full justify-center">
-      <PageTitle title={`${selectedProject?.name} | Secrets`} />
+      <PageTitle title={`${currentProject?.name} | Secrets`} />
       {secrets.length === 0 ? (
         <EmptySecretListContent />
       ) : (
@@ -144,11 +146,11 @@ export default function SecretPage(): React.JSX.Element {
               {secrets.map((secretData) => (
                 <SecretCard
                   className={cn(
-                    highlightSlug === secretData.secret.slug &&
+                    highlightSlug === secretData.slug &&
                       isHighlighted &&
                       'animate-highlight'
                   )}
-                  key={secretData.secret.id}
+                  key={secretData.id}
                   privateKey={projectPrivateKey}
                   secretData={secretData}
                 />

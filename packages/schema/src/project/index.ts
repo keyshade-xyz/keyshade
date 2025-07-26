@@ -7,7 +7,7 @@ import {
 import { projectAccessLevelEnum } from '@/enums'
 import { WorkspaceSchema } from '@/workspace'
 
-const BaseProjectSchema = z.object({
+export const BaseProjectSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),

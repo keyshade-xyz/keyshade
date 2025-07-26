@@ -4,16 +4,16 @@ import type {
   ApiKey,
   Environment,
   GetAllEnvironmentsOfProjectResponse,
+  GetAllProjectsResponse,
+  GetAllWorkspacesOfUserResponse,
   GetMembersResponse,
   Integration,
-  ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  WorkspaceRole,
-  WorkspaceWithTierLimitAndProjectCount
+  WorkspaceRole
 } from '@keyshade/schema'
 
 export const userAtom = atomWithStorage<Partial<User> | null>('user', null)
@@ -47,16 +47,12 @@ export const globalSearchDataAtom = atom<{
   projects: []
 })
 
-export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
-  []
-)
+export const allWorkspacesAtom = atom<GetAllProjectsResponse[]>([])
 export const selectedWorkspaceAtom =
-  atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
+  atom<GetAllWorkspacesOfUserResponse | null>(null)
 
-export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
-  null
-)
-export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
+export const selectedProjectAtom = atom<GetAllProjectsResponse | null>(null)
+export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse[]>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
 export const selectedMemberAtom = atom<
@@ -116,7 +112,7 @@ export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 export const localProjectPrivateKeyAtom = atom<
   {
     slug: Environment['slug']
-    key: ProjectWithTierLimitAndCount['privateKey']
+    key: GetAllProjectsResponse['items'][number]['privateKey']
   }[]
 >([])
 export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(
