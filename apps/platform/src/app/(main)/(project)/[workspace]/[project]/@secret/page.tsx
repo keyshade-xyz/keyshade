@@ -56,7 +56,7 @@ export default function SecretPage(): React.JSX.Element {
       >
         <ConfirmDeleteEnvironmentValueOfSecretDialog />
       </Visible>
-      <Visible if={Boolean(isSecretRevisionsOpen && canUpdateSecret)}>
+      <Visible if={Boolean(isSecretRevisionsOpen)}>
         <SecretRevisionsSheet />
       </Visible>
       <Visible if={Boolean(isRollbackSecretOpen && canUpdateSecret)}>

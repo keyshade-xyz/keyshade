@@ -276,7 +276,6 @@ export default function SecretCard({
       <ContextMenuContent className="flex w-[15.938rem] flex-col items-center justify-center rounded-lg bg-[#3F3F46]">
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] border-b-[0.025rem] border-white/65 text-xs font-semibold tracking-wide"
-          disabled={!canUpdateSecret}
           onSelect={handleRevisionsClick}
         >
           Show Version History

@@ -27,6 +27,7 @@ import {
   AccordionTrigger,
   AccordionContent
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
@@ -53,6 +54,8 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
   const [revisions, setRevisions] = useAtom(revisionsOfVariableAtom)
 
   const [isLoading, setIsLoading] = useState(true)
+
+  const canEditVariable = selectedVariable?.entitlements.canUpdate
 
   const getAllRevisionsOfVariable = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -177,8 +180,9 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                                 <span>{revision.createdBy.name} </span>
                               </div>
                               {index !== 0 ? (
-                                <button
-                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                <Button
+                                  className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
+                                  disabled={!canEditVariable}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,
@@ -186,9 +190,10 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                                     )
                                   }
                                   type="button"
+                                  variant="ghost"
                                 >
                                   <RollbackSVG />
-                                </button>
+                                </Button>
                               ) : null}
                             </div>
                           </div>

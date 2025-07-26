@@ -30,6 +30,7 @@ import {
   AccordionTrigger,
   AccordionContent
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
@@ -59,6 +60,8 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
   const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   const [isLoading, setIsLoading] = useState(true)
+
+  const canUpdateSecret = selectedSecret?.entitlements.canUpdate
 
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -214,8 +217,9 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                 <span>{revision.createdBy.name} </span>
                               </div>
                               {index !== 0 ? (
-                                <button
-                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                <Button
+                                  className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
+                                  disabled={!canUpdateSecret}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,
@@ -223,9 +227,10 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                     )
                                   }
                                   type="button"
+                                  variant="ghost"
                                 >
                                   <RollbackSVG />
-                                </button>
+                                </Button>
                               ) : null}
                             </div>
                           </div>

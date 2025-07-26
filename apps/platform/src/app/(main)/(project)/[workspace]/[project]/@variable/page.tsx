@@ -30,26 +30,31 @@ export default function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
+  const canUpdateVariable = selectedVariable?.entitlements.canUpdate
+  const canDeleteVariable = selectedVariable?.entitlements.canDelete
+
   return (
     <div className="flex h-full w-full justify-center">
       <PageTitle title={`${selectedProject?.name} | Variables`} />
       <VariableList />
 
-      <Visible if={Boolean(isDeleteVariableOpen && selectedVariable)}>
+      <Visible if={Boolean(isDeleteVariableOpen && canDeleteVariable)}>
         <ConfirmDeleteVariable />
       </Visible>
-      <Visible if={Boolean(isEditVariableOpen && selectedVariable)}>
+      <Visible if={Boolean(isEditVariableOpen && canUpdateVariable)}>
         <EditVariablSheet />
       </Visible>
       <Visible
-        if={Boolean(isDeleteEnvironmentValueOfVariableOpen && selectedVariable)}
+        if={Boolean(
+          isDeleteEnvironmentValueOfVariableOpen && canDeleteVariable
+        )}
       >
         <ConfirmDeleteEnvironmentValueOfVariableDialog />
       </Visible>
-      <Visible if={Boolean(isVariableRevisionsOpen && selectedVariable)}>
+      <Visible if={Boolean(isVariableRevisionsOpen)}>
         <VariableRevisionsSheet />
       </Visible>
-      <Visible if={Boolean(isRollbackVariableOpen && selectedVariable)}>
+      <Visible if={Boolean(isRollbackVariableOpen && canUpdateVariable)}>
         <ConfirmRollbackVariable />
       </Visible>
     </div>

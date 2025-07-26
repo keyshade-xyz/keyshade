@@ -59,10 +59,13 @@ export default function VariableCard({
   )
   const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
-  const { variable, values } = variableData
+  const canUpdateVariable = variableData.entitlements.canUpdate
+  const canDeleteVariable = variableData.entitlements.canDelete
+
+  const { versions } = variableData
   const handleCopyToClipboard = () => {
     copyToClipboard(
-      variable.slug,
+      variableData.slug,
       'You copied the slug successfully.',
       'Failed to copy the slug.',
       'You successfully copied the slug.'
@@ -91,41 +94,45 @@ export default function VariableCard({
   }
 
   return (
-    <ContextMenu key={variable.id}>
+    <ContextMenu key={variableData.id}>
       <AccordionItem
         className={`rounded-xl bg-white/5 px-5 ${className}`}
-        id={`variable-${variable.slug}`}
-        key={variable.id}
-        value={variable.id}
+        id={`variable-${variableData.slug}`}
+        key={variableData.id}
+        value={variableData.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline overflow-hidden"
+            className="overflow-hidden hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
+                {dayjs(variableData.updatedAt).toNow(true)} ago by{' '}
                 <div className="flex items-center gap-x-2">
                   <span className="text-white">
-                    {variable.lastUpdatedBy.name}
+                    {variableData.lastUpdatedBy.name}
                   </span>
                   <AvatarComponent
-                    name={variable.lastUpdatedBy.name}
-                    profilePictureUrl={variable.lastUpdatedBy.profilePictureUrl}
+                    name={variableData.lastUpdatedBy.name}
+                    profilePictureUrl={
+                      variableData.lastUpdatedBy.profilePictureUrl
+                    }
                   />
                 </div>
               </div>
             }
           >
-            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
-              <div className="flex items-center gap-x-4 truncate">{variable.name}</div>
-              {variable.note ? (
+            <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
+              <div className="flex items-center gap-x-4 truncate">
+                {variableData.name}
+              </div>
+              {variableData.note ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                      <p>{variable.note}</p>
+                      <p>{variableData.note}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -134,7 +141,7 @@ export default function VariableCard({
           </AccordionTrigger>
         </ContextMenuTrigger>
         <AccordionContent>
-          {values.length > 0 ? (
+          {versions.length > 0 ? (
             <Table className="h-full w-full">
               <TableHeader className="h-[3.125rem] w-full ">
                 <TableRow className="h-full w-full bg-white/10 ">
@@ -151,7 +158,7 @@ export default function VariableCard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {values.map((value) => {
+                {versions.map((value) => {
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -206,12 +213,14 @@ export default function VariableCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!canUpdateVariable}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!canDeleteVariable}
           onSelect={handleDeleteClick}
         >
           Delete
