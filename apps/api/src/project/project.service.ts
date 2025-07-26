@@ -231,7 +231,8 @@ export class ProjectService {
 
     return await this.hydrationService.hydrateProject({
       project: newProject,
-      user
+      user,
+      authorizationService: this.authorizationService
     })
   }
 
@@ -444,7 +445,8 @@ export class ProjectService {
 
     return await this.hydrationService.hydrateProject({
       project: updatedProject,
-      user
+      user,
+      authorizationService: this.authorizationService
     })
   }
 
@@ -610,7 +612,8 @@ export class ProjectService {
 
     return await this.hydrationService.hydrateProject({
       user,
-      project: newProject
+      project: newProject,
+      authorizationService: this.authorizationService
     })
   }
 
@@ -1017,7 +1020,8 @@ export class ProjectService {
         async (project) =>
           await this.hydrationService.hydrateProject({
             project,
-            user
+            user,
+            authorizationService: this.authorizationService
           })
       )
     )

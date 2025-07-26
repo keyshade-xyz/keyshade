@@ -7,6 +7,9 @@ export interface HydratedProject extends Project {
   totalSecrets: number
   maxAllowedVariables: number
   totalVariables: number
+  environments: number
+  secrets: number
+  variables: number
   entitlements: {
     canReadSecrets: boolean
     canCreateSecrets: boolean
@@ -34,6 +37,9 @@ export interface RawProject
     | 'totalSecrets'
     | 'maxAllowedVariables'
     | 'totalVariables'
+    | 'environments'
+    | 'secrets'
+    | 'variables'
   > {
   secrets: Secret[]
   variables: Variable[]

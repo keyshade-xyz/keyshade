@@ -55,7 +55,8 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverWorkspace(
-    params: AuthorizationParams
+    params: AuthorizationParams,
+    authorizationService: AuthorizationService
   ): Promise<HydratedWorkspace> {
     const { user, slug, authorities } = params
     this.logger.log(
@@ -103,7 +104,8 @@ export class AuthorityCheckerService {
     return await this.hydrationService.hydrateWorkspace({
       workspace,
       user,
-      permittedAuthorities
+      permittedAuthorities,
+      authorizationService
     })
   }
 
@@ -117,7 +119,8 @@ export class AuthorityCheckerService {
    * @throws UnauthorizedException if the user does not have the required authorities
    */
   public async checkAuthorityOverProject(
-    params: AuthorizationParams
+    params: AuthorizationParams,
+    authorizationService: AuthorizationService
   ): Promise<HydratedProject> {
     const { user, slug, authorities } = params
     this.logger.log(
@@ -207,7 +210,8 @@ export class AuthorityCheckerService {
       permittedAuthorities:
         projectAccessLevel === ProjectAccessLevel.PRIVATE
           ? permittedAuthoritiesForProject
-          : permittedAuthoritiesForWorkspace
+          : permittedAuthoritiesForWorkspace,
+      authorizationService
     })
   }
 
