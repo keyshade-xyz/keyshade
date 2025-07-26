@@ -9,6 +9,7 @@ interface Tab {
   id: string
   label: string
   icon?: React.ReactNode
+  route?: string
 }
 
 export default function LineTabController() {
@@ -23,7 +24,12 @@ export default function LineTabController() {
       : ''
 
   const shouldRenderTab = (): boolean => {
-    const allowedPaths = ['/settings', '/members', getProjectPath()] // modify the list based on what paths you want to have tab
+    const allowedPaths = [
+      '/settings',
+      '/members',
+      '/integrations',
+      getProjectPath()
+    ] // modify the list based on what paths you want to have tab
     return pathname !== '/' && allowedPaths.includes(pathname)
   }
 
@@ -36,8 +42,11 @@ export default function LineTabController() {
       case '/settings':
         return TAB_CONFIGS.settings
 
-      // case '/members':
-      //   return TAB_CONFIGS.members
+      case '/members':
+        return TAB_CONFIGS.members
+
+      case '/integrations':
+        return TAB_CONFIGS.integrations
 
       default:
         return []
