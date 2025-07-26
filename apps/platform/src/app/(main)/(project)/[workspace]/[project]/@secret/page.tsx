@@ -34,12 +34,11 @@ export default function SecretPage(): React.JSX.Element {
   const isRollbackSecretOpen = useAtomValue(rollbackSecretOpenAtom)
   const selectedSecret = useAtomValue(selectedSecretAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
-  const currentProject = selectedProject?.items[0] || null
-  const { projectPrivateKey } = useProjectPrivateKey(currentProject)
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
   return (
     <div className="flex h-full w-full justify-center">
-      <PageTitle title={`${currentProject?.name} | Secrets`} />
+      <PageTitle title={`${selectedProject?.name} | Secrets`} />
       <SecretList projectPrivateKey={projectPrivateKey} />
 
       <Visible if={Boolean(isDeleteSecretOpen && selectedSecret)}>

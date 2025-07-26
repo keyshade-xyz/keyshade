@@ -36,9 +36,7 @@ export default function EditSecretSheet(): JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const selectedSecretData = useAtomValue(selectedSecretAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
-  const { projectPrivateKey } = useProjectPrivateKey(
-    selectedProject?.items[0] || null
-  )
+  const { projectPrivateKey } = useProjectPrivateKey(selectedProject || null)
   const [name, setName] = useState(selectedSecretData?.name || '')
   const [note, setNote] = useState(selectedSecretData?.note || '')
   const [isLoading, setIsLoading] = useState(false)

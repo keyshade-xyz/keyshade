@@ -64,7 +64,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().secretController.getRevisionsOfSecret({
         environmentSlug,
-        secretSlug: selectedSecret!.secret.slug
+        secretSlug: selectedSecret!.slug
       })
   )
 
@@ -151,11 +151,11 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">
-            {selectedSecret?.secret.name}&apos;s revisions
+            {selectedSecret?.name}&apos;s revisions
           </SheetTitle>
           <SheetDescription className="text-white/60">
-            See all the values of {selectedSecret?.secret.name} from the past.
-            You can also roll back to a previous version from here.
+            See all the values of {selectedSecret?.name} from the past. You can
+            also roll back to a previous version from here.
           </SheetDescription>
         </SheetHeader>
         <div className="my-10 flex w-full flex-col">

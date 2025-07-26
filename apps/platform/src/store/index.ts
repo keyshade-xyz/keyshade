@@ -92,7 +92,9 @@ export const resetIntegrationFormAtom = atom(null, (get, set) => {
 export const selectedWorkspaceAtom =
   atom<GetAllWorkspacesOfUserResponse | null>(null)
 
-export const selectedProjectAtom = atom<GetAllProjectsResponse | null>(null)
+export const selectedProjectAtom = atom<
+  GetAllProjectsResponse['items'][number] | null
+>(null)
 export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse[]>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])

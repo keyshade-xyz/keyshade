@@ -59,7 +59,7 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
       ControllerInstance.getInstance().variableController.getRevisionsOfVariable(
         {
           environmentSlug,
-          variableSlug: selectedVariable!.variable.slug
+          variableSlug: selectedVariable!.slug
         }
       )
   )
@@ -114,11 +114,11 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">
-            {selectedVariable?.variable.name}&apos;s revisions
+            {selectedVariable?.name}&apos;s revisions
           </SheetTitle>
           <SheetDescription className="text-white/60">
-            See all the values of {selectedVariable?.variable.name} from the
-            past. You can also roll back to a previous version from here.
+            See all the values of {selectedVariable?.name} from the past. You
+            can also roll back to a previous version from here.
           </SheetDescription>
         </SheetHeader>
         <div className="my-10 flex w-full flex-col">
