@@ -291,9 +291,6 @@ function UpdateIntegration({
                 selectedIntegration.environments ?? undefined
               }
               initialProject={selectedIntegration.project}
-              isMultiEnvironment={
-                (selectedIntegration.environments?.length ?? 0) > 1
-              }
               isProjectDisabled
               onEnvironmentChange={handleEnvironmentChange}
             />
