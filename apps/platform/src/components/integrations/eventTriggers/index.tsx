@@ -26,7 +26,7 @@ export default function EventTriggersInput({
   )
 
   const allEvents: EventTypeEnum[] = useMemo(
-    () => eventGroups.flatMap((group) => group.items),
+    () => eventGroups!.flatMap((group) => group.items),
     [eventGroups]
   )
 
@@ -62,7 +62,7 @@ export default function EventTriggersInput({
 
   const visibleGroups = showAllGroups
     ? eventGroups
-    : eventGroups.slice(0, INITIAL_GROUP_COUNT)
+    : eventGroups!.slice(0, INITIAL_GROUP_COUNT)
 
   return (
     <div>
@@ -95,7 +95,7 @@ export default function EventTriggersInput({
             </label>
           </div>
 
-          <Visible if={eventGroups.length > INITIAL_GROUP_COUNT}>
+          <Visible if={eventGroups!.length > INITIAL_GROUP_COUNT}>
             <Button
               className="my-0 h-fit p-0 text-white/50 hover:bg-transparent hover:text-white/60"
               onClick={() => setShowAllGroups(!showAllGroups)}
@@ -107,7 +107,7 @@ export default function EventTriggersInput({
           </Visible>
         </div>
         <div className="space-y-5">
-          {visibleGroups.map((group) => (
+          {visibleGroups!.map((group) => (
             <div className="" key={group.name}>
               <div className="flex flex-col items-start gap-2">
                 <div className="flex items-start space-x-3">

@@ -22,7 +22,7 @@ function IntegrationMetadata({
   )
 
   const [metadata, setMetadata] = useState<Record<string, string>>(() => {
-    return metadataFields.reduce<Record<string, string>>((acc, field) => {
+    return metadataFields!.reduce<Record<string, string>>((acc, field) => {
       acc[field.requestFieldName] =
         initialMetadata[field.requestFieldName] !== undefined
           ? String(initialMetadata[field.requestFieldName])

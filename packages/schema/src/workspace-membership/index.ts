@@ -9,7 +9,9 @@ export const WorkspaceMemberSchema = z.object({
   user: z.object({
     id: z.string(),
     name: z.string(),
-    profilePictureUrl: z.string().nullable()
+    profilePictureUrl: z.string().nullable(),
+    email: z.string().email(),
+    joinedOn: z.string().datetime()
   }),
   roles: z.array(
     z.object({
@@ -24,6 +26,7 @@ export const WorkspaceMemberSchema = z.object({
       })
     })
   ),
+  invitationAccepted: z.boolean(),
   entitlements: z.object({
     canUpdateRoles: z.boolean(),
     canTransferOwnershipTo: z.boolean(),
