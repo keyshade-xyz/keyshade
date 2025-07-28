@@ -21,20 +21,10 @@ import {
 } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private readonly app: App
+  private app: App
 
   constructor(prisma: PrismaService) {
     super(IntegrationType.SLACK, prisma)
-
-    if (!this.app && this.integration) {
-      const metadata = decryptMetadata<SlackIntegrationMetadata>(
-        this.integration.metadata
-      )
-      this.app = new App({
-        token: metadata.botToken,
-        signingSecret: metadata.signingSecret
-      })
-    }
   }
 
   public init(): Promise<void> {
@@ -78,6 +68,23 @@ export class SlackIntegration extends BaseIntegration {
 
   public getRequiredMetadataParameters(): Set<string> {
     return new Set(['botToken', 'signingSecret', 'channelId'])
+  }
+
+  private async getSlackApp() {
+    const { App } = await import('@slack/bolt')
+
+    if (!this.app) {
+      const metadata = decryptMetadata<SlackIntegrationMetadata>(
+        this.integration.metadata
+      )
+
+      this.app = new App({
+        token: metadata.botToken,
+        signingSecret: metadata.signingSecret
+      })
+    }
+
+    return this.app
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
@@ -134,6 +141,8 @@ export class SlackIntegration extends BaseIntegration {
           ]
         }
       ]
+
+      this.app = await this.getSlackApp()
 
       const { response, duration } = await makeTimedRequest(() =>
         this.app.client.chat.postMessage({
