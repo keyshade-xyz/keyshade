@@ -1,3 +1,13 @@
+## [2.31.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0...v2.31.1) (2025-07-28)
+
+### 🐛 Bug Fixes
+
+* **api:** broken migration file name ([07952fd](https://github.com/keyshade-xyz/keyshade/commit/07952fdffb4b66adf359cd5f083e7ad781a0c160))
+
+### 🔧 Miscellaneous Chores
+
+* **release:** 2.31.1-stage.1 [skip ci] ([0012a77](https://github.com/keyshade-xyz/keyshade/commit/0012a775bcf4393da5e288136c08b325c66c2627))
+
 ## [2.31.1-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0...v2.31.1-stage.1) (2025-07-28)
 
 ### 🐛 Bug Fixes
