@@ -1,10 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Avvvatars from 'avvvatars-react'
-import type {
-  ProjectWithCount,
-  ProjectWithTierLimitAndCount
-} from '@keyshade/schema'
+import type { GetAllProjectsResponse } from '@keyshade/schema'
 import { useAtomValue, useSetAtom } from 'jotai'
 import {
   SecretSVG,
@@ -31,7 +28,7 @@ import {
 import { copyToClipboard } from '@/lib/clipboard'
 
 interface ProjectCardProps {
-  project: ProjectWithTierLimitAndCount
+  project: GetAllProjectsResponse['items'][number]
 }
 
 export default function ProjectCard({
@@ -42,10 +39,11 @@ export default function ProjectCard({
     slug,
     name,
     description,
-    environmentCount,
-    secretCount,
-    variableCount,
-    accessLevel
+    totalEnvironments,
+    totalVariables,
+    totalSecrets,
+    accessLevel,
+    entitlements
   } = project
 
   const setIsEditProjectSheetOpen = useSetAtom(editProjectOpenAtom)
@@ -53,6 +51,9 @@ export default function ProjectCard({
   const setSelectedProject = useSetAtom(selectedProjectAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setIsExportConfigurationDialogOpen = useSetAtom(exportConfigOpenAtom)
+
+  const isAuthorizedToEditProjects = entitlements.canUpdate
+  const isAuthorizedToDeleteProjects = entitlements.canDelete
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
@@ -79,7 +80,9 @@ export default function ProjectCard({
     setIsExportConfigurationDialogOpen(true)
   }
 
-  const accessLevelToSVG = (accessLvl: ProjectWithCount['accessLevel']) => {
+  const accessLevelToSVG = (
+    accessLvl: GetAllProjectsResponse['items'][number]['accessLevel']
+  ) => {
     switch (accessLvl) {
       case 'GLOBAL':
         return <GlobalSVG width={16} />
@@ -117,15 +120,15 @@ export default function ProjectCard({
             <div className="grid grid-cols-3 gap-x-3">
               <div className="flex items-center gap-x-1">
                 <EnvironmentSVG width={16} />
-                {environmentCount}
+                {totalEnvironments}
               </div>
               <div className="flex items-center gap-x-1">
                 <VariableSVG width={16} />
-                {variableCount}
+                {totalVariables}
               </div>
               <div className="flex items-center gap-x-1">
                 <SecretSVG width={16} />
-                {secretCount}
+                {totalSecrets}
               </div>
             </div>
           </div>
@@ -159,10 +162,18 @@ export default function ProjectCard({
           Export configuration
         </ContextMenuItem>
         <ContextMenuSeparator className="bg-white/15" />
-        <ContextMenuItem inset onClick={handleEditProject}>
+        <ContextMenuItem
+          disabled={!isAuthorizedToEditProjects}
+          inset
+          onClick={handleEditProject}
+        >
           Edit
         </ContextMenuItem>
-        <ContextMenuItem inset onClick={handleDeleteProject}>
+        <ContextMenuItem
+          disabled={!isAuthorizedToDeleteProjects}
+          inset
+          onClick={handleDeleteProject}
+        >
           Delete
         </ContextMenuItem>
       </ContextMenuContent>
