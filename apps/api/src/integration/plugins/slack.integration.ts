@@ -71,17 +71,14 @@ export class SlackIntegration extends BaseIntegration {
   }
 
   private async getSlackApp() {
-    const { App } = await import('@slack/bolt')
-
     if (!this.app) {
-      const metadata = decryptMetadata<SlackIntegrationMetadata>(
-        this.integration.metadata
-      )
-
+      this.logger.log('Generating Slack app...')
+      const integration = this.getIntegration<SlackIntegrationMetadata>()
       this.app = new App({
-        token: metadata.botToken,
-        signingSecret: metadata.signingSecret
+        token: integration.metadata.botToken,
+        signingSecret: integration.metadata.signingSecret
       })
+      this.logger.log('Generated Slack app...')
     }
 
     return this.app
