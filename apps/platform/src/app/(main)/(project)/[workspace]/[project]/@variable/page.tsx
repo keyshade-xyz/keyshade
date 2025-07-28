@@ -30,23 +30,25 @@ export default function VariablePage(): React.JSX.Element {
   const selectedVariable = useAtomValue(selectedVariableAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
-  const canUpdateVariable = selectedVariable?.entitlements.canUpdate
-  const canDeleteVariable = selectedVariable?.entitlements.canDelete
+  const isAuthorizedToEditVariable = selectedVariable?.entitlements.canUpdate
+  const isAuthorizedToDeleteVariable = selectedVariable?.entitlements.canDelete
 
   return (
     <div className="flex h-full w-full justify-center">
       <PageTitle title={`${selectedProject?.name} | Variables`} />
       <VariableList />
 
-      <Visible if={Boolean(isDeleteVariableOpen && canDeleteVariable)}>
+      <Visible
+        if={Boolean(isDeleteVariableOpen && isAuthorizedToDeleteVariable)}
+      >
         <ConfirmDeleteVariable />
       </Visible>
-      <Visible if={Boolean(isEditVariableOpen && canUpdateVariable)}>
+      <Visible if={Boolean(isEditVariableOpen && isAuthorizedToEditVariable)}>
         <EditVariablSheet />
       </Visible>
       <Visible
         if={Boolean(
-          isDeleteEnvironmentValueOfVariableOpen && canDeleteVariable
+          isDeleteEnvironmentValueOfVariableOpen && isAuthorizedToDeleteVariable
         )}
       >
         <ConfirmDeleteEnvironmentValueOfVariableDialog />
@@ -54,7 +56,9 @@ export default function VariablePage(): React.JSX.Element {
       <Visible if={Boolean(isVariableRevisionsOpen)}>
         <VariableRevisionsSheet />
       </Visible>
-      <Visible if={Boolean(isRollbackVariableOpen && canUpdateVariable)}>
+      <Visible
+        if={Boolean(isRollbackVariableOpen && isAuthorizedToEditVariable)}
+      >
         <ConfirmRollbackVariable />
       </Visible>
     </div>

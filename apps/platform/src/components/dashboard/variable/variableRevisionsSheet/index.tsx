@@ -55,7 +55,7 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const canEditVariable = selectedVariable?.entitlements.canUpdate
+  const isAuthorizedToEditVariables = selectedVariable?.entitlements.canUpdate
 
   const getAllRevisionsOfVariable = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -182,7 +182,7 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                               {index !== 0 ? (
                                 <Button
                                   className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
-                                  disabled={!canEditVariable}
+                                  disabled={!isAuthorizedToEditVariables}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,

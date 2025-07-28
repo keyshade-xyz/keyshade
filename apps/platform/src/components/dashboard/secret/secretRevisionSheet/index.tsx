@@ -61,7 +61,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const canUpdateSecret = selectedSecret?.entitlements.canUpdate
+  const isAuthorizedToEditSecret = selectedSecret?.entitlements.canUpdate
 
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
@@ -219,7 +219,7 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                               {index !== 0 ? (
                                 <Button
                                   className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
-                                  disabled={!canUpdateSecret}
+                                  disabled={!isAuthorizedToEditSecret}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,

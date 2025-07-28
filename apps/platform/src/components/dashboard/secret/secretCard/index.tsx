@@ -69,8 +69,8 @@ export default function SecretCard({
     Record<Environment['id'], string>
   >({})
 
-  const canUpdateSecret = secretData.entitlements.canUpdate
-  const canDeleteSecret = secretData.entitlements.canDelete
+  const isAuthorizedToEditSecrets = secretData.entitlements.canUpdate
+  const isAuthorizedToDeleteSecrets = secretData.entitlements.canDelete
 
   const handleDecryptValues = useCallback(
     (environmentSlug: Environment['slug']) => {
@@ -288,14 +288,14 @@ export default function SecretCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!canUpdateSecret}
+          disabled={!isAuthorizedToEditSecrets}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!canDeleteSecret}
+          disabled={!isAuthorizedToDeleteSecrets}
           onSelect={handleDeleteClick}
         >
           Delete

@@ -36,30 +36,32 @@ export default function SecretPage(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const { projectPrivateKey } = useProjectPrivateKey(selectedProject)
 
-  const canUpdateSecret = selectedSecret?.entitlements.canUpdate
-  const canDeleteSecret = selectedSecret?.entitlements.canDelete
+  const isAuthorizedToEditSecrets = selectedSecret?.entitlements.canUpdate
+  const isAuthorizedToDeleteSecrets = selectedSecret?.entitlements.canDelete
 
   return (
     <div className="flex h-full w-full justify-center">
       <PageTitle title={`${selectedProject?.name} | Secrets`} />
       <SecretList projectPrivateKey={projectPrivateKey} />
 
-      <Visible if={Boolean(isDeleteSecretOpen && canDeleteSecret)}>
+      <Visible if={Boolean(isDeleteSecretOpen && isAuthorizedToDeleteSecrets)}>
         <ConfirmDeleteSecret />
       </Visible>
 
-      <Visible if={Boolean(isEditSecretOpen && canUpdateSecret)}>
+      <Visible if={Boolean(isEditSecretOpen && isAuthorizedToEditSecrets)}>
         <EditSecretSheet />
       </Visible>
       <Visible
-        if={Boolean(isDeleteEnvironmentValueOfSecretOpen && canDeleteSecret)}
+        if={Boolean(
+          isDeleteEnvironmentValueOfSecretOpen && isAuthorizedToDeleteSecrets
+        )}
       >
         <ConfirmDeleteEnvironmentValueOfSecretDialog />
       </Visible>
       <Visible if={Boolean(isSecretRevisionsOpen)}>
         <SecretRevisionsSheet />
       </Visible>
-      <Visible if={Boolean(isRollbackSecretOpen && canUpdateSecret)}>
+      <Visible if={Boolean(isRollbackSecretOpen && isAuthorizedToEditSecrets)}>
         <ConfirmRollbackSecret />
       </Visible>
     </div>

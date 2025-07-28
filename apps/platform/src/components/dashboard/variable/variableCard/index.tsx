@@ -59,8 +59,8 @@ export default function VariableCard({
   )
   const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
-  const canUpdateVariable = variableData.entitlements.canUpdate
-  const canDeleteVariable = variableData.entitlements.canDelete
+  const isAuthorizedToEditVariable = variableData.entitlements.canUpdate
+  const isAuthorizedToDeleteVariable = variableData.entitlements.canDelete
 
   const { versions } = variableData
   const handleCopyToClipboard = () => {
@@ -213,14 +213,14 @@ export default function VariableCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!canUpdateVariable}
+          disabled={!isAuthorizedToEditVariable}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
-          disabled={!canDeleteVariable}
+          disabled={!isAuthorizedToDeleteVariable}
           onSelect={handleDeleteClick}
         >
           Delete
