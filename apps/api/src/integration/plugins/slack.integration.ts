@@ -1,7 +1,9 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
-  IntegrationType
+  IntegrationType,
+  Project
 } from '@prisma/client'
 import {
   SlackIntegrationMetadata,
@@ -27,8 +29,63 @@ export class SlackIntegration extends BaseIntegration {
     super(IntegrationType.SLACK, prisma)
   }
 
-  public init(): Promise<void> {
-    // TODO: implement this
+  public async init(
+    _privateKey: Project['privateKey'],
+    eventId: Event['id']
+  ): Promise<void> {
+    this.logger.log(`Initializing Slack Integration...`)
+
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
+
+    try {
+      const { id: integrationRunId } = await this.registerIntegrationRun({
+        eventId: eventId,
+        integrationId: integration.id,
+        title: 'Posting message to Slack'
+      })
+
+      const block = [
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: '🥁 Keyshade is now configured with this channel!',
+            emoji: true
+          }
+        }
+      ]
+
+      this.app = await this.getSlackApp()
+
+      const { response, duration } = await makeTimedRequest(() =>
+        this.app.client.chat.postMessage({
+          channel: integration.metadata.channelId,
+          blocks: block,
+          text: 'Integration initialized'
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        response.message.text
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to integrate Slack: ${response.status} - ${response.statusText}`
+        )
+      } else {
+        this.logger.log(`Slack integration initialized in ${duration}ms`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to integrate Slack: ${error}`)
+      throw new InternalServerErrorException('Failed to integrate Slack')
+    }
+
     return Promise.resolve()
   }
 
