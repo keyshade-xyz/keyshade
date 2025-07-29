@@ -126,8 +126,6 @@ export default class RunCommand extends BaseCommand {
       transports: ['websocket']
     })
 
-    ioClient.connect()
-
     ioClient.on('connect', async () => {
       ioClient.emit('register-client-app', {
         workspaceSlug: data.workspace,
@@ -161,10 +159,18 @@ export default class RunCommand extends BaseCommand {
         this.processEnvironmentalVariables[data.name] = data.value
         this.restartCommand()
       })
+      // Set a timeout for registration response
+      const registrationTimeout = setTimeout(() => {
+        Logger.error(
+          'Connection timeout: No response from server after 30 seconds'
+        )
+        process.exit(1)
+      }, 30000)
 
       ioClient.on(
         'client-registered',
         (registrationResponse: ClientRegisteredResponse) => {
+          clearTimeout(registrationTimeout)
           if (registrationResponse.success) {
             this.projectSlug = data.project
             this.environmentSlug = data.environment
