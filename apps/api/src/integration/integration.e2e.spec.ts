@@ -36,6 +36,16 @@ import {
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
 
+jest.mock('@vercel/sdk', () => {
+  const getEnvMock = jest.fn()
+  return {
+    Vercel: jest.fn().mockImplementation(() => ({
+      environment: { getV9ProjectsIdOrNameCustomEnvironments: getEnvMock }
+    })),
+    __getEnvMock: getEnvMock
+  }
+})
+
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
   let prisma: PrismaService
@@ -50,6 +60,7 @@ describe('Integration Controller Tests', () => {
   let project1: Project, project2: Project
   let environment1: Environment, environment2: Environment
   let createDiscordIntegration: () => Promise<Integration>
+  let getEnvMock: jest.Mock
 
   const USER_IP_ADDRESS = '127.0.0.1'
   const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
@@ -64,6 +75,11 @@ describe('Integration Controller Tests', () => {
   const DUMMY_INTEGRATION_NAME = 'Integration 1'
 
   beforeAll(async () => {
+    const sdkMock = jest.requireMock('@vercel/sdk') as {
+      __getEnvMock: jest.Mock
+    }
+    getEnvMock = sdkMock.__getEnvMock
+
     nock.disableNetConnect()
     nock.enableNetConnect('127.0.0.1')
 
@@ -938,12 +954,7 @@ describe('Integration Controller Tests', () => {
       }
 
       it('should fail validating metadata on create if Vercel API is unreachable', async () => {
-        nock('https://api.vercel.com')
-          .get(
-            `/v9/projects/${validDtoVercel.metadata.projectId}/custom-environments`
-          )
-          .query(true)
-          .reply(404)
+        getEnvMock.mockRejectedValueOnce(new Error('Network unreachable'))
 
         const response = await app.inject({
           method: 'POST',
@@ -952,19 +963,16 @@ describe('Integration Controller Tests', () => {
           payload: validDtoVercel
         })
 
-        expect(nock.isDone()).toBe(true)
         expect(response.statusCode).toEqual(400)
       })
 
       it('should fail validating metadata on create if custom environment ID is invalid', async () => {
-        nock('https://api.vercel.com')
-          .get(
-            `/v9/projects/${validDtoVercel.metadata.projectId}/custom-environments`
-          )
-          .query(true)
-          .reply(200, {
+        getEnvMock.mockResolvedValueOnce({
+          response: {
             environments: [{ id: 'some-other-id', name: 'staging' }]
-          })
+          },
+          duration: 5
+        })
 
         const response = await app.inject({
           method: 'POST',
@@ -973,7 +981,6 @@ describe('Integration Controller Tests', () => {
           payload: validDtoVercel
         })
 
-        expect(nock.isDone()).toBe(true)
         expect(response.statusCode).toEqual(400)
       })
     })
