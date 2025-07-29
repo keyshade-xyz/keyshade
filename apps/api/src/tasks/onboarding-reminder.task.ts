@@ -6,6 +6,10 @@ import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 
 let isRunning = false
 
+// Reminder schedule in days from previous reminder
+// Total reminders: 6, sent on days: 3, 9, 16, 26, 41, 56 after joinedOn
+const scheduleOffsets = [3, 6, 7, 10, 15, 15]
+
 @Injectable()
 export class OnboardingReminderTask {
   constructor(
@@ -25,7 +29,7 @@ export class OnboardingReminderTask {
       where: {
         isActive: true,
         isOnboardingFinished: false,
-        noOfReminderSent: { lt: 7 }
+        noOfReminderSent: { lt: scheduleOffsets.length }
       },
       select: {
         id: true,
@@ -41,8 +45,6 @@ export class OnboardingReminderTask {
     })
 
     try {
-      const scheduleOffsets = [3, 6, 7, 10, 15, 15]
-
       for (const user of allUsers) {
         const reminderIndex = user.noOfReminderSent
 
@@ -62,7 +64,7 @@ export class OnboardingReminderTask {
           await this.mailService.sendOnboardingReminder(
             user.email,
             user.name,
-            reminderIndex
+            reminderIndex + 1
           )
 
           await this.prisma.user.update({
@@ -73,6 +75,8 @@ export class OnboardingReminderTask {
           console.error(`Failed to send reminder to ${user.email}:`, err)
         }
       }
+    } catch (err) {
+      console.error(`Error during reminder task:`, err)
     } finally {
       isRunning = false
     }
