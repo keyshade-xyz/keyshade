@@ -753,7 +753,7 @@ describe('Integration Controller Tests', () => {
       expect(response.json()).toEqual({ success: true })
     })
 
-    it('should return 400 if integrationSlug is missing on update', async () => {
+    it('should return 500 if integrationSlug is missing on update', async () => {
       const response = await app.inject({
         method: 'POST',
         url: `${endpoint}?isCreate=false`,
