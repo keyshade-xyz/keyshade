@@ -230,6 +230,7 @@ model User {
   authProvider         AuthProvider?
   subscription         Subscription?
   joinedOn             DateTime      @default(now())
+  noOfReminderSent     Int           @default(0) 
   referralCode         String        @unique
   
   workspaceMembers  WorkspaceMember[]
