@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req
 } from '@nestjs/common'
 import { PaymentGatewayService } from './payment-gateway.service'
@@ -77,14 +78,14 @@ export class PaymentGatewayController {
   public getPaymentHistory(
     @CurrentUser() user: AuthenticatedUser,
     @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
-    @Body('page') page: number = 1,
-    @Body('limit') limit: number = 10
+    @Query('page') page: number,
+    @Query('limit') limit: number
   ) {
     return this.paymentGatewayService.getPaymentHistory(
       user,
       workspaceSlug,
-      page,
-      limit
+      page === undefined || page === 0 ? 1 : page,
+      limit === undefined || limit === 0 ? 10 : limit
     )
   }
 

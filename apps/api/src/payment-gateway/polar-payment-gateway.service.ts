@@ -292,7 +292,34 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     page: number,
     limit: number
   ): Promise<PaymentHistory> {
-    throw new Error('Method not implemented.')
+    this.logger.log(
+      `User ${user.id} attempted to get payment history for workspace ${workspaceSlug}`
+    )
+
+    await this.getAuthorizedWorkspace(user, workspaceSlug)
+    const subscriptions = await this.polarClient.orders.list({
+      metadata: {
+        workspaceSlug
+      },
+      page,
+      limit
+    })
+
+    return {
+      items: subscriptions.result.items.map((order) => ({
+        amount: order.totalAmount / 100,
+        date: order.createdAt,
+        plan: order.product.metadata.plan as AllowedPlans,
+        status: order.status,
+        seats: order.product.metadata.seats as string,
+        paid: order.paid,
+        currency: order.currency
+      })),
+      metadata: {
+        lastPage: subscriptions.result.pagination.maxPage,
+        totalCount: subscriptions.result.pagination.totalCount
+      }
+    }
   }
 
   public async processWebhook(req: any): Promise<void> {

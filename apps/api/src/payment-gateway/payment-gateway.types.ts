@@ -5,6 +5,9 @@ export interface PaymentHistory {
     amount: number
     date: Date
     plan: AllowedPlans
+    status: string
+    seats: string
+    paid: boolean
   }[]
   metadata: {
     totalCount: number
