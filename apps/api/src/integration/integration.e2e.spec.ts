@@ -34,6 +34,7 @@ import {
   LambdaClient,
   GetFunctionConfigurationCommand
 } from '@aws-sdk/client-lambda'
+import { SlackIntegrationMetadata } from './integration.types'
 
 describe('Integration Controller Tests', () => {
   let app: NestFastifyApplication
@@ -844,6 +845,93 @@ describe('Integration Controller Tests', () => {
         })
 
         expect(response.statusCode).toEqual(400)
+      })
+    })
+
+    describe('Slack configuration tests', () => {
+      const DUMMY_TOKEN = 'xoxb-valid-but-test'
+      const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
+      const DUMMY_CHANNEL = 'C1234567890'
+
+      const validDtoSlack: CreateIntegration = {
+        name: 'Validation Test',
+        type: IntegrationType.SLACK,
+        metadata: {
+          botToken: DUMMY_TOKEN,
+          signingSecret: DUMMY_SIGNING_SECRET,
+          channelId: DUMMY_CHANNEL
+        } satisfies SlackIntegrationMetadata,
+        notifyOn: [EventType.WORKSPACE_UPDATED]
+      }
+
+      it('should fail when token is invalid', async () => {
+        nock('https://slack.com')
+          .post('/api/auth.test')
+          .reply(200, { ok: false, error: 'invalid_auth' })
+
+        const result = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          payload: validDtoSlack,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(result.statusCode).toBe(400)
+        expect(JSON.parse(await result.json().message)).toEqual(
+          expect.objectContaining({
+            header: 'Slack token validation failed',
+            body: 'invalid_auth'
+          })
+        )
+      })
+
+      it('should fail when channel is invalid', async () => {
+        nock('https://slack.com').post('/api/auth.test').reply(200, {
+          ok: true
+        })
+
+        nock('https://slack.com')
+          .post('/api/chat.postEphemeral')
+          .reply(200, { ok: false, error: 'channel_not_found' })
+
+        const result = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          payload: validDtoSlack,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(result.statusCode).toBe(400)
+        expect(JSON.parse(await result.json().message)).toEqual(
+          expect.objectContaining({
+            header: 'Slack write validation failed',
+            body: 'channel_not_found'
+          })
+        )
+      })
+
+      it('should succeed when token and write-permission are valid', async () => {
+        nock('https://slack.com').post('/api/auth.test').reply(200, {
+          ok: true
+        })
+
+        nock('https://slack.com')
+          .post('/api/chat.postEphemeral')
+          .reply(200, { ok: true })
+
+        const result = await app.inject({
+          method: 'POST',
+          url: `${endpoint}?isCreate=true`,
+          payload: validDtoSlack,
+          headers: { 'x-e2e-user-email': user1.email }
+        })
+
+        expect(result.statusCode).toBe(200)
+        expect(await result.json()).toEqual(
+          expect.objectContaining({
+            success: true
+          })
+        )
       })
     })
 
