@@ -170,40 +170,61 @@ export class SlackIntegration extends BaseIntegration {
       `Validating Slack integration (channel: ${metadata.channelId})`
     )
 
-    const testApp = new App({
-      token: metadata.botToken,
-      signingSecret: metadata.signingSecret
-    })
-
-    const testBlocks = [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: '*Keyshade integration test successful!*'
-        }
-      }
-    ]
-
-    const { response, duration } = await makeTimedRequest(() =>
-      testApp.client.chat.postMessage({
-        channel: metadata.channelId,
-        blocks: testBlocks,
-        text: 'Keyshade integration test'
-      })
-    )
-
-    this.logger.log(
-      `Slack validation responded ${response.ok ? 'OK' : 'FAIL'} in ${duration}ms`
-    )
-
-    if (!response.ok) {
+    const { data: authData, duration: authDur } = await this.slackApi<{
+      ok: boolean
+      user_id: string
+      error?: string
+    }>('auth.test', {}, metadata.botToken)
+    this.logger.log(`auth.test ok=${authData.ok} in ${authDur}ms`)
+    if (!authData.ok) {
       throw new BadRequestException(
-        constructErrorBody(
-          'Slack webhook validation failed',
-          response.error ?? 'Unknown error'
-        )
+        constructErrorBody('Slack token validation failed', authData.error)
       )
     }
+
+    const userId = authData.user_id
+
+    const { data: ephData, duration: ephDur } = await this.slackApi<{
+      ok: boolean
+      error?: string
+    }>(
+      'chat.postEphemeral',
+      {
+        channel: metadata.channelId,
+        user: userId,
+        text: "Keyshade write-test (you won't see this after validation!)"
+      },
+      metadata.botToken
+    )
+    this.logger.log(`chat.postEphemeral ok=${ephData.ok} in ${ephDur}ms`)
+    if (!ephData.ok) {
+      throw new BadRequestException(
+        constructErrorBody('Slack write validation failed', ephData.error!)
+      )
+    }
+
+    this.logger.log(
+      `Slack write validation succeeded (ephemeral in ${metadata.channelId}).`
+    )
+  }
+
+  private async slackApi<T extends { ok: boolean; error?: string }>(
+    method: string,
+    params: Record<string, string>,
+    token: string
+  ): Promise<{ data: T; duration: number }> {
+    const url = `https://slack.com/api/${method}`
+    const body = new URLSearchParams(params).toString()
+    const start = Date.now()
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    })
+    const data = await res.json()
+    return { data, duration: Date.now() - start }
   }
 }
