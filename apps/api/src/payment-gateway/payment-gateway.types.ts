@@ -8,6 +8,7 @@ export interface PaymentHistory {
     status: string
     seats: string
     paid: boolean
+    currency: string
   }[]
   metadata: {
     totalCount: number
