@@ -49,6 +49,7 @@ describe('Integration Controller Tests', () => {
   let workspace1: Workspace, workspace2: Workspace
   let project1: Project, project2: Project
   let environment1: Environment, environment2: Environment
+  let createDiscordIntegration: () => Promise<Integration>
 
   const USER_IP_ADDRESS = '127.0.0.1'
   const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
@@ -59,6 +60,8 @@ describe('Integration Controller Tests', () => {
       .get(pathname || '/')
       .reply(200)
   }
+
+  const DUMMY_INTEGRATION_NAME = 'Integration 1'
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -167,6 +170,22 @@ describe('Integration Controller Tests', () => {
       },
       project2.slug
     )) as Environment
+
+    createDiscordIntegration = async () => {
+      return await integrationService.createIntegration(
+        user1,
+        {
+          name: DUMMY_INTEGRATION_NAME,
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+    }
   })
 
   afterEach(async () => {
@@ -192,22 +211,8 @@ describe('Integration Controller Tests', () => {
 
   describe('Create Integration Tests', () => {
     it('should not be able to create an integration in the workspace with the same name', async () => {
-      const duplicateIntegrationName = 'Integration 1'
-
       createDummyDiscordWebhookUrlInterceptor()
-      await integrationService.createIntegration(
-        user1,
-        {
-          name: duplicateIntegrationName,
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED],
-          privateKey: 'abc'
-        },
-        workspace1.slug
-      )
+      await createDiscordIntegration()
 
       const result = await app.inject({
         method: 'POST',
@@ -216,7 +221,7 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          name: duplicateIntegrationName,
+          name: DUMMY_INTEGRATION_NAME,
           type: IntegrationType.DISCORD,
           metadata: {
             webhookUrl: DUMMY_WEBHOOK_URL
@@ -413,19 +418,7 @@ describe('Integration Controller Tests', () => {
 
     beforeEach(async () => {
       createDummyDiscordWebhookUrlInterceptor()
-      integration1 = await integrationService.createIntegration(
-        user1,
-        {
-          name: 'Integration 1',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED],
-          privateKey: 'abc'
-        },
-        workspace1.slug
-      )
+      integration1 = await createDiscordIntegration()
     })
 
     it('should not be able to update an integration if it does not exist', async () => {
@@ -615,19 +608,7 @@ describe('Integration Controller Tests', () => {
 
     beforeEach(async () => {
       createDummyDiscordWebhookUrlInterceptor()
-      integration1 = await integrationService.createIntegration(
-        user1,
-        {
-          name: 'Integration 1',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED],
-          privateKey: 'abc'
-        },
-        workspace1.slug
-      )
+      integration1 = await createDiscordIntegration()
     })
 
     it('should be able to fetch an integration', async () => {
@@ -1069,19 +1050,7 @@ describe('Integration Controller Tests', () => {
 
     beforeEach(async () => {
       createDummyDiscordWebhookUrlInterceptor()
-      integration1 = await integrationService.createIntegration(
-        user1,
-        {
-          name: 'Integration 1',
-          type: IntegrationType.DISCORD,
-          metadata: {
-            webhookUrl: DUMMY_WEBHOOK_URL
-          },
-          notifyOn: [EventType.WORKSPACE_UPDATED],
-          privateKey: 'abc'
-        },
-        workspace1.slug
-      )
+      integration1 = await createDiscordIntegration()
     })
 
     it('should be able to delete an integration', async () => {
