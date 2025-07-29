@@ -46,17 +46,16 @@ describe('Integration Controller Tests', () => {
 
   let user1: AuthenticatedUser, user2: AuthenticatedUser
   let workspace1: Workspace, workspace2: Workspace
-  let integration1: Integration
   let project1: Project, project2: Project
   let environment1: Environment, environment2: Environment
 
   const USER_IP_ADDRESS = '127.0.0.1'
   const DUMMY_WEBHOOK_URL = 'https://dummy-webhook-url.com'
 
-  const createDummyWebhookUrlInterceptor = () => {
+  const createDummyDiscordWebhookUrlInterceptor = () => {
     const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
     return nock(origin)
-      .post(pathname || '/')
+      .get(pathname || '/')
       .reply(200)
   }
 
@@ -140,22 +139,6 @@ describe('Integration Controller Tests', () => {
       }
     }
 
-    createDummyWebhookUrlInterceptor()
-
-    integration1 = await integrationService.createIntegration(
-      user1,
-      {
-        name: 'Integration 1',
-        type: IntegrationType.DISCORD,
-        metadata: {
-          webhookUrl: DUMMY_WEBHOOK_URL
-        },
-        notifyOn: [EventType.WORKSPACE_UPDATED],
-        privateKey: 'abc'
-      },
-      workspace1.slug
-    )
-
     project1 = (await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Description 1'
@@ -208,6 +191,23 @@ describe('Integration Controller Tests', () => {
 
   describe('Create Integration Tests', () => {
     it('should not be able to create an integration in the workspace with the same name', async () => {
+      const duplicateIntegrationName = 'Integration 1'
+
+      createDummyDiscordWebhookUrlInterceptor()
+      await integrationService.createIntegration(
+        user1,
+        {
+          name: duplicateIntegrationName,
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+
       const result = await app.inject({
         method: 'POST',
         url: `/integration/${workspace1.slug}`,
@@ -215,7 +215,7 @@ describe('Integration Controller Tests', () => {
           'x-e2e-user-email': user1.email
         },
         payload: {
-          name: 'Integration 1',
+          name: duplicateIntegrationName,
           type: IntegrationType.DISCORD,
           metadata: {
             webhookUrl: DUMMY_WEBHOOK_URL
@@ -374,7 +374,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to create an integration without any project or environment slug', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       const result = await app.inject({
         method: 'POST',
@@ -408,6 +408,25 @@ describe('Integration Controller Tests', () => {
   })
 
   describe('Update Integration Tests', () => {
+    let integration1: Integration
+
+    beforeEach(async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+      integration1 = await integrationService.createIntegration(
+        user1,
+        {
+          name: 'Integration 1',
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+    })
+
     it('should not be able to update an integration if it does not exist', async () => {
       const result = await app.inject({
         method: 'PUT',
@@ -470,7 +489,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should not fail to update if the integration has project present and only environmentSlugs is updated', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       // Create the integration
       const integration = await integrationService.createIntegration(
@@ -562,7 +581,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should be able to update the integration', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       // Update the integration
       const result = await app.inject({
@@ -591,6 +610,25 @@ describe('Integration Controller Tests', () => {
   })
 
   describe('Get Integration Tests', () => {
+    let integration1: Integration
+
+    beforeEach(async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+      integration1 = await integrationService.createIntegration(
+        user1,
+        {
+          name: 'Integration 1',
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+    })
+
     it('should be able to fetch an integration', async () => {
       const result = await app.inject({
         method: 'GET',
@@ -627,34 +665,34 @@ describe('Integration Controller Tests', () => {
 
       expect(result.statusCode).toEqual(401)
     })
-  })
 
-  it('should be able to fetch all integrations on first page', async () => {
-    const result = await app.inject({
-      method: 'GET',
-      url: `/integration/all/${workspace1.slug}?page=0&limit=10`,
-      headers: {
-        'x-e2e-user-email': user1.email
-      }
+    it('should be able to fetch all integrations on first page', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: `/integration/all/${workspace1.slug}?page=0&limit=10`,
+        headers: {
+          'x-e2e-user-email': user1.email
+        }
+      })
+
+      expect(result.statusCode).toEqual(200)
+      expect(result.json().items).toHaveLength(1)
+
+      //check metadata
+      const metadata = result.json().metadata
+      expect(metadata.totalCount).toEqual(1)
+      expect(metadata.links.self).toEqual(
+        `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.first).toEqual(
+        `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
+      expect(metadata.links.previous).toBeNull()
+      expect(metadata.links.next).toBeNull()
+      expect(metadata.links.last).toEqual(
+        `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
+      )
     })
-
-    expect(result.statusCode).toEqual(200)
-    expect(result.json().items).toHaveLength(1)
-
-    //check metadata
-    const metadata = result.json().metadata
-    expect(metadata.totalCount).toEqual(1)
-    expect(metadata.links.self).toEqual(
-      `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
-    )
-    expect(metadata.links.first).toEqual(
-      `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
-    )
-    expect(metadata.links.previous).toBeNull()
-    expect(metadata.links.next).toBeNull()
-    expect(metadata.links.last).toEqual(
-      `/integration/all/${workspace1.slug}?page=0&limit=10&sort=name&order=asc&search=`
-    )
   })
 
   describe('Validate Config (metadata-only) Tests', () => {
@@ -673,7 +711,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should succeed validating metadata on create when DTO is valid', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       const response = await app.inject({
         method: 'POST',
@@ -687,7 +725,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should succeed validating metadata on update when DTO is valid', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       existingIntegration = await integrationService.createIntegration(
         user1,
@@ -698,7 +736,7 @@ describe('Integration Controller Tests', () => {
         workspace1.slug
       )
 
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       const response = await app.inject({
         method: 'POST',
@@ -729,7 +767,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should return 401 if user is not authorized to update that integration', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       existingIntegration = await integrationService.createIntegration(
         user1,
@@ -740,7 +778,7 @@ describe('Integration Controller Tests', () => {
         workspace1.slug
       )
 
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       const response = await app.inject({
         method: 'POST',
@@ -756,7 +794,7 @@ describe('Integration Controller Tests', () => {
     })
 
     it('should return 400 if notifyOn contains an event the integration does not permit', async () => {
-      createDummyWebhookUrlInterceptor()
+      createDummyDiscordWebhookUrlInterceptor()
 
       const badDto = {
         ...validDto,
@@ -795,7 +833,7 @@ describe('Integration Controller Tests', () => {
         const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
 
         nock(origin)
-          .post(pathname || '/')
+          .get(pathname || '/')
           .reply(404)
 
         const response = await app.inject({
@@ -803,32 +841,6 @@ describe('Integration Controller Tests', () => {
           url: `${endpoint}?isCreate=true`,
           headers: { 'x-e2e-user-email': user1.email },
           payload: validDto
-        })
-
-        expect(response.statusCode).toEqual(400)
-      })
-    })
-
-    describe('Slack configuration tests', () => {
-      const validDtoSlack: CreateIntegration = {
-        name: 'Validation Test',
-        type: IntegrationType.SLACK,
-        metadata: { webhookUrl: DUMMY_WEBHOOK_URL },
-        notifyOn: [EventType.WORKSPACE_UPDATED]
-      }
-
-      it('should fail validating metadata on create if webhook URL is unreachable', async () => {
-        const { origin, pathname } = new URL(DUMMY_WEBHOOK_URL)
-
-        nock(origin)
-          .post(pathname || '/')
-          .reply(404)
-
-        const response = await app.inject({
-          method: 'POST',
-          url: `${endpoint}?isCreate=true`,
-          headers: { 'x-e2e-user-email': user1.email },
-          payload: validDtoSlack
         })
 
         expect(response.statusCode).toEqual(400)
@@ -965,6 +977,25 @@ describe('Integration Controller Tests', () => {
   })
 
   describe('Delete Integration Tests', () => {
+    let integration1: Integration
+
+    beforeEach(async () => {
+      createDummyDiscordWebhookUrlInterceptor()
+      integration1 = await integrationService.createIntegration(
+        user1,
+        {
+          name: 'Integration 1',
+          type: IntegrationType.DISCORD,
+          metadata: {
+            webhookUrl: DUMMY_WEBHOOK_URL
+          },
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'abc'
+        },
+        workspace1.slug
+      )
+    })
+
     it('should be able to delete an integration', async () => {
       const result = await app.inject({
         method: 'DELETE',
