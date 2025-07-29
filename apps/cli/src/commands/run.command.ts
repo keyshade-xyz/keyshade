@@ -126,6 +126,7 @@ export default class RunCommand extends BaseCommand {
       transports: ['websocket']
     })
 
+    ioClient.connect()
     ioClient.on('connect', async () => {
       ioClient.emit('register-client-app', {
         workspaceSlug: data.workspace,
