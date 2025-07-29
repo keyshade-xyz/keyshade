@@ -127,11 +127,8 @@ export class DiscordIntegration extends BaseIntegration {
 
     const { response, duration } = await makeTimedRequest(() =>
       fetch(metadata.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: 'Keyshade integration test'
-        })
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       })
     )
 
