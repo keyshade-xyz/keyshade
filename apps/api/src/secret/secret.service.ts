@@ -822,7 +822,7 @@ export class SecretService {
     // Get the environments
     const environments = await this.prisma.environment.findMany({
       where: {
-        DisabledEnvironmentOfSecret: {
+        disabledEnvironmentOfSecret: {
           some: {
             secretId
           }
@@ -1217,7 +1217,7 @@ export class SecretService {
           }
         },
         // Ignore disabled secrets
-        DisabledEnvironmentOfSecret: {
+        disabledEnvironmentOfSecret: {
           none: {
             environmentId
           }

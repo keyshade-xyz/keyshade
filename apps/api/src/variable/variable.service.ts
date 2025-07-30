@@ -821,7 +821,7 @@ export class VariableService {
     // Get the environments
     const environments = await this.prisma.environment.findMany({
       where: {
-        DisabledEnvironmentOfVariable: {
+        disabledEnvironmentOfVariable: {
           some: {
             variableId
           }
@@ -1237,7 +1237,7 @@ export class VariableService {
           }
         },
         // Ignore disabled variables
-        DisabledEnvironmentOfVariable: {
+        disabledEnvironmentOfVariable: {
           none: {
             environmentId
           }

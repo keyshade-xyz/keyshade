@@ -924,7 +924,6 @@ export class WorkspaceMembershipService {
       workspace.name,
       `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
       user.name,
-      membership.createdOn.toISOString(),
       true
     )
 
@@ -1059,7 +1058,6 @@ export class WorkspaceMembershipService {
           workspace.name,
           `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
-          invitedOn.toISOString(),
           true,
           inviteeName
         )
@@ -1088,7 +1086,6 @@ export class WorkspaceMembershipService {
           workspace.name,
           `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
-          new Date().toISOString(),
           false
         )
 
