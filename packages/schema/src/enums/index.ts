@@ -122,3 +122,11 @@ export const subscriptionPlanEnum = z.enum([
   'TEAM',
   'ENTERPRISE'
 ])
+
+export const subscriptionStatusEnum = z.enum([
+  'INCOMPLETE',
+  'ACTIVE',
+  'PAST_DUE',
+  'CANCELLED',
+  'UNPAID'
+])

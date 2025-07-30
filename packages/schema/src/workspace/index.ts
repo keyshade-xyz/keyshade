@@ -4,7 +4,8 @@ import {
   authorityEnum,
   projectAccessLevelEnum,
   rotateAfterEnum,
-  subscriptionPlanEnum
+  subscriptionPlanEnum,
+  subscriptionStatusEnum
 } from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 
@@ -35,6 +36,7 @@ export const WorkspaceSchema = z.object({
   subscription: z.object({
     id: z.string(),
     plan: subscriptionPlanEnum,
+    status: subscriptionStatusEnum,
     renewsOn: z.string().datetime().optional(),
     activatedOn: z.string().datetime(),
     seatsBooked: z.number(),
