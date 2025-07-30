@@ -38,6 +38,7 @@ function UpdateIntegration({
 
   const [name, setName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isTesting, setIsTesting] = useState(false)
   const [selectedEvents, setSelectedEvents] = useState<Set<EventTypeEnum>>(
     new Set()
   )
@@ -91,51 +92,66 @@ function UpdateIntegration({
     )
   })
 
+  const testIntegration = useHttp((finalMetadata) => {
+    return ControllerInstance.getInstance().integrationController.validateIntegrationConfiguration(
+      {
+        isCreate: false,
+        integrationSlug: selectedIntegration!.slug,
+        name: name.trim(),
+        notifyOn: Array.from(selectedEvents),
+        metadata: finalMetadata as Record<string, string>,
+        ...(selectedEnvironments.length > 0
+          ? { environmentSlugs: selectedEnvironments }
+          : {})
+      }
+    )
+  })
+
+  // extracted shared validation & metadata logic:
+  const prepareMetadata = useCallback(() => {
+    if (!name.trim()) {
+      toast.error('Name of integration is required')
+      return null
+    }
+    if (selectedEvents.size === 0) {
+      toast.error('At least one event trigger is required')
+      return null
+    }
+
+    const finalMetadata = isMappingRequired
+      ? { ...metadata, environments: envMappings }
+      : metadata
+
+    if (Object.keys(finalMetadata).length === 0) {
+      toast.error('Configuration metadata is required')
+      return null
+    }
+
+    const isEmptyValue = (value: unknown): boolean => {
+      if (typeof value === 'string' && value.trim() === '') return true
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        Object.keys(value).length === 0
+      )
+        return true
+      return false
+    }
+
+    const hasEmptyValues = Object.values(finalMetadata).some(isEmptyValue)
+    if (hasEmptyValues) {
+      toast.error('All configuration fields are required and cannot be empty')
+      return null
+    }
+
+    return finalMetadata
+  }, [name, selectedEvents, metadata, envMappings, isMappingRequired])
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
-      if (!name.trim()) {
-        toast.error('Name of integration is required')
-        return
-      }
-      if (selectedEvents.size === 0) {
-        toast.error('At least one event trigger is required')
-        return
-      }
-
-      const finalMetadata = isMappingRequired
-        ? {
-            ...metadata,
-            environments: envMappings
-          }
-        : metadata
-
-      if (Object.keys(finalMetadata).length === 0) {
-        toast.error('Configuration metadata is required')
-        return
-      }
-
-      const isEmptyValue = (value: unknown): boolean => {
-        if (typeof value === 'string' && value.trim() === '') {
-          return true
-        }
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          Object.keys(value).length === 0
-        ) {
-          return true
-        }
-
-        return false
-      }
-
-      const hasEmptyValues = Object.values(finalMetadata).some(isEmptyValue)
-
-      if (hasEmptyValues) {
-        toast.error('All configuration fields are required and cannot be empty')
-        return
-      }
+      const finalMetadata = prepareMetadata()
+      if (!finalMetadata) return
 
       setIsLoading(true)
 
@@ -155,17 +171,47 @@ function UpdateIntegration({
       }
     },
     [
-      name,
-      selectedEvents,
       updateIntegration,
       setIsEditIntegrationOpen,
       onUpdateSuccess,
-      isMappingRequired,
-      metadata,
-      envMappings,
-      setSelectedIntegration
+      setSelectedIntegration,
+      prepareMetadata
     ]
   )
+
+  const handleTesting = useCallback(async () => {
+    const finalMetadata = prepareMetadata()
+    if (!finalMetadata) return
+
+    setIsTesting(true)
+    try {
+      const { success, error } = await testIntegration(
+        finalMetadata as Record<string, string>
+      )
+      if (success) {
+        toast.success('Test event sent successfully!')
+      } else {
+        let errorMsg = 'Test failed. Please check your configuration.'
+        if (error?.message) {
+          try {
+            const parsed = JSON.parse(error.message)
+            if (parsed.header && parsed.body) {
+              errorMsg = `${parsed.header}: ${parsed.body}`
+            } else {
+              errorMsg = error.message
+            }
+          } catch {
+            errorMsg = error.message
+          }
+        }
+        toast.error(errorMsg)
+      }
+    } catch {
+      toast.error('An error occurred while testing.')
+    } finally {
+      setIsTesting(false)
+    }
+  }, [prepareMetadata, testIntegration])
 
   const handleCancel = () => {
     setIsEditIntegrationOpen(false)
@@ -251,10 +297,22 @@ function UpdateIntegration({
           )}
 
           <SheetFooter className="flex justify-end gap-3 pt-4">
+            <Button
+              disabled={isLoading || isTesting}
+              onClick={handleTesting}
+              type="button"
+              variant="default"
+            >
+              {isTesting ? 'Testing...' : 'Test Configuration'}
+            </Button>
             <Button onClick={handleCancel} type="button" variant="outline">
               Cancel
             </Button>
-            <Button disabled={isLoading} type="submit" variant="secondary">
+            <Button
+              disabled={isLoading || isTesting}
+              type="submit"
+              variant="secondary"
+            >
               {isLoading ? 'Updating...' : 'Update Integration'}
             </Button>
           </SheetFooter>
