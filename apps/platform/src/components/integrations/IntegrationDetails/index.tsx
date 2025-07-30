@@ -71,7 +71,7 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
               />
               <div className="flex text-sm text-white/70">
                 <div>
-                  Last updated by{' '}
+                  Last updated by &nbsp;
                   <span className="font-semibold text-white">
                     {selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                   </span>
