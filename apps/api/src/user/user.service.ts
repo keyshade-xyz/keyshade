@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
-import { Cron } from '@nestjs/schedule'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { UpdateUserDto } from './dto/update.user/update.user'
 import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -30,13 +30,6 @@ import dayjs from 'dayjs'
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
-
-  @Cron(
-    (process.env.NODE_ENV as string) === 'test' ? '*/15 * * * * *' : '0 9 * * *'
-  )
-  handleOnboardingRemindersCron() {
-    this.handleOnboardingReminders()
-  }
 
   constructor(
     private readonly prisma: PrismaService,
@@ -576,8 +569,9 @@ export class UserService {
     this.log.log('Admin user found', 'UserService')
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleOnboardingReminders() {
-    const scheduleOffsets = [3, 6, 7, 10, 15, 15]
+    const scheduleOffsets = [3, 6, 7, 10, 15, 30]
 
     const users = await this.prisma.user.findMany({
       where: {
@@ -587,22 +581,20 @@ export class UserService {
       }
     })
 
-    this.log.log(`Fetched ${users.length} users who didn't finish onboarding`)
+    this.log.log(`Fetched ${users.length} users pending onboarding reminders`)
 
     for (const user of users) {
       const reminderIndex = user.timesRemindedForOnboarding
-
-      const waitDays = scheduleOffsets
+      const totalDaysToWait = scheduleOffsets
         .slice(0, reminderIndex)
-        .reduce((a, b) => a + b, 0)
+        .reduce((sum, days) => sum + days, 0)
 
-      const lastSentDate = dayjs(user.joinedOn).add(waitDays, 'day')
-      const now = dayjs()
+      const daysSinceJoined = dayjs().diff(user.joinedOn, 'day')
 
-      if (now.isBefore(lastSentDate)) continue
+      if (daysSinceJoined < totalDaysToWait) continue
 
       this.log.log(
-        `Reminding ${user.id} for onboarding - ${reminderIndex + 1}th time`
+        `Sending onboarding reminder #${reminderIndex + 1} to ${user.email}`
       )
 
       try {
@@ -620,7 +612,7 @@ export class UserService {
         this.log.log(`Reminder #${reminderIndex + 1} sent to ${user.email}`)
       } catch (err) {
         this.log.error(
-          `Failed to send reminder to ${user.email}`,
+          `Failed to send onboarding reminder to ${user.email}`,
           err.stack || err
         )
       }
