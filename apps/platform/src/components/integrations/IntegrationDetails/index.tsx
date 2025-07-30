@@ -73,7 +73,7 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
                 <div>
                   Last updated by &nbsp;
                   <span className="font-semibold text-white">
-                    {selectedIntegration.lastUpdatedBy.name}
+                    {selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                   </span>
                 </div>
                 <div className="text-white/80">
