@@ -31,7 +31,7 @@ import dayjs from 'dayjs'
 export class UserService {
   private readonly log = new Logger(UserService.name)
 
-  @Cron('*/15 * * * * *') // Every 15 seconds
+  @Cron('0 9 * * *') // at 9 AM server time
   handleOnboardingRemindersCron() {
     this.handleOnboardingReminders()
   }
