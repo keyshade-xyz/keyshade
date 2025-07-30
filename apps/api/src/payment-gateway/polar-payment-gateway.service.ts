@@ -104,7 +104,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         products: [productId],
         label: paymentLinkLabel,
         requireBillingAddress: false,
-        successUrl: `${process.env.PLATFORM_FRONTEND_URL}/workspace/${workspaceSlug}`
+        successUrl: `${process.env.PLATFORM_FRONTEND_URL}/${workspaceSlug}/billing`
       })
       this.logger.log(`Payment link generated with ID: ${id}`)
 
