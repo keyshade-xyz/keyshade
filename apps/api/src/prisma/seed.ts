@@ -34,7 +34,6 @@ async function main() {
       data: {
         id: faker.string.uuid(),
         name: faker.company.name(),
-        isFreeTier: true,
         createdAt: new Date(),
         ownerId: user.id,
         isDefault: true,

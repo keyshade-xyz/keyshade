@@ -538,7 +538,6 @@ model Workspace {
   id                     String        @id @default(cuid())
   name                   String
   slug                   String        @unique
-  isFreeTier             Boolean       @default(true)
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
   ownerId                String

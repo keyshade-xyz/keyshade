@@ -55,7 +55,6 @@ export const createWorkspace = async (
       slug: workspaceSlug,
       name: dto.name,
       icon: dto.icon,
-      isFreeTier: true,
       ownerId: user.id,
       isDefault,
       roles: {

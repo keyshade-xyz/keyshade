@@ -13,7 +13,6 @@ export const WorkspaceSchema = z.object({
   name: z.string(),
   slug: z.string(),
   icon: z.string().nullable(),
-  isFreeTier: z.boolean(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   ownerId: z.string(),

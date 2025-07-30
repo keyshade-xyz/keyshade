@@ -238,7 +238,6 @@ describe('Workspace Controller Tests', () => {
       expect(body.slug).toBeDefined()
       expect(body.icon).toBe('🤓')
       expect(body.ownerId).toBe(user1.id)
-      expect(body.isFreeTier).toBe(true)
       expect(body.isDefault).toBe(false)
     })
 
@@ -277,7 +276,6 @@ describe('Workspace Controller Tests', () => {
       expect(workspace2.name).toBe('Workspace 1')
       expect(workspace2.icon).toBe('🤓')
       expect(workspace2.ownerId).toBe(user2.id)
-      expect(workspace2.isFreeTier).toBe(true)
       expect(workspace2.isDefault).toBe(false)
     })
 
