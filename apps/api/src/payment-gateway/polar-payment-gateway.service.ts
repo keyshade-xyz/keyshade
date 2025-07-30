@@ -2,7 +2,8 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException
+  InternalServerErrorException,
+  NotFoundException
 } from '@nestjs/common'
 import { PaymentGatewayService } from './payment-gateway.service'
 import { AuthenticatedUser } from '@/user/user.types'
@@ -14,6 +15,7 @@ import {
 import { PurchaseDto } from './dto/purchase.dto'
 import {
   AllowedPlans,
+  Invoice,
   PaymentHistory,
   PaymentLinkMetadata,
   ProductMetadata
@@ -313,13 +315,65 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         status: order.status,
         seats: order.product.metadata.seats as string,
         paid: order.paid,
-        currency: order.currency
+        currency: order.currency,
+        orderId: order.id
       })),
       metadata: {
         lastPage: subscriptions.result.pagination.maxPage,
         totalCount: subscriptions.result.pagination.totalCount
       }
     }
+  }
+
+  public async downloadInvoice(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug'],
+    orderId: string
+  ): Promise<Invoice> {
+    this.logger.log(
+      `User ${user.id} attempted to download invoice of order ${orderId} in workspace ${workspaceSlug}`
+    )
+
+    // Ensure the user has access to the workspace
+    this.logger.log(
+      `Checking if user is authorized for workspace ${workspaceSlug}...`
+    )
+    await this.getAuthorizedWorkspace(user, workspaceSlug)
+
+    // Fetch the order from Polar
+    this.logger.log(`Fetching invoice for order ${orderId}...`)
+    const order = await this.polarClient.orders.get({
+      id: orderId
+    })
+
+    // Ensure the order exists
+    if (!order) {
+      this.logger.error(`Order ${orderId} not found`)
+      throw new NotFoundException(
+        constructErrorBody(
+          'Order not found',
+          'The order that you are trying to download does not exist.'
+        )
+      )
+    }
+
+    // Generate the invoice, if not already generated
+    if (!order.isInvoiceGenerated) {
+      this.logger.log(`Generating invoice for order ${orderId}...`)
+      await this.polarClient.orders.generateInvoice({
+        id: orderId
+      })
+    } else {
+      this.logger.log(`Invoice already generated for order ${orderId}`)
+    }
+
+    // Fetch the invoice from Polar
+    this.logger.log(`Fetching invoice for order ${orderId}...`)
+    const invoice = await this.polarClient.orders.invoice({
+      id: orderId
+    })
+
+    return invoice
   }
 
   public async processWebhook(req: any): Promise<void> {

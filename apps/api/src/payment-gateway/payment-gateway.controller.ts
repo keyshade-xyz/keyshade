@@ -89,6 +89,20 @@ export class PaymentGatewayController {
     )
   }
 
+  @Get('/:workspaceSlug/invoice/:orderId')
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
+  public downloadInvoice(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Param('orderId') orderId: string
+  ) {
+    return this.paymentGatewayService.downloadInvoice(
+      user,
+      workspaceSlug,
+      orderId
+    )
+  }
+
   @Post('/webhook')
   @Public()
   @HttpCode(202)

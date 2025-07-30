@@ -9,11 +9,16 @@ export interface PaymentHistory {
     seats: string
     paid: boolean
     currency: string
+    orderId: string
   }[]
   metadata: {
     totalCount: number
     lastPage: number
   }
+}
+
+export interface Invoice {
+  url: string
 }
 
 export interface PaymentLinkMetadata {

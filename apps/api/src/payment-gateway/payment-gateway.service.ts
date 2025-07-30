@@ -9,7 +9,7 @@ import { constructErrorBody } from '@/common/util'
 import { WorkspaceWithLastUpdatedByAndOwnerAndSubscription } from '@/workspace/workspace.types'
 import { POLAR_CLIENT } from '@/provider/polar.provider'
 import { Polar } from '@polar-sh/sdk'
-import { PaymentHistory } from './payment-gateway.types'
+import { Invoice, PaymentHistory } from './payment-gateway.types'
 import { SubscriptionCancellation } from './dto/subscription-cancellation.dto'
 
 @Injectable()
@@ -103,6 +103,22 @@ export abstract class PaymentGatewayService {
     page: number,
     limit: number
   ): Promise<PaymentHistory>
+
+  /**
+   * Downloads an invoice for a specific order.
+   *
+   * @param user The authenticated user requesting the invoice
+   * @param orderId The ID of the order for which to download the invoice
+   * @returns A promise that resolves to the invoice for the specified order
+   * @throws UnauthorizedException if the user does not have the required authority to download the invoice
+   * @throws NotFoundException if the order or invoice does not exist
+   * @throws InternalServerErrorException if something goes wrong on our end
+   */
+  public abstract downloadInvoice(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug'],
+    orderId: string
+  ): Promise<Invoice>
 
   /**
    * Processes a webhook from external payment gateway
