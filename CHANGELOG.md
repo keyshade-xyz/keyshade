@@ -1,3 +1,9 @@
+## [2.32.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.1...v2.32.0-stage.2) (2025-07-30)
+
+### 🐛 Bug Fixes
+
+* **platform:** UI Issues in integration screen [#1088](https://github.com/keyshade-xyz/keyshade/issues/1088) ([#1091](https://github.com/keyshade-xyz/keyshade/issues/1091)) ([faba12a](https://github.com/keyshade-xyz/keyshade/commit/faba12a809ff2b87dccd5e4f6b3bacaa6ad71304))
+
 ## [2.32.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0-stage.1) (2025-07-30)
 
 ### 🚀 Features
