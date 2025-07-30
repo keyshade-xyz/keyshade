@@ -355,6 +355,17 @@ export class WorkspaceService implements OnModuleInit {
             name: true,
             profilePictureUrl: true
           }
+        },
+        subscription: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profilePictureUrl: true
+              }
+            }
+          }
         }
       }
     })
