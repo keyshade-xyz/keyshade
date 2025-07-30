@@ -23,7 +23,6 @@ interface IntegrationTriggerListProps {
 }
 
 function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
-  const [totalTriggerCount, setTotalTriggerCount] = useState<number>(0)
   const [refreshKey, setRefreshKey] = useState<number>(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -35,7 +34,6 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
             { integrationSlug: integration.slug, page, limit },
             {}
           )
-        setTotalTriggerCount(response.data?.metadata.totalCount || 0)
         return {
           success: response.success,
           data: {
@@ -167,10 +165,6 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
             >
               <RefreshCcw className="h-4 w-4" />
             </Button>
-            <div className="flex items-center justify-center gap-1 rounded-md p-2 text-sm font-medium text-white/70">
-              <RefreshCcw className="h-4 w-4" />
-              {totalTriggerCount} x
-            </div>
           </div>
         </div>
         <div

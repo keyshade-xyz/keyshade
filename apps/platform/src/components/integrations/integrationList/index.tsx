@@ -72,9 +72,11 @@ function IntegrationList() {
   const handleClick = useCallback(
     (integration: Integration) => {
       setSelectedIntegration(integration)
-      router.push(`/integrations?tab=details`)
+      if (selectedWorkspace?.slug && integration.slug) {
+        router.push(`/${selectedWorkspace.slug}/${integration.slug}`)
+      }
     },
-    [router, setSelectedIntegration]
+    [router, setSelectedIntegration, selectedWorkspace]
   )
 
   const hasIntegrations = integrations.length > 0
