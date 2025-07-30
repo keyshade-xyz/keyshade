@@ -3,6 +3,8 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
 import { Integrations } from '@keyshade/common'
 import { KeyshadeBigSVG } from '@public/svg/auth'
+// import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import IntegrationIcon from '../integrationIcon'
 import SetupIntegration from '../integrationSetup'
 import { formatText } from '@/lib/utils'
@@ -16,6 +18,12 @@ import {
 import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
 
 function CreateIntegration(): React.JSX.Element {
+  const router = useRouter()
+
+  const handleHowItWorks = () => {
+    router.push(`/integrations/${integrationType}/how-it-works`)
+  }
+
   const integrationType = useAtomValue(createIntegrationTypeAtom)
   const setCreateIntegrationModelOpen = useSetAtom(createIntegrationOpenAtom)
 
@@ -34,7 +42,7 @@ function CreateIntegration(): React.JSX.Element {
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
 
-  const handleClose = () => {
+  const _handleClose = () => {
     setCreateIntegrationModelOpen(false)
   }
 
@@ -90,9 +98,9 @@ function CreateIntegration(): React.JSX.Element {
             </div>
 
             <div className="flex justify-between">
-              <Button onClick={handleClose} variant="secondary">
+            <Button onClick={handleHowItWorks} variant="secondary">
                 How it works
-              </Button>
+            </Button>
               <Button onClick={handleNext} variant="secondary">
                 Next
               </Button>
