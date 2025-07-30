@@ -1,3 +1,9 @@
+## [2.32.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.2...v2.32.0-stage.3) (2025-07-30)
+
+### 🐛 Bug Fixes
+
+* **api, cli:** ambiguous error messages on keyshade run failure ([#1087](https://github.com/keyshade-xyz/keyshade/issues/1087)) ([206dda7](https://github.com/keyshade-xyz/keyshade/commit/206dda702b3f3f0cabeb73e4f74dd2ccfc962631))
+
 ## [2.32.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.1...v2.32.0-stage.2) (2025-07-30)
 
 ### 🐛 Bug Fixes
