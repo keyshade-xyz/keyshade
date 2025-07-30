@@ -12,7 +12,8 @@ import {
   selectedWorkspaceAtom,
   integrationFormAtom,
   integrationLoadingAtom,
-  resetIntegrationFormAtom
+  resetIntegrationFormAtom,
+  integrationTestingAtom
 } from '@/store'
 
 export function useSetupIntegration(
@@ -21,6 +22,7 @@ export function useSetupIntegration(
 ) {
   const [formState, setFormState] = useAtom(integrationFormAtom)
   const [isLoading, setIsLoading] = useAtom(integrationLoadingAtom)
+  const [isTesting, setIsTesting] = useAtom(integrationTestingAtom)
   const resetForm = useSetAtom(resetIntegrationFormAtom)
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const router = useRouter()
@@ -106,6 +108,68 @@ export function useSetupIntegration(
     )
   })
 
+  // ── validate config without submitting ────────────────────────────────────
+  const prepareMetadata = useCallback((): Record<string, string> | null => {
+    if (!formState.name.trim()) {
+      toast.error('Name of integration is required')
+      return null
+    }
+    if (formState.selectedEvents.size === 0) {
+      toast.error('At least one event trigger is required')
+      return null
+    }
+    if (
+      config.maxEnvironmentsCount === 'single' &&
+      formState.selectedEnvironments.length === 0
+    ) {
+      toast.error('At least one environment is required')
+      return null
+    }
+    const finalMetadata = config.envMapping
+      ? { ...formState.metadata, environments: formState.mappings }
+      : formState.metadata
+    if (Object.keys(finalMetadata).length === 0) {
+      toast.error('Configuration metadata is required')
+      return null
+    }
+    const isEmpty = (v: unknown) =>
+      (typeof v === 'string' && v.trim() === '') ||
+      (typeof v === 'object' && v !== null && Object.keys(v).length === 0)
+    if (Object.values(finalMetadata).some(isEmpty)) {
+      toast.error('All configuration fields are required and cannot be empty')
+      return null
+    }
+    if (
+      formState.selectedProjectSlug &&
+      config.privateKeyRequired &&
+      !projectPrivateKey &&
+      !formState.manualPrivateKey.trim()
+    ) {
+      toast.error('Project private key is required for this integration')
+      return null
+    }
+    return finalMetadata as Record<string, string>
+  }, [config, formState, projectPrivateKey])
+
+  // ── testing endpoint ───────────────────────────────────────────────────────
+  const testIntegration = useHttp((metadata: Record<string, string>) => {
+    const privateKeyToUse =
+      projectPrivateKey || formState.manualPrivateKey || undefined
+    return ControllerInstance.getInstance().integrationController.validateIntegrationConfiguration(
+      {
+        isCreate: true,
+        type: integrationType.toUpperCase() as IntegrationTypeEnum,
+        name: formState.name.trim(),
+        notifyOn: Array.from(formState.selectedEvents),
+        metadata,
+        workspaceSlug: selectedWorkspace!.slug,
+        projectSlug: formState.selectedProjectSlug ?? undefined,
+        environmentSlugs: formState.selectedEnvironments,
+        ...(config.privateKeyRequired ? { privateKey: privateKeyToUse } : {})
+      }
+    )
+  })
+
   // Event handlers - simplified with direct atom updates
   const handlers = {
     handleNameChange: useCallback(
@@ -170,6 +234,9 @@ export function useSetupIntegration(
 
         if (!validateForm()) return false
 
+        const metadata = prepareMetadata()
+        if (!metadata) return false
+
         setIsLoading(true)
 
         try {
@@ -198,7 +265,37 @@ export function useSetupIntegration(
         router,
         setIsLoading
       ]
-    )
+    ),
+    handleTesting: useCallback(async () => {
+      const metadata = prepareMetadata()
+      if (!metadata) return
+
+      setIsTesting(true)
+      try {
+        const { success, error } = await testIntegration(metadata)
+        if (success) {
+          toast.success('Test event sent successfully!')
+        } else {
+          let msg = 'Test failed. Please check your configuration.'
+          if (error?.message) {
+            try {
+              const parsed = JSON.parse(error.message)
+              msg =
+                parsed.header && parsed.body
+                  ? `${parsed.header}: ${parsed.body}`
+                  : error.message
+            } catch {
+              msg = error.message
+            }
+          }
+          toast.error(msg)
+        }
+      } catch {
+        toast.error('An error occurred while testing.')
+      } finally {
+        setIsTesting(false)
+      }
+    }, [prepareMetadata, testIntegration])
   }
 
   return {
@@ -211,6 +308,7 @@ export function useSetupIntegration(
     },
     projectPrivateKey,
     privateKeyLoading,
+    isTesting,
     handlers
   }
 }
