@@ -29,7 +29,7 @@ function ProjectDetails({ project }: ProjectDetailsProps) {
           profilePictureUrl={project.lastUpdatedBy.profilePictureUrl}
         />
         <div className="flex-wrap text-sm text-white/60">
-          last updated by{' '}
+          last updated by &nbsp;
           <span className="font-semibold text-white">
             {project.lastUpdatedBy.name}
           </span>{' '}

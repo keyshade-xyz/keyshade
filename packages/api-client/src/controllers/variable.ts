@@ -15,6 +15,12 @@ import {
   BulkCreateVariableResponse,
   DeleteVariableRequest,
   DeleteVariableResponse,
+  DisableVariableRequest,
+  DisableVariableResponse,
+  EnableVariableRequest,
+  EnableVariableResponse,
+  GetAllDisabledEnvironmentsOfVariableRequest,
+  GetAllDisabledEnvironmentsOfVariableResponse,
   GetAllVariablesOfProjectRequest,
   GetAllVariablesOfProjectResponse,
   GetRevisionsOfVariableRequest,
@@ -93,6 +99,46 @@ export default class VariableController {
     )
 
     return await parseResponse<RollBackVariableResponse>(response)
+  }
+
+  async disableVariable(
+    request: DisableVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DisableVariableResponse>> {
+    const response = await this.apiClient.put(
+      `/api/variable/${request.variableSlug}/disable/${request.environmentSlug}`,
+      request,
+      headers
+    )
+
+    return await parseResponse<DisableVariableResponse>(response)
+  }
+
+  async enableVariable(
+    request: EnableVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<EnableVariableResponse>> {
+    const response = await this.apiClient.put(
+      `/api/variable/${request.variableSlug}/enable/${request.environmentSlug}`,
+      request,
+      headers
+    )
+
+    return await parseResponse<EnableVariableResponse>(response)
+  }
+
+  async getAllDisabledEnvironmentsOfVariable(
+    request: GetAllDisabledEnvironmentsOfVariableRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllDisabledEnvironmentsOfVariableResponse>> {
+    const response = await this.apiClient.get(
+      `/api/variable/${request.variableSlug}/disabled`,
+      headers
+    )
+
+    return await parseResponse<GetAllDisabledEnvironmentsOfVariableResponse>(
+      response
+    )
   }
 
   async deleteVariable(

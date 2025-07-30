@@ -1,6 +1,11 @@
 import type { Integration, IntegrationRun } from '@keyshade/schema'
-import React, { useCallback } from 'react'
-import { ErrorSVG, PendingSVG, VectorSVG } from '@public/svg/shared'
+import React, { useCallback, useState, useRef } from 'react'
+import { Clock, RefreshCcw } from 'lucide-react'
+import {
+  ErrorTriggerSVG,
+  RefreshTriggerSVG,
+  SuccessTriggerSVG
+} from '@public/svg/shared'
 import ControllerInstance from '@/lib/controller-instance'
 import { formatDate, formatTime } from '@/lib/utils'
 import {
@@ -11,12 +16,16 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
+import { Button } from '@/components/ui/button'
 
 interface IntegrationTriggerListProps {
   integration: Integration
 }
 
 function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
+  const [refreshKey, setRefreshKey] = useState<number>(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
   const fetchIntegrationRuns = useCallback(
     async ({ page, limit }: { page: number; limit: number }) => {
       try {
@@ -25,7 +34,6 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
             { integrationSlug: integration.slug, page, limit },
             {}
           )
-
         return {
           success: response.success,
           data: {
@@ -48,6 +56,13 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
     },
     [integration]
   )
+
+  const handleRefresh = useCallback(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0
+    }
+    setRefreshKey((prev) => prev + 1)
+  }, [])
 
   const renderTooltipContent = (trigger: IntegrationRun) => {
     const eventLog = trigger.logs
@@ -91,35 +106,38 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
       <TooltipTrigger asChild>
         <div className="flex cursor-pointer justify-between gap-2 rounded-md border border-white/20 bg-white/10 p-3 text-xs font-medium text-white/90 transition-colors hover:bg-white/15">
           <div className="flex items-start gap-3">
-            <div className="pt-2">
+            <div className="flex h-full items-center pt-2">
               {trigger.status === 'SUCCESS' ? (
-                <VectorSVG />
+                <SuccessTriggerSVG />
               ) : trigger.status === `RUNNING` ? (
-                <PendingSVG />
+                <RefreshTriggerSVG />
               ) : (
-                <ErrorSVG />
+                <ErrorTriggerSVG />
               )}
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-medium text-white">
                 {trigger.title}
               </h3>
               {trigger.event.title ? (
-                <h4 className="mt-1 text-base font-medium text-white/70">
+                <h4 className="mt-1 text-sm font-semibold text-white/60">
                   {trigger.event.title}
                 </h4>
               ) : null}
-              <p className="mt-1 text-sm text-white/50">
-                Duration:{' '}
-                <span className="font-semibold text-white/70">
-                  {trigger.duration} ms
-                </span>
+              <p className="mt-1 text-xs text-white/60">
+                {formatTime(trigger.triggeredAt)},{' '}
+                {formatDate(trigger.triggeredAt)}
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-end text-sm text-white/50">
-            <p>{formatTime(trigger.triggeredAt)}</p>
-            <p>{formatDate(trigger.triggeredAt)}</p>
+          <div className="flex items-start gap-1 text-sm">
+            <Clock className="h-4 w-4" />
+            <p className="text-sm text-white/50">
+              Duration:{' '}
+              <span className="font-semibold text-white/70">
+                {trigger.duration} ms
+              </span>
+            </p>
           </div>
         </div>
       </TooltipTrigger>
@@ -137,8 +155,22 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
   return (
     <div className="w-3/5 flex-1">
       <div className="h-full rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-        <h2 className="mb-6 text-xl font-semibold text-white">Run History</h2>
-        <div className="max-h-[60vh] overflow-y-auto">
+        <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
+          <h2 className="text-xl font-semibold text-white">Run History</h2>
+          <div className="flex items-center justify-center">
+            <Button
+              className="bg-white/10 p-3 font-medium text-white hover:bg-white/20"
+              onClick={handleRefresh}
+              variant="default"
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div
+          className="max-h-[75vh] min-h-0 overflow-y-scroll"
+          ref={scrollContainerRef}
+        >
           <TooltipProvider>
             <InfiniteScrollList<IntegrationRun>
               className="grid grid-cols-1 gap-4"
@@ -146,6 +178,7 @@ function IntegrationTriggerList({ integration }: IntegrationTriggerListProps) {
               itemComponent={renderTriggerItem}
               itemKey={(trigger) => trigger.id}
               itemsPerPage={10}
+              key={refreshKey}
             />
           </TooltipProvider>
         </div>

@@ -1052,13 +1052,16 @@ export class WorkspaceMembershipService {
       if (memberUser) {
         await this.prisma.$transaction([createMembership])
 
+        const inviteeName = memberUser.name ?? undefined
+
         this.mailService.invitedToWorkspace(
           member.email,
           workspace.name,
           `${process.env.PLATFORM_FRONTEND_URL}/settings?tab=invites`,
           currentUser.name,
           invitedOn.toISOString(),
-          true
+          true,
+          inviteeName
         )
 
         this.log.debug(
