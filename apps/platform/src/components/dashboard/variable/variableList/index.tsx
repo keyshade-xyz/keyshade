@@ -19,6 +19,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 import { useHighlight } from '@/hooks/use-highlight'
+import ProjectErrorCard from '@/components/shared/project-error-card'
 
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
@@ -33,6 +34,9 @@ export default function VariableList(): React.JSX.Element {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
+
+  const isAuthorizedToReadVariables =
+    selectedProject?.entitlements.canReadVariables
 
   // Highlight the variable if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=variables&highlight=<variableSlug>
   const { isHighlighted } = useHighlight(highlightSlug, 'variable')
@@ -138,6 +142,10 @@ export default function VariableList(): React.JSX.Element {
     },
     [highlightSlug, isHighlighted]
   )
+
+  if (!isAuthorizedToReadVariables) {
+    return <ProjectErrorCard tab="variables" />
+  }
 
   return (
     <div

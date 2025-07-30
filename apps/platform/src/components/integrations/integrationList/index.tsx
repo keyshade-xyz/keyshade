@@ -12,10 +12,7 @@ import {
 import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
-import ErrorCard from '@/components/shared/error-card'
 import { formatText } from '@/lib/utils'
-
-type ErrorMessage = { header: string; body: string } | null
 
 function IntegrationListItemSkeleton(): React.JSX.Element {
   return (
@@ -32,7 +29,6 @@ function IntegrationList() {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setSelectedIntegration = useSetAtom(selectedIntegrationAtom)
   const [integrations, setIntegrations] = useAtom(integrationsOfWorkspaceAtom)
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const router = useRouter()
 
@@ -48,14 +44,9 @@ function IntegrationList() {
   useEffect(() => {
     if (selectedWorkspace?.slug) {
       getAllIntegrations()
-        .then(({ data, success, error }) => {
+        .then(({ data, success }) => {
           if (success && data) {
             setIntegrations(data.items)
-          }
-          if (error) {
-            const errorMsg = error.message
-            const parsedError = JSON.parse(errorMsg) as ErrorMessage
-            setErrorMessage(parsedError)
           }
         })
         .finally(() => {
@@ -85,11 +76,6 @@ function IntegrationList() {
         <IntegrationListItemSkeleton />
         <IntegrationListItemSkeleton />
       </div>
-    )
-  }
-  if (!hasIntegrations && errorMessage) {
-    return (
-      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
     )
   }
 

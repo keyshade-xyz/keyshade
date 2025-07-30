@@ -19,6 +19,7 @@ import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
 import { useHighlight } from '@/hooks/use-highlight'
+import ProjectErrorCard from '@/components/shared/project-error-card'
 
 interface SecretListProps {
   projectPrivateKey: string | null
@@ -39,6 +40,7 @@ export default function SecretList({
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
+  const isAuthorizedToReadSecrets = selectedProject?.entitlements.canReadSecrets
 
   // Highlight the secret if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=secrets&highlight=<secretSlug>
   const { isHighlighted } = useHighlight(highlightSlug, 'secret')
@@ -145,6 +147,10 @@ export default function SecretList({
     },
     [projectPrivateKey, highlightSlug, isHighlighted]
   )
+
+  if (!isAuthorizedToReadSecrets) {
+    return <ProjectErrorCard tab="secrets" />
+  }
 
   return (
     <div
