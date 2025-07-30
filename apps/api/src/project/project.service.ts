@@ -279,7 +279,7 @@ export class ProjectService {
 
     return {
       ...newProject,
-      ...(await this.parseProjectItemLimits(newProject.id))
+      ...(await this.parseProjectItemLimits(newProject))
     }
   }
 
@@ -985,7 +985,7 @@ export class ProjectService {
         project,
         user
       )),
-      ...(await this.parseProjectItemLimits(project.id))
+      ...(await this.parseProjectItemLimits(project))
     }
   }
 
@@ -1632,7 +1632,7 @@ export class ProjectService {
    * Returns the project with additional information about the limits of items
    * in the project and the current count of items.
    *
-   * @param project The project to parse
+   * @param project The project to parse the tier limits of
    * @returns The project with the following additional properties:
    * - maxAllowedEnvironments: The maximum number of environments allowed in the project
    * - totalEnvironments: The current number of environments in the project
@@ -1641,7 +1641,7 @@ export class ProjectService {
    * - maxAllowedVariables: The maximum number of variables allowed in the project
    * - totalVariables: The current number of variables in the project
    */
-  private async parseProjectItemLimits(projectId: Project['id']): Promise<{
+  private async parseProjectItemLimits(project: Project): Promise<{
     maxAllowedEnvironments: number
     totalEnvironments: number
     maxAllowedSecrets: number
@@ -1649,12 +1649,17 @@ export class ProjectService {
     maxAllowedVariables: number
     totalVariables: number
   }> {
-    this.logger.log(`Parsing project item limits for project ${projectId}`)
+    this.logger.log(`Parsing project item limits for project ${project.slug}`)
 
-    this.logger.log(`Getting environment tier limit for project ${projectId}`)
+    const projectId = project.id
+    const workspaceId = project.workspaceId
+
+    this.logger.log(
+      `Getting environment tier limit for workspace ${workspaceId}`
+    )
     // Get the tier limit for environments in the project
     const maxAllowedEnvironments =
-      await this.tierLimitService.getEnvironmentTierLimit(projectId)
+      await this.tierLimitService.getEnvironmentTierLimit(workspaceId)
 
     // Get the total number of environments in the project
     const totalEnvironments = await this.prisma.environment.count({
@@ -1666,10 +1671,10 @@ export class ProjectService {
       `Found ${totalEnvironments} environments in project ${projectId}`
     )
 
-    this.logger.log(`Getting secret tier limit for project ${projectId}`)
+    this.logger.log(`Getting secret tier limit for workspace ${workspaceId}`)
     // Get the tier limit for secrets in the project
     const maxAllowedSecrets =
-      await this.tierLimitService.getSecretTierLimit(projectId)
+      await this.tierLimitService.getSecretTierLimit(workspaceId)
 
     // Get the total number of secrets in the project
     const totalSecrets = await this.prisma.secret.count({
@@ -1679,10 +1684,10 @@ export class ProjectService {
     })
     this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
 
-    this.logger.log(`Getting variable tier limit for project ${projectId}`)
+    this.logger.log(`Getting variable tier limit for workspace ${workspaceId}`)
     // Get the tier limit for variables in the project
     const maxAllowedVariables =
-      await this.tierLimitService.getVariableTierLimit(projectId)
+      await this.tierLimitService.getVariableTierLimit(workspaceId)
 
     // Get the total number of variables in the project
     const totalVariables = await this.prisma.variable.count({
