@@ -18,6 +18,9 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
   const setIsEditIntegrationOpen = useSetAtom(editIntegrationOpenAtom)
   const setIsDeleteIntegrationOpen = useSetAtom(deleteIntegrationOpenAtom)
 
+  const isAuthorizedToUpdate = selectedIntegration.entitlements.canUpdate
+  const isAuthorizedToDelete = selectedIntegration.entitlements.canDelete
+
   const handleEditIntegration = useCallback(() => {
     setIsEditIntegrationOpen(true)
   }, [setIsEditIntegrationOpen])
@@ -47,12 +50,14 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
         <div className="flex items-center gap-2">
           <Button
             className="rounded-lg bg-white/10 p-2 transition-colors hover:bg-white/20"
+            disabled={!isAuthorizedToDelete}
             onClick={handleDeleteIntegration}
           >
             <TrashWhiteSVG />
           </Button>
           <Button
             className="rounded-lg bg-white/10 p-2 transition-colors hover:bg-white/20"
+            disabled={!isAuthorizedToUpdate}
             onClick={handleEditIntegration}
           >
             <EditTwoSVG className="h-5 w-5 text-white/70 hover:text-white" />

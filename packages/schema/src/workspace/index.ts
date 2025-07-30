@@ -14,7 +14,7 @@ export const WorkspaceSchema = z.object({
   ownerId: z.string(),
   isDefault: z.boolean(),
   lastUpdatedById: z.string().nullable(),
-  lastUpdateBy: z
+  lastUpdatedBy: z
     .object({
       id: z.string(),
       name: z.string(),

@@ -203,9 +203,14 @@ export class IntegrationService {
         type: dto.type,
         metadata: encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
-        environments: {
-          connect: environments
-        },
+        environments:
+          environments.length > 0
+            ? {
+                connect: environments.map((environment) => ({
+                  id: environment.id
+                }))
+              }
+            : undefined,
         projectId: project?.id,
         workspaceId,
         lastUpdatedById: user.id

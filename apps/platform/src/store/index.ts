@@ -49,7 +49,7 @@ export const globalSearchDataAtom = atom<{
   projects: []
 })
 
-export const allWorkspacesAtom = atom<GetAllProjectsResponse[]>([])
+export const allWorkspacesAtom = atom<GetAllProjectsResponse['items']>([])
 
 type PartialProject = Pick<
   GetAllProjectsResponse['items'][number],

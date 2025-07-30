@@ -47,9 +47,8 @@ function SelectedProjectComponent({
   const combinationEnvironments = useMemo<Set<PartialEnvironment>>(
     () =>
       /* eslint-disable @typescript-eslint/no-unnecessary-condition -- False positive */
-      projectEnvironmentCombinations[project.slug].environments
-        ? projectEnvironmentCombinations[project.slug].environments
-        : new Set<PartialEnvironment>(),
+      projectEnvironmentCombinations[project.slug].environments ||
+      new Set<PartialEnvironment>(),
     [projectEnvironmentCombinations, project.slug]
   )
 

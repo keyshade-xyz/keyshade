@@ -39,6 +39,9 @@ export default function MembersHeader(): React.JSX.Element {
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setMemberCount = useSetAtom(workspaceMemberCountAtom)
 
+  const isAuthorizedToInviteMembers =
+    currentWorkspace?.entitlements.canInviteMembers
+
   const toggleRole = (role: SelectedRoles): void => {
     setSelectedRoles((prev) => {
       const isSelected = prev.some((r) => r.roleSlug === role.roleSlug)
@@ -107,7 +110,10 @@ export default function MembersHeader(): React.JSX.Element {
       <div className="flex gap-x-4">
         <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button
+              disabled={!isAuthorizedToInviteMembers}
+              onClick={() => setIsDialogOpen(true)}
+            >
               <AddSVG /> Add Member
             </Button>
           </DialogTrigger>
