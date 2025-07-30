@@ -1,3 +1,9 @@
+## [2.32.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0-stage.1) (2025-07-30)
+
+### 🚀 Features
+
+* integration configuration testing ([#1035](https://github.com/keyshade-xyz/keyshade/issues/1035)) ([46db338](https://github.com/keyshade-xyz/keyshade/commit/46db338cc4c335f769f9690b8c9fbc2bfa1d3e80))
+
 ## [2.31.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0...v2.31.1) (2025-07-28)
 
 ### 🐛 Bug Fixes
