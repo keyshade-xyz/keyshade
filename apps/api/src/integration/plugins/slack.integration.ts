@@ -28,13 +28,13 @@ export class SlackIntegration extends BaseIntegration {
 
     const integration = this.getIntegration<SlackIntegrationMetadata>()
 
-    try {
-      const { id: integrationRunId } = await this.registerIntegrationRun({
-        eventId: eventId,
-        integrationId: integration.id,
-        title: 'Posting message to Slack'
-      })
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId: eventId,
+      integrationId: integration.id,
+      title: 'Posting message to Slack'
+    })
 
+    try {
       const block = [
         {
           type: 'header',
@@ -72,6 +72,14 @@ export class SlackIntegration extends BaseIntegration {
       }
     } catch (error) {
       this.logger.error(`Failed to integrate Slack: ${error}`)
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        error.message || 'Unknown error occurred'
+      )
+
       throw new InternalServerErrorException('Failed to integrate Slack')
     }
   }
