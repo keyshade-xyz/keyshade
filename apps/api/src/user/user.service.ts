@@ -581,14 +581,14 @@ export class UserService {
       where: {
         isActive: true,
         isOnboardingFinished: false,
-        noOfReminderSent: { lt: scheduleOffsets.length }
+        timesRemindedForOnboarding: { lt: scheduleOffsets.length }
       }
     })
 
     this.log.log(`Fetched ${users.length} users who didn't finish onboarding`)
 
     for (const user of users) {
-      const reminderIndex = user.noOfReminderSent
+      const reminderIndex = user.timesRemindedForOnboarding
 
       const waitDays = scheduleOffsets
         .slice(0, reminderIndex)
@@ -612,7 +612,7 @@ export class UserService {
 
         await this.prisma.user.update({
           where: { id: user.id },
-          data: { noOfReminderSent: { increment: 1 } }
+          data: { timesRemindedForOnboarding: { increment: 1 } }
         })
 
         this.log.log(`Reminder #${reminderIndex + 1} sent to ${user.email}`)
