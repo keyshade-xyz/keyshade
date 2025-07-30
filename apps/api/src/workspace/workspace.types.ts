@@ -16,6 +16,8 @@ export interface HydratedWorkspace extends Workspace {
   entitlements: {
     canReadProjects: boolean
     canCreateProjects: boolean
+    canReadIntegrations: boolean
+    canCreateIntegrations: boolean
     canReadMembers: boolean
     canInviteMembers: boolean
     canReadRoles: boolean

@@ -536,6 +536,14 @@ export class HydrationService {
         Authority.CREATE_PROJECT,
         permittedAuthorities
       ),
+      canCreateIntegrations: this.isPermitted(
+        Authority.CREATE_INTEGRATION,
+        permittedAuthorities
+      ),
+      canReadIntegrations: this.isPermitted(
+        Authority.READ_INTEGRATION,
+        permittedAuthorities
+      ),
       canReadRoles: this.isPermitted(
         Authority.READ_WORKSPACE_ROLE,
         permittedAuthorities

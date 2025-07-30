@@ -526,15 +526,17 @@ export class IntegrationService {
             projectId: {
               in: projectIds
             }
-          }
-        ],
-        environments: {
-          every: {
-            id: {
-              in: environmentIds
+          },
+          {
+            environments: {
+              every: {
+                id: {
+                  in: environmentIds
+                }
+              }
             }
           }
-        }
+        ]
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
