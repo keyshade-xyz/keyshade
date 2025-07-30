@@ -121,6 +121,37 @@ export abstract class PaymentGatewayService {
   ): Promise<Invoice>
 
   /**
+   * Downloads invoices for a specified list of orders.
+   *
+   * @param user The authenticated user requesting the invoices
+   * @param workspaceSlug The slug of the workspace for which to download the invoices
+   * @param orderIds The IDs of the orders for which to download the invoices
+   * @returns A promise that resolves to an array of invoices for the specified orders
+   * @throws UnauthorizedException if the user does not have the required authority to download the invoices
+   * @throws NotFoundException if any of the orders or invoices do not exist
+   * @throws InternalServerErrorException if something goes wrong on our end
+   */
+  public abstract downloadSelectedInvoices(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug'],
+    orderIds: string[]
+  ): Promise<Invoice[]>
+
+  /**
+   * Downloads all invoices for the specified workspace.
+   *
+   * @param user The authenticated user requesting the invoices
+   * @param workspaceSlug The slug of the workspace for which to download the invoices
+   * @returns A promise that resolves to an array of invoices for the workspace
+   * @throws UnauthorizedException if the user does not have the required authority to download the invoices
+   * @throws InternalServerErrorException if something goes wrong on our end
+   */
+  public abstract downloadAllInvoices(
+    user: AuthenticatedUser,
+    workspaceSlug: Workspace['slug']
+  ): Promise<Invoice[]>
+
+  /**
    * Processes a webhook from external payment gateway
    * @param req The request from the payment gateway
    * @returns A promise that resolves when the webhook is processed

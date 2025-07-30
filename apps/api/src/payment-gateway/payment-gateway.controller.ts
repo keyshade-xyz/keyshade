@@ -89,7 +89,30 @@ export class PaymentGatewayController {
     )
   }
 
-  @Get('/:workspaceSlug/invoice/:orderId')
+  @Get('/:workspaceSlug/invoices/selected')
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
+  public downloadSelectedInvoices(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug'],
+    @Body() orderIds: string[]
+  ) {
+    return this.paymentGatewayService.downloadSelectedInvoices(
+      user,
+      workspaceSlug,
+      orderIds
+    )
+  }
+
+  @Get('/:workspaceSlug/invoices/all')
+  @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
+  public downloadAllInvoices(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('workspaceSlug') workspaceSlug: Workspace['slug']
+  ) {
+    return this.paymentGatewayService.downloadAllInvoices(user, workspaceSlug)
+  }
+
+  @Get('/:workspaceSlug/invoices/:orderId')
   @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   public downloadInvoice(
     @CurrentUser() user: AuthenticatedUser,
