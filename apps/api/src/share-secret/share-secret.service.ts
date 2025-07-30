@@ -76,7 +76,7 @@ export class ShareSecretService {
       where: { hash },
       data: {
         recepientEmails: {
-          push: email
+          set: [...new Set([...(share.recepientEmails ?? []), email])]
         }
       }
     })
