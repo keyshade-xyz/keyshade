@@ -237,7 +237,7 @@
 
 - Added `-e/--environment` option to `keyshade run` command to override the environment configuration at runtime
 
-## 3.2.3
+## 3.2.2-stage.2
 
 ### Minor Changes
 - Fixed error handling in run command and socket notifier that displayed [object Object]; errors are now properly formatted for clearer CLI output
