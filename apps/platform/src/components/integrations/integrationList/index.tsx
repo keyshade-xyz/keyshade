@@ -73,7 +73,7 @@ function IntegrationList() {
     (integration: Integration) => {
       setSelectedIntegration(integration)
       if (selectedWorkspace?.slug && integration.slug) {
-        router.push(`/${selectedWorkspace.slug}/${integration.slug}`)
+        router.push(`/${selectedWorkspace.slug}/integrations/${integration.slug}`)
       }
     },
     [router, setSelectedIntegration, selectedWorkspace]
