@@ -23,6 +23,7 @@ interface InfiniteScrollListProps<T> {
   }) => Promise<InfiniteScrollListResponse<T>>
   className?: string
   inTable?: boolean
+  emptyComponent?: React.ReactNode
 }
 
 export function InfiniteScrollList<T>({
@@ -31,7 +32,8 @@ export function InfiniteScrollList<T>({
   itemsPerPage,
   fetchFunction,
   className = '',
-  inTable = false
+  inTable = false,
+  emptyComponent
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -142,6 +144,16 @@ export function InfiniteScrollList<T>({
     )
   }
   if (items.length === 0) {
+    if (emptyComponent) {
+      return inTable ? (
+        <tr>
+          <td colSpan={3}>{emptyComponent}</td>
+        </tr>
+      ) : (
+        <>{emptyComponent}</>
+      )
+    }
+
     return inTable ? (
       <tr>
         <td className="p-4 text-center text-gray-500" colSpan={3}>

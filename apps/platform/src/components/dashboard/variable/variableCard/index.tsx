@@ -1,5 +1,6 @@
-import type { GetAllVariablesOfProjectResponse } from '@keyshade/schema'
+import type { Environment, GetAllVariablesOfProjectResponse } from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
+import { useState, useEffect} from 'react'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG } from '@public/svg/shared'
@@ -23,6 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfVariableOpenAtom,
   deleteVariableOpenAtom,
@@ -38,6 +40,7 @@ import {
 } from '@/components/ui/accordion'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface VariableCardProps {
   variableData: GetAllVariablesOfProjectResponse['items'][number]
@@ -58,6 +61,10 @@ export default function VariableCard({
     deleteEnvironmentValueOfVariableOpenAtom
   )
   const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
+
+  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+      new Set()
+    )
 
   const { variable, values } = variableData
   const handleCopyToClipboard = () => {
@@ -90,6 +97,58 @@ export default function VariableCard({
     setIsVariableRevisionsOpen(true)
   }
 
+  useEffect(() => {
+      const fetchDisabled = async () => {
+        try {
+          const res =
+            await ControllerInstance.getInstance().variableController.getAllDisabledEnvironmentsOfVariable(
+              { variableSlug: variable.slug }
+            )
+  
+          if (res.success && res.data) {
+            setDisabledEnvironments(new Set(res.data))
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console -- console.error is used for debugging
+          console.error('Failed to load disabled environments', error)
+        }
+      }
+  
+      fetchDisabled()
+    }, [variable.slug])
+
+   const handleToggleDisableVariableClick = async (
+      environmentSlug: Environment['slug'],
+      environmentId: Environment['id'],
+      checked: boolean
+    ) => {
+      const controller = ControllerInstance.getInstance().variableController
+  
+      if (checked) {
+        // Enable variable
+        await controller.enableVariable({
+          variableSlug: variable.slug,
+          environmentSlug
+        })
+        setDisabledEnvironments((prev) => {
+          const next = new Set(prev)
+          next.delete(environmentId) // Update local state
+          return next
+        })
+      } else {
+        // Disable variable
+        await controller.disableVariable({
+          variableSlug: variable.slug,
+          environmentSlug
+        })
+        setDisabledEnvironments((prev) => {
+          const next = new Set(prev)
+          next.add(environmentId) // Update local state
+          return next
+        })
+      }
+    }
+  
   return (
     <ContextMenu key={variable.id}>
       <AccordionItem
@@ -152,6 +211,9 @@ export default function VariableCard({
               </TableHeader>
               <TableBody>
                 {values.map((value) => {
+                  const isDisabled = disabledEnvironments.has(
+                    value.environment.id
+                  )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -167,16 +229,28 @@ export default function VariableCard({
                         {value.version}
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
-                        <button
-                          onClick={() =>
-                            handleDeleteEnvironmentValueOfVariableClick(
-                              value.environment.slug
-                            )
-                          }
-                          type="button"
-                        >
-                          <TrashWhiteSVG />
-                        </button>
+                        <div className="flex gap-3">
+                          <Switch
+                              checked={!isDisabled}
+                              onCheckedChange={(checked) => {
+                                handleToggleDisableVariableClick(
+                                  value.environment.slug,
+                                  value.environment.id,
+                                  checked
+                                )
+                              }}
+                            />
+                          <button
+                            onClick={() =>
+                              handleDeleteEnvironmentValueOfVariableClick(
+                                value.environment.slug
+                              )
+                            }
+                            type="button"
+                          >
+                            <TrashWhiteSVG />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )

@@ -19,7 +19,13 @@ import {
   DeleteEnvironmentValueOfVariableResponseSchema,
   VariableVersionSchema,
   BulkCreateVariableRequestSchema,
-  BulkCreateVariableResponseSchema
+  BulkCreateVariableResponseSchema,
+  DisableVariableRequestSchema,
+  DisableVariableResponseSchema,
+  EnableVariableRequestSchema,
+  EnableVariableResponseSchema,
+  getAllDisabledEnvironmentsOfVariableRequestSchema,
+  getAllDisabledEnvironmentsOfVariableResponseSchema
 } from '.'
 
 export type Variable = z.infer<typeof VariableSchema>
@@ -58,6 +64,28 @@ export type RollBackVariableRequest = z.infer<
 
 export type RollBackVariableResponse = z.infer<
   typeof RollBackVariableResponseSchema
+>
+
+export type DisableVariableRequest = z.infer<
+  typeof DisableVariableRequestSchema
+>
+
+export type DisableVariableResponse = z.infer<
+  typeof DisableVariableResponseSchema
+>
+
+export type EnableVariableRequest = z.infer<typeof EnableVariableRequestSchema>
+
+export type EnableVariableResponse = z.infer<
+  typeof EnableVariableResponseSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableRequest = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableRequestSchema
+>
+
+export type GetAllDisabledEnvironmentsOfVariableResponse = z.infer<
+  typeof getAllDisabledEnvironmentsOfVariableResponseSchema
 >
 
 export type DeleteVariableRequest = z.infer<typeof DeleteVariableRequestSchema>

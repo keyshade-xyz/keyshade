@@ -11,6 +11,7 @@ import WorkspaceInvitationEmail from '../emails/workspace-invitation'
 import OTPEmailTemplate from '../emails/otp-email-template'
 import { constructErrorBody } from '@/common/util'
 import WelcomeEmail from '../emails/welcome-email'
+import { LoginNotificationEmail } from '../emails/login-notification-email'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -34,7 +35,8 @@ export class MailService implements IMailService {
     actionUrl: string,
     invitedBy: string,
     invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void> {
     const subject = forRegisteredUser
       ? 'Welcome Back! Join Your Workspace'
@@ -42,10 +44,10 @@ export class MailService implements IMailService {
 
     const body = await render(
       WorkspaceInvitationEmail({
+        inviteeName,
         workspaceName,
         actionUrl,
         invitedBy,
-        invitedOn,
         forRegisteredUser
       })
     )
@@ -89,6 +91,28 @@ export class MailService implements IMailService {
     )
 
     await this.sendEmail(email, subject, body)
+  }
+  async sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      location?: string
+    }
+  ) {
+    const html = await render(
+      LoginNotificationEmail({
+        ip: data.ip,
+        device: data.device,
+        location: data.location
+      })
+    )
+
+    await this.transporter.sendMail({
+      to: email,
+      subject: 'New Sign-in alert for your Keyshade account',
+      html
+    })
   }
 
   async adminUserCreateEmail(email: string): Promise<void> {
