@@ -23,8 +23,6 @@ import {
 } from '@nestjs/common'
 
 export class SlackIntegration extends BaseIntegration {
-  private app: App
-
   constructor(prisma: PrismaService) {
     super(IntegrationType.SLACK, prisma)
   }
@@ -55,10 +53,8 @@ export class SlackIntegration extends BaseIntegration {
         }
       ]
 
-      this.app = await this.getSlackApp()
-
       const { response, duration } = await makeTimedRequest(() =>
-        this.app.client.chat.postMessage({
+        this.getSlackApp().client.chat.postMessage({
           channel: integration.metadata.channelId,
           blocks: block,
           text: 'Integration initialized'
@@ -85,8 +81,6 @@ export class SlackIntegration extends BaseIntegration {
       this.logger.error(`Failed to integrate Slack: ${error}`)
       throw new InternalServerErrorException('Failed to integrate Slack')
     }
-
-    return Promise.resolve()
   }
 
   public getPermittedEvents(): Set<EventType> {
@@ -127,18 +121,14 @@ export class SlackIntegration extends BaseIntegration {
     return new Set(['botToken', 'signingSecret', 'channelId'])
   }
 
-  private async getSlackApp() {
-    if (!this.app) {
-      this.logger.log('Generating Slack app...')
-      const integration = this.getIntegration<SlackIntegrationMetadata>()
-      this.app = new App({
-        token: integration.metadata.botToken,
-        signingSecret: integration.metadata.signingSecret
-      })
-      this.logger.log('Generated Slack app...')
-    }
+  private getSlackApp() {
+    this.logger.log('Generating Slack app...')
+    const integration = this.getIntegration<SlackIntegrationMetadata>()
 
-    return this.app
+    return new App({
+      token: integration.metadata.botToken,
+      signingSecret: integration.metadata.signingSecret
+    })
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
@@ -196,10 +186,8 @@ export class SlackIntegration extends BaseIntegration {
         }
       ]
 
-      this.app = await this.getSlackApp()
-
       const { response, duration } = await makeTimedRequest(() =>
-        this.app.client.chat.postMessage({
+        this.getSlackApp().client.chat.postMessage({
           channel: integration.metadata.channelId,
           blocks: block,
           text: data.title
