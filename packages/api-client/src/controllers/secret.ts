@@ -14,6 +14,12 @@ import {
   BulkCreateSecretResponse,
   DeleteSecretRequest,
   DeleteSecretResponse,
+  DisableSecretRequest,
+  DisableSecretResponse,
+  EnableSecretRequest,
+  EnableSecretResponse,
+  GetAllDisabledEnvironmentsOfSecretRequest,
+  GetAllDisabledEnvironmentsOfSecretResponse,
   GetAllSecretsOfProjectRequest,
   GetAllSecretsOfProjectResponse,
   GetRevisionsOfSecretRequest,
@@ -94,6 +100,46 @@ export default class SecretController {
     )
 
     return await parseResponse<RollBackSecretResponse>(response)
+  }
+
+  async disableSecret(
+    request: DisableSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<DisableSecretResponse>> {
+    const response = await this.apiClient.put(
+      `/api/secret/${request.secretSlug}/disable/${request.environmentSlug}`,
+      request,
+      headers
+    )
+
+    return await parseResponse<DisableSecretResponse>(response)
+  }
+
+  async enableSecret(
+    request: EnableSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<EnableSecretResponse>> {
+    const response = await this.apiClient.put(
+      `/api/secret/${request.secretSlug}/enable/${request.environmentSlug}`,
+      request,
+      headers
+    )
+
+    return await parseResponse<EnableSecretResponse>(response)
+  }
+
+  async getAllDisabledEnvironmentsOfSecret(
+    request: GetAllDisabledEnvironmentsOfSecretRequest,
+    headers?: Record<string, string>
+  ): Promise<ClientResponse<GetAllDisabledEnvironmentsOfSecretResponse>> {
+    const response = await this.apiClient.get(
+      `/api/secret/${request.secretSlug}/disabled`,
+      headers
+    )
+
+    return await parseResponse<GetAllDisabledEnvironmentsOfSecretResponse>(
+      response
+    )
   }
 
   async deleteSecret(

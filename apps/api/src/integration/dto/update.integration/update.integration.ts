@@ -23,5 +23,5 @@ export class UpdateIntegration {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, string>
+  metadata?: Record<string, unknown>
 }

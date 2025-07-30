@@ -71,6 +71,46 @@ export class SecretController {
     )
   }
 
+  @Put(':secretSlug/disable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
+  async disableSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.secretService.disableSecret(
+      user,
+      secretSlug,
+      environmentSlug
+    )
+  }
+
+  @Put(':secretSlug/enable/:environmentSlug')
+  @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
+  async enableSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string,
+    @Param('environmentSlug') environmentSlug: string
+  ) {
+    return await this.secretService.enableSecret(
+      user,
+      secretSlug,
+      environmentSlug
+    )
+  }
+
+  @Get(':secretSlug/disabled')
+  @RequiredApiKeyAuthorities(Authority.READ_SECRET)
+  async getAllDisabledEnvironmentsOfSecret(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('secretSlug') secretSlug: string
+  ) {
+    return await this.secretService.getAllDisabledEnvironmentsOfSecret(
+      user,
+      secretSlug
+    )
+  }
+
   @Delete(':secretSlug/:environmentSlug')
   @RequiredApiKeyAuthorities(Authority.UPDATE_SECRET)
   async deleteEnvironmentValueOfSecret(

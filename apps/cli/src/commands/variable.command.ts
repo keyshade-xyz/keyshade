@@ -5,6 +5,8 @@ import ListVariable from '@/commands/variable/list.variable'
 import FetchVariableRevisions from '@/commands/variable/revisions.variable'
 import UpdateVariable from '@/commands/variable/update.variable'
 import RollbackVariable from '@/commands/variable/rollback.variable'
+import DisableVariable from './variable/disable.variable'
+import EnableVariable from './variable/enable.variable'
 
 export default class VariableCommand extends BaseCommand {
   getName(): string {
@@ -19,6 +21,8 @@ export default class VariableCommand extends BaseCommand {
     return [
       new CreateVariable(),
       new DeleteVariable(),
+      new DisableVariable(),
+      new EnableVariable(),
       new ListVariable(),
       new FetchVariableRevisions(),
       new UpdateVariable(),

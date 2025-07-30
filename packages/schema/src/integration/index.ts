@@ -108,3 +108,24 @@ export const GetAllIntegrationRunsRequestSchema = PageRequestSchema.extend({
 
 export const GetAllIntegrationRunsResponseSchema =
   PageResponseSchema(IntegrationRunSchema)
+
+const ValidateIntegrationConfigurationCreateRequestSchema =
+  CreateIntegrationRequestSchema.extend({
+    isCreate: z.literal(true)
+  })
+
+const ValidateIntegrationConfigurationUpdateRequestSchema =
+  UpdateIntegrationRequestSchema.extend({
+    isCreate: z.literal(false),
+    integrationSlug: IntegrationSchema.shape.slug
+  })
+
+export const ValidateIntegrationConfigurationRequestSchema =
+  z.discriminatedUnion('isCreate', [
+    ValidateIntegrationConfigurationCreateRequestSchema,
+    ValidateIntegrationConfigurationUpdateRequestSchema
+  ])
+
+export const ValidateIntegrationConfigurationResponseSchema = z.object({
+  success: z.literal(true)
+})

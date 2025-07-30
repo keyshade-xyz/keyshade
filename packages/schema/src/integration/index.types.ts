@@ -12,7 +12,9 @@ import {
   GetAllIntegrationResponseSchema,
   IntegrationRunSchema,
   GetAllIntegrationRunsRequestSchema,
-  GetAllIntegrationRunsResponseSchema
+  GetAllIntegrationRunsResponseSchema,
+  ValidateIntegrationConfigurationRequestSchema,
+  ValidateIntegrationConfigurationResponseSchema
 } from '.'
 import { z } from 'zod'
 
@@ -64,4 +66,12 @@ export type GetAllIntegrationRunsRequest = z.infer<
 
 export type GetAllIntegrationRunsResponse = z.infer<
   typeof GetAllIntegrationRunsResponseSchema
+>
+
+export type ValidateIntegrationConfigurationRequest = z.infer<
+  typeof ValidateIntegrationConfigurationRequestSchema
+>
+
+export type ValidateIntegrationConfigurationResponse = z.infer<
+  typeof ValidateIntegrationConfigurationResponseSchema
 >

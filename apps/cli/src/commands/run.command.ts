@@ -112,8 +112,9 @@ export default class RunCommand extends BaseCommand {
 
   private async connectToSocket(data: RunData) {
     Logger.info('Connecting to socket...')
-    const host = this.baseUrl.substring(this.baseUrl.lastIndexOf('/') + 1)
-    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${host}/change-notifier`
+    // Fix: Parse the full host from baseUrl, not just the last segment
+    const url = new URL(this.baseUrl)
+    const websocketUrl = `${this.getWebsocketType(this.baseUrl)}://${url.host}/change-notifier`
     const privateKey = data.privateKey
     const quitOnDecryptionFailure = data.quitOnDecryptionFailure
 
@@ -126,7 +127,6 @@ export default class RunCommand extends BaseCommand {
     })
 
     ioClient.connect()
-
     ioClient.on('connect', async () => {
       ioClient.emit('register-client-app', {
         workspaceSlug: data.workspace,
@@ -160,25 +160,61 @@ export default class RunCommand extends BaseCommand {
         this.processEnvironmentalVariables[data.name] = data.value
         this.restartCommand()
       })
+      // Set a timeout for registration response
+      const registrationTimeout = setTimeout(() => {
+        Logger.error(
+          'Connection timeout: No response from server after 30 seconds'
+        )
+        process.exit(1)
+      }, 30000)
 
       ioClient.on(
         'client-registered',
         (registrationResponse: ClientRegisteredResponse) => {
+          clearTimeout(registrationTimeout)
           if (registrationResponse.success) {
             this.projectSlug = data.project
             this.environmentSlug = data.environment
             Logger.info('Successfully registered to API')
           } else {
-            let errorText: string
+            // Extract meaningful error message
+            let errorMessage = 'Unknown error'
 
-            try {
-              const { header, body } = JSON.parse(registrationResponse.message)
-              errorText = `${header}: ${body}`
-            } catch {
-              errorText = `Error registering to API: ${registrationResponse.message}`
+            if (typeof registrationResponse.message === 'string') {
+              // If it is just a string, use it directly
+              errorMessage = registrationResponse.message
+            } else if (
+              typeof registrationResponse.message === 'object' &&
+              registrationResponse.message !== null
+            ) {
+              // If the message is an object and not null
+              // Attempt to parse the message if it's a JSON string
+              // Handle nested error structure
+              const msgObj = registrationResponse.message as any
+              const nestedMessage = msgObj.response?.message || msgObj.message // Fallback to message if response is not available
+
+              if (typeof nestedMessage === 'string') {
+                try {
+                  const parsed = JSON.parse(nestedMessage)
+                  if (parsed.header && parsed.body) {
+                    errorMessage = `${parsed.header}: ${parsed.body}`
+                  } else {
+                    errorMessage = nestedMessage
+                  }
+                } catch {
+                  // If parsing fails, fallback to string representation
+                  errorMessage = nestedMessage
+                }
+              } else {
+                // If the message is not a string, stringify it
+                errorMessage = JSON.stringify(msgObj)
+              }
+            } else {
+              // Handle other types (undefined, null, etc.)
+              errorMessage = String(registrationResponse.message)
             }
 
-            Logger.error(errorText)
+            Logger.error(`Error registering to API: ${errorMessage}`)
             process.exit(1)
           }
         }

@@ -43,6 +43,7 @@ export default function SetupIntegration({
   const {
     formState,
     isLoading,
+    isTesting,
     config,
     projectPrivateKey,
     privateKeyLoading,
@@ -89,6 +90,11 @@ export default function SetupIntegration({
       onOpenChange?.(false)
       setCurrentStep(Step.IntegrationSetupStep)
     }
+  }
+
+  const handleTesting = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await handlers.handleTesting()
   }
 
   return (
@@ -170,14 +176,25 @@ export default function SetupIntegration({
           </Visible>
 
           <Visible if={currentStep === Step.ProjectEnvironmentStep}>
-            <Button
-              disabled={isLoading}
-              onClick={handleSubmit}
-              variant="secondary"
-            >
-              {isLoading ? 'Creating...' : 'Create Integration'}
-            </Button>
+            <div className="flex justify-end gap-3">
+              <Button
+                disabled={isLoading || isTesting}
+                onClick={handleTesting}
+                type="button"
+                variant="default"
+              >
+                {isTesting ? 'Testing...' : 'Test Configuration'}
+              </Button>
+              <Button
+                disabled={isLoading}
+                onClick={handleSubmit}
+                variant="secondary"
+              >
+                {isLoading ? 'Creating...' : 'Create Integration'}
+              </Button>
+            </div>
           </Visible>
+          
         </div>
       </DialogContent>
     </Dialog>

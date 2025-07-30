@@ -9,7 +9,8 @@ import {
 } from '../integration.types'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import { makeTimedRequest } from '@/common/util'
+import { constructErrorBody, makeTimedRequest } from '@/common/util'
+import { BadRequestException } from '@nestjs/common'
 
 export class DiscordIntegration extends BaseIntegration {
   constructor(prisma: PrismaService) {
@@ -115,6 +116,33 @@ export class DiscordIntegration extends BaseIntegration {
       )
     } else {
       this.logger.log(`Successfully emitted event to Discord: ${data.title}`)
+    }
+  }
+
+  /**
+   * Test that the webhook URL is valid & reachable.
+   */
+  public async validateConfiguration(metadata: DiscordIntegrationMetadata) {
+    this.logger.log(`Validating Discord webhook URL: ${metadata.webhookUrl}`)
+
+    const { response, duration } = await makeTimedRequest(() =>
+      fetch(metadata.webhookUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+    )
+
+    this.logger.log(
+      `Discord validation responded ${response.status} in ${duration}ms`
+    )
+
+    if (!response.ok) {
+      throw new BadRequestException(
+        constructErrorBody(
+          'Webhook validation failed',
+          `Discord returned ${response.status} ${response.statusText}`
+        )
+      )
     }
   }
 }

@@ -30,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
@@ -40,6 +41,7 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface SecretCardProps {
   secretData: Secret
@@ -65,6 +67,9 @@ export default function SecretCard({
     selectedSecretEnvironmentAtom
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
+  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+    new Set()
+  )
   const [decryptedValues, setDecryptedValues] = useState<
     Record<Environment['id'], string>
   >({})
@@ -100,6 +105,26 @@ export default function SecretCard({
   )
 
   useEffect(() => {
+    const fetchDisabled = async () => {
+      try {
+        const res =
+          await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
+            { secretSlug: secretData.slug }
+          )
+
+        if (res.success && res.data) {
+          setDisabledEnvironments(new Set(res.data))
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Failed to load disabled environments', error)
+      }
+    }
+
+    fetchDisabled()
+  }, [secretData.slug])
+
+  useEffect(() => {
     handleDecryptValues(secretData.versions[0]?.environment.slug)
   }, [secretData.versions, handleDecryptValues])
 
@@ -111,6 +136,39 @@ export default function SecretCard({
       'You successfully copied the slug.'
     )
   }
+
+  const handleToggleDisableSecretClick = async (
+    environmentSlug: Environment['slug'],
+    environmentId: Environment['id'],
+    checked: boolean
+  ) => {
+    const controller = ControllerInstance.getInstance().secretController
+
+    if (checked) {
+      // Enable secret
+      await controller.enableSecret({
+        secretSlug: secretData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.delete(environmentId) // Update local state
+        return next
+      })
+    } else {
+      // Disable secret
+      await controller.disableSecret({
+        secretSlug: secretData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.add(environmentId) // Update local state
+        return next
+      })
+    }
+  }
+
   const handleRevealEnvironmentValueOfSecretClick = (
     environment: Environment['slug']
   ) => {
@@ -216,6 +274,9 @@ export default function SecretCard({
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
+                  const isDisabled = disabledEnvironments.has(
+                    value.environment.id
+                  )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -234,6 +295,16 @@ export default function SecretCard({
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
+                          <Switch
+                            checked={!isDisabled}
+                            onCheckedChange={(checked) => {
+                              handleToggleDisableSecretClick(
+                                value.environment.slug,
+                                value.environment.id,
+                                checked
+                              )
+                            }}
+                          />
                           {privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
