@@ -7,6 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
+import { Cron } from '@nestjs/schedule'
 import { UpdateUserDto } from './dto/update.user/update.user'
 import { AuthProvider, User } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -24,10 +25,16 @@ import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { OnboardingAnswersDto } from './dto/onboarding-answers/onboarding-answers'
+import dayjs from 'dayjs'
 
 @Injectable()
 export class UserService {
   private readonly log = new Logger(UserService.name)
+
+  @Cron('*/15 * * * * *') // Every 15 seconds
+  handleOnboardingRemindersCron() {
+    this.handleOnboardingReminders()
+  }
 
   constructor(
     private readonly prisma: PrismaService,
@@ -565,5 +572,56 @@ export class UserService {
       return
     }
     this.log.log('Admin user found', 'UserService')
+  }
+
+  async handleOnboardingReminders() {
+    const scheduleOffsets = [3, 6, 7, 10, 15, 15]
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        isOnboardingFinished: false,
+        noOfReminderSent: { lt: scheduleOffsets.length }
+      }
+    })
+
+    this.log.log(`Fetched ${users.length} users who didn't finish onboarding`)
+
+    for (const user of users) {
+      const reminderIndex = user.noOfReminderSent
+
+      const waitDays = scheduleOffsets
+        .slice(0, reminderIndex)
+        .reduce((a, b) => a + b, 0)
+
+      const lastSentDate = dayjs(user.joinedOn).add(waitDays, 'day')
+      const now = dayjs()
+
+      if (now.isBefore(lastSentDate)) continue
+
+      this.log.log(
+        `Reminding ${user.id} for onboarding - ${reminderIndex + 1}th time`
+      )
+
+      try {
+        await this.mailService.sendOnboardingReminder(
+          user.email,
+          user.name,
+          reminderIndex + 1
+        )
+
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { noOfReminderSent: { increment: 1 } }
+        })
+
+        this.log.log(`Reminder #${reminderIndex + 1} sent to ${user.email}`)
+      } catch (err) {
+        this.log.error(
+          `Failed to send reminder to ${user.email}`,
+          err.stack || err
+        )
+      }
+    }
   }
 }

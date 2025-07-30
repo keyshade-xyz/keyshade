@@ -25,7 +25,6 @@ import { IntegrationModule } from '@/integration/integration.module'
 import { FeedbackModule } from '@/feedback/feedback.module'
 import { CacheModule } from '@/cache/cache.module'
 import { WorkspaceMembershipModule } from '@/workspace-membership/workspace-membership.module'
-import { TasksModule } from '@/tasks/tasks.module'
 
 @Module({
   controllers: [AppController],
@@ -59,8 +58,7 @@ import { TasksModule } from '@/tasks/tasks.module'
     IntegrationModule,
     FeedbackModule,
     CacheModule,
-    WorkspaceMembershipModule,
-    TasksModule
+    WorkspaceMembershipModule
   ],
   providers: [
     {
