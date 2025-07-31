@@ -1,3 +1,9 @@
+## [2.32.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.3...v2.32.0-stage.4) (2025-07-31)
+
+### 🚀 Features
+
+* **api:** unfinished onboarding follow-up email ([#1090](https://github.com/keyshade-xyz/keyshade/issues/1090)) ([69dbb02](https://github.com/keyshade-xyz/keyshade/commit/69dbb02b90d877e4249c8b4da6359d5a6d866bc4))
+
 ## [2.32.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.2...v2.32.0-stage.3) (2025-07-30)
 
 ### 🐛 Bug Fixes
