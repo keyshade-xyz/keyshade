@@ -85,7 +85,10 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     this.logger.log(
       `User ${user.id} is attempted to purchase ${dto.plan} for workspace ${workspaceSlug}`
     )
-    await this.validateWorkspaceForNewSubscription(user, workspaceSlug)
+    const { id: workspaceId } = await this.validateWorkspaceForNewSubscription(
+      user,
+      workspaceSlug
+    )
 
     this.logger.log('Generating formatted plan name...')
     const formattedPlanName = this.getFormattedName(
@@ -117,7 +120,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         id,
         checkoutLinkUpdate: {
           metadata: {
-            workspaceSlug,
+            workspaceId,
             plan: dto.plan,
             seats: dto.seats,
             isAnnual: dto.isAnnual,
@@ -299,11 +302,12 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       `User ${user.id} attempted to get payment history for workspace ${workspaceSlug}`
     )
 
-    await this.getAuthorizedWorkspace(user, workspaceSlug)
+    const { id: workspaceId } = await this.getAuthorizedWorkspace(
+      user,
+      workspaceSlug
+    )
     const orders = await this.polarClient.orders.list({
-      metadata: {
-        workspaceSlug
-      },
+      metadata: { workspaceId },
       page,
       limit
     })
@@ -381,7 +385,10 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     this.logger.log(
       `Checking if user is authorized for workspace ${workspaceSlug}...`
     )
-    await this.getAuthorizedWorkspace(user, workspaceSlug)
+    const { id: workspaceId } = await this.getAuthorizedWorkspace(
+      user,
+      workspaceSlug
+    )
 
     const orders: Order[] = []
 
@@ -391,7 +398,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     while (hasNextPage) {
       const response = await this.polarClient.orders.list({
         metadata: {
-          workspaceSlug
+          workspaceId
         },
         page,
         limit: 100
@@ -492,15 +499,15 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
 
     // @ts-expect-error -- Metadata set while creating payment link
-    const { workspaceSlug } = data.metadata as PaymentLinkMetadata
+    const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription cancellation: ${subscriptionId}`
     )
 
     // Update the subscription
-    this.logger.log(`Cancelling subscription for workspace ${workspaceSlug}...`)
+    this.logger.log(`Cancelling subscription for workspace ${workspaceId}...`)
 
-    const workspace = await this.getWorkspace(workspaceSlug)
+    const workspace = await this.getWorkspace(workspaceId)
 
     await this.prisma.subscription.update({
       where: {
@@ -511,7 +518,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       }
     })
 
-    this.logger.log(`Subscription cancelled for workspace ${workspaceSlug}`)
+    this.logger.log(`Subscription cancelled for workspace ${workspaceId}`)
   }
 
   private async processSubscriptionUncancelled(
@@ -524,17 +531,15 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
 
     // @ts-expect-error -- Metadata set while creating payment link
-    const { workspaceSlug } = data.metadata as PaymentLinkMetadata
+    const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription uncancellation: ${subscriptionId}`
     )
 
     // Update the subscription
-    this.logger.log(
-      `Uncancelling subscription for workspace ${workspaceSlug}...`
-    )
+    this.logger.log(`Uncancelling subscription for workspace ${workspaceId}...`)
 
-    const workspace = await this.getWorkspace(workspaceSlug)
+    const workspace = await this.getWorkspace(workspaceId)
 
     await this.prisma.subscription.update({
       where: {
@@ -545,7 +550,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       }
     })
 
-    this.logger.log(`Subscription uncancelled for workspace ${workspaceSlug}`)
+    this.logger.log(`Subscription uncancelled for workspace ${workspaceId}`)
   }
 
   private async processSubscriptionRevoked(
@@ -558,17 +563,17 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
 
     // @ts-expect-error -- Metadata set while creating payment link
-    const { workspaceSlug } = data.metadata as PaymentLinkMetadata
+    const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription revokation: ${subscriptionId}`
     )
 
     // Update the subscription
     this.logger.log(
-      `Resetting subscription to free for workspace ${workspaceSlug}...`
+      `Resetting subscription to free for workspace ${workspaceId}...`
     )
 
-    const workspace = await this.getWorkspace(workspaceSlug)
+    const workspace = await this.getWorkspace(workspaceId)
 
     await this.prisma.$transaction([
       // Update subscription
@@ -598,7 +603,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       })
     ])
 
-    this.logger.log(`Subscription reset to free for workspace ${workspaceSlug}`)
+    this.logger.log(`Subscription reset to free for workspace ${workspaceId}`)
   }
 
   private async processSubscriptionUpdated(
@@ -644,7 +649,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
 
     // Fetch the workspace
-    const workspace = await this.getWorkspace(paymentLinkMetadata.workspaceSlug)
+    const workspace = await this.getWorkspace(paymentLinkMetadata.workspaceId)
 
     // Update the subscription
     this.logger.log('Updating subscription...')
@@ -688,15 +693,15 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
 
     // @ts-expect-error -- Metadata set while creating payment link
-    const { workspaceSlug } = data.metadata as PaymentLinkMetadata
+    const { workspaceId } = data.metadata as PaymentLinkMetadata
     this.logger.log(
       `Metadata received for subscription renewed: ${subscriptionId}`
     )
 
     // Update the subscription
-    this.logger.log(`Renewing subscription for workspace ${workspaceSlug}...`)
+    this.logger.log(`Renewing subscription for workspace ${workspaceId}...`)
 
-    const workspace = await this.getWorkspace(workspaceSlug)
+    const workspace = await this.getWorkspace(workspaceId)
 
     await this.prisma.subscription.update({
       where: {
@@ -707,7 +712,7 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
       }
     })
 
-    this.logger.log(`Subscription uncancelled for workspace ${workspaceSlug}`)
+    this.logger.log(`Subscription uncancelled for workspace ${workspaceId}`)
   }
 
   private getFormattedName(
@@ -736,17 +741,17 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
     )
   }
 
-  private async getWorkspace(slug: Workspace['slug']): Promise<Workspace> {
-    this.logger.log(`Fetching workspace ${slug}...`)
+  private async getWorkspace(id: Workspace['id']): Promise<Workspace> {
+    this.logger.log(`Fetching workspace ${id}...`)
     const workspace = await this.prisma.workspace.findUnique({
       where: {
-        slug
+        id
       }
     })
     if (!workspace) {
-      this.logger.error(`Workspace ${slug} not found.`)
+      this.logger.error(`Workspace ${id} not found.`)
       throw new Error(
-        `Workspace ${slug} not found while processing subscription creation.`
+        `Workspace ${id} not found while processing subscription creation.`
       )
     }
     this.logger.log(`Workspace fetched successfully: ${workspace.name}`)
@@ -851,11 +856,9 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
 
     // Fetch the invoice from Polar
     this.logger.log(`Fetching invoice for order ${orderId}...`)
-    const invoice = await this.polarClient.orders.invoice({
+    return await this.polarClient.orders.invoice({
       id: orderId
     })
-
-    return invoice
   }
 
   private async getOrder(orderId: string): Promise<Order> {

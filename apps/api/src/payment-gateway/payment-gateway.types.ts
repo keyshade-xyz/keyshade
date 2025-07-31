@@ -22,7 +22,7 @@ export interface Invoice {
 }
 
 export interface PaymentLinkMetadata {
-  workspaceSlug: string
+  workspaceId: string
   plan: AllowedPlans
   seats: number
   isAnnual: boolean
