@@ -17,7 +17,11 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
-import { decryptMetadata, makeTimedRequest } from '@/common/util'
+import {
+  constructErrorBody,
+  decryptMetadata,
+  makeTimedRequest
+} from '@/common/util'
 import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
@@ -741,6 +745,80 @@ export class VercelIntegration extends BaseIntegration {
         IntegrationRunStatus.FAILED,
         duration,
         err instanceof Error ? err.message : String(err)
+      )
+    }
+  }
+
+  public async validateConfiguration(metadata: VercelIntegrationMetadata) {
+    this.logger.log(
+      `Validating Vercel integration for project ${metadata.projectId}`
+    )
+
+    try {
+      const { Vercel } = await import('@vercel/sdk')
+      const vercel = new Vercel({ bearerToken: metadata.token })
+
+      const { response, duration } = await makeTimedRequest(() =>
+        vercel.environment.getV9ProjectsIdOrNameCustomEnvironments({
+          idOrName: metadata.projectId
+        })
+      )
+
+      if (!Array.isArray(response.environments)) {
+        throw new Error('Unexpected response format from Vercel API')
+      }
+
+      const builtInEnvs = new Set([
+        'production',
+        'preview',
+        'development'
+      ] as const)
+
+      const customEnvDefs = response.environments
+      const customIds = new Set(customEnvDefs.map((e) => e.id))
+
+      const invalid = Object.entries(metadata.environments).filter(
+        ([, { vercelSystemEnvironment, vercelCustomEnvironmentId }]) => {
+          if (vercelSystemEnvironment) {
+            return !builtInEnvs.has(vercelSystemEnvironment)
+          }
+          if (vercelCustomEnvironmentId) {
+            return !customIds.has(vercelCustomEnvironmentId)
+          }
+          return true
+        }
+      )
+
+      if (invalid.length > 0) {
+        const badList = invalid
+          .map(
+            ([
+              slug,
+              { vercelSystemEnvironment, vercelCustomEnvironmentId }
+            ]) => {
+              const val = vercelSystemEnvironment ?? vercelCustomEnvironmentId
+              return `${slug} (${val})`
+            }
+          )
+          .join(', ')
+        throw new Error(
+          `The following metadata.environments keys are invalid for project ` +
+            `"${metadata.projectId}": ${badList}`
+        )
+      }
+
+      this.logger.log(
+        `Vercel validation succeeded for project "${metadata.projectId}" in ${duration}ms`
+      )
+    } catch (error) {
+      this.logger.error(
+        `Vercel configuration validation failed: ${error instanceof Error ? error.message : String(error)}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Vercel validation failed',
+          error instanceof Error ? error.message : String(error)
+        )
       )
     }
   }

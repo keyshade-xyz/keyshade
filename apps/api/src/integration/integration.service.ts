@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   Logger
 } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -179,13 +180,7 @@ export class IntegrationService {
       }
     }
 
-    // Check for permitted events
-    this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
-    integrationObject.validatePermittedEvents(dto.notifyOn)
-
-    // Check for authentication parameters
-    this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
-    integrationObject.validateMetadataParameters(dto.metadata)
+    await this.validateEventsAndMetadataParams(dto, integrationObject, true)
 
     // Create the integration
     this.logger.log(`Creating integration: ${dto.name}`)
@@ -352,6 +347,8 @@ export class IntegrationService {
         )
       )
     }
+
+    await this.validateEventsAndMetadataParams(dto, integrationObject, false)
 
     // Update the integration
     this.logger.log(`Updating integration: ${integration.id}`)
@@ -780,6 +777,102 @@ export class IntegrationService {
           )
         }
         break
+    }
+  }
+
+  /**
+   * Tests a new integration in the given workspace. The user needs to have
+   * `CREATE_INTEGRATION` and `READ_WORKSPACE` authority in the workspace.
+   * Validate only metadata and event subscriptions for an integration.
+   *
+   * This method skips project and environment resolution entirely, focusing on
+   * permitted events, metadata parameter validation and live configuration tests.
+   *
+   * @param user - The authenticated user performing metadata validation.
+   * @param dto - CreateIntegration or UpdateIntegration DTO containing optional
+   *   notifyOn and metadata fields.
+   * @param isIntegrationNew - True if validating for a new integration; false for update.
+   * @param integrationSlug - Slug of the existing integration (required when isIntegrationNew is false).
+   * @returns A promise resolving to { success: true } upon successful validation.
+   * @throws BadRequestException if integrationSlug is missing when updating.
+   * @throws UnauthorizedException if the user is not authorized to update the integration.
+   * @throws BadRequestException if event subscriptions or metadata parameters are invalid.
+   * @throws BadRequestException if live configuration testing via validateConfiguration fails.
+   */
+  async validateIntegrationMetadata(
+    user: AuthenticatedUser,
+    dto: CreateIntegration | UpdateIntegration,
+    isIntegrationNew: boolean,
+    integrationSlug?: Integration['slug']
+  ): Promise<{ success: true }> {
+    this.logger.log(
+      `User ${user.id} is metadata‐validating integration ${dto.name} ` +
+        (isIntegrationNew ? `(new)` : `(existing ${integrationSlug})`)
+    )
+
+    let integrationObject: BaseIntegration
+    if (isIntegrationNew) {
+      integrationObject = IntegrationFactory.createIntegrationWithType(
+        (dto as CreateIntegration).type,
+        this.prisma
+      )
+    } else {
+      if (!integrationSlug) {
+        throw new InternalServerErrorException(
+          constructErrorBody(
+            'Uh-oh, something went wront on our end',
+            'We have faced an issue while validating your integration. Please try again later, or get in touch with us at support@keyshade.xyz'
+          )
+        )
+      }
+      const existing =
+        await this.authorizationService.authorizeUserAccessToIntegration({
+          user,
+          entity: { slug: integrationSlug },
+          authorities: [Authority.UPDATE_INTEGRATION]
+        })
+      integrationObject = IntegrationFactory.createIntegrationWithType(
+        existing.type,
+        this.prisma
+      )
+    }
+
+    await this.validateEventsAndMetadataParams(
+      dto,
+      integrationObject,
+      isIntegrationNew
+    )
+
+    return { success: true }
+  }
+
+  /**
+   * Validate metadata parameters, permitted events and live configuration testing.
+   *
+   * @param dto - CreateIntegration or UpdateIntegration DTO.
+   * @param integration - The BaseIntegration instance responsible for validation logic.
+   * @param isIntegrationNew - True if this invocation is part of a create operation;
+   *   false if part of update.
+   * @returns A promise that resolves when all validations complete.
+   * @throws BadRequestException if event subscriptions or metadata parameters are invalid.
+   * @throws BadRequestException if live configuration testing via validateConfiguration fails.
+   */
+  private async validateEventsAndMetadataParams(
+    dto: CreateIntegration | UpdateIntegration,
+    integration: BaseIntegration,
+    isIntegrationNew: boolean
+  ): Promise<void> {
+    if ('notifyOn' in dto && dto.notifyOn) {
+      this.logger.log(`Checking for permitted events: ${dto.notifyOn}`)
+      integration.validatePermittedEvents(dto.notifyOn)
+    }
+
+    if ('metadata' in dto && dto.metadata) {
+      this.logger.log(`Checking for metadata parameters: ${dto.metadata}`)
+      integration.validateMetadataParameters(dto.metadata, !isIntegrationNew)
+
+      this.logger.log(`Testing configuration for integration: ${dto.name}`)
+      await integration.validateConfiguration(dto.metadata)
     }
   }
 }
