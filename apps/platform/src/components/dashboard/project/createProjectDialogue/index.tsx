@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAtom} from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { Plus } from 'lucide-react'
 import { AddSVG } from '@public/svg/shared'
 import ViewAndDownloadProjectKeysDialog from '../viewAndDownloadKeysDialog'
@@ -19,7 +19,8 @@ import {
 import { Label } from '@/components/ui/label'
 import {
   createProjectOpenAtom,
-  viewAndDownloadProjectKeysOpenAtom,
+  selectedWorkspaceAtom,
+  viewAndDownloadProjectKeysOpenAtom
 } from '@/store'
 import Visible from '@/components/common/visible'
 import { useProjectCreateData } from '@/hooks/screen/project/createProjectDialogue/use-project-create-data'
@@ -27,9 +28,12 @@ import { useCreateNewProject } from '@/hooks/api/use-create-new-project'
 
 export default function CreateProjectDialogue(): JSX.Element {
   const privateKeyWarningRef = useRef<HTMLDivElement | null>(null)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useAtom(
     createProjectOpenAtom
   )
+  const isAuthorizedToCreateProjects =
+    selectedWorkspace?.entitlements.canCreateProjects
 
   const [
     isViewAndDownloadProjectKeysDialogOpen,
@@ -59,7 +63,7 @@ export default function CreateProjectDialogue(): JSX.Element {
   const { projects, isLoading, createNewProject } = useCreateNewProject(
     newProjectData,
     setProjectKeys,
-    setProjectSlug,
+    setProjectSlug
   )
 
   const toggleDialog = useCallback(() => {
@@ -96,7 +100,10 @@ export default function CreateProjectDialogue(): JSX.Element {
       >
         <DialogTrigger asChild>
           {isProjectsEmpty ? null : (
-            <Button onClick={toggleDialog}>
+            <Button
+              disabled={!isAuthorizedToCreateProjects}
+              onClick={toggleDialog}
+            >
               <AddSVG /> Create a new Project
             </Button>
           )}

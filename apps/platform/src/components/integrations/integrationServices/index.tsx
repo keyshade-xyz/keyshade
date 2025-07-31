@@ -1,12 +1,16 @@
 'use client'
 import React, { useCallback, useMemo } from 'react'
 import { Integrations } from '@keyshade/common'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import type { Integration } from '@keyshade/schema'
 import IntegrationIcon from '../integrationIcon'
 import CreateIntegration from '../createIntegration'
 import { Button } from '@/components/ui/button'
-import { createIntegrationOpenAtom, createIntegrationTypeAtom } from '@/store'
+import {
+  createIntegrationOpenAtom,
+  createIntegrationTypeAtom,
+  selectedWorkspaceAtom
+} from '@/store'
 import Visible from '@/components/common/visible'
 
 export default function IntegrationServices(): React.JSX.Element {
@@ -14,7 +18,10 @@ export default function IntegrationServices(): React.JSX.Element {
   const [createIntegrationModelOpen, setCreateIntegrationModelOpen] = useAtom(
     createIntegrationOpenAtom
   )
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setCreateIntegrationType = useSetAtom(createIntegrationTypeAtom)
+  const isAuthorizedToCreateIntegration =
+    selectedWorkspace?.entitlements.canCreateIntegrations
 
   const handleConnect = useCallback(
     (type: Integration['type']) => {
@@ -43,6 +50,7 @@ export default function IntegrationServices(): React.JSX.Element {
                   />
                   <Button
                     className={`${!isActive && 'cursor-not-allowed'}`}
+                    disabled={!isAuthorizedToCreateIntegration}
                     onClick={() => isActive && handleConnect(integration.type)}
                     variant="secondary"
                   >

@@ -14,8 +14,7 @@ import {
   EventType,
   Project,
   Secret,
-  SecretVersion,
-  User
+  SecretVersion
 } from '@prisma/client'
 import { CreateSecret } from './dto/create.secret/create.secret'
 import { UpdateSecret } from './dto/update.secret/update.secret'
@@ -24,11 +23,8 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import {
-  ChangeNotification,
-  ChangeNotificationEvent
-} from '@/socket/socket.types'
-import { paginate } from '@/common/paginate'
+import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import {
   addHoursToDate,
   constructErrorBody,
@@ -37,9 +33,9 @@ import {
 } from '@/common/util'
 import { createEvent } from '@/common/event'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
-import { getSecretWithValues, generateSecretValue } from '@/common/secret'
+import { generateSecretValue } from '@/common/secret'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { SecretWithProject, SecretWithValues } from './secret.types'
+import { HydratedSecret, RawSecret, SecretRevision } from './secret.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
@@ -50,6 +46,8 @@ import {
   ConfigurationDeletedEventMetadata,
   ConfigurationUpdatedEventMetadata
 } from '@/event/event.types'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class SecretService {
@@ -61,6 +59,7 @@ export class SecretService {
     private readonly authorizationService: AuthorizationService,
     private readonly tierLimitService: TierLimitService,
     private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService,
     @Inject(forwardRef(() => VariableService))
     private readonly variableService: VariableService,
     @Inject(REDIS_CLIENT)
@@ -82,7 +81,7 @@ export class SecretService {
     user: AuthenticatedUser,
     dto: CreateSecret,
     projectSlug: Project['slug']
-  ): Promise<SecretWithValues> {
+  ): Promise<HydratedSecret> {
     this.logger.log(
       `User ${user.id} attempted to create a secret ${dto.name} in project ${projectSlug}`
     )
@@ -94,7 +93,7 @@ export class SecretService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.CREATE_SECRET]
       })
     const projectId = project.id
@@ -103,10 +102,10 @@ export class SecretService {
     await this.tierLimitService.checkSecretLimitReached(project)
 
     // Check if the secret with the same name already exists in the project
-    await this.secretExists(dto.name, project)
+    await this.secretExists(dto.name, project.id)
 
     // Check if a variable with the same name already exists in the project
-    await this.variableService.variableExists(dto.name, project)
+    await this.variableService.variableExists(dto.name, project.id)
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
@@ -158,46 +157,22 @@ export class SecretService {
           }
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        versions: {
-          select: {
-            environment: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            value: true,
-            version: true,
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
-      }
+      include: InclusionQuery.Secret
     })
 
     this.logger.log(`Secret ${dto.name} created in project ${projectSlug}`)
 
-    const secret = await getSecretWithValues(secretData)
+    const hydratedSecret = await this.hydrationService.hydrateSecret({
+      secret: secretData,
+      user,
+      authorizationService: this.authorizationService
+    })
 
     if (dto.entries && dto.entries.length > 0) {
       try {
         for (const { environmentSlug, value } of dto.entries) {
           this.logger.log(
-            `Publishing secret creation to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+            `Publishing secret creation to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
           await this.redis.publish(
             CHANGE_NOTIFIER_RSC,
@@ -209,7 +184,7 @@ export class SecretService {
             } as ChangeNotificationEvent)
           )
           this.logger.log(
-            `Published secret update to Redis for secret ${secretData.slug} in environment ${environmentSlug}`
+            `Published secret update to Redis for secret ${hydratedSecret.slug} in environment ${environmentSlug}`
           )
         }
       } catch (error) {
@@ -220,13 +195,13 @@ export class SecretService {
     await createEvent(
       {
         triggeredBy: user,
-        entity: secret.secret,
+        entity: hydratedSecret,
         type: EventType.SECRET_ADDED,
         source: EventSource.SECRET,
         title: `Secret created`,
         metadata: {
-          name: secretData.name,
-          description: secretData.note,
+          name: hydratedSecret.name,
+          description: hydratedSecret.note,
           values: mapEntriesToEventMetadata(dto.entries),
           isSecret: true,
           isPlaintext: true
@@ -236,7 +211,8 @@ export class SecretService {
       this.prisma
     )
 
-    return secret
+    delete hydratedSecret.project
+    return hydratedSecret
   }
 
   async bulkCreateSecrets(
@@ -244,14 +220,14 @@ export class SecretService {
     projectSlug: string,
     secrets: CreateSecret[]
   ): Promise<{
-    successful: SecretWithValues[]
+    successful: HydratedSecret[]
     failed: Array<{ name: string; error: string }>
   }> {
     this.logger.log(
       `User ${user.id} initiated bulk creation of ${secrets.length} secrets in project ${projectSlug}`
     )
 
-    const successful: SecretWithValues[] = []
+    const successful: HydratedSecret[] = []
     const failed: Array<{ name: string; error: string }> = []
 
     for (const secret of secrets) {
@@ -280,7 +256,7 @@ export class SecretService {
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
     dto: UpdateSecret
-  ) {
+  ): Promise<HydratedSecret> {
     this.logger.log(`User ${user.id} attempted to update secret ${secretSlug}`)
 
     // Fetch the secret
@@ -289,20 +265,20 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
     const shouldCreateRevisions = dto.entries && dto.entries.length > 0
     this.logger.log(
-      `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${dto.name} is set to ${shouldCreateRevisions}`
+      `${dto.entries?.length || 0} revisions set for secret. Revision creation for secret ${secret.name} is set to ${shouldCreateRevisions}`
     )
 
     // Check if the secret with the same name already exists in the project
-    await this.secretExists(dto.name, secret.project)
+    await this.secretExists(dto.name, secret.projectId)
 
     // Check if a variable with the same name already exists in the project
-    await this.variableService.variableExists(dto.name, secret.project)
+    await this.variableService.variableExists(dto.name, secret.projectId)
 
     // Check if the user has access to the environments
     const environmentSlugToIdMap = await getEnvironmentIdToSlugMap(
@@ -334,12 +310,6 @@ export class SecretService {
               }
             : {}),
           lastUpdatedById: user.id
-        },
-        select: {
-          id: true,
-          name: true,
-          note: true,
-          slug: true
         }
       })
     )
@@ -378,26 +348,6 @@ export class SecretService {
               createdById: user.id,
               environmentId: environmentSlugToIdMap.get(entry.environmentSlug),
               secretId: secret.id
-            },
-            select: {
-              id: true,
-              value: true,
-              version: true,
-              environment: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true
-                }
-              },
-              createdOn: true,
-              createdBy: {
-                select: {
-                  id: true,
-                  name: true,
-                  profilePictureUrl: true
-                }
-              }
             }
           })
         )
@@ -405,14 +355,14 @@ export class SecretService {
     }
 
     // Make the transaction
-    const tx = await this.prisma.$transaction(op)
-    const updatedSecret = tx[0]
-    const updatedVersions = tx.slice(1)
+    await this.prisma.$transaction(op)
 
-    const result = {
-      secret: updatedSecret,
-      updatedVersions: updatedVersions
-    }
+    const updatedSecret = await this.prisma.secret.findUnique({
+      where: {
+        id: secret.id
+      },
+      include: InclusionQuery.Secret
+    })
 
     // Notify the new secret version through Redis
     if (dto.entries && dto.entries.length > 0) {
@@ -461,9 +411,24 @@ export class SecretService {
 
     this.logger.log(`User ${user.id} updated secret ${secret.id}`)
 
-    return result
+    return await this.hydrationService.hydrateSecret({
+      secret: updatedSecret,
+      user,
+      authorizationService: this.authorizationService
+    })
   }
 
+  /**
+   * Deletes the value of a secret for a specific environment.
+   *
+   * @param user The authenticated user performing the action.
+   * @param secretSlug The slug identifier of the secret.
+   * @param environmentSlug The slug identifier of the environment.
+   *
+   * This method verifies the user's permissions to modify the secret in the specified environment.
+   * It deletes all secret versions associated with the environment and logs the operation.
+   * Additionally, it creates an event to track the deletion action.
+   */
   async deleteEnvironmentValueOfSecret(
     user: AuthenticatedUser,
     secretSlug: Secret['slug'],
@@ -480,7 +445,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
     const environmentId = environment.id
@@ -488,7 +453,7 @@ export class SecretService {
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -548,7 +513,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -559,7 +524,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
     const environmentId = environment.id
@@ -705,14 +670,14 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
 
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -759,14 +724,14 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
 
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -813,7 +778,7 @@ export class SecretService {
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.READ_SECRET]
     })
 
@@ -851,7 +816,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.DELETE_SECRET]
     })
 
@@ -903,7 +868,7 @@ export class SecretService {
     page: number,
     limit: number,
     order: 'asc' | 'desc' = 'desc'
-  ) {
+  ): Promise<PaginatedResponse<SecretRevision>> {
     this.logger.log(
       `User ${user.id} attempted to get revisions of secret ${secretSlug} in environment ${environmentSlug}`
     )
@@ -914,7 +879,7 @@ export class SecretService {
     )
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.READ_SECRET]
     })
     const secretId = secret.id
@@ -926,7 +891,7 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
@@ -940,25 +905,7 @@ export class SecretService {
         secretId: secretId,
         environmentId: environmentId
       },
-      select: {
-        value: true,
-        version: true,
-        createdOn: true,
-        environment: {
-          select: {
-            id: true,
-            slug: true,
-            name: true
-          }
-        },
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        }
-      },
+      select: InclusionQuery.Secret['versions']['select'],
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
       orderBy: {
@@ -1004,7 +951,7 @@ export class SecretService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedSecret>> {
     this.logger.log(
       `User ${user.id} attempted to get all secrets of project ${projectSlug}`
     )
@@ -1016,7 +963,7 @@ export class SecretService {
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
@@ -1032,39 +979,9 @@ export class SecretService {
           contains: search
         }
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        },
-        versions: {
-          select: {
-            value: true,
-            version: true,
-            environment: {
-              select: {
-                name: true,
-                id: true,
-                slug: true
-              }
-            },
-            createdBy: {
-              select: {
-                id: true,
-                name: true,
-                profilePictureUrl: true
-              }
-            },
-            createdOn: true
-          }
-        }
-      },
+      include: InclusionQuery.Secret,
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       }
@@ -1073,87 +990,21 @@ export class SecretService {
       `Fetched ${secrets.length} secrets of project ${projectSlug}`
     )
 
-    const secretsWithEnvironmentalValues = new Set<{
-      secret: Partial<Secret>
-      values: {
-        environment: {
-          name: Environment['name']
-          id: Environment['id']
-          slug: Environment['slug']
-        }
-        value: SecretVersion['value']
-        version: SecretVersion['version']
-        createdBy: {
-          id: User['id']
-          name: User['name']
-          profilePictureUrl: User['profilePictureUrl']
-        }
-        createdOn: SecretVersion['createdOn']
-      }[]
-    }>()
+    const hydratedSecrets: HydratedSecret[] = []
 
     for (const secret of secrets) {
-      // Logic to update the map:
-      // 1. If the environment ID is not present in the key, insert the environment ID and the secret version
-      // 2. If the environment ID is already present, check if the existing secret version is lesser than the new secret version.
-      //    If it is, update the secret version
-      const envIdToSecretVersionMap = new Map<
-        Environment['id'],
-        Partial<SecretVersion> & {
-          environment: {
-            id: Environment['id']
-            slug: Environment['slug']
-            name: Environment['name']
-          }
-          createdBy: {
-            id: User['id']
-            name: User['name']
-            profilePictureUrl: User['profilePictureUrl']
-          }
-        }
-      >()
-
-      for (const secretVersion of secret.versions) {
-        const environmentId = secretVersion.environment.id
-        const existingSecretVersion = envIdToSecretVersionMap.get(environmentId)
-
-        if (!existingSecretVersion) {
-          envIdToSecretVersionMap.set(environmentId, secretVersion)
-        } else {
-          if (existingSecretVersion.version < secretVersion.version) {
-            envIdToSecretVersionMap.set(environmentId, secretVersion)
-          }
-        }
-      }
-
-      delete secret.versions
-
-      // Add the secret to the map
-      secretsWithEnvironmentalValues.add({
+      const hydratedSecret = await this.hydrationService.hydrateSecret({
+        user,
         secret,
-        values: await Promise.all(
-          Array.from(envIdToSecretVersionMap.values()).map(
-            async (secretVersion) => ({
-              environment: {
-                id: secretVersion.environment.id,
-                name: secretVersion.environment.name,
-                slug: secretVersion.environment.slug
-              },
-              value: secretVersion.value,
-              version: secretVersion.version,
-              createdBy: {
-                id: secretVersion.createdBy.id,
-                name: secretVersion.createdBy.name,
-                profilePictureUrl: secretVersion.createdBy.profilePictureUrl
-              },
-              createdOn: secretVersion.createdOn
-            })
-          )
-        )
+        authorizationService: this.authorizationService
       })
-    }
 
-    const items = Array.from(secretsWithEnvironmentalValues.values())
+      delete secret.project
+      hydratedSecrets.push(hydratedSecret)
+    }
+    this.logger.log(
+      `Hydrated ${hydratedSecrets.length} secrets of project ${projectSlug}`
+    )
 
     // Calculate pagination metadata
     const totalCount = await this.prisma.secret.count({
@@ -1173,7 +1024,7 @@ export class SecretService {
       search
     })
 
-    return { items, metadata }
+    return { items: hydratedSecrets, metadata }
   }
 
   /**
@@ -1189,12 +1040,16 @@ export class SecretService {
     user: AuthenticatedUser,
     projectSlug: Project['slug'],
     environmentSlug: Environment['slug']
-  ) {
+  ): Promise<Configuration[]> {
+    this.logger.log(
+      `User ${user.id} attempted to get all secrets of project ${projectSlug} and environment ${environmentSlug}`
+    )
+
     // Fetch the project
     const project =
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: projectSlug },
+        slug: projectSlug,
         authorities: [Authority.READ_SECRET]
       })
     const projectId = project.id
@@ -1203,11 +1058,19 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.READ_ENVIRONMENT]
       })
     const environmentId = environment.id
 
+    this.logger.log(
+      `User ${user.id} has access to project ${projectSlug} and environment ${environmentSlug}`
+    )
+
+    // Fetch the secrets
+    this.logger.log(
+      `Fetching secrets of project ${projectSlug} and environment ${environmentSlug}`
+    )
     const secrets = await this.prisma.secret.findMany({
       where: {
         projectId,
@@ -1242,6 +1105,7 @@ export class SecretService {
             environment: {
               select: {
                 id: true,
+                name: true,
                 slug: true
               }
             }
@@ -1249,8 +1113,11 @@ export class SecretService {
         }
       }
     })
+    this.logger.log(
+      `Fetched ${secrets.length} secrets of project ${projectSlug} and environment ${environmentSlug}`
+    )
 
-    const response: ChangeNotification[] = []
+    const response: Configuration[] = []
 
     for (const secret of secrets) {
       response.push({
@@ -1280,9 +1147,7 @@ export class SecretService {
           lt: currentTime
         }
       },
-      include: {
-        project: true
-      }
+      include: InclusionQuery.Secret
     })
     this.logger.log(
       `Fetched ${secrets.length} secrets that have reached their rotation time`
@@ -1294,7 +1159,7 @@ export class SecretService {
     this.logger.log('Secrets rotation complete')
   }
 
-  private async rotateSecret(secret: SecretWithProject): Promise<void> {
+  private async rotateSecret(secret: RawSecret): Promise<void> {
     const op = []
 
     // Update the secret
@@ -1409,30 +1274,30 @@ export class SecretService {
    */
   async secretExists(
     secretName: Secret['name'] | null | undefined,
-    project: Project
+    projectId: Project['id']
   ) {
     if (!secretName) return
 
     this.logger.log(
-      `Checking if secret ${secretName} exists in project ${project.slug}`
+      `Checking if secret ${secretName} exists in project ${projectId}`
     )
 
     if (
       (await this.prisma.secret.findFirst({
         where: {
           name: secretName,
-          projectId: project.id
+          projectId
         }
       })) !== null
     ) {
-      const errorMessage = `Secret ${secretName} already exists in project ${project.slug}`
+      const errorMessage = `Secret ${secretName} already exists in project ${projectId}`
       this.logger.error(errorMessage)
       throw new ConflictException(
         constructErrorBody('Secret already exists', errorMessage)
       )
     }
     this.logger.log(
-      `Secret ${secretName} does not exist in project ${project.slug}`
+      `Secret ${secretName} does not exist in project ${projectId}`
     )
   }
 }

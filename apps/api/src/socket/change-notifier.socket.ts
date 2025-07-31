@@ -132,7 +132,7 @@ export default class ChangeNotifier
       this.logger.log('Checking user access to workspace')
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: data.workspaceSlug },
+        slug: data.workspaceSlug,
         authorities: [
           Authority.READ_WORKSPACE,
           Authority.READ_VARIABLE,
@@ -144,7 +144,7 @@ export default class ChangeNotifier
       this.logger.log('Checking user access to project')
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: data.projectSlug },
+        slug: data.projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -153,7 +153,7 @@ export default class ChangeNotifier
       const environment =
         await this.authorizationService.authorizeUserAccessToEnvironment({
           user,
-          entity: { slug: data.environmentSlug },
+          slug: data.environmentSlug,
           authorities: [Authority.READ_ENVIRONMENT]
         })
 

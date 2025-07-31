@@ -1,6 +1,9 @@
-import type { Environment, GetAllVariablesOfProjectResponse } from '@keyshade/schema'
+import type {
+  Environment,
+  GetAllVariablesOfProjectResponse
+} from '@keyshade/schema'
 import { useSetAtom } from 'jotai'
-import { useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { NoteIconSVG } from '@public/svg/secret'
 import { TrashWhiteSVG } from '@public/svg/shared'
@@ -62,14 +65,18 @@ export default function VariableCard({
   )
   const setIsVariableRevisionsOpen = useSetAtom(variableRevisionsOpenAtom)
 
-  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
-      new Set()
-    )
+  const isAuthorizedToEditVariable = variableData.entitlements.canUpdate
+  const isAuthorizedToDeleteVariable = variableData.entitlements.canDelete
 
-  const { variable, values } = variableData
+  const { versions } = variableData
+
+  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+    new Set()
+  )
+
   const handleCopyToClipboard = () => {
     copyToClipboard(
-      variable.slug,
+      variableData.slug,
       'You copied the slug successfully.',
       'Failed to copy the slug.',
       'You successfully copied the slug.'
@@ -98,93 +105,97 @@ export default function VariableCard({
   }
 
   useEffect(() => {
-      const fetchDisabled = async () => {
-        try {
-          const res =
-            await ControllerInstance.getInstance().variableController.getAllDisabledEnvironmentsOfVariable(
-              { variableSlug: variable.slug }
-            )
-  
-          if (res.success && res.data) {
-            setDisabledEnvironments(new Set(res.data))
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console -- console.error is used for debugging
-          console.error('Failed to load disabled environments', error)
-        }
-      }
-  
-      fetchDisabled()
-    }, [variable.slug])
+    const fetchDisabled = async () => {
+      try {
+        const res =
+          await ControllerInstance.getInstance().variableController.getAllDisabledEnvironmentsOfVariable(
+            { variableSlug: variableData.slug }
+          )
 
-   const handleToggleDisableVariableClick = async (
-      environmentSlug: Environment['slug'],
-      environmentId: Environment['id'],
-      checked: boolean
-    ) => {
-      const controller = ControllerInstance.getInstance().variableController
-  
-      if (checked) {
-        // Enable variable
-        await controller.enableVariable({
-          variableSlug: variable.slug,
-          environmentSlug
-        })
-        setDisabledEnvironments((prev) => {
-          const next = new Set(prev)
-          next.delete(environmentId) // Update local state
-          return next
-        })
-      } else {
-        // Disable variable
-        await controller.disableVariable({
-          variableSlug: variable.slug,
-          environmentSlug
-        })
-        setDisabledEnvironments((prev) => {
-          const next = new Set(prev)
-          next.add(environmentId) // Update local state
-          return next
-        })
+        if (res.success && res.data) {
+          setDisabledEnvironments(new Set(res.data))
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Failed to load disabled environments', error)
       }
     }
-  
+
+    fetchDisabled()
+  }, [variableData.slug])
+
+  const handleToggleDisableVariableClick = async (
+    environmentSlug: Environment['slug'],
+    environmentId: Environment['id'],
+    checked: boolean
+  ) => {
+    const controller = ControllerInstance.getInstance().variableController
+
+    if (checked) {
+      // Enable variable
+      await controller.enableVariable({
+        variableSlug: variableData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.delete(environmentId) // Update local state
+        return next
+      })
+    } else {
+      // Disable variable
+      await controller.disableVariable({
+        variableSlug: variableData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.add(environmentId) // Update local state
+        return next
+      })
+    }
+  }
+
   return (
-    <ContextMenu key={variable.id}>
+    <ContextMenu key={variableData.id}>
       <AccordionItem
         className={`rounded-xl bg-white/5 px-5 ${className}`}
-        id={`variable-${variable.slug}`}
-        key={variable.id}
-        value={variable.id}
+        id={`variable-${variableData.slug}`}
+        key={variableData.id}
+        value={variableData.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
-            className="hover:no-underline overflow-hidden"
+            className="overflow-hidden hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(variable.updatedAt).toNow(true)} ago by{' '}
+                {dayjs(variableData.updatedAt).toNow(true)} ago by{' '}
                 <div className="flex items-center gap-x-2">
                   <span className="text-white">
-                    {variable.lastUpdatedBy.name}
+                    {variableData.lastUpdatedBy.name}
                   </span>
                   <AvatarComponent
-                    name={variable.lastUpdatedBy.name}
-                    profilePictureUrl={variable.lastUpdatedBy.profilePictureUrl}
+                    name={variableData.lastUpdatedBy.name}
+                    profilePictureUrl={
+                      variableData.lastUpdatedBy.profilePictureUrl
+                    }
                   />
                 </div>
               </div>
             }
           >
-            <div className="flex flex-1 gap-x-5 overflow-hidden mr-5">
-              <div className="flex items-center gap-x-4 truncate">{variable.name}</div>
-              {variable.note ? (
+            <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
+              <div className="flex items-center gap-x-4 truncate">
+                {variableData.name}
+              </div>
+              {variableData.note ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                      <p>{variable.note}</p>
+                      <p>{variableData.note}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -193,7 +204,7 @@ export default function VariableCard({
           </AccordionTrigger>
         </ContextMenuTrigger>
         <AccordionContent>
-          {values.length > 0 ? (
+          {versions.length > 0 ? (
             <Table className="h-full w-full">
               <TableHeader className="h-[3.125rem] w-full ">
                 <TableRow className="h-full w-full bg-white/10 ">
@@ -210,7 +221,7 @@ export default function VariableCard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {values.map((value) => {
+                {versions.map((value) => {
                   const isDisabled = disabledEnvironments.has(
                     value.environment.id
                   )
@@ -231,15 +242,15 @@ export default function VariableCard({
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
                           <Switch
-                              checked={!isDisabled}
-                              onCheckedChange={(checked) => {
-                                handleToggleDisableVariableClick(
-                                  value.environment.slug,
-                                  value.environment.id,
-                                  checked
-                                )
-                              }}
-                            />
+                            checked={!isDisabled}
+                            onCheckedChange={(checked) => {
+                              handleToggleDisableVariableClick(
+                                value.environment.slug,
+                                value.environment.id,
+                                checked
+                              )
+                            }}
+                          />
                           <button
                             onClick={() =>
                               handleDeleteEnvironmentValueOfVariableClick(
@@ -280,12 +291,14 @@ export default function VariableCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!isAuthorizedToEditVariable}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!isAuthorizedToDeleteVariable}
           onSelect={handleDeleteClick}
         >
           Delete

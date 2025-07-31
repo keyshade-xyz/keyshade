@@ -7,10 +7,10 @@ import {
 } from '@prisma/client'
 import {
   EnvironmentSupportType,
+  HydratedIntegration,
   IntegrationEventData,
   IntegrationMetadata,
   IntegrationRunData,
-  IntegrationWithEnvironments,
   IntegrationWithEnvironmentsAndMetadata
 } from '../integration.types'
 import {
@@ -27,7 +27,10 @@ import { Project } from '@keyshade/schema'
  */
 export abstract class BaseIntegration {
   protected readonly logger = new Logger(BaseIntegration.name)
-  protected integration: IntegrationWithEnvironments | null = null
+  protected integration:
+    | HydratedIntegration
+    | Omit<HydratedIntegration, 'entitlements'>
+    | null = null
 
   constructor(
     private readonly integrationType: IntegrationType,
@@ -115,7 +118,7 @@ export abstract class BaseIntegration {
   }
 
   public setIntegration<T extends IntegrationMetadata>(
-    integration: IntegrationWithEnvironments
+    integration: HydratedIntegration | Omit<HydratedIntegration, 'entitlements'>
   ): void {
     this.integration = integration
 

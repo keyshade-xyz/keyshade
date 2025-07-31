@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
-import ErrorCard from '../shared/error-card'
 import { cn } from '@/lib/utils'
 
 interface InfiniteScrollListResponse<T> {
@@ -11,7 +10,6 @@ interface InfiniteScrollListResponse<T> {
   }
   error?: { message: string }
 }
-type ErrorMessage = { header: string; body: string } | null
 
 interface InfiniteScrollListProps<T> {
   itemKey: (item: T) => string | number
@@ -37,7 +35,6 @@ export function InfiniteScrollList<T>({
 }: InfiniteScrollListProps<T>) {
   const [items, setItems] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage>(null)
 
   const pageRef = useRef<number>(0)
   const hasMoreRef = useRef<boolean>(true)
@@ -62,9 +59,6 @@ export function InfiniteScrollList<T>({
         limit: itemsPerPage
       })
       if (!success && err) {
-        const errorMsg = err.message
-        const parsedError = JSON.parse(errorMsg) as ErrorMessage
-        setErrorMessage(parsedError)
         return
       }
       const fetched = data.items
@@ -82,7 +76,6 @@ export function InfiniteScrollList<T>({
 
         return [...prev, ...newItems]
       })
-      setErrorMessage(null)
     } catch (e) {
       hasMoreRef.current = false
     } finally {
@@ -93,7 +86,6 @@ export function InfiniteScrollList<T>({
 
   useEffect(() => {
     setItems([])
-    setErrorMessage(null)
     pageRef.current = 0
     hasMoreRef.current = true
     loadingRef.current = false
@@ -136,11 +128,6 @@ export function InfiniteScrollList<T>({
       <div className="flex justify-center p-4">
         <Loader2 className="h-5 w-5 animate-spin text-white/70" />
       </div>
-    )
-  }
-  if (errorMessage && items.length === 0) {
-    return (
-      <ErrorCard description={errorMessage.body} header={errorMessage.header} />
     )
   }
   if (items.length === 0) {

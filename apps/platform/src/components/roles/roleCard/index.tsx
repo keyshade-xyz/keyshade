@@ -71,6 +71,9 @@ export default function RoleCard({
   const setIsDeleteRoleOpen = useSetAtom(deleteRoleOpenAtom)
   const setIsEditRoleOpen = useSetAtom(editRoleOpenAtom)
 
+  const isAuthorisedToEditRole = role.entitlements.canUpdate
+  const isAuthorisedToDeleteRole = role.entitlements.canDelete
+
   const handleDeleteRole = useCallback(() => {
     setSelectedRole(role)
     setIsDeleteRoleOpen(true)
@@ -107,7 +110,7 @@ export default function RoleCard({
         ) : null}
       </TableCell>
       <TableCell className="h-full">
-        <div className="flex h-full mt-1 items-start flex-wrap">
+        <div className="mt-1 flex h-full flex-wrap items-start">
           {role.members.map((member) => (
             <TooltipProvider key={member.email}>
               <Tooltip>
@@ -193,11 +196,13 @@ export default function RoleCard({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="flex justify-end gap-x-4 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
+      <TableCell className="flex justify-end gap-0.5 opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                className="
+                hover:bg-white/5 hover:text-white "
                 onClick={() =>
                   copyToClipboard(
                     role.slug,
@@ -205,10 +210,10 @@ export default function RoleCard({
                     'Failed to copy slug'
                   )
                 }
-                type="button"
+                variant="ghost"
               >
                 <Copy size={20} />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent
               className="rounded-[6px] border-none bg-zinc-700 p-3 text-sm text-white"
@@ -219,20 +224,27 @@ export default function RoleCard({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <button onClick={handleEditRole} type="button">
+        <Button
+          className="
+                hover:bg-white/5 hover:text-white "
+          disabled={!isAuthorisedToEditRole}
+          onClick={handleEditRole}
+          variant="ghost"
+        >
           <Pen size={20} />
-        </button>
+        </Button>
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                disabled={isAdminRole}
+              <Button
+                className="hover:bg-white/5 hover:text-white"
+                disabled={isAdminRole || !isAuthorisedToDeleteRole}
                 onClick={handleDeleteRole}
-                type="button"
+                variant="ghost"
               >
                 <TrashWhiteSVG />
-              </button>
+              </Button>
             </TooltipTrigger>
             {isAdminRole ? (
               <TooltipContent

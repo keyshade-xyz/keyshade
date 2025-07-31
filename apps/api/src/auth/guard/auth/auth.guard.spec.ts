@@ -2,6 +2,6 @@ import { AuthGuard } from './auth.guard'
 
 describe('AuthGuard', () => {
   it('should be defined', () => {
-    expect(new AuthGuard(null, null, null, null, null)).toBeDefined()
+    expect(new AuthGuard(null, null, null, null, null, null)).toBeDefined()
   })
 })

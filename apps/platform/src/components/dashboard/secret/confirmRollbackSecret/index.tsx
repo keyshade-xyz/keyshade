@@ -42,8 +42,7 @@ export default function ConfirmRollbackSecret() {
     ControllerInstance.getInstance().secretController.rollbackSecret({
       environmentSlug: selectedSecretEnvironment!,
       version: selectedSecretRollbackVersion!,
-      secretSlug: selectedSecret!.secret.slug,
-      decryptValue: true
+      secretSlug: selectedSecret!.slug
     })
   )
 
@@ -98,8 +97,8 @@ export default function ConfirmRollbackSecret() {
 
           setSecrets((prev) =>
             prev.map((s) => {
-              if (s.secret.slug === selectedSecret.secret.slug) {
-                s.values = s.values.map((v) => {
+              if (s.slug === selectedSecret.slug) {
+                s.versions = s.versions.map((v) => {
                   if (v.environment.slug === selectedSecretEnvironment) {
                     return data.currentRevision
                   }

@@ -68,6 +68,8 @@ export default function CreateRoleDialog() {
     useState<ProjectEnvironmentComboType>({})
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const isAuthorizedToCreateRoles =
+    currentWorkspace?.entitlements.canCreateRoles
   const [createRoleData, setCreateRoleData] = useState({
     name: '',
     description: '',
@@ -153,7 +155,7 @@ export default function CreateRoleDialog() {
       open={isCreateRolesOpen}
     >
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={!isAuthorizedToCreateRoles}>
           <AddSVG /> Add Role
         </Button>
       </DialogTrigger>

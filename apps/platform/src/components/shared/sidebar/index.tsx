@@ -12,43 +12,44 @@ import {
 import SidebarTab from './sidebarTab'
 import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
-import { selectedWorkspaceAtom } from '@/store'
+import { selectedWorkspaceAtom, selectedProjectAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 import { TIRE_PLAN, VERSION_BADGE } from '@/constants/sidebar'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const sidebarTabData = [
     {
       name: 'Dashboard',
       icon: <DashboardSVG />,
       link: '/',
-      matchTo: '/'
+      matchTo: ['/', `/${selectedWorkspace?.slug}/${selectedProject?.slug}`]
     },
     {
       name: 'Members',
       icon: <TeamSVG />,
       link: '/members?tab=joined',
-      matchTo: '/members?tab=joined'
+      matchTo: ['/members']
     },
     {
       name: 'Roles',
       icon: <RolesSVG />,
       link: '/roles',
-      matchTo: '/roles'
+      matchTo: ['/roles']
     },
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
       link: '/integrations?tab=overview',
-      matchTo: '/integrations?tab=overview'
+      matchTo: ['/integrations']
     },
     {
       name: 'Settings',
       icon: <SettingsSVG />,
-      link: `/${selectedWorkspace?.slug}`,
-      matchTo: `/${selectedWorkspace?.slug}`
+      link: `/${selectedWorkspace?.slug}/settings`,
+      matchTo: [`/${selectedWorkspace?.slug}/settings`]
     }
   ]
 

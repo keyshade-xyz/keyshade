@@ -28,9 +28,8 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
   const { isExportConfigurationDialogOpen, handleSheetChange } =
     useExportProjectDialog(resetForm, selectedProject)
 
-  const projectSlug = selectedProject?.slug
   const { handleExport, isLoading } = useExportConfigurations(
-    projectSlug ?? '',
+    selectedProject?.slug ?? '',
     formData,
     validateForm
   )
@@ -73,7 +72,9 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
             />
 
             <Visible
-              if={!selectedProject.storePrivateKey && !browserProjectPrivateKey}
+              if={
+                !selectedProject.storePrivateKey && !browserProjectPrivateKey
+              }
             >
               <ExportProjectPrivateKeyInput
                 onChange={(value: string) =>

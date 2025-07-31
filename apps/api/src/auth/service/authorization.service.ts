@@ -1,16 +1,17 @@
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common'
 import { AuthorityCheckerService } from './authority-checker.service'
-import { ProjectWithSecrets } from '@/project/project.types'
-import { EnvironmentWithProject } from '@/environment/environment.types'
-import { VariableWithProjectAndVersion } from '@/variable/variable.types'
-import { SecretWithProjectAndVersion } from '@/secret/secret.types'
-import { IntegrationWithLastUpdatedByAndReferences } from '@/integration/integration.types'
+import { HydratedProject } from '@/project/project.types'
+import { HydratedEnvironment } from '@/environment/environment.types'
+import { HydratedIntegration } from '@/integration/integration.types'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Workspace } from '@prisma/client'
 import { PrismaService } from '@/prisma/prisma.service'
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { AuthorizationParams } from '../auth.types'
-import { WorkspaceWithLastUpdatedByAndOwner } from '@/workspace/workspace.types'
+import { HydratedWorkspaceRole } from '@/workspace-role/workspace-role.types'
+import { HydratedVariable } from '@/variable/variable.types'
+import { HydratedSecret } from '@/secret/secret.types'
+import { HydratedWorkspace } from '@/workspace/workspace.types'
 
 @Injectable()
 export class AuthorizationService {
@@ -32,9 +33,12 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToWorkspace(
     params: AuthorizationParams
-  ): Promise<WorkspaceWithLastUpdatedByAndOwner> {
+  ): Promise<HydratedWorkspace> {
     const workspace =
-      await this.authorityCheckerService.checkAuthorityOverWorkspace(params)
+      await this.authorityCheckerService.checkAuthorityOverWorkspace(
+        params,
+        this
+      )
 
     this.checkUserHasAccessToWorkspace(params.user, workspace)
 
@@ -52,9 +56,9 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToProject(
     params: AuthorizationParams
-  ): Promise<ProjectWithSecrets> {
+  ): Promise<HydratedProject> {
     const project =
-      await this.authorityCheckerService.checkAuthorityOverProject(params)
+      await this.authorityCheckerService.checkAuthorityOverProject(params, this)
 
     const workspace = await this.getWorkspace(project.workspaceId)
 
@@ -74,7 +78,7 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToEnvironment(
     params: AuthorizationParams
-  ): Promise<EnvironmentWithProject> {
+  ): Promise<HydratedEnvironment> {
     const environment =
       await this.authorityCheckerService.checkAuthorityOverEnvironment(params)
 
@@ -96,9 +100,12 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToVariable(
     params: AuthorizationParams
-  ): Promise<VariableWithProjectAndVersion> {
+  ): Promise<HydratedVariable> {
     const variable =
-      await this.authorityCheckerService.checkAuthorityOverVariable(params)
+      await this.authorityCheckerService.checkAuthorityOverVariable(
+        params,
+        this
+      )
 
     const workspace = await this.getWorkspace(variable.project.workspaceId)
 
@@ -118,9 +125,11 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToSecret(
     params: AuthorizationParams
-  ): Promise<SecretWithProjectAndVersion> {
-    const secret =
-      await this.authorityCheckerService.checkAuthorityOverSecret(params)
+  ): Promise<HydratedSecret> {
+    const secret = await this.authorityCheckerService.checkAuthorityOverSecret(
+      params,
+      this
+    )
 
     const workspace = await this.getWorkspace(secret.project.workspaceId)
 
@@ -140,13 +149,35 @@ export class AuthorizationService {
    */
   public async authorizeUserAccessToIntegration(
     params: AuthorizationParams
-  ): Promise<IntegrationWithLastUpdatedByAndReferences> {
+  ): Promise<HydratedIntegration> {
     const integration =
       await this.authorityCheckerService.checkAuthorityOverIntegration(params)
 
     this.checkUserHasAccessToWorkspace(params.user, integration.workspace)
+    delete integration.workspace
 
     return integration
+  }
+
+  /**
+   * Checks if the user is authorized to access the given workspace role.
+   * @param params The authorization parameters
+   * @returns The workspace role if the user is authorized to access it
+   * @throws InternalServerErrorException if there's an error when communicating with the database
+   * @throws NotFoundException if the workspace role is not found
+   * @throws UnauthorizedException if the user does not have the required authorities
+   * @throws ForbiddenException if the user is not authorized to access the workspace role
+   */
+  public async authorizeUserAccessToWorkspaceRole(
+    params: AuthorizationParams
+  ): Promise<HydratedWorkspaceRole> {
+    const workspaceRole =
+      await this.authorityCheckerService.checkAuthorityOverWorkspaceRole(params)
+
+    this.checkUserHasAccessToWorkspace(params.user, workspaceRole.workspace)
+    delete workspaceRole.workspace
+
+    return workspaceRole
   }
 
   /**

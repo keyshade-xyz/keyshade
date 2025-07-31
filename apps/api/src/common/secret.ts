@@ -1,20 +1,3 @@
-import { SecretWithValues } from '@/secret/secret.types'
-
-export async function getSecretWithValues(
-  secretWithVersion: SecretWithValues['secret'] & {
-    versions: SecretWithValues['values']
-  }
-): Promise<SecretWithValues> {
-  const values = secretWithVersion.versions
-
-  delete secretWithVersion.versions
-  const secret = secretWithVersion
-  return {
-    secret,
-    values
-  }
-}
-
 export function generateSecretValue(): string {
   const length = 20
   const digits = '0123456789'

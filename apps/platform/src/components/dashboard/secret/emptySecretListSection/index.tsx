@@ -1,10 +1,13 @@
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { SecretSVG } from '@public/svg/dashboard'
 import { Button } from '@/components/ui/button'
-import { createSecretOpenAtom } from '@/store'
+import { createSecretOpenAtom, selectedProjectAtom } from '@/store'
 
 export default function EmptySecretListContent(): React.JSX.Element {
   const setIsCreateSecretOpen = useSetAtom(createSecretOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
+  const isAuthorizedToCreateSecrets =
+    selectedProject?.entitlements.canCreateSecrets
 
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
@@ -21,6 +24,7 @@ export default function EmptySecretListContent(): React.JSX.Element {
 
       <Button
         className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+        disabled={!isAuthorizedToCreateSecrets}
         onClick={() => setIsCreateSecretOpen(true)}
       >
         Create secret

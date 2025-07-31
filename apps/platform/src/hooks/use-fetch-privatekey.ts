@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import type { ProjectWithTierLimitAndCount } from '@keyshade/schema'
+import type { GetAllProjectsResponse } from '@keyshade/schema'
 import {
   selectedProjectPrivateKeyAtom,
   localProjectPrivateKeyAtom,
@@ -8,11 +8,13 @@ import {
 } from '@/store'
 
 export interface UseProjectPrivateKeyResult {
-  projectPrivateKey: ProjectWithTierLimitAndCount['privateKey'] | null
+  projectPrivateKey:
+    | GetAllProjectsResponse['items'][number]['privateKey']
+    | null
   loading: boolean
 }
 type PartialProject = Pick<
-  ProjectWithTierLimitAndCount,
+  GetAllProjectsResponse['items'][number],
   'slug' | 'storePrivateKey' | 'privateKey'
 >
 

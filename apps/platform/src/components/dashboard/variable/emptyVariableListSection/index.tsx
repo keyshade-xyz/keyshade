@@ -1,10 +1,13 @@
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { VariableSVG } from '@public/svg/dashboard'
 import { Button } from '@/components/ui/button'
-import { createVariableOpenAtom } from '@/store'
+import { createVariableOpenAtom, selectedProjectAtom } from '@/store'
 
 export default function EmptyVariableListContent(): React.JSX.Element {
   const setIsCreateVariableOpen = useSetAtom(createVariableOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
+  const isAuthorizedToCreateVariables =
+    selectedProject?.entitlements.canCreateVariables
 
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
@@ -21,6 +24,7 @@ export default function EmptyVariableListContent(): React.JSX.Element {
 
       <Button
         className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+        disabled={!isAuthorizedToCreateVariables}
         onClick={() => setIsCreateVariableOpen(true)}
       >
         Create variable

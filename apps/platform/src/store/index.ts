@@ -5,17 +5,16 @@ import type {
   Environment,
   EventTypeEnum,
   GetAllEnvironmentsOfProjectResponse,
+  GetAllProjectsResponse,
+  GetAllWorkspacesOfUserResponse,
   GetMembersResponse,
   Integration,
-  Project,
-  ProjectWithTierLimitAndCount,
   Secret,
   SecretVersion,
   User,
   Variable,
   VariableVersion,
-  WorkspaceRole,
-  WorkspaceWithTierLimitAndProjectCount
+  WorkspaceRole
 } from '@keyshade/schema'
 import type { VercelEnvironmentMapping } from '@keyshade/common'
 
@@ -50,15 +49,17 @@ export const globalSearchDataAtom = atom<{
   projects: []
 })
 
+export const allWorkspacesAtom = atom<GetAllProjectsResponse['items']>([])
+
 type PartialProject = Pick<
-  ProjectWithTierLimitAndCount,
+  GetAllProjectsResponse['items'][number],
   'slug' | 'storePrivateKey' | 'privateKey'
 >
 
 export const integrationFormAtom = atom<{
   name: string
   selectedEvents: Set<EventTypeEnum>
-  selectedProjectSlug: Project['slug'] | null
+  selectedProjectSlug: GetAllProjectsResponse['items'][number]['slug'] | null
   selectedProject: PartialProject | null
   selectedEnvironments: Environment['slug'][]
   metadata: Record<string, unknown>
@@ -88,16 +89,14 @@ export const resetIntegrationFormAtom = atom(null, (get, set) => {
   })
 })
 
-export const allWorkspacesAtom = atom<WorkspaceWithTierLimitAndProjectCount[]>(
-  []
-)
-export const selectedWorkspaceAtom =
-  atom<WorkspaceWithTierLimitAndProjectCount | null>(null)
+export const selectedWorkspaceAtom = atom<
+  GetAllWorkspacesOfUserResponse['items'][number] | null
+>(null)
 
-export const selectedProjectAtom = atom<ProjectWithTierLimitAndCount | null>(
-  null
-)
-export const projectsOfWorkspaceAtom = atom<ProjectWithTierLimitAndCount[]>([])
+export const selectedProjectAtom = atom<
+  GetAllProjectsResponse['items'][number] | null
+>(null)
+export const projectsOfWorkspaceAtom = atom<GetAllProjectsResponse[]>([])
 
 export const membersOfWorkspaceAtom = atom<GetMembersResponse['items']>([])
 export const selectedMemberAtom = atom<
@@ -157,7 +156,7 @@ export const selectedProjectPrivateKeyAtom = atom<string | null>(null)
 export const localProjectPrivateKeyAtom = atom<
   {
     slug: Environment['slug']
-    key: ProjectWithTierLimitAndCount['privateKey']
+    key: GetAllProjectsResponse['items'][number]['privateKey']
   }[]
 >([])
 export const privateKeyStorageTypeAtom = atom<'IN_ATOM' | 'IN_DB' | 'NONE'>(

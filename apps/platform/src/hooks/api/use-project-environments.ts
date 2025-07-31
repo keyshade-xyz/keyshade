@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import type {
   GetAllEnvironmentsOfProjectResponse,
-  ProjectWithTierLimitAndCount
+  GetAllProjectsResponse
 } from '@keyshade/schema'
 import { environmentsOfProjectAtom, selectedProjectAtom } from '@/store'
 import { useHttp } from '@/hooks/use-http'
@@ -16,7 +16,7 @@ interface UseProjectEnvironmentsReturn {
   /**
    * Currently selected project.
    */
-  selectedProject: ProjectWithTierLimitAndCount | null
+  selectedProject: GetAllProjectsResponse['items'][number] | null
 }
 
 /**
@@ -31,7 +31,7 @@ export const useProjectEnvironments = (): UseProjectEnvironmentsReturn => {
   const fetchEnvironments = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
-        projectSlug: selectedProject!.slug
+        projectSlug: selectedProject?.slug ?? ''
       }
     )
   )

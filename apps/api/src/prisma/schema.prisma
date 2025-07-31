@@ -220,17 +220,18 @@ model LoginSession {
 }
 
 model User {
-  id                   String        @id @default(cuid())
-  email                String        @unique
-  name                 String?
-  profilePictureUrl    String?
-  isActive             Boolean       @default(true)
-  isOnboardingFinished Boolean       @default(false)
-  isAdmin              Boolean       @default(false)
-  authProvider         AuthProvider?
-  subscription         Subscription?
-  joinedOn             DateTime      @default(now())
-  referralCode         String        @unique
+  id                         String        @id @default(cuid())
+  email                      String        @unique
+  name                       String?
+  profilePictureUrl          String?
+  isActive                   Boolean       @default(true)
+  isOnboardingFinished       Boolean       @default(false)
+  isAdmin                    Boolean       @default(false)
+  authProvider               AuthProvider?
+  subscription               Subscription?
+  joinedOn                   DateTime      @default(now())
+  timesRemindedForOnboarding Int           @default(0) 
+  referralCode               String        @unique
   
   workspaceMembers  WorkspaceMember[]
   workspaces        Workspace[]
