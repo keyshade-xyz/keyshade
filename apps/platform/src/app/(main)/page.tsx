@@ -56,6 +56,7 @@ export default function Index(): React.JSX.Element {
   }
 
   return (
+
     <div className="flex flex-col gap-4">
       <PageTitle title={`${selectedWorkspace.name} | Dashboard`} />
       <div className="flex items-center justify-between">
