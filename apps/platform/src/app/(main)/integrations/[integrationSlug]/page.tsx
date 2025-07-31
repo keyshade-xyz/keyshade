@@ -1,6 +1,6 @@
 'use client'
 import { useAtom, useAtomValue } from 'jotai'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { PageTitle } from '@/components/common/page-title'
 import IntegrationLoader from '@/components/integrations/IntegrationLoader'
@@ -14,9 +14,12 @@ import ProjectEnvironmentList from '@/components/integrations/projectEnvironment
 import ResyncIntegration from '@/components/integrations/resyncIntegration'
 import EventSubscriptions from '@/components/integrations/eventSubcriptions'
 import IntegrationDetails from '@/components/integrations/IntegrationDetails'
+import ErrorCard from '@/components/shared/error-card'
+import Visible from '@/components/common/visible'
 
 function IntegrationDetailsPage() {
   const router = useRouter()
+  const { integrationSlug }: { integrationSlug: string } = useParams()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const currentWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -24,7 +27,7 @@ function IntegrationDetailsPage() {
     selectedIntegrationAtom
   )
 
-  const integrationSlug = selectedIntegration?.slug
+  const isAuthorizedToRead = currentWorkspace?.entitlements.canReadIntegrations
 
   const getIntegrationDetails = useHttp(async () => {
     if (!integrationSlug) {
@@ -49,21 +52,30 @@ function IntegrationDetailsPage() {
       router.push('/integrations?tab=all')
       return
     }
-
+    if (!isAuthorizedToRead) return
     setIsLoading(true)
     getIntegrationDetails()
       .then(({ data, success }) => {
         if (success && data) {
           setSelectedIntegration(data)
         } else {
-          router.push('/integrations')
+          router.push('/integrations?tab=all')
         }
       })
       .finally(() => {
         setIsLoading(false)
       })
-  }, [getIntegrationDetails, integrationSlug, router, setSelectedIntegration])
+  }, [
+    getIntegrationDetails,
+    integrationSlug,
+    router,
+    setSelectedIntegration,
+    isAuthorizedToRead
+  ])
 
+  if (!isAuthorizedToRead) {
+    return <ErrorCard tab="integrations" />
+  }
   if (isLoading || !selectedIntegration) {
     return <IntegrationLoader />
   }
@@ -82,12 +94,12 @@ function IntegrationDetailsPage() {
         <EventSubscriptions selectedIntegration={selectedIntegration} />
 
         {/* Project and Environment Info */}
-        {currentWorkspace ? (
+        <Visible if={Boolean(currentWorkspace)}>
           <ProjectEnvironmentList
             currentWorkspace={currentWorkspace}
             selectedIntegration={selectedIntegration}
           />
-        ) : null}
+        </Visible>
       </div>
 
       {/* Integration Trigger List Component */}

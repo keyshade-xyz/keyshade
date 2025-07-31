@@ -30,6 +30,8 @@ export const WorkspaceSchema = z.object({
     canCreateProjects: z.boolean(),
     canReadMembers: z.boolean(),
     canInviteMembers: z.boolean(),
+    canReadIntegrations: z.boolean(),
+    canCreateIntegrations: z.boolean(),
     canReadRoles: z.boolean(),
     canCreateRoles: z.boolean(),
     canUpdate: z.boolean(),

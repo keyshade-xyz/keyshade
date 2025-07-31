@@ -13,6 +13,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import CopyToClipboard from '@/components/common/copy-to-clipboard'
 import { formatText } from '@/lib/utils'
+import ErrorCard from '@/components/shared/error-card'
 
 function IntegrationListItemSkeleton(): React.JSX.Element {
   return (
@@ -32,6 +33,8 @@ function IntegrationList() {
   const [loading, setLoading] = useState<boolean>(true)
   const router = useRouter()
 
+  const isAuthorizedToReadIntegration =
+    selectedWorkspace?.entitlements.canReadIntegrations
   const MAX_INTEGRATION_NAME_LENGTH = 25
 
   const getAllIntegrations = useHttp(() =>
@@ -41,8 +44,19 @@ function IntegrationList() {
     )
   )
 
+  const handleClick = useCallback(
+    (integration: Integration) => {
+      setSelectedIntegration(integration)
+      if (selectedWorkspace?.slug && integration.slug) {
+        router.push(`/integrations/${integration.slug}`)
+      }
+    },
+    [router, setSelectedIntegration, selectedWorkspace]
+  )
+
   useEffect(() => {
-    if (selectedWorkspace?.slug) {
+    if (!isAuthorizedToReadIntegration) return
+    if (selectedWorkspace.slug) {
       getAllIntegrations()
         .then(({ data, success }) => {
           if (success && data) {
@@ -57,18 +71,14 @@ function IntegrationList() {
     selectedWorkspace,
     getAllIntegrations,
     selectedWorkspace?.slug,
-    setIntegrations
+    setIntegrations,
+    isAuthorizedToReadIntegration
   ])
 
-  const handleClick = useCallback(
-    (integration: Integration) => {
-      setSelectedIntegration(integration)
-      if (selectedWorkspace?.slug && integration.slug) {
-        router.push(`/${selectedWorkspace.slug}/integrations/${integration.slug}`)
-      }
-    },
-    [router, setSelectedIntegration, selectedWorkspace]
-  )
+  // Move conditional return AFTER all hooks
+  if (!isAuthorizedToReadIntegration) {
+    return <ErrorCard tab="integrations" />
+  }
 
   const hasIntegrations = integrations.length > 0
 

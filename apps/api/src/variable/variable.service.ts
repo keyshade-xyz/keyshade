@@ -663,7 +663,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -671,7 +671,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -718,7 +718,7 @@ export class VariableService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -726,7 +726,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.UPDATE_VARIABLE]
       })
 
@@ -774,7 +774,7 @@ export class VariableService {
     const variable =
       await this.authorizationService.authorizeUserAccessToVariable({
         user,
-        entity: { slug: variableSlug },
+        slug: variableSlug,
         authorities: [Authority.READ_VARIABLE]
       })
 

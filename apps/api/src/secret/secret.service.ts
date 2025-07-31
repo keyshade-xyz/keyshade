@@ -670,14 +670,14 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
 
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -724,14 +724,14 @@ export class SecretService {
     const environment =
       await this.authorizationService.authorizeUserAccessToEnvironment({
         user,
-        entity: { slug: environmentSlug },
+        slug: environmentSlug,
         authorities: [Authority.UPDATE_SECRET]
       })
 
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.UPDATE_SECRET]
     })
 
@@ -778,7 +778,7 @@ export class SecretService {
     // Fetch the secret
     const secret = await this.authorizationService.authorizeUserAccessToSecret({
       user,
-      entity: { slug: secretSlug },
+      slug: secretSlug,
       authorities: [Authority.READ_SECRET]
     })
 

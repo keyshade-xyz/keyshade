@@ -29,6 +29,10 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
     setIsDeleteIntegrationOpen(true)
   }, [setIsDeleteIntegrationOpen])
 
+  const lastUpdatedTime = formatDate(
+    selectedIntegration.updatedAt || selectedIntegration.createdAt
+  )
+
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
       <div className="mb-4 flex items-start justify-between">
@@ -80,12 +84,7 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
                   <span className="font-semibold text-white">
                     {selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                   </span>
-                </div>
-                <div className="text-white/80">
-                  {formatDate(
-                    selectedIntegration.updatedAt ||
-                      selectedIntegration.createdAt
-                  )}
+                  &nbsp;{lastUpdatedTime}
                 </div>
               </div>
             </div>

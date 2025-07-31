@@ -825,7 +825,7 @@ export class IntegrationService {
       const existing =
         await this.authorizationService.authorizeUserAccessToIntegration({
           user,
-          entity: { slug: integrationSlug },
+          slug: integrationSlug,
           authorities: [Authority.UPDATE_INTEGRATION]
         })
       integrationObject = IntegrationFactory.createIntegrationWithType(
