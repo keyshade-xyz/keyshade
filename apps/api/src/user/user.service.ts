@@ -25,6 +25,7 @@ import { CacheService } from '@/cache/cache.service'
 import { UserWithWorkspace } from './user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { OnboardingAnswersDto } from './dto/onboarding-answers/onboarding-answers'
+import { HydrationService } from '@/common/hydration.service'
 import dayjs from 'dayjs'
 
 @Injectable()
@@ -35,7 +36,8 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {}
 
   async onApplicationBootstrap() {
@@ -492,7 +494,8 @@ export class UserService {
     const createdUser = await createUser(
       { authProvider: AuthProvider.EMAIL_OTP, ...dto },
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
     this.log.log(`Created user with email ${createdUser.email}`)
 

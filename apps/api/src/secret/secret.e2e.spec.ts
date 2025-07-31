@@ -199,23 +199,21 @@ describe('Secret Controller Tests', () => {
       }
     })
 
-    secret1 = (
-      await secretService.createSecret(
-        user1,
-        {
-          name: 'Secret 1',
-          rotateAfter: '24',
-          note: 'Secret 1 note',
-          entries: [
-            {
-              environmentSlug: environment1.slug,
-              value: 'Secret 1 value'
-            }
-          ]
-        },
-        project1.slug
-      )
-    ).secret as Secret
+    secret1 = (await secretService.createSecret(
+      user1,
+      {
+        name: 'Secret 1',
+        rotateAfter: '24',
+        note: 'Secret 1 note',
+        entries: [
+          {
+            environmentSlug: environment1.slug,
+            value: 'Secret 1 value'
+          }
+        ]
+      },
+      project1.slug
+    )) as Secret
   })
 
   afterEach(async () => {
@@ -871,17 +869,15 @@ describe('Secret Controller Tests', () => {
     })
 
     it('should not create a secret version entity if value-environmentSlug is not provided during creation', async () => {
-      const secret = (
-        await secretService.createSecret(
-          user1,
-          {
-            name: 'Secret 4',
-            note: 'Secret 4 note',
-            rotateAfter: '24'
-          },
-          project1.slug
-        )
-      ).secret
+      const secret = (await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret 4',
+          note: 'Secret 4 note',
+          rotateAfter: '24'
+        },
+        project1.slug
+      )) as Secret
 
       const secretVersion = await prisma.secretVersion.findMany({
         where: {
@@ -1243,23 +1239,21 @@ describe('Secret Controller Tests', () => {
 
   describe('Rotate Secrets Tests', () => {
     it('should have not created a new secret version when there is no rotation defined', async () => {
-      const secretWithoutRotation = (
-        await secretService.createSecret(
-          user1,
-          {
-            name: 'Secret',
-            note: 'Secret note',
-            rotateAfter: 'never',
-            entries: [
-              {
-                environmentSlug: environment1.slug,
-                value: 'Secret value'
-              }
-            ]
-          },
-          project1.slug
-        )
-      ).secret as Secret
+      const secretWithoutRotation = (await secretService.createSecret(
+        user1,
+        {
+          name: 'Secret',
+          note: 'Secret note',
+          rotateAfter: 'never',
+          entries: [
+            {
+              environmentSlug: environment1.slug,
+              value: 'Secret value'
+            }
+          ]
+        },
+        project1.slug
+      )) as Secret
 
       await secretService.rotateSecrets()
 
