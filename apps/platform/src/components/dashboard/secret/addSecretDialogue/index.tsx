@@ -30,6 +30,9 @@ export default function AddSecretDialog() {
   const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
 
+  const isAuthorizedToCreateSecret =
+    selectedProject?.entitlements.canCreateSecrets
+
   const [requestData, setRequestData] = useState({
     name: '',
     note: ''
@@ -105,6 +108,7 @@ export default function AddSecretDialog() {
         <DialogTrigger asChild>
           <Button
             className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+            disabled={!isAuthorizedToCreateSecret}
             variant="outline"
           >
             <AddSVG /> Add Secret

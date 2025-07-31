@@ -17,23 +17,11 @@ import {
   GlobalSearchRequestSchema,
   GlobalSearchResponseSchema,
   GetWorkspaceInvitationsRequest,
-  GetWorkspaceInvitationsResponse,
-  WorkspaceWithProjectCountSchema,
-  WorkspaceWithTierLimitSchema,
-  WorkspaceWithTierLimitAndProjectCountSchema
+  GetWorkspaceInvitationsResponse
 } from '.'
 import { PageRequestSchema } from '..'
 
 export type Workspace = z.infer<typeof WorkspaceSchema>
-export type WorkspaceWithProjectCount = z.infer<
-  typeof WorkspaceWithProjectCountSchema
->
-export type WorkspaceWithTierLimit = z.infer<
-  typeof WorkspaceWithTierLimitSchema
->
-export type WorkspaceWithTierLimitAndProjectCount = z.infer<
-  typeof WorkspaceWithTierLimitAndProjectCountSchema
->
 
 export type CreateWorkspaceRequest = z.infer<
   typeof CreateWorkspaceRequestSchema

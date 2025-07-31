@@ -1,6 +1,6 @@
 {
   "name": "keyshade-xyz",
-  "version": "2.32.0-stage.3",
+  "version": "2.32.0-stage.5",
   "license": "MPL-2.0",
   "private": true,
   "engineStrict": false,
@@ -189,7 +189,7 @@
     "class-validator": "^0.14.1",
     "clsx": "^2.1.0",
     "conventional-changelog-conventionalcommits": "8.0.0",
-    "conventional-changelog-writer": "8.1.0",
+    "conventional-changelog-writer": "8.2.0",
     "framer-motion": "^11.2.9",
     "million": "^3.0.5",
     "moment": "^2.30.1",
