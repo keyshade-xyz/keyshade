@@ -28,14 +28,13 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
   const { isExportConfigurationDialogOpen, handleSheetChange } =
     useExportProjectDialog(resetForm, selectedProject)
 
-  const currentProject = selectedProject?.items[0]
   const { handleExport, isLoading } = useExportConfigurations(
-    currentProject?.slug ?? '',
+    selectedProject?.slug ?? '',
     formData,
     validateForm
   )
 
-  if (!currentProject) {
+  if (!selectedProject) {
     return null
   }
 
@@ -52,7 +51,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
 
           <DialogDescription className=" font-inter h-[1.25rem] w-full text-[0.875rem] font-normal text-[#D4D4D4]">
             Pick options and export selected configurations for project{' '}
-            <strong>{currentProject.name}</strong>
+            <strong>{selectedProject.name}</strong>
           </DialogDescription>
         </div>
 
@@ -73,7 +72,9 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
             />
 
             <Visible
-              if={!currentProject.storePrivateKey && !browserProjectPrivateKey}
+              if={
+                !selectedProject.storePrivateKey && !browserProjectPrivateKey
+              }
             >
               <ExportProjectPrivateKeyInput
                 onChange={(value: string) =>

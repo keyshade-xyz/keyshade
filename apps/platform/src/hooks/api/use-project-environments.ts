@@ -16,7 +16,7 @@ interface UseProjectEnvironmentsReturn {
   /**
    * Currently selected project.
    */
-  selectedProject: GetAllProjectsResponse | null
+  selectedProject: GetAllProjectsResponse['items'][number] | null
 }
 
 /**
@@ -31,7 +31,7 @@ export const useProjectEnvironments = (): UseProjectEnvironmentsReturn => {
   const fetchEnvironments = useHttp(() =>
     ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
       {
-        projectSlug: selectedProject!.items[0].slug
+        projectSlug: selectedProject?.slug ?? ''
       }
     )
   )
