@@ -1,3 +1,13 @@
+## [2.32.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.4...v2.32.0-stage.5) (2025-07-31)
+
+### 🚀 Features
+
+* RBAC ([#1073](https://github.com/keyshade-xyz/keyshade/issues/1073)) ([6d34710](https://github.com/keyshade-xyz/keyshade/commit/6d347106c9e5c5dd4a942bce54d5bf32be41e442))
+
+### 🔧 Miscellaneous Chores
+
+* Upgrade conventional-changelog-writer from 8.1.0 to 8.2.0 ([#1095](https://github.com/keyshade-xyz/keyshade/issues/1095)) ([7d092bf](https://github.com/keyshade-xyz/keyshade/commit/7d092bf1818978ecded4beed719c0831e106c531))
+
 ## [2.32.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.3...v2.32.0-stage.4) (2025-07-31)
 
 ### 🚀 Features
