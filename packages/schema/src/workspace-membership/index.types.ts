@@ -23,8 +23,11 @@ import {
   GetMembersRequestSchema,
   GetMembersResponseSchema,
   ResendInvitationRequestSchema,
-  ResendInvitationResponseSchema
+  ResendInvitationResponseSchema,
+  WorkspaceMemberSchema
 } from './'
+
+export type WorkspaceMember = z.infer<typeof WorkspaceMemberSchema>
 
 export type CreateWorkspaceMember = z.infer<typeof CreateWorkspaceMemberSchema>
 

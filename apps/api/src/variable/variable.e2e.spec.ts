@@ -183,21 +183,19 @@ describe('Variable Controller Tests', () => {
       }
     })
 
-    variable1 = (
-      await variableService.createVariable(
-        user1,
-        {
-          name: 'Variable 1',
-          entries: [
-            {
-              environmentSlug: environment1.slug,
-              value: 'Variable 1 value'
-            }
-          ]
-        },
-        project1.slug
-      )
-    ).variable as Variable
+    variable1 = (await variableService.createVariable(
+      user1,
+      {
+        name: 'Variable 1',
+        entries: [
+          {
+            environmentSlug: environment1.slug,
+            value: 'Variable 1 value'
+          }
+        ]
+      },
+      project1.slug
+    )) as Variable
   })
 
   afterEach(async () => {
@@ -501,16 +499,14 @@ describe('Variable Controller Tests', () => {
     })
 
     it('should not create a variable version entity if value-environmentSlug is not provided during creation', async () => {
-      const variable = (
-        await variableService.createVariable(
-          user1,
-          {
-            name: 'Var 3',
-            note: 'Var 3 note'
-          },
-          project1.slug
-        )
-      ).variable
+      const variable = (await variableService.createVariable(
+        user1,
+        {
+          name: 'Var 3',
+          note: 'Var 3 note'
+        },
+        project1.slug
+      )) as Variable
 
       const variableVersions = await prisma.variableVersion.findMany({
         where: {

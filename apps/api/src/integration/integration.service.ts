@@ -31,6 +31,9 @@ import {
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
 import { BaseIntegration } from './plugins/base.integration'
+import { HydrationService } from '@/common/hydration.service'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { HydratedIntegration } from './integration.types'
 
 @Injectable()
 export class IntegrationService {
@@ -39,7 +42,8 @@ export class IntegrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -123,13 +127,13 @@ export class IntegrationService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.CREATE_INTEGRATION, Authority.READ_WORKSPACE]
       })
     const workspaceId = workspace.id
 
     // Check if integration with the same name already exists
-    await this.existsByNameAndWorkspaceId(dto.name, workspace)
+    await this.existsByNameAndWorkspaceId(dto.name, workspace.id)
 
     let project: Project | null = null
     let privateKey: string | null = null
@@ -140,7 +144,7 @@ export class IntegrationService {
       this.logger.log(`Checking user access to project ${dto.projectSlug}`)
       project = await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: dto.projectSlug },
+        slug: dto.projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -173,7 +177,7 @@ export class IntegrationService {
         const environment =
           await this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environmentSlug },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
         environments.push(environment)
@@ -194,29 +198,19 @@ export class IntegrationService {
         type: dto.type,
         metadata: encryptMetadata(dto.metadata),
         notifyOn: dto.notifyOn,
-        environments: {
-          connect: environments
-        },
+        environments:
+          environments.length > 0
+            ? {
+                connect: environments.map((environment) => ({
+                  id: environment.id
+                }))
+              }
+            : undefined,
         projectId: project?.id,
         workspaceId,
         lastUpdatedById: user.id
       },
-      include: {
-        lastUpdatedBy: {
-          select: {
-            id: true,
-            name: true,
-            profilePictureUrl: true
-          }
-        },
-        environments: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
-        }
-      }
+      include: InclusionQuery.Integration
     })
     this.logger.log(
       `Integration ${integration.id} created by user ${user.id} in workspace ${workspaceId}`
@@ -243,15 +237,20 @@ export class IntegrationService {
 
     // Initialize the integration
     this.logger.log(`Initializing integration: ${integration.id}`)
+    const hydratedIntegration = await this.hydrationService.hydrateIntegration({
+      user,
+      integration
+    })
     integrationObject = IntegrationFactory.createIntegration(
-      integration,
+      hydratedIntegration,
       this.prisma
     )
     integrationObject.init(privateKey, event.id)
 
     // integration.metadata = decryptMetadata(integration.metadata)
-    delete integration.environments
-    return integration
+    delete hydratedIntegration.workspace
+
+    return hydratedIntegration
   }
 
   /**
@@ -289,7 +288,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.UPDATE_INTEGRATION]
       })
     const integrationId = integration.id
@@ -310,7 +309,7 @@ export class IntegrationService {
 
     // Check if the name of the integration is being changed, and if so, check if the new name is unique
     dto.name &&
-      (await this.existsByNameAndWorkspaceId(dto.name, integration.workspace))
+      (await this.existsByNameAndWorkspaceId(dto.name, integration.workspaceId))
 
     let environments: Array<Environment> | null = null
     if (dto.environmentSlugs) {
@@ -341,7 +340,7 @@ export class IntegrationService {
         dto.environmentSlugs.map((environmentSlug) =>
           this.authorizationService.authorizeUserAccessToEnvironment({
             user,
-            entity: { slug: environmentSlug },
+            slug: environmentSlug,
             authorities: [Authority.READ_ENVIRONMENT]
           })
         )
@@ -369,15 +368,7 @@ export class IntegrationService {
             : undefined,
         lastUpdatedById: user.id
       },
-      include: {
-        environments: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
-        }
-      }
+      include: InclusionQuery.Integration
     })
 
     this.logger.log(
@@ -401,6 +392,9 @@ export class IntegrationService {
 
     // @ts-expect-error -- We expect the metadata to be in JSON format
     updatedIntegration.metadata = decryptMetadata(updatedIntegration.metadata)
+    updatedIntegration['entitlements'] = integration.entitlements
+    delete updatedIntegration.workspace
+
     return updatedIntegration
   }
 
@@ -422,7 +416,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
 
@@ -467,7 +461,7 @@ export class IntegrationService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
     const workspaceId = workspace.id
@@ -498,15 +492,21 @@ export class IntegrationService {
       include: {
         projects: {
           include: {
-            project: true
+            project: true,
+            environments: true
           }
         }
       }
     })
-    const projectIds =
-      workspaceRoles
-        .map((role) => role.projects.map((p) => p.projectId))
-        .flat() || []
+    const projectIds: Project['id'][] = []
+    const environmentIds: Environment['id'][] = []
+
+    for (const { projects } of workspaceRoles) {
+      projectIds.push(...projects.map((p) => p.projectId))
+      environmentIds.push(
+        ...projects.flatMap((p) => p.environments.map((e) => e.id))
+      )
+    }
 
     // Get all integrations in the workspace
     const integrations = await this.prisma.integration.findMany({
@@ -523,35 +523,24 @@ export class IntegrationService {
             projectId: {
               in: projectIds
             }
+          },
+          {
+            environments: {
+              every: {
+                id: {
+                  in: environmentIds
+                }
+              }
+            }
           }
         ]
       },
-      omit: {
-        projectId: true
-      },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       },
-
-      include: {
-        project: {
-          select: {
-            id: true,
-            slug: true,
-            name: true
-          }
-        },
-        environments: {
-          select: {
-            id: true,
-            slug: true,
-            name: true
-          }
-        }
-      }
+      include: InclusionQuery.Integration
     })
 
     // Calculate metadata for pagination
@@ -581,13 +570,22 @@ export class IntegrationService {
       search
     })
 
+    const hydratedIntegrations: HydratedIntegration[] = []
+
     // Decrypt the metadata
     for (const integration of integrations) {
       // @ts-expect-error -- We expect the metadata to be in JSON format
       integration.metadata = decryptMetadata(integration.metadata)
+      delete integration.workspace
+      hydratedIntegrations.push(
+        await this.hydrationService.hydrateIntegration({
+          user,
+          integration
+        })
+      )
     }
 
-    return { items: integrations, metadata }
+    return { items: hydratedIntegrations, metadata }
   }
 
   /**
@@ -609,7 +607,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.DELETE_INTEGRATION]
       })
     const integrationId = integration.id
@@ -653,7 +651,7 @@ export class IntegrationService {
     const integration =
       await this.authorizationService.authorizeUserAccessToIntegration({
         user,
-        entity: { slug: integrationSlug },
+        slug: integrationSlug,
         authorities: [Authority.READ_INTEGRATION]
       })
 
@@ -702,12 +700,11 @@ export class IntegrationService {
    */
   private async existsByNameAndWorkspaceId(
     name: Integration['name'],
-    workspace: Workspace
+    workspaceId: Workspace['id']
   ) {
     this.logger.log(
-      `Checking if integration with name ${name} exists in workspace ${workspace.slug}`
+      `Checking if integration with name ${name} exists in workspace ${workspaceId}`
     )
-    const workspaceId = workspace.id
 
     if (
       (await this.prisma.integration.findUnique({
@@ -719,14 +716,14 @@ export class IntegrationService {
         }
       })) !== null
     ) {
-      const errorMessage = `Integration with name ${name} already exists in workspace ${workspace.slug}`
+      const errorMessage = `Integration with name ${name} already exists in workspace ${workspaceId}`
       this.logger.error(errorMessage)
       throw new ConflictException(
         constructErrorBody('Integration already exists', errorMessage)
       )
     } else {
       this.logger.log(
-        `Integration with name ${name} does not exist in workspace ${workspace.slug}`
+        `Integration with name ${name} does not exist in workspace ${workspaceId}`
       )
     }
   }
@@ -828,7 +825,7 @@ export class IntegrationService {
       const existing =
         await this.authorizationService.authorizeUserAccessToIntegration({
           user,
-          entity: { slug: integrationSlug },
+          slug: integrationSlug,
           authorities: [Authority.UPDATE_INTEGRATION]
         })
       integrationObject = IntegrationFactory.createIntegrationWithType(

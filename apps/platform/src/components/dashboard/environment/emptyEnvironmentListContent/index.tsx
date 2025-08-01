@@ -1,10 +1,13 @@
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { EnvironmentSVG } from '@public/svg/dashboard'
 import { Button } from '@/components/ui/button'
-import { createEnvironmentOpenAtom } from '@/store'
+import { createEnvironmentOpenAtom, selectedProjectAtom } from '@/store'
 
 export default function EmptyEnvironmentListContent(): React.JSX.Element {
   const setIsCreateEnvironmentOpen = useSetAtom(createEnvironmentOpenAtom)
+  const selectedProject = useAtomValue(selectedProjectAtom)
+  const isAuthorizedToCreateEnvironments =
+    selectedProject?.entitlements.canCreateEnvironments
 
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
@@ -21,6 +24,7 @@ export default function EmptyEnvironmentListContent(): React.JSX.Element {
 
       <Button
         className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
+        disabled={!isAuthorizedToCreateEnvironments}
         onClick={() => setIsCreateEnvironmentOpen(true)}
       >
         Create environment

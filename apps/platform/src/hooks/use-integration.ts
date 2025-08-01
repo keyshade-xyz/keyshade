@@ -263,7 +263,8 @@ export function useSetupIntegration(
         integrationName,
         resetForm,
         router,
-        setIsLoading
+        setIsLoading,
+        prepareMetadata
       ]
     ),
     handleTesting: useCallback(async () => {
@@ -295,7 +296,7 @@ export function useSetupIntegration(
       } finally {
         setIsTesting(false)
       }
-    }, [prepareMetadata, testIntegration])
+    }, [prepareMetadata, testIntegration, setIsTesting])
   }
 
   return {

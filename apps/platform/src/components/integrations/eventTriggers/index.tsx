@@ -21,16 +21,16 @@ export default function EventTriggersInput({
   const [showAllGroups, setShowAllGroups] = useState(false)
 
   const eventGroups = useMemo(
-    () => Integrations[integrationType].events!,
+    () => Integrations[integrationType].events,
     [integrationType]
   )
 
   const allEvents: EventTypeEnum[] = useMemo(
-    () => eventGroups.flatMap((group) => group.items),
+    () => eventGroups!.flatMap((group) => group.items),
     [eventGroups]
   )
 
-  if (Integrations[integrationType].envMapping === true) {
+  if (Integrations[integrationType].envMapping) {
     if (selectedEvents.size !== allEvents.length) {
       onChange(new Set(allEvents))
     }
@@ -62,7 +62,7 @@ export default function EventTriggersInput({
 
   const visibleGroups = showAllGroups
     ? eventGroups
-    : eventGroups.slice(0, INITIAL_GROUP_COUNT)
+    : eventGroups!.slice(0, INITIAL_GROUP_COUNT)
 
   return (
     <div>
@@ -95,7 +95,7 @@ export default function EventTriggersInput({
             </label>
           </div>
 
-          <Visible if={eventGroups.length > INITIAL_GROUP_COUNT}>
+          <Visible if={eventGroups!.length > INITIAL_GROUP_COUNT}>
             <Button
               className="my-0 h-fit p-0 text-white/50 hover:bg-transparent hover:text-white/60"
               onClick={() => setShowAllGroups(!showAllGroups)}
@@ -107,7 +107,7 @@ export default function EventTriggersInput({
           </Visible>
         </div>
         <div className="space-y-5">
-          {visibleGroups.map((group) => (
+          {visibleGroups!.map((group) => (
             <div className="" key={group.name}>
               <div className="flex flex-col items-start gap-2">
                 <div className="flex items-start space-x-3">

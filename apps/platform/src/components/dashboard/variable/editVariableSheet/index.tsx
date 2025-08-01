@@ -35,14 +35,14 @@ export default function EditVariablSheet() {
   const selectedVariableData = useAtomValue(selectedVariableAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
 
-  const [name, setName] = useState(selectedVariableData?.variable.name || '')
-  const [note, setNote] = useState(selectedVariableData?.variable.note || '')
+  const [name, setName] = useState(selectedVariableData?.name || '')
+  const [note, setNote] = useState(selectedVariableData?.note || '')
   const [isLoading, setIsLoading] = useState(false)
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >(
     () =>
-      selectedVariableData?.values.reduce(
+      selectedVariableData?.versions.reduce(
         (acc, entry) => {
           acc[entry.environment.slug] = entry.value
           return acc
@@ -52,7 +52,7 @@ export default function EditVariablSheet() {
   )
   const originalValues = useMemo(
     () =>
-      selectedVariableData?.values.reduce(
+      selectedVariableData?.versions.reduce(
         (acc, entry) => {
           acc[entry.environment.slug] = entry.value
           return acc
@@ -65,8 +65,8 @@ export default function EditVariablSheet() {
   const hasChanges = useMemo(() => {
     if (!selectedVariableData) return false
 
-    const nameChanged = name !== selectedVariableData.variable.name
-    const noteChanged = note !== (selectedVariableData.variable.note || '')
+    const nameChanged = name !== selectedVariableData.name
+    const noteChanged = note !== (selectedVariableData.note || '')
 
     const allEnvironmentSlugs = new Set([
       ...Object.keys(originalValues),
@@ -106,16 +106,13 @@ export default function EditVariablSheet() {
     const hasEnvChanges = Object.keys(changedEnvValues).length > 0
 
     return ControllerInstance.getInstance().variableController.updateVariable({
-      variableSlug: selectedVariableData!.variable.slug,
-      name:
-        name !== selectedVariableData!.variable.name ? name.trim() : undefined,
+      variableSlug: selectedVariableData!.slug,
+      name: name !== selectedVariableData!.name ? name.trim() : undefined,
       note:
-        note !== (selectedVariableData!.variable.note || '')
-          ? note.trim()
-          : undefined,
+        note !== (selectedVariableData!.note || '') ? note.trim() : undefined,
       entries: hasEnvChanges
         ? parseUpdatedEnvironmentValues(
-            selectedVariableData!.values.filter((v) =>
+            selectedVariableData!.versions.filter((v) =>
               Object.prototype.hasOwnProperty.call(
                 changedEnvValues,
                 v.environment.slug
@@ -140,19 +137,15 @@ export default function EditVariablSheet() {
 
         setVariables((prev) =>
           prev.map((v) => {
-            if (v.variable.slug === selectedVariableData.variable.slug) {
+            if (v.slug === selectedVariableData.slug) {
               return {
                 ...v,
                 variable: {
-                  ...v.variable,
                   name,
                   note,
-                  slug: data.variable.slug
+                  slug: data.slug
                 },
-                values: mergeExistingEnvironments(
-                  v.values,
-                  data.updatedVersions
-                )
+                versions: mergeExistingEnvironments(v.versions, data.versions)
               }
             }
             return v

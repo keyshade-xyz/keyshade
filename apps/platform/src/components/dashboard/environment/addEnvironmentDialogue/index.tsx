@@ -29,6 +29,9 @@ export default function AddEnvironmentDialogue() {
   const setEnvironments = useSetAtom(environmentsOfProjectAtom)
   const setProjectEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
 
+  const isAuthorizedToCreateEnvironment =
+    selectedProject?.entitlements.canCreateEnvironments
+
   const [newEnvironmentData, setNewEnvironmentData] = useState({
     environmentName: '',
     environmentDescription: ''
@@ -116,6 +119,7 @@ export default function AddEnvironmentDialogue() {
       <DialogTrigger asChild>
         <Button
           className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+          disabled={!isAuthorizedToCreateEnvironment}
           variant="outline"
         >
           <AddSVG /> Add Environment

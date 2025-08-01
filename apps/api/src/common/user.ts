@@ -7,9 +7,10 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { createWorkspace } from './workspace'
-import { UserWithWorkspace } from '@/user/user.types'
+import { AuthenticatedUser, UserWithWorkspace } from '@/user/user.types'
 import { constructErrorBody, generateReferralCode } from './util'
 import SlugGenerator from './slug-generator.service'
+import { HydrationService } from './hydration.service'
 
 /**
  * Creates a new user and optionally creates a default workspace for them.
@@ -20,7 +21,8 @@ import SlugGenerator from './slug-generator.service'
 export async function createUser(
   dto: Partial<CreateUserDto> & { authProvider: AuthProvider; id?: User['id'] },
   prisma: PrismaService,
-  slugGenerator: SlugGenerator
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('createUser')
 
@@ -64,10 +66,11 @@ export async function createUser(
     // Create the user's default workspace
     logger.log(`User ${user.id} is not an admin. Creating default workspace.`)
     const workspace = await createWorkspace(
-      user,
+      user as AuthenticatedUser, // Doesn't harm us
       { name: 'My Workspace' },
       prisma,
       slugGenerator,
+      hydrationService,
       true
     )
     logger.log(`Created user ${user.id} with default workspace ${workspace.id}`)
@@ -97,7 +100,8 @@ export async function createUser(
 export async function getUserByEmailOrId(
   input: User['email'] | User['id'],
   prisma: PrismaService,
-  slugGenerator: SlugGenerator
+  slugGenerator: SlugGenerator,
+  hydrationService: HydrationService
 ): Promise<UserWithWorkspace> {
   const logger = new Logger('getUserByEmailOrId')
 
@@ -167,10 +171,11 @@ export async function getUserByEmailOrId(
         `User ${user.id} has no default workspace. Creating default workspace.`
       )
       defaultWorkspace = await createWorkspace(
-        user,
+        user as AuthenticatedUser, // Doesn't harm us
         { name: 'My Workspace' },
         prisma,
         slugGenerator,
+        hydrationService,
         true
       )
       logger.log(

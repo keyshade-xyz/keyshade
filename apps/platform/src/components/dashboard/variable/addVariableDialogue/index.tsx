@@ -31,6 +31,9 @@ export default function AddVariableDialogue() {
   const setVariables = useSetAtom(variablesOfProjectAtom)
   const setProjectVariableCount = useSetAtom(projectVariableCountAtom)
 
+  const isAuthorizedToCreateVariable =
+    selectedProject?.entitlements.canCreateVariables
+
   const [requestData, setRequestData] = useState({
     name: '',
     note: ''
@@ -108,6 +111,7 @@ export default function AddVariableDialogue() {
       <DialogTrigger asChild>
         <Button
           className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+          disabled={!isAuthorizedToCreateVariable}
           variant="outline"
         >
           <AddSVG /> Add Variable
