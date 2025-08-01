@@ -29,7 +29,7 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
     useExportProjectDialog(resetForm, selectedProject)
 
   const { handleExport, isLoading } = useExportConfigurations(
-    selectedProject?.slug || '',
+    selectedProject?.slug ?? '',
     formData,
     validateForm
   )
@@ -72,7 +72,9 @@ export default function ExportProjectConfigurationsDialog(): JSX.Element | null 
             />
 
             <Visible
-              if={!selectedProject.storePrivateKey && !browserProjectPrivateKey}
+              if={
+                !selectedProject.storePrivateKey && !browserProjectPrivateKey
+              }
             >
               <ExportProjectPrivateKeyInput
                 onChange={(value: string) =>

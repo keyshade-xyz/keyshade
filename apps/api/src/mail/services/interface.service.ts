@@ -11,7 +11,8 @@ export interface IMailService {
     projectUrl: string,
     invitedBy: string,
     invitedOn: string,
-    forRegisteredUser: boolean
+    forRegisteredUser: boolean,
+    inviteeName?: string
   ): Promise<void>
 
   accountLoginEmail(
@@ -28,5 +29,20 @@ export interface IMailService {
     email: string,
     workspaceName: string,
     removedOn: Date
+  ): Promise<void>
+
+  sendLoginNotification(
+    email: string,
+    data: {
+      ip: string
+      device: string
+      location?: string
+    }
+  ): Promise<void>
+
+  sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
   ): Promise<void>
 }

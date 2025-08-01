@@ -1,10 +1,9 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
 import { EnvironmentSchema } from '@/environment'
-import { BaseProjectSchema } from '@/project'
 import { UserSchema } from '@/user'
 
-export const VariableVersionSchema = z.object({
+export const VariableRevisionSchema = z.object({
   version: z.number(),
   value: z.string(),
   createdOn: z.string().datetime(),
@@ -21,26 +20,27 @@ export const VariableVersionSchema = z.object({
 })
 
 export const VariableSchema = z.object({
-  variable: z.object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    note: z.string().nullable(),
-    lastUpdatedById: z.string(),
-    projectId: BaseProjectSchema.shape.id,
-    lastUpdatedBy: z.object({
-      id: UserSchema.shape.id,
-      name: UserSchema.shape.name,
-      profilePictureUrl: UserSchema.shape.profilePictureUrl
-    })
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  note: z.string().nullable(),
+  lastUpdatedById: z.string(),
+  projectId: z.string(),
+  lastUpdatedBy: z.object({
+    id: UserSchema.shape.id,
+    name: UserSchema.shape.name,
+    profilePictureUrl: UserSchema.shape.profilePictureUrl
   }),
-  values: z.array(VariableVersionSchema)
+  entitlements: z.object({
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
+  }),
+  versions: z.array(VariableRevisionSchema)
 })
-
 export const CreateVariableRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   name: z.string(),
   note: z.string().optional(),
   entries: z
@@ -56,7 +56,7 @@ export const CreateVariableRequestSchema = z.object({
 export const CreateVariableResponseSchema = VariableSchema
 
 export const BulkCreateVariableRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   variables: z.array(CreateVariableRequestSchema.omit({ projectSlug: true }))
 })
 
@@ -84,15 +84,7 @@ export const UpdateVariableRequestSchema = z.object({
     .optional()
 })
 
-export const UpdateVariableResponseSchema = z.object({
-  variable: VariableSchema.shape.variable.pick({
-    id: true,
-    name: true,
-    slug: true,
-    note: true
-  }),
-  updatedVersions: z.array(VariableVersionSchema)
-})
+export const UpdateVariableResponseSchema = VariableSchema
 
 export const DeleteEnvironmentValueOfVariableRequestSchema = z.object({
   variableSlug: z.string(),
@@ -109,8 +101,30 @@ export const RollBackVariableRequestSchema = z.object({
 
 export const RollBackVariableResponseSchema = z.object({
   count: z.number(),
-  currentRevision: VariableVersionSchema
+  currentRevision: VariableRevisionSchema
 })
+
+export const DisableVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const DisableVariableResponseSchema = z.void()
+
+export const EnableVariableRequestSchema = z.object({
+  variableSlug: z.string(),
+  environmentSlug: EnvironmentSchema.shape.slug
+})
+
+export const EnableVariableResponseSchema = z.void()
+
+export const getAllDisabledEnvironmentsOfVariableRequestSchema = z.object({
+  variableSlug: z.string()
+})
+
+export const getAllDisabledEnvironmentsOfVariableResponseSchema = z.array(
+  z.string()
+)
 
 export const DeleteVariableRequestSchema = z.object({
   variableSlug: z.string()
@@ -119,7 +133,7 @@ export const DeleteVariableRequestSchema = z.object({
 export const DeleteVariableResponseSchema = z.void()
 
 export const GetAllVariablesOfProjectRequestSchema = PageRequestSchema.extend({
-  projectSlug: BaseProjectSchema.shape.slug
+  projectSlug: z.string()
 })
 
 export const GetAllVariablesOfProjectResponseSchema =
@@ -132,11 +146,11 @@ export const GetRevisionsOfVariableRequestSchema =
   })
 
 export const GetRevisionsOfVariableResponseSchema = PageResponseSchema(
-  VariableVersionSchema
+  VariableRevisionSchema
 )
 
 export const GetAllVariablesOfEnvironmentRequestSchema = z.object({
-  projectSlug: BaseProjectSchema.shape.slug,
+  projectSlug: z.string(),
   environmentSlug: EnvironmentSchema.shape.slug
 })
 

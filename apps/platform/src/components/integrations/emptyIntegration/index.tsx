@@ -1,10 +1,13 @@
-import { useSetAtom } from 'jotai'
+import { useRouter } from 'next/navigation'
 import { EmptyIntegrationSVG } from '@public/svg/shared'
 import { Button } from '@/components/ui/button'
-import { createIntegrationOpenAtom } from '@/store'
 
 export default function EmptyIntegration(): React.JSX.Element {
-  const setIsCreateIntegrationOpen = useSetAtom(createIntegrationOpenAtom)
+  const router = useRouter()
+
+  const handleCreateIntegration = () => {
+    router.push('/integrations?tab=overview')
+  }
 
   return (
     <div className="flex h-[95%] w-full flex-col items-center justify-center gap-y-8">
@@ -22,7 +25,7 @@ export default function EmptyIntegration(): React.JSX.Element {
 
       <Button
         className="h-[2.25rem] rounded-md bg-white text-black hover:bg-gray-300"
-        onClick={() => setIsCreateIntegrationOpen(true)}
+        onClick={handleCreateIntegration}
       >
         Create Integration
       </Button>

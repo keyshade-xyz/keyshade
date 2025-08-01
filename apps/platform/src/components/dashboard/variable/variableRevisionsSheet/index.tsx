@@ -27,6 +27,7 @@ import {
   AccordionTrigger,
   AccordionContent
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
@@ -54,12 +55,14 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(true)
 
+  const isAuthorizedToEditVariables = selectedVariable?.entitlements.canUpdate
+
   const getAllRevisionsOfVariable = useHttp(
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().variableController.getRevisionsOfVariable(
         {
           environmentSlug,
-          variableSlug: selectedVariable!.variable.slug
+          variableSlug: selectedVariable!.slug
         }
       )
   )
@@ -114,11 +117,11 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">
-            {selectedVariable?.variable.name}&apos;s revisions
+            {selectedVariable?.name}&apos;s revisions
           </SheetTitle>
           <SheetDescription className="text-white/60">
-            See all the values of {selectedVariable?.variable.name} from the
-            past. You can also roll back to a previous version from here.
+            See all the values of {selectedVariable?.name} from the past. You
+            can also roll back to a previous version from here.
           </SheetDescription>
         </SheetHeader>
         <div className="my-10 flex w-full flex-col">
@@ -177,8 +180,9 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                                 <span>{revision.createdBy.name} </span>
                               </div>
                               {index !== 0 ? (
-                                <button
-                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                <Button
+                                  className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
+                                  disabled={!isAuthorizedToEditVariables}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,
@@ -186,9 +190,10 @@ export default function VariableRevisionsSheet(): React.JSX.Element {
                                     )
                                   }
                                   type="button"
+                                  variant="ghost"
                                 >
                                   <RollbackSVG />
-                                </button>
+                                </Button>
                               ) : null}
                             </div>
                           </div>

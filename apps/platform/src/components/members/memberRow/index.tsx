@@ -45,6 +45,13 @@ function MemberRow({
     [member.roles]
   )
 
+  const isAuthorisedToUpdateRoles = member.entitlements.canUpdateRoles
+  const isAuthorisedToTransferOwnership =
+    member.entitlements.canTransferOwnershipTo
+  const isAuthorisedToRemoveMember = member.entitlements.canRemove
+  const isAuthorisedToResendInvitation = member.entitlements.canResendInvitation
+  const isAuthorisedToCancelInvitation = member.entitlements.canCancelInvitation
+
   return (
     <TableRow className="group hover:bg-transparent" key={member.id}>
       <TableCell className="w-[30%] text-left">
@@ -65,7 +72,7 @@ function MemberRow({
         </div>
       </TableCell>
       <TableCell className="w-[30%] text-left">
-        {dayjs(member.createdOn).format('MMM D, YYYY')}
+        {dayjs(member.user.joinedOn).format('MMM D, YYYY')}
       </TableCell>
       <TableCell className="w-[40%] text-left">
         <div className="flex w-[8rem] items-center justify-center rounded-full border border-purple-200 bg-[#3B0764] px-4 py-2 text-purple-200">
@@ -73,15 +80,17 @@ function MemberRow({
         </div>
       </TableCell>
       <TableCell className="text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-        <div className="flex justify-start gap-2">
+        <div className="flex justify-start gap-0.5">
           <TooltipProvider>
             {isInvited ? (
               <>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
+                      className="hover:bg-white/5 hover:text-white"
+                      disabled={!isAuthorisedToResendInvitation}
                       onClick={() => onResendInvitation?.(member)}
+                      variant="ghost"
                     >
                       Resend
                     </Button>
@@ -98,8 +107,10 @@ function MemberRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
+                      className="hover:bg-white/5 hover:text-white"
+                      disabled={!isAuthorisedToCancelInvitation}
                       onClick={() => onCancelInvitation?.(member)}
+                      variant="ghost"
                     >
                       <CloseCircleSVG />
                     </Button>
@@ -118,9 +129,10 @@ function MemberRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="border-none bg-transparent p-1 hover:bg-transparent disabled:bg-transparent"
-                      disabled={isAdminRole}
+                      className="hover:bg-white/5 hover:text-white"
+                      disabled={isAdminRole || !isAuthorisedToRemoveMember}
                       onClick={() => onRemoveClick?.(member)}
+                      variant="ghost"
                     >
                       <UserRemoveSVG />
                     </Button>
@@ -139,8 +151,10 @@ function MemberRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="border-none bg-transparent p-1 hover:bg-transparent"
+                      className="hover:bg-white/5 hover:text-white"
+                      disabled={!isAuthorisedToUpdateRoles}
                       onClick={() => onEditMember?.(member)}
+                      variant="ghost"
                     >
                       <EditTwoSVG />
                     </Button>
@@ -157,8 +171,10 @@ function MemberRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="border-none bg-transparent p-1 hover:bg-transparent"
+                      className="hover:bg-white/5 hover:text-white"
+                      disabled={!isAuthorisedToTransferOwnership}
                       onClick={() => onTransferOwnership?.(member)}
+                      variant="ghost"
                     >
                       <MedalStarSVG />
                     </Button>

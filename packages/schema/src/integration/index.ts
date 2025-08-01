@@ -41,6 +41,10 @@ export const IntegrationSchema = z.object({
     id: z.string(),
     name: z.string(),
     profilePictureUrl: z.string().nullable()
+  }),
+  entitlements: z.object({
+    canUpdate: z.boolean(),
+    canDelete: z.boolean()
   })
 })
 
@@ -89,9 +93,7 @@ export const GetIntegrationRequestSchema = z.object({
   integrationSlug: IntegrationSchema.shape.slug
 })
 
-export const GetIntegrationResponseSchema = IntegrationSchema.extend({
-  workspace: WorkspaceSchema
-})
+export const GetIntegrationResponseSchema = IntegrationSchema
 
 export const GetAllIntegrationRequestSchema = PageRequestSchema.extend({
   workspaceSlug: WorkspaceSchema.shape.slug
@@ -106,3 +108,24 @@ export const GetAllIntegrationRunsRequestSchema = PageRequestSchema.extend({
 
 export const GetAllIntegrationRunsResponseSchema =
   PageResponseSchema(IntegrationRunSchema)
+
+const ValidateIntegrationConfigurationCreateRequestSchema =
+  CreateIntegrationRequestSchema.extend({
+    isCreate: z.literal(true)
+  })
+
+const ValidateIntegrationConfigurationUpdateRequestSchema =
+  UpdateIntegrationRequestSchema.extend({
+    isCreate: z.literal(false),
+    integrationSlug: IntegrationSchema.shape.slug
+  })
+
+export const ValidateIntegrationConfigurationRequestSchema =
+  z.discriminatedUnion('isCreate', [
+    ValidateIntegrationConfigurationCreateRequestSchema,
+    ValidateIntegrationConfigurationUpdateRequestSchema
+  ])
+
+export const ValidateIntegrationConfigurationResponseSchema = z.object({
+  success: z.literal(true)
+})
