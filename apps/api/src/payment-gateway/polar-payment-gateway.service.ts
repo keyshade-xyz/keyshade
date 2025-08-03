@@ -321,7 +321,8 @@ export class PolarPaymentGatewayService extends PaymentGatewayService {
         seats: order.product.metadata.seats as string,
         paid: order.paid,
         currency: order.currency,
-        orderId: order.id
+        orderId: order.id,
+        name: order.product.name
       })),
       metadata: {
         lastPage: orders.result.pagination.maxPage,

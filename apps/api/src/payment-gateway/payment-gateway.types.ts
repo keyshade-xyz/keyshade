@@ -10,6 +10,7 @@ export interface PaymentHistory {
     paid: boolean
     currency: string
     orderId: string
+    name: string
   }[]
   metadata: {
     totalCount: number
