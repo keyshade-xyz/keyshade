@@ -3,8 +3,8 @@ import React, { useCallback, useState } from 'react'
 import type { AuthorityEnum } from '@keyshade/schema'
 import { toast } from 'sonner'
 import { AddSVG } from '@public/svg/shared'
-import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
 import type { ProjectEnvironmentComboType } from '../projectEnvironmentSelector'
+import ProjectEnvironmentSelector from '../projectEnvironmentSelector'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -68,6 +68,8 @@ export default function CreateRoleDialog() {
     useState<ProjectEnvironmentComboType>({})
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const isAuthorizedToCreateRoles =
+    currentWorkspace?.entitlements.canCreateRoles
   const [createRoleData, setCreateRoleData] = useState({
     name: '',
     description: '',
@@ -153,7 +155,7 @@ export default function CreateRoleDialog() {
       open={isCreateRolesOpen}
     >
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={!isAuthorizedToCreateRoles}>
           <AddSVG /> Add Role
         </Button>
       </DialogTrigger>

@@ -12,11 +12,13 @@ interface TabProps {
   searchParams: ReadonlyURLSearchParams
   customID: string
   icon?: React.ReactNode
+  route?: string
 }
 
 function Tab({
   text,
   selected,
+  route,
   // setSelected,
   searchParams,
   customID,
@@ -43,7 +45,7 @@ function Tab({
       onClick={() => {
         // setSelected(text)
         router.push(
-          `${pathname}?${createQueryString('tab', text.toLocaleLowerCase())}`
+          `${pathname}?${createQueryString('tab', route || text.toLocaleLowerCase())}`
         )
       }}
       type="button"
@@ -69,6 +71,7 @@ interface TabConfig {
   id: string
   label: string
   icon?: React.ReactNode
+  route?: string
 }
 
 interface LineTabsProps {
@@ -89,7 +92,8 @@ function LineTab({ customID, tabs }: LineTabsProps): React.JSX.Element {
           customID={customID}
           icon={tab.icon}
           key={tab.id}
-          searchParams={searchParams} 
+          route={tab.route}
+          searchParams={searchParams}
           selected={search?.toLocaleLowerCase() === tab.id.toLocaleLowerCase()}
           text={tab.label}
         />

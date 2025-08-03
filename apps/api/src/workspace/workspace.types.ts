@@ -1,29 +1,53 @@
-import { Subscription, User, Workspace, WorkspaceMember } from '@prisma/client'
+import {
+  Subscription,
+  Integration,
+  Project,
+  User,
+  Workspace,
+  WorkspaceMember,
+  WorkspaceRole
+} from '@prisma/client'
 
-export interface WorkspaceWithLastUpdateBy extends Workspace {
+export interface HydratedWorkspace extends Workspace {
+  maxAllowedProjects: number
+  totalProjects: number
+  maxAllowedMembers: number
+  totalMembers: number
+  projects: number
+  subscription: Subscription
+  entitlements: {
+    canReadProjects: boolean
+    canCreateProjects: boolean
+    canReadIntegrations: boolean
+    canCreateIntegrations: boolean
+    canReadMembers: boolean
+    canInviteMembers: boolean
+    canReadRoles: boolean
+    canCreateRoles: boolean
+    canUpdate: boolean
+    canDelete: boolean
+  }
   lastUpdatedBy: {
     id: User['id']
     name: User['name']
     profilePictureUrl: User['profilePictureUrl']
   }
+  isDefault: boolean
 }
 
-export interface WorkspaceWithLastUpdatedByAndOwner
-  extends WorkspaceWithLastUpdateBy {
-  ownedBy: {
-    id: User['id']
-    name: User['name']
-    profilePictureUrl: User['profilePictureUrl']
-    ownedSince: WorkspaceMember['createdOn']
-  }
-}
-
-export interface WorkspaceWithLastUpdatedByAndOwnerAndSubscription
-  extends WorkspaceWithLastUpdatedByAndOwner {
+export interface RawWorkspace
+  extends Omit<
+    HydratedWorkspace,
+    | 'entitlements'
+    | 'maxAllowedProjects'
+    | 'totalProjects'
+    | 'maxAllowedMembers'
+    | 'totalMembers'
+    | 'projects'
+  > {
   subscription: Subscription
-}
-
-export interface WorkspaceWithLastUpdatedByAndOwnerAndProjects
-  extends WorkspaceWithLastUpdatedByAndOwnerAndSubscription {
-  projects: number
+  members: Partial<WorkspaceMember>[]
+  roles: Partial<WorkspaceRole>[]
+  projects: Partial<Project>[]
+  integrations: Partial<Integration>[]
 }

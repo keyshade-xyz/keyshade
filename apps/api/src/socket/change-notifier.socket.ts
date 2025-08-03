@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Logger, UseGuards } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Logger,
+  ForbiddenException,
+  UnauthorizedException
+} from '@nestjs/common'
 import {
   ConnectedSocket,
   MessageBody,
@@ -15,19 +21,16 @@ import {
   ChangeNotifierRegistration
 } from './socket.types'
 import { Authority } from '@prisma/client'
-import { CurrentUser } from '@/decorators/user.decorator'
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { RedisClientType } from 'redis'
-import { ApiKeyGuard } from '@/auth/guard/api-key/api-key.guard'
-import { AuthGuard } from '@/auth/guard/auth/auth.guard'
-import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { AuthenticatedUser } from '@/user/user.types'
 import { constructErrorBody } from '@/common/util'
-
-// The redis subscription channel for configuration updates
+import { AuthenticatedUserContext } from '@/auth/auth.types'
+import { toSHA256 } from '@/common/cryptography'
+import SlugGenerator from '@/common/slug-generator.service' // The redis subscription channel for configuration updates
 export const CHANGE_NOTIFIER_RSC = 'configuration-updates'
 
 // This will store the mapping of environmentId -> socketId[]
@@ -53,7 +56,8 @@ export default class ChangeNotifier
       publisher: RedisClientType
     },
     private readonly prisma: PrismaService,
-    private readonly authorizationService: AuthorizationService
+    private readonly authorizationService: AuthorizationService,
+    private readonly slugGenerator: SlugGenerator
   ) {
     this.redis = redisClient.publisher
     this.redisSubscriber = redisClient.subscriber
@@ -79,6 +83,9 @@ export default class ChangeNotifier
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}.`)
+    this.logger.log(
+      `Auth headers - x-keyshade-token: ${client.handshake.headers['x-keyshade-token'] ? 'present' : 'missing'}`
+    )
   }
 
   async handleDisconnect(client: Socket) {
@@ -90,17 +97,10 @@ export default class ChangeNotifier
    * This event is emitted from the client app to register
    * itself with our services so that it can receive updates.
    */
-  @RequiredApiKeyAuthorities(
-    Authority.READ_WORKSPACE,
-    Authority.READ_PROJECT,
-    Authority.READ_ENVIRONMENT
-  )
-  @UseGuards(AuthGuard, ApiKeyGuard)
   @SubscribeMessage('register-client-app')
   async handleRegister(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: ChangeNotifierRegistration,
-    @CurrentUser() user: AuthenticatedUser
+    @MessageBody() data: ChangeNotifierRegistration
   ) {
     /**
      * This event is emitted from the CLI to register
@@ -124,12 +124,18 @@ export default class ChangeNotifier
     )
 
     try {
+      // First, we need to authenticate the user from the socket connection
+      const userContext = await this.extractAndValidateUser(client)
+
+      // Convert to AuthenticatedUser for authorization service
+      const user = await this.convertToAuthenticatedUser(userContext)
+
       // Check if the user has access to the workspace
-      this.logger.log(`Checking user access to workspace ${data.workspaceSlug}`)
+      this.logger.log('Checking user access to workspace')
       const workspace =
         await this.authorizationService.authorizeUserAccessToWorkspace({
           user,
-          entity: { slug: data.workspaceSlug },
+          slug: data.workspaceSlug,
           authorities: [
             Authority.READ_WORKSPACE,
             Authority.READ_VARIABLE,
@@ -151,7 +157,7 @@ export default class ChangeNotifier
       this.logger.log(`Checking user access to project ${data.projectSlug}`)
       await this.authorizationService.authorizeUserAccessToProject({
         user,
-        entity: { slug: data.projectSlug },
+        slug: data.projectSlug,
         authorities: [Authority.READ_PROJECT]
       })
 
@@ -162,7 +168,7 @@ export default class ChangeNotifier
       const environment =
         await this.authorizationService.authorizeUserAccessToEnvironment({
           user,
-          entity: { slug: data.environmentSlug },
+          slug: data.environmentSlug,
           authorities: [Authority.READ_ENVIRONMENT]
         })
 
@@ -182,10 +188,79 @@ export default class ChangeNotifier
         )}`
       )
     } catch (error) {
-      this.logger.error(error)
+      // User friendly feedback on error
+      let errorMessage = 'An unknown error occurred.'
+
+      this.logger.error({
+        message: 'Error during client registration',
+        body: error,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name
+      })
+
+      if (error instanceof Error) {
+        // If the error is an instance of Error, we can get the message directly
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        // If the error is a string, use it directly
+        errorMessage = error
+      } else if (typeof error === 'object' && error !== null) {
+        // Try multiple ways to extract a meaningful error message
+        let messageToParse = null
+
+        // Check various common error object structures
+        if (error.response?.message) {
+          messageToParse = error.response.message
+        } else if (error.message) {
+          messageToParse = error.message
+        } else if (error.error?.message) {
+          messageToParse = error.error.message
+        } else if (error.response?.data?.message) {
+          messageToParse = error.response.data.message
+        }
+
+        if (messageToParse) {
+          if (typeof messageToParse === 'string') {
+            try {
+              // Try to parse as JSON first (for structured error messages)
+              const parsedMessage = JSON.parse(messageToParse)
+              if (parsedMessage.header && parsedMessage.body) {
+                errorMessage = `${parsedMessage.header}: ${parsedMessage.body}`
+              } else if (parsedMessage.message) {
+                errorMessage = parsedMessage.message
+              } else {
+                errorMessage = messageToParse
+              }
+            } catch {
+              // If JSON parsing fails, use the raw message
+              errorMessage = messageToParse
+            }
+          } else {
+            // If messageToParse is an object, try to extract meaningful info
+            errorMessage =
+              messageToParse.message || JSON.stringify(messageToParse)
+          }
+        } else {
+          // Try to extract useful information from the error object
+          if (error.statusCode && error.error) {
+            errorMessage = `${error.statusCode}: ${error.error}`
+          } else if (error.code && error.detail) {
+            errorMessage = `${error.code}: ${error.detail}`
+          } else {
+            // Stringify the entire error as a fallback, but try to make it readable
+            try {
+              errorMessage = JSON.stringify(error, null, 2)
+            } catch {
+              errorMessage =
+                'An error occurred but could not be formatted for display'
+            }
+          }
+        }
+      }
+
       client.emit('client-registered', {
         success: false,
-        message: error as string
+        message: errorMessage
       })
     }
   }
@@ -275,5 +350,102 @@ export default class ChangeNotifier
       )
     }
     this.logger.log('Rehydrated ChangeNotifier cache')
+  }
+
+  /**
+   * Extract and validate user authentication from socket connection
+   * This mimics the behavior of AuthGuard and ApiKeyGuard but allows us to handle errors gracefully
+   */
+  private async extractAndValidateUser(
+    client: Socket
+  ): Promise<AuthenticatedUserContext> {
+    const X_KEYSHADE_TOKEN = 'x-keyshade-token'
+
+    // Extract API key from socket headers (similar to how AuthGuard does it)
+    const headers = client.handshake.headers
+    const apiKeyValue = headers[X_KEYSHADE_TOKEN] as string
+
+    if (!apiKeyValue) {
+      throw new ForbiddenException('No API key provided')
+    }
+
+    // Validate API key
+    const apiKey = await this.prisma.apiKey.findUnique({
+      where: {
+        value: toSHA256(apiKeyValue)
+      },
+      include: {
+        user: true
+      }
+    })
+
+    if (!apiKey) {
+      throw new ForbiddenException('Invalid API key')
+    }
+
+    // Check if user is active
+    if (!apiKey.user.isActive) {
+      throw new UnauthorizedException('User account is not active')
+    }
+
+    // Get default workspace
+    const defaultWorkspace = await this.prisma.workspace.findFirst({
+      where: {
+        ownerId: apiKey.userId,
+        isDefault: true
+      }
+    })
+
+    // Create authenticated user context
+    const userContext: AuthenticatedUserContext = {
+      ...apiKey.user,
+      defaultWorkspace,
+      ipAddress: client.handshake.address,
+      isAuthViaApiKey: true,
+      apiKeyAuthorities: new Set(apiKey.authorities)
+    }
+
+    // Check required authorities for this socket endpoint
+    const requiredAuthorities = [
+      Authority.READ_WORKSPACE,
+      Authority.READ_PROJECT,
+      Authority.READ_ENVIRONMENT
+    ]
+
+    // If user has ADMIN authority, bypass individual authority checks
+    if (!userContext.apiKeyAuthorities.has(Authority.ADMIN)) {
+      for (const requiredAuthority of requiredAuthorities) {
+        if (!userContext.apiKeyAuthorities.has(requiredAuthority)) {
+          throw new UnauthorizedException(
+            `API key is missing the required authority: ${requiredAuthority}`
+          )
+        }
+      }
+    }
+
+    return userContext
+  }
+
+  /**
+   * Convert AuthenticatedUserContext to AuthenticatedUser for authorization service
+   */
+  private async convertToAuthenticatedUser(
+    userContext: AuthenticatedUserContext
+  ): Promise<AuthenticatedUser> {
+    // Get email preference
+    const emailPreference = await this.prisma.emailPreference.findUnique({
+      where: {
+        userId: userContext.id
+      }
+    })
+
+    if (!emailPreference) {
+      throw new ForbiddenException('User email preferences not found')
+    }
+
+    return {
+      ...userContext,
+      emailPreference
+    }
   }
 }

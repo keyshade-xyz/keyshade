@@ -3,14 +3,13 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common'
 import {
   Authority,
   EventSource,
   EventType,
-  User,
+  Project,
   Workspace,
   WorkspaceMemberRoleAssociation,
   WorkspaceRole
@@ -18,15 +17,16 @@ import {
 import { CreateWorkspaceRole } from './dto/create-workspace-role/create-workspace-role'
 import { UpdateWorkspaceRole } from './dto/update-workspace-role/update-workspace-role'
 import { PrismaService } from '@/prisma/prisma.service'
-import { WorkspaceRoleWithProjects } from './workspace-role.types'
 import { v4 } from 'uuid'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { paginate } from '@/common/paginate'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { createEvent } from '@/common/event'
-import { getCollectiveWorkspaceAuthorities } from '@/common/collective-authorities'
 import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import SlugGenerator from '@/common/slug-generator.service'
+import { HydratedWorkspaceRole, RawWorkspaceRole } from './workspace-role.types'
+import { HydrationService } from '@/common/hydration.service'
+import { InclusionQuery } from '@/common/inclusion-query'
 
 @Injectable()
 export class WorkspaceRoleService {
@@ -35,7 +35,8 @@ export class WorkspaceRoleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -51,26 +52,17 @@ export class WorkspaceRoleService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     dto: CreateWorkspaceRole
-  ) {
+  ): Promise<HydratedWorkspaceRole> {
     this.logger.log(
-      `Creating workspace role ${dto.name} for workspace ${workspaceSlug}. UserID: ${user.id}`
+      `User ${user.id} attempted to create workspace role ${dto.name} in workspace ${workspaceSlug}`
     )
-    if (dto.authorities?.includes(Authority.WORKSPACE_ADMIN)) {
-      this.logger.warn(
-        `Attempt to create workspace role ${dto.name} for workspace ${workspaceSlug} with workspace admin authority. UserID: ${user.id}`
-      )
-      throw new BadRequestException(
-        constructErrorBody(
-          'Can not add workspace admin authority',
-          'You can not explicitly assign workspace admin authority to a role'
-        )
-      )
-    }
+
+    this.checkAdminAuthorityPresence(dto.authorities)
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.CREATE_WORKSPACE_ROLE]
       })
     const workspaceId = workspace.id
@@ -87,14 +79,7 @@ export class WorkspaceRoleService {
       )
     }
 
-    if (await this.checkWorkspaceRoleExists(workspace, dto.name)) {
-      throw new ConflictException(
-        constructErrorBody(
-          'Workspace role already exists',
-          `Another workspace role with the name ${dto.name} already exists`
-        )
-      )
-    }
+    await this.checkWorkspaceRoleExists(workspace.id, dto.name)
 
     const workspaceRoleId = v4()
 
@@ -123,83 +108,12 @@ export class WorkspaceRoleService {
       })
     )
 
-    if (dto.projectEnvironments) {
-      // Create the project associations
-      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments.map((pe) => pe.projectSlug)
-      )
-
-      for (const pe of dto.projectEnvironments) {
-        const projectId = projectSlugToIdMap.get(pe.projectSlug)
-        if (projectId) {
-          if (pe.environmentSlugs) {
-            //Check if all environments are part of the project
-            const project = await this.prisma.project.findFirst({
-              where: {
-                id: projectId,
-                AND: pe.environmentSlugs.map((slug) => ({
-                  environments: {
-                    some: {
-                      slug: slug
-                    }
-                  }
-                }))
-              }
-            })
-
-            if (!project) {
-              throw new BadRequestException(
-                constructErrorBody(
-                  'Some environment slugs are not part of the project',
-                  'Some or all of the environment slugs specified do not belong to this project'
-                )
-              )
-            }
-
-            // Check if the user has read authority over all the environments
-            for (const environmentSlug of pe.environmentSlugs) {
-              try {
-                await this.authorizationService.authorizeUserAccessToEnvironment(
-                  {
-                    user,
-                    entity: {
-                      slug: environmentSlug
-                    },
-                    authorities: [Authority.READ_ENVIRONMENT]
-                  }
-                )
-              } catch {
-                throw new UnauthorizedException(
-                  constructErrorBody(
-                    `Autority to read environment ${environmentSlug} is required`,
-                    `You do not have the required read authority over environment ${environmentSlug}`
-                  )
-                )
-              }
-            }
-          }
-          // Create the project workspace role association with the environments accessible on the project
-          op.push(
-            this.prisma.projectWorkspaceRoleAssociation.create({
-              data: {
-                roleId: workspaceRoleId,
-                projectId: projectId,
-                environments: pe.environmentSlugs && {
-                  connect: pe.environmentSlugs.map((slug) => ({ slug }))
-                }
-              }
-            })
-          )
-        } else {
-          throw new NotFoundException(
-            constructErrorBody(
-              `Project not found`,
-              `Project ${pe.projectSlug} does not exist`
-            )
-          )
-        }
-      }
-    }
+    await this.parseProjectEnvironmentsDBOperation(
+      dto.projectEnvironments,
+      workspaceRoleId,
+      user,
+      op
+    )
 
     // Fetch the new workspace role
     op.push(
@@ -207,31 +121,19 @@ export class WorkspaceRoleService {
         where: {
           id: workspaceRoleId
         },
-        include: {
-          projects: {
-            select: {
-              project: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true
-                }
-              },
-              environments: {
-                select: {
-                  id: true,
-                  slug: true,
-                  name: true
-                }
-              }
-            }
-          },
-          workspaceMembers: true
-        }
+        include: InclusionQuery.WorkspaceRole
       })
     )
 
-    const workspaceRole = (await this.prisma.$transaction(op)).pop()
+    const workspaceRole = await this.parseWorkspaceRoleMembers(
+      (await this.prisma.$transaction(op)).pop()
+    )
+    const hydratedWorkspaceRole =
+      await this.hydrationService.hydrateWorkspaceRole({
+        workspaceRole,
+        user
+      })
+    delete hydratedWorkspaceRole.workspace
 
     await createEvent(
       {
@@ -255,7 +157,7 @@ export class WorkspaceRoleService {
       `${user.email} created workspace role ${workspaceRole.slug}`
     )
 
-    return await this.parseWorkspaceRoleMembers(workspaceRole)
+    return hydratedWorkspaceRole
   }
 
   /**
@@ -271,18 +173,21 @@ export class WorkspaceRoleService {
     user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug'],
     dto: UpdateWorkspaceRole
-  ) {
-    const workspaceRole = (await this.getWorkspaceRoleWithAuthority(
-      user.id,
-      workspaceRoleSlug,
-      Authority.UPDATE_WORKSPACE_ROLE
-    )) as WorkspaceRoleWithProjects
-
-    const isAdminRole = workspaceRole.authorities.includes(
-      Authority.WORKSPACE_ADMIN
+  ): Promise<HydratedWorkspaceRole> {
+    this.logger.log(
+      `User ${user.id} attempted to update workspace role ${workspaceRoleSlug}`
     )
 
-    if (isAdminRole) {
+    this.checkAdminAuthorityPresence(dto.authorities)
+
+    const workspaceRole =
+      await this.authorizationService.authorizeUserAccessToWorkspaceRole({
+        user,
+        slug: workspaceRoleSlug,
+        authorities: [Authority.UPDATE_WORKSPACE_ROLE]
+      })
+
+    if (workspaceRole.hasAdminAuthority) {
       // For the admin role, only allow updating description and colorCode
       if (dto.authorities || dto.name) {
         throw new BadRequestException(
@@ -292,180 +197,48 @@ export class WorkspaceRoleService {
           )
         )
       }
-    } else {
-      // For non-admin roles, prevent assigning admin authority
-      if (
-        dto.authorities &&
-        dto.authorities.includes(Authority.WORKSPACE_ADMIN)
-      ) {
-        throw new BadRequestException(
-          constructErrorBody(
-            'Can not assign admin authority',
-            'You can not explicitly assign workspace admin authority to a role'
-          )
-        )
-      }
     }
 
     const workspaceRoleId = workspaceRole.id
 
-    const workspace = await this.prisma.workspace.findUnique({
-      where: {
-        id: workspaceRole.workspaceId
-      }
-    })
+    await this.checkWorkspaceRoleExists(workspaceRole.workspaceId, dto.name)
 
-    if (
-      dto.name &&
-      ((await this.checkWorkspaceRoleExists(workspace, dto.name)) ||
-        dto.name === workspaceRole.name)
-    ) {
-      throw new ConflictException(
-        constructErrorBody(
-          'Workspace role already exists',
-          `A workspace role with the name ${dto.name} already exists in this workspace`
-        )
-      )
-    }
+    const op = []
 
-    if (dto.projectEnvironments) {
-      await this.prisma.projectWorkspaceRoleAssociation.deleteMany({
+    // Update project environment combo
+    await this.parseProjectEnvironmentsDBOperation(
+      dto.projectEnvironments,
+      workspaceRoleId,
+      user,
+      op
+    )
+
+    // Update workspace role
+    op.push(
+      this.prisma.workspaceRole.update({
         where: {
-          roleId: workspaceRoleId
-        }
-      })
-
-      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
-        dto.projectEnvironments.map((pe) => pe.projectSlug)
-      )
-
-      for (const pe of dto.projectEnvironments) {
-        const projectId = projectSlugToIdMap.get(pe.projectSlug)
-        if (projectId) {
-          if (pe.environmentSlugs && pe.environmentSlugs.length === 0)
-            throw new BadRequestException(
-              constructErrorBody(
-                'Missing environment slugs',
-                `Environment slugs must be specified for project ${pe.projectSlug}`
-              )
-            )
-          if (pe.environmentSlugs) {
-            //Check if all environments are part of the project
-            const project = await this.prisma.project.findFirst({
-              where: {
-                id: projectId,
-                AND: pe.environmentSlugs.map((slug) => ({
-                  environments: {
-                    some: {
-                      slug: slug
-                    }
-                  }
-                }))
-              }
-            })
-
-            if (!project) {
-              throw new BadRequestException(
-                constructErrorBody(
-                  'Invalid environment slugs',
-                  `All environmentSlugs in the project ${pe.projectSlug} are not part of the project`
-                )
-              )
-            }
-
-            // Check if the user has read authority over all the environments
-            for (const environmentSlug of pe.environmentSlugs) {
-              try {
-                await this.authorizationService.authorizeUserAccessToEnvironment(
-                  {
-                    user,
-                    entity: {
-                      slug: environmentSlug
-                    },
-                    authorities: [Authority.READ_ENVIRONMENT]
-                  }
-                )
-              } catch {
-                throw new BadRequestException(
-                  constructErrorBody(
-                    'Missing required authorities',
-                    `You do not have update authority over environment ${environmentSlug}`
-                  )
-                )
-              }
-            }
-          }
-          // Create or Update the project workspace role association with the environments accessible on the project
-          await this.prisma.projectWorkspaceRoleAssociation.upsert({
-            where: {
-              roleId_projectId: {
-                roleId: workspaceRoleId,
-                projectId: projectId
-              }
-            },
-            update: {
-              environments: pe.environmentSlugs && {
-                set: [],
-                connect: pe.environmentSlugs.map((slug) => ({ slug }))
-              }
-            },
-            create: {
-              roleId: workspaceRoleId,
-              projectId: projectId,
-              environments: pe.environmentSlugs && {
-                connect: pe.environmentSlugs.map((slug) => ({ slug }))
-              }
-            }
-          })
-        } else {
-          throw new NotFoundException(
-            constructErrorBody(
-              'Project not found',
-              `Project ${pe.projectSlug} not found`
-            )
-          )
-        }
-      }
-    }
-
-    const updatedWorkspaceRole = await this.prisma.workspaceRole.update({
-      where: {
-        id: workspaceRoleId
-      },
-      data: {
-        name: dto.name,
-        slug: dto.name
-          ? await this.slugGenerator.generateEntitySlug(
-              dto.name,
-              'WORKSPACE_ROLE'
-            )
-          : undefined,
-        description: dto.description,
-        colorCode: dto.colorCode,
-        authorities: dto.authorities
-      },
-      include: {
-        projects: {
-          select: {
-            project: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            },
-            environments: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            }
-          }
+          id: workspaceRoleId
         },
-        workspaceMembers: true
-      }
-    })
+        data: {
+          name: dto.name,
+          slug: dto.name
+            ? await this.slugGenerator.generateEntitySlug(
+                dto.name,
+                'WORKSPACE_ROLE'
+              )
+            : undefined,
+          description: dto.description,
+          colorCode: dto.colorCode,
+          authorities: dto.authorities
+        },
+        include: InclusionQuery.WorkspaceRole
+      })
+    )
+
+    const updatedWorkspaceRole = await this.parseWorkspaceRoleMembers(
+      (await this.prisma.$transaction(op)).pop()
+    )
+
     await createEvent(
       {
         triggeredBy: user,
@@ -485,7 +258,10 @@ export class WorkspaceRoleService {
 
     this.logger.log(`${user.email} updated workspace role ${workspaceRoleSlug}`)
 
-    return await this.parseWorkspaceRoleMembers(updatedWorkspaceRole)
+    return await this.hydrationService.hydrateWorkspaceRole({
+      workspaceRole: updatedWorkspaceRole,
+      user
+    })
   }
 
   /**
@@ -498,11 +274,16 @@ export class WorkspaceRoleService {
     user: AuthenticatedUser,
     workspaceRoleSlug: WorkspaceRole['slug']
   ) {
-    const workspaceRole = await this.getWorkspaceRoleWithAuthority(
-      user.id,
-      workspaceRoleSlug,
-      Authority.DELETE_WORKSPACE_ROLE
+    this.logger.log(
+      `User ${user.id} attempted to delete workspace role ${workspaceRoleSlug}`
     )
+
+    const workspaceRole =
+      await this.authorizationService.authorizeUserAccessToWorkspaceRole({
+        user,
+        slug: workspaceRoleSlug,
+        authorities: [Authority.DELETE_WORKSPACE_ROLE]
+      })
     const workspaceRoleId = workspaceRole.id
 
     if (workspaceRole.hasAdminAuthority) {
@@ -537,7 +318,9 @@ export class WorkspaceRoleService {
       this.prisma
     )
 
-    this.logger.log(`${user.email} deleted workspace role ${workspaceRoleSlug}`)
+    this.logger.log(
+      `User ${user.id} deleted workspace role ${workspaceRoleSlug}`
+    )
   }
 
   /**
@@ -547,39 +330,32 @@ export class WorkspaceRoleService {
    * @param name the name of the workspace role to check
    * @returns true if a workspace role with the given name exists, false otherwise
    */
-  async checkWorkspaceRoleExists(workspace: Workspace, name: string) {
+  async checkWorkspaceRoleExists(
+    workspaceId: Workspace['id'],
+    name?: WorkspaceRole['name']
+  ) {
     this.logger.log(
-      `Checking if workspace role ${name} exists in workspace ${workspace.slug}`
+      `Checking if workspace role ${name} exists in workspace ${workspaceId}`
     )
 
-    return (
-      (await this.prisma.workspaceRole.count({
-        where: {
-          workspaceId: workspace.id,
-          name
-        }
-      })) > 0
-    )
-  }
+    if (name) {
+      const workspaceRoleExists =
+        (await this.prisma.workspaceRole.count({
+          where: {
+            workspaceId,
+            name
+          }
+        })) > 0
 
-  /**
-   * Gets a workspace role by its slug
-   * @throws {UnauthorizedException} if the user does not have the required authority
-   * @param user the user performing the request
-   * @param workspaceRoleSlug the slug of the workspace role to get
-   * @returns the workspace role with the given slug
-   */
-  async getWorkspaceRole(
-    user: AuthenticatedUser,
-    workspaceRoleSlug: WorkspaceRole['slug']
-  ): Promise<WorkspaceRole> {
-    const workspaceRole = await this.getWorkspaceRoleWithAuthority(
-      user.id,
-      workspaceRoleSlug,
-      Authority.READ_WORKSPACE_ROLE
-    )
-
-    return await this.parseWorkspaceRoleMembers(workspaceRole)
+      if (workspaceRoleExists) {
+        throw new ConflictException(
+          constructErrorBody(
+            'Workspace role already exists',
+            `A workspace role with the name ${name} already exists in workspace ${workspaceId}`
+          )
+        )
+      }
+    }
   }
 
   /**
@@ -602,15 +378,16 @@ export class WorkspaceRoleService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedWorkspaceRole>> {
     const { id: workspaceId } =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_WORKSPACE_ROLE]
       })
-    //get workspace roles of a workspace for given page and limit
-    let items = await this.prisma.workspaceRole.findMany({
+
+    // Get workspace roles of a workspace for given page and limit
+    const items = await this.prisma.workspaceRole.findMany({
       where: {
         workspaceId,
         name: {
@@ -619,42 +396,24 @@ export class WorkspaceRoleService {
       },
       skip: page * limit,
       take: limitMaxItemsPerPage(limit),
-
       orderBy: {
         [sort]: order
       },
-
-      include: {
-        projects: {
-          select: {
-            project: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            },
-            environments: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            }
-          }
-        },
-        workspaceMembers: true
-      }
+      include: InclusionQuery.WorkspaceRole
     })
 
-    items = await Promise.all(
-      items.map(
-        async (workspaceRole) =>
-          await this.parseWorkspaceRoleMembers(workspaceRole)
-      )
-    )
+    const hydratedWorkspaceRoles = []
+    for (const workspaceRole of items) {
+      const hydratedWorkspaceRole =
+        await this.hydrationService.hydrateWorkspaceRole({
+          workspaceRole: await this.parseWorkspaceRoleMembers(workspaceRole),
+          user
+        })
+      delete hydratedWorkspaceRole.workspace
+      hydratedWorkspaceRoles.push(hydratedWorkspaceRole)
+    }
 
-    //calculate metadata
+    // Calculate metadata
     const totalCount = await this.prisma.workspaceRole.count({
       where: {
         workspaceId,
@@ -676,79 +435,7 @@ export class WorkspaceRoleService {
       }
     )
 
-    return { items, metadata }
-  }
-
-  /**
-   * Gets a workspace role by its slug, with additional authorities check
-   * @throws {NotFoundException} if the workspace role does not exist
-   * @throws {UnauthorizedException} if the user does not have the required authority
-   * @param userId the user that is performing the request
-   * @param workspaceRoleSlug the slug of the workspace role to get
-   * @param authorities the authorities to check against
-   * @returns the workspace role with the given slug
-   */
-  private async getWorkspaceRoleWithAuthority(
-    userId: User['id'],
-    workspaceRoleSlug: Workspace['slug'],
-    authorities: Authority
-  ) {
-    const workspaceRole = await this.prisma.workspaceRole.findUnique({
-      where: {
-        slug: workspaceRoleSlug
-      },
-      include: {
-        projects: {
-          select: {
-            project: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            },
-            environments: {
-              select: {
-                id: true,
-                slug: true,
-                name: true
-              }
-            }
-          }
-        },
-        workspaceMembers: true
-      }
-    })
-
-    if (!workspaceRole) {
-      throw new NotFoundException(
-        constructErrorBody(
-          `Workspace role not found`,
-          `The workspace role ${workspaceRoleSlug} does not exist`
-        )
-      )
-    }
-
-    const permittedAuthorities = await getCollectiveWorkspaceAuthorities(
-      workspaceRole.workspaceId,
-      userId,
-      this.prisma,
-      this.logger
-    )
-
-    if (
-      !permittedAuthorities.has(authorities) &&
-      !permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    ) {
-      throw new UnauthorizedException(
-        constructErrorBody(
-          'Unauthorized',
-          `You do not have the required authorities to perform the action`
-        )
-      )
-    }
-
-    return workspaceRole
+    return { items: hydratedWorkspaceRoles, metadata }
   }
 
   /**
@@ -758,17 +445,27 @@ export class WorkspaceRoleService {
    * @returns A Map where each key is a project slug and the value is the project ID.
    */
   private async getProjectSlugToIdMap(
-    slugs: string[]
-  ): Promise<Map<string, string>> {
+    slugs: Project['slug'][],
+    user: AuthenticatedUser
+  ): Promise<Map<Project['slug'], Project['id']>> {
+    const map = new Map<Project['slug'], Project['id']>()
+
     if (slugs.length === 0) {
-      return new Map()
+      return map
     }
 
-    const projects = await this.prisma.project.findMany({
-      where: { slug: { in: slugs } }
-    })
+    for (const slug of slugs) {
+      const project =
+        await this.authorizationService.authorizeUserAccessToProject({
+          slug,
+          authorities: [Authority.READ_PROJECT],
+          user
+        })
 
-    return new Map(projects.map((project) => [project.slug, project.id]))
+      map.set(slug, project.id)
+    }
+
+    return map
   }
 
   /**
@@ -782,10 +479,10 @@ export class WorkspaceRoleService {
    * @returns the parsed workspace role with the associated members
    */
   private async parseWorkspaceRoleMembers<
-    T extends WorkspaceRole & {
+    T extends RawWorkspaceRole & {
       workspaceMembers: WorkspaceMemberRoleAssociation[]
     }
-  >(workspaceRole: T) {
+  >(workspaceRole: T): Promise<RawWorkspaceRole> {
     const workspaceMemberIds = workspaceRole.workspaceMembers.map(
       (workspaceMember) => workspaceMember.workspaceMemberId
     )
@@ -803,12 +500,13 @@ export class WorkspaceRoleService {
     })
 
     const members = users.map((user) => ({
+      id: user.id,
       name: user.name,
       email: user.email,
       profilePictureUrl: user.profilePictureUrl,
       memberSince: workspaceMembers.find(
         (workspaceMember) => workspaceMember.userId === user.id
-      )!.createdOn
+      ).createdOn
     }))
 
     delete workspaceRole.workspaceMembers
@@ -817,5 +515,92 @@ export class WorkspaceRoleService {
       ...workspaceRole,
       members
     }
+  }
+
+  /**
+   * Checks if the given authorities contains the workspace admin authority.
+   * If it does, it throws a BadRequestException because workspace admin authority
+   * can not be explicitly assigned to a role.
+   * @param authorities the authorities to check
+   */
+  private checkAdminAuthorityPresence(authorities?: Authority[]): void {
+    if (authorities?.includes(Authority.WORKSPACE_ADMIN)) {
+      this.logger.error(
+        `Attempted to create workspace role with workspace admin authority`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'Can not add workspace admin authority',
+          'You can not explicitly assign workspace admin authority to a role'
+        )
+      )
+    }
+  }
+
+  private async parseProjectEnvironmentsDBOperation(
+    projectEnvironments: CreateWorkspaceRole['projectEnvironments'],
+    workspaceRoleId: WorkspaceRole['id'],
+    user: AuthenticatedUser,
+    op: any[]
+  ): Promise<any[]> {
+    if (projectEnvironments) {
+      // Create the project associations
+      const projectSlugToIdMap = await this.getProjectSlugToIdMap(
+        projectEnvironments.map((pe) => pe.projectSlug),
+        user
+      )
+
+      for (const pe of projectEnvironments) {
+        const projectId = projectSlugToIdMap.get(pe.projectSlug)
+
+        if (pe.environmentSlugs) {
+          // Check if the user has read authority over all the environments
+          for (const environmentSlug of pe.environmentSlugs) {
+            const environment =
+              await this.authorizationService.authorizeUserAccessToEnvironment({
+                user,
+                slug: environmentSlug,
+                authorities: [Authority.READ_ENVIRONMENT]
+              })
+
+            // Check if the environment is part of the project
+            if (environment.projectId !== projectId) {
+              throw new BadRequestException(
+                constructErrorBody(
+                  'Invalid environment slugs',
+                  `Environment ${environmentSlug} is not part of project ${pe.projectSlug}`
+                )
+              )
+            }
+          }
+        }
+
+        // Create the project workspace role association with the environments accessible on the project
+        op.push(
+          this.prisma.projectWorkspaceRoleAssociation.upsert({
+            where: {
+              roleId_projectId: {
+                roleId: workspaceRoleId,
+                projectId: projectId
+              }
+            },
+            update: {
+              environments: pe.environmentSlugs && {
+                set: [],
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            },
+            create: {
+              roleId: workspaceRoleId,
+              projectId: projectId,
+              environments: pe.environmentSlugs && {
+                connect: pe.environmentSlugs.map((slug) => ({ slug }))
+              }
+            }
+          })
+        )
+      }
+    }
+    return op
   }
 }

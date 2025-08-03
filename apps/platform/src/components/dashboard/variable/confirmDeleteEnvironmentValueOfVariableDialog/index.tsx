@@ -37,7 +37,7 @@ export default function ConfirmDeleteEnvironmentValueOfVariableDialog(): React.J
   const deleteEnvironmentValueOfVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.deleteEnvironmentValueOfVariable(
       {
-        variableSlug: selectedVariable!.variable.slug,
+        variableSlug: selectedVariable!.slug,
         environmentSlug: selectedVariableEnvironment!
       }
     )
@@ -73,10 +73,10 @@ export default function ConfirmDeleteEnvironmentValueOfVariableDialog(): React.J
           // Remove the environment value from the state
           setVariablesOfProject((prev) =>
             prev.map((variable) => {
-              if (variable.variable.slug === selectedVariable.variable.slug) {
+              if (variable.slug === selectedVariable.slug) {
                 return {
                   ...variable,
-                  values: variable.values.filter(
+                  versions: variable.versions.filter(
                     (value) =>
                       value.environment.slug !== selectedVariableEnvironment
                   )

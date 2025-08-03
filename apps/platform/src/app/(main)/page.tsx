@@ -32,6 +32,9 @@ export default function Index(): React.JSX.Element {
   const isDeleteProjectOpen = useAtomValue(deleteProjectOpenAtom)
   const selectedProject = useAtomValue(selectedProjectAtom)
 
+  const isAuthorizedToViewProject =
+    selectedWorkspace?.entitlements.canReadProjects
+
   const { loading, isProjectsEmpty, fetchProjects } = useGetAllProjects()
 
   const getSelf = useHttp(() =>
@@ -46,9 +49,15 @@ export default function Index(): React.JSX.Element {
     })
   }, [getSelf, setUser])
 
+  if (!isAuthorizedToViewProject) {
+    return (
+      <div>You do not have permission to view projects in this workspace.</div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <PageTitle title={`${selectedWorkspace?.name} | Dashboard`} />
+      <PageTitle title={`${selectedWorkspace.name} | Dashboard`} />
       <div className="flex items-center justify-between">
         <Visible if={!isProjectsEmpty}>
           <h1 className="text-[1.75rem] font-semibold ">My Projects</h1>
@@ -69,7 +78,7 @@ export default function Index(): React.JSX.Element {
       </ProjectLoader>
 
       <Visible if={Boolean(isDeleteProjectOpen && selectedProject)}>
-          <ConfirmDeleteProject />
+        <ConfirmDeleteProject />
       </Visible>
 
       <EditProjectSheet />

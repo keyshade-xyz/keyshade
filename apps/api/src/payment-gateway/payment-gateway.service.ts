@@ -6,7 +6,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { AuthorizationService } from '@/auth/service/authorization.service'
 import dayjs from 'dayjs'
 import { constructErrorBody } from '@/common/util'
-import { WorkspaceWithLastUpdatedByAndOwnerAndSubscription } from '@/workspace/workspace.types'
+import { HydratedWorkspace } from '@/workspace/workspace.types'
 import { POLAR_CLIENT } from '@/provider/polar.provider'
 import { Polar } from '@polar-sh/sdk'
 import { Invoice, PaymentHistory } from './payment-gateway.types'
@@ -170,10 +170,10 @@ export abstract class PaymentGatewayService {
   protected async getAuthorizedWorkspace(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
+  ): Promise<HydratedWorkspace> {
     return this.authorizationService.authorizeUserAccessToWorkspace({
       user,
-      entity: { slug: workspaceSlug },
+      slug: workspaceSlug,
       authorities: [Authority.WORKSPACE_ADMIN]
     })
   }
@@ -188,7 +188,7 @@ export abstract class PaymentGatewayService {
   protected async validateWorkspaceForNewSubscription(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
+  ): Promise<HydratedWorkspace> {
     const workspace = await this.getAuthorizedWorkspace(user, workspaceSlug)
 
     if (
@@ -222,7 +222,7 @@ export abstract class PaymentGatewayService {
   protected async validateWorkspaceForExistingSubscription(
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug']
-  ): Promise<WorkspaceWithLastUpdatedByAndOwnerAndSubscription> {
+  ): Promise<HydratedWorkspace> {
     const workspace = await this.getAuthorizedWorkspace(user, workspaceSlug)
 
     if (workspace.subscription.plan === SubscriptionPlanType.FREE) {

@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { AddSVG } from '@public/svg/shared'
+import { Input } from '../../../ui/input'
+import { Button } from '../../../ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,8 +12,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../ui/dialog'
-import { Button } from '../../../ui/button'
-import { Input } from '../../../ui/input'
 import ControllerInstance from '@/lib/controller-instance'
 import {
   createSecretOpenAtom,
@@ -29,6 +29,9 @@ export default function AddSecretDialog() {
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setProjectSecretCount = useSetAtom(projectSecretCountAtom)
   const setSecrets = useSetAtom(secretsOfProjectAtom)
+
+  const isAuthorizedToCreateSecret =
+    selectedProject?.entitlements.canCreateSecrets
 
   const [requestData, setRequestData] = useState({
     name: '',
@@ -105,6 +108,7 @@ export default function AddSecretDialog() {
         <DialogTrigger asChild>
           <Button
             className="bg-[#26282C] hover:bg-[#161819] hover:text-white/55"
+            disabled={!isAuthorizedToCreateSecret}
             variant="outline"
           >
             <AddSVG /> Add Secret

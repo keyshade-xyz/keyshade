@@ -30,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
 import {
   deleteEnvironmentValueOfSecretOpenAtom,
   deleteSecretOpenAtom,
@@ -40,6 +41,7 @@ import {
 } from '@/store'
 import AvatarComponent from '@/components/common/avatar'
 import { copyToClipboard } from '@/lib/clipboard'
+import ControllerInstance from '@/lib/controller-instance'
 
 interface SecretCardProps {
   secretData: Secret
@@ -52,7 +54,7 @@ export default function SecretCard({
   privateKey,
   className
 }: SecretCardProps) {
-  const { secret, values } = secretData
+  const { versions } = secretData
 
   const setSelectedSecret = useSetAtom(selectedSecretAtom)
   const setIsEditSecretOpen = useSetAtom(editSecretOpenAtom)
@@ -65,14 +67,20 @@ export default function SecretCard({
     selectedSecretEnvironmentAtom
   )
   const [isSecretRevealed, setIsSecretRevealed] = useState<boolean>(false)
+  const [disabledEnvironments, setDisabledEnvironments] = useState<Set<string>>(
+    new Set()
+  )
   const [decryptedValues, setDecryptedValues] = useState<
     Record<Environment['id'], string>
   >({})
 
+  const isAuthorizedToEditSecrets = secretData.entitlements.canUpdate
+  const isAuthorizedToDeleteSecrets = secretData.entitlements.canDelete
+
   const handleDecryptValues = useCallback(
     (environmentSlug: Environment['slug']) => {
       if (!privateKey) return
-      const targetValue = values.find(
+      const targetValue = versions.find(
         (value) => value.environment.slug === environmentSlug
       )
       if (!targetValue) return
@@ -93,21 +101,74 @@ export default function SecretCard({
           }))
         })
     },
-    [privateKey, values]
+    [privateKey, versions]
   )
 
   useEffect(() => {
-    handleDecryptValues(secretData.values[0]?.environment.slug)
-  }, [secretData.values, handleDecryptValues])
+    const fetchDisabled = async () => {
+      try {
+        const res =
+          await ControllerInstance.getInstance().secretController.getAllDisabledEnvironmentsOfSecret(
+            { secretSlug: secretData.slug }
+          )
+
+        if (res.success && res.data) {
+          setDisabledEnvironments(new Set(res.data))
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console -- console.error is used for debugging
+        console.error('Failed to load disabled environments', error)
+      }
+    }
+
+    fetchDisabled()
+  }, [secretData.slug])
+
+  useEffect(() => {
+    handleDecryptValues(secretData.versions[0]?.environment.slug)
+  }, [secretData.versions, handleDecryptValues])
 
   const handleCopyToClipboard = () => {
     copyToClipboard(
-      secret.slug,
+      secretData.slug,
       'You copied the slug successfully.',
       'Failed to copy the slug.',
       'You successfully copied the slug.'
     )
   }
+
+  const handleToggleDisableSecretClick = async (
+    environmentSlug: Environment['slug'],
+    environmentId: Environment['id'],
+    checked: boolean
+  ) => {
+    const controller = ControllerInstance.getInstance().secretController
+
+    if (checked) {
+      // Enable secret
+      await controller.enableSecret({
+        secretSlug: secretData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.delete(environmentId) // Update local state
+        return next
+      })
+    } else {
+      // Disable secret
+      await controller.disableSecret({
+        secretSlug: secretData.slug,
+        environmentSlug
+      })
+      setDisabledEnvironments((prev) => {
+        const next = new Set(prev)
+        next.add(environmentId) // Update local state
+        return next
+      })
+    }
+  }
+
   const handleRevealEnvironmentValueOfSecretClick = (
     environment: Environment['slug']
   ) => {
@@ -147,23 +208,25 @@ export default function SecretCard({
     <ContextMenu>
       <AccordionItem
         className={`rounded-xl bg-white/5 px-5 ${className}`}
-        id={`secret-${secretData.secret.slug}`}
-        key={secret.id}
-        value={secret.id}
+        id={`secret-${secretData.slug}`}
+        key={secretData.id}
+        value={secretData.id}
       >
         <ContextMenuTrigger>
           <AccordionTrigger
             className="overflow-hidden hover:no-underline"
             rightChildren={
               <div className="flex items-center gap-x-4 text-xs text-white/50">
-                {dayjs(secret.updatedAt).toNow(true)} ago by{' '}
+                {dayjs(secretData.updatedAt).toNow(true)} ago by{' '}
                 <div className="flex items-center gap-x-2">
                   <span className="text-white">
-                    {secret.lastUpdatedBy.name}
+                    {secretData.lastUpdatedBy.name}
                   </span>
                   <AvatarComponent
-                    name={secret.lastUpdatedBy.name}
-                    profilePictureUrl={secret.lastUpdatedBy.profilePictureUrl}
+                    name={secretData.lastUpdatedBy.name}
+                    profilePictureUrl={
+                      secretData.lastUpdatedBy.profilePictureUrl
+                    }
                   />
                 </div>
               </div>
@@ -172,16 +235,16 @@ export default function SecretCard({
             <div className="mr-5 flex flex-1 gap-x-5 overflow-hidden">
               <div className="flex items-center gap-x-4 truncate">
                 {/* <SecretLogoSVG /> */}
-                {secret.name}
+                {secretData.name}
               </div>
-              {secret.note ? (
+              {secretData.note ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <NoteIconSVG className="w-7" />
                     </TooltipTrigger>
                     <TooltipContent className="border-white/20 bg-white/10 text-white backdrop-blur-xl">
-                      <p>{secret.note}</p>
+                      <p>{secretData.note}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -190,7 +253,7 @@ export default function SecretCard({
           </AccordionTrigger>
         </ContextMenuTrigger>
         <AccordionContent>
-          {values.length > 0 ? (
+          {versions.length > 0 ? (
             <Table className="h-full w-full">
               <TableHeader className="h-[3.125rem] w-full">
                 <TableRow className="h-[3.125rem] w-full bg-white/10">
@@ -207,10 +270,13 @@ export default function SecretCard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {values.map((value) => {
+                {versions.map((value) => {
                   const isRevealed =
                     isSecretRevealed &&
                     value.environment.slug === selectedSecretEnvironment
+                  const isDisabled = disabledEnvironments.has(
+                    value.environment.id
+                  )
                   return (
                     <TableRow
                       className="group h-[3.125rem] w-full hover:bg-white/5"
@@ -229,6 +295,16 @@ export default function SecretCard({
                       </TableCell>
                       <TableCell className="h-full px-8 py-4 text-base opacity-0 transition-all duration-150 ease-in-out group-hover:opacity-100">
                         <div className="flex gap-3">
+                          <Switch
+                            checked={!isDisabled}
+                            onCheckedChange={(checked) => {
+                              handleToggleDisableSecretClick(
+                                value.environment.slug,
+                                value.environment.id,
+                                checked
+                              )
+                            }}
+                          />
                           {privateKey ? (
                             <button
                               className="duration-300 hover:scale-105"
@@ -283,12 +359,14 @@ export default function SecretCard({
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!isAuthorizedToEditSecrets}
           onSelect={handleEditClick}
         >
           Edit
         </ContextMenuItem>
         <ContextMenuItem
           className="h-[33%] w-[15.938rem] text-xs font-semibold tracking-wide"
+          disabled={!isAuthorizedToDeleteSecrets}
           onSelect={handleDeleteClick}
         >
           Delete

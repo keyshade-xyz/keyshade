@@ -1,11 +1,11 @@
 'use client'
 import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useAtom, useSetAtom } from 'jotai'
-import OverviewPage from './@overview/page'
-import EnvironmentPage from './@environment/page'
-import SecretPage from './@secret/page'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import VariablePage from './@variable/page'
+import SecretPage from './@secret/page'
+import EnvironmentPage from './@environment/page'
+import OverviewPage from './@overview/page'
 import ControllerInstance from '@/lib/controller-instance'
 import AddSecretDialog from '@/components/dashboard/secret/addSecretDialogue'
 import {
@@ -14,7 +14,8 @@ import {
   globalSearchDataAtom,
   projectEnvironmentCountAtom,
   projectSecretCountAtom,
-  projectVariableCountAtom
+  projectVariableCountAtom,
+  selectedWorkspaceAtom
 } from '@/store'
 import AddVariableDialogue from '@/components/dashboard/variable/addVariableDialogue'
 import AddEnvironmentDialogue from '@/components/dashboard/environment/addEnvironmentDialogue'
@@ -23,6 +24,7 @@ import { useHttp } from '@/hooks/use-http'
 function DetailedProjectPage(): JSX.Element {
   const { project: projectSlug }: { project: string } = useParams()
   const [selectedProject, setSelectedProject] = useAtom(selectedProjectAtom)
+  const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setEnvironmentCount = useSetAtom(projectEnvironmentCountAtom)
   const setSecretCount = useSetAtom(projectSecretCountAtom)
   const setVariableCount = useSetAtom(projectVariableCountAtom)
@@ -31,6 +33,11 @@ function DetailedProjectPage(): JSX.Element {
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
+
+  const isAuthorizedToViewProject =
+    selectedWorkspace?.entitlements.canReadProjects
+  const isAuthorizedToViewEnvironments =
+    selectedProject?.entitlements.canReadEnvironments
 
   const getProject = useHttp(() =>
     ControllerInstance.getInstance().projectController.getProject({
@@ -48,6 +55,7 @@ function DetailedProjectPage(): JSX.Element {
 
   useEffect(() => {
     if (!projectSlug) return
+    if (!isAuthorizedToViewProject) return
 
     getProject().then(({ data, success, error }) => {
       if (success && data) {
@@ -65,11 +73,12 @@ function DetailedProjectPage(): JSX.Element {
     setSelectedProject,
     setEnvironmentCount,
     setSecretCount,
-    setVariableCount
+    setVariableCount,
+    isAuthorizedToViewProject
   ])
 
   useEffect(() => {
-    selectedProject &&
+    isAuthorizedToViewEnvironments &&
       getAllEnvironmentsOfProject().then(({ data, success }) => {
         if (success && data) {
           setEnvironments(data.items)
@@ -87,7 +96,8 @@ function DetailedProjectPage(): JSX.Element {
     getAllEnvironmentsOfProject,
     selectedProject,
     setEnvironments,
-    setGlobalSearchData
+    setGlobalSearchData,
+    isAuthorizedToViewEnvironments
   ])
 
   return (

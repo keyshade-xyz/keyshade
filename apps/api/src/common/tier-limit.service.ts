@@ -8,8 +8,8 @@ import {
   Workspace
 } from '@prisma/client'
 import { constructErrorBody } from './util'
-import { SecretWithProject } from '@/secret/secret.types'
-import { VariableWithProject } from '@/variable/variable.types'
+import { HydratedSecret } from '@/secret/secret.types'
+import { HydratedVariable } from '@/variable/variable.types'
 
 const INFINITE = -1 // Used to represent infinite limit
 
@@ -431,7 +431,7 @@ export class TierLimitService {
   }
 
   async checkConfigurationVersionLimitReached(
-    configuration: SecretWithProject | VariableWithProject,
+    configuration: HydratedSecret | HydratedVariable,
     environmentId: Environment['id'],
     type: 'secret' | 'variable'
   ) {

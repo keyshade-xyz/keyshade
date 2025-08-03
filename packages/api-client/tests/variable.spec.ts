@@ -78,7 +78,7 @@ describe('Get Variable Tests', () => {
       }
     )
 
-    variableSlug = variable.data.variable.slug
+    variableSlug = variable.data.slug
   })
 
   afterEach(async () => {
@@ -106,16 +106,16 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(variable.data.variable.name).toBe('Variable 2')
-    expect(variable.data.values.length).toBe(1)
-    expect(variable.data.values[0].value).toBe('Variable 2 value')
-    expect(variable.data.values[0].environment.id).toBe(environment.id)
-    expect(variable.data.values[0].environment.slug).toBe(environment.slug)
+    expect(variable.data.name).toBe('Variable 2')
+    expect(variable.data.versions.length).toBe(1)
+    expect(variable.data.versions[0].value).toBe('Variable 2 value')
+    expect(variable.data.versions[0].environment.id).toBe(environment.id)
+    expect(variable.data.versions[0].environment.slug).toBe(environment.slug)
 
     // Delete the variable
     const deleteVariable = await variableController.deleteVariable(
       {
-        variableSlug: variable.data.variable.slug
+        variableSlug: variable.data.slug
       },
       {
         'x-e2e-user-email': email
@@ -135,12 +135,12 @@ describe('Get Variable Tests', () => {
         'x-e2e-user-email': email
       }
     )
-    expect(updatedVariable.data.variable.name).toBe('UpdatedVariable 1')
+    expect(updatedVariable.data.name).toBe('UpdatedVariable 1')
 
     // Delete the variable
     const deleteVariable = await variableController.deleteVariable(
       {
-        variableSlug: updatedVariable.data.variable.slug
+        variableSlug: updatedVariable.data.slug
       },
       {
         'x-e2e-user-email': email
@@ -163,12 +163,10 @@ describe('Get Variable Tests', () => {
       },
       { 'x-e2e-user-email': email }
     )
-    expect(updateVariable.data.updatedVersions.length).toBe(1)
-    expect(updateVariable.data.updatedVersions[0].value).toBe('1234')
-    expect(updateVariable.data.updatedVersions[0].environment.id).toBe(
-      environment.id
-    )
-    expect(updateVariable.data.updatedVersions[0].environment.slug).toBe(
+    expect(updateVariable.data.versions.length).toBe(2)
+    expect(updateVariable.data.versions[0].value).toBe('1234')
+    expect(updateVariable.data.versions[0].environment.id).toBe(environment.id)
+    expect(updateVariable.data.versions[0].environment.slug).toBe(
       environment.slug
     )
   })
@@ -208,9 +206,8 @@ describe('Get Variable Tests', () => {
     )
 
     expect(response.data.items.length).toBe(1)
-    const variable1 = response.data.items[0]
-    const variable = variable1.variable
-    const values = variable1.values
+    const variable = response.data.items[0]
+    const values = variable.versions
     expect(variable).toHaveProperty('slug')
 
     expect(variable).toHaveProperty('name')

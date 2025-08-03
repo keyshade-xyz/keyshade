@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Button } from '@/components/ui/button'
@@ -35,19 +35,14 @@ export default function EditVariablSheet() {
   const selectedVariableData = useAtomValue(selectedVariableAtom)
   const setVariables = useSetAtom(variablesOfProjectAtom)
 
-  const [requestData, setRequestData] = useState<{
-    name: string | undefined
-    note: string | undefined
-  }>({
-    name: selectedVariableData?.variable.name,
-    note: selectedVariableData?.variable.note || ''
-  })
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [name, setName] = useState(selectedVariableData?.name || '')
+  const [note, setNote] = useState(selectedVariableData?.note || '')
+  const [isLoading, setIsLoading] = useState(false)
   const [environmentValues, setEnvironmentValues] = useState<
     Record<string, string>
   >(
     () =>
-      selectedVariableData?.values.reduce(
+      selectedVariableData?.versions.reduce(
         (acc, entry) => {
           acc[entry.environment.slug] = entry.value
           return acc
@@ -55,138 +50,166 @@ export default function EditVariablSheet() {
         {} as Record<string, string>
       ) || {}
   )
-
-  const updateVariable = useHttp(() =>
-    ControllerInstance.getInstance().variableController.updateVariable({
-      variableSlug: selectedVariableData!.variable.slug,
-      name:
-        requestData.name === selectedVariableData!.variable.name ||
-        requestData.name === ''
-          ? undefined
-          : requestData.name,
-      note: requestData.note === '' ? undefined : requestData.note,
-      entries: parseUpdatedEnvironmentValues(
-        selectedVariableData!.values,
-        environmentValues
-      )
-    })
+  const originalValues = useMemo(
+    () =>
+      selectedVariableData?.versions.reduce(
+        (acc, entry) => {
+          acc[entry.environment.slug] = entry.value
+          return acc
+        },
+        {} as Record<string, string>
+      ) || {},
+    [selectedVariableData]
   )
 
-  const handleClose = useCallback(() => {
-    setIsEditVariableOpen(false)
-  }, [setIsEditVariableOpen])
+  const hasChanges = useMemo(() => {
+    if (!selectedVariableData) return false
 
-  const updateRequestData = useCallback((key: string, value: string) => {
-    setRequestData((prev) => ({
-      ...prev,
-      [key]: value
-    }))
-  }, [])
+    const nameChanged = name !== selectedVariableData.name
+    const noteChanged = note !== (selectedVariableData.note || '')
 
-  const handleUpdateVariable = useCallback(async () => {
-    if (selectedVariableData) {
-      setIsLoading(true)
-      toast.loading('Updating variable...')
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
 
-      try {
-        const { success, data } = await updateVariable()
-        if (success && data) {
-          toast.success('Variable edited successfully', {
-            description: (
-              <p className="text-xs text-emerald-300">
-                You successfully edited the variable
-              </p>
-            )
-          })
-          // Update the variable in the store
-          setVariables((prev) => {
-            const newVariables = prev.map((v) => {
-              if (v.variable.slug === selectedVariableData.variable.slug) {
-                return {
-                  ...v,
-                  variable: {
-                    ...v.variable,
-                    name: requestData.name || v.variable.name,
-                    note: requestData.note || v.variable.note,
-                    slug: data.variable.slug
-                  },
-                  values: mergeExistingEnvironments(
-                    v.values,
-                    data.updatedVersions
-                  )
-                }
-              }
-              return v
-            })
-            return newVariables
-          })
-          handleClose()
-        }
-      } finally {
-        setIsLoading(false)
-        toast.dismiss()
+    const envChanged = Array.from(allEnvironmentSlugs).some((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+      return originalValue !== currentValue
+    })
+
+    return nameChanged || noteChanged || envChanged
+  }, [name, note, environmentValues, originalValues, selectedVariableData])
+
+  const getChangedEnvValues = () => {
+    const changed: Record<string, string> = {}
+    const allEnvironmentSlugs = new Set([
+      ...Object.keys(originalValues),
+      ...Object.keys(environmentValues)
+    ])
+
+    Array.from(allEnvironmentSlugs).forEach((slug) => {
+      const originalValue = originalValues[slug] || ''
+      const currentValue = environmentValues[slug] || ''
+
+      if (originalValue !== currentValue) {
+        changed[slug] = currentValue
       }
+    })
+
+    return changed
+  }
+
+  const updateVariable = useHttp(() => {
+    const changedEnvValues = getChangedEnvValues()
+    const hasEnvChanges = Object.keys(changedEnvValues).length > 0
+
+    return ControllerInstance.getInstance().variableController.updateVariable({
+      variableSlug: selectedVariableData!.slug,
+      name: name !== selectedVariableData!.name ? name.trim() : undefined,
+      note:
+        note !== (selectedVariableData!.note || '') ? note.trim() : undefined,
+      entries: hasEnvChanges
+        ? parseUpdatedEnvironmentValues(
+            selectedVariableData!.versions.filter((v) =>
+              Object.prototype.hasOwnProperty.call(
+                changedEnvValues,
+                v.environment.slug
+              )
+            ),
+            changedEnvValues
+          )
+        : undefined
+    })
+  })
+
+  const handleSave = useCallback(async () => {
+    if (!selectedVariableData || !hasChanges) return
+
+    setIsLoading(true)
+    toast.loading('Updating variable...')
+
+    try {
+      const { success, data } = await updateVariable()
+      if (success && data) {
+        toast.success('Variable updated successfully')
+
+        setVariables((prev) =>
+          prev.map((v) => {
+            if (v.slug === selectedVariableData.slug) {
+              return {
+                ...v,
+                variable: {
+                  name,
+                  note,
+                  slug: data.slug
+                },
+                versions: mergeExistingEnvironments(v.versions, data.versions)
+              }
+            }
+            return v
+          })
+        )
+
+        setIsEditVariableOpen(false)
+      }
+    } finally {
+      setIsLoading(false)
+      toast.dismiss()
     }
   }, [
     selectedVariableData,
+    hasChanges,
     updateVariable,
     setVariables,
-    handleClose,
-    requestData.name,
-    requestData.note
+    name,
+    note,
+    setIsEditVariableOpen
   ])
 
   return (
-    <Sheet
-      onOpenChange={(open) => {
-        setIsEditVariableOpen(open)
-      }}
-      open={isEditVariableOpen}
-    >
+    <Sheet onOpenChange={setIsEditVariableOpen} open={isEditVariableOpen}>
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
-          <SheetTitle className="text-white">Edit this variable</SheetTitle>
+          <SheetTitle className="text-white">Edit Variable</SheetTitle>
           <SheetDescription className="text-white/60">
-            Edit the variable name or the note
+            Edit the variable name, note, or environment values
           </SheetDescription>
         </SheetHeader>
-        <div className="grid gap-x-4 gap-y-6 py-8">
-          <div className="flex flex-col items-start gap-x-4 gap-y-3">
-            <Label className="text-right" htmlFor="name">
-              Variable Name
-            </Label>
+
+        <div className="grid gap-6 py-8">
+          <div className="space-y-2">
+            <Label htmlFor="name">Variable Name</Label>
             <Input
-              className="col-span-3 h-[2.75rem]"
               id="name"
-              onChange={(e) => updateRequestData(e.target.id, e.target.value)}
-              placeholder="Enter the name of the variable"
-              value={requestData.name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter variable name"
+              value={name}
             />
           </div>
 
-          <div className="flex flex-col items-start gap-x-4 gap-y-3">
-            <Label className="text-right" htmlFor="name">
-              Extra Note
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="note">Note</Label>
             <Textarea
-              className="col-span-3 h-[2.75rem]"
-              id="name"
-              onChange={(e) => updateRequestData(e.target.id, e.target.value)}
-              placeholder="Enter the note of the variable"
-              value={requestData.note}
+              id="note"
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Enter note"
+              value={note}
             />
           </div>
+
           <EnvironmentValueEditor
             environmentValues={environmentValues}
             setEnvironmentValues={setEnvironmentValues}
           />
         </div>
-        <SheetFooter className="py-3">
+
+        <SheetFooter>
           <SheetClose asChild>
             <Button
-              className="font-semibold"
-              disabled={isLoading}
-              onClick={handleUpdateVariable}
+              disabled={isLoading || !hasChanges}
+              onClick={handleSave}
               variant="secondary"
             >
               Save Changes

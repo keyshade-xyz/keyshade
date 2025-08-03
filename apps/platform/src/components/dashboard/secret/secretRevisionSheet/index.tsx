@@ -2,8 +2,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import type { Environment, SecretVersion } from '@keyshade/schema'
 import dayjs from 'dayjs'
-import { RollbackSVG } from '@public/svg/shared'
 import { decrypt } from '@keyshade/common'
+import { RollbackSVG } from '@public/svg/shared'
 import {
   Sheet,
   SheetContent,
@@ -30,6 +30,7 @@ import {
   AccordionTrigger,
   AccordionContent
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 
 function Loader() {
   return (
@@ -60,11 +61,13 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(true)
 
+  const isAuthorizedToEditSecret = selectedSecret?.entitlements.canUpdate
+
   const getAllRevisionsOfSecret = useHttp(
     (environmentSlug: Environment['slug']) =>
       ControllerInstance.getInstance().secretController.getRevisionsOfSecret({
         environmentSlug,
-        secretSlug: selectedSecret!.secret.slug
+        secretSlug: selectedSecret!.slug
       })
   )
 
@@ -151,11 +154,11 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
       <SheetContent className="border-white/15 bg-[#222425]">
         <SheetHeader>
           <SheetTitle className="text-white">
-            {selectedSecret?.secret.name}&apos;s revisions
+            {selectedSecret?.name}&apos;s revisions
           </SheetTitle>
           <SheetDescription className="text-white/60">
-            See all the values of {selectedSecret?.secret.name} from the past.
-            You can also roll back to a previous version from here.
+            See all the values of {selectedSecret?.name} from the past. You can
+            also roll back to a previous version from here.
           </SheetDescription>
         </SheetHeader>
         <div className="my-10 flex w-full flex-col">
@@ -214,8 +217,9 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                 <span>{revision.createdBy.name} </span>
                               </div>
                               {index !== 0 ? (
-                                <button
-                                  className="opacity-0 transition-all duration-150 ease-in group-hover:opacity-100"
+                                <Button
+                                  className="opacity-20 transition-all duration-150 ease-in hover:bg-transparent disabled:border-transparent disabled:bg-transparent group-hover:opacity-100"
+                                  disabled={!isAuthorizedToEditSecret}
                                   onClick={() =>
                                     handleRollbackClick(
                                       environmentSlug,
@@ -223,9 +227,10 @@ export default function SecretRevisionsSheet(): React.JSX.Element {
                                     )
                                   }
                                   type="button"
+                                  variant="ghost"
                                 >
                                   <RollbackSVG />
-                                </button>
+                                </Button>
                               ) : null}
                             </div>
                           </div>

@@ -35,7 +35,7 @@ export default function ConfirmDeleteVariable() {
 
   const deleteVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.deleteVariable({
-      variableSlug: selectedVariable!.variable.slug
+      variableSlug: selectedVariable!.slug
     })
   )
 
@@ -64,7 +64,7 @@ export default function ConfirmDeleteVariable() {
           // Remove the variable from the store
           setVariables((prevVariables) =>
             prevVariables.filter(
-              ({ variable }) => variable.slug !== selectedVariable.variable.slug
+              (variable) => variable.slug !== selectedVariable.slug
             )
           )
           setSelectedVariable(null)

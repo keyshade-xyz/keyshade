@@ -75,7 +75,13 @@ export default function WorkspaceSettingsPage(): JSX.Element {
   const isDisableLeave =
     memberCount === 1 ||
     selectedWorkspace?.isDefault ||
-    user?.id === selectedWorkspace?.ownedBy.id
+    user?.id === selectedWorkspace?.ownerId
+
+  const isAuthorizedToUpdate = selectedWorkspace?.entitlements.canUpdate
+  const isAuthorizedToDelete = selectedWorkspace?.entitlements.canDelete
+
+  const isDeleteWorkspaceDisabled =
+    isLoading || selectedWorkspace?.isDefault || !isAuthorizedToDelete
 
   function handleEmojiSelect(emojiData: string) {
     setWorkspaceData({
@@ -96,9 +102,10 @@ export default function WorkspaceSettingsPage(): JSX.Element {
     ControllerInstance.getInstance().workspaceController.updateWorkspace({
       workspaceSlug: selectedWorkspace!.slug,
       icon: workspaceData.icon,
-      name: workspaceData.name === selectedWorkspace?.name
-        ? undefined
-        : workspaceData.name
+      name:
+        workspaceData.name === selectedWorkspace?.name
+          ? undefined
+          : workspaceData.name
     })
   )
 
@@ -125,7 +132,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
 
           if (workspaceFromStorage?.id === selectedWorkspace.id) {
             setSelectedWorkspaceToStorage({
-              ...workspaceFromStorage,
+              ...selectedWorkspace,
               name: data.name,
               slug: data.slug,
               icon: data.icon
@@ -198,26 +205,22 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               {selectedWorkspace?.icon ?? '🔥'}
             </div>
             <div className="flex flex-grow flex-col gap-y-2 overflow-hidden">
-              {/* <div className="mb-2 flex flex-row gap-x-2">
-              </div> */}
-              <h1 className="text-2xl font-bold truncate">{selectedWorkspace?.name}</h1>
-              {selectedWorkspace ? (
+              <div className="mb-2 flex flex-row gap-x-2" />
+              <h1 className="truncate text-2xl font-bold">
+                {selectedWorkspace?.name}
+              </h1>
+              {selectedWorkspace?.lastUpdatedBy ? (
                 <div className="flex flex-row gap-x-2 text-white/60">
                   <div className="flex flex-row gap-x-1 text-sm">
                     <span>Last updated by</span>
                     <AvatarComponent
-                      name={
-                        selectedWorkspace.lastUpdateBy?.name ||
-                        selectedWorkspace.ownedBy.name
-                      }
+                      name={selectedWorkspace.lastUpdatedBy.name}
                       profilePictureUrl={
-                        selectedWorkspace.lastUpdateBy?.profilePictureUrl ||
-                        selectedWorkspace.ownedBy.profilePictureUrl
+                        selectedWorkspace.lastUpdatedBy.profilePictureUrl
                       }
                     />
                     <span className="font-semibold text-white/90">
-                      {selectedWorkspace.lastUpdateBy?.name ||
-                        selectedWorkspace.ownedBy.name}
+                      {selectedWorkspace.lastUpdatedBy.name}
                     </span>
                   </div>
                   <div className="flex flex-row gap-x-1 text-sm">
@@ -236,23 +239,6 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               <CopyToClipboard text={selectedWorkspace?.slug || ''} />
             </div>
           </div>
-          {selectedWorkspace ? (
-            <div className="mt-2 flex flex-row items-center gap-x-2 rounded-md border-[1px] border-white/20 p-2 text-sm text-white/60">
-              <AvatarComponent
-                name={selectedWorkspace.ownedBy.name}
-                profilePictureUrl={selectedWorkspace.ownedBy.profilePictureUrl}
-              />
-              <span>
-                <span className="font-semibold text-white/90">
-                  {selectedWorkspace.ownedBy.name}
-                </span>{' '}
-                has been the owner of this workspace since{' '}
-                <span className="font-semibold text-white/90">
-                  {formatDate(selectedWorkspace.ownedBy.ownedSince)}
-                </span>
-              </span>
-            </div>
-          ) : null}
         </section>
 
         <Separator className="bg-white/20" />
@@ -336,7 +322,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               <TooltipTrigger asChild>
                 <Button
                   className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
-                  disabled={isLoading || isDisableLeave}
+                  disabled={isDeleteWorkspaceDisabled}
                   onClick={() => setIsLeaveWorkspaceOpen(true)}
                   role="button"
                 >
@@ -351,7 +337,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
                 >
                   {selectedWorkspace?.isDefault ? (
                     <p>This is your default workspace. You can not leave it.</p>
-                  ) : user?.id === selectedWorkspace?.ownedBy.id ? (
+                  ) : user?.id === selectedWorkspace?.ownerId ? (
                     <p>
                       You are the owner of this workspace. You can not leave
                       workspace without transferring ownership.
@@ -382,7 +368,11 @@ export default function WorkspaceSettingsPage(): JSX.Element {
               <TooltipTrigger asChild>
                 <Button
                   className="flex w-2/5 items-center gap-x-2 bg-red-600 text-white/90 transition-all duration-100 ease-in-out hover:bg-red-500"
-                  disabled={isLoading || selectedWorkspace?.isDefault}
+                  disabled={
+                    isLoading ||
+                    selectedWorkspace?.isDefault ||
+                    !isAuthorizedToDelete
+                  }
                   onClick={() => setIsDeleteWorkspaceOpen(true)}
                   role="button"
                 >
@@ -404,7 +394,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
         <section className="my-5 flex w-full items-center justify-end">
           <Button
             className="w-2/5"
-            disabled={isLoading}
+            disabled={isLoading || !isAuthorizedToUpdate}
             onClick={handleSaveDetails}
             type="button"
           >
@@ -414,7 +404,7 @@ export default function WorkspaceSettingsPage(): JSX.Element {
       </div>
 
       {/* Delete workspace alert dialog */}
-      {isDeleteWorkspaceOpen && selectedWorkspace ? (
+      {isDeleteWorkspaceOpen && isAuthorizedToDelete ? (
         <ConfirmDeleteWorkspace />
       ) : null}
 
