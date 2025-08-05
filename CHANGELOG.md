@@ -1,3 +1,9 @@
+## [2.32.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.5...v2.32.0-stage.6) (2025-08-03)
+
+### 🐛 Bug Fixes
+
+* update lockfile ([e1ec592](https://github.com/keyshade-xyz/keyshade/commit/e1ec59279216ee6cb6fcf3c49bcab6fbb541d12b))
+
 ## [2.32.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.4...v2.32.0-stage.5) (2025-07-31)
 
 ### 🚀 Features
