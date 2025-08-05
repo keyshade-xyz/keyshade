@@ -11,7 +11,8 @@ import {
   deleteEnvironmentValueOfVariableOpenAtom,
   variableRevisionsOpenAtom,
   rollbackVariableOpenAtom,
-  globalSearchDataAtom
+  globalSearchDataAtom,
+  createVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
@@ -24,6 +25,7 @@ import ProjectErrorCard from '@/components/shared/project-error-card'
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
   const highlightSlug = searchParams.get('highlight')
+  const isCreateVariableOpen = useAtomValue(createVariableOpenAtom)
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
@@ -43,6 +45,7 @@ export default function VariableList(): React.JSX.Element {
 
   useEffect(() => {
     const shouldRefetch =
+      isCreateVariableOpen ||
       isDeleteVariableOpen ||
       isEditVariableOpen ||
       isDeleteEnvironmentValueOfVariableOpen ||
@@ -53,6 +56,7 @@ export default function VariableList(): React.JSX.Element {
       setRefetchTrigger((prev) => prev + 1)
     }
   }, [
+    isCreateVariableOpen,
     isDeleteVariableOpen,
     isEditVariableOpen,
     isDeleteEnvironmentValueOfVariableOpen,
