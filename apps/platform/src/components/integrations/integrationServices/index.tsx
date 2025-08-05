@@ -21,7 +21,7 @@ export default function IntegrationServices(): React.JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
   const setCreateIntegrationType = useSetAtom(createIntegrationTypeAtom)
   const isAuthorizedToCreateIntegration =
-    selectedWorkspace?.entitlements.canCreateIntegrations
+    selectedWorkspace?.entitlements.canCreateIntegrations ?? true
 
   const handleConnect = useCallback(
     (type: Integration['type']) => {

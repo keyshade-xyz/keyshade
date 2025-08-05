@@ -19,7 +19,7 @@ Here's what this guide covers:
 - [Test the Integration](#test-the-integration)
 - [Best Practices and Troubleshooting](#best-practices-and-troubleshooting)
 
-> 💡 If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/introduction.md)
+> If you're not familiar with how Keyshade works, check out [What is Keyshade?](/docs/getting-started/)
 
 ---
 
@@ -32,10 +32,6 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 - Right-click your **Discord server name** and click **"Server Settings"**
 - In the left sidebar, go to **"Integrations"**
 - Click on **"Webhooks"**
-
-  ![Open Webhooks Panel](../../../blob/discord-guide/open-webhooks.png)
-
-![Alt text](image_url_or_path)
 
 ---
 
