@@ -11,6 +11,8 @@ import WorkspaceMembershipController from '@api-client/controllers/workspace-mem
 import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
 import ApiKeyController from './controllers/api-key'
+import PaymentController from './controllers/payment'
+
 export {
   AppController,
   EnvironmentController,
@@ -24,5 +26,6 @@ export {
   WorkspaceMembershipController,
   AuthController,
   UserController,
-  ApiKeyController
+  ApiKeyController,
+  PaymentController
 }

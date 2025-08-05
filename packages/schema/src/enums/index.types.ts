@@ -11,6 +11,7 @@ import {
   integrationTypeEnum,
   projectAccessLevelEnum,
   rotateAfterEnum,
+  subscriptionCancellationReasonEnum,
   subscriptionPlanEnum,
   subscriptionStatusEnum
 } from '.'
@@ -40,3 +41,7 @@ export type IntegrationRunStatusEnum = z.infer<typeof integrationRunStatusEnum>
 export type SubscriptionPlanTypeEnum = z.infer<typeof subscriptionPlanEnum>
 
 export type SubscriptionStatusTypeEnum = z.infer<typeof subscriptionStatusEnum>
+
+export type SubscriptionCancellationReasonEnum = z.infer<
+  typeof subscriptionCancellationReasonEnum
+>

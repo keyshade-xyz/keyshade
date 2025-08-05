@@ -89,7 +89,7 @@ export class PaymentGatewayController {
     )
   }
 
-  @Get('/:workspaceSlug/invoices/selected')
+  @Put('/:workspaceSlug/invoices/selected')
   @RequiredApiKeyAuthorities(Authority.WORKSPACE_ADMIN)
   public downloadSelectedInvoices(
     @CurrentUser() user: AuthenticatedUser,
