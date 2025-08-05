@@ -56,7 +56,7 @@ function Sidebar(): JSX.Element {
       name: 'Settings',
       icon: <SettingsSVG />,
       link: `/${selectedWorkspace?.slug}/settings`,
-      matchTo: [`/${selectedWorkspace?.slug}/settings`]
+      matchTo: `/${selectedWorkspace?.slug}/settings`
     }
   ]
 
