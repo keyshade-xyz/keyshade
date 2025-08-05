@@ -16,6 +16,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { selectedWorkspaceAtom } from '@/store'
 import { Button } from '@/components/ui/button'
 import { VERSION_BADGE } from '@/constants/sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
@@ -59,8 +60,11 @@ function Sidebar(): JSX.Element {
     }
   ]
 
-  const formatPlan = (): string => {
-    return `${selectedWorkspace?.subscription.plan[0].toUpperCase()}${selectedWorkspace?.subscription.plan.slice(1).toLowerCase()}`
+  const formatPlan = (): string | undefined => {
+    if (selectedWorkspace?.subscription === undefined) {
+      return undefined
+    }
+    return `${selectedWorkspace.subscription.plan[0].toUpperCase()}${selectedWorkspace.subscription.plan.slice(1).toLowerCase()}`
   }
 
   return (
@@ -91,7 +95,11 @@ function Sidebar(): JSX.Element {
         <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
           <div className="mb-5 flex items-center gap-3">
             <Button className="h-6 cursor-default bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
-              {formatPlan()}
+              {formatPlan() === undefined ? (
+                <Skeleton className="h-2 w-14" />
+              ) : (
+                formatPlan()
+              )}
             </Button>
           </div>
 
