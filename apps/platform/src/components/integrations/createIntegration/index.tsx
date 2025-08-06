@@ -22,6 +22,10 @@ function CreateIntegration(): React.JSX.Element {
 
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false)
 
+  const DOCS_SLUG_MAP: Record<string, string> = {
+  aws_lambda: "aws",
+
+}
   if (!integrationType) {
     return (
       <div className="text-center text-gray-500">No integration selected</div>
@@ -35,16 +39,15 @@ function CreateIntegration(): React.JSX.Element {
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
 
-  const _handleClose = () => {
-    setCreateIntegrationModalOpen(false)
-  }
+
 
   const handleNext = () => {
     setSetupModalOpen(true)
   }
 
   const handleHowItWorks = () => {
-    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
+    const slug = DOCS_SLUG_MAP[integrationType.toLowerCase()] || integrationType.toLowerCase()
+    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${slug}`
     window.location.href = url
   }
 

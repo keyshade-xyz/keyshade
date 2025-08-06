@@ -51,12 +51,24 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 ### Step 1: Access Integration Settings
 
 - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
-- Choose your project
-- In the left sidebar, click **“Integrations”**
-- Click **“Add Integration”**
-- Select **“Discord”** from the integration options
 
-[Integration settings](https://i.postimg.cc/Cx0fFtqT/Keyshade-Discord-integration-step-1.png)
+
+## Create a Keyshade Project
+
+
+- Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
+
+- Go to the Keyshade Dashboard
+- Click "Create Project"
+- Name your project (e.g., `My Project`)
+- Note: You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
+- Pro Tip: Create your Keyshade project first, as you'll need to select it during the integration setup.
+
+
+
+
+
+[Integration setup Page](https://i.postimg.cc/Cx0fFtqT/Keyshade-Discord-integration-step-1.png)
 
 ---
 
@@ -65,8 +77,13 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 - **Integration Name**: Enter a name (e.g., `Keyshade Discord Alerts`)
 - **Webhook URL**: Paste the Discord Webhook URL you copied earlier
 - **Event Triggers**:
-  - Secret Events (e.g., added, updated, deleted)
-  - Variable Events
+  - Workspace Events (create, update, delete)
+  - User Role Events (create, update, delete)
+  - Project Events (create, update, delete)
+  - Secret Events (create, update, delete)
+  - Variable Events (create, update, delete)
+  - Environment Events (create, update, delete)
+  - Integration Events (create, update, delete)
   - Integration Errors
   - Manual Syncs
 

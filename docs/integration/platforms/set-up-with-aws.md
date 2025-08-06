@@ -166,17 +166,7 @@ You can either create a new IAM user specifically for Keyshade or use an existin
     - Click **"Next"** → **"Create access key"**
     - Copy and securely store the credentials
 
-## Create a Keyshade Project and Add Secrets
-
-1. **Access Keyshade Dashboard**
-    - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
-    - Sign in to your account
-
-2. **Create or Select Project**
-    - Click **"Create Project"** [(Refer the docs)](../../getting-started/adding-your-first-secret-and-variable.md) or select an existing project
-    - Name your project (e.g., `lambda-secrets-project`)
-
-3. **Add Secrets and Variables**
+1. **Add Secrets and Variables**
 
 > 💡 **Secrets vs Variables:**
 >
@@ -189,7 +179,7 @@ You can either create a new IAM user specifically for Keyshade or use an existin
     - Example Secret: `DATABASE_PASSWORD`, `API_KEY` 
     - Example Variable: `LOG_LEVEL`, `FEATURE_FLAG_ENABLED`
 
-4. **Configure Environment**
+2. **Configure Environment**
     - Ensure you have at least one environment (e.g., `development`, `production`)
     - **Important**: Each AWS Lambda integration can only sync with one environment
 
@@ -198,12 +188,12 @@ You can either create a new IAM user specifically for Keyshade or use an existin
 
 ### Access Integration Settings
 
-1. **Navigate to Integrations**
+3. **Navigate to Integrations**
     - In your Keyshade project dashboard
     - Click **"Integrations"** in the left sidebar
     - Click **"Add Integration"**
 
-2. **Select AWS Lambda**
+4. **Select AWS Lambda**
     - Choose **"AWS Lambda"** from the available integrations
     - Click **"Configure"**
 
