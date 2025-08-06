@@ -5,7 +5,12 @@ import {
 import { PrismaService } from '@/prisma/prisma.service'
 import { AuthenticatedUser } from '@/user/user.types'
 import { Injectable, Logger } from '@nestjs/common'
-import { Authority, Environment, ProjectAccessLevel } from '@prisma/client'
+import {
+  Authority,
+  Environment,
+  Project,
+  ProjectAccessLevel
+} from '@prisma/client'
 import {
   getCollectiveEnvironmentAuthorities,
   getCollectiveProjectAuthorities,
@@ -13,13 +18,13 @@ import {
 } from './collective-authorities'
 import {
   HydratedSecret,
-  RawSecret,
-  HydratedSecretRevision
+  HydratedSecretRevision,
+  RawSecret
 } from '@/secret/secret.types'
 import {
   HydratedVariable,
-  RawVariable,
-  HydratedVariableRevision
+  HydratedVariableRevision,
+  RawVariable
 } from '@/variable/variable.types'
 import {
   HydratedEnvironment,
@@ -488,14 +493,12 @@ export class HydrationService {
     delete project.variables
     delete project.secrets
 
-    const hydratedProject: HydratedProject = {
+    return {
       ...project,
       ...tierLimits,
       ...projectResources,
       entitlements
     }
-
-    return hydratedProject
   }
 
   public async hydrateWorkspace({
@@ -567,7 +570,8 @@ export class HydrationService {
           authorizationService
         )
       : {
-          projects: 0
+          projects: 0,
+          integrations: 0
         }
 
     this.logger.log(
@@ -587,133 +591,6 @@ export class HydrationService {
       ...workspaceResources,
       entitlements,
       isDefault: workspace.isDefault && workspace.ownerId === user.id
-    }
-  }
-
-  /**
-   * Checks if the given authority is present in the set of permitted authorities.
-   *
-   * @param authority The authority to check for permission.
-   * @param permittedAuthorities The set of authorities that are permitted.
-   * @returns true if the authority is included in the permitted authorities or if
-   * the WORKSPACE_ADMIN authority is present; false otherwise.
-   */
-  private isPermitted(
-    authority: Authority,
-    permittedAuthorities: Set<Authority>
-  ) {
-    return (
-      permittedAuthorities.has(authority) ||
-      permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
-    )
-  }
-
-  /**
-   * Parses the item limits for a project. This includes the maximum allowed number
-   * of environments, secrets, and variables, as well as the total number of each
-   * currently in the project.
-   *
-   * @param projectId The ID of the project to parse the item limits for.
-   * @param tierLimitService The tier limit service to use for getting the tier
-   * limits.
-   * @returns An object with the maximum allowed number of environments, secrets,
-   * and variables, as well as the total number of each currently in the project.
-   */
-  private async computeProjectLimits(project: RawProject): Promise<{
-    maxAllowedEnvironments: number
-    totalEnvironments: number
-    maxAllowedSecrets: number
-    totalSecrets: number
-    maxAllowedVariables: number
-    totalVariables: number
-  }> {
-    const projectId = project.id
-    this.logger.log(`Parsing project item limits for project ${projectId}`)
-
-    this.logger.log(`Getting environment tier limit for project ${projectId}`)
-    // Get the tier limit for environments in the project
-    const maxAllowedEnvironments =
-      await this.tierLimitService.getEnvironmentTierLimit(projectId)
-
-    // Get the total number of environments in the project
-    const totalEnvironments = project.environments.length
-    this.logger.log(
-      `Found ${totalEnvironments} environments in project ${projectId}`
-    )
-
-    this.logger.log(`Getting secret tier limit for project ${projectId}`)
-    // Get the tier limit for secrets in the project
-    const maxAllowedSecrets =
-      await this.tierLimitService.getSecretTierLimit(projectId)
-
-    // Get the total number of secrets in the project
-    const totalSecrets = project.secrets.length
-    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
-
-    this.logger.log(`Getting variable tier limit for project ${projectId}`)
-    // Get the tier limit for variables in the project
-    const maxAllowedVariables =
-      await this.tierLimitService.getVariableTierLimit(projectId)
-
-    // Get the total number of variables in the project
-    const totalVariables = project.variables.length
-    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
-
-    return {
-      maxAllowedEnvironments,
-      totalEnvironments,
-      maxAllowedSecrets,
-      totalSecrets,
-      maxAllowedVariables,
-      totalVariables
-    }
-  }
-  /**
-   * Parses the tier limits for a given workspace and returns an object containing
-   * the maximum allowed and current total of members and projects.
-   *
-   * @param workspace The workspace to parse tier limits for.
-   * @param tierLimitService The service used to obtain tier limits.
-   * @param prisma The Prisma client for database operations.
-   * @returns A promise that resolves to an object containing the workspace with
-   * tier limits, including maximum allowed and total members and projects.
-   */
-  private async computeWorkspaceLimits(workspace: RawWorkspace): Promise<{
-    maxAllowedProjects: number
-    totalProjects: number
-    maxAllowedMembers: number
-    totalMembers: number
-  }> {
-    const workspaceId = workspace.id
-    this.logger.log(
-      `Parsing workspace item limits for workspace ${workspaceId}`
-    )
-
-    // Get the tier limit for the members in the workspace
-    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
-    const maxAllowedMembers =
-      await this.tierLimitService.getMemberTierLimit(workspaceId)
-
-    // Get total members in the workspace
-    const totalMembers = workspace.members.length
-    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
-
-    // Get project tier limit
-    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
-    const maxAllowedProjects =
-      await this.tierLimitService.getProjectTierLimit(workspaceId)
-
-    // Get total projects in the workspace
-    const totalProjects = workspace.projects.length
-    this.logger.log(
-      `Found ${totalProjects} projects in workspace ${workspaceId}`
-    )
-
-    return {
-      maxAllowedMembers,
-      totalMembers,
-      maxAllowedProjects,
-      totalProjects
     }
   }
 
@@ -827,6 +704,163 @@ export class HydrationService {
   }
 
   /**
+   * Checks if the given authority is present in the set of permitted authorities.
+   *
+   * @param authority The authority to check for permission.
+   * @param permittedAuthorities The set of authorities that are permitted.
+   * @returns true if the authority is included in the permitted authorities or if
+   * the WORKSPACE_ADMIN authority is present; false otherwise.
+   */
+  private isPermitted(
+    authority: Authority,
+    permittedAuthorities: Set<Authority>
+  ) {
+    return (
+      permittedAuthorities.has(authority) ||
+      permittedAuthorities.has(Authority.WORKSPACE_ADMIN)
+    )
+  }
+
+  /**
+   * Computes the project limits and returns them.
+   *
+   * @param project The project to parse the tier limits of.
+   * @returns An object with the following properties:
+   * - maxAllowedEnvironments: The maximum number of environments allowed in the project
+   * - totalEnvironments: The current number of environments in the project
+   * - maxAllowedSecrets: The maximum number of secrets allowed in the project
+   * - totalSecrets: The current number of secrets in the project
+   * - maxAllowedVariables: The maximum number of variables allowed in the project
+   * - totalVariables: The current number of variables in the project
+   */
+  private async computeProjectLimits(project: RawProject): Promise<{
+    maxAllowedEnvironments: number
+    totalEnvironments: number
+    maxAllowedSecrets: number
+    totalSecrets: number
+    maxAllowedVariables: number
+    totalVariables: number
+  }> {
+    const projectId = project.id
+    this.logger.log(`Parsing project item limits for project ${projectId}`)
+
+    this.logger.log(`Getting environment tier limit for project ${projectId}`)
+    // Get the tier limit for environments in the project
+    const maxAllowedEnvironments =
+      await this.tierLimitService.getEnvironmentTierLimit(projectId)
+
+    // Get the total number of environments in the project
+    const totalEnvironments = project.environments.length
+    this.logger.log(
+      `Found ${totalEnvironments} environments in project ${projectId}`
+    )
+
+    this.logger.log(`Getting secret tier limit for project ${projectId}`)
+    // Get the tier limit for secrets in the project
+    const maxAllowedSecrets =
+      await this.tierLimitService.getSecretTierLimit(projectId)
+
+    // Get the total number of secrets in the project
+    const totalSecrets = project.secrets.length
+    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
+
+    this.logger.log(`Getting variable tier limit for project ${projectId}`)
+    // Get the tier limit for variables in the project
+    const maxAllowedVariables =
+      await this.tierLimitService.getVariableTierLimit(projectId)
+
+    // Get the total number of variables in the project
+    const totalVariables = project.variables.length
+    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
+
+    return {
+      maxAllowedEnvironments,
+      totalEnvironments,
+      maxAllowedSecrets,
+      totalSecrets,
+      maxAllowedVariables,
+      totalVariables
+    }
+  }
+
+  /**
+   * Parses the tier limits for a given workspace and returns an object containing
+   * the maximum allowed and current total of members and projects.
+   *
+   * @param workspace The workspace to parse tier limits for.
+   * @returns A promise that resolves to an object containing the workspace with
+   * tier limits, including maximum allowed and total members and projects.
+   */
+  private async computeWorkspaceLimits(workspace: RawWorkspace): Promise<{
+    maxAllowedProjects: number
+    totalProjects: number
+    maxAllowedMembers: number
+    totalMembers: number
+    maxAllowedRoles: number
+    totalRoles: number
+    maxAllowedIntegrations: number
+    totalIntegrations: number
+  }> {
+    const workspaceId = workspace.id
+    this.logger.log(
+      `Parsing workspace item limits for workspace ${workspaceId}`
+    )
+
+    // Get the tier limit for the members in the workspace
+    this.logger.log(`Getting member tier limit for workspace ${workspaceId}`)
+    const maxAllowedMembers =
+      await this.tierLimitService.getMemberTierLimit(workspaceId)
+
+    // Get total members in the workspace
+    const totalMembers = workspace.members.length
+    this.logger.log(`Found ${totalMembers} members in workspace ${workspaceId}`)
+
+    // Get project tier limit
+    this.logger.log(`Getting project tier limit for workspace ${workspaceId}`)
+    const maxAllowedProjects =
+      await this.tierLimitService.getProjectTierLimit(workspaceId)
+
+    // Get total projects in the workspace
+    const totalProjects = workspace.projects.length
+    this.logger.log(
+      `Found ${totalProjects} projects in workspace ${workspaceId}`
+    )
+
+    // Get role tier limit
+    this.logger.log(`Getting role tier limit for workspace ${workspaceId}`)
+    const maxAllowedRoles =
+      await this.tierLimitService.getRoleTierLimit(workspaceId)
+
+    // Get total roles in the workspace
+    const totalRoles = workspace.roles.length
+    this.logger.log(`Found ${totalRoles} roles for workspace ${workspaceId}`)
+
+    // Get integration tier limit
+    this.logger.log(
+      `Getting integration tier limit for workspace ${workspaceId}`
+    )
+    const maxAllowedIntegrations =
+      await this.tierLimitService.getIntegrationTierLimit(workspaceId)
+
+    // Get total integrations in workspace
+    const totalIntegrations = workspace.integrations.length
+    this.logger.log(
+      `Found ${totalIntegrations} integrations for workspace ${workspaceId}`
+    )
+
+    return {
+      maxAllowedMembers,
+      totalMembers,
+      maxAllowedProjects,
+      totalProjects,
+      maxAllowedRoles,
+      totalRoles,
+      maxAllowedIntegrations,
+      totalIntegrations
+    }
+  }
+
+  /**
    * Counts the number of resources of a given type that are accessible to the
    * given user in the given workspace.
    *
@@ -843,6 +877,7 @@ export class HydrationService {
     authorizationService: AuthorizationService
   ): Promise<{
     projects: number
+    integrations: number
   }> {
     const projects = await this.prisma.project.findMany({
       where: {
@@ -850,8 +885,7 @@ export class HydrationService {
       }
     })
 
-    let accessibleProjectCount = 0
-
+    const accessibleProjects: Project[] = []
     for (const project of projects) {
       let hasAuthority = null
       try {
@@ -867,11 +901,49 @@ export class HydrationService {
       }
 
       if (hasAuthority) {
-        accessibleProjectCount++
+        accessibleProjects.push(project)
       }
     }
+
+    const integrations = await this.prisma.integration.findMany({
+      where: {
+        workspaceId: workspace.id,
+        OR: [
+          {
+            project: {
+              id: {
+                in: accessibleProjects.map((p) => p.id)
+              }
+            }
+          }
+        ]
+      }
+    })
+
+    let accessibleIntegrationCount = 0
+    for (const integration of integrations) {
+      let hasAuthority = null
+      try {
+        hasAuthority =
+          await authorizationService.authorizeUserAccessToIntegration({
+            user,
+            slug: integration.slug,
+            authorities: [Authority.READ_INTEGRATION]
+          })
+      } catch (_ignored) {
+        this.logger.log(
+          `User ${user.id} does not have access to integration ${integration.slug}`
+        )
+      }
+
+      if (hasAuthority) {
+        accessibleIntegrationCount++
+      }
+    }
+
     return {
-      projects: accessibleProjectCount
+      projects: accessibleProjects.length,
+      integrations: accessibleIntegrationCount
     }
   }
 
