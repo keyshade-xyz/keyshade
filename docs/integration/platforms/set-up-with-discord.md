@@ -65,10 +65,10 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 - Pro Tip: Create your Keyshade project first, as you'll need to select it during the integration setup.
 
 
-
-
-
 [Integration setup Page](https://i.postimg.cc/Cx0fFtqT/Keyshade-Discord-integration-step-1.png)
+
+
+![Where to copy the Webhook URL](https://i.postimg.cc/sD7hCy14/Keyshade-Discord-integration-step-2.png)
 
 ---
 
@@ -87,7 +87,7 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
   - Integration Errors
   - Manual Syncs
 
-  ![Where to copy the Webhook URL](https://i.postimg.cc/sD7hCy14/Keyshade-Discord-integration-step-2.png)
+ 
 
 > We recommend enabling all triggers for complete observability.
 
