@@ -25,13 +25,14 @@ interface RoleListItemProps {
 }
 
 function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
-  let [first, second] = authority.split('_')
-  first = first.charAt(0) + first.slice(1).toLowerCase()
-  second = second.charAt(0) + second.slice(1).toLowerCase()
+  const formattedAuthority = authority
+    .split('_')
+    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .join(' ')
 
   return (
     <div className="h-fit w-fit rounded-md border border-cyan-200 bg-cyan-950 px-2 py-1 text-center text-sm text-cyan-200">
-      {first} {second}
+      {formattedAuthority}
     </div>
   )
 }
