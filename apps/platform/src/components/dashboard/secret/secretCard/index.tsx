@@ -263,7 +263,7 @@ export default function SecretCard({
                   <TableHead className="h-full text-base font-normal text-white/50">
                     Value
                   </TableHead>
-                  <TableHead className="h-full rounded-tr-xl text-base font-normal text-white/50">
+                  <TableHead className="h-full text-base font-normal text-white/50">
                     Version
                   </TableHead>
                   <TableHead className="h-full w-[100px] rounded-tr-xl text-base font-normal text-white/50" />
