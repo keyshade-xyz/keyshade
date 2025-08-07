@@ -34,6 +34,7 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 - Click on **"Webhooks"**
 
 ---
+![Where to copy the Webhook URL](https://i.postimg.cc/sD7hCy14/Keyshade-Discord-integration-step-2.png)
 
 ### Step 2: Create a New Webhook
 
@@ -52,46 +53,29 @@ Keyshade sends messages to Discord using [Incoming Webhooks](https://support.dis
 
 - Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
 
-
 ## Create a Keyshade Project
 
+Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
 
-- Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
+1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+2. Click **"Create Project"**
+3. Name your project (e.g., `my-discord-app`)
+4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
 
-- Go to the Keyshade Dashboard
-- Click "Create Project"
-- Name your project (e.g., `My Project`)
-- Note: You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
-- Pro Tip: Create your Keyshade project first, as you'll need to select it during the integration setup.
+> 💡 **Pro Tip:** Create your Keyshade project first, as you'll need to select it during the integration setup.
 
-
-[Integration setup Page](https://i.postimg.cc/Cx0fFtqT/Keyshade-Discord-integration-step-1.png)
-
-
-![Where to copy the Webhook URL](https://i.postimg.cc/sD7hCy14/Keyshade-Discord-integration-step-2.png)
-
----
+![Integration setup Page](https://i.postimg.cc/Cx0fFtqT/Keyshade-Discord-integration-step-1.png)
 
 ### Step 2: Configure Discord Integration
 
 - **Integration Name**: Enter a name (e.g., `Keyshade Discord Alerts`)
 - **Webhook URL**: Paste the Discord Webhook URL you copied earlier
-- **Event Triggers**:
-  - Workspace Events (create, update, delete)
-  - User Role Events (create, update, delete)
-  - Project Events (create, update, delete)
-  - Secret Events (create, update, delete)
-  - Variable Events (create, update, delete)
-  - Environment Events (create, update, delete)
-  - Integration Events (create, update, delete)
-  - Integration Errors
-  - Manual Syncs
-
- 
 
 > We recommend enabling all triggers for complete observability.
 
 - Click **“Save Integration”**
+**Event Triggers**  
+Select which kinds of events you want to get notified about from the list of available triggers, or choose "Select All Events" for complete coverage.
 
 ---
 

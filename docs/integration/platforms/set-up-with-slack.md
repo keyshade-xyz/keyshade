@@ -89,16 +89,14 @@ Keyshade sends notifications to Slack using a Slack App with bot permissions. Yo
 
 ## Create a Keyshade Project
 
+Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
 
-- Before setting up the integration, you need a Keyshade project with your secrets and environment variables.
+1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
+2. Click **"Create Project"**
+3. Name your project (e.g., `my-discord-app`)
+4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
 
-- Go to the Keyshade Dashboard
-- Click "Create Project"
-- Name your project (e.g., `My Project`)
-- Note: You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
-- Pro Tip: Create your Keyshade project first, as you'll need to select it during the integration setup.
-
-
+> 💡 **Pro Tip:** Create your Keyshade project first, as you'll need to select it during the integration setup.
 
 ---
 
@@ -108,17 +106,8 @@ Keyshade sends notifications to Slack using a Slack App with bot permissions. Yo
 - **Bot Token**: Paste the Slack bot token (`xoxb-...`) from your Slack app
 - **Signing Secret**: Paste the Slack signing secret
 - **Channel ID**: Paste the Slack channel ID where messages should be posted
-- **Event Triggers**:
-- **Event Triggers**:
-  - Workspace Events (create, update, delete)
-  - User Role Events (create, update, delete)
-  - Project Events (create, update, delete)
-  - Secret Events (create, update, delete)
-  - Variable Events (create, update, delete)
-  - Environment Events (create, update, delete)
-  - Integration Events (create, update, delete)
-  - Integration Errors
-  - Manual Syncs
+**Event Triggers**  
+Select which kinds of events you want to get notified about from the list of available triggers, or choose "Select All Events" for complete coverage.
 
 > Enable all event triggers for full visibility or select only what you need.
 

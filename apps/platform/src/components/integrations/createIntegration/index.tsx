@@ -15,16 +15,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
-
 function CreateIntegration(): React.JSX.Element {
   const integrationType = useAtomValue(createIntegrationTypeAtom)
   const setCreateIntegrationModalOpen = useSetAtom(createIntegrationOpenAtom)
-
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false)
-
-  const DOCS_SLUG_MAP: Record<string, string> = {
-  aws_lambda: "aws",
-
 }
   if (!integrationType) {
     return (
@@ -33,31 +27,23 @@ function CreateIntegration(): React.JSX.Element {
   }
   const integrationName = formatText(integrationType)
   const integrationConfig = Integrations[integrationType]
-
   const integrationPermissions =
     integrationConfig.events?.map(
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
-
-
-
   const handleNext = () => {
     setSetupModalOpen(true)
   }
-
   const handleHowItWorks = () => {
-    const slug = DOCS_SLUG_MAP[integrationType.toLowerCase()] || integrationType.toLowerCase()
-    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${slug}`
+    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
     window.location.href = url
   }
-
   const handleSetupOpenChange = (open: boolean) => {
     setSetupModalOpen(open)
     if (!open) {
       setCreateIntegrationModalOpen(false)
     }
   }
-
   return (
     <div>
       <Dialog onOpenChange={handleSetupOpenChange} open={!setupModalOpen}>
@@ -85,7 +71,6 @@ function CreateIntegration(): React.JSX.Element {
               </div>
             </DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
             <div className="space-y-3 border-y border-white/20 py-4">
               <h3 className="text-sm font-medium">Keyshade would do</h3>
@@ -98,7 +83,6 @@ function CreateIntegration(): React.JSX.Element {
                 ))}
               </div>
             </div>
-
             <div className="flex justify-between">
               <Button onClick={handleHowItWorks} variant="secondary">
                 How it works
@@ -110,7 +94,6 @@ function CreateIntegration(): React.JSX.Element {
           </div>
         </DialogContent>
       </Dialog>
-
       <SetupIntegration
         integrationName={integrationName}
         integrationType={integrationType}
@@ -120,5 +103,4 @@ function CreateIntegration(): React.JSX.Element {
     </div>
   )
 }
-
 export default CreateIntegration
