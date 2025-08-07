@@ -1,3 +1,9 @@
+## [2.32.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.6...v2.32.0-stage.7) (2025-08-06)
+
+### 🐛 Bug Fixes
+
+* **platform:** update variable list after add or delete issue ([#1099](https://github.com/keyshade-xyz/keyshade/issues/1099)) ([2741a37](https://github.com/keyshade-xyz/keyshade/commit/2741a37010e2f9c91fdbaa1a6c3013d5421b601e))
+
 ## [2.32.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.5...v2.32.0-stage.6) (2025-08-03)
 
 ### 🐛 Bug Fixes

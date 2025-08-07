@@ -53,7 +53,7 @@ export default function AddVariableDialogue() {
   )
 
   const handleClose = useCallback(() => {
-    setIsCreateVariableOpen(false)
+    setIsCreateVariableOpen((prev) => !prev)
     setRequestData({
       name: '',
       note: ''
