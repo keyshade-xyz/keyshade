@@ -1,3 +1,9 @@
+## [2.32.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.7...v2.32.0-stage.8) (2025-08-07)
+
+### 🐛 Bug Fixes
+
+* **platform:** corner radius in wrong place for [secure] and variable ([#1100](https://github.com/keyshade-xyz/keyshade/issues/1100)) ([0320f1b](https://github.com/keyshade-xyz/keyshade/commit/0320f1bfdd65cb6c4118dca30c2a808a69ac232c))
+
 ## [2.32.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.6...v2.32.0-stage.7) (2025-08-06)
 
 ### 🐛 Bug Fixes
