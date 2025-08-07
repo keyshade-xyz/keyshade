@@ -12,11 +12,7 @@ import {
 import { App } from '@slack/bolt'
 import { BaseIntegration } from './base.integration'
 import { PrismaService } from '@/prisma/prisma.service'
-import {
-  constructErrorBody,
-  decryptMetadata,
-  makeTimedRequest
-} from '@/common/util'
+import { constructErrorBody, makeTimedRequest } from '@/common/util'
 import {
   BadRequestException,
   InternalServerErrorException
