@@ -45,6 +45,7 @@ import { VariableService } from '@/variable/variable.service'
 import { ExportService } from './export/export.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydrationService } from '@/common/hydration.service'
+import { checkForDisabledWorkspace } from '@/common/workspace'
 
 @Injectable()
 export class ProjectService {
@@ -85,6 +86,18 @@ export class ProjectService {
         authorities: [Authority.CREATE_PROJECT]
       })
     const workspaceId = workspace.id
+
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create a project in disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
 
     // Check if more workspaces can be created under the workspace
     await this.tierLimitService.checkProjectLimitReached(workspace)
@@ -479,6 +492,12 @@ export class ProjectService {
         authorities: [Authority.READ_PROJECT]
       })
 
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace ${project.workspaceId}`
+    )
+
     let workspaceId = null
 
     if (forkMetadata.workspaceSlug) {
@@ -491,6 +510,18 @@ export class ProjectService {
           slug: forkMetadata.workspaceSlug,
           authorities: [Authority.CREATE_PROJECT]
         })
+
+      if (workspace.isDisabled) {
+        this.logger.log(
+          `User ${user.id} attempted to fork project ${projectSlug} in disabled workspace`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'This workspace has been disabled',
+            'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+          )
+        )
+      }
 
       workspaceId = workspace.id
     } else {
@@ -691,6 +722,12 @@ export class ProjectService {
         authorities: [Authority.UPDATE_PROJECT]
       })
     const projectId = project.id
+
+    await checkForDisabledWorkspace(
+      project.workspaceId,
+      this.prisma,
+      `User ${user.id} attempted to sync project ${projectSlug} in a disabled workspace ${project.workspaceId}`
+    )
 
     this.isProjectForked(project)
 
@@ -1467,6 +1504,85 @@ export class ProjectService {
     )
 
     return { txs, newPrivateKey, newPublicKey }
+  }
+
+  /**
+   * Returns the project with additional information about the limits of items
+   * in the project and the current count of items.
+   *
+   * @param project The project to parse the tier limits of
+   * @returns The project with the following additional properties:
+   * - maxAllowedEnvironments: The maximum number of environments allowed in the project
+   * - totalEnvironments: The current number of environments in the project
+   * - maxAllowedSecrets: The maximum number of secrets allowed in the project
+   * - totalSecrets: The current number of secrets in the project
+   * - maxAllowedVariables: The maximum number of variables allowed in the project
+   * - totalVariables: The current number of variables in the project
+   */
+  private async parseProjectItemLimits(project: Project): Promise<{
+    maxAllowedEnvironments: number
+    totalEnvironments: number
+    maxAllowedSecrets: number
+    totalSecrets: number
+    maxAllowedVariables: number
+    totalVariables: number
+  }> {
+    this.logger.log(`Parsing project item limits for project ${project.slug}`)
+
+    const projectId = project.id
+    const workspaceId = project.workspaceId
+
+    this.logger.log(
+      `Getting environment tier limit for workspace ${workspaceId}`
+    )
+    // Get the tier limit for environments in the project
+    const maxAllowedEnvironments =
+      await this.tierLimitService.getEnvironmentTierLimit(workspaceId)
+
+    // Get the total number of environments in the project
+    const totalEnvironments = await this.prisma.environment.count({
+      where: {
+        projectId
+      }
+    })
+    this.logger.log(
+      `Found ${totalEnvironments} environments in project ${projectId}`
+    )
+
+    this.logger.log(`Getting secret tier limit for workspace ${workspaceId}`)
+    // Get the tier limit for secrets in the project
+    const maxAllowedSecrets =
+      await this.tierLimitService.getSecretTierLimit(workspaceId)
+
+    // Get the total number of secrets in the project
+    const totalSecrets = await this.prisma.secret.count({
+      where: {
+        projectId
+      }
+    })
+    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
+
+    this.logger.log(`Getting variable tier limit for workspace ${workspaceId}`)
+    // Get the tier limit for variables in the project
+    const maxAllowedVariables =
+      await this.tierLimitService.getVariableTierLimit(workspaceId)
+
+    // Get the total number of variables in the project
+    const totalVariables = await this.prisma.variable.count({
+      where: {
+        projectId
+      }
+    })
+    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
+
+    return {
+      maxAllowedEnvironments,
+      totalEnvironments,
+      maxAllowedSecrets,
+      totalSecrets,
+      maxAllowedVariables,
+      totalVariables
+    }
   }
 
   /**

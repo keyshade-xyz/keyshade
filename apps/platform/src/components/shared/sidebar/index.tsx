@@ -2,6 +2,7 @@
 import React from 'react'
 import { useAtomValue } from 'jotai'
 import {
+  CardSVG,
   DashboardSVG,
   IntegrationSVG,
   KeyshadeLogoSVG,
@@ -12,46 +13,59 @@ import {
 import SidebarTab from './sidebarTab'
 import TierLimit from './tierLimit'
 import { Combobox } from '@/components/ui/combobox'
-import { selectedWorkspaceAtom, selectedProjectAtom } from '@/store'
+import { selectedWorkspaceAtom } from '@/store'
 import { Button } from '@/components/ui/button'
-import { TIRE_PLAN, VERSION_BADGE } from '@/constants/sidebar'
+import { VERSION_BADGE } from '@/constants/sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function Sidebar(): JSX.Element {
   const selectedWorkspace = useAtomValue(selectedWorkspaceAtom)
-  const selectedProject = useAtomValue(selectedProjectAtom)
 
   const sidebarTabData = [
     {
       name: 'Dashboard',
       icon: <DashboardSVG />,
       link: '/',
-      matchTo: ['/', `/${selectedWorkspace?.slug}/${selectedProject?.slug}`]
+      matchTo: '/'
     },
     {
       name: 'Members',
       icon: <TeamSVG />,
       link: '/members?tab=joined',
-      matchTo: ['/members']
+      matchTo: '/members'
     },
     {
       name: 'Roles',
       icon: <RolesSVG />,
       link: '/roles',
-      matchTo: ['/roles']
+      matchTo: '/roles'
     },
     {
       name: 'Integrations',
       icon: <IntegrationSVG />,
       link: '/integrations?tab=overview',
-      matchTo: ['/integrations']
+      matchTo: '/integrations'
+    },
+    {
+      name: 'Billing',
+      icon: <CardSVG />,
+      link: `/${selectedWorkspace?.slug}/billing`,
+      matchTo: `/${selectedWorkspace?.slug}/billing`
     },
     {
       name: 'Settings',
       icon: <SettingsSVG />,
       link: `/${selectedWorkspace?.slug}/settings`,
-      matchTo: [`/${selectedWorkspace?.slug}/settings`]
+      matchTo: `/${selectedWorkspace?.slug}/settings`
     }
   ]
+
+  const formatPlan = (): string | undefined => {
+    if (selectedWorkspace?.subscription === undefined) {
+      return undefined
+    }
+    return `${selectedWorkspace.subscription.plan[0].toUpperCase()}${selectedWorkspace.subscription.plan.slice(1).toLowerCase()}`
+  }
 
   return (
     <aside className="m-8 w-[14rem]">
@@ -80,8 +94,12 @@ function Sidebar(): JSX.Element {
         </div>
         <div className="absolute bottom-12 w-[16rem] rounded-lg border border-white/10 bg-white/5 p-4">
           <div className="mb-5 flex items-center gap-3">
-            <Button className="h-6 bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
-              {TIRE_PLAN}
+            <Button className="h-6 cursor-default bg-[#60A5FA4D] p-3 text-white hover:bg-[#60A5FA4D]">
+              {formatPlan() === undefined ? (
+                <Skeleton className="h-2 w-14" />
+              ) : (
+                formatPlan()
+              )}
             </Button>
           </div>
 

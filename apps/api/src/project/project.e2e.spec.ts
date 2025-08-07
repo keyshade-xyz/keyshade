@@ -234,19 +234,20 @@
 //       expect(response.json().updatedAt).toBeDefined()
 //     })
 
-//     it('should not be able to create projects if tier limit it reached', async () => {
-//       // Create the number of projects that the tier limit allows
-//       for (
-//         let x = 100;
-//         x < 100 + tierLimitService.getProjectTierLimit(workspace1.id) - 2; // Subtract 2 for the projects created above
-//         x++
-//       ) {
-//         await projectService.createProject(user1, workspace1.slug, {
-//           name: `Project ${x}`,
-//           description: `Project ${x} description`,
-//           storePrivateKey: true
-//         })
-//       }
+// it('should not be able to create projects if tier limit it reached', async () => {
+//   // Create the number of projects that the tier limit allows
+//   for (
+//     let x = 100;
+//     x <
+//     100 + (await tierLimitService.getProjectTierLimit(workspace1.id)) - 2; // Subtract 2 for the projects created above
+//     x++
+//   ) {
+//     await projectService.createProject(user1, workspace1.slug, {
+//       name: `Project ${x}`,
+//       description: `Project ${x} description`,
+//       storePrivateKey: true
+//     })
+//   }
 
 //       const response = await app.inject({
 //         method: 'POST',
@@ -481,19 +482,18 @@
 
 //       expect(response.statusCode).toBe(200)
 
-//       const project = response.json()
-//       expect(project.id).toBe(project1.id)
-//       expect(project.name).toBe(project1.name)
-//       expect(project.slug).toBe(project1.slug)
-//       expect(project.description).toBe(project1.description)
-//       expect(project.storePrivateKey).toBe(project1.storePrivateKey)
-//       expect(project.workspaceId).toBe(project1.workspaceId)
-//       expect(project.lastUpdatedById).toBe(project1.lastUpdatedById)
-//       expect(project.isDisabled).toBe(project1.isDisabled)
-//       expect(project.accessLevel).toBe(project1.accessLevel)
-//       expect(project.publicKey).toBe(project1.publicKey)
-//       expect(project.privateKey).toBe(project1.privateKey)
-//     })
+//   const project = response.json()
+//   expect(project.id).toBe(project1.id)
+//   expect(project.name).toBe(project1.name)
+//   expect(project.slug).toBe(project1.slug)
+//   expect(project.description).toBe(project1.description)
+//   expect(project.storePrivateKey).toBe(project1.storePrivateKey)
+//   expect(project.workspaceId).toBe(project1.workspaceId)
+//   expect(project.lastUpdatedById).toBe(project1.lastUpdatedById)
+//   expect(project.accessLevel).toBe(project1.accessLevel)
+//   expect(project.publicKey).toBe(project1.publicKey)
+//   expect(project.privateKey).toBe(project1.privateKey)
+// })
 
 //     it('should not be able to fetch a non existing project', async () => {
 //       const response = await app.inject({
@@ -932,22 +932,21 @@
 
 //       expect(response.statusCode).toBe(200)
 
-//       const project = response.json()
-//       expect(project.id).toBe(globalProject.id)
-//       expect(project.name).toBe(globalProject.name)
-//       expect(project.slug).toBe(globalProject.slug)
-//       expect(project.description).toBe(globalProject.description)
-//       expect(project.storePrivateKey).toBe(globalProject.storePrivateKey)
-//       expect(project.workspaceId).toBe(globalProject.workspaceId)
-//       expect(project.lastUpdatedById).toBe(globalProject.lastUpdatedById)
-//       expect(project.isDisabled).toBe(globalProject.isDisabled)
-//       expect(project.accessLevel).toBe(globalProject.accessLevel)
-//       expect(project.publicKey).toBe(globalProject.publicKey)
-//       expect(project.privateKey).toBe(globalProject.privateKey)
-//       expect(project.environmentCount).toBe(1)
-//       expect(project.secretCount).toBe(0)
-//       expect(project.variableCount).toBe(0)
-//     })
+//   const project = response.json()
+//   expect(project.id).toBe(globalProject.id)
+//   expect(project.name).toBe(globalProject.name)
+//   expect(project.slug).toBe(globalProject.slug)
+//   expect(project.description).toBe(globalProject.description)
+//   expect(project.storePrivateKey).toBe(globalProject.storePrivateKey)
+//   expect(project.workspaceId).toBe(globalProject.workspaceId)
+//   expect(project.lastUpdatedById).toBe(globalProject.lastUpdatedById)
+//   expect(project.accessLevel).toBe(globalProject.accessLevel)
+//   expect(project.publicKey).toBe(globalProject.publicKey)
+//   expect(project.privateKey).toBe(globalProject.privateKey)
+//   expect(project.environmentCount).toBe(1)
+//   expect(project.secretCount).toBe(0)
+//   expect(project.variableCount).toBe(0)
+// })
 
 //     it('should allow workspace members with READ_PROJECT to access an internal project', async () => {
 //       const response = await app.inject({
@@ -960,22 +959,21 @@
 
 //       expect(response.statusCode).toBe(200)
 
-//       const project = response.json()
-//       expect(project.id).toBe(internalProject.id)
-//       expect(project.name).toBe(internalProject.name)
-//       expect(project.slug).toBe(internalProject.slug)
-//       expect(project.description).toBe(internalProject.description)
-//       expect(project.storePrivateKey).toBe(internalProject.storePrivateKey)
-//       expect(project.workspaceId).toBe(internalProject.workspaceId)
-//       expect(project.lastUpdatedById).toBe(internalProject.lastUpdatedById)
-//       expect(project.isDisabled).toBe(internalProject.isDisabled)
-//       expect(project.accessLevel).toBe(internalProject.accessLevel)
-//       expect(project.publicKey).toBe(internalProject.publicKey)
-//       expect(project.privateKey).toBe(internalProject.privateKey)
-//       expect(project.environmentCount).toBe(1)
-//       expect(project.secretCount).toBe(0)
-//       expect(project.variableCount).toBe(0)
-//     })
+//   const project = response.json()
+//   expect(project.id).toBe(internalProject.id)
+//   expect(project.name).toBe(internalProject.name)
+//   expect(project.slug).toBe(internalProject.slug)
+//   expect(project.description).toBe(internalProject.description)
+//   expect(project.storePrivateKey).toBe(internalProject.storePrivateKey)
+//   expect(project.workspaceId).toBe(internalProject.workspaceId)
+//   expect(project.lastUpdatedById).toBe(internalProject.lastUpdatedById)
+//   expect(project.accessLevel).toBe(internalProject.accessLevel)
+//   expect(project.publicKey).toBe(internalProject.publicKey)
+//   expect(project.privateKey).toBe(internalProject.privateKey)
+//   expect(project.environmentCount).toBe(1)
+//   expect(project.secretCount).toBe(0)
+//   expect(project.variableCount).toBe(0)
+// })
 
 //     it('should not allow non-members to access an internal project', async () => {
 //       const response = await app.inject({
@@ -1192,19 +1190,18 @@
 
 //     expect(response.statusCode).toBe(200)
 
-//     const project = response.json()
-//     expect(project.id).toBe(privateProject.id)
-//     expect(project.name).toBe(privateProject.name)
-//     expect(project.slug).toBe(privateProject.slug)
-//     expect(project.description).toBe(privateProject.description)
-//     expect(project.storePrivateKey).toBe(privateProject.storePrivateKey)
-//     expect(project.workspaceId).toBe(privateProject.workspaceId)
-//     expect(project.lastUpdatedById).toBe(privateProject.lastUpdatedById)
-//     expect(project.isDisabled).toBe(privateProject.isDisabled)
-//     expect(project.accessLevel).toBe(privateProject.accessLevel)
-//     expect(project.publicKey).toBe(privateProject.publicKey)
-//     expect(project.privateKey).toBe(privateProject.privateKey)
-//   })
+//   const project = response.json()
+//   expect(project.id).toBe(privateProject.id)
+//   expect(project.name).toBe(privateProject.name)
+//   expect(project.slug).toBe(privateProject.slug)
+//   expect(project.description).toBe(privateProject.description)
+//   expect(project.storePrivateKey).toBe(privateProject.storePrivateKey)
+//   expect(project.workspaceId).toBe(privateProject.workspaceId)
+//   expect(project.lastUpdatedById).toBe(privateProject.lastUpdatedById)
+//   expect(project.accessLevel).toBe(privateProject.accessLevel)
+//   expect(project.publicKey).toBe(privateProject.publicKey)
+//   expect(project.privateKey).toBe(privateProject.privateKey)
+// })
 
 //   it('should not allow users without sufficient access to access a private project', async () => {
 //     const privateProject = await projectService.createProject(

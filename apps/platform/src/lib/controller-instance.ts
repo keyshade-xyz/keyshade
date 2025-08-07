@@ -10,7 +10,8 @@ import {
   WorkspaceRoleController,
   ApiKeyController,
   IntegrationController,
-  EventController
+  EventController,
+  PaymentController
 } from '@keyshade/api-client'
 
 export default class ControllerInstance {
@@ -28,6 +29,7 @@ export default class ControllerInstance {
   private _apiKeyController: ApiKeyController
   private _integrationController: IntegrationController
   private _eventController: EventController
+  private _paymentController: PaymentController
 
   get authController(): AuthController {
     return this._authController
@@ -77,6 +79,10 @@ export default class ControllerInstance {
     return this._eventController
   }
 
+  get paymentController(): PaymentController {
+    return this._paymentController
+  }
+
   static getInstance(): ControllerInstance {
     if (!ControllerInstance.instance) {
       ControllerInstance.instance = new ControllerInstance()
@@ -109,6 +115,9 @@ export default class ControllerInstance {
       ControllerInstance.instance._integrationController =
         new IntegrationController(process.env.NEXT_PUBLIC_BACKEND_URL)
       ControllerInstance.instance._eventController = new EventController(
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      )
+      ControllerInstance.instance._paymentController = new PaymentController(
         process.env.NEXT_PUBLIC_BACKEND_URL
       )
     }

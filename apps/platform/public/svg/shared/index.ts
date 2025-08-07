@@ -50,6 +50,7 @@ import EmptyIntegrationSVG from './emptyIntegration.svg'
 import SuccessTriggerSVG from './successTrigger.svg'
 import ErrorTriggerSVG from './errorTrigger.svg'
 import RefreshTriggerSVG from './refreshTrigger.svg'
+import CardSVG from './card.svg'
 
 export {
   DropdownSVG,
@@ -103,5 +104,6 @@ export {
   GitHubSVG,
   SuccessTriggerSVG,
   ErrorTriggerSVG,
-  RefreshTriggerSVG
+  RefreshTriggerSVG,
+  CardSVG
 }

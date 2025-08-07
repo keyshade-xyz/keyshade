@@ -36,6 +36,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/throttler": "^6.2.1",
     "@nestjs/websockets": "^10.3.7",
+    "@polar-sh/sdk": "^0.34.3",
     "@react-email/components": "^0.0.25",
     "@react-email/preview": "0.0.11",
     "@react-email/render": "^1.0.1",

@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import { PageRequestSchema, PageResponseSchema } from '@/pagination'
-import { authorityEnum, projectAccessLevelEnum, rotateAfterEnum } from '@/enums'
+import {
+  authorityEnum,
+  projectAccessLevelEnum,
+  rotateAfterEnum,
+  subscriptionPlanEnum,
+  subscriptionStatusEnum
+} from '@/enums'
 import { EnvironmentSchema } from '@/environment'
 
 export const WorkspaceSchema = z.object({
@@ -8,23 +14,22 @@ export const WorkspaceSchema = z.object({
   name: z.string(),
   slug: z.string(),
   icon: z.string().nullable(),
-  isFreeTier: z.boolean(),
   updatedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
   ownerId: z.string(),
   isDefault: z.boolean(),
+  isDisabled: z.boolean(),
   lastUpdatedById: z.string().nullable(),
-  lastUpdatedBy: z
-    .object({
-      id: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable()
-    })
-    .optional(),
   maxAllowedMembers: z.number(),
-  maxAllowedProjects: z.number(),
   totalMembers: z.number(),
+  maxAllowedProjects: z.number(),
   totalProjects: z.number(),
+  maxAllowedIntegrations: z.number(),
+  totalIntegrations: z.number(),
+  maxAllowedRoles: z.number(),
+  totalRoles: z.number(),
+  projects: z.number(),
+  integrations: z.number(),
   entitlements: z.object({
     canReadProjects: z.boolean(),
     canCreateProjects: z.boolean(),
@@ -36,6 +41,35 @@ export const WorkspaceSchema = z.object({
     canCreateRoles: z.boolean(),
     canUpdate: z.boolean(),
     canDelete: z.boolean()
+  }),
+  lastUpdatedBy: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
+    .optional(),
+  ownedBy: z.object({
+    id: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable(),
+    ownedSince: z.string().datetime()
+  }),
+  subscription: z.object({
+    id: z.string(),
+    plan: subscriptionPlanEnum,
+    status: subscriptionStatusEnum,
+    renewsOn: z.string().datetime().optional(),
+    activatedOn: z.string().datetime(),
+    seatsBooked: z.number(),
+    isAnnual: z.boolean(),
+    trialActivatedOn: z.string().datetime().nullable(),
+    trialPlan: subscriptionPlanEnum.nullable(),
+    user: z.object({
+      id: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string().nullable()
+    })
   })
 })
 

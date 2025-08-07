@@ -178,6 +178,7 @@ export const InclusionQuery = {
         profilePictureUrl: true
       }
     },
+    subscription: true,
     members: {
       select: {
         id: true

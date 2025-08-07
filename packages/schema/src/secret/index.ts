@@ -11,7 +11,9 @@ export const SecretRevisionSchema = z.object({
   environment: z.object({
     id: EnvironmentSchema.shape.id,
     name: EnvironmentSchema.shape.name,
-    slug: EnvironmentSchema.shape.slug
+    slug: EnvironmentSchema.shape.slug,
+    maxAllowedRevisions: z.number(),
+    totalRevisions: z.number()
   }),
   createdBy: z.object({
     id: UserSchema.shape.id,

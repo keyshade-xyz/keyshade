@@ -6,6 +6,7 @@ import type { WorkspaceWithTierLimitAndProjectCount } from '@keyshade/schema'
 import { AddWorkspaceDialog } from '../shared/add-workspace-dialog'
 import { InfiniteScrollList } from './infinite-scroll-list'
 import { WorkspaceListItem } from './workspace-list-item'
+import { Skeleton } from './skeleton'
 import {
   Popover,
   PopoverContent,
@@ -21,13 +22,16 @@ import ControllerInstance from '@/lib/controller-instance'
 import {
   allWorkspacesAtom,
   globalSearchDataAtom,
-  selectedWorkspaceAtom,
+  selectedWorkspaceAtom
 } from '@/store'
 import { useHttp } from '@/hooks/use-http'
-import { getSelectedWorkspaceFromStorage, setSelectedWorkspaceToStorage } from '@/store/workspace'
+import {
+  getSelectedWorkspaceFromStorage,
+  setSelectedWorkspaceToStorage
+} from '@/store/workspace'
 
 export function Combobox(): React.JSX.Element {
-  const workspaceFromStorage = getSelectedWorkspaceFromStorage();
+  const workspaceFromStorage = getSelectedWorkspaceFromStorage()
 
   const [open, setOpen] = useState<boolean>(false)
 
@@ -52,7 +56,7 @@ export function Combobox(): React.JSX.Element {
             items: allWorkspaces,
             metadata: { totalCount: allWorkspaces.length }
           }
-        };
+        }
       }
 
       // If not loaded, fetch from API
@@ -93,7 +97,6 @@ export function Combobox(): React.JSX.Element {
 
   useEffect(() => {
     if (allWorkspaces.length === 0) {
-
       getWorkspacesOfUser().then(({ success, data }) => {
         if (success && data) {
           setGlobalSearchData((prev) => ({
@@ -112,18 +115,29 @@ export function Combobox(): React.JSX.Element {
            * then set the selected workspace to the first one in the list.
            * This is to ensure that the selected workspace is always valid and belongs to the currently logged in user
            */
-          const existingWorkspace = data.items.find(item => item.id === workspaceFromStorage?.id && item.ownerId === workspaceFromStorage.ownerId);
+          const existingWorkspace = data.items.find(
+            (item) =>
+              item.id === workspaceFromStorage?.id &&
+              item.ownerId === workspaceFromStorage.ownerId
+          )
           if (!existingWorkspace) {
-            const newSelectedWorkspace = data.items[0];
-            setSelectedWorkspace(newSelectedWorkspace);
-            setSelectedWorkspaceToStorage(newSelectedWorkspace);
+            const newSelectedWorkspace = data.items[0]
+            setSelectedWorkspace(newSelectedWorkspace)
+            setSelectedWorkspaceToStorage(newSelectedWorkspace)
           } else {
-            setSelectedWorkspace(existingWorkspace);
+            setSelectedWorkspace(existingWorkspace)
           }
         }
       })
     }
-  }, [setSelectedWorkspace, getWorkspacesOfUser, setGlobalSearchData, setAllWorkspaces, allWorkspaces, workspaceFromStorage])
+  }, [
+    setSelectedWorkspace,
+    getWorkspacesOfUser,
+    setGlobalSearchData,
+    setAllWorkspaces,
+    allWorkspaces,
+    workspaceFromStorage
+  ])
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -141,11 +155,16 @@ export function Combobox(): React.JSX.Element {
             </div>
             <div className="flex flex-col items-start">
               <div className="text-start text-lg text-white">
-                {selectedWorkspace?.name ?? 'No workspace'}
+                {selectedWorkspace?.name ?? (
+                  <Skeleton className="h-6 w-[10vw]" />
+                )}
               </div>
               <span className="text-xs text-white/55">
                 {selectedWorkspace?.projects}{' '}
-                {selectedWorkspace?.projects === 1 ? 'project' : 'projects'}
+                {selectedWorkspace?.projects === 1 ||
+                selectedWorkspace?.projects === 0
+                  ? 'project'
+                  : 'projects'}
               </span>
             </div>
           </div>

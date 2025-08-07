@@ -67,6 +67,18 @@ export class WorkspaceRoleService {
       })
     const workspaceId = workspace.id
 
+    if (workspace.isDisabled) {
+      this.logger.log(
+        `User ${user.id} attempted to create workspace role for disabled workspace ${workspaceSlug}`
+      )
+      throw new BadRequestException(
+        constructErrorBody(
+          'This workspace has been disabled',
+          'To use the workspace again, remove the previum resources, or upgrade to a paid plan'
+        )
+      )
+    }
+
     await this.checkWorkspaceRoleExists(workspace.id, dto.name)
 
     const workspaceRoleId = v4()

@@ -8,7 +8,7 @@ interface SidebarTabProps {
   name: string
   icon: React.JSX.Element
   link: string
-  matchTo: string[]
+  matchTo: string
 }
 
 function SidebarTab({
@@ -21,17 +21,15 @@ function SidebarTab({
 
   /**
    * Determines if a tab is active based on the current path.
-   * Checks if the current path matches any of the patterns in matchTo array.
+   * It strips any query parameters from matchTo and checks if
+   * the current path is equal to or starts with that base.
    */
-  const isCurrentActive = (matchPatterns: string[]): boolean => {
-    return matchPatterns.some((pattern) => {
-      const basePath = pattern.split('?')[0]
-      const currentBasePath = currentPath.split('?')[0]
-      return (
-        currentBasePath === basePath ||
-        currentBasePath.startsWith(`${basePath}/`)
-      )
-    })
+  const isCurrentActive = (matchPattern: string): boolean => {
+    if (!matchPattern || typeof matchPattern !== 'string') {
+      return false
+    }
+    const basePath = matchPattern.split('?')[0]
+    return currentPath === basePath || currentPath.startsWith(`${basePath}/`)
   }
 
   return (

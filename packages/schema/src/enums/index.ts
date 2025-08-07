@@ -121,3 +121,29 @@ export const integrationRunStatusEnum = z.enum([
   'SUCCESS',
   'FAILURE'
 ])
+
+export const subscriptionPlanEnum = z.enum([
+  'FREE',
+  'HACKER',
+  'TEAM',
+  'ENTERPRISE'
+])
+
+export const subscriptionStatusEnum = z.enum([
+  'INCOMPLETE',
+  'ACTIVE',
+  'PAST_DUE',
+  'CANCELLED',
+  'UNPAID'
+])
+
+export const subscriptionCancellationReasonEnum = z.enum([
+  'too_expensive',
+  'missing_features',
+  'switched_service',
+  'unused',
+  'customer_service',
+  'low_quality',
+  'too_complex',
+  'other'
+])
