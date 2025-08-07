@@ -15,6 +15,7 @@ import {
   Environment,
   EventType,
   Integration,
+  IntegrationRunStatus,
   IntegrationType,
   Project,
   Workspace
@@ -35,6 +36,9 @@ import {
   GetFunctionConfigurationCommand
 } from '@aws-sdk/client-lambda'
 import { SlackIntegrationMetadata } from './integration.types'
+import { BaseIntegration } from './plugins/base.integration'
+import IntegrationFactory from './plugins/integration.factory'
+import { HydratedIntegration } from './integration.types'
 
 jest.mock('@vercel/sdk', () => {
   const getEnvMock = jest.fn()
@@ -43,6 +47,15 @@ jest.mock('@vercel/sdk', () => {
       environment: { getV9ProjectsIdOrNameCustomEnvironments: getEnvMock }
     })),
     __getEnvMock: getEnvMock
+  }
+})
+
+const postMsgMock = jest.fn()
+jest.mock('@slack/bolt', () => {
+  return {
+    App: jest.fn().mockImplementation(() => ({
+      client: { chat: { postMessage: postMsgMock } }
+    }))
   }
 })
 
@@ -1096,6 +1109,62 @@ describe('Integration Controller Tests', () => {
       })
 
       expect(result.statusCode).toEqual(404)
+    })
+  })
+
+  describe('Slack Integration Init Tests', () => {
+    let integration: HydratedIntegration
+    let createSlackIntegration: () => Promise<BaseIntegration>
+    const DUMMY_TOKEN = 'xoxb-valid-but-test'
+    const DUMMY_SIGNING_SECRET = 'fake-signing-secret'
+    const DUMMY_CHANNEL = 'C1234567890'
+
+    beforeEach(async () => {
+      integration = await integrationService.createIntegration(
+        user1,
+        {
+          name: 'Slack Init Test',
+          type: IntegrationType.SLACK,
+          metadata: {
+            botToken: DUMMY_TOKEN,
+            signingSecret: DUMMY_SIGNING_SECRET,
+            channelId: DUMMY_CHANNEL
+          } satisfies SlackIntegrationMetadata,
+          notifyOn: [EventType.WORKSPACE_UPDATED],
+          privateKey: 'test-private-key'
+        },
+        workspace1.slug
+      )
+
+      createSlackIntegration = async () => {
+        return await IntegrationFactory.createIntegration(integration, prisma)
+      }
+
+      jest.clearAllMocks()
+    })
+
+    it('should send a message when the init function is called', async () => {
+      postMsgMock.mockResolvedValueOnce({
+        ok: true,
+        message: { text: 'Integration initialized' }
+      })
+
+      const slack = await createSlackIntegration()
+
+      slack.init('dummy-key', 'event-id')
+
+      expect(postMsgMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'C12345',
+          text: 'Integration initialized'
+        })
+      )
+
+      const run = await prisma.integrationRun.findFirst({
+        where: { integrationId: integration.id },
+        orderBy: { triggeredAt: 'desc' }
+      })
+      expect(run?.status).toBe(IntegrationRunStatus.SUCCESS)
     })
   })
 })
