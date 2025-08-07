@@ -102,5 +102,4 @@ function CreateIntegration(): React.JSX.Element {
       />
     </div>
   )
-}
 export default CreateIntegration
