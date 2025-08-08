@@ -51,7 +51,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 
 1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
 2. Click **"Create Project"**
-3. Name your project (e.g., `my-discord-app`)
+3. Name your project (e.g., `my-vercel-app`)
 4. **Note:** You can skip adding secrets and variables during project creation; these can be added after the integration is set up.
 
 > 💡 **Pro Tip:** Create your Keyshade project first, as you'll need to select it during the integration setup.
@@ -97,7 +97,6 @@ Fill in the integration details:
 
 **Integration Name**
 - Give your integration a descriptive name (e.g., `My App Vercel Integration`)
-1. Select **"Vercel"** from the available integrations
 
 ### Step 3: Configure Integration Settings
 **Vercel Configuration**

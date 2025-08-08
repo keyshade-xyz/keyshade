@@ -93,7 +93,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 
 1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
 2. Click **"Create Project"**
-3. Name your project (e.g., `my-discord-app`)
+3. Name your project (e.g., `my-slack-app`)
 4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
 
 > 💡 **Pro Tip:** Create your Keyshade project first, as you'll need to select it during the integration setup.
@@ -103,15 +103,19 @@ Before setting up the integration, you need a Keyshade project with your secrets
 ### Step 2: Configure Slack Integration in Keyshade
 
 - **Integration Name**: Enter a descriptive name (e.g., `Keyshade Slack Alerts`)
+- **Event Triggers**: Select which kinds of events you want to get notified about from the list of available triggers, or choose "Select All Events" for complete coverage.
 - **Bot Token**: Paste the Slack bot token (`xoxb-...`) from your Slack app
 - **Signing Secret**: Paste the Slack signing secret
 - **Channel ID**: Paste the Slack channel ID where messages should be posted
-**Event Triggers**  
-Select which kinds of events you want to get notified about from the list of available triggers, or choose "Select All Events" for complete coverage.
+- Click **Continue**
 
-> Enable all event triggers for full visibility or select only what you need.
+### Select Project and Environments (optional)
 
-- Click **Save Integration**
+- If you don’t select a project: Keyshade will listen for events from all projects in the workspace
+- If you select a project but no environment(s): it will listen for all environments in that project
+- If you select a project and one or more environments: it will listen only to those environments of that project
+
+Finally, click **Create Integration**.
 
 ---
 
