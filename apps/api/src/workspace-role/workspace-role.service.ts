@@ -489,7 +489,7 @@ export class WorkspaceRoleService {
 
     const members = users.map((user) => {
       const workspaceMember = workspaceMembers.find(
-        (wm) => wm.userId === user.id
+        (workspaceMember) => workspaceMember.userId === user.id
       )
       return {
         id: user.id,
