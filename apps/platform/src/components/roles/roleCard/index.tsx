@@ -31,7 +31,7 @@ function AuthorityTile({ authority }: { authority: AuthorityEnum }) {
     .join(' ')
 
   return (
-    <div className="m-1 h-fit w-fit rounded-md border border-cyan-200 bg-cyan-950 px-4 py-2 text-center text-sm text-cyan-200">
+    <div className="h-fit w-fit rounded-md border border-cyan-200 bg-cyan-950 px-3 py-2 text-center text-sm text-cyan-200">
       {formattedAuthority}
     </div>
   )
