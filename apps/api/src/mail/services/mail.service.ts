@@ -12,6 +12,7 @@ import OTPEmailTemplate from '../emails/otp-email-template'
 import { constructErrorBody } from '@/common/util'
 import WelcomeEmail from '../emails/welcome-email'
 import { LoginNotificationEmail } from '../emails/login-notification-email'
+import ShareSecretEmailTemplate from '../emails/share-secrete-email'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -35,12 +36,11 @@ export class MailService implements IMailService {
     data: { expiresAt: Date; isPasswordProtected: boolean; url: string }
   ): Promise<void> {
     const subject = 'A secret has been shared with you over Keyshade!'
-    const body = `
-      <p>Someone has shared a secret with you over Keyshade!</p>
-      <p>The secret is accessible at <a href="${data.url}">${data.url}</a></p>
-      ${data.isPasswordProtected ? '<p>The secret is password protected</p>' : ''}
-      <p>The secret will be available until ${data.expiresAt.toDateString()}</p>
-    `
+    const body = await render(
+      ShareSecretEmailTemplate({
+        data
+      })
+    )
     await this.sendEmail(email, subject, body)
   }
 

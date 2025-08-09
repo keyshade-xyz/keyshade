@@ -86,7 +86,7 @@ export class ShareSecretService {
     await this.mailService.shareSecret(email, {
       expiresAt: share.expiresAt,
       isPasswordProtected: share.isPasswordProtected,
-      url: `${process.env.PLATFORM_FRONTEND_URL}/share/${share.hash}`
+      url: `${process.env.WEB_FRONTEND_URL}/share/${share.hash}`
     })
 
     this.logger.log(`Email sent to ${email}`)
