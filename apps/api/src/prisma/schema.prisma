@@ -204,19 +204,19 @@ model Notification {
   userId    String
 }
 
-model LoginSession {  
-  id             String   @id @default(cuid())  
-  userId         String  
-  ipHash         String  
-  browser        String  
-  geolocation    String?  
+model LoginSession {
+  id             String   @id @default(cuid())
+  userId         String
+  ipHash         String
+  browser        String
+  geolocation    String?
   createdAt      DateTime @default(now())
   lastLoggedOnAt DateTime @default(now())
-    
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  
-    
-  @@unique([userId, ipHash, browser])  
-  @@index([userId])  
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ipHash, browser])
+  @@index([userId])
 }
 
 model User {
@@ -232,7 +232,6 @@ model User {
   joinedOn                   DateTime      @default(now())
   timesRemindedForOnboarding Int           @default(0) 
   referralCode               String        @unique
-  
   workspaceMembers  WorkspaceMember[]
   workspaces        Workspace[]
   apiKeys           ApiKey[]
@@ -247,7 +246,7 @@ model User {
   events            Event[]
   integrations      Integration[] // Stores the integrations the user updated
   emailPreference   EmailPreference?
-  loginSessions    LoginSession[] 
+  loginSessions     LoginSession[]
   onboardingAnswers OnboardingAnswers?
 
   referredById  String?
@@ -327,8 +326,8 @@ model Environment {
   projectId String
 
   projectWorkspaceRoleAssociations ProjectWorkspaceRoleAssociation[]
-  DisabledEnvironmentOfSecret      DisabledEnvironmentOfSecret[]
-  DisabledEnvironmentOfVariable    DisabledEnvironmentOfVariable[]
+  disabledEnvironmentOfSecret      DisabledEnvironmentOfSecret[]
+  disabledEnvironmentOfVariable    DisabledEnvironmentOfVariable[]
 
   @@unique([projectId, name])
   @@index([name])
@@ -468,7 +467,7 @@ model Secret {
 
   projectId                   String
   project                     Project                       @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  DisabledEnvironmentOfSecret DisabledEnvironmentOfSecret[]
+  disabledEnvironmentOfSecret DisabledEnvironmentOfSecret[]
 
   @@unique([projectId, name])
 }
@@ -515,7 +514,7 @@ model Variable {
 
   projectId                     String
   project                       Project                         @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  DisabledEnvironmentOfVariable DisabledEnvironmentOfVariable[]
+  disabledEnvironmentOfVariable DisabledEnvironmentOfVariable[]
 
   @@unique([projectId, name])
 }
@@ -602,4 +601,17 @@ model EmailPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId, id], name: "userEmailPreference")
+}
+
+model Share {
+  id                  String   @id @default(cuid())
+  hash                String   @unique
+  secret              String
+  expiresAt           DateTime
+  isPasswordProtected Boolean
+  viewLimit           Int
+  timesViewed         Int      @default(0)
+  recepientEmails     String[] @default([])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

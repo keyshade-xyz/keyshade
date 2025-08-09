@@ -1,4 +1,17 @@
+import { createDecipheriv, createHash } from 'crypto'
 import * as eccrypto from 'eccrypto'
+
+const ALGORITHM = 'aes-256-gcm'
+const IV_LENGTH = 12
+
+/**
+ * Derives a cryptographic key from the given string using SHA256 hashing.
+ *
+ * @param keyString - The string from which to derive the key.
+ * @returns A Buffer containing the derived key.
+ */
+const deriveKey = (keyString: string): Buffer =>
+  createHash('sha256').update(keyString).digest()
 
 /**
  * Interface for the encrypted data structure
@@ -104,4 +117,32 @@ export const decrypt = async (
       `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     )
   }
+}
+
+/**
+ * Decrypts the given encrypted string using the given string key.
+ *
+ * @param encryptedBase64 - The encrypted string as a base64-encoded string.
+ * @param secret - Optionally, The string secret to use for decryption.
+ *
+ * @returns The decrypted string.
+ *
+ * @throws {Error} If the decryption fails.
+ */
+export const sDecrypt = (encryptedBase64: string, secret?: string): string => {
+  const key = deriveKey(secret || process.env.SERVER_SECRET)
+  const data: Buffer = Buffer.from(encryptedBase64, 'base64')
+
+  const iv = data.subarray(0, IV_LENGTH)
+  const authTag = data.subarray(IV_LENGTH, IV_LENGTH + 16)
+  const encrypted = data.subarray(IV_LENGTH + 16)
+
+  const decipher = createDecipheriv(ALGORITHM, key, iv)
+  decipher.setAuthTag(authTag)
+
+  const decrypted = Buffer.concat([
+    decipher.update(encrypted),
+    decipher.final()
+  ])
+  return decrypted.toString('utf8')
 }

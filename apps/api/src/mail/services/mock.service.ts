@@ -5,19 +5,27 @@ import { IMailService } from './interface.service'
 export class MockMailService implements IMailService {
   private readonly log = new Logger(MockMailService.name)
 
+  async shareSecret(
+    email: string,
+    data: { expiresAt: Date; isPasswordProtected: boolean; url: string }
+  ): Promise<void> {
+    this.log.log(
+      `[MOCK] Secret shared notification would be sent to ${email}: Expiration Date=${data.expiresAt.toISOString()}, URL=${data.url}`
+    )
+  }
+
   async invitedToWorkspace(
     email: string,
     workspaceName: string,
     actionUrl: string,
     invitedBy: string,
-    invitedOn: string,
     forRegisteredUser: boolean,
     inviteeName?: string
   ): Promise<void> {
     this.log.log(
       forRegisteredUser
-        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Invitation details can be accessed at ${actionUrl}.`
-        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy} on ${invitedOn}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
+        ? `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy}. Invitation details can be accessed at ${actionUrl}.`
+        : `User ${email} has been invited to the workspace ${workspaceName} by ${invitedBy}. Since the user is not registered, they can sign up and access the invitation details at ${actionUrl}.`
     )
   }
 

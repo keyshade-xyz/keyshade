@@ -80,6 +80,7 @@ async function initializeNestApp() {
     credentials: true,
     origin: [
       'http://localhost:3025',
+      'http://localhost:6969',
       'https://keyshade.xyz',
       'https://app.keyshade.xyz',
       'https://stage.app.keyshade.xyz'

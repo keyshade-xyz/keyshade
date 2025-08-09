@@ -34,6 +34,9 @@ function Navbar(): React.JSX.Element {
           <Link href="/pricing">Pricing</Link>
         </li>
         <li>
+          <Link href="/share">Share</Link>
+        </li>
+        <li>
           <a
             href="https://blog.keyshade.xyz/"
             rel="noopener noreferrer"

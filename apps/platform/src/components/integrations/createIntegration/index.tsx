@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React, { useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
@@ -12,14 +12,15 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog'
 import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
+
 function CreateIntegration(): React.JSX.Element {
   const integrationType = useAtomValue(createIntegrationTypeAtom)
   const setCreateIntegrationModalOpen = useSetAtom(createIntegrationOpenAtom)
   const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false)
-}
+
   if (!integrationType) {
     return (
       <div className="text-center text-gray-500">No integration selected</div>
@@ -102,4 +103,6 @@ function CreateIntegration(): React.JSX.Element {
       />
     </div>
   )
+}
+
 export default CreateIntegration

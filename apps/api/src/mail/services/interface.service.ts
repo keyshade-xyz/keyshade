@@ -10,7 +10,6 @@ export interface IMailService {
     workspaceName: string,
     projectUrl: string,
     invitedBy: string,
-    invitedOn: string,
     forRegisteredUser: boolean,
     inviteeName?: string
   ): Promise<void>
@@ -37,6 +36,15 @@ export interface IMailService {
       ip: string
       device: string
       location?: string
+    }
+  ): Promise<void>
+
+  shareSecret(
+    email: string,
+    data: {
+      expiresAt: Date
+      isPasswordProtected: boolean
+      url: string
     }
   ): Promise<void>
 
