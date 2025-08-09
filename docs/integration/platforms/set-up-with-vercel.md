@@ -52,7 +52,7 @@ Before setting up the integration, you need a Keyshade project with your secrets
 1. Go to the [Keyshade Dashboard](https://app.keyshade.xyz/)
 2. Click **"Create Project"**
 3. Name your project (e.g., `my-vercel-app`)
-4. **Note:** You can skip adding secrets and variables during project creation as we'll add them after setting up the integration
+4. **Note:** You can skip adding secrets and variables during project creation; these can be added after the integration is set up.
 
 > 💡 **Pro Tip:** Create your Keyshade project first, as you'll need to select it during the integration setup.
 
@@ -89,8 +89,7 @@ Now you're ready to set up the integration in Keyshade.
 
 1. Go to your [Keyshade Dashboard](https://app.keyshade.xyz/)
 2. Navigate to **"Integrations"** in the sidebar
-3. Click **"Create Integration"**
-4. Select **"Vercel"** from the available integrations
+3. Select **"Vercel"** from the available integrations
 
 ### Step 2: Configure Integration Settings
 
@@ -99,16 +98,17 @@ Fill in the integration details:
 **Integration Name**
 - Give your integration a descriptive name (e.g., `My App Vercel Integration`)
 
+### Step 3: Configure Integration Settings
 **Vercel Configuration**
 - **Token:** Paste the Vercel API token you created earlier
 - **Project ID:** Enter your Vercel project ID (starts with `prj_`)
 
-### Step 3: Link Keyshade Project
+### Step 4: Link Keyshade Project
 
 - **Project:** Select the Keyshade project you created earlier
 - **Private Key:** If you haven't saved your project's private key in Keyshade, you'll need to provide it here
 
-### Step 4: Map Environments
+### Step 5: Map Environments
 
 Map your Keyshade environments to Vercel environments:
 
@@ -131,7 +131,7 @@ Map your Keyshade environments to Vercel environments:
 * Keyshade `staging` → Vercel `preview`
 * Keyshade `production` → Vercel `production`
 
-### Step 5: Create Integration
+### Step 6: Create Integration
 
 1. Review your configuration
 2. Click **"Create Integration"**

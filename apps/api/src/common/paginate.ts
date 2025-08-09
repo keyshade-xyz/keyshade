@@ -20,6 +20,11 @@ interface QueryOptions {
   search?: string
 }
 
+export interface PaginatedResponse<T> {
+  items: T[]
+  metadata: PaginatedMetadata
+}
+
 //convert query object to query string to use in links
 const getQueryString = (query: QueryOptions) => {
   return Object.keys(query)
@@ -40,7 +45,7 @@ export const paginate = (
   relativeUrl: string,
   query: QueryOptions,
   defaultQuery?: Record<string, any>
-) => {
+): PaginatedMetadata => {
   if (!query.limit) return {} as PaginatedMetadata
   let defaultQueryStr = ''
   if (defaultQuery) {

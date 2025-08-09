@@ -47,4 +47,10 @@ export interface IMailService {
       url: string
     }
   ): Promise<void>
+
+  sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
+  ): Promise<void>
 }

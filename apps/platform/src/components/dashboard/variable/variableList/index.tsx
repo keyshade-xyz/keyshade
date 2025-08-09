@@ -11,7 +11,8 @@ import {
   deleteEnvironmentValueOfVariableOpenAtom,
   variableRevisionsOpenAtom,
   rollbackVariableOpenAtom,
-  globalSearchDataAtom
+  globalSearchDataAtom,
+  createVariableOpenAtom
 } from '@/store'
 import VariableCard from '@/components/dashboard/variable/variableCard'
 import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
@@ -19,10 +20,12 @@ import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
 import EmptyVariableListContent from '@/components/dashboard/variable/emptyVariableListSection'
 import { useHighlight } from '@/hooks/use-highlight'
+import ProjectErrorCard from '@/components/shared/project-error-card'
 
 export default function VariableList(): React.JSX.Element {
   const searchParams = useSearchParams()
   const highlightSlug = searchParams.get('highlight')
+  const isCreateVariableOpen = useAtomValue(createVariableOpenAtom)
   const isDeleteVariableOpen = useAtomValue(deleteVariableOpenAtom)
   const isEditVariableOpen = useAtomValue(editVariableOpenAtom)
   const isDeleteEnvironmentValueOfVariableOpen = useAtomValue(
@@ -34,11 +37,15 @@ export default function VariableList(): React.JSX.Element {
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
 
+  const isAuthorizedToReadVariables =
+    selectedProject?.entitlements.canReadVariables
+
   // Highlight the variable if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=variables&highlight=<variableSlug>
   const { isHighlighted } = useHighlight(highlightSlug, 'variable')
 
   useEffect(() => {
     const shouldRefetch =
+      isCreateVariableOpen ||
       isDeleteVariableOpen ||
       isEditVariableOpen ||
       isDeleteEnvironmentValueOfVariableOpen ||
@@ -49,6 +56,7 @@ export default function VariableList(): React.JSX.Element {
       setRefetchTrigger((prev) => prev + 1)
     }
   }, [
+    isCreateVariableOpen,
     isDeleteVariableOpen,
     isEditVariableOpen,
     isDeleteEnvironmentValueOfVariableOpen,
@@ -70,7 +78,6 @@ export default function VariableList(): React.JSX.Element {
           }
         }
       }
-
       try {
         const response =
           await ControllerInstance.getInstance().variableController.getAllVariablesOfProject(
@@ -91,9 +98,9 @@ export default function VariableList(): React.JSX.Element {
           setGlobalSearchData((prev) => ({
             ...prev,
             variables: response.data!.items.map((item) => ({
-              slug: item.variable.slug,
-              name: item.variable.name,
-              note: item.variable.note
+              slug: item.slug,
+              name: item.name,
+              note: item.note
             }))
           }))
         }
@@ -129,7 +136,7 @@ export default function VariableList(): React.JSX.Element {
       return (
         <VariableCard
           className={cn(
-            highlightSlug === variableData.variable.slug &&
+            highlightSlug === variableData.slug &&
               isHighlighted &&
               'animate-highlight'
           )}
@@ -139,6 +146,10 @@ export default function VariableList(): React.JSX.Element {
     },
     [highlightSlug, isHighlighted]
   )
+
+  if (!isAuthorizedToReadVariables) {
+    return <ProjectErrorCard tab="variables" />
+  }
 
   return (
     <div
@@ -158,7 +169,7 @@ export default function VariableList(): React.JSX.Element {
             emptyComponent={<EmptyVariableListContent />}
             fetchFunction={fetchVariables}
             itemComponent={renderVariableCard}
-            itemKey={(variableData) => variableData.variable.id}
+            itemKey={(variableData) => variableData.id}
             itemsPerPage={10}
             key={refetchTrigger}
           />

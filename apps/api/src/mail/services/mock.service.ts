@@ -73,4 +73,12 @@ export class MockMailService implements IMailService {
       `[MOCK] Login notification would be sent to ${email}: IP=${data.ip}, Location=${data.location}, Device=${data.device}`
     )
   }
+
+  async sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
+  ): Promise<void> {
+    return
+  }
 }

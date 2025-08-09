@@ -1,3 +1,61 @@
+## [2.32.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.8...v2.32.0-stage.9) (2025-08-08)
+
+### 🐛 Bug Fixes
+
+* **platform:** Role Tab Member Status and Role Naming Issues ([#1097](https://github.com/keyshade-xyz/keyshade/issues/1097)) ([#1104](https://github.com/keyshade-xyz/keyshade/issues/1104)) ([4f04355](https://github.com/keyshade-xyz/keyshade/commit/4f04355cdacf3d6f2cf41ee878ebf01fad654db1))
+
+## [2.32.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.7...v2.32.0-stage.8) (2025-08-07)
+
+### 🐛 Bug Fixes
+
+* **platform:** corner radius in wrong place for [secure] and variable ([#1100](https://github.com/keyshade-xyz/keyshade/issues/1100)) ([0320f1b](https://github.com/keyshade-xyz/keyshade/commit/0320f1bfdd65cb6c4118dca30c2a808a69ac232c))
+
+## [2.32.0-stage.7](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.6...v2.32.0-stage.7) (2025-08-06)
+
+### 🐛 Bug Fixes
+
+* **platform:** update variable list after add or delete issue ([#1099](https://github.com/keyshade-xyz/keyshade/issues/1099)) ([2741a37](https://github.com/keyshade-xyz/keyshade/commit/2741a37010e2f9c91fdbaa1a6c3013d5421b601e))
+
+## [2.32.0-stage.6](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.5...v2.32.0-stage.6) (2025-08-03)
+
+### 🐛 Bug Fixes
+
+* update lockfile ([e1ec592](https://github.com/keyshade-xyz/keyshade/commit/e1ec59279216ee6cb6fcf3c49bcab6fbb541d12b))
+
+## [2.32.0-stage.5](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.4...v2.32.0-stage.5) (2025-07-31)
+
+### 🚀 Features
+
+* RBAC ([#1073](https://github.com/keyshade-xyz/keyshade/issues/1073)) ([6d34710](https://github.com/keyshade-xyz/keyshade/commit/6d347106c9e5c5dd4a942bce54d5bf32be41e442))
+
+### 🔧 Miscellaneous Chores
+
+* Upgrade conventional-changelog-writer from 8.1.0 to 8.2.0 ([#1095](https://github.com/keyshade-xyz/keyshade/issues/1095)) ([7d092bf](https://github.com/keyshade-xyz/keyshade/commit/7d092bf1818978ecded4beed719c0831e106c531))
+
+## [2.32.0-stage.4](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.3...v2.32.0-stage.4) (2025-07-31)
+
+### 🚀 Features
+
+* **api:** unfinished onboarding follow-up email ([#1090](https://github.com/keyshade-xyz/keyshade/issues/1090)) ([69dbb02](https://github.com/keyshade-xyz/keyshade/commit/69dbb02b90d877e4249c8b4da6359d5a6d866bc4))
+
+## [2.32.0-stage.3](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.2...v2.32.0-stage.3) (2025-07-30)
+
+### 🐛 Bug Fixes
+
+* **api, cli:** ambiguous error messages on keyshade run failure ([#1087](https://github.com/keyshade-xyz/keyshade/issues/1087)) ([206dda7](https://github.com/keyshade-xyz/keyshade/commit/206dda702b3f3f0cabeb73e4f74dd2ccfc962631))
+
+## [2.32.0-stage.2](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.1...v2.32.0-stage.2) (2025-07-30)
+
+### 🐛 Bug Fixes
+
+* **platform:** UI Issues in integration screen [#1088](https://github.com/keyshade-xyz/keyshade/issues/1088) ([#1091](https://github.com/keyshade-xyz/keyshade/issues/1091)) ([faba12a](https://github.com/keyshade-xyz/keyshade/commit/faba12a809ff2b87dccd5e4f6b3bacaa6ad71304))
+
+## [2.32.0-stage.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.1...v2.32.0-stage.1) (2025-07-30)
+
+### 🚀 Features
+
+* integration configuration testing ([#1035](https://github.com/keyshade-xyz/keyshade/issues/1035)) ([46db338](https://github.com/keyshade-xyz/keyshade/commit/46db338cc4c335f769f9690b8c9fbc2bfa1d3e80))
+
 ## [2.31.1](https://github.com/keyshade-xyz/keyshade/compare/v2.31.0...v2.31.1) (2025-07-28)
 
 ### 🐛 Bug Fixes

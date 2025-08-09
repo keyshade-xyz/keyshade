@@ -1,4 +1,4 @@
-import { paginate } from '@/common/paginate'
+import { paginate, PaginatedResponse } from '@/common/paginate'
 import { createUser, getUserByEmailOrId } from '@/common/user'
 import { IMailService, MAIL_SERVICE } from '@/mail/services/interface.service'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -30,6 +30,12 @@ import { constructErrorBody, limitMaxItemsPerPage } from '@/common/util'
 import { AuthenticatedUser } from '@/user/user.types'
 import { TierLimitService } from '@/common/tier-limit.service'
 import SlugGenerator from '@/common/slug-generator.service'
+import {
+  HydratedWorkspaceMember,
+  RawWorkspaceMember
+} from './workspace-membership.types'
+import { InclusionQuery } from '@/common/inclusion-query'
+import { HydrationService } from '@/common/hydration.service'
 
 @Injectable()
 export class WorkspaceMembershipService {
@@ -41,7 +47,8 @@ export class WorkspaceMembershipService {
     private readonly jwt: JwtService,
     private readonly tierLimitService: TierLimitService,
     @Inject(MAIL_SERVICE) private readonly mailService: IMailService,
-    private readonly slugGenerator: SlugGenerator
+    private readonly slugGenerator: SlugGenerator,
+    private readonly hydrationService: HydrationService
   ) {}
 
   /**
@@ -62,14 +69,15 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.WORKSPACE_ADMIN]
       })
 
     const otherUser = await getUserByEmailOrId(
       otherUserEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     if (otherUser.id === user.id) {
@@ -174,8 +182,13 @@ export class WorkspaceMembershipService {
     try {
       await this.prisma.$transaction([removeRole, assignRole, updateWorkspace])
     } catch (e) {
-      this.log.error('Error in transaction', e)
-      throw new InternalServerErrorException('Error in transaction')
+      this.log.error('Error in transaction while transferring ownership', e)
+      throw new InternalServerErrorException(
+        constructErrorBody(
+          'Uh oh, something went wrong',
+          'Something went wrong while transferring ownership. If the issue persists, please get in touch with us.'
+        )
+      )
     }
 
     await createEvent(
@@ -213,11 +226,11 @@ export class WorkspaceMembershipService {
     user: AuthenticatedUser,
     workspaceSlug: Workspace['slug'],
     members: CreateWorkspaceMember[]
-  ): Promise<void> {
+  ): Promise<HydratedWorkspaceMember[]> {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.ADD_USER]
       })
 
@@ -238,7 +251,11 @@ export class WorkspaceMembershipService {
 
     // Add users to the workspace if any
     if (members && members.length > 0) {
-      await this.addMembersToWorkspace(workspace, user, members)
+      const hydratedMembers = await this.addMembersToWorkspace(
+        workspace,
+        user,
+        members
+      )
 
       await createEvent(
         {
@@ -261,12 +278,13 @@ export class WorkspaceMembershipService {
         `Added users to workspace ${workspace.name} (${workspace.id})`
       )
 
-      return
+      return hydratedMembers
+    } else {
+      this.log.warn(
+        `No users to add to workspace ${workspace.name} (${workspace.id})`
+      )
+      return []
     }
-
-    this.log.warn(
-      `No users to add to workspace ${workspace.name} (${workspace.id})`
-    )
   }
 
   /**
@@ -287,7 +305,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.REMOVE_USER]
       })
 
@@ -382,17 +400,18 @@ export class WorkspaceMembershipService {
     workspaceSlug: Workspace['slug'],
     otherUserEmail: User['email'],
     roleSlugs: WorkspaceRole['slug'][]
-  ): Promise<void> {
+  ): Promise<HydratedWorkspaceMember> {
     const otherUser = await getUserByEmailOrId(
       otherUserEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.UPDATE_USER_ROLE]
       })
 
@@ -430,7 +449,8 @@ export class WorkspaceMembershipService {
           workspaceId: workspace.id,
           userId: otherUser.id
         }
-      }
+      },
+      include: InclusionQuery.WorkspaceMember
     })
 
     // Clear out the existing roles
@@ -497,6 +517,11 @@ export class WorkspaceMembershipService {
     this.log.debug(
       `Updated role of user ${otherUser.id} in workspace ${workspace.name} (${workspace.id})`
     )
+
+    return await this.hydrationService.hydrateWorkspaceMember({
+      user,
+      workspaceMember: membership
+    })
   }
 
   /**
@@ -518,11 +543,11 @@ export class WorkspaceMembershipService {
     sort: string,
     order: string,
     search: string
-  ) {
+  ): Promise<PaginatedResponse<HydratedWorkspaceMember>> {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_USERS]
       })
     //get all members of workspace for page with limit
@@ -540,7 +565,8 @@ export class WorkspaceMembershipService {
           OR: [
             {
               name: {
-                contains: search
+                contains: search,
+                mode: 'insensitive'
               }
             },
             {
@@ -551,32 +577,7 @@ export class WorkspaceMembershipService {
           ]
         }
       },
-      select: {
-        id: true,
-        user: true,
-        roles: {
-          select: {
-            id: true,
-            role: {
-              select: {
-                id: true,
-                slug: true,
-                name: true,
-                description: true,
-                colorCode: true,
-                authorities: true,
-                projects: {
-                  select: {
-                    id: true
-                  }
-                }
-              }
-            }
-          }
-        },
-        invitationAccepted: true,
-        createdOn: true
-      }
+      include: InclusionQuery.WorkspaceMember
     })
 
     //calculate metadata for pagination
@@ -612,7 +613,16 @@ export class WorkspaceMembershipService {
       }
     )
 
-    return { items, metadata }
+    const hydratedMembers: HydratedWorkspaceMember[] = await Promise.all(
+      items.map(async (member) => {
+        return await this.hydrationService.hydrateWorkspaceMember({
+          user,
+          workspaceMember: member
+        })
+      })
+    )
+
+    return { items: hydratedMembers, metadata }
   }
 
   /**
@@ -686,13 +696,14 @@ export class WorkspaceMembershipService {
     const inviteeUser = await getUserByEmailOrId(
       inviteeEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.REMOVE_USER]
       })
 
@@ -780,7 +791,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_WORKSPACE]
       })
 
@@ -845,7 +856,8 @@ export class WorkspaceMembershipService {
       otherUser = await getUserByEmailOrId(
         otherUserEmail,
         this.prisma,
-        this.slugGenerator
+        this.slugGenerator,
+        this.hydrationService
       )
     } catch (e) {
       return false
@@ -854,7 +866,7 @@ export class WorkspaceMembershipService {
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_USERS]
       })
 
@@ -874,13 +886,14 @@ export class WorkspaceMembershipService {
     const member = await getUserByEmailOrId(
       inviteeEmail,
       this.prisma,
-      this.slugGenerator
+      this.slugGenerator,
+      this.hydrationService
     )
 
     const workspace =
       await this.authorizationService.authorizeUserAccessToWorkspace({
         user,
-        entity: { slug: workspaceSlug },
+        slug: workspaceSlug,
         authorities: [Authority.READ_WORKSPACE, Authority.ADD_USER]
       })
 
@@ -965,8 +978,9 @@ export class WorkspaceMembershipService {
     workspace: Workspace,
     currentUser: AuthenticatedUser,
     members: CreateWorkspaceMember[]
-  ) {
+  ): Promise<HydratedWorkspaceMember[]> {
     const workspaceAdminRole = await this.getWorkspaceAdminRole(workspace.id)
+    const hydratedMembers: HydratedWorkspaceMember[] = []
 
     for (const member of members) {
       // Check if the admin role is tried to be assigned to the user
@@ -974,16 +988,20 @@ export class WorkspaceMembershipService {
         throw new BadRequestException(
           constructErrorBody(
             'Admin role cannot be assigned to the user',
-            'You can not assign the admin role to the user. Please check the teams tab to confirm whether the user is a member of this workspace'
+            'You can not assign the admin role to the user.'
           )
         )
       }
 
-      const memberUser: User | null = await this.prisma.user.findUnique({
-        where: {
-          email: member.email.toLowerCase()
-        }
-      })
+      let memberUser: User | null
+
+      try {
+        memberUser = await this.prisma.user.findUnique({
+          where: {
+            email: member.email.toLowerCase()
+          }
+        })
+      } catch (_ignored) {}
 
       const userId = memberUser?.id ?? v4()
 
@@ -1045,11 +1063,16 @@ export class WorkspaceMembershipService {
               }
             }))
           }
-        }
+        },
+        include: InclusionQuery.WorkspaceMember
       })
 
+      let rawWorkspaceMember: RawWorkspaceMember
+
       if (memberUser) {
-        await this.prisma.$transaction([createMembership])
+        rawWorkspaceMember = (
+          await this.prisma.$transaction([createMembership])
+        )[0]
 
         const inviteeName = memberUser.name ?? undefined
 
@@ -1074,10 +1097,13 @@ export class WorkspaceMembershipService {
             authProvider: AuthProvider.EMAIL_OTP
           },
           this.prisma,
-          this.slugGenerator
+          this.slugGenerator,
+          this.hydrationService
         )
 
-        await this.prisma.$transaction([createMembership])
+        rawWorkspaceMember = await this.prisma.$transaction([
+          createMembership
+        ])[0]
 
         this.log.debug(`Created non-registered user ${memberUser}`)
 
@@ -1094,8 +1120,17 @@ export class WorkspaceMembershipService {
         )
       }
 
+      hydratedMembers.push(
+        await this.hydrationService.hydrateWorkspaceMember({
+          user: currentUser,
+          workspaceMember: rawWorkspaceMember
+        })
+      )
+
       this.log.debug(`Added user ${memberUser} to workspace ${workspace.name}.`)
     }
+
+    return hydratedMembers
   }
 
   /**

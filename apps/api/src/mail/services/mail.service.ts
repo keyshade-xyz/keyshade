@@ -13,6 +13,12 @@ import { constructErrorBody } from '@/common/util'
 import WelcomeEmail from '../emails/welcome-email'
 import { LoginNotificationEmail } from '../emails/login-notification-email'
 import ShareSecretEmailTemplate from '../emails/share-secrete-email'
+import { OnboardingReminder1Email } from '../emails/onboarding-reminder-email-1'
+import { OnboardingReminder2Email } from '../emails/onboarding-reminder-email-2'
+import { OnboardingReminder3Email } from '../emails/onboarding-reminder-email-3'
+import { OnboardingReminder4Email } from '../emails/onboarding-reminder-email-4'
+import { OnboardingReminder5Email } from '../emails/onboarding-reminder-email-5'
+import { OnboardingReminder6Email } from '../emails/onboarding-reminder-email-6'
 
 @Injectable()
 export class MailService implements IMailService {
@@ -186,6 +192,33 @@ export class MailService implements IMailService {
     )
 
     await this.sendEmail(email, subject, body)
+  }
+
+  async sendOnboardingReminder(
+    email: string,
+    name: string | null,
+    reminderIndex: number
+  ): Promise<void> {
+    const subject = `Getting started with Keyshade (Reminder ${reminderIndex})`
+
+    const templates = [
+      OnboardingReminder1Email,
+      OnboardingReminder2Email,
+      OnboardingReminder3Email,
+      OnboardingReminder4Email,
+      OnboardingReminder5Email,
+      OnboardingReminder6Email
+    ]
+
+    const templateComponent = templates[reminderIndex - 1]
+    if (!templateComponent) {
+      this.log.warn(`Invalid reminder index ${reminderIndex} for ${email}`)
+      return
+    }
+
+    const html = await render(templateComponent({ name: name ?? 'there' }))
+
+    await this.sendEmail(email, subject, html)
   }
 
   private async sendEmail(

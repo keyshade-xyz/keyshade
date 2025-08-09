@@ -9,6 +9,7 @@ import ControllerInstance from '@/lib/controller-instance'
 import { useHttp } from '@/hooks/use-http'
 import { rolesOfWorkspaceAtom, selectedWorkspaceAtom } from '@/store'
 import { PageTitle } from '@/components/common/page-title'
+import ErrorCard from '@/components/shared/error-card'
 
 function DetailedMemberPage(): React.JSX.Element {
   const setRoles = useSetAtom(rolesOfWorkspaceAtom)
@@ -16,6 +17,8 @@ function DetailedMemberPage(): React.JSX.Element {
 
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab') ?? 'rollup-details'
+  const isAuthorizedToViewMembers =
+    currentWorkspace?.entitlements.canReadMembers
 
   const getAllRoles = useHttp(() =>
     ControllerInstance.getInstance().workspaceRoleController.getWorkspaceRolesOfWorkspace(
@@ -25,6 +28,7 @@ function DetailedMemberPage(): React.JSX.Element {
   )
 
   useEffect(() => {
+    if (!isAuthorizedToViewMembers) return
     getAllRoles().then(({ data, success }) => {
       if (success && data) {
         const nonAdminRoles = data.items.filter(
@@ -33,7 +37,7 @@ function DetailedMemberPage(): React.JSX.Element {
         setRoles(nonAdminRoles)
       }
     })
-  }, [getAllRoles, setRoles])
+  }, [getAllRoles, setRoles, isAuthorizedToViewMembers])
 
   return (
     <main>
@@ -41,8 +45,14 @@ function DetailedMemberPage(): React.JSX.Element {
         <PageTitle title={`${currentWorkspace?.name} | Members`} />
         <MembersHeader />
 
-        {tab === 'joined' && <JoinedMemberPage />}
-        {tab === 'invited' && <InvitedMemberPage />}
+        {isAuthorizedToViewMembers ? (
+          <>
+            {tab === 'joined' && <JoinedMemberPage />}
+            {tab === 'invited' && <InvitedMemberPage />}
+          </>
+        ) : (
+          <ErrorCard tab="members" />
+        )}
       </div>
     </main>
   )

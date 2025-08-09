@@ -7,10 +7,10 @@ import {
 } from '@prisma/client'
 import {
   EnvironmentSupportType,
+  HydratedIntegration,
   IntegrationEventData,
   IntegrationMetadata,
   IntegrationRunData,
-  IntegrationWithEnvironments,
   IntegrationWithEnvironmentsAndMetadata
 } from '../integration.types'
 import {
@@ -27,7 +27,10 @@ import { Project } from '@keyshade/schema'
  */
 export abstract class BaseIntegration {
   protected readonly logger = new Logger(BaseIntegration.name)
-  protected integration: IntegrationWithEnvironments | null = null
+  protected integration:
+    | HydratedIntegration
+    | Omit<HydratedIntegration, 'entitlements'>
+    | null = null
 
   constructor(
     private readonly integrationType: IntegrationType,
@@ -63,6 +66,11 @@ export abstract class BaseIntegration {
    * Use this function to list the required metadata parameters for the integration.
    */
   abstract getRequiredMetadataParameters(): Set<string>
+
+  /**
+   * Use this function to test the condfiguration of the integration.
+   */
+  abstract validateConfiguration(metadata: IntegrationMetadata): Promise<void>
 
   // WARNING: DO NOT OVERRIDE
   protected async registerIntegrationRun({
@@ -110,7 +118,7 @@ export abstract class BaseIntegration {
   }
 
   public setIntegration<T extends IntegrationMetadata>(
-    integration: IntegrationWithEnvironments
+    integration: HydratedIntegration | Omit<HydratedIntegration, 'entitlements'>
   ): void {
     this.integration = integration
 
@@ -156,7 +164,7 @@ export abstract class BaseIntegration {
 
   // WARNING: DO NOT OVERRIDE
   validateMetadataParameters(
-    metadata: Record<string, string>,
+    metadata: Record<string, unknown>,
     partialCheck?: boolean
   ): void {
     if (partialCheck) {

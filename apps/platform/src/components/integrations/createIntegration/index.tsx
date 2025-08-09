@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ArrowLeftRight, CheckSquare2 } from 'lucide-react'
@@ -17,9 +18,8 @@ import { createIntegrationTypeAtom, createIntegrationOpenAtom } from '@/store'
 
 function CreateIntegration(): React.JSX.Element {
   const integrationType = useAtomValue(createIntegrationTypeAtom)
-  const setCreateIntegrationModelOpen = useSetAtom(createIntegrationOpenAtom)
-
-  const [setupModelOpen, setSetupModelOpen] = useState<boolean>(false)
+  const setCreateIntegrationModalOpen = useSetAtom(createIntegrationOpenAtom)
+  const [setupModalOpen, setSetupModalOpen] = useState<boolean>(false)
 
   if (!integrationType) {
     return (
@@ -28,29 +28,26 @@ function CreateIntegration(): React.JSX.Element {
   }
   const integrationName = formatText(integrationType)
   const integrationConfig = Integrations[integrationType]
-
   const integrationPermissions =
     integrationConfig.events?.map(
       (group) => `Get notified about ${group.name.toLowerCase()}`
     ) || []
-
-  const handleClose = () => {
-    setCreateIntegrationModelOpen(false)
-  }
-
   const handleNext = () => {
-    setSetupModelOpen(true)
+    setSetupModalOpen(true)
   }
-
+  const handleHowItWorks = () => {
+    const url = `https://docs.keyshade.xyz/integrations/platforms/set-up-with-${integrationType.toLowerCase()}`
+    window.location.href = url
+  }
   const handleSetupOpenChange = (open: boolean) => {
-    setSetupModelOpen(open)
+    setSetupModalOpen(open)
     if (!open) {
-      setCreateIntegrationModelOpen(false)
+      setCreateIntegrationModalOpen(false)
     }
   }
   return (
     <div>
-      <Dialog onOpenChange={handleSetupOpenChange} open={!setupModelOpen}>
+      <Dialog onOpenChange={handleSetupOpenChange} open={!setupModalOpen}>
         <DialogContent className="max-w-md bg-[#18181B] text-white">
           <DialogHeader className="flex flex-col items-center justify-between gap-5 pb-4">
             <div className="flex w-full items-center justify-center gap-3">
@@ -75,7 +72,6 @@ function CreateIntegration(): React.JSX.Element {
               </div>
             </DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
             <div className="space-y-3 border-y border-white/20 py-4">
               <h3 className="text-sm font-medium">Keyshade would do</h3>
@@ -88,9 +84,8 @@ function CreateIntegration(): React.JSX.Element {
                 ))}
               </div>
             </div>
-
             <div className="flex justify-between">
-              <Button onClick={handleClose} variant="secondary">
+              <Button onClick={handleHowItWorks} variant="secondary">
                 How it works
               </Button>
               <Button onClick={handleNext} variant="secondary">
@@ -100,12 +95,11 @@ function CreateIntegration(): React.JSX.Element {
           </div>
         </DialogContent>
       </Dialog>
-
       <SetupIntegration
         integrationName={integrationName}
         integrationType={integrationType}
         onOpenChange={handleSetupOpenChange}
-        open={setupModelOpen}
+        open={setupModalOpen}
       />
     </div>
   )

@@ -35,7 +35,7 @@ export default function ConfirmDeleteVariable() {
 
   const deleteVariable = useHttp(() =>
     ControllerInstance.getInstance().variableController.deleteVariable({
-      variableSlug: selectedVariable!.variable.slug
+      variableSlug: selectedVariable!.slug
     })
   )
 
@@ -45,12 +45,13 @@ export default function ConfirmDeleteVariable() {
 
   const handleDeleteVariable = useCallback(async () => {
     if (selectedVariable) {
-      const { success } = await deleteVariable()
 
       setIsLoading(true)
       toast.loading('Deleting variable...')
 
       try {
+        const { success } = await deleteVariable()
+
         if (success) {
           setProjectVariableCount((prevCount) => prevCount - 1)
           toast.success('Variable deleted successfully', {
@@ -64,16 +65,16 @@ export default function ConfirmDeleteVariable() {
           // Remove the variable from the store
           setVariables((prevVariables) =>
             prevVariables.filter(
-              ({ variable }) => variable.slug !== selectedVariable.variable.slug
+              (variable) => variable.slug !== selectedVariable.slug
             )
           )
           setSelectedVariable(null)
-
-          handleClose()
         }
       } finally {
         setIsLoading(false)
         toast.dismiss()
+        setSelectedVariable(null)
+        handleClose()
       }
     }
   }, [

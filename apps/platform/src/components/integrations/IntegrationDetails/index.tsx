@@ -18,6 +18,9 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
   const setIsEditIntegrationOpen = useSetAtom(editIntegrationOpenAtom)
   const setIsDeleteIntegrationOpen = useSetAtom(deleteIntegrationOpenAtom)
 
+  const isAuthorizedToUpdate = selectedIntegration.entitlements.canUpdate
+  const isAuthorizedToDelete = selectedIntegration.entitlements.canDelete
+
   const handleEditIntegration = useCallback(() => {
     setIsEditIntegrationOpen(true)
   }, [setIsEditIntegrationOpen])
@@ -25,6 +28,10 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
   const handleDeleteIntegration = useCallback(() => {
     setIsDeleteIntegrationOpen(true)
   }, [setIsDeleteIntegrationOpen])
+
+  const lastUpdatedTime = formatDate(
+    selectedIntegration.updatedAt || selectedIntegration.createdAt
+  )
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
@@ -47,12 +54,14 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
         <div className="flex items-center gap-2">
           <Button
             className="rounded-lg bg-white/10 p-2 transition-colors hover:bg-white/20"
+            disabled={!isAuthorizedToDelete}
             onClick={handleDeleteIntegration}
           >
             <TrashWhiteSVG />
           </Button>
           <Button
             className="rounded-lg bg-white/10 p-2 transition-colors hover:bg-white/20"
+            disabled={!isAuthorizedToUpdate}
             onClick={handleEditIntegration}
           >
             <EditTwoSVG className="h-5 w-5 text-white/70 hover:text-white" />
@@ -71,16 +80,11 @@ function IntegrationDetails({ selectedIntegration }: IntegrationDetailsProps) {
               />
               <div className="flex text-sm text-white/70">
                 <div>
-                  Last updated by{' '}
+                  Last updated by &nbsp;
                   <span className="font-semibold text-white">
-                    {selectedIntegration.lastUpdatedBy.name}
+                    {selectedIntegration.lastUpdatedBy.name || 'Unknown User'}
                   </span>
-                </div>
-                <div className="text-white/80">
-                  {formatDate(
-                    selectedIntegration.updatedAt ||
-                      selectedIntegration.createdAt
-                  )}
+                  &nbsp;{lastUpdatedTime}
                 </div>
               </div>
             </div>

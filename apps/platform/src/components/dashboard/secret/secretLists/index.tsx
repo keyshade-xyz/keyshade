@@ -19,6 +19,7 @@ import { InfiniteScrollList } from '@/components/ui/infinite-scroll-list'
 import ControllerInstance from '@/lib/controller-instance'
 import { cn } from '@/lib/utils'
 import { useHighlight } from '@/hooks/use-highlight'
+import ProjectErrorCard from '@/components/shared/project-error-card'
 
 interface SecretListProps {
   projectPrivateKey: string | null
@@ -39,6 +40,7 @@ export default function SecretList({
   const selectedProject = useAtomValue(selectedProjectAtom)
   const setGlobalSearchData = useSetAtom(globalSearchDataAtom)
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0)
+  const isAuthorizedToReadSecrets = selectedProject?.entitlements.canReadSecrets
 
   // Highlight the secret if a highlight slug is provided... eg,  baseURL/workspaceSlug/projectSlug?tab=secrets&highlight=<secretSlug>
   const { isHighlighted } = useHighlight(highlightSlug, 'secret')
@@ -96,9 +98,9 @@ export default function SecretList({
           setGlobalSearchData((prev) => ({
             ...prev,
             secrets: response.data!.items.map((item) => ({
-              slug: item.secret.slug,
-              name: item.secret.name,
-              note: item.secret.note
+              slug: item.slug,
+              name: item.name,
+              note: item.note
             }))
           }))
         }
@@ -134,7 +136,7 @@ export default function SecretList({
       return (
         <SecretCard
           className={cn(
-            highlightSlug === secretData.secret.slug &&
+            highlightSlug === secretData.slug &&
               isHighlighted &&
               'animate-highlight'
           )}
@@ -145,6 +147,10 @@ export default function SecretList({
     },
     [projectPrivateKey, highlightSlug, isHighlighted]
   )
+
+  if (!isAuthorizedToReadSecrets) {
+    return <ProjectErrorCard tab="secrets" />
+  }
 
   return (
     <div
@@ -164,7 +170,7 @@ export default function SecretList({
             emptyComponent={<EmptySecretListContent />}
             fetchFunction={fetchSecrets}
             itemComponent={renderSecretCard}
-            itemKey={(secretData) => secretData.secret.id}
+            itemKey={(secretData) => secretData.id}
             itemsPerPage={10}
             key={refetchTrigger}
           />
