@@ -8,6 +8,10 @@ import {
 import { Logger } from '@/util/logger'
 import { PAGINATION_OPTION } from '@/util/pagination-options'
 import { Table } from '@/util/table'
+import {
+  GetAllEnvironmentsOfProjectRequestSchema,
+  GetAllEnvironmentsOfProjectResponseSchema
+} from '@keyshade/schema/raw'
 
 export class ListEnvironment extends BaseCommand {
   getName(): string {
@@ -38,8 +42,12 @@ export class ListEnvironment extends BaseCommand {
   async action({ args, options }: CommandActionData): Promise<void> {
     const [projectSlug] = args
 
-    if (!projectSlug) {
-      Logger.error('Project slug is required')
+    const request = GetAllEnvironmentsOfProjectRequestSchema.safeParse({
+      projectSlug,
+      ...options
+    })
+    if (!request.success) {
+      Logger.error(request.error.toString())
       return
     }
 
@@ -50,11 +58,18 @@ export class ListEnvironment extends BaseCommand {
       error,
       success
     } = await ControllerInstance.getInstance().environmentController.getAllEnvironmentsOfProject(
-      { projectSlug, ...options },
+      request.data,
       this.headers
     )
 
-    if (success) {
+    if (!success) {
+      this.logError(error)
+      return
+    }
+
+    const response =
+      GetAllEnvironmentsOfProjectResponseSchema.safeParse(environments)
+    if (response.success) {
       const headers = ['#', '📦 Environment Name', '🆔 Environment Slug']
       const rows = environments.items.map((environment: any, index: number) => [
         (index + 1).toString(),
@@ -63,7 +78,7 @@ export class ListEnvironment extends BaseCommand {
       ])
       Table.render(headers, rows)
     } else {
-      this.logError(error)
+      Logger.error('Invalid server response')
     }
   }
 }
