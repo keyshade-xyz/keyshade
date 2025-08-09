@@ -1,3 +1,9 @@
+## [2.32.0-stage.9](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.8...v2.32.0-stage.9) (2025-08-08)
+
+### 🐛 Bug Fixes
+
+* **platform:** Role Tab Member Status and Role Naming Issues ([#1097](https://github.com/keyshade-xyz/keyshade/issues/1097)) ([#1104](https://github.com/keyshade-xyz/keyshade/issues/1104)) ([4f04355](https://github.com/keyshade-xyz/keyshade/commit/4f04355cdacf3d6f2cf41ee878ebf01fad654db1))
+
 ## [2.32.0-stage.8](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.7...v2.32.0-stage.8) (2025-08-07)
 
 ### 🐛 Bug Fixes

@@ -487,15 +487,19 @@ export class WorkspaceRoleService {
       where: { id: { in: userIds } }
     })
 
-    const members = users.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      profilePictureUrl: user.profilePictureUrl,
-      memberSince: workspaceMembers.find(
+    const members = users.map((user) => {
+      const workspaceMember = workspaceMembers.find(
         (workspaceMember) => workspaceMember.userId === user.id
-      ).createdOn
-    }))
+      )
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        profilePictureUrl: user.profilePictureUrl,
+        memberSince: workspaceMember.createdOn,
+        invitationAccepted: workspaceMember.invitationAccepted
+      }
+    })
 
     delete workspaceRole.workspaceMembers
 
