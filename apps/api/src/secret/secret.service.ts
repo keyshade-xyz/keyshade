@@ -23,7 +23,7 @@ import { AuthorizationService } from '@/auth/service/authorization.service'
 import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
-import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { ChangeNotificationEvent, Configuration } from '@/socket/socket.types'
 import { paginate, PaginatedResponse } from '@/common/paginate'
 import {
   addHoursToDate,
@@ -1181,6 +1181,45 @@ export class SecretService {
     this.logger.log('Secrets rotation complete')
   }
 
+  /**
+   * Checks if a secret with a given name already exists in the project
+   * @throws {ConflictException} if the secret already exists
+   * @param secretName the name of the secret to check
+   * @param project the project to check the secret in
+   */
+  async secretExists(
+    secretName: Secret['name'] | null | undefined,
+    projectId: Project['id']
+  ) {
+    if (!secretName) return
+
+    this.logger.log(
+      `Checking if secret ${secretName} exists in project ${projectId}`
+    )
+
+    if (
+      (await this.prisma.secret.findFirst({
+        where: {
+          name: secretName,
+          projectId
+        }
+      })) !== null
+    ) {
+      this.logger.error(
+        `Secret ${secretName} already exists in project ${projectId}`
+      )
+      throw new ConflictException(
+        constructErrorBody(
+          'Secret already exists',
+          'A secret with this name already exists in this project. Please choose a different name.'
+        )
+      )
+    }
+    this.logger.log(
+      `Secret ${secretName} does not exist in project ${projectId}`
+    )
+  }
+
   private async rotateSecret(secret: RawSecret): Promise<void> {
     const op = []
 
@@ -1286,40 +1325,5 @@ export class SecretService {
     )
 
     this.logger.log(`Secret ${secret.id} rotated`)
-  }
-
-  /**
-   * Checks if a secret with a given name already exists in the project
-   * @throws {ConflictException} if the secret already exists
-   * @param secretName the name of the secret to check
-   * @param project the project to check the secret in
-   */
-  async secretExists(
-    secretName: Secret['name'] | null | undefined,
-    projectId: Project['id']
-  ) {
-    if (!secretName) return
-
-    this.logger.log(
-      `Checking if secret ${secretName} exists in project ${projectId}`
-    )
-
-    if (
-      (await this.prisma.secret.findFirst({
-        where: {
-          name: secretName,
-          projectId
-        }
-      })) !== null
-    ) {
-      const errorMessage = `Secret ${secretName} already exists in project ${projectId}`
-      this.logger.error(errorMessage)
-      throw new ConflictException(
-        constructErrorBody('Secret already exists', errorMessage)
-      )
-    }
-    this.logger.log(
-      `Secret ${secretName} does not exist in project ${projectId}`
-    )
   }
 }

@@ -144,7 +144,7 @@ describe('Environment Controller Tests', () => {
       }
     }
 
-    project1 = (await projectService.createProject(user1, workspace1.slug, {
+    project1 = await projectService.createProject(user1, workspace1.slug, {
       name: 'Project 1',
       description: 'Project 1 description',
       storePrivateKey: true,
@@ -159,7 +159,7 @@ describe('Environment Controller Tests', () => {
         }
       ],
       accessLevel: ProjectAccessLevel.PRIVATE
-    })) as Project
+    })
 
     environment1 = await prisma.environment.findUnique({
       where: {
@@ -224,46 +224,16 @@ describe('Environment Controller Tests', () => {
       expect(environmentFromDb).toBeDefined()
     })
 
-    it('should add the environment to the workspace admin role', async () => {
-      // Create an environment
-      const environment = await environmentService.createEnvironment(
-        user1,
-        {
-          name: 'Environment 3',
-          description: 'Environment 3 description'
-        },
-        project1.slug
-      )
-
-      // Fetch the admin role
-      const adminRole = await prisma.workspaceRole.findUnique({
-        where: {
-          workspaceId_name: {
-            workspaceId: project1.workspaceId,
-            name: 'Admin'
-          }
-        },
-        include: {
-          projects: {
-            include: {
-              environments: true
-            }
-          }
-        }
-      })
-
-      const environmentSlugs = adminRole.projects[0].environments.map(
-        (e) => e.slug
-      )
-      expect(environmentSlugs).toContain(environment.slug)
-    })
-
     it('should not be able to create more environments if tier limit is reached', async () => {
       // Create the number of environments that the tier limit allows
       for (
         let x = 100;
         x <
-        100 + (await tierLimitService.getEnvironmentTierLimit(project1.id)) - 2; // Subtract 2 for the environments created above
+        100 +
+          (await tierLimitService.getEnvironmentTierLimit(
+            project1.workspaceId
+          )) -
+          2; // Subtract 2 for the environments created above
         x++
       ) {
         await environmentService.createEnvironment(

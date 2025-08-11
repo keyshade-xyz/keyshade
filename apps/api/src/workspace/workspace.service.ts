@@ -53,33 +53,37 @@ export class WorkspaceService implements OnModuleInit {
    * - creates a subscription for every workspace that doesn't have one
    */
   async onModuleInit() {
-    // Create default subscriptions for workspaces that don't have one
-    this.logger.log('Fetching workspaces without any subscription...')
-    const workspacesWithoutSubscriptiion = await this.prisma.workspace.findMany(
-      {
-        where: {
-          subscription: null
-        }
-      }
-    )
-    this.logger.log(
-      `Found ${workspacesWithoutSubscriptiion.length} workspaces without any subscription`
-    )
-
-    const createSubscriptionOps = []
-    for (const workspace of workspacesWithoutSubscriptiion) {
-      this.logger.log(`Creating a subscription for workspace ${workspace.slug}`)
-      createSubscriptionOps.push(
-        this.prisma.subscription.create({
-          data: {
-            workspaceId: workspace.id,
-            userId: workspace.ownerId
+    const currentEnv = process.env.NODE_ENV as unknown as string
+    if (currentEnv !== 'e2e') {
+      // Create default subscriptions for workspaces that don't have one
+      this.logger.log('Fetching workspaces without any subscription...')
+      const workspacesWithoutSubscription =
+        await this.prisma.workspace.findMany({
+          where: {
+            subscription: null
           }
         })
+      this.logger.log(
+        `Found ${workspacesWithoutSubscription.length} workspaces without any subscription`
       )
+
+      const createSubscriptionOps = []
+      for (const workspace of workspacesWithoutSubscription) {
+        this.logger.log(
+          `Creating a subscription for workspace ${workspace.slug}`
+        )
+        createSubscriptionOps.push(
+          this.prisma.subscription.create({
+            data: {
+              workspaceId: workspace.id,
+              userId: workspace.ownerId
+            }
+          })
+        )
+      }
+      await this.prisma.$transaction(createSubscriptionOps)
+      this.logger.log('Finished creating subscriptions for workspaces')
     }
-    await this.prisma.$transaction(createSubscriptionOps)
-    this.logger.log('Finished creating subscriptions for workspaces')
   }
 
   /**

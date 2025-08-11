@@ -747,7 +747,7 @@ export class HydrationService {
     this.logger.log(`Getting environment tier limit for project ${projectId}`)
     // Get the tier limit for environments in the project
     const maxAllowedEnvironments =
-      await this.tierLimitService.getEnvironmentTierLimit(projectId)
+      await this.tierLimitService.getEnvironmentTierLimit(project.workspaceId)
 
     // Get the total number of environments in the project
     const totalEnvironments = project.environments.length
@@ -757,8 +757,9 @@ export class HydrationService {
 
     this.logger.log(`Getting secret tier limit for project ${projectId}`)
     // Get the tier limit for secrets in the project
-    const maxAllowedSecrets =
-      await this.tierLimitService.getSecretTierLimit(projectId)
+    const maxAllowedSecrets = await this.tierLimitService.getSecretTierLimit(
+      project.workspaceId
+    )
 
     // Get the total number of secrets in the project
     const totalSecrets = project.secrets.length
@@ -767,7 +768,7 @@ export class HydrationService {
     this.logger.log(`Getting variable tier limit for project ${projectId}`)
     // Get the tier limit for variables in the project
     const maxAllowedVariables =
-      await this.tierLimitService.getVariableTierLimit(projectId)
+      await this.tierLimitService.getVariableTierLimit(project.workspaceId)
 
     // Get the total number of variables in the project
     const totalVariables = project.variables.length

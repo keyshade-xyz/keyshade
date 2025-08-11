@@ -16,6 +16,8 @@ import { constructErrorBody } from './util'
  * @param user The user creating the workspace
  * @param dto The workspace data
  * @param prisma The Prisma client
+ * @param slugGenerator
+ * @param hydrationService
  * @param isDefault Whether the workspace should be the default workspace
  * @returns The created workspace
  */

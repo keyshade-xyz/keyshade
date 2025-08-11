@@ -211,13 +211,6 @@ export class ProjectService {
       ...createEnvironmentOps
     ])
 
-    await this.associateProjectWithAdminRole(
-      workspace,
-      user,
-      newProject.id,
-      newEnvironmentSlugs
-    )
-
     await createEvent(
       {
         triggeredBy: user,
@@ -1074,6 +1067,65 @@ export class ProjectService {
     return { items, metadata }
   }
 
+  /**
+   * Returns an export of the project configurations (secrets and variables)
+   * in the desired format
+   *
+   * @param user The user who is requesting the project secrets
+   * @param projectSlug The slug of the project to export secrets from
+   * @param environmentSlug The slug of the environment to export secrets from
+   * @param format The format to export the secrets in
+   * @param privateKey The private key to use for secret decryption
+   * @returns The secrets exported in the desired format
+   *
+   * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
+   * @throws BadRequestException If the private key is required but not supplied
+   */
+  async exportProjectConfigurations(
+    user: AuthenticatedUser,
+    projectSlug: Project['slug'],
+    environmentSlugs: Environment['slug'][],
+    format: ExportFormat
+  ) {
+    this.logger.log(
+      `User ${user.id} attempted to export secrets in project ${projectSlug}`
+    )
+
+    const environmentExports = await Promise.all(
+      environmentSlugs.map(async (environmentSlug) => {
+        const rawSecrets =
+          await this.secretService.getAllSecretsOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+
+        const secrets = rawSecrets.map((secret) => ({
+          name: secret.name,
+          value: secret.value
+        }))
+
+        const variables = (
+          await this.variableService.getAllVariablesOfProjectAndEnvironment(
+            user,
+            projectSlug,
+            environmentSlug
+          )
+        ).map((variable) => ({
+          name: variable.name,
+          value: variable.value
+        }))
+
+        return [
+          environmentSlug,
+          this.exportService.format({ secrets, variables }, format)
+        ]
+      })
+    )
+
+    return Object.fromEntries(environmentExports)
+  }
+
   private isProjectForked(project: Project) {
     if (!project.isForked || project.forkedFromId == null) {
       this.logger.error(`Project ${project.slug} is not a forked project`)
@@ -1504,212 +1556,5 @@ export class ProjectService {
     )
 
     return { txs, newPrivateKey, newPublicKey }
-  }
-
-  /**
-   * Returns the project with additional information about the limits of items
-   * in the project and the current count of items.
-   *
-   * @param project The project to parse the tier limits of
-   * @returns The project with the following additional properties:
-   * - maxAllowedEnvironments: The maximum number of environments allowed in the project
-   * - totalEnvironments: The current number of environments in the project
-   * - maxAllowedSecrets: The maximum number of secrets allowed in the project
-   * - totalSecrets: The current number of secrets in the project
-   * - maxAllowedVariables: The maximum number of variables allowed in the project
-   * - totalVariables: The current number of variables in the project
-   */
-  private async parseProjectItemLimits(project: Project): Promise<{
-    maxAllowedEnvironments: number
-    totalEnvironments: number
-    maxAllowedSecrets: number
-    totalSecrets: number
-    maxAllowedVariables: number
-    totalVariables: number
-  }> {
-    this.logger.log(`Parsing project item limits for project ${project.slug}`)
-
-    const projectId = project.id
-    const workspaceId = project.workspaceId
-
-    this.logger.log(
-      `Getting environment tier limit for workspace ${workspaceId}`
-    )
-    // Get the tier limit for environments in the project
-    const maxAllowedEnvironments =
-      await this.tierLimitService.getEnvironmentTierLimit(workspaceId)
-
-    // Get the total number of environments in the project
-    const totalEnvironments = await this.prisma.environment.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(
-      `Found ${totalEnvironments} environments in project ${projectId}`
-    )
-
-    this.logger.log(`Getting secret tier limit for workspace ${workspaceId}`)
-    // Get the tier limit for secrets in the project
-    const maxAllowedSecrets =
-      await this.tierLimitService.getSecretTierLimit(workspaceId)
-
-    // Get the total number of secrets in the project
-    const totalSecrets = await this.prisma.secret.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(`Found ${totalSecrets} secrets in project ${projectId}`)
-
-    this.logger.log(`Getting variable tier limit for workspace ${workspaceId}`)
-    // Get the tier limit for variables in the project
-    const maxAllowedVariables =
-      await this.tierLimitService.getVariableTierLimit(workspaceId)
-
-    // Get the total number of variables in the project
-    const totalVariables = await this.prisma.variable.count({
-      where: {
-        projectId
-      }
-    })
-    this.logger.log(`Found ${totalVariables} variables in project ${projectId}`)
-
-    return {
-      maxAllowedEnvironments,
-      totalEnvironments,
-      maxAllowedSecrets,
-      totalSecrets,
-      maxAllowedVariables,
-      totalVariables
-    }
-  }
-
-  /**
-   * Returns an export of the project configurations (secrets and variables)
-   * in the desidered format
-   *
-   * @param user The user who is requesting the project secrets
-   * @param projectSlug The slug of the project to export secrets from
-   * @param environmentSlug The slug of the environment to export secrets from
-   * @param format The format to export the secrets in
-   * @param privateKey The private key to use for secret decryption
-   * @returns The secrets exported in the desired format
-   *
-   * @throws UnauthorizedException If the user does not have the authority to read the project, secrets, variables and environments
-   * @throws BadRequestException If the private key is required but not supplied
-   */
-  async exportProjectConfigurations(
-    user: AuthenticatedUser,
-    projectSlug: Project['slug'],
-    environmentSlugs: Environment['slug'][],
-    format: ExportFormat
-  ) {
-    this.logger.log(
-      `User ${user.id} attempted to export secrets in project ${projectSlug}`
-    )
-
-    const environmentExports = await Promise.all(
-      environmentSlugs.map(async (environmentSlug) => {
-        const rawSecrets =
-          await this.secretService.getAllSecretsOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-
-        const secrets = rawSecrets.map((secret) => ({
-          name: secret.name,
-          value: secret.value
-        }))
-
-        const variables = (
-          await this.variableService.getAllVariablesOfProjectAndEnvironment(
-            user,
-            projectSlug,
-            environmentSlug
-          )
-        ).map((variable) => ({
-          name: variable.name,
-          value: variable.value
-        }))
-
-        return [
-          environmentSlug,
-          this.exportService.format({ secrets, variables }, format)
-        ]
-      })
-    )
-
-    const fileData = Object.fromEntries(environmentExports)
-
-    return fileData
-  }
-
-  /**
-   * Associates a newly created project with the admin role of a workspace.
-   * This is necessary because the admin role is the only role that can be
-   * associated with a project.
-   *
-   * @param workspace The workspace of the project
-   * @param user The user who is creating the project
-   * @param newProjectId The ID of the newly created project
-   * @param newEnvironmentSlugs The slug of the environments of the newly created project
-   *
-   * @throws BadRequestException if the admin role does not exist
-   */
-  private async associateProjectWithAdminRole(
-    workspace: Workspace,
-    user: AuthenticatedUser,
-    newProjectId: Project['id'],
-    newEnvironmentSlugs: Environment['slug'][]
-  ) {
-    this.logger.log(`Associating project ${newProjectId} with admin role`)
-
-    const workspaceId = workspace.id
-
-    this.logger.log(`Fetching admin role for workspace ${workspace.slug}`)
-    const adminRole = await this.prisma.workspaceRole.findFirst({
-      where: {
-        workspaceId,
-        hasAdminAuthority: true
-      }
-    })
-
-    if (!adminRole) {
-      const errorMessage = `Admin role not found for workspace ${workspace.slug}`
-      this.logger.error(
-        `User ${user.id} attempted to create a project without an admin role: ${errorMessage}`
-      )
-      throw new BadRequestException(
-        constructErrorBody('Admin role not found', errorMessage)
-      )
-    }
-
-    this.logger.log(
-      `Admin role for workspace ${workspace.slug} is ${adminRole.slug}`
-    )
-
-    await this.prisma.workspaceRole.update({
-      where: {
-        id: adminRole.id
-      },
-      data: {
-        projects: {
-          create: {
-            project: {
-              connect: {
-                id: newProjectId
-              }
-            },
-            environments: {
-              connect: newEnvironmentSlugs.map((slug) => ({
-                slug
-              }))
-            }
-          }
-        }
-      }
-    })
   }
 }

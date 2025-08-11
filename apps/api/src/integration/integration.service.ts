@@ -704,92 +704,6 @@ export class IntegrationService {
   }
 
   /**
-   * Checks if an integration with the same name already exists in the workspace.
-   * Throws a ConflictException if the integration already exists.
-   *
-   * @param name The name of the integration to check
-   * @param workspace The workspace to check in
-   */
-  private async existsByNameAndWorkspaceId(
-    name: Integration['name'],
-    workspaceId: Workspace['id']
-  ) {
-    this.logger.log(
-      `Checking if integration with name ${name} exists in workspace ${workspaceId}`
-    )
-
-    if (
-      (await this.prisma.integration.findUnique({
-        where: {
-          workspaceId_name: {
-            workspaceId,
-            name
-          }
-        }
-      })) !== null
-    ) {
-      const errorMessage = `Integration with name ${name} already exists in workspace ${workspaceId}`
-      this.logger.error(errorMessage)
-      throw new ConflictException(
-        constructErrorBody('Integration already exists', errorMessage)
-      )
-    } else {
-      this.logger.log(
-        `Integration with name ${name} does not exist in workspace ${workspaceId}`
-      )
-    }
-  }
-
-  /**
-   * Validates the environment support for an integration based on its type and environment slugs.
-   * Throws a BadRequestException if the required environment conditions are not met.
-   *
-   * @param integrationObject The integration object to validate.
-   * @param type The type of the integration.
-   * @param environmentSlugs Optional array of environment slugs associated with the integration.
-   */
-
-  private validateEnvironmentSupport(
-    integrationObject: BaseIntegration,
-    type: IntegrationType,
-    environmentSlugs?: Environment['slug'][]
-  ) {
-    this.logger.log(
-      `Environment support is ${integrationObject.environmentSupport()} for integration type ${type}. Supplied enviornment slugs: ${environmentSlugs}`
-    )
-
-    // Validate environment requirement
-    switch (integrationObject.environmentSupport()) {
-      case 'atleast-one':
-        if (!environmentSlugs || environmentSlugs.length < 1) {
-          this.logger.error(
-            `Can not create integration ${type} without environment.`
-          )
-          throw new BadRequestException(
-            constructErrorBody(
-              'Can not create integration without environment',
-              'Environment is required for this integration type'
-            )
-          )
-        }
-        break
-      case 'single':
-        if (!environmentSlugs || environmentSlugs.length !== 1) {
-          this.logger.error(
-            `Can not create integration ${type} with multiple environments.`
-          )
-          throw new BadRequestException(
-            constructErrorBody(
-              'Can not create integration with multiple environments',
-              'Single environment is required for this integration type'
-            )
-          )
-        }
-        break
-    }
-  }
-
-  /**
    * Tests a new integration in the given workspace. The user needs to have
    * `CREATE_INTEGRATION` and `READ_WORKSPACE` authority in the workspace.
    * Validate only metadata and event subscriptions for an integration.
@@ -853,6 +767,96 @@ export class IntegrationService {
     )
 
     return { success: true }
+  }
+
+  /**
+   * Checks if an integration with the same name already exists in the workspace.
+   * Throws a ConflictException if the integration already exists.
+   *
+   * @param name The name of the integration to check
+   * @param workspace The workspace to check in
+   */
+  private async existsByNameAndWorkspaceId(
+    name: Integration['name'],
+    workspaceId: Workspace['id']
+  ) {
+    this.logger.log(
+      `Checking if integration with name ${name} exists in workspace ${workspaceId}`
+    )
+
+    if (
+      (await this.prisma.integration.findUnique({
+        where: {
+          workspaceId_name: {
+            workspaceId,
+            name
+          }
+        }
+      })) !== null
+    ) {
+      this.logger.error(
+        `Integration with name ${name} already exists in workspace ${workspaceId}`
+      )
+      throw new ConflictException(
+        constructErrorBody(
+          'Integration already exists',
+          'An integration with this name already exists in this workspace. Please choose a different name.'
+        )
+      )
+    } else {
+      this.logger.log(
+        `Integration with name ${name} does not exist in workspace ${workspaceId}`
+      )
+    }
+  }
+
+  /**
+   * Validates the environment support for an integration based on its type and environment slugs.
+   * Throws a BadRequestException if the required environment conditions are not met.
+   *
+   * @param integrationObject The integration object to validate.
+   * @param type The type of the integration.
+   * @param environmentSlugs Optional array of environment slugs associated with the integration.
+   */
+
+  private validateEnvironmentSupport(
+    integrationObject: BaseIntegration,
+    type: IntegrationType,
+    environmentSlugs?: Environment['slug'][]
+  ) {
+    this.logger.log(
+      `Environment support is ${integrationObject.environmentSupport()} for integration type ${type}. Supplied enviornment slugs: ${environmentSlugs}`
+    )
+
+    // Validate environment requirement
+    switch (integrationObject.environmentSupport()) {
+      case 'atleast-one':
+        if (!environmentSlugs || environmentSlugs.length < 1) {
+          this.logger.error(
+            `Can not create integration ${type} without environment.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration without environment',
+              'Environment is required for this integration type'
+            )
+          )
+        }
+        break
+      case 'single':
+        if (!environmentSlugs || environmentSlugs.length !== 1) {
+          this.logger.error(
+            `Can not create integration ${type} with multiple environments.`
+          )
+          throw new BadRequestException(
+            constructErrorBody(
+              'Can not create integration with multiple environments',
+              'Single environment is required for this integration type'
+            )
+          )
+        }
+        break
+    }
   }
 
   /**

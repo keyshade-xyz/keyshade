@@ -445,7 +445,7 @@ describe('Workspace Controller Tests', () => {
 
   describe('Get All Workspace Of User Tests', () => {
     it('should be able to fetch all the workspaces the user is a member of', async () => {
-      // Create the invitation, but don't accept it.
+      // Create the invitation but don't accept it.
       await createMembership(memberRole.id, user2.id, workspace1.id, prisma)
 
       const response = await app.inject({

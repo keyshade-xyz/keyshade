@@ -22,7 +22,7 @@ import { RedisClientType } from 'redis'
 import { REDIS_CLIENT } from '@/provider/redis.provider'
 import { CHANGE_NOTIFIER_RSC } from '@/socket/change-notifier.socket'
 import { AuthorizationService } from '@/auth/service/authorization.service'
-import { Configuration, ChangeNotificationEvent } from '@/socket/socket.types'
+import { ChangeNotificationEvent, Configuration } from '@/socket/socket.types'
 import { paginate, PaginatedResponse } from '@/common/paginate'
 import { getEnvironmentIdToSlugMap } from '@/common/environment'
 import { createEvent } from '@/common/event'
@@ -1181,10 +1181,14 @@ export class VariableService {
         }
       })) !== null
     ) {
-      const errorMessage = `Variable ${variableName} already exists in project ${projectId}`
-      this.logger.error(errorMessage)
+      this.logger.error(
+        `Variable ${variableName} already exists in project ${projectId}`
+      )
       throw new ConflictException(
-        constructErrorBody('Variable already exists', errorMessage)
+        constructErrorBody(
+          'Variable already exists',
+          'A variable with this name already exists in this project. Please choose a different name.'
+        )
       )
     }
 
