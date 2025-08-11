@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
 
-export class CreateShareDto {
+export class CreateShare {
   @IsString()
   secret: string
 

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common'
 import { ShareSecretService } from './share-secret.service'
 import { Public } from '@/decorators/public.decorator'
-import { CreateShareDto } from './dto/create.share/create.share'
+import { CreateShare } from './dto/create.share/create.share'
 
 @Controller('share-secret')
 export class ShareSecretController {
@@ -20,7 +20,7 @@ export class ShareSecretController {
   @Post()
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  async createShare(@Body() dto: CreateShareDto) {
+  async createShare(@Body() dto: CreateShare) {
     return await this.shareSecretService.createShare(dto)
   }
 
