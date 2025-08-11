@@ -15,19 +15,29 @@ export const ShareSecretEmailTemplate = ({
 }: ShareSecretEmailTemplateProps) => {
   return (
     <BaseEmailTemplate
-      previewText="A secret has been shared with you over Keyshade!"
-      heading="A secret has been shared with you over Keyshade!"
+      previewText="A secret is waiting for you!"
+      heading="A secret is waiting for you!"
     >
       <Text style={text}>
-        Someone has shared a secret with your over keyshade
+        someone has shared a secret with you over keyshade.
       </Text>
-      <Text style={text}>The secret is accessible at {url}</Text>
+      <Text style={text}>
+        you can access it securely by clicking the button below. In case it
+        doesn't work, you can head over to this link:{' '}
+        <a href={url}>View Secret</a>
+      </Text>
       {isPasswordProtected && (
         <Text style={text}>The secret is password protected</Text>
       )}
       <Text style={text}>
         The secret will be available until{' '}
-        <strong>{expiresAt.toDateString()}</strong>
+        <strong>
+          {expiresAt.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </strong>
       </Text>
     </BaseEmailTemplate>
   )
