@@ -1284,7 +1284,7 @@ describe('Integration Controller Tests', () => {
 
       expect(postMsgMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          channel: 'C12345',
+          channel: DUMMY_CHANNEL,
           text: 'Integration initialized'
         })
       )
