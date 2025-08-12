@@ -11,6 +11,7 @@ import WorkspaceMembershipController from '@api-client/controllers/workspace-mem
 import AuthController from '@api-client/controllers/auth'
 import UserController from '@api-client/controllers/user'
 import ApiKeyController from './controllers/api-key'
+import ShareSecretController from './controllers/share-secret'
 export {
   AppController,
   EnvironmentController,
@@ -24,5 +25,6 @@ export {
   WorkspaceMembershipController,
   AuthController,
   UserController,
-  ApiKeyController
+  ApiKeyController,
+  ShareSecretController
 }
