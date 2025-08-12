@@ -1,6 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service'
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { CreateShareDto } from './dto/create.share/create.share'
+import { CreateShare } from './dto/create.share/create.share'
 import { ShareResponse } from './share-secret.types'
 import { Share } from '@prisma/client'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -19,7 +19,7 @@ export class ShareSecretService {
   ) {}
 
   public async createShare(
-    dto: CreateShareDto
+    dto: CreateShare
   ): Promise<Omit<ShareResponse, 'secret'>> {
     this.logger.log('Creating a shared secret...')
 

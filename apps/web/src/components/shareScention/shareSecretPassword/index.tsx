@@ -5,21 +5,25 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 interface ShareSecretPasswordProps {
-  alert: string
+  encryptedSecret: string
   onSuccess: (decrypted: string) => void
 }
 
-function ShareSecretPassword({ alert, onSuccess }: ShareSecretPasswordProps) {
+function ShareSecretPassword({
+  encryptedSecret,
+  onSuccess
+}: ShareSecretPasswordProps) {
   const [password, setPassword] = useState<string>('')
   const [incorrectPassword, setIncorrectPassword] = useState<boolean>(false)
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
   }
+
   const handleDecrypt = () => {
     try {
-      const decrypted = sDecrypt(alert, password)
-      onSuccess(decrypted)
+      const decryptedSecret: string = sDecrypt(encryptedSecret, password)
+      onSuccess(decryptedSecret)
     } catch (error) {
       setIncorrectPassword(true)
     }

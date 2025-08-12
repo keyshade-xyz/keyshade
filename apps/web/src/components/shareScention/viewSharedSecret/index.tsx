@@ -119,7 +119,10 @@ function ViewShareSecret({ secretHash, setError }: ViewShareSecretProps) {
         </Button>
       </div>
       {isPasswordRequired ? (
-        <ShareSecretPassword alert={secret} onSuccess={handlePasswordSuccess} />
+        <ShareSecretPassword
+          encryptedSecret={secret}
+          onSuccess={handlePasswordSuccess}
+        />
       ) : null}
     </>
   )
