@@ -40,7 +40,7 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon asChild>
         <ChevronDownIcon
-          className="text-muted-foreground/80 in-aria-invalid:text-destructive/80 shrink-0"
+          className="in-aria-invalid:text-destructive/80 shrink-0 text-white/80"
           size={16}
         />
       </SelectPrimitive.Icon>

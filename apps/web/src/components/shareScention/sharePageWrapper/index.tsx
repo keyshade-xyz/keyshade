@@ -2,7 +2,7 @@ import React from 'react'
 
 function SharePageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-screen w-full overflow-auto p-1.5">
+    <div className="h-screen w-full p-1.5">
       <div className="relative flex h-full justify-center rounded-2xl border-2 border-[#B3EBF2]/20 bg-[#06728A]/10 p-3 shadow-[inset_0px_4px_20px_rgba(179,235,242,0.2)] backdrop-blur-md">
         <div
           className="absolute -top-28 h-40 w-[60%]"

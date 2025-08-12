@@ -19,10 +19,10 @@ export const ShareSecretEmailTemplate = ({
       heading="A secret is waiting for you!"
     >
       <Text style={text}>
-        someone has shared a secret with you over keyshade.
+        Someone has shared a secret with you over keyshade.
       </Text>
       <Text style={text}>
-        you can access it securely by clicking the button below. In case it
+        You can access it securely by clicking the button below. In case it
         doesn't work, you can head over to this link:{' '}
         <a href={url}>View Secret</a>
       </Text>

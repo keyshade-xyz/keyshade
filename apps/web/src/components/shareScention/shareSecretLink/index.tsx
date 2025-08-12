@@ -61,11 +61,16 @@ function ShareSecretLink({ shareHash }: ShareSecretLinkProps) {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-y-4">
-      <div className="flex w-full flex-col gap-y-1">
-        <div className="flex items-center justify-between">
-          <Label>Your secure link is ready</Label>
+      <div className="flex w-full flex-col gap-y-3">
+        <Label>Your secure link is ready</Label>
+        <div className="flex items-center justify-between gap-2">
+          <Input
+            className="w-full rounded-xl border border-[#B3EBF2]/50 p-2.5 backdrop-blur-sm"
+            readOnly
+            value={shareLink}
+          />
           <Button
-            className="text-white hover:bg-transparent hover:text-white/70"
+            className="rounded-xl border border-[#B3EBF2]/50 p-2.5 text-white hover:bg-transparent hover:text-white/70"
             disabled={isLoading}
             onClick={() => {
               void handleCopyToClipboard()
@@ -75,12 +80,6 @@ function ShareSecretLink({ shareHash }: ShareSecretLinkProps) {
             <Copy />
           </Button>
         </div>
-
-        <Input
-          className="w-full rounded-xl border border-[#B3EBF2]/50 p-2.5 backdrop-blur-sm"
-          readOnly
-          value={shareLink}
-        />
       </div>
 
       <div className="flex w-full flex-col gap-y-3">

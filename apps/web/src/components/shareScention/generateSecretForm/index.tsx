@@ -129,7 +129,7 @@ function GenerateSecretForm({ generatedShareHash }: GenerateSecretFormProps) {
               }}
               value={expiresAfterDays.toString()}
             >
-              <SelectTrigger className="h-fit w-full rounded-xl border border-[#B3EBF2]/50 bg-transparent p-2 text-white/50 backdrop-blur-sm">
+              <SelectTrigger className="h-fit w-full rounded-xl border border-[#B3EBF2]/50 bg-transparent p-2 text-white backdrop-blur-sm">
                 <SelectValue placeholder="Choose when the secret should expire" />
               </SelectTrigger>
               <SelectContent className="border border-[#B3EBF2]/50 bg-[#111A1F] text-white/50">
@@ -153,7 +153,7 @@ function GenerateSecretForm({ generatedShareHash }: GenerateSecretFormProps) {
               }}
               value={viewLimit.toString()}
             >
-              <SelectTrigger className="h-fit w-full rounded-xl border border-[#B3EBF2]/50 bg-transparent p-2 text-white/50 backdrop-blur-sm">
+              <SelectTrigger className="h-fit w-full rounded-xl border border-[#B3EBF2]/50 bg-transparent p-2 text-white backdrop-blur-sm">
                 <SelectValue placeholder="How many times can this secret be viewed?" />
               </SelectTrigger>
               <SelectContent className="border border-[#B3EBF2]/50 bg-[#111A1F] text-white/50">
@@ -175,9 +175,7 @@ function GenerateSecretForm({ generatedShareHash }: GenerateSecretFormProps) {
         onClick={handleCreateSecret}
         variant="secondary"
       >
-        {isLoading
-          ? 'Creating Secret...'
-          : 'Generate and share your own secret'}
+        {isLoading ? 'Creating Secret...' : 'Generate your secure link'}
       </Button>
     </div>
   )
