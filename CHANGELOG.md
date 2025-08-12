@@ -1,3 +1,9 @@
+## [2.32.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.10...v2.32.0-stage.11) (2025-08-12)
+
+### 🐛 Bug Fixes
+
+* **platform:** add missing closing brace & update integration name casing ([#1107](https://github.com/keyshade-xyz/keyshade/issues/1107)) ([8640495](https://github.com/keyshade-xyz/keyshade/commit/864049525f040a1a7aab7559b7eef1e106470654))
+
 ## [2.32.0-stage.10](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.9...v2.32.0-stage.10) (2025-08-12)
 
 ### 🚀 Features
