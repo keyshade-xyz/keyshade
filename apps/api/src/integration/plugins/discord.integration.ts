@@ -1,7 +1,9 @@
 import {
+  Event,
   EventType,
   IntegrationRunStatus,
-  IntegrationType
+  IntegrationType,
+  Project
 } from '@prisma/client'
 import {
   DiscordIntegrationMetadata,
@@ -55,9 +57,104 @@ export class DiscordIntegration extends BaseIntegration {
     return new Set(['webhookUrl'])
   }
 
-  public init(): Promise<void> {
-    // TODO: Send a text message to the discord channel confirming keyshade was added
-    return Promise.resolve()
+  public async init(
+    privateKey: Project['privateKey'],
+    eventId: Event['id']
+  ): Promise<void> {
+    this.logger.log('Initializing Discord integration...')
+
+    const integration = this.getIntegration<DiscordIntegrationMetadata>()
+
+    const { id: integrationRunId } = await this.registerIntegrationRun({
+      eventId,
+      integrationId: integration.id,
+      title: 'Initializing Discord integration'
+    })
+
+    try {
+      const { response, duration } = await makeTimedRequest(() =>
+        fetch(integration.metadata.webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: '🥁 Keyshade is now configured with this channel',
+            embeds: [
+              {
+                title: '🎉 Keyshade Integration Successful!',
+                description:
+                  'Your Discord channel is now connected to Keyshade. You will receive notifications for configured events.',
+                color: 0x00ff00,
+                author: {
+                  name: 'Keyshade',
+                  url: 'https://keyshade.xyz'
+                },
+                fields: [
+                  {
+                    name: 'Status',
+                    value: '✅ Connected',
+                    inline: true
+                  },
+                  {
+                    name: 'Webhook',
+                    value: '✅ Valid',
+                    inline: true
+                  }
+                ],
+                footer: {
+                  text: 'Keyshade Integration'
+                },
+                timestamp: new Date().toISOString()
+              }
+            ]
+          })
+        })
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        response.ok
+          ? IntegrationRunStatus.SUCCESS
+          : IntegrationRunStatus.FAILED,
+        duration,
+        await response.text()
+      )
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to send initialization message to Discord: ${response.status} ${response.statusText}`
+        )
+        throw new BadRequestException(
+          constructErrorBody(
+            'Discord initialization failed',
+            `Discord returned ${response.status} ${response.statusText}`
+          )
+        )
+      } else {
+        this.logger.log(
+          `Successfully sent initialization message to Discord in ${duration}ms`
+        )
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send initialization message to Discord: ${error}`
+      )
+
+      await this.markIntegrationRunAsFinished(
+        integrationRunId,
+        IntegrationRunStatus.FAILED,
+        0,
+        JSON.stringify(error)
+      )
+
+      throw new BadRequestException(
+        constructErrorBody(
+          'Discord initialization failed',
+          'Failed to send initialization message to Discord'
+        )
+      )
+    }
   }
 
   async emitEvent(data: IntegrationEventData): Promise<void> {
