@@ -1,3 +1,10 @@
+## [2.32.0-stage.12](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.11...v2.32.0-stage.12) (2025-08-13)
+
+### 🐛 Bug Fixes
+
+* CI broken ([8d5d00f](https://github.com/keyshade-xyz/keyshade/commit/8d5d00fe9c7410aecd9db0e94853b64984ea5e4c))
+* **web:** add missing env declaration ([0781dd2](https://github.com/keyshade-xyz/keyshade/commit/0781dd2ed59878f4b1f9eb2ff356ba2286714e7f))
+
 ## [2.32.0-stage.11](https://github.com/keyshade-xyz/keyshade/compare/v2.32.0-stage.10...v2.32.0-stage.11) (2025-08-12)
 
 ### 🐛 Bug Fixes
