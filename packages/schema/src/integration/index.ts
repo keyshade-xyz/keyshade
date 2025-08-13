@@ -129,3 +129,16 @@ export const ValidateIntegrationConfigurationRequestSchema =
 export const ValidateIntegrationConfigurationResponseSchema = z.object({
   success: z.literal(true)
 })
+
+export const GetVercelEnvironmentsRequestSchema = z.object({
+  integrationSlug: IntegrationSchema.shape.slug
+})
+
+export const GetVercelEnvironmentsResponseSchema = z.record(
+  z.object({
+    vercelSystemEnvironment: z
+      .enum(['production', 'preview', 'development'])
+      .optional(),
+    vercelCustomEnvironmentId: z.string().optional()
+  })
+)

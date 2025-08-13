@@ -34,6 +34,7 @@ import { BaseIntegration } from './plugins/base.integration'
 import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
+import { VercelIntegration } from './plugins/vercel.integration'
 
 @Injectable()
 export class IntegrationService {
@@ -43,7 +44,8 @@ export class IntegrationService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly slugGenerator: SlugGenerator,
-    private readonly hydrationService: HydrationService
+    private readonly hydrationService: HydrationService,
+    private readonly vercelIntegration: VercelIntegration
   ) {}
 
   /**
@@ -423,6 +425,19 @@ export class IntegrationService {
     // @ts-expect-error -- We expect the metadata to be in JSON format
     integration.metadata = decryptMetadata(integration.metadata)
     return integration
+  }
+
+  async getVercelEnvironments(
+    user: AuthenticatedUser,
+    integrationSlug: string
+  ) {
+    this.logger.log(
+      `User ${user.id} fetching Vercel environments for integration ${integrationSlug}`
+    )
+
+    const { project } = await this.getIntegration(user, integrationSlug)
+
+    return this.vercelIntegration.getVercelEnvironments(project.id)
   }
 
   /* istanbul ignore next */

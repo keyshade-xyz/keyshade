@@ -654,6 +654,41 @@ export class VercelIntegration extends BaseIntegration {
     return this.vercel
   }
 
+  public async getVercelEnvironments(
+    projectId: string
+  ): Promise<VercelIntegrationMetadata['environments']> {
+    this.logger.log(
+      `Fetching environments from Vercel for project: ${projectId}`
+    )
+
+    const environments: VercelIntegrationMetadata['environments'] = {
+      development: { vercelSystemEnvironment: 'development' },
+      preview: { vercelSystemEnvironment: 'preview' },
+      production: { vercelSystemEnvironment: 'production' }
+    }
+
+    this.vercel = await this.getVercelClient()
+
+    try {
+      const response =
+        await this.vercel.environment.getV9ProjectsIdOrNameCustomEnvironments({
+          idOrName: projectId
+        })
+
+      for (const env of response.environments ?? []) {
+        environments[env.slug] = {
+          vercelCustomEnvironmentId: env.id
+        }
+      }
+    } catch (err) {
+      this.logger.error(`Fetching custom vercel envs failed`, err)
+    }
+
+    return {
+      environments
+    }
+  }
+
   private async triggerRedeploy(eventId: Event['id']): Promise<void> {
     const integration = this.getIntegration<VercelIntegrationMetadata>()
     const projectId: string = integration.metadata.projectId

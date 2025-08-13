@@ -141,4 +141,20 @@ export class IntegrationController {
       integrationSlug
     )
   }
+
+  @Put(':integrationSlug/vercel/environments')
+  @RequiredApiKeyAuthorities(
+    Authority.READ_PROJECT,
+    Authority.READ_ENVIRONMENT,
+    Authority.READ_INTEGRATION
+  )
+  async getVercelEnvironments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('integrationSlug') integrationSlug: string
+  ) {
+    return await this.integrationService.getVercelEnvironments(
+      user,
+      integrationSlug
+    )
+  }
 }
