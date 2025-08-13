@@ -427,6 +427,14 @@ export class IntegrationService {
     return integration
   }
 
+  /**
+   * Retrieves all the Vercel environments for given integration. The user needs to have `READ_INTEGRATION`
+   * authority over the integration.
+   *
+   * @param user The user retrieving the integration
+   * @param integrationSlug The slug of the integration to retrieve
+   * @returns The Vercel environmants for given integration
+   */
   async getVercelEnvironments(
     user: AuthenticatedUser,
     integrationSlug: string
@@ -435,9 +443,13 @@ export class IntegrationService {
       `User ${user.id} fetching Vercel environments for integration ${integrationSlug}`
     )
 
-    const { project } = await this.getIntegration(user, integrationSlug)
+    const integration = await this.getIntegration(user, integrationSlug)
 
-    return this.vercelIntegration.getVercelEnvironments(project.id)
+    if (!integration.project) {
+      throw new BadRequestException('Integration has no associated project')
+    }
+
+    return this.vercelIntegration.getVercelEnvironments(integration.project.id)
   }
 
   /* istanbul ignore next */
