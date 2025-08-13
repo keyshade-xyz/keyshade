@@ -131,7 +131,8 @@ export const ValidateIntegrationConfigurationResponseSchema = z.object({
 })
 
 export const GetVercelEnvironmentsRequestSchema = z.object({
-  integrationSlug: IntegrationSchema.shape.slug
+  token: z.string(),
+  projectId: z.string()
 })
 
 export const GetVercelEnvironmentsResponseSchema = z.record(

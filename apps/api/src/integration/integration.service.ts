@@ -35,6 +35,7 @@ import { HydrationService } from '@/common/hydration.service'
 import { InclusionQuery } from '@/common/inclusion-query'
 import { HydratedIntegration } from './integration.types'
 import { VercelIntegration } from './plugins/vercel.integration'
+import { GetVercelEnvironments } from './dto/getVercelEnvironments/getVercelEnvironments'
 
 @Injectable()
 export class IntegrationService {
@@ -432,24 +433,18 @@ export class IntegrationService {
    * authority over the integration.
    *
    * @param user The user retrieving the integration
-   * @param integrationSlug The slug of the integration to retrieve
+   * @body DTO containing token and project id
    * @returns The Vercel environmants for given integration
    */
   async getVercelEnvironments(
     user: AuthenticatedUser,
-    integrationSlug: string
+    dto: GetVercelEnvironments
   ) {
     this.logger.log(
-      `User ${user.id} fetching Vercel environments for integration ${integrationSlug}`
+      `User ${user.id} fetching Vercel environments for integration ${dto.projectId}`
     )
 
-    const integration = await this.getIntegration(user, integrationSlug)
-
-    if (!integration.project) {
-      throw new BadRequestException('Integration has no associated project')
-    }
-
-    return this.vercelIntegration.getVercelEnvironments(integration.project.id)
+    return this.vercelIntegration.getVercelEnvironments(dto)
   }
 
   /* istanbul ignore next */

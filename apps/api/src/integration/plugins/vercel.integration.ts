@@ -25,6 +25,7 @@ import {
 import { BadRequestException } from '@nestjs/common'
 import { Vercel } from '@vercel/sdk'
 import { decrypt, sDecrypt, sEncrypt } from '@/common/cryptography'
+import { GetVercelEnvironments } from '../dto/getVercelEnvironments/getVercelEnvironments'
 
 export class VercelIntegration extends BaseIntegration {
   private vercel: Vercel
@@ -639,14 +640,16 @@ export class VercelIntegration extends BaseIntegration {
     }
   }
 
-  private async getVercelClient(): Promise<Vercel> {
+  private async getVercelClient(token?: string): Promise<Vercel> {
     const { Vercel } = await import('@vercel/sdk')
 
-    if (!this.vercel) {
+    if (!this.vercel || token) {
       this.logger.log('Generating Vercel client...')
       const integration = this.getIntegration<VercelIntegrationMetadata>()
+
+      const bearerToken = token ?? integration.metadata.token
       this.vercel = new Vercel({
-        bearerToken: integration.metadata.token
+        bearerToken
       })
       this.logger.log('Generated Vercel client')
     }
@@ -655,8 +658,10 @@ export class VercelIntegration extends BaseIntegration {
   }
 
   public async getVercelEnvironments(
-    projectId: string
+    dto: GetVercelEnvironments
   ): Promise<VercelIntegrationMetadata['environments']> {
+    const { token, projectId } = dto
+
     this.logger.log(
       `Fetching environments from Vercel for project: ${projectId}`
     )
@@ -667,7 +672,7 @@ export class VercelIntegration extends BaseIntegration {
       production: { vercelSystemEnvironment: 'production' }
     }
 
-    this.vercel = await this.getVercelClient()
+    this.vercel = await this.getVercelClient(token)
 
     try {
       const response =

@@ -18,6 +18,7 @@ import { Authority, Integration } from '@prisma/client'
 import { RequiredApiKeyAuthorities } from '@/decorators/required-api-key-authorities.decorator'
 import { UpdateIntegration } from './dto/update.integration/update.integration'
 import { AuthenticatedUser } from '@/user/user.types'
+import { GetVercelEnvironments } from './dto/getVercelEnvironments/getVercelEnvironments'
 
 @Controller('integration')
 export class IntegrationController {
@@ -150,11 +151,8 @@ export class IntegrationController {
   )
   async getVercelEnvironments(
     @CurrentUser() user: AuthenticatedUser,
-    @Param('integrationSlug') integrationSlug: string
+    @Body() dto: GetVercelEnvironments
   ) {
-    return await this.integrationService.getVercelEnvironments(
-      user,
-      integrationSlug
-    )
+    return await this.integrationService.getVercelEnvironments(user, dto)
   }
 }
