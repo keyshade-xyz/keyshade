@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -348,6 +346,7 @@ jobs:
           ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
           REPOSITORY_NAME: web
           VERSION: ${{ needs.release.outputs.version }}
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID }}
           NEXT_PUBLIC_SENTRY_WEB_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_WEB_DSN }}
           NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE: ${{ vars.NEXT_PUBLIC_SENTRY_WEB_PROFILE_SAMPLE_RATE }}
